@@ -29,7 +29,9 @@ ok($bv, 'new is defined');
 
 is(ref($bv), 'Bio::EnsEMBL::VEP::BaseVEP', 'check class');
 
-throws_ok { Bio::EnsEMBL::VEP::BaseVEP->new({config => {}}) } qr/was expected to be .*Bio::EnsEMBL::VEP::Config/, 'give invalid config object';
+throws_ok { Bio::EnsEMBL::VEP::BaseVEP->new('not a hashref') } qr/Can\'t use .+ as a HASH ref/, 'new with invalid arg';
+
+throws_ok { Bio::EnsEMBL::VEP::BaseVEP->new({config => {}}) } qr/was expected to be .*Bio::EnsEMBL::VEP::Config/, 'new with invalid config object';
 
 
 
