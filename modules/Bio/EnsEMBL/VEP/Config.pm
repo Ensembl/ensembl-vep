@@ -77,7 +77,7 @@ our %DEFAULTS = (
   failed            => 0,
   core_type         => 'core',
   polyphen_analysis => 'humvar',
-  pick_order        => [qw(canonical appris tsl biotype ccds rank length)],
+  pick_order        => [qw(canonical appris tsl biotype ccds rank length ensembl refseq)],
   terminal_width    => 48,
   vcf_info_field    => 'CSQ',
   
@@ -189,7 +189,7 @@ our @OPTION_SETS = (
   },
   
   {
-    flags => [qw(check_frequency check_alleles gmaf maf_1kg maf_esp pubmed)],
+    flags => [qw(check_frequency check_alleles gmaf maf_1kg maf_esp maf_exac pubmed)],
     set   => {
       check_existing => 1,
     },
@@ -238,14 +238,14 @@ our %VALID = (
   terms      => [qw(SO display NCBI)],
   sift       => [qw(s p b)],
   polyphen   => [qw(s p b)],
-  pick_order => [qw(canonical appris tsl biotype ccds rank length)],
+  pick_order => [qw(canonical appris tsl biotype ccds rank length ensembl refseq)],
 );
 
 # incompatible options
 our %INCOMPATIBLE = (
-  most_severe => [qw(no_intergenic protein symbol sift polyphen coding_only ccds canonical xref_refseq numbers domains summary pick flag_pick pick_allele flag_pick_allele)],
-  summary     => [qw(no_intergenic protein symbol sift polyphen coding_only ccds canonical xref_refseq numbers domains most_severe pick flag_pick pick_allele flag_pick_allele)],
-  database    => [qw(maf_1kg maf_esp pubmed offline cache)],
+  most_severe => [qw(no_intergenic protein symbol sift polyphen coding_only ccds canonical xref_refseq numbers domains tsl appris uniprot summary pick flag_pick pick_allele flag_pick_allele)],
+  summary     => [qw(no_intergenic protein symbol sift polyphen coding_only ccds canonical xref_refseq numbers domains tsl appris uniprot most_severe pick flag_pick pick_allele flag_pick_allele)],
+  database    => [qw(maf_1kg maf_esp maf_exac pubmed offline cache)],
   quiet       => [qw(verbose)],
   refseq      => [qw(gencode_basic merged)],
   merged      => [qw(database)],
