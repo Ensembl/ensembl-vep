@@ -19,6 +19,10 @@ use Test::More;
 use Test::Exception;
 use FindBin qw($Bin);
 
+use lib $Bin;
+use VEPTestingConfig;
+my $test_cfg = VEPTestingConfig->new();
+
 ## BASIC TESTS
 ##############
 
@@ -49,7 +53,7 @@ $cfg = Bio::EnsEMBL::VEP::Config->new();
 
 throws_ok { $cfg->read_config_from_file() } qr/Could not open config file/, 'read_config_from_file no file given';
 throws_ok { $cfg->read_config_from_file('does_not_exist') } qr/Could not open config file/, 'read_config_from_file invalid file given';
-ok(my $tmp = $cfg->read_config_from_file($Bin.'/testdata/test_vep.ini'), 'read_config_from_file ok');
+ok(my $tmp = $cfg->read_config_from_file($test_cfg->{test_ini_file}), 'read_config_from_file ok');
 
 is($tmp->{test1}, 'hello', 'read_config_from_file basic');
 is($tmp->{test2}, 'foo bar', 'quoted string with spaces');
