@@ -47,15 +47,6 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
 use parent qw(Bio::EnsEMBL::VEP::AnnotationSource::Cache);
 
-sub new {  
-  my $caller = shift;
-  my $class = ref($caller) || $caller;
-  
-  my $self = $class->SUPER::new(@_);
-
-  return $self;
-}
-
 sub get_dump_file_name {
   my $self = shift;
   my $chr  = shift;
