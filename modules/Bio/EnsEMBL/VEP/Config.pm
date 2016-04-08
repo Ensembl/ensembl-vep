@@ -199,6 +199,7 @@ our @OPTION_SETS = (
     flags => [qw(offline)],
     set   => {
       cache => 1,
+      database => 0,
     }
   },
   
@@ -362,14 +363,14 @@ sub check_config {
   }
   
   # check incompatible flags
-  foreach my $flag(grep {defined($config->{$_})} keys %INCOMPATIBLE) {
-    foreach my $invalid(grep {defined($config->{$_})} @{$INCOMPATIBLE{$flag}}) {
+  foreach my $flag(grep {$config->{$_}} keys %INCOMPATIBLE) {
+    foreach my $invalid(grep {$config->{$_}} @{$INCOMPATIBLE{$flag}}) {
       die sprintf("ERROR: Can't use --%s and --%s together\n", $flag, $invalid);
     }
   }
   
   # check one of database/cache/offline/build
-  if(!grep {defined($config->{$_})} qw(database cache offline build convert)) {
+  if(!grep {$config->{$_}} qw(database cache offline build convert)) {
     die qq{
 IMPORTANT INFORMATION:
 

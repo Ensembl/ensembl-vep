@@ -60,7 +60,7 @@ sub get_dump_file_name {
 
   return sprintf(
     "%s/%s/%s\.%s",
-    $self->root_dir,
+    $self->dir,
     $chr,
     $region,
     $self->file_suffix

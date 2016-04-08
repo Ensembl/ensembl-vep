@@ -53,7 +53,7 @@ sub new {
   
   my $self = $class->SUPER::new(@_);
 
-  my $hashref = shift;
+  my $hashref = $_[0];
 
   $self->{$_} = $hashref->{$_} for keys %$hashref;
 
@@ -63,10 +63,10 @@ sub new {
   return $self;
 }
 
-sub root_dir {
+sub dir {
   my $self = shift;
-  $self->{root_dir} = shift if @_;
-  return $self->{root_dir};
+  $self->{dir} = shift if @_;
+  return $self->{dir};
 }
 
 sub serializer_type {

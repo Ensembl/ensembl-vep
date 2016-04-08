@@ -43,6 +43,10 @@ use warnings;
 
 package Bio::EnsEMBL::VEP::BaseVEP;
 
+use Bio::EnsEMBL::Registry;
+use Bio::EnsEMBL::Variation::DBSQL::VariationFeatureAdaptor;
+use Bio::EnsEMBL::Variation::DBSQL::StructuralVariationFeatureAdaptor;
+use Bio::EnsEMBL::Variation::DBSQL::TranscriptVariationAdaptor;
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
@@ -55,7 +59,7 @@ sub new {
   my $self = bless {}, $class;
   
   # most new methods will pass in the config in the hashref given as the first arg to new()
-  if(my $hashref = shift) {
+  if(my $hashref = $_[0]) {
 
     # does the config key exist?
     if(exists($hashref->{config})) {
@@ -83,6 +87,100 @@ sub config {
 sub param {
   my $self = shift;
   return $self->config->param(@_);
+}
+
+sub species {
+  my $self = shift;
+
+  if(@_) {
+    $self->{_species} = shift;
+    $self->param('species', $self->{_species});
+  }
+  else {
+    $self->{_species} ||= $self->param('species');
+  }
+
+  return $self->{_species};
+}
+
+# gets Bio::EnsEMBL::Registry, connects to DB if available
+sub registry {
+  my $self = shift;
+
+  if(!exists($self->{_registry})) {
+
+    my $reg = 'Bio::EnsEMBL::Registry';
+    
+    unless($self->param('offline')) {
+      # suppress warnings that the FeatureAdpators spit if using no_slice_cache
+      Bio::EnsEMBL::Utils::Exception::verbose(1999) if $self->param('no_slice_cache');
+
+      # load DB options from registry file if given
+      if(my $registry_file = $self->param('registry')) {
+        $self->status_msg("Loading DB self from registry file ", $registry_file);
+        
+        $reg->load_all(
+          $registry_file,
+          $self->param('verbose'),
+          undef,
+          $self->param('no_slice_cache')
+        );
+      }
+
+      # otherwise manually connect to DB server
+      else {
+        $reg->load_registry_from_db(
+          -host       => $self->param('host'),
+          -user       => $self->param('user'),
+          -pass       => $self->param('password'),
+          -port       => $self->param('port'),
+          -db_version => $self->param('db_version'),
+          -species    => $self->param('species') =~ /^[a-z]+\_[a-z]+/i ? $self->param('species') : undef,
+          -verbose    => $self->param('verbose'),
+          -no_cache   => $self->param('no_slice_cache'),
+        );
+      }
+
+      eval { $reg->set_reconnect_when_lost() };
+    }
+
+    $self->{_registry} = $reg;
+  }
+
+  return $self->{_registry};
+}
+
+sub get_adaptor {
+  my $self = shift;
+  my $group = shift;
+  my $type = shift;
+
+  throw("No adaptor group specified") unless $group;
+  throw("No adaptor type specified") unless $type;
+
+  my $cache = $self->{_adaptors} ||= {};
+
+  if(!exists($cache->{$group}) || !exists($cache->{$group}->{$type})) {
+    my $ad;
+
+    if($self->param('offline')) {
+      my $module_name = sprintf(
+        "Bio::EnsEMBL::%s::DBSQL::%sAdaptor",
+        (lc($group) eq 'core' ? '' : ucfirst($group).'::'),
+        $type
+      );
+
+      eval { $ad = $module_name->new_fake($self->species()) };
+    }
+
+    else {
+      $ad = $self->registry->get_adaptor($self->species, $group, $type);
+    }
+
+    $cache->{$group}->{$type} = $ad;
+  }
+
+  return $cache->{$group}->{$type};
 }
 
 # prints a status message to STDOUT
