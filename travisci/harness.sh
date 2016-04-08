@@ -1,13 +1,13 @@
 #!/bin/bash
 
-export PERL5LIB=$PWD/bioperl-live-release-1-6-924:$PWD/ensembl-test/modules:$PWD/ensembl/modules:$PWD/modules:$PWD/ensembl-io/modules:$PWD/ensembl-funcgen/modules
+export PERL5LIB=$PWD/bioperl-live-release-1-6-924:$PWD/ensembl-test/modules:$PWD/ensembl/modules:$PWD/modules:$PWD/ensembl-io/modules:$PWD/ensembl-funcgen/modules:$PWD/ensembl-variation/modules
 
 export PATH=$PATH:$PWD/htslib
 
 echo "Running test suite"
 echo "Using $PERL5LIB"
 if [ "$COVERALLS" = 'true' ]; then
-  PERL5OPT='-MDevel::Cover=+ignore,bioperl,+ignore,ensembl-test,+ignore,ensembl,+ignore,ensembl-io,+ignore,ensembl-funcgen' perl $PWD/ensembl-test/scripts/runtests.pl -verbose $PWD/t $SKIP_TESTS
+  PERL5OPT='-MDevel::Cover=+ignore,bioperl,+ignore,ensembl-test,+ignore,ensembl,+ignore,ensembl-io,+ignore,ensembl-funcgen,+ignore,ensembl-variation' perl $PWD/ensembl-test/scripts/runtests.pl -verbose $PWD/t $SKIP_TESTS
 else
   perl $PWD/ensembl-test/scripts/runtests.pl $PWD/t $SKIP_TESTS
 fi
