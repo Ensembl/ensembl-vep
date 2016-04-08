@@ -17,6 +17,13 @@ use warnings;
 
 use Test::More;
 use Test::Exception;
+use FindBin qw($Bin);
+
+use lib $Bin;
+use VEPTestingConfig;
+my $test_cfg = VEPTestingConfig->new();
+my $cfg_hash = $test_cfg->base_testing_cfg;
+
 
 ## BASIC TESTS
 ##############
@@ -52,6 +59,18 @@ is(ref($bv->config), 'Bio::EnsEMBL::VEP::Config', 'config method');
 is($bv->param('species'), 'homo_sapiens', 'param get');
 is($bv->param('species', 'mouse'), 'mouse', 'param set');
 throws_ok { $bv->param() } qr/No param/, 'param without key';
+$bv->param('species', 'homo_sapiens');
+
+is($bv->species, 'homo_sapiens', 'species get');
+is($bv->species('human'), 'human', 'species set');
+$bv->species('homo_sapiens');
+
+# get_adaptor should work offline for some var adaptors using new_fake
+is(ref($bv->get_adaptor('variation', 'VariationFeature')), 'Bio::EnsEMBL::Variation::DBSQL::VariationFeatureAdaptor', 'get_adaptor - offline');
+
+# we can also test throws offline
+throws_ok { $bv->get_adaptor() } qr/No adaptor group specified/, 'get_adaptor no group';
+throws_ok { $bv->get_adaptor('core') } qr/No adaptor type specified/, 'get_adaptor no type';
 
 
 
@@ -70,6 +89,45 @@ $bv->status_msg('Hello');
 ok($tmp =~ /Hello/, 'status_msg');
 
 open(STDOUT, ">&SAVE") or die "Can't restore STDOUT\n";
+
+
+
+## DATABASE TESTS
+#################
+
+SKIP: {
+  my $db_cfg = $test_cfg->db_cfg;
+  my $can_use_db = $db_cfg && scalar keys %$db_cfg;
+
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  skip 'No local database configured', 2 unless $can_use_db;
+
+  my $multi;
+
+  if($can_use_db) {
+    eval q{
+      use Bio::EnsEMBL::Test::TestUtils;
+      use Bio::EnsEMBL::Test::MultiTestDB;
+      1;
+    };
+
+    $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens');
+  }
+  
+  $bv = Bio::EnsEMBL::VEP::BaseVEP->new({
+    config => Bio::EnsEMBL::VEP::Config->new({
+      %$cfg_hash,
+      %$db_cfg,
+      database => 1,
+      offline => 0,
+      species => 'homo_vepiens',
+    })
+  });
+
+  ok($bv->registry, 'db - registry');
+
+  is(ref($bv->get_adaptor('core', 'slice')), 'Bio::EnsEMBL::DBSQL::SliceAdaptor', 'get_adaptor slice');
+};
 
 
 ## DONE

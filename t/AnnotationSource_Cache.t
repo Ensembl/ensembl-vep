@@ -29,9 +29,9 @@ my $test_cfg = VEPTestingConfig->new();
 # use test
 use_ok('Bio::EnsEMBL::VEP::AnnotationSource::Cache');
 
-my $root_dir = $test_cfg->{cache_root_dir};
+my $dir = $test_cfg->{cache_dir};
 
-my $c = Bio::EnsEMBL::VEP::AnnotationSource::Cache->new({root_dir => $root_dir});
+my $c = Bio::EnsEMBL::VEP::AnnotationSource::Cache->new({dir => $dir});
 ok($c, 'new is defined');
 
 
@@ -41,8 +41,8 @@ ok($c, 'new is defined');
 is($c->serializer_type, 'storable', 'serializer_type');
 is($c->file_suffix, 'gz', 'file_suffix');
 
-is($c->root_dir, $root_dir, 'root_dir get');
-is($c->root_dir('/tmp'), '/tmp', 'root_dir set');
-$c->root_dir($root_dir);
+is($c->dir, $dir, 'dir get');
+is($c->dir('/tmp'), '/tmp', 'dir set');
+$c->dir($dir);
 
 done_testing();

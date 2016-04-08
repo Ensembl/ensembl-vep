@@ -29,16 +29,16 @@ my $test_cfg = VEPTestingConfig->new();
 # use test
 use_ok('Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript');
 
-my $root_dir = $test_cfg->{cache_root_dir};
+my $dir = $test_cfg->{cache_dir};
 
-my $c = Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript->new({root_dir => $root_dir});
+my $c = Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript->new({dir => $dir});
 ok($c, 'new is defined');
 
 
 ## METHODS
 ##########
 
-is($c->get_dump_file_name(1, '1-100'), $root_dir.'/1/1-100.gz', 'get_dump_file_name');
+is($c->get_dump_file_name(1, '1-100'), $dir.'/1/1-100.gz', 'get_dump_file_name');
 
 throws_ok { $c->get_dump_file_name() } qr/No chromosome/, 'get_dump_file_name no chromosome';
 throws_ok { $c->get_dump_file_name(1) } qr/No region/, 'get_dump_file_name no region';
