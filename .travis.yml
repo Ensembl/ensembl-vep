@@ -32,7 +32,7 @@ install:
     - export HTSLIB_DIR=$PWD/htslib
     - export PERL5LIB=$PWD/bioperl-live-release-1-6-924
     - cpanm Bio::DB::HTS
-    - cp travisci/MultiTestDB.conf.travisci  modules/t/MultiTestDB.conf
+    - cp travisci/MultiTestDB.conf.travisci  t/MultiTestDB.conf
 
 script: "./travisci/harness.sh"
 
