@@ -1,0 +1,43 @@
+language: "perl"
+
+perl:
+  - "5.14"
+
+env:
+  - COVERALLS=true  DB=mysql
+
+sudo: false
+
+addons:
+    apt:
+        packages:
+        - unzip
+
+before_install:
+    - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-test.git
+    - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl.git
+    - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-io.git
+    - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-funcgen.git
+    - wget https://github.com/bioperl/bioperl-live/archive/bioperl-release-1-6-924.zip
+    - unzip bioperl-release-1-6-924.zip
+    - git clone --branch master --depth 1 https://github.com/samtools/htslib.git
+    - cd htslib
+    - make
+    - cd ..
+
+
+install:
+    - cpanm -v --installdeps --with-recommends --notest --cpanfile ensembl/cpanfile .
+    - cpanm -v --installdeps --notest .
+    - cpanm -n Devel::Cover::Report::Coveralls
+    - export HTSLIB_DIR=$PWD/htslib
+    - export PERL5LIB=$PWD/bioperl-live-bioperl-release-1-6-924
+    - cpanm Bio::DB::HTS
+    - cp travisci/MultiTestDB.conf.travisci  modules/t/MultiTestDB.conf
+
+script: "./travisci/harness.sh"
+
+notifications:
+  email:
+    on_success: always
+    on_failure: always
