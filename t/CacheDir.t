@@ -101,30 +101,26 @@ is($cd->dir, $test_cfg->{cache_dir}, 'dir');
 
 is_deeply(
   $cd->info,
-  {
+    {
     'polyphen' => 'b',
     'sift' => 'b',
-    'polyphen_version' => '2.2.2',
     'species' => 'homo_sapiens',
     'version_data' => {
-      'polyphen' => '2.2.2',
       'sift' => 'sift5.2.2',
-      'COSMIC' => '71',
-      'ESP' => '20140509',
-      'gencode' => 'GENCODE',
-      'HGMD-PUBLIC' => '20142',
+      'polyphen' => '2.2.2',
+      'COSMIC' => '75',
+      'ESP' => '20141103',
+      'gencode' => 'GENCODE 24',
+      'HGMD-PUBLIC' => '20154',
       'genebuild' => '2014-07',
       'regbuild' => '13.0',
-      'assembly' => 'GRCh38.p2',
-      'dbSNP' => '138',
-      'ClinVar' => '201410'
+      'ClinVar' => '201601',
+      'dbSNP' => '146',
+      'assembly' => 'GRCh38.p5'
     },
     'build' => 'all',
-    'port' => '3306',
     'regulatory' => '1',
-    'host' => 'genebuild13',
-    'sift_version' => 'sift5.0.2',
-    'cell_types' => 'HeLa-S3,GM06990,U2OS,CD4,IMR90,HL-60,HepG2,Lymphoblastoid,CD133,CD36,K562,GM12878,HUVEC,NHEK,H1ESC,MultiCell,K562b,NH-A,HSMM,HMEC,A549,AG04449,AG04450,AG09309,AG09319,AG10803,Caco-2,Chorion,CMK,GM10847,GM12801,GM12864,GM12865,GM12872,GM12873,GM12874,GM12875,GM12891,GM12892,GM15510,GM18505,GM18507,GM18526,GM18951,GM19099,GM19193,GM19238,GM19239,GM19240,H7ESC,H9ESC,HAEpiC,HCF,HCM,HCPEpiC,HCT116,HEEpiC,HEK293b,HEK293,HepG2b,HGF,HIPEpiC,HNPCEpiC,HRCEpiC,HRE,HRPEpiC,Jurkat,LHSR,MCF7,Medullo,Melano,NB4,NHBE,NHDF-neo,NHLF,NT2-D1,Panc1,PanIslets,PFSK1,SAEC,SKMC,SKNMC,SKNSHRA,Th1,Th2,WERIRB1,RPTEC,ProgFib,HSMMtube,Osteobl,MCF10A-Er-Src,HPAEpiC,Fibrobl,GM12878-XiMat,BJ,NHDF-AD,Monocytes-CD14+,DND-41',
+    'cell_types' => 'A549,CD14+CD16-Monocyte:CordBlood:hist,CD14+CD16-Monocyte:VenousBlood:hist,CD4+abTcell:VenousBlood:hist,CD8+abTcell:CordBlood:hist,CMCD4+abTcell:VenousBlood:hist,DND-41,eosinophil:VenousBlood:hist,EPC:VenousBlood:hist,erythroblast:CordBlood:hist,GM12878,H1ESC,HeLa-S3,HepG2,HMEC,HSMM,HSMMtube,HUVEC,HUVECprol:CordBlood:hist,IMR90,K562,M0Macrophage:CordBlood:hist,M0Macrophage:VenousBlood:hist,M1Macrophage:CordBlood:hist,M1Macrophage:VenousBlood:hist,M2Macrophage:CordBlood:hist,M2Macrophage:VenousBlood:hist,Monocytes-CD14+,MSC:VenousBlood:hist,naiveBcell:VenousBlood:hist,neutroMyelocyte:BoneMarrow:hist,neutrophil:CordBlood:hist,neutrophil:VenousBlood:hist,NH-A,NHDF-AD,NHEK,NHLF,Osteobl,MultiCell',
     'variation_cols' => [
       'variation_name',
       'failed',
@@ -155,7 +151,6 @@ is_deeply(
       'ExAC_OTH',
       'ExAC_SAS'
     ],
-    'user' => 'ensro',
     'assembly' => 'GRCh38'
   },
   'info'
@@ -164,17 +159,17 @@ is_deeply(
 is_deeply(
   $cd->version_data,
   {
-    'polyphen' => '2.2.2',
     'sift' => 'sift5.2.2',
-    'COSMIC' => '71',
-    'ESP' => '20140509',
-    'gencode' => 'GENCODE',
-    'HGMD-PUBLIC' => '20142',
+    'polyphen' => '2.2.2',
+    'COSMIC' => '75',
+    'ESP' => '20141103',
+    'gencode' => 'GENCODE 24',
+    'HGMD-PUBLIC' => '20154',
     'genebuild' => '2014-07',
     'regbuild' => '13.0',
-    'assembly' => 'GRCh38.p2',
-    'dbSNP' => '138',
-    'ClinVar' => '201410'
+    'ClinVar' => '201601',
+    'dbSNP' => '146',
+    'assembly' => 'GRCh38.p5'
   },
   'version_data'
 );
