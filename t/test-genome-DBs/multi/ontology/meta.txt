@@ -1,0 +1,22 @@
+1	schema_type	ontology	\N
+2	OBO_file_date	GO.obo/05:02:2013 16:56	\N
+3	OBO_load_date	GO.obo/Thu Feb 14 14:33:07 2013	\N
+4	OBO_file_date	SO.obo/14:11:2012 16:46	\N
+5	OBO_load_date	SO.obo/Thu Feb 14 14:33:14 2013	\N
+6	OBO_file_date	EFO.obo.new/04:01:2013 13:28	\N
+7	OBO_load_date	EFO.obo.new/Thu Feb 14 14:33:33 2013	\N
+9	patch	patch_72_73_a.sql|schema_version	\N
+10	patch	patch_72_73_b.sql|meta	\N
+12	patch	patch_73_74_a.sql|schema_version	\N
+14	patch	patch_74_75_a.sql|schema_version	\N
+15	schema_version	84	\N
+16	patch	patch_75_76_a.sql|schema_version	\N
+17	patch	patch_76_77_a.sql|schema_version	\N
+18	patch	patch_77_78_a.sql|schema_version	\N
+19	patch	patch_78_79_a.sql|schema_version	\N
+20	patch	patch_78_79_b.sql|synonym_type	\N
+21	patch	patch_79_80_a.sql|schema_version	\N
+22	patch	patch_80_81_a.sql|schema_version	\N
+23	patch	patch_81_82_a.sql|schema_version	\N
+24	patch	patch_82_83_a.sql|schema_version	\N
+25	patch	patch_83_84_a.sql|schema_version	\N

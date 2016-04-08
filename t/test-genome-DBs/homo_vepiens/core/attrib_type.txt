@@ -1,0 +1,296 @@
+1	embl_acc	European Nucleotide Archive (was EMBL) accession	\N
+2	status	Status	\N
+3	synonym	Synonym	\N
+4	name	Name	Alternative/long name
+5	type	Type of feature	\N
+6	toplevel	Top Level	Top Level Non-Redundant Sequence Region
+7	GeneCount	Gene Count	Total Number of Genes
+10	SNPCount	Short Variants	Total Number of SNPs
+11	codon_table	Codon Table	Alternate codon table
+12	_selenocysteine	Selenocysteine	\N
+13	bacend	bacend	\N
+14	htg	htg	High Throughput phase attribute
+15	miRNA	Micro RNA	Coordinates of the mature miRNA
+16	non_ref	Non Reference	Non Reference Sequence Region
+17	sanger_project	Sanger Project name	\N
+18	clone_name	Clone name	\N
+19	fish	FISH location	\N
+21	org	Sequencing centre	\N
+22	method	Method	\N
+23	superctg	Super contig id	\N
+24	inner_start	Max start value	\N
+25	inner_end	Min end value	\N
+26	state	Current state of clone	\N
+27	organisation	Organisation sequencing clone	\N
+28	seq_len	Accession length	\N
+29	fp_size	FP size	\N
+30	BACend_flag	BAC end flags	\N
+31	fpc_clone_id	fpc clone	\N
+32	KnwnPCCount	protein_coding_KNOWN	Number of Known Protein Coding
+33	NovPCCount	protein_coding_NOVEL	Number of Novel Protein Coding
+36	PredPCCount	protein_coding_PREDICTED	Number of Predicted Protein Coding
+37	IGGeneCount	IG_gene	Number of IG Genes
+38	IGPsGenCount	IG_pseudogene	Number of IG Pseudogenes
+39	TotPsCount	total_pseudogene	Total Number of Pseudogenes
+42	KnwnPCProgCount	protein_coding_in_progress_KNOWN	Number of Known Protein Coding in progress
+43	NovPCProgCount	protein_coding_in_progress_NOVEL	Number of Novel Protein Coding in progress
+44	AnnotSeqLength	Annotated sequence length	Annotated Sequence
+45	TotCloneNum	Total number of clones	Total Number of Clones
+46	NumAnnotClone	Fully annotated clones	Number of Fully Annotated Clones
+47	ack	Acknowledgement	Acknowledgement for manual annotation
+48	htg_phase	High throughput phase	High throughput genomic sequencing phase
+49	description	Description	A general descriptive text attribute
+50	chromosome	Chromosome	Chromosomal location for supercontigs that are not assembled
+51	nonsense	Nonsense Mutation	Strain specific nonesense mutation
+52	author	Author	Group resonsible for Vega annotation
+53	author_email	Author email address	Author email address
+54	remark	Remark	Annotation remark
+55	transcr_class	Transcript class	Transcript class
+57	ccds	CCDS	CCDS identifier
+58	CCDS_PublicNote	CCDS Public Note	Public Note for CCDS identifier, provided by http://www.ncbi.nlm.nih.gov/CCDS
+59	Frameshift	Frameshift	Frameshift modelled as intron
+62	ncRNA	Structure	RNA secondary structure line
+63	skip_clone	skip clone  Skip clone in align_by_clone_identity.pl	\N
+64	coding_cnt	Coding genes	Number of protein coding Genes
+67	pseudogene_cnt	Pseudogenes	Number of pseudogenes
+80	supercontig	SuperContig name	\N
+81	well_name	Well plate name	\N
+82	bacterial	Bacterial	\N
+90	bacend_well_nam	BACend well name	\N
+91	alt_well_name	Alt well name	\N
+92	TranscriptEdge	Transcript Edge	\N
+93	alt_embl_acc	Alt European Nucleotide Archive (was EMBL) acc	\N
+94	alt_org	Alt org	\N
+95	intl_clone_name	International Clone Name	\N
+96	embl_version	European Nucleotide Archive (was EMBL) Version	\N
+97	chr	Chromosome Name	Chromosome Name Contained in the Assembly
+98	equiv_asm	Equivalent EnsEMBL assembly	For full chromosomes made from NCBI AGPs
+109	HitSimilarity	hit similarity	percentage id to parent transcripts
+110	HitCoverage	hit coverage	coverage of parent transcripts
+111	PropNonGap	proportion non gap	proportion non gap
+112	NumStops	number of stops	\N
+113	GapExons	gap exons	number of gap exons
+114	SourceTran	source transcript	source transcript
+115	EndNotFound	end not found	end not found
+116	StartNotFound	start not found	start not found
+117	Frameshift Fra	Frameshift modelled as intron	\N
+118	ensembl_name	Ensembl name	Name of equivalent Ensembl chromosome
+119	NoAnnotation	NoAnnotation	Clones without manual annotation
+120	hap_contig	Haplotype contig	Contig present on a haplotype
+121	annotated	Clone Annotation Status	\N
+122	keyword	Clone Keyword	\N
+123	hidden_remark	Hidden Remark	\N
+124	mRNA_start_NF	mRNA start not found	\N
+125	mRNA_end_NF	mRNA end not found	\N
+126	cds_start_NF	CDS start not found	\N
+127	cds_end_NF	CDS end not found	\N
+128	write_access	Write access for Sequence Set	1 for writable , 0 for read-only
+129	hidden	Hidden Sequence Set	\N
+130	vega_name	Vega name	Vega seq_region.name
+131	vega_export_mod	Export mode	E (External), I (Internal) etc
+132	vega_release	Vega release	Vega release number
+133	atag_CLE	Clone_left_end	Clone_lef_end feature marked in GAP database
+134	atag_CRE	Clone_right_end	Clone_right_end feature marked in GAP database
+135	atag_Misc	Misc	miscellaneous feature marked in GAP database
+136	atag_Unsure	Unsure	region of uncertain DNA sequence marked in GAP database
+137	MultAssem	Multiple Assembled seq region	Part of Seq Region is part of more than one assembly
+140	wgs	WGS contig	WGS contig integrated into the map
+141	bac	AGP clones	tiling path of clones
+142	GeneGC	Gene GC	Percentage GC content for this gene
+143	TotAssemblyLeng	Finished sequence length	Length of the assembly not counting sequence gaps
+144	amino_acid_sub	Amino acid substitution	Some translations have been manually curated for amino acid substitiutions. For example a stop codon may be changed to an amino acid in order to prevent premature truncation, or one amino acid can be substituted for another.
+145	_rna_edit	rna_edit	RNA edit
+146	kill_reason	Kill Reason	Reason why a transcript has been killed
+147	strip_UTR	Strip UTR	Transcript needs bad UTR removing
+148	TotAssLength	Finished sequence length	Finished Sequence
+149	PsCount	pseudogene	Number of Pseudogenes
+152	TotPTCount	total_processed_transcript	Total Number of Processed Transcripts
+153	TotPCCount	total_protein_coding	Total Number of Protein Coding
+156	PolyPsCount	polymorphic_pseudogene	Number of Polymorphic Pseudogenes
+157	TotIGGeneCount	total_IG_gene	Total Number of IG Genes
+158	ProcPsCount	proc_pseudogene	Number of Processed Pseudogenes
+159	UnPsCount	unproc_pseudogene	Number of Unprocessed Pseudogenes
+160	TPsCount	transcribed_pseudogene	Number of Transcribed Pseudogenes
+161	TECCount	TEC	Number of TEC Genes
+164	IsoPoint	Isoelectric point	Pepstats attributes
+165	Charge	Charge	Pepstats attributes
+166	MolecularWeight	Molecular weight	Pepstats attributes
+167	NumResidues	Number of residues	Pepstats attributes
+168	AvgResWeight	Ave. residue weight	Pepstats attributes
+170	initial_met	Initial methionine	Set first amino acid to methionine
+171	NonGapHCov	NonGapHCov	\N
+172	otter_support	otter support	Evidence ID that was used as supporting feature for building a gene in Vega
+173	enst_link	enst link	Code to link a OTTT with an ENST when they both share the CDS of ENST
+174	upstream_ATG	upstream ATG	Alternative ATG found upstream of the defined as start ATG for the transcript
+175	TPPsCount	transcribed_processed_pseudogene	Number of Transcribed Processed Pseudogenes
+176	TUPsCount	transcribed_unprocessed_pseudogene	Number of Transcribed Unprocessed Pseudogenes
+177	UniPsCount	unitary_pseudogene	Number of Unitary Pseudogenes
+180	TUyPsCount	transcribed_unitary_pseudogene	Number of Transcribed Unitary Pseudogenes
+181	PolyCount	polymorphic	Number of Polymorphic Genes
+184	TRGeneCount	TR_gene	Number of TR Genes
+185	TRPsCount	TR_pseudo	Number of TR Pseudogenes
+186	tp_ott_support	otter protein transcript support	Evidence ID that was used as supporting feature for building a gene in Vega
+187	td_ott_support	otter dna transcript support	Evidence ID that was used as supporting feature for building a gene in Vega
+188	ep_ott_support	otter protein exon support	Evidence ID that was used as supporting feature for building a gene in Vega
+189	ed_ott_support	otter dna exon support	Evidence ID that was used as supporting feature for building a gene in Vega
+191	StopGained	SNP causes stop codon to be gained	This transcript has a variant that causes a stop codon to be gained in at least 10 percent of a HapMap population
+192	StopLost	SNP causes stop codon to be lost	This transcript has a variant that causes a stop codon to be lost in at least 10 percent of a HapMap population
+198	lost_frameshift	lost_frameshift	Frameshift on the query sequence is lost in the target sequence
+199	AltThreePrime	Alternate three prime end	The position of other possible three prime ends for the transcript
+216	GeneInLRG	Gene in LRG	This gene is contained within an LRG region
+217	GeneOverlapLRG	Gene overlaps LRG	This gene is partially overlapped by a LRG region (start or end outside LRG)
+218	readthrough_tra	readthrough transcript	Havana readthrough transcripts
+300	CNE	Constitutive exon	An exon that is always included in the mature mRNA, even in different mRNA isoforms
+301	CE	Cassette exon	One exon is spliced out of the primary transcript together with its flanking introns
+302	IR	Intron retention	A sequence is spliced out as an intron or remains in the mature mRNA transcript
+303	MXE	Mutually exclusive exons	In the simpliest case, one or two consecutive exons are retained but not both
+304	A3SS	Alternative 3' sites	Two or more splice sites are recognized at the 5' end of an exon. An alternative 3' splice junction (acceptor site) is used, changing the 5' boundary of the downstream exon
+305	A5SS	Alternative 5' sites	Two or more splice sites are recognized at the 3' end of an exon. An alternative 5' splice junction (donor site) is used, changing the 3' boundary of the upstream exon
+306	AFE	Alternative first exon	The second exons of each variant have identical boundaries, but the first exons do not overlap
+307	ALE	Alternative last exon	Penultimate exons of each splice variant have identical boundaries, but the last exons do not overlap
+308	II	Intron isoform	Alternative donor or acceptor splice sites lead to truncation or extension of introns, respectively
+309	EI	Exon isoform	Alternative donor or acceptor splice sites leads to truncation or extension of exons, respectively
+310	AI	Alternative initiation	Alternative choice of promoters
+311	AT	Alternative termination	Alternative choice of polyadenylation sites
+312	patch_fix	Assembly Patch Fix	Assembly patch that will, in the next assembly release, replace the corresponding sequence found in the current assembly
+313	patch_novel	Assembly Patch Novel	Assembly patch that will, in the next assembly release, be retained as an alternate non-reference sequence in a similar way to haplotypes
+314	LRG	Locus Reference Genomic	Locus Reference Genomic sequence
+315	NoEvidence	Evidence for transcript removed	Supporting evidence for this projected transcript has been removed
+316	circular_seq	Circular sequence	Circular chromosome or plasmid molecule
+317	external_db	External database	External database to which seq_region name may be linked
+318	split_tscript	split_tscript	split_tscript
+319	Threep	Three prime end	Alternate three prime end
+320	gene_cluster	Gene cluster	Havana annotated gene cluster
+328	_rib_frameshift	Ribosomal Frameshift	Position and magnitude of frameshift
+345	vega_ref_chrom	Vega reference chromosome	Haplotypes reference a regular chromosome (indicated in the value of the attribute)
+346	PutPCCount	protein_coding_PUTATIVE	Number of Putative Protein Coding
+347	proj_alt_seq	Projection altered sequence	Projected sequence differs from original
+348	hav_gene_type	Havana gene biotype	Gene biotype assigned by Havana
+353	noncoding_cnt	Non coding genes	Number of non coding genes
+358	PHIbase_mutant	PHI-base mutant	PHI-base phenotype of the mutants
+360	ncrna_host	ncrna_host	Havana ncrna_host gene
+361	peptide-class	Peptide classification	The classification of the gene or transcript based on alignment to NR (values: TE WH NH)
+362	working-set	Working Gene Set	High-confidence set of genes, composed of evidence-based genes and non-overlapping protein-coding ab initio gene models
+363	filtered-set	Filtered Gene Set v1	Working genes that are screened for TE content and orthology with sorghum and rice
+364	super-set	Super Working Gene Set	Set of all working gene set loci from both Builds 4a and 5a
+365	projected4a2	Projected by alignment	Temporary (Monday, August 23, 2010)
+366	merged	Merged species	\N
+367	karyotype_rank	Rank in the karyotype	For a given seq_region, if it is part of the species karyotype, will indicate its rank
+368	noncoding_acnt	Non coding genes	Number of non coding genes on alternate sequences
+369	coding_acnt	Coding genes	Number of protein coding genes on alternate sequences
+370	pseudogene_acnt	Pseudogenes	Number of pseudogenes on alternate sequences
+371	clone_end	Clone end	Side of the contig on which a vector lies (enum:RIGHT, LEFT)
+372	contig_scaffold	Contig Scaffold	Scaffold that contains mutually ordered contigs
+373	current_version	Current Accession Version	Identifies the most recent version of an accession
+374	seq_status	Sequence Status	Sequence status.
+375	clone_vector	Vector sequence	A clone-end vector associated with a contig (enum:SP6, T7).
+376	creation_date	Creation date	Creation date of annotation
+377	update_date	Update date	Last update date of annotation
+378	seq_date	Sequence date	Sequence date
+379	has_stop_codon	Contains stop codon	Translation attribute
+380	havana_cv	Havana CV term	Controlled vocabulary terms from Havana
+381	TlPPsCount	translated_processed_pseudogene	Number of Translated Processed Pseudogenes
+382	NoTransRefError	No translations due to reference error	This gene is believed to include protein coding transcripts, but no transcript has a translation due to a reference assembly error making specifying the translation impossible.
+383	parent_exon_key	parent_exon_key	The exon key to identify a projected transcript's parent transcript.
+386	parent_sid	parent_sid	The parent stable ID to identify a projected transcript's parent transcript. For internal statistics use only since this method does not work in all cases.
+387	noncoding_acnt_s	Small non coding genes	Number of small non coding genes on alternate sequences
+388	noncoding_acnt_m	Misc non coding genes	Number of unclassified (miscellaneous) non coding genes on alternate sequences
+389	noncoding_cnt_s	Small non coding genes	Number of small non coding genes
+390	noncoding_cnt_l	Long non coding genes	Number of long non coding genes
+391	TlUPsCount	translated_unprocessed_pseudogene	Number of Translated Unprocessed Pseudogenes
+393	AFFYMETRIXCount	AFFYMETRIX Count	Total Number of AFFYMETRIX features
+394	RFLPCount	RFLP Count	Total Number of RFLP features
+395	xref_id	Xref ID	ID of associated database reference
+396	vega_chr_type	Vega chrom type	Type of chromosome - haplotype, other, etc
+398	genscan	Genscan gene predictions	Number of prediction genes generated by Genscan
+399	gsc	GSC gene prediction	Number of prediction genes generated by gsc
+400	snap	Snap gene prediction	Number of prediction genes generated by Snap
+401	fgenesh	FGENESH gene prediction	Number of prediction genes generated by FGENESH
+402	genefinder	Genefinder gene prediction	Number of prediction genes generated by Genefinder
+403	transcript_cnt	Gene transcripts	Number of transcripts
+404	transcript_acnt	Gene transcripts	Number of transcripts on the alternate sequences
+405	ref_length	Golden Path Length	Length of the primary assembly
+406	total_length	Base Pairs	Total length of the assembly
+407	refseq_compare	refseq_compare	This attribute can be applied to both gene and transcript. It is supposed to give an indication of whether the annotation in the ensembl database is matched by annotation that we have imported from refseq. At the gene level, the match is unlikely to be an exact match because all or some of the transcripts may differ. Also, the biotype e.g. coding potential may differ. therefore, matching is a bit fuzzy and is done primarily on genomic location and then also takes gene length and gene name into consideration.
+408	coding_rcnt	Readthrough coding genes	Number of readthrough coding genes
+409	coding_racnt	Readthrough coding genes	Number of readthrough coding genes on alternate sequences
+410	noncoding_racnt_l	Readthrough long non coding genes	Number of readthrough long non coding genes on alternate sequences
+411	noncoding_racnt_s	Readthrough small non coding genes	Number of readthrough small non coding genes on alternate sequences
+412	noncoding_rcnt_s	Readthrough small non coding genes	Number of readthrough small non coding genes
+413	noncoding_rcnt_l	Readthrough long non coding genes	Number of readthrough long non coding genes
+414	pseudogene_rcnt	Readthrough pseudogenes	Number of readthrough pseudogenes
+415	pseudogene_racnt	Readthrough pseudogenes	Number of readthrough pseudogenes on alternate sequences
+416	gencode_level	GENCODE annotation level	level 1 (verified loci), level 2 (manually annotated loci), level 3 (automatically annotated loci)
+417	gencode_basic	GENCODE basic annotation	GENCODE Basic is a view provided by UCSC for users. It includes a subset of the GENCODE transcripts. In general, for protein coding genes it will show only the full length models (unless a protein coding gene has no full-length models, in which case other rules apply). For noncoding genes, it will also only show the full-length (mRNA start and end found) models (unless there are no full-length models, in which case other rules apply).
+418	struct_var	Structural variants	Total Number of structural variants
+419	genblast	GenBlastG gene predictions	Number of prediction genes generated by GenBlastG
+420	syn_gene_pairs	Syntenic gene pairs	Syntenic gene relationship from Gramene pipeline
+421	vectorbase_maker_pre	VectorBase gene predictions	Number of prediction genes generated with MAKER, by VectorBase.
+422	trnascan	tRNAscan-SE predictions	Number of predicted tRNA genes generated by tRNAscan-SE
+423	tgac_pred_supp7	T. turgidum RNA-seq alignments	Number of T. turgidum RNA-seq alignments from Krasileva et al.
+424	tgac_pred_supp17	T. aestivum RNA-seq alignments	Number of T. aestivum RNA-seq alignments from Krasileva et al.
+425	genome_component	Genome Component Name	For polyploid genome, the genome component name the seq_region belongs to
+426	transcript_whl	RNA-seq transcripts	RNA-seq transcripts from EchinoBase
+427	appris	APPRIS	APPRIS is a system that deploys a range of computational methods to provide value to the annotations of the human genome. APPRIS also selects one of the CDS for each gene as the principal isoform. APPRIS defines the principal variant by combining protein structural and functional information and information from the conservation of related species. principal1 - APPRIS principal isoform. principal2 - APPRIS candidate isoform (CCDS). principal3 - APPRIS candidate isoform (earliest CCDS). principal4 - APPRIS candidate isoform (longest CCDS). principal5 - APPRIS candidate isoform (longest coding sequence). alternative1 - APPRIS candidate isoform that is conserved in at least three tested species. alternative2 - APPRIS candidate isoform that appears to be conserved in fewer than three tested species
+428	TSL	Transcript Support Level	Transcription Support Level (TSL) is a method to highlight the well-supported and poorly-supported transcript models for users. The method relies on the primary data that can support full-length transcript structure and data are provided by UCSC.  The following categories are assigned to each of the evaluated annotations. tsl1 - all splice junctions of the transcript are supported by at least one non-suspect mRNA. tsl2 - the best supporting mRNA is flagged as suspect or the support is from multiple ESTs. tsl3 - the only support is from a single EST. tsl4 - the best supporting EST is flagged as suspect. tsl5 - no single transcript supports the model structure. tslNA - the transcript was not analyzed for one of the following reasons: pseudogene annotation, including transcribed pseudogenes.Human leukocyte antigen (HLA) transcript. Immunoglobin gene transcript.  T-cell receptor transcript. Single-exon transcript (will be included in a future version)
+429	protein_coverage	Protein Coverage	Protein coverage for this gene derived from geneTree in compara
+430	consensus_coverage	Consensus Coverage	Consensus coverage for this gene derived from geneTree in compara
+431	has_start_codon	Contains start codon	Translation attribute
+437	lncRNACount	lncRNA_Count	Number of lncRNAs
+438	ncRNACount	ncRNA_Count	Number of ncRNAs
+439	UnclassPTCount	UnclassPT_Count	Number of Unclassified Processed Transcripts
+444	noncoding_cnt_m	Misc non coding genes	Number of unclassified (miscellaneous) non coding genes
+445	noncoding_rcnt_m	Readthrough misc non coding genes	Number of readthrough unclassified (miscellaneous) non coding genes
+446	noncoding_racnt_m	Readthrough misc non coding genes	Number of readthrough unclassified (miscellaneous) non coding genes on alternate sequences
+447	noncoding_acnt_l	Long non coding genes	Number of long non coding genes on alternate sequences
+448	noncoding_racnt	Readthrough non coding genes	Number of readthrough non coding genes on alternate sequences
+449	noncoding_rcnt	Readthrough non coding genes	Number of readthrough non coding genes
+450	rseq_mrna_match	RefSeq model genomic seq to mRNA match	This is a transcript attribute that signifies an exact match between the underlying genomic sequence of the RefSeq transcript with the corresponding RefSeq mRNA sequence the model was built from (based on a match between the transcript stable id and an accession in the RefSeq mRNA file). An exact match occurs when the underlying genomic sequence of the model can be perfectly aligned to the mRNA sequence post polyA clipping.
+451	rseq_mrna_nonmatch	RefSeq model genomic seq to mRNA non-match	This is a transcript attribute that signifies a non-match between the underlying genomic sequence of the RefSeq transcript with the corresponding RefSeq mRNA sequence the model was built from. A non-match is deemed to have occurred if the underlying genomic sequence does not have a perfect alignment to the mRNA sequence post polyA clipping. It can also signify that no comparison was possible as the model stable id may not have had a corresponding entry in the RefSeq mRNA file (sometimes happens when accessions are retired or changed). When a non-match occurs one or several of the following transcript attributes will also be present to provide more detail on the nature of the non-match: rseq_5p_mismatch, rseq_cds_mismatch, rseq_3p_mismatch, rseq_nctran_mismatch, rseq_no_comparison
+452	rseq_5p_mismatch	RefSeq model genomic seq (5' UTR) to mRNA mismatch	This is a transcript attribute that signifies a mismatch between the underlying genomic sequence of the RefSeq transcript with the corresponding RefSeq mRNA sequence the model was built from. Specifically, there is a mismatch in the 5' UTR of the RefSeq model. Information about the mismatch can be found in the value field of the transcript attribute.
+453	rseq_cds_mismatch	RefSeq model genomic seq (CDS) to mRNA mismatch	This is a transcript attribute that signifies a mismatch between the underlying genomic sequence of the RefSeq transcript with the corresponding RefSeq mRNA sequence the model was built from. Specifically, there is a mismatch in the CDS of the RefSeq model. Information about the mismatch can be found in the value field of the transcript attribute.
+454	rseq_3p_mismatch	RefSeq model genomic seq (3' UTR) to mRNA mismatch	This is a transcript attribute that signifies a mismatch between the underlying genomic sequence of the RefSeq transcript with the corresponding RefSeq mRNA sequence the model was built from. Specifically, there is a mismatch in the 3' UTR of the RefSeq model. Information about the mismatch can be found in the value field of the transcript attribute.
+455	rseq_nctran_mismatch	RefSeq model genomic seq (non-coding) to mRNA mismatch	This is a transcript attribute that signifies a mismatch between the underlying genomic sequence of the RefSeq transcript with the corresponding RefSeq mRNA sequence the model was built from. This is a comparison between the entire underlying genomic sequence of the RefSeq model to the mRNA in the case of RefSeq models that are non-coding. Information about the mismatch can be found in the value field of the transcript attribute.
+456	rseq_no_comparison	RefSeq model no comparison made to mRNA	This is a transcript attribute that signifies that no alignment was carried out between the underlying genomic sequence of RefSeq model and a corresponding RefSeq mRNA. The reason for this is generally that no corresponding, unversioned accession was found in the RefSeq mRNA file for the transcript stable id. This sometimes happens when accessions are retired or replaced. A second possibility is that the sequences were too long and problematic to align (though this is rare). The value field gives more information about the reason no comparison was possible.
+457	rseq_ens_match_wt	RefSeq model to overlapping Ensembl model whole transcript match	This is a transcript attribute that signifies that for the RefSeq transcript there is an overlapping Ensembl model that is identical across the whole transcript. A whole transcript match is defined as follows: 1) In the case that both models are coding, the transcript, CDS and peptide sequences are all identical and the genomic coordinates of every exon match. 2) In the case that both transcripts are non-coding the transcript sequences and the genomic coordinates of every exon are identical. No comparison is made between a coding and a non-coding transcript. Useful related attributes are: rseq_ens_match_cds and rseq_ens_no_match.
+458	rseq_ens_match_cds	RefSeq model to overlapping Ensembl model CDS match	This is a transcript attribute that signifies that for the RefSeq transcript there is an overlapping Ensembl model that is identical across the CDS region only. A CDS match is defined as follows: the CDS and peptide sequences are identical and the genomic coordinates of every translatable exon match. Useful related attributes are: rseq_ens_match_wt and rseq_ens_no_match.
+459	rseq_ens_no_match	RefSeq model to overlapping Ensembl model no match	This is a transcript attribute that signifies that for the RefSeq transcript there is no overlapping Ensembl model that is identical across either the whole transcript or the CDS. This is caused by differences between the transcript, CDS or peptide sequences or between the exon genomic coordinates. Useful related attributes are: rseq_ens_match_wt and rseq_ens_match_cds.
+468	ccds_transcript	CCDS transcript	This attribute signifies that a transcript has a matching CCDS transcript (the accession of which will be in the value column of the transcript_attrib entry). A match occurs when the genomic coordinates of all coding exons of the transcript are identical to the genomic coordinate of all coding exons in the overlapping CCDS model.
+469	SO_accession	SO accession	Sequence Ontology accession
+470	SO_term	SO term	Sequence Ontology term
+471	display_term	display term	Ensembl display term
+472	NCBI_term	NCBI term	NCBI term
+473	feature_SO_term	feature SO term	Sequence Ontology term for the associated feature
+474	rank	rank	Relative severity of this variation consequence
+475	polyphen_prediction	polyphen prediction	PolyPhen-2 prediction
+476	sift_prediction	sift prediction	SIFT prediction
+477	short_name	Short name	A shorter name for an instance, e.g. a VariationSet
+478	dbsnp_clin_sig	dbSNP/ClinVar clinical significance	The clinical significance of a variant as reported by ClinVar and dbSNP
+479	dgva_clin_sig	DGVa clinical significance	The clinical significance of a structural variant as reported by DGVa
+480	clinvar_clin_sig	ClinVar clinical significance	The clinical significance of a variant as reported by ClinVar
+481	prot_func_analysis	Protein function analysis 	The program used to make protein function predictions
+482	associated_gene	Associated gene	ID of gene(s) linked by phenotype association
+483	risk_allele	Risk allele	Risk allele in phenotype association
+484	p_value	P-value	P-value denoting significance of an observed phenotype annotation
+485	variation_names	Variation names	Variant ID(s) linked with a phenotype association
+486	sample_id	Sample ID	Sample ID for source of phenotype association
+487	strain_id	Strain ID	Strain ID for source of phenotype association
+488	lod_score	LOD score	Log Of Odds score
+489	variance	Variance	Variance statistic
+490	inheritance_type	Inheritance type	Inheritance type of a trait
+491	external_id	External ID	External identifier for an entity
+492	odds_ratio	Odds ratio	Odds ratio used to denote significance of an observed phenotype annotation
+493	beta_coef	Beta coefficient	Beta coefficient (or standardized coefficient) used to denote significance of an observed phenotype annotation
+494	allele_symbol	Allele symbol	Allele symbol linked with phenotype association
+495	allele_accession_id	Allele accession ID	Allele accession ID linked with phenotype association
+496	marker_accession_id	Marker accession ID	Marker ID linked with phenotype association
+497	evidence	Variant evidence status	Evidence status for a variant
+498	review_status	ClinVar review_status	ClinVar review_status for assertation
+499	based_on	Evidence type used for protein impact prediction	Evidence type used for a PolyPhen protein impact prediction
+500	conservation_score	Sift conservation score	Median conservation va in an alignment used to make a Sift prediction
+501	sequence_number	Number of sequences in alignment	Number of protein sequences in the alignment use to make a protein impact prediction
+502	otter_truncated	Otter truncated feature	This feature extends beyond the slice, but has been trimmed. (For use in otter client-server communications.)
+503	trans_spliced	Trans-spliced transcript	A single RNA transcript derived from multiple precursor mRNAs.
+505	genebuild_msu7_tes	TE-related Gene (MSU)	Number of TE-related genes predicted by <a href="http://rice.plantbiology.msu.edu">MSU</a> through a process of automatic and manual curation
+506	ibsc_low_confidence	PGSB low-confidence	Number of low-confidence genes annotated by the <A HREF="http://pgsb.helmholtz-muenchen.de/plant/barley/index.jsp">International Barley Sequencing Consortium</A>
+507	pubmed_id	PubMed ID	PubMed identifier

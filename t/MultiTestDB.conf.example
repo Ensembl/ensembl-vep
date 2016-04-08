@@ -1,0 +1,7 @@
+{
+  'port'   => '3306',
+  'driver' => 'mysql',
+  'user'   => 'user with write access',
+  'pass'   => 'password for user',
+  'host'   => 'database host'
+}

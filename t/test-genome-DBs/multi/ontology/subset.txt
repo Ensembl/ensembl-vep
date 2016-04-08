@@ -1,0 +1,17 @@
+1	Cross_product_review	Involved_in
+2	goslim_aspergillus	Aspergillus GO slim
+3	goslim_candida	Candida GO slim
+4	goslim_generic	Generic GO slim
+5	goslim_metagenomics	Metagenomics GO slim
+6	goslim_pir	PIR GO slim
+7	goslim_plant	Plant GO slim
+8	goslim_pombe	Fission yeast GO slim
+9	goslim_yeast	Yeast GO slim
+10	gosubset_prok	Prokaryotic GO subset
+11	high_level_annotation_qc	High-level terms not to be used for direct annotation
+12	mf_needs_review	Catalytic activity terms in need of attention
+13	termgenie_unvetted	Terms created by TermGenie that do not follow a template and require additional vetting by editors
+14	virus_checked	Viral overhaul terms
+15	DBVAR	database of genomic structural variation
+16	SOFA	SO feature annotation
+17	biosapiens	biosapiens protein feature ontology
