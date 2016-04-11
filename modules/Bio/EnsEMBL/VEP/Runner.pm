@@ -95,7 +95,7 @@ sub setup_db_connection {
 
     my $config_assembly = $self->param('assembly');
 
-    die(
+    throw(
       "ERROR: Assembly version specified by --assembly (".$config_assembly.
       ") and assembly version in coord_system table (".$assembly.") do not match\n".
       (
@@ -109,8 +109,8 @@ sub setup_db_connection {
     # update to database version
     $self->param('assembly', $assembly);
 
-    if(!$config_assembly) {
-      die("ERROR: No assembly version specified, use --assembly [version] or check the coord_system table in your core database\n");
+    if(!$self->param('assembly')) {
+      throw("ERROR: No assembly version specified, use --assembly [version] or check the coord_system table in your core database\n");
     }
   }
 
