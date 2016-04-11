@@ -1,0 +1,12 @@
+use Bio::EnsEMBL::DBSQL::DBAdaptor;
+use Bio::EnsEMBL::Registry;
+
+Bio::EnsEMBL::DBSQL::DBAdaptor->new(
+  '-species' => "homo_vepiens",
+  '-group'   => "core",
+  '-port'    => '__port__',
+  '-host'    => '__host__',
+  '-user'    => '__user__',
+  '-pass'    => '__pass__',
+  '-dbname'  => '__dbname__',
+);
