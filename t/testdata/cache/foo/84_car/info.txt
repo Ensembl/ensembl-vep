@@ -1,0 +1,20 @@
+# CACHE UPDATED 2016-03-01 05:03:27
+sift	b
+cell_types	A549,CD14+CD16-Monocyte:CordBlood:hist,CD14+CD16-Monocyte:VenousBlood:hist,CD4+abTcell:VenousBlood:hist,CD8+abTcell:CordBlood:hist,CMCD4+abTcell:VenousBlood:hist,DND-41,eosinophil:VenousBlood:hist,EPC:VenousBlood:hist,erythroblast:CordBlood:hist,GM12878,H1ESC,HeLa-S3,HepG2,HMEC,HSMM,HSMMtube,HUVEC,HUVECprol:CordBlood:hist,IMR90,K562,M0Macrophage:CordBlood:hist,M0Macrophage:VenousBlood:hist,M1Macrophage:CordBlood:hist,M1Macrophage:VenousBlood:hist,M2Macrophage:CordBlood:hist,M2Macrophage:VenousBlood:hist,Monocytes-CD14+,MSC:VenousBlood:hist,naiveBcell:VenousBlood:hist,neutroMyelocyte:BoneMarrow:hist,neutrophil:CordBlood:hist,neutrophil:VenousBlood:hist,NH-A,NHDF-AD,NHEK,NHLF,Osteobl,MultiCell
+variation_cols	variation_name,failed,somatic,start,end,allele_string,strand,minor_allele,minor_allele_freq,clin_sig,phenotype_or_disease,pubmed,AFR,AMR,EAS,EUR,SAS,AA,EA,ExAC,ExAC_AFR,ExAC_AMR,ExAC_Adj,ExAC_EAS,ExAC_FIN,ExAC_NFE,ExAC_OTH,ExAC_SAS
+build	all
+polyphen	b
+regulatory	1
+assembly	GRCh38
+species	homo_sapiens
+source_polyphen	2.2.2
+source_sift	sift5.2.2
+source_COSMIC	75
+source_ESP	20141103
+source_gencode	GENCODE 24
+source_HGMD-PUBLIC	20154
+source_genebuild	2014-07
+source_regbuild	13.0
+source_assembly	GRCh38.p5
+source_dbSNP	146
+source_ClinVar	201601
