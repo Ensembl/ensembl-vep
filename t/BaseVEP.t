@@ -73,6 +73,25 @@ is(ref($bv->get_adaptor('variation', 'VariationFeature')), 'Bio::EnsEMBL::Variat
 throws_ok { $bv->get_adaptor() } qr/No adaptor group specified/, 'get_adaptor no group';
 throws_ok { $bv->get_adaptor('core') } qr/No adaptor type specified/, 'get_adaptor no type';
 
+# add_shortcuts copies params to $self to speed up lookups
+$bv = Bio::EnsEMBL::VEP::BaseVEP->new({
+  config => Bio::EnsEMBL::VEP::Config->new({
+      %$cfg_hash, test => 'hello'
+  })
+});
+$bv->add_shortcuts('test');
+is($bv->{test}, 'hello', 'add_shortcuts');
+
+$bv = Bio::EnsEMBL::VEP::BaseVEP->new({
+  config => Bio::EnsEMBL::VEP::Config->new({
+      %$cfg_hash, test => 'hello'
+  })
+});
+$bv->add_shortcuts(['test']);
+is($bv->{test}, 'hello', 'add_shortcuts arrayref');
+
+throws_ok { $bv->add_shortcuts('test') } qr/add_shortcuts would overwrite value/, 'add_shortcuts overwrite';
+
 
 
 ## status_msg tests require we mess with STDOUT

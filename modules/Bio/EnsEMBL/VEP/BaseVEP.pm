@@ -183,6 +183,16 @@ sub get_adaptor {
   return $cache->{$group}->{$type};
 }
 
+# adds shortcuts to named params to this object
+sub add_shortcuts {
+  my $self = shift;
+
+  foreach my $param(map {ref($_) eq 'ARRAY' ? @$_ : $_} @_) {
+    throw("ERROR: add_shortcuts would overwrite value for \"$param\"\n") if exists($self->{$param});
+    $self->{$param} = $self->param($param); 
+  }
+}
+
 # prints a status message to STDOUT
 sub status_msg {
   my $self = shift;
