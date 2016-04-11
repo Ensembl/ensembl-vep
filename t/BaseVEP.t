@@ -101,7 +101,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 2 unless $can_use_db;
+  skip 'No local database configured', 4 unless $can_use_db;
 
   my $multi;
 
@@ -128,6 +128,22 @@ SKIP: {
   ok($bv->registry, 'db - registry');
 
   is(ref($bv->get_adaptor('core', 'slice')), 'Bio::EnsEMBL::DBSQL::SliceAdaptor', 'get_adaptor slice');
+
+  $bv = Bio::EnsEMBL::VEP::BaseVEP->new({
+    config => Bio::EnsEMBL::VEP::Config->new({
+      %$cfg_hash,
+      registry => $test_cfg->registry_file($multi->{conf}->{core}->{dbname}),
+      database => 1,
+      offline => 0,
+      species => 'homo_vepiens',
+    })
+  });
+
+  ok($bv->registry, 'db - registry from registry file');
+
+  is(ref($bv->get_adaptor('core', 'slice')), 'Bio::EnsEMBL::DBSQL::SliceAdaptor', 'get_adaptor slice - registry file');
+
+  1;
 };
 
 

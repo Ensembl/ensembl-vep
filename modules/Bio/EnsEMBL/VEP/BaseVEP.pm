@@ -117,7 +117,7 @@ sub registry {
 
       # load DB options from registry file if given
       if(my $registry_file = $self->param('registry')) {
-        $self->status_msg("Loading DB self from registry file ", $registry_file);
+        $self->status_msg("Loading DB self from registry file ", $registry_file) if $self->param('verbose');
         
         $reg->load_all(
           $registry_file,

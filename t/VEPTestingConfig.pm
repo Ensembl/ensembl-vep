@@ -26,6 +26,7 @@ our %DEFAULTS = (
   cache_assembly => 'GRCh38',
   cache_dir      => $Bin.'/testdata/cache/homo_sapiens/84_GRCh38',
   test_ini_file  => $Bin.'/testdata/vep.ini',
+  registry_file  => $Bin.'/testdata/vep.registry',
 );
 
 sub new {
@@ -70,4 +71,46 @@ sub db_cfg {
   }
 
   return $self->{db_cfg};
+}
+
+sub registry_file {
+  my $self = shift;
+  my $dbname = shift;
+
+  if(!exists($self->{user_registry_file})) {
+
+    die("ERROR: No dbname given\n") unless $dbname;
+
+    my %db_cfg = %{$self->db_cfg()};
+
+    die("ERROR: No db config found\n") unless scalar keys %db_cfg;
+
+    $db_cfg{dbname} = $dbname;
+
+    my $base_file = $self->{registry_file};
+
+    # we need to write a new version of this file
+    my $reg_file = $base_file.$$;
+
+    open IN, $base_file or die "ERROR: Could not read from $base_file\n";
+    open OUT, ">$reg_file" or die "ERROR: Could not write to $reg_file\n";
+
+    while(<IN>) {
+      my $line = $_;
+      $line =~ s/\_\_$_\_\_/$db_cfg{$_}/ge for keys %db_cfg;
+      print OUT $line;
+    }
+
+    close IN;
+    close OUT;
+
+    $self->{user_registry_file} = $reg_file;
+  }
+
+  return $self->{user_registry_file};
+}
+
+sub DESTROY {
+  my $self = shift;
+  unlink($self->{user_registry_file}) if $self->{user_registry_file};
 }
