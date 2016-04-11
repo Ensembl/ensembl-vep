@@ -27,6 +27,9 @@ our %DEFAULTS = (
   cache_dir      => $Bin.'/testdata/cache/homo_sapiens/84_GRCh38',
   test_ini_file  => $Bin.'/testdata/vep.ini',
   registry_file  => $Bin.'/testdata/vep.registry',
+
+  test_vcf       => $Bin.'/testdata/input/test.vcf',
+  user_file      => $Bin.'/testdata/user_file'.$$,
 );
 
 sub new {
@@ -41,6 +44,7 @@ sub new {
   return $self;
 }
 
+# returns a hashref for general testing use
 sub base_testing_cfg {
   my $self = shift;
 
@@ -53,6 +57,8 @@ sub base_testing_cfg {
   }
 }
 
+# reads MultTestDB.conf for DB params
+# the same file is used by Bio::EnsEMBL::Test::MultiTestDB
 sub db_cfg {
   my $self = shift;
 
@@ -73,6 +79,10 @@ sub db_cfg {
   return $self->{db_cfg};
 }
 
+# creates a registry file with the params from MultTestDB.conf
+# caveat is that you must pass in the dbname parameter as created by Bio::EnsEMBL::Test::MultiTestDB
+# AFTER you have called Bio::EnsEMBL::Test::MultiTestDB->new()
+# $vep_testing_cfg->registry_file($multi->{conf}->{core}->{dbname})
 sub registry_file {
   my $self = shift;
   my $dbname = shift;
@@ -110,7 +120,26 @@ sub registry_file {
   return $self->{user_registry_file};
 }
 
+# creates an input file for testing
+sub create_input_file {
+  my $self = shift;
+  my $data = shift;
+
+  open OUT, ">".$self->{user_file} or die "ERROR: Could not write to file ".$self->{user_file}."\n";
+
+  print OUT ref($data) eq 'ARRAY' ? join("\t", @$data) : $data;
+  print OUT "\n";
+
+  close OUT;
+
+  return $self->{user_file};
+}
+
+# remove any created files
 sub DESTROY {
   my $self = shift;
-  unlink($self->{user_registry_file}) if $self->{user_registry_file};
+
+  for my $file_key(qw(user_file user_registry_file)) {
+    unlink($self->{$file_key}) if $self->{$file_key};
+  }
 }
