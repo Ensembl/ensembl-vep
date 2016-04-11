@@ -218,15 +218,16 @@ sub info {
       throw("ERROR: Mismatch in assembly versions from self (".$config_assembly.") and cache info.txt file (".$info->{cache_assembly}.")\n");
     }
 
+    ## NOT CURRENTLY BEING USED, COMMENTED OUT AS NO UNIT TEST
     # check if any disabled options are in use
     # these are set in the cache info file
-    if(my $cache_disabled = $info->{cache_disabled}) {
-      my @arr = ref($cache_disabled eq 'ARRAY') ? @{$cache_disabled} : ($cache_disabled);
+    # if(my $cache_disabled = $info->{cache_disabled}) {
+    #   my @arr = ref($cache_disabled eq 'ARRAY') ? @{$cache_disabled} : ($cache_disabled);
 
-      if(my ($disabled) = grep {$self->param($_)} @arr) {
-        throw("ERROR: Unable to use --".$disabled." with this cache\n");
-      }
-    }
+    #   if(my ($disabled) = grep {$self->param($_)} @arr) {
+    #     throw("ERROR: Unable to use --".$disabled." with this cache\n");
+    #   }
+    # }
 
     $self->{info} = $info;
   }
