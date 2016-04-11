@@ -8,8 +8,8 @@ Copy MultiTestDB.conf.example to MultiTestDB.conf and edit this file to set the 
 
 ## Notes on generating test DBs
 
-perl ../../ensembl-test/scripts/clone_core_database.pl -host ens-livemirror \
--user ensro -dbname homo_sapiens_core_84_38 -json test_core_region_config.json \
+perl ../../ensembl-test/scripts/clone_core_database.pl -host ensembldb.ensembl.org \
+-user anonymous -dbname homo_sapiens_core_84_38 -json test_core_region_config.json \
 -directory t/test-genome-dbs -dest_host [host] -dest_user [user] -dest_pass [pass]
 
 test_core_region_config.json contains the regions used.
