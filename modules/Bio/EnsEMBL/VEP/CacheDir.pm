@@ -50,7 +50,7 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript;
 use Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat;
 
-sub new {  
+sub new {
   my $caller = shift;
   my $class = ref($caller) || $caller;
   
