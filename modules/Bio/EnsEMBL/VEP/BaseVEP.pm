@@ -165,7 +165,7 @@ sub get_adaptor {
 
     if($self->param('offline')) {
       my $module_name = sprintf(
-        "Bio::EnsEMBL::%s::DBSQL::%sAdaptor",
+        "Bio::EnsEMBL::%sDBSQL::%sAdaptor",
         (lc($group) eq 'core' ? '' : ucfirst($group).'::'),
         $type
       );
