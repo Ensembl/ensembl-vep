@@ -98,7 +98,7 @@ sub init {
     my $dir = $self->dir;
 
     opendir CACHE, $dir;
-    my ($fa) = grep {/\.fa$/} readdir CACHE;
+    my ($fa) = grep {/\.fa(\.gz)?$/} readdir CACHE;
     closedir CACHE;
 
     if(defined $fa) {
@@ -214,8 +214,8 @@ sub info {
     my $config_assembly = $self->param('assembly');
 
     # check assembly matches
-    if(defined($config_assembly) && defined($info->{cache_assembly}) && $config_assembly ne $info->{cache_assembly}) {
-      throw("ERROR: Mismatch in assembly versions from self (".$config_assembly.") and cache info.txt file (".$info->{cache_assembly}.")\n");
+    if(defined($config_assembly) && defined($info->{assembly}) && $config_assembly ne $info->{assembly}) {
+      throw("ERROR: Mismatch in assembly versions from config (".$config_assembly.") and cache info.txt file (".$info->{assembly}.")\n");
     }
 
     ## NOT CURRENTLY BEING USED, COMMENTED OUT AS NO UNIT TEST

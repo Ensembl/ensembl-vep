@@ -73,21 +73,21 @@ throws_ok {
   Bio::EnsEMBL::VEP::CacheDir->new({
     root_dir => $cfg_hash->{dir},
     config => Bio::EnsEMBL::VEP::Config->new({%$cfg_hash, species => 'bar'})
-  })
+  })->dir()
 } qr/Cache directory .+ not found/, 'new with invalid species';
 
 throws_ok {
   Bio::EnsEMBL::VEP::CacheDir->new({
     root_dir => $cfg_hash->{dir},
     config => Bio::EnsEMBL::VEP::Config->new({%$cfg_hash, cache_version => 20})
-  })
+  })->dir()
 } qr/No cache found for .+ 20/, 'new with invalid version';
 
 throws_ok {
   Bio::EnsEMBL::VEP::CacheDir->new({
     root_dir => $cfg_hash->{dir},
     config => Bio::EnsEMBL::VEP::Config->new({%$cfg_hash, assembly => 'bar'})
-  })
+  })->dir()
 } qr/Cache assembly version .+bar.+ do not match/, 'new with invalid assembly';
 
 
@@ -98,15 +98,22 @@ throws_ok {
   Bio::EnsEMBL::VEP::CacheDir->new({
     root_dir => $cfg_hash->{dir},
     config => Bio::EnsEMBL::VEP::Config->new({%tmp_cfg_hash, species => 'foo'})
-  })
+  })->dir()
 } qr/Multiple assemblies found/, 'new with no assembly, multiple available';
 
 throws_ok {
   Bio::EnsEMBL::VEP::CacheDir->new({
     root_dir => $cfg_hash->{dir},
     config => Bio::EnsEMBL::VEP::Config->new({%tmp_cfg_hash, species => 'foo', assembly => 'tar'})
-  })
+  })->dir()
 } qr/No cache found/, 'new with assembly, multiple available';
+
+throws_ok {
+  Bio::EnsEMBL::VEP::CacheDir->new({
+    root_dir => $cfg_hash->{dir},
+    config => Bio::EnsEMBL::VEP::Config->new({%tmp_cfg_hash, species => 'foo', assembly => 'bar'})
+  })->info()
+} qr/Mismatch in assembly versions/, 'new, mismatch assembly';
 
 
 ## METHOD CALLS
