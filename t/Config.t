@@ -82,6 +82,14 @@ is($cfg->param('check_existing'), 1, 'option sets, multiple in same out 1');
 $cfg = Bio::EnsEMBL::VEP::Config->new({check_alleles => 1});
 is($cfg->param('check_existing'), 1, 'option sets, multiple in same out 2');
 
+# give config file
+$cfg = Bio::EnsEMBL::VEP::Config->new({config => $test_cfg->{test_ini_file}});
+is($cfg->param('test1'), 'hello', 'config file');
+
+# give config file auto-detected as $config->{dir}.'/vep.ini'
+$cfg = Bio::EnsEMBL::VEP::Config->new({dir => $test_cfg->{cache_root_dir}.'/../'});
+is($cfg->param('test1'), 'hello', 'ini file');
+
 # list conversion
 $cfg = Bio::EnsEMBL::VEP::Config->new({individual => 'dave,barry,keith'});
 is_deeply($cfg->param('individual'), [qw(dave barry keith)], 'list conversion');
@@ -91,6 +99,10 @@ throws_ok { Bio::EnsEMBL::VEP::Config->new({format => 'gobbledegook'}) } qr/not 
 
 # incompatible flags
 throws_ok { Bio::EnsEMBL::VEP::Config->new({database => 1, cache => 1}) } qr/Can\'t use.+together/, 'incompatible params';
+
+# missing database/cache/offline
+throws_ok { Bio::EnsEMBL::VEP::Config->new({database => 0}) } qr/The VEP can read gene data from/, 'no database/cache/offline';
+
 
 # some specific case tests
 $cfg = Bio::EnsEMBL::VEP::Config->new({output_file => 'STDOUT', verbose => 1});

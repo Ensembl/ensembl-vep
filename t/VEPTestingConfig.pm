@@ -25,7 +25,7 @@ our %DEFAULTS = (
   cache_version  => 84,
   cache_assembly => 'GRCh38',
   cache_dir      => $Bin.'/testdata/cache/homo_sapiens/84_GRCh38',
-  test_ini_file  => $Bin.'/testdata/test_vep.ini',
+  test_ini_file  => $Bin.'/testdata/vep.ini',
 );
 
 sub new {

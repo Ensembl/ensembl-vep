@@ -440,7 +440,7 @@ sub read_config_from_file {
 
   close CONFIG;
 
-  $self->status_msg("Read configuration from $file");
+  $self->status_msg("Read configuration from $file") if $self->param('verbose');
 
   return $config;
 }
