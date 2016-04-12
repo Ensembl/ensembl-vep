@@ -59,7 +59,7 @@ sub new {
   throw("ERROR: No file given\n") unless $hashref->{file};
   $self->file($hashref->{file});
 
-  $self->line_number(1);
+  $self->line_number(0);
 
   return $self;
 }
