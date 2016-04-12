@@ -168,6 +168,12 @@ is_deeply($vf, bless( {
   'non_variant' => 1,
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'non-variant');
 
+$vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({allow_non_variant => 0}),
+  file => $test_cfg->create_input_file([qw(21 25587759 test G . . . .)])
+})->next();
+is($vf, undef, 'non-variant without allow_non_variant');
+
 # *-type as produced by GATK
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
@@ -255,6 +261,13 @@ is_deeply($vf, $expected, 'StructuralVariationFeature 1');
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
+  file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T . . . SVTYPE=DUP;END=25587769)])
+})->next();
+delete($vf->{adaptor});
+is_deeply($vf, $expected, 'StructuralVariationFeature 2');
+
+$vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $cfg,
   file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DUP> . . END=25587769)])
 })->next();
 delete($vf->{adaptor});
@@ -285,6 +298,21 @@ is_deeply($vf, bless( {
   'start' => 25587759
 }, 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature fuzzy');
 
+no warnings 'once';
+open(SAVE, ">&STDERR") or die "Can't save STDERR\n"; 
+
+close STDERR;
+my $tmp;
+open STDERR, '>', \$tmp;
+
+$vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({gp => 1, warning_file => 'STDERR'}),
+  file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DEL> . . .)])
+})->next();
+ok($tmp =~ /VCF line.+looks incomplete/, 'StructuralVariationFeature del without end or length');
+
+open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
+
 
 
 ## OTHER TESTS
@@ -311,7 +339,6 @@ no warnings 'once';
 open(SAVE, ">&STDERR") or die "Can't save STDERR\n"; 
 
 close STDERR;
-my $tmp;
 open STDERR, '>', \$tmp;
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
