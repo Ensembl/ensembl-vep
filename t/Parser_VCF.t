@@ -58,36 +58,353 @@ is_deeply($vf, bless( {
   'map_weight' => 1,
   'allele_string' => 'C/T',
   'end' => 25585733,
-  'start' => '25585733'
+  'start' => 25585733
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'next');
 
 is(ref($p->next), 'Bio::EnsEMBL::Variation::VariationFeature', 'next again');
 
 
 
-## OTHER TESTS
-##############
+## FORMAT TESTS
+###############
+
+# disable warnings for using "," in a qw()
+no warnings 'qw';
+
+# deletion
+$vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $cfg,
+  file => $test_cfg->create_input_file([qw(21 25587759 test AC A . . .)])
+})->next();
+delete($vf->{adaptor});
+is_deeply($vf, bless( {
+  'chr' => '21',
+  'strand' => 1,
+  'variation_name' => 'test',
+  'map_weight' => 1,
+  'allele_string' => 'C/-',
+  'end' => 25587760,
+  'start' => 25587760
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'deletion');
+
+# insertion
+$vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $cfg,
+  file => $test_cfg->create_input_file([qw(21 25587759 test A AC . . .)])
+})->next();
+delete($vf->{adaptor});
+is_deeply($vf, bless( {
+  'chr' => '21',
+  'strand' => 1,
+  'variation_name' => 'test',
+  'map_weight' => 1,
+  'allele_string' => '-/C',
+  'end' => 25587759,
+  'start' => 25587760
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'insertion');
+
+# multiple alts
+$vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $cfg,
+  file => $test_cfg->create_input_file([qw(21 25587759 test A C,G . . .)])
+})->next();
+delete($vf->{adaptor});
+is_deeply($vf, bless( {
+  'chr' => '21',
+  'strand' => 1,
+  'variation_name' => 'test',
+  'map_weight' => 1,
+  'allele_string' => 'A/C/G',
+  'end' => 25587759,
+  'start' => 25587759
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'multiple alts');
+
+# mixed types - different first base
+$vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $cfg,
+  file => $test_cfg->create_input_file([qw(21 25587759 test A C,GG . . .)])
+})->next();
+delete($vf->{adaptor});
+is_deeply($vf, bless( {
+  'chr' => '21',
+  'strand' => 1,
+  'variation_name' => 'test',
+  'map_weight' => 1,
+  'allele_string' => 'A/C/GG',
+  'end' => 25587759,
+  'start' => 25587759
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'mixed types - different first base');
+
+# mixed types - different first base
+$vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $cfg,
+  file => $test_cfg->create_input_file([qw(21 25587759 test G GC,GT . . .)])
+})->next();
+delete($vf->{adaptor});
+is_deeply($vf, bless( {
+  'chr' => '21',
+  'strand' => 1,
+  'variation_name' => 'test',
+  'map_weight' => 1,
+  'allele_string' => '-/C/T',
+  'end' => 25587759,
+  'start' => 25587760
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'mixed types - same first base');
+
+# non-variant
+$vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({allow_non_variant => 1}),
+  file => $test_cfg->create_input_file([qw(21 25587759 test G . . . .)])
+})->next();
+delete($vf->{adaptor});
+is_deeply($vf, bless( {
+  'chr' => '21',
+  'strand' => 1,
+  'variation_name' => 'test',
+  'map_weight' => 1,
+  'allele_string' => 'G',
+  'end' => 25587759,
+  'start' => 25587759,
+  'non_variant' => 1,
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'non-variant');
+
+# *-type as produced by GATK
+$vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $cfg,
+  file => $test_cfg->create_input_file([qw(21 25587759 test G C,* . . .)])
+})->next();
+delete($vf->{adaptor});
+is_deeply($vf, bless( {
+  'chr' => '21',
+  'strand' => 1,
+  'variation_name' => 'test',
+  'map_weight' => 1,
+  'allele_string' => 'G/C/*',
+  'end' => 25587759,
+  'start' => 25587759,
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), '*-type 1');
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
- config => $cfg,
- file => $test_cfg->create_input_file([qw(21 25587759 sv_dup . <DUP> . . SVTYPE=DUP;END=25587769)])
+  config => $cfg,
+  file => $test_cfg->create_input_file([qw(21 25587759 test G C,<DEL:*> . . .)])
+})->next();
+delete($vf->{adaptor});
+is_deeply($vf, bless( {
+  'chr' => '21',
+  'strand' => 1,
+  'variation_name' => 'test',
+  'map_weight' => 1,
+  'allele_string' => 'G/C/<DEL:*>',
+  'end' => 25587759,
+  'start' => 25587759,
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), '*-type 2 ');
+
+$vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $cfg,
+  file => $test_cfg->create_input_file([qw(21 25587759 test GC G,* . . .)])
 })->next();
 delete($vf->{adaptor});
 
 is_deeply($vf, bless( {
-  'outer_end' => undef,
   'chr' => '21',
-  'inner_end' => undef,
-  'outer_start' => undef,
+  'strand' => 1,
+  'variation_name' => 'test',
+  'map_weight' => 1,
+  'allele_string' => 'C/-/*',
+  'end' => 25587760,
+  'start' => 25587760,
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), '*-type with deletion');
+
+$vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $cfg,
+  file => $test_cfg->create_input_file([qw(21 25587759 test G GC,* . . .)])
+})->next();
+delete($vf->{adaptor});
+
+is_deeply($vf, bless( {
+  'chr' => '21',
+  'strand' => 1,
+  'variation_name' => 'test',
+  'map_weight' => 1,
+  'allele_string' => '-/C/*',
+  'end' => 25587759,
+  'start' => 25587760,
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), '*-type with insertion');
+
+
+# basic SV coord tests
+my $expected = bless( {
+  'outer_end' => 25587769,
+  'chr' => '21',
+  'inner_end' => 25587769,
+  'outer_start' => 25587759,
   'end' => 25587769,
-  'inner_start' => undef,
+  'inner_start' => 25587759,
   'strand' => 1,
   'class_SO_term' => 'duplication',
   'variation_name' => 'sv_dup',
   'start' => 25587759
-}, 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ), 'StructuralVariationFeature');
+}, 'Bio::EnsEMBL::Variation::StructuralVariationFeature' );
+
+$vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $cfg,
+  file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DUP> . . SVTYPE=DUP;END=25587769)])
+})->next();
+delete($vf->{adaptor});
+is_deeply($vf, $expected, 'StructuralVariationFeature 1');
+
+$vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $cfg,
+  file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DUP> . . END=25587769)])
+})->next();
+delete($vf->{adaptor});
+is_deeply($vf, $expected , 'StructuralVariationFeature no SVTYPE');
+
+$vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $cfg,
+  file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DUP> . . SVLEN=11)])
+})->next();
+delete($vf->{adaptor});
+is_deeply($vf, $expected , 'StructuralVariationFeature SVLEN');
+
+$vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $cfg,
+  file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DUP> . . SVLEN=11;CIPOS=-3,2;CIEND=-4,5)])
+})->next();
+delete($vf->{adaptor});
+is_deeply($vf, bless( {
+  'outer_end' => 25587774,
+  'chr' => '21',
+  'inner_end' => 25587765,
+  'outer_start' => 25587756,
+  'end' => 25587769,
+  'inner_start' => 25587761,
+  'strand' => 1,
+  'class_SO_term' => 'duplication',
+  'variation_name' => 'sv_dup',
+  'start' => 25587759
+}, 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature fuzzy');
 
 
+
+## OTHER TESTS
+##############
+
+# GP flag
+$vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({gp => 1}),
+  file => $test_cfg->create_input_file([qw(21 25587759 test A G . . GP=21:25586000)])
+})->next();
+delete($vf->{adaptor});
+is_deeply($vf, bless( {
+  'chr' => '21',
+  'strand' => 1,
+  'variation_name' => 'test',
+  'map_weight' => 1,
+  'allele_string' => 'A/G',
+  'end' => 25586000,
+  'start' => 25586000
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'gp');
+
+# GP flag not found
+no warnings 'once';
+open(SAVE, ">&STDERR") or die "Can't save STDERR\n"; 
+
+close STDERR;
+my $tmp;
+open STDERR, '>', \$tmp;
+
+$vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({gp => 1, warning_file => 'STDERR'}),
+  file => $test_cfg->create_input_file([qw(21 25587759 test A G . . .)])
+})->next();
+ok($tmp =~ /No GP flag found in INFO column/, 'gp - not found');
+
+open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
+
+
+# individual data
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({allow_non_variant => 1, individual => 'all'}),
+  file => $test_cfg->create_input_file([
+    ['##fileformat=VCFv4.1'],
+    [qw(#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT dave barry jeff)],
+    [qw(21 25587759 indtest A G . . . GT 0|1 1/1 0/0)],
+  ])
+});
+
+$vf = $p->next;
+delete($vf->{adaptor});
+is_deeply($vf, bless( {
+  'chr' => '21',
+  'strand' => 1,
+  'variation_name' => 'indtest',
+  'map_weight' => 1,
+  'allele_string' => 'A/G',
+  'end' => 25587759,
+  'start' => 25587759,
+  'genotype' => ['A', 'G'],
+  'individual' => 'dave',
+  'phased' => 1,
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'individual 1');
+
+$vf = $p->next;
+delete($vf->{adaptor});
+is_deeply($vf, bless( {
+  'chr' => '21',
+  'strand' => 1,
+  'variation_name' => 'indtest',
+  'map_weight' => 1,
+  'allele_string' => 'A/G',
+  'end' => 25587759,
+  'start' => 25587759,
+  'genotype' => ['G', 'G'],
+  'individual' => 'barry',
+  'phased' => 0,
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'individual 2');
+
+$vf = $p->next;
+delete($vf->{adaptor});
+is_deeply($vf, bless( {
+  'chr' => '21',
+  'strand' => 1,
+  'variation_name' => 'indtest',
+  'map_weight' => 1,
+  'allele_string' => 'A',
+  'end' => 25587759,
+  'start' => 25587759,
+  'genotype' => ['A', 'A'],
+  'individual' => 'jeff',
+  'phased' => 0,
+  'non_variant' => 1,
+  'hom_ref' => 1,
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'individual 3');
+
+
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({allow_non_variant => 1, process_ref_homs => 1, individual => 'jeff'}),
+  file => $test_cfg->create_input_file([
+    ['##fileformat=VCFv4.1'],
+    [qw(#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT jeff)],
+    [qw(21 25587759 indtest A G . . . GT 0/0)],
+  ])
+});
+
+$vf = $p->next;
+delete($vf->{adaptor});
+is_deeply($vf, bless( {
+  'chr' => '21',
+  'strand' => 1,
+  'variation_name' => 'indtest',
+  'map_weight' => 1,
+  'allele_string' => 'A/A',
+  'end' => 25587759,
+  'start' => 25587759,
+  'genotype' => ['A', 'A'],
+  'individual' => 'jeff',
+  'phased' => 0,
+  'hom_ref' => 1,
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'individual - process_ref_homs');
 
 
 # done
