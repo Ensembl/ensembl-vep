@@ -42,8 +42,12 @@ is(ref($p), 'Bio::EnsEMBL::VEP::Parser', 'check class');
 ###############
 
 is($p->file, $test_cfg->{test_vcf}, 'file');
+is($p->file('stdin'), 'STDIN', 'file STDIN');
 
-is($p->line_number, 1, 'line_number');
+throws_ok {$p->file('foo')} qr/File.+does not exist/, 'file not exists';
+
+is($p->line_number, 0, 'line_number get');
+is($p->line_number(1), 1, 'line_number set');
 
 
 done_testing();
