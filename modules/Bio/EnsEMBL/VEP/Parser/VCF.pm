@@ -73,6 +73,7 @@ sub next {
 
   if(!scalar @$cache) {
     $self->parser->next;
+    $self->line_number($self->line_number + 1);
     push @$cache, @{$self->create_VariationFeatures()};
   }
 
