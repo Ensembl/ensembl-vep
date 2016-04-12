@@ -33,7 +33,7 @@ limitations under the License.
 
 =head1 NAME
 
-Bio::EnsEMBL::VEP::Parser - VCF input parser
+Bio::EnsEMBL::VEP::Parser::VCF - VCF input parser
 
 =cut
 
@@ -73,8 +73,9 @@ sub next {
 
   if(!scalar @$cache) {
     $self->parser->next;
-    $self->line_number($self->line_number + 1);
     push @$cache, @{$self->create_VariationFeatures()};
+
+    $self->line_number($self->line_number + 1) if scalar @$cache;
   }
 
   return shift @$cache;
