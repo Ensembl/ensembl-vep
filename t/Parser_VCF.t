@@ -23,7 +23,7 @@ use lib $Bin;
 use VEPTestingConfig;
 my $test_cfg = VEPTestingConfig->new();
 
-my $vf;
+my ($vf, $tmp, $expected);
 
 ## BASIC TESTS
 ##############
@@ -239,7 +239,7 @@ is_deeply($vf, bless( {
 
 
 # basic SV coord tests
-my $expected = bless( {
+$expected = bless( {
   'outer_end' => 25587769,
   'chr' => '21',
   'inner_end' => 25587769,
@@ -302,7 +302,6 @@ no warnings 'once';
 open(SAVE, ">&STDERR") or die "Can't save STDERR\n"; 
 
 close STDERR;
-my $tmp;
 open STDERR, '>', \$tmp;
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
