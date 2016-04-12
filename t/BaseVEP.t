@@ -120,7 +120,7 @@ close STDERR;
 open STDERR, '>', \$tmp;
 
 # test warning_msg
-my $warning_file = $test_cfg->create_input_file();
+my $warning_file = $test_cfg->create_input_file('tmp');
 
 $bv = Bio::EnsEMBL::VEP::BaseVEP->new({
   config => Bio::EnsEMBL::VEP::Config->new({
