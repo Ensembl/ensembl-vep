@@ -127,8 +127,19 @@ sub create_input_file {
 
   open OUT, ">".$self->{user_file} or die "ERROR: Could not write to file ".$self->{user_file}."\n";
 
-  print OUT ref($data) eq 'ARRAY' ? join("\t", @$data) : $data;
-  print OUT "\n";
+  if($data) {
+    if(ref($data) eq 'ARRAY') {
+      if(ref($data->[0]) eq 'ARRAY') {
+        print OUT join("\t", @$_)."\n" for @$data;
+      }
+      else {
+        print OUT join("\t", @$data)."\n";
+      }
+    }
+    else {
+      print OUT "$data\n";
+    }
+  }
 
   close OUT;
 
