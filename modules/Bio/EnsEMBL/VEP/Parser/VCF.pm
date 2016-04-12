@@ -87,22 +87,24 @@ sub create_VariationFeatures {
 
   return [] unless $record;
 
-  # get relevant data
-  my ($chr, $start, $end, $ref, $alts, $info, $ids) = (
+  # get the data we need to decide if this is an SV
+  my ($alts, $info) = (
+    $parser->get_alternatives,
+    $parser->get_info,
+  );
+
+  if($info->{SVTYPE} || join(",", @$alts) =~ /[<\[][^\*]+[>\]]/) {
+    return $self->create_StructuralVariationFeatures();
+  }
+
+  # get the rest of the relevant data
+  my ($chr, $start, $end, $ref, $ids) = (
     $parser->get_seqname,
     $parser->get_raw_start,
     $parser->get_raw_end,
     $parser->get_reference,
-    $parser->get_alternatives,
-    $parser->get_info,
     $parser->get_IDs,
   );
-
-  # simple validity check
-  # unless($chr && $start && $end && $ref && $alts) {
-  #   warning_msg($config, "Invalid input formatting on line ".$config->{line_number});
-  #   return [];
-  # }
 
   # non-variant
   my $non_variant = 0;
@@ -118,7 +120,7 @@ sub create_VariationFeatures {
 
   # some VCF files have a GRCh37 pos defined in GP flag in INFO column
   # if user has requested, we can use that as the position instead
-  if($self->{allow_non_variant}) {
+  if($self->{gp}) {
     $chr = undef;
     $start = undef;
 
@@ -134,21 +136,12 @@ sub create_VariationFeatures {
   }
 
   # adjust end coord
-  $end += (length($ref) - 1);
-
-  # structural variation
-  if($info->{SVTYPE} || join(",", @$alts) =~ /[\<|\[]^\*[\]\>]/) {
-    return $self->create_StructuralVariationFeatures();
-  }
+  # $end += (length($ref) - 1);
 
   # find out if any of the alt alleles make this an insertion or a deletion
-  my ($is_indel, $is_sub, $ins_count, $total_count);
+  my $is_indel = 0;
   foreach my $alt_allele(@$alts) {
-    $is_indel = 1 if $alt_allele =~ /^[DI]/;
-    $is_indel = 1 if length($alt_allele) != length($ref);
-    $is_sub = 1 if length($alt_allele) == length($ref);
-    $ins_count++ if length($alt_allele) > length($ref);
-    $total_count++;
+    $is_indel = 1 if $alt_allele =~ /^[DI]/ or length($alt_allele) != length($ref);
   }
 
   # multiple alt alleles?
@@ -189,8 +182,6 @@ sub create_VariationFeatures {
     }
   }
 
-  my @original_alts = @$alts;
-
   # create VF object
   my $vf = Bio::EnsEMBL::Variation::VariationFeature->new_fast({
     start          => $start,
@@ -206,66 +197,11 @@ sub create_VariationFeatures {
   # flag as non-variant
   $vf->{non_variant} = 1 if $non_variant;
 
-  # individuals?
-  if($self->{indvidual}) {
-    my @alleles = split '\/', $ref.'/'.join('/', @original_alts);
+  # individual data?
+  return $self->create_individual_VariationFeatures($vf) if $self->{individual};
 
-    my @return;
-
-    my $ind_cols = $self->individual_columns();
-
-    foreach my $ind(keys %{$ind_cols}) {
-
-      # get alleles present in this individual
-      my @bits;
-      my $gt = (split ':', $record->[$ind_cols->{$ind}])[0];
-
-      my $phased = ($gt =~ /\|/ ? 1 : 0);
-
-      foreach my $bit(split /\||\/|\\/, $gt) {
-        push @bits, $alleles[$bit] unless $bit eq '.';
-      }
-
-      # shallow copy VF
-      my $vf_copy = { %$vf };
-      bless $vf_copy, ref($vf);
-
-      # get non-refs, remembering to exclude "*"-types
-      my %non_ref = map {$_ => 1} grep {$_ ne $ref && $_ !~ /\*/} @bits;
-
-      # construct allele_string
-      if(scalar keys %non_ref) {
-        $vf_copy->{allele_string} = $ref."/".(join "/", keys %non_ref);
-      }
-      else {
-        $vf_copy->{allele_string} = $ref;
-        $vf_copy->{hom_ref} = 1;
-
-        if($self->{process_ref_homs}) {
-          $vf_copy->{allele_string} .= "/".$ref;
-        }
-        else {
-          $vf_copy->{non_variant} = 1;
-        }
-      }
-
-      # store phasing info
-      $vf_copy->{phased} = $self->{phased} ? 1 : $phased;
-
-      # store GT
-      $vf_copy->{genotype} = \@bits;
-
-      # store individual name
-      $vf_copy->{individual} = $ind;
-
-      push @return, $vf_copy;
-    }
-
-    return \@return;
-  }
-  else {
-    return [$vf];
-  }
+  # normal return
+  return [$vf];
 }
 
 sub create_StructuralVariationFeatures {
@@ -275,11 +211,10 @@ sub create_StructuralVariationFeatures {
   my $record = $parser->{record};
 
   # get relevant data
-  my ($chr, $start, $end, $ref, $alts, $info, $ids) = (
+  my ($chr, $start, $end, $alts, $info, $ids) = (
     $parser->get_seqname,
-    $parser->get_raw_start,
-    $parser->get_raw_end,
-    $parser->get_reference,
+    $parser->get_start,
+    $parser->get_end,
     $parser->get_alternatives,
     $parser->get_info,
     $parser->get_IDs,
@@ -296,19 +231,12 @@ sub create_StructuralVariationFeatures {
   }
 
   # check for imprecise breakpoints
-  my ($min_start, $max_start, $min_end, $max_end);
-
-  if(defined($info->{CIPOS})) {
-    my ($low, $high) = split ',', $info->{CIPOS};
-    $min_start = $start + $low;
-    $max_start = $start + $high;
-  }
-
-  if(defined($info->{CIEND})) {
-    my ($low, $high) = split ',', $info->{CIEND};
-    $min_end = $end + $low;
-    $max_end = $end + $high;
-  }
+  my ($min_start, $max_start, $min_end, $max_end) = (
+    $parser->get_outer_start,
+    $parser->get_inner_start,
+    $parser->get_inner_end,
+    $parser->get_outer_end,
+  );
 
   # get type
   my $type;
@@ -358,6 +286,67 @@ sub create_StructuralVariationFeatures {
   });
 
   return [$svf];
+}
+
+sub create_individual_VariationFeatures {
+  my $self = shift;
+  my $vf = shift;
+
+  my $parser = $self->parser();
+  my $record = $parser->{record};
+
+  my @alleles = split '\/', $vf->{allele_string};
+  my $ref = $alleles[0];
+
+  my @return;
+
+  # get genotypes from parser
+  my $include = lc($self->{individual}->[0]) eq 'all' ? $parser->get_samples : $self->{individual};
+  my $ind_gts = $parser->get_samples_genotypes($include, 1 - ($self->{allow_non_variant} || 0));
+
+  foreach my $ind(@$include) {
+
+    # get alleles present in this individual
+    my $gt = $ind_gts->{$ind};
+    my @bits = split /\||\/|\\/, $gt;
+    my $phased = ($gt =~ /\|/ ? 1 : 0);
+
+    # shallow copy VF
+    my $vf_copy = { %$vf };
+    bless $vf_copy, ref($vf);
+
+    # get non-refs, remembering to exclude "*"-types
+    my %non_ref = map {$_ => 1} grep {$_ ne $ref && $_ !~ /\*/} @bits;
+
+    # construct allele_string
+    if(scalar keys %non_ref) {
+      $vf_copy->{allele_string} = $ref."/".(join "/", keys %non_ref);
+    }
+    else {
+      $vf_copy->{allele_string} = $ref;
+      $vf_copy->{hom_ref} = 1;
+
+      if($self->{process_ref_homs}) {
+        $vf_copy->{allele_string} .= "/".$ref;
+      }
+      else {
+        $vf_copy->{non_variant} = 1;
+      }
+    }
+
+    # store phasing info
+    $vf_copy->{phased} = $self->{phased} ? 1 : $phased;
+
+    # store GT
+    $vf_copy->{genotype} = \@bits;
+
+    # store individual name
+    $vf_copy->{individual} = $ind;
+
+    push @return, $vf_copy;
+  }
+
+  return \@return;
 }
 
 sub individual_columns {
