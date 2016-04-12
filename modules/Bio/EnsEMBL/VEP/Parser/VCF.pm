@@ -349,9 +349,4 @@ sub create_individual_VariationFeatures {
   return \@return;
 }
 
-sub individual_columns {
-  my $self = shift;
-  return $self->{individual_columns} ||= $self->parser->get_sample_column_indices();
-}
-
 1;
