@@ -1,0 +1,70 @@
+1	\N	schema_type	variation
+3	\N	patch	patch_73_74_a.sql|schema version
+4	\N	patch	patch_73_74_b.sql|Add doi and UCSC id to publication table
+5	\N	patch	patch_73_74_c.sql|Add clinical_significance to variation_feature table
+6	\N	patch	patch_73_74_d.sql|Add data_types to source table
+7	\N	patch	patch_73_74_e.sql|Update indexes for the phenotype table
+10	\N	patch	patch_74_75_a.sql|schema version
+11	\N	patch	patch_74_75_b.sql|Drop read_coverage table
+12	\N	patch	patch_70_71_e.sql|create study_variation table
+13	\N	patch	patch_70_71_f.sql|add phenotype_feature and phenotype_feature_attrib
+14	\N	patch	patch_70_71_g.sql|add stable_id column to phenotype
+15	\N	patch	patch_70_71_h.sql|copy data to phenotype_feature and phenotype_feature_attrib
+16	\N	patch	patch_70_71_i.sql|drop old annotation tables
+17	\N	patch	patch_70_71_j.sql|add pos_idx key to phenotype_feature
+18	\N	patch	patch_70_71_k.sql|add type_value_idx key to phenotype_feature_attrib
+19	\N	patch	patch_71_72_a.sql|schema version
+20	\N	patch	patch_71_72_b.sql|Changes for sample table redesign: Rename columns and indexes
+21	\N	patch	patch_71_72_c.sql|Move data from sample table to new individual and population tables.
+22	\N	patch	patch_71_72_d.sql|Replace sample_synonym by individual_synonym and population_synonym
+23	\N	patch	patch_71_72_e.sql|change variation clinical_significance column
+24	\N	patch	patch_71_72_f.sql|new tables for citations
+25	\N	patch	patch_71_72_g.sql|Add new columns to the tables structural_variation and structural_variation_feature.
+26	\N	patch	patch_71_72_h.sql|Create a table structural_variation_sample. Move the structural variation data from phenotype_feature_attrib to structural_variation_sample and structural_variation.
+27	\N	patch	patch_71_72_i.sql|Change the type of the column description in the table study.
+28	\N	patch	patch_72_73_a.sql|schema version
+29	\N	patch	patch_72_73_b.sql|Add year to publication table
+30	\N	patch	patch_72_73_c.sql|Add phased column to genotype_code table
+31	\N	patch	patch_72_73_d.sql| revert population_synonym.name and individual_synonym.name to varchars
+32	\N	patch	patch_72_73_e.sql|Add ESP to varition set in variation and variation_feature tables
+38	\N	patch	patch_75_76_a.sql|schema version
+39	\N	patch	patch_75_76_b.sql|Change evidence storage in Variation & Variation_feature table to attribs
+40	\N	patch	patch_75_76_c.sql|Add new table and extra column to population table to specify if population is to be displayed seperately on the PopulationGenetics page and if so with what priority
+41	\N	patch	patch_75_76_d.sql|Restore read_coverage table
+42	\N	patch	patch_75_76_e.sql|Add has_coverage flag to individual table
+43	\N	patch	patch_75_76_f.sql|Add index on the source_id column in variation_feature and phenotype_feature
+44	\N	patch	patch_75_76_g.sql|update variation and variation_feature to use the same clinical significance terms as ClinVar
+45	\N	patch	patch_75_76_h.sql|Replace the column clinical_significance_attrib_id by clinical_significance in structural_variation
+46	\N	patch	patch_75_76_i.sql|Add tables required for HGVS index creation
+47	\N	patch	patch_76_77_a.sql|schema version
+48	\N	patch	patch_76_77_b.sql|Add new column to Variation table to flag whether variants should be displayed or not
+49	\N	patch	patch_76_77_c.sql|update SO consequence terms
+50	\N	patch	patch_76_77_d.sql|update SO terms in attrib table
+51	\N	patch	patch_76_77_e.sql|add variation_attrib table
+52	\N	patch	patch_76_77_f.sql|Add new variation_set_id column to individual table
+53	\N	patch	patch_76_77_g.sql|Add new column to Variation_feature table to flag whether variants should be displayed or not
+54	\N	pairwise_ld.default_population	679
+55	\N	patch	patch_77_78_a.sql|schema version
+56	\N	patch	patch_77_78_b.sql|Add a column copy_number for CNV supporting structural variants
+57	\N	patch	patch_77_78_c.sql|Drop the table study_variation
+58	\N	patch	patch_77_78_d.sql|Extend the index type_val_idx in the table attrib
+59	\N	patch	patch_77_78_e.sql|add indexes on father_ and mother_individual_id and population name
+2	\N	schema_version	83
+60	\N	patch	patch_78_79_a.sql|schema version
+61	\N	patch	patch_78_79_b.sql|change the column attrib_type_id by attrib_id in the variation_attrib table
+62	\N	patch	patch_78_79_c.sql|Store more detailed Sift information
+63	\N	patch	patch_79_80_a.sql|schema version
+64	\N	patch	patch_79_80_b.sql|create a unique key for the variation_name column in the table structural_variation
+65	\N	patch	patch_79_80_c.sql|change the column consequence_types in transcript_variation and variation_feature to add protein_altering_variant and change initiator_codon_variant to start_lost
+66	\N	patch	patch_79_80_d.sql|Reduce consequence_terms to the set of relevant SO_terms in motif_feature_variation and regulatory_feature_variation tables
+67	\N	patch	patch_79_80_e.sql|update the attrib tables by changing the default values
+68	\N	patch	patch_79_80_f.sql|add Phenotype or Disease evidence_attribs
+69	\N	patch	patch_80_81_a.sql|schema version
+70	\N	patch	patch_80_81_b.sql|Create new sample table and update individual table. Copy individual data into new sample table.
+71	\N	patch	patch_80_81_c.sql|Update table, column and index names from individual to sample.
+72	\N	patch	patch_83_84_a.sql|schema version
+73	\N	patch	patch_81_82_a.sql|schema version
+74	\N	patch	patch_81_82_b.sql|update the description in the failed_description table
+75	\N	patch	patch_81_82_c.sql|new entry in the failed_description table
+76	\N	patch	patch_82_83_a.sql|schema version
+77	\N	patch	patch_82_83_b.sql|Add the evidence ExAC in variation and variation_feature

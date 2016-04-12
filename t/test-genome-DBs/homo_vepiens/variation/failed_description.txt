@@ -1,0 +1,19 @@
+1	Variant maps to more than 3 different locations
+2	None of the variant alleles match the reference allele
+3	Variant has more than 3 different alleles
+4	Loci with no observed variant alleles in dbSNP
+5	Variant does not map to the genome
+6	Variant has no genotypes
+7	Genotype frequencies do not add up to 1
+8	Variant has no associated sequence
+9	Variant submission has been withdrawn by the 1000 genomes project due to high false positive rate
+11	Additional submitted allele data from dbSNP does not agree with the dbSNP refSNP alleles
+12	Variant has more than 3 different submitted alleles
+13	Alleles contain non-nucleotide characters
+14	Alleles contain ambiguity codes
+15	Mapped position is not compatible with reported alleles
+16	Flagged as suspect by dbSNP
+17	Variant can not be re-mapped to the current assembly
+18	Supporting evidence can not be re-mapped to the current assembly
+19	Variant maps to more than one genomic location
+20	Variant at first base in sequence

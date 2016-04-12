@@ -1,0 +1,4 @@
+1	fully_inbred	multiple organisms have the same genome sequence
+2	partly_inbred	single organisms have reduced genome variability due to human intervention
+3	outbred	a single organism which breeds freely
+4	mutant	a single or multiple organisms with the same genome sequence that have a natural or experimentally induced mutation

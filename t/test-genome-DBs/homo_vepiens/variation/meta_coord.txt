@@ -1,0 +1,6 @@
+variation_feature	2	11
+flanking_sequence	2	\N
+phenotype_feature	2	10000000
+read_coverage	2	10000000
+compressed_genotype_region	2	100000
+structural_variation_feature	2	100000

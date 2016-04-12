@@ -1,0 +1,33 @@
+419	evidence	Variant evidence status	Evidence status for a variant
+1	SO_accession		Sequence Ontology accession
+2	SO_term		Sequence Ontology term
+3	display_term		Ensembl display term
+4	NCBI_term		NCBI term
+5	feature_SO_term		Sequence Ontology term for the associated feature
+6	rank		Relative severity of this variation consequence
+7	polyphen_prediction		PolyPhen-2 prediction
+8	sift_prediction		SIFT prediction
+9	short_name	Short name	A shorter name for an instance, e.g. a VariationSet
+10	dbsnp_clin_sig	dbSNP/ClinVar clinical significance	The clinical significance of a variant as reported by ClinVar and dbSNP
+11	dgva_clin_sig	DGVa clinical significance	The clinical significance of a structural variant as reported by DGVa
+12	prot_func_analysis	Protein function analysis 	The program used to make protein function predictions
+13	associated_gene	Associated gene	ID of gene(s) linked by phenotype association
+14	risk_allele	Risk allele	Risk allele in phenotype association
+15	p_value	P-value	P-value denoting significance of an observed phenotype annotation
+16	variation_names	Variation names	Variant ID(s) linked with a phenotype association
+17	sample_id	Sample ID	Sample ID for source of phenotype association
+18	strain_id	Strain ID	Strain ID for source of phenotype association
+19	lod_score	LOD score	Log Of Odds score
+20	variance	Variance	Variance statistic
+21	inheritance_type	Inheritance type	Inheritance type of a trait
+22	external_id	External ID	External identifier for an entity
+23	odds_ratio	Odds ratio	Odds ratio used to denote significance of an observed phenotype annotation
+24	beta_coef	Beta coefficient	Beta coefficient (or standardized coefficient) used to denote significance of an observed phenotype annotation
+25	allele_symbol	Allele symbol	Allele symbol linked with phenotype association
+26	allele_accession_id	Allele accession ID	Allele accession ID linked with phenotype association
+33	marker_accession_id	Marker accession ID	Marker ID linked with phenotype association
+420	clinvar_clin_sig	ClinVar clinical significance	The clinical significance of a variant as reported by ClinVar
+422	sequence_number	Number of sequences in alignment	Number of protein sequences in the alignment use to make a protein impact prediction
+423	based_on	Evidence type used for protein impact prediction	Evidence type used for a PolyPhen protein impact prediction
+424	conservation_score	Sift conservation score	Median conservation value in an alignment used to make a Sift prediction
+421	review_status	ClinVar review_status	ClinVar review_status for assertation

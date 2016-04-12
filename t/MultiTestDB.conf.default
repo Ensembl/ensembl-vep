@@ -7,7 +7,7 @@
   'databases' => {
     'homo_vepiens' => { 
       'core'      => 'Bio::EnsEMBL::DBSQL::DBAdaptor',
-      #'variation' => 'Bio::EnsEMBL::Variation::DBSQL::DBAdaptor',
+      'variation' => 'Bio::EnsEMBL::Variation::DBSQL::DBAdaptor',
       #'funcgen'   => 'Bio::EnsEMBL::Funcgen::DBSQL::DBAdaptor',
     },
     'multi' => {

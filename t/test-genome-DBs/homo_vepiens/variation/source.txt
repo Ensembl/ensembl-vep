@@ -1,0 +1,6 @@
+1	dbSNP	138	Variants (including SNPs and indels) imported from dbSNP	http://www.ncbi.nlm.nih.gov/projects/SNP/	\N	mixed	variation
+26	COSMIC	67	http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/	NULL			variation
+2	Archive dbSNP	138	Former variants names imported from dbSNP	http://www.ncbi.nlm.nih.gov/projects/SNP/	\N	mixed	variation_synonym
+3	LSDB	0	Variants dbSNP annotates as being from LSDBs	http://www.ncbi.nlm.nih.gov/projects/SNP/	lsdb	\N	variation_synonym
+11	DGVa	201310	Database of Genomic Variants Archive	http://www.ebi.ac.uk/dgva/			structural_variation,study
+23	Affy GenomeWideSNP_6 CNV	0	\N	http://www.affymetrix.com/	chip	\N	structural_variation
