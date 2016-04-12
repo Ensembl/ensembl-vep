@@ -111,6 +111,48 @@ ok($tmp =~ /Hello/, 'status_msg');
 open(STDOUT, ">&SAVE") or die "Can't restore STDOUT\n";
 
 
+## warning_msg tests require we mess with STDERR
+################################################
+
+open(SAVE, ">&STDERR") or die "Can't save STDERR\n"; 
+
+close STDERR;
+open STDERR, '>', \$tmp;
+
+# test warning_msg
+my $warning_file = $test_cfg->create_input_file();
+
+$bv = Bio::EnsEMBL::VEP::BaseVEP->new({
+  config => Bio::EnsEMBL::VEP::Config->new({
+      %$cfg_hash, warning_file => $warning_file, no_progress => 1
+  })
+});
+
+is(ref($bv->warning_fh), 'FileHandle', 'warning_fh');
+
+ok($bv->warning_msg('test warning message'), 'warning_msg');
+
+# we have to close the fh before we can read the contents of the file
+$bv->warning_fh->close();
+
+open IN, $warning_file;
+my @contents = map {chomp; $_} <IN>;
+close IN;
+is($contents[0], 'WARNING: test warning message', 'warning_msg in file');
+
+$bv = Bio::EnsEMBL::VEP::BaseVEP->new({
+  config => Bio::EnsEMBL::VEP::Config->new({
+      %$cfg_hash, warning_file => 'STDERR', no_progress => 1
+  })
+});
+
+# test STDERR
+$bv->warning_msg('Hello');
+ok($tmp =~ /Hello/, 'warning_msg to STDERR');
+
+open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
+
+
 
 ## DATABASE TESTS
 #################

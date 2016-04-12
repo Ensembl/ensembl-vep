@@ -49,6 +49,7 @@ use Bio::EnsEMBL::Variation::DBSQL::StructuralVariationFeatureAdaptor;
 use Bio::EnsEMBL::Variation::DBSQL::TranscriptVariationAdaptor;
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
+use FileHandle;
 
 # new method, may or may not be reused by child classes
 sub new {
@@ -202,6 +203,51 @@ sub status_msg {
   
   my $msg = (@_ ? (join "", @_) : "No message");
   print $self->get_time()." - ".$msg.($msg =~ /\n$/ ? "" : "\n");
+}
+
+# prints warning messages to STDERR or a log file
+sub warning_msg {
+  my $self = shift;
+  my $text = shift || '';
+
+  $text = 'WARNING: '.$text unless $text =~ /^warn/i;
+  $text = $text."\n" unless $text =~ /\n$/;
+
+  $self->config->{warning_count}++;
+
+  my $fh = $self->warning_fh;
+
+  print $fh $text;
+
+  unless($self->param('quiet')) {
+    warn($self->param('no_progress') ? $text : "\n$text");
+  }
+}
+
+# gets filehandle for use by warning_msg
+sub warning_fh {
+  my $self = shift;
+
+  unless(exists($self->config->{warning_fh})) {
+    my $file = $self->param('warning_file');
+    my $fh;
+
+    if($file && $file =~ /^stderr$/i) {
+      $fh = *STDERR;
+    }
+
+    else {
+      $file ||= ($self->param('output_file') || 'vep').'_warnings.txt';
+      $self->param('warning_file', $file);
+
+      $fh = FileHandle->new();
+      $fh->open(">".$file) or throw("ERROR: Could not write to warnings file $file\n");
+    }
+
+    $self->config->{warning_fh} = $fh;
+  }
+
+  return $self->config->{warning_fh};
 }
 
 # gets time
