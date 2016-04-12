@@ -60,7 +60,7 @@ sub next {
   my $parser = $self->parser;
   $parser->next();
 
-  return [] unless $parser->{record};
+  return undef unless $parser->{record};
 
   $self->line_number($self->line_number + 1);
 
