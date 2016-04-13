@@ -138,12 +138,6 @@ sub get_all_AnnotationSources {
 sub get_Parser {
   my $self = shift;
 
-  if(@_) {
-    my $parser = shift;
-    assert_ref($parser, 'Bio::EnsEMBL::VEP::Parser');
-    $self->{parser} = $parser;
-  }
-
   if(!exists($self->{parser})) {
 
     # user given input data as string (REST)?
@@ -165,12 +159,6 @@ sub get_Parser {
 # sub get_Writer {
 #   my $self = shift;
 
-#   if(@_) {
-#     my $writer = shift;
-#     assert_ref($writer, 'Bio::EnsEMBL::VEP::Writer');
-#     $self->{writer} = $writer;
-#   }
-
 #   if(!exists($self->{writer})) {
 #     $self->{writer} = Bio::EnsEMBL::VEP::Writer->new({
 #       config => $self->config,
@@ -183,12 +171,6 @@ sub get_Parser {
 
 sub get_InputBuffer {
   my $self = shift;
-
-  if(@_) {
-    my $buffer = shift;
-    assert_ref($buffer, 'Bio::EnsEMBL::VEP::InputBuffer');
-    $self->{input_buffer} = $buffer;
-  }
 
   if(!exists($self->{input_buffer})) {
     $self->{input_buffer} = Bio::EnsEMBL::VEP::InputBuffer->new({
