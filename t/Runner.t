@@ -24,6 +24,7 @@ use VEPTestingConfig;
 my $test_cfg = VEPTestingConfig->new();
 
 my $cfg_hash = $test_cfg->base_testing_cfg;
+$cfg_hash->{input_data} = '21 25585733 25585733 C/T + rs142513484';
 
 ## BASIC TESTS
 ##############
@@ -54,6 +55,22 @@ is_deeply(
 
 # setup_db_connection should return silently in offline mode
 ok(!$runner->setup_db_connection(), 'setup_db_connection');
+
+is_deeply($runner->get_Parser, bless({
+  '_config' => $runner->config,
+  'file' => *Bio::EnsEMBL::VEP::Runner::IN,
+  'line_number' => 0,
+}, 'Bio::EnsEMBL::VEP::Parser::VEP_input' ), 'get_Parser');
+
+is_deeply($runner->get_InputBuffer, bless({
+  '_config' => $runner->config,
+  'parser' => bless({
+    '_config' => $runner->config,
+    'file' => *Bio::EnsEMBL::VEP::Runner::IN,
+    'line_number' => 0,
+  }, 'Bio::EnsEMBL::VEP::Parser::VEP_input' ),
+  'buffer_size' => $runner->param('buffer_size'),
+}, 'Bio::EnsEMBL::VEP::InputBuffer' ), 'get_InputBuffer');
 
 ok($runner->init, 'init');
 

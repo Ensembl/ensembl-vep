@@ -48,6 +48,8 @@ use parent qw(Bio::EnsEMBL::VEP::BaseVEP);
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::Config;
+use Bio::EnsEMBL::VEP::Parser;
+use Bio::EnsEMBL::VEP::InputBuffer;
 use Bio::EnsEMBL::VEP::AnnotationSourceAdaptor;
 
 # has our own new method, does not use BaseVEP's
@@ -76,6 +78,8 @@ sub init {
 
   # get all annotation sources
   my $annotation_sources = $self->get_all_AnnotationSources();
+
+  my $buffer = $self->get_InputBuffer();
 
   return $self->{_initialized} = 1;
 }
@@ -129,6 +133,71 @@ sub get_all_AnnotationSources {
   }
 
   return $self->{_annotation_sources};
+}
+
+sub get_Parser {
+  my $self = shift;
+
+  if(@_) {
+    my $parser = shift;
+    assert_ref($parser, 'Bio::EnsEMBL::VEP::Parser');
+    $self->{parser} = $parser;
+  }
+
+  if(!exists($self->{parser})) {
+
+    # user given input data as string (REST)?
+    if(my $input_data = $self->param('input_data')) {
+      open IN, '<', \$input_data;
+      $self->param('input_file', *IN);
+    }
+
+    $self->{parser} = Bio::EnsEMBL::VEP::Parser->new({
+      config => $self->config,
+      format => $self->param('format'),
+      file   => $self->param('input_file')
+    })
+  }
+
+  return $self->{parser};
+}
+
+# sub get_Writer {
+#   my $self = shift;
+
+#   if(@_) {
+#     my $writer = shift;
+#     assert_ref($writer, 'Bio::EnsEMBL::VEP::Writer');
+#     $self->{writer} = $writer;
+#   }
+
+#   if(!exists($self->{writer})) {
+#     $self->{writer} = Bio::EnsEMBL::VEP::Writer->new({
+#       config => $self->config,
+#       format => $self->param('output_format'),
+#     })
+#   }
+
+#   return $self->{writer};
+# }
+
+sub get_InputBuffer {
+  my $self = shift;
+
+  if(@_) {
+    my $buffer = shift;
+    assert_ref($buffer, 'Bio::EnsEMBL::VEP::InputBuffer');
+    $self->{input_buffer} = $buffer;
+  }
+
+  if(!exists($self->{input_buffer})) {
+    $self->{input_buffer} = Bio::EnsEMBL::VEP::InputBuffer->new({
+      config => $self->config,
+      parser => $self->get_Parser
+    });
+  }
+
+  return $self->{input_buffer};
 }
 
 1;
