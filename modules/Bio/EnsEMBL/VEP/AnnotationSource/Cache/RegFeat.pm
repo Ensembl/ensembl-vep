@@ -45,7 +45,7 @@ package Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat;
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
-use parent qw(Bio::EnsEMBL::VEP::AnnotationSource::Cache);
+use base qw(Bio::EnsEMBL::VEP::AnnotationSource::Cache::BaseCache);
 
 sub get_dump_file_name {
   my $self = shift;

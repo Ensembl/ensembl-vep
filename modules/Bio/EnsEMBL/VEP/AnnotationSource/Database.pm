@@ -45,6 +45,6 @@ package Bio::EnsEMBL::VEP::AnnotationSource::Database;
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
-use parent qw(Bio::EnsEMBL::VEP::AnnotationSource);
+use base qw(Bio::EnsEMBL::VEP::AnnotationSource);
 
 1;

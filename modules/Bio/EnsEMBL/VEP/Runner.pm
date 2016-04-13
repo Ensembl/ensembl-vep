@@ -43,7 +43,7 @@ use warnings;
 
 package Bio::EnsEMBL::VEP::Runner;
 
-use parent qw(Bio::EnsEMBL::VEP::BaseVEP);
+use base qw(Bio::EnsEMBL::VEP::BaseVEP);
 
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);

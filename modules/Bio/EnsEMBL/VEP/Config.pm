@@ -45,7 +45,7 @@ package Bio::EnsEMBL::VEP::Config;
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
-use parent qw(Bio::EnsEMBL::VEP::BaseVEP);
+use base qw(Bio::EnsEMBL::VEP::BaseVEP);
 
 
 ## GLOBAL VARIABLES USED FOR INITIAL CONFIG AND SETUP

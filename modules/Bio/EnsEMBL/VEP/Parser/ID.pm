@@ -43,7 +43,7 @@ use warnings;
 
 package Bio::EnsEMBL::VEP::Parser::ID;
 
-use parent qw(Bio::EnsEMBL::VEP::Parser);
+use base qw(Bio::EnsEMBL::VEP::Parser);
 
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);

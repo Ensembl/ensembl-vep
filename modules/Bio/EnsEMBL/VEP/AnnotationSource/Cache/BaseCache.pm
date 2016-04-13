@@ -27,13 +27,15 @@ limitations under the License.
 
 =cut
 
-# EnsEMBL module for Bio::EnsEMBL::VEP::AnnotationSource::Cache
+# EnsEMBL module for Bio::EnsEMBL::VEP::AnnotationSource::Cache::BaseCache
 #
 #
 
 =head1 NAME
 
-Bio::EnsEMBL::VEP::AnnotationSource::Cache - local disk annotation source
+Bio::EnsEMBL::VEP::AnnotationSource::Cache::BaseCache - local disk annotation source base class.
+
+DO NOT USE DIRECTLY
 
 =cut
 
@@ -41,43 +43,8 @@ Bio::EnsEMBL::VEP::AnnotationSource::Cache - local disk annotation source
 use strict;
 use warnings;
 
-package Bio::EnsEMBL::VEP::AnnotationSource::Cache;
+package Bio::EnsEMBL::VEP::AnnotationSource::Cache::BaseCache;
 
-use Bio::EnsEMBL::Utils::Exception qw(throw warning);
-
-use base qw(Bio::EnsEMBL::VEP::AnnotationSource);
-
-sub new {  
-  my $caller = shift;
-  my $class = ref($caller) || $caller;
-  
-  my $self = $class->SUPER::new(@_);
-
-  my $hashref = $_[0];
-
-  $self->{$_} = $hashref->{$_} for keys %$hashref;
-
-  # set default serializer type
-  $self->{serializer_type} ||= 'storable';
-
-  return $self;
-}
-
-sub dir {
-  my $self = shift;
-  $self->{dir} = shift if @_;
-  return $self->{dir};
-}
-
-sub serializer_type {
-  my $self = shift;
-  $self->{serializer_type} = shift if @_;
-  return $self->{serializer_type};
-}
-
-sub file_suffix {
-  my $self = shift;
-  return $self->{file_suffix} ||= $self->serializer_type eq 'sereal' ? 'sereal' : 'gz';
-}
+use base qw(Bio::EnsEMBL::VEP::AnnotationSource::Cache);
 
 1;
