@@ -48,6 +48,21 @@ use parent qw(Bio::EnsEMBL::VEP::BaseVEP);
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
+use Bio::EnsEMBL::VEP::Parser::VCF;
+use Bio::EnsEMBL::VEP::Parser::VEP_input;
+use Bio::EnsEMBL::VEP::Parser::ID;
+use Bio::EnsEMBL::VEP::Parser::HGVS;
+
+use Scalar::Util qw(openhandle);
+use FileHandle;
+
+my %FORMAT_MAP = (
+  'vcf'     => 'VCF',
+  'ensembl' => 'VEP_input',
+  'id'      => 'ID',
+  'hgvs'    => 'HGVS',
+);
+
 sub new {
   my $caller = shift;
   my $class = ref($caller) || $caller;
@@ -61,6 +76,24 @@ sub new {
 
   $self->line_number(0);
 
+  if(my $format = $hashref->{format}) {
+
+    delete $hashref->{format};
+
+    # detect format
+    if(lc($format) eq 'guess' || lc($format) eq 'detect' || lc($format) eq 'auto') {
+      $format = $self->detect_format();
+    }
+
+    throw("ERROR: Can't detect format\n") unless $format;
+
+    $format = lc($format);
+    throw("ERROR: Unknown or unsupported format $format\n") unless $FORMAT_MAP{$format};
+
+    my $class = 'Bio::EnsEMBL::VEP::Parser::'.$FORMAT_MAP{$format};
+    return $class->new({%$hashref, config => $self->config});
+  }
+
   return $self;
 }
 
@@ -71,9 +104,9 @@ sub file {
     my $file = shift;
 
     if(uc($file) eq 'STDIN') {
-      $file = uc($file);
+      $file = *STDIN;
     }
-    else {
+    elsif(!openhandle($file)) {
       throw("ERROR: File \"$file\" does not exist\n") unless -e $file;
     }
 
@@ -87,6 +120,92 @@ sub line_number {
   my $self = shift;
   $self->{line_number} = shift if @_;
   return $self->{line_number};
+}
+
+sub detect_format {
+  my $self = shift;
+
+  my $file = $self->file;
+
+  my $fh;
+  my $file_was_fh = 0;
+
+  if(openhandle($file)) {
+    $fh = $file;
+    $file_was_fh = 1;
+  }
+  else {
+    $fh = FileHandle->new();
+    $fh->open($file) or throw("ERROR: Could not open $file to detect format\n");
+  }
+
+  my $format;
+
+  while(<$fh>) {
+    next if /^\#/;
+    chomp;
+
+    my @data = split /\s+/, $_;
+
+    # HGVS: ENST00000285667.3:c.1047_1048insC
+    if (
+      scalar @data == 1 &&
+      $data[0] =~ /^([^\:]+)\:.*?([cgmrp]?)\.?([\*\-0-9]+.*)$/i
+    ) {
+      $format = 'hgvs';
+    }
+
+    # variant identifier: rs123456
+    elsif (
+      scalar @data == 1
+    ) {
+      $format = 'id';
+    }
+
+    # VCF: 20  14370  rs6054257  G  A  29  0  NS=58;DP=258;AF=0.786;DB;H2  GT:GQ:DP:HQ
+    elsif (
+      $data[0] =~ /(chr)?\w+/ &&
+      $data[1] =~ /^\d+$/ &&
+      $data[3] && $data[3] =~ /^[ACGTN\-\.]+$/i &&
+      $data[4]
+    ) {
+
+      # do some more thorough checking on the ALTs
+      my $ok = 1;
+
+      foreach my $alt(split(',', $data[4])) {
+        $ok = 0 unless $alt =~ /^[\.ACGTN\-\*]+$|^(\<[\w\:\*]+\>)$/i;
+      }
+
+      $format = 'vcf' if $ok;
+    }
+
+    # pileup: chr1  60  T  A
+    elsif (
+      $data[0] =~ /(chr)?\w+/ &&
+      $data[1] =~ /^\d+$/ &&
+      $data[2] && $data[2] =~ /^[\*ACGTN-]+$/i &&
+      $data[3] && $data[3] =~ /^[\*ACGTNRYSWKM\+\/-]+$/i
+    ) {
+      $format = 'pileup';
+    }
+
+    # ensembl: 20  14370  14370  A/G  +
+    elsif (
+      $data[0] =~ /\w+/ &&
+      $data[1] =~ /^\d+$/ &&
+      $data[2] && $data[2] =~ /^\d+$/ &&
+      $data[3] && $data[3] =~ /(ins|dup|del)|([ACGTN-]+\/[ACGTN-]+)/i
+    ) {
+      $format = 'ensembl';
+    }
+
+    # reset file handle if it was a handle
+    seek $fh, 0, 0 if $file_was_fh;
+    last;
+  }
+
+  return $format;
 }
 
 1;
