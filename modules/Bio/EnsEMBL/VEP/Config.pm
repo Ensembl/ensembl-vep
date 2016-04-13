@@ -69,6 +69,7 @@ our %DEFAULTS = (
   
   # misc settings
   buffer_size       => 5000,
+  input_file        => 'STDIN',
   output_file       => "variant_effect_output.txt",
   tmpdir            => '/tmp',
   format            => 'guess',
