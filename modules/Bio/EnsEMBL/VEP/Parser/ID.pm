@@ -86,8 +86,6 @@ sub next {
 sub create_VariationFeatures {
   my $self = shift;
 
-  $DB::single = 1;
-
   my $parser = $self->parser;
 
   return [] unless $parser->{record};
