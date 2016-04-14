@@ -29,6 +29,7 @@ before_install:
 
 install:
     - cpanm -v --installdeps --with-recommends --notest --cpanfile ensembl/cpanfile .
+    - cpanm -v --installdeps --notest .
     - cpanm -n Devel::Cover::Report::Coveralls
     - export HTSLIB_DIR=$PWD/htslib
     - export PERL5LIB=$PWD/bioperl-live-release-1-6-924
