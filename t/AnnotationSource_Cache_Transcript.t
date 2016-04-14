@@ -126,6 +126,8 @@ is($features->[0]->stable_id, 'ENST00000441009', 'get_features_by_regions_from_m
 $c->clean_cache();
 is_deeply($c->cache, {}, 'clean_cache');
 
+
+
 ## TESTS WITH AN INPUT BUFFER
 #############################
 
@@ -164,6 +166,42 @@ $vf->_finish_annotation;
 is($vf->display_consequence, 'missense_variant', 'annotate_InputBuffer - display_consequence');
 
 
+
+## SEREAL
+#########
+
+SKIP: {
+
+  eval { use Sereal; };
+  my $can_use_sereal = $@ ? 0 : 1;
+
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  skip 'No local database configured', 5 unless $can_use_sereal;
+
+  $c = Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript->new({
+    config => $cfg,
+    dir => $test_cfg->{sereal_dir},
+    serializer_type => 'sereal',
+    source_type => 'ensembl'
+  });
+
+  is($c->serializer_type, 'sereal', 'sereal - serializer_type');
+
+  # deserialization
+  my $obj = $c->deserialize_from_file(
+    $c->get_dump_file_name(
+      $test_cfg->{cache_chr},
+      $test_cfg->{cache_region}
+    )
+  );
+  is(ref($obj), 'HASH', 'sereal - deserialize_from_file ref 1');
+  is(ref($obj->{$test_cfg->{cache_chr}}), 'ARRAY', 'sereal - deserialize_from_file ref 2');
+  is(ref($obj->{$test_cfg->{cache_chr}}->[0]), 'Bio::EnsEMBL::Transcript', 'sereal - deserialize_from_file ref 3');
+
+  is($obj->{$test_cfg->{cache_chr}}->[0]->stable_id, 'ENST00000441009', 'sereal - deserialize_from_file stable_id');
+
+  1;
+}
 
 # done
 done_testing();

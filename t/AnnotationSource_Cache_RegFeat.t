@@ -148,6 +148,65 @@ is($vf->display_consequence, 'regulatory_region_variant', 'annotate_InputBuffer 
 
 
 
+## SEREAL
+#########
+
+SKIP: {
+
+  eval { use Sereal; };
+  my $can_use_sereal = $@ ? 0 : 1;
+
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  skip 'No local database configured', 7 unless $can_use_sereal;
+
+  $c = Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat->new({
+    config => $cfg,
+    dir => $test_cfg->{sereal_dir},
+    serializer_type => 'sereal',
+  });
+
+  is($c->serializer_type, 'sereal', 'sereal - serializer_type');
+
+  # deserialization
+  my $obj = $c->deserialize_from_file(
+    $c->get_dump_file_name(
+      $test_cfg->{cache_chr},
+      $test_cfg->{cache_region}
+    )
+  );
+
+  is(ref($obj), 'HASH', 'sereal - deserialize_from_file ref 1');
+  is(ref($obj->{$test_cfg->{cache_chr}}), 'HASH', 'sereal - deserialize_from_file ref 2');
+
+  is_deeply(
+    [sort keys %{$obj->{$test_cfg->{cache_chr}}}],
+    ['MotifFeature', 'RegulatoryFeature'],
+    'sereal - deserialize_from_file keys'
+  );
+
+  is(
+    ref($obj->{$test_cfg->{cache_chr}}->{RegulatoryFeature}->[0]),
+    'Bio::EnsEMBL::Funcgen::RegulatoryFeature',
+    'sereal - deserialize_from_file ref 3'
+  );
+  
+  is(
+    ref($obj->{$test_cfg->{cache_chr}}->{MotifFeature}->[0]),
+    'Bio::EnsEMBL::Funcgen::MotifFeature',
+    'sereal - deserialize_from_file ref 4'
+  );
+
+  is(
+    $obj->{$test_cfg->{cache_chr}}->{RegulatoryFeature}->[0]->stable_id,
+    'ENSR00001565774',
+    'sereal - deserialize_from_file stable_id'
+  );
+
+  1;
+}
+
+
+
 # done
 done_testing();
 

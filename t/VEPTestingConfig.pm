@@ -25,15 +25,18 @@ our %DEFAULTS = (
   cache_version  => 84,
   cache_assembly => 'GRCh38',
   cache_dir      => $Bin.'/testdata/cache/homo_sapiens/84_GRCh38',
+
+  cache_chr      => 21,
+  cache_region   => '25000001-26000000',
+  cache_s        => 25,
+
+  sereal_dir     => $Bin.'/testdata/cache/sereal/homo_sapiens/84_GRCh38',
+
   test_ini_file  => $Bin.'/testdata/vep.ini',
   registry_file  => $Bin.'/testdata/vep.registry',
 
   test_vcf       => $Bin.'/testdata/input/test.vcf',
   user_file      => $Bin.'/testdata/user_file'.$$,
-
-  cache_chr      => 21,
-  cache_region   => '25000001-26000000',
-  cache_s        => 25,
 );
 
 sub new {
