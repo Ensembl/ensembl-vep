@@ -49,7 +49,7 @@
 57	\N	patch	patch_77_78_c.sql|Drop the table study_variation
 58	\N	patch	patch_77_78_d.sql|Extend the index type_val_idx in the table attrib
 59	\N	patch	patch_77_78_e.sql|add indexes on father_ and mother_individual_id and population name
-2	\N	schema_version	83
+2	\N	schema_version	84
 60	\N	patch	patch_78_79_a.sql|schema version
 61	\N	patch	patch_78_79_b.sql|change the column attrib_type_id by attrib_id in the variation_attrib table
 62	\N	patch	patch_78_79_c.sql|Store more detailed Sift information
@@ -68,3 +68,4 @@
 75	\N	patch	patch_81_82_c.sql|new entry in the failed_description table
 76	\N	patch	patch_82_83_a.sql|schema version
 77	\N	patch	patch_82_83_b.sql|Add the evidence ExAC in variation and variation_feature
+78  \N  patch patch_83_84_a.sql|schema version
