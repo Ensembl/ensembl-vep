@@ -176,7 +176,7 @@ SKIP: {
   my $can_use_sereal = $@ ? 0 : 1;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 5 unless $can_use_sereal;
+  skip 'No local database configured', 6 unless $can_use_sereal;
 
   $c = Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript->new({
     config => $cfg,
@@ -186,6 +186,7 @@ SKIP: {
   });
 
   is($c->serializer_type, 'sereal', 'sereal - serializer_type');
+  is($c->file_suffix, 'sereal', 'file_suffix');
 
   # deserialization
   my $obj = $c->deserialize_from_file(

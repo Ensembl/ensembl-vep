@@ -157,7 +157,7 @@ SKIP: {
   my $can_use_sereal = $@ ? 0 : 1;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 7 unless $can_use_sereal;
+  skip 'No local database configured', 8 unless $can_use_sereal;
 
   $c = Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat->new({
     config => $cfg,
@@ -166,6 +166,8 @@ SKIP: {
   });
 
   is($c->serializer_type, 'sereal', 'sereal - serializer_type');
+
+  is($c->file_suffix, 'sereal', 'file_suffix');
 
   # deserialization
   my $obj = $c->deserialize_from_file(
@@ -189,7 +191,7 @@ SKIP: {
     'Bio::EnsEMBL::Funcgen::RegulatoryFeature',
     'sereal - deserialize_from_file ref 3'
   );
-  
+
   is(
     ref($obj->{$test_cfg->{cache_chr}}->{MotifFeature}->[0]),
     'Bio::EnsEMBL::Funcgen::MotifFeature',
