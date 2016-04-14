@@ -153,7 +153,7 @@ is($vf->display_consequence, 'regulatory_region_variant', 'annotate_InputBuffer 
 
 SKIP: {
 
-  eval { use Sereal; };
+  eval q{ use Sereal; };
   my $can_use_sereal = $@ ? 0 : 1;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
