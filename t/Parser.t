@@ -88,6 +88,9 @@ is($p->detect_format, 'ensembl', 'detect_format - VEP_input multiple');
 $p->file($test_cfg->create_input_file('21 25587759 25587769 DUP + test'));
 is($p->detect_format, 'ensembl', 'detect_format - VEP_input SV');
 
+$p->file($test_cfg->create_input_file([qw(chr1 60 T A)]));
+is($p->detect_format, 'pileup', 'detect_format - pileup');
+
 $p->file($test_cfg->create_input_file('21 25587759 25587769'));
 is($p->detect_format, undef, 'detect_format - incomplete');
 
@@ -120,6 +123,15 @@ throws_ok {
 # new with format detection
 $p = Bio::EnsEMBL::VEP::Parser->new({config => $cfg, file => $test_cfg->{test_vcf}, format => 'guess'});
 is(ref($p), 'Bio::EnsEMBL::VEP::Parser::VCF', 'new with format detection');
+
+# new with unsupported format
+throws_ok {
+  Bio::EnsEMBL::VEP::Parser->new({
+    config => $cfg,
+    file => $test_cfg->create_input_file([qw(chr1 60 T A)]),
+    format => 'guess'
+  })
+} qr/Unknown or unsupported format/, 'new with unsupported format';
 
 
 done_testing();
