@@ -50,7 +50,7 @@ is(ref($ib), 'Bio::EnsEMBL::VEP::InputBuffer', 'check class');
 ###############
 
 is_deeply($ib->buffer, [], '_buffer');
-is_deeply($ib->_full_buffer, [], '_full_buffer');
+is_deeply($ib->pre_buffer, [], 'pre_buffer');
 
 push @{$ib->buffer}, 'hello';
 $ib->reset_buffer;
@@ -70,6 +70,9 @@ is_deeply($vfs->[0], bless( {
   'end' => 25585733,
   'start' => '25585733'
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'next first variant');
+
+is_deeply($ib->get_cache_regions, [[21, 25]], 'get_cache_regions no size');
+is_deeply($ib->get_cache_regions(500000), [[21, 51]], 'get_cache_regions with size');
 
 
 $vfs = $ib->next();
@@ -113,6 +116,9 @@ $vfs = $ib->next();
 is(scalar @$vfs, $ib->param('buffer_size'), 'next again');
 is(scalar @$vfs, $ib->param('buffer_size'), 'next again size');
 
+$ib->finish_annotation();
+is($vfs->[0]->display_consequence, 'intergenic_variant', 'finish_annotation gives intergenic_variant');
+
 
 $vfs = $ib->next();
 is(scalar @$vfs, 0, 'next again - finished');
@@ -121,8 +127,8 @@ $ib->reset_buffer();
 delete($ib->{_config});
 is_deeply($ib, bless( {
   'buffer_size' => 5,
-  '_full_buffer' => [],
-  '_buffer' => []
+  'pre_buffer' => [],
+  'temp' => {},
 }, 'Bio::EnsEMBL::VEP::InputBuffer' ), 'finished buffer empty after reset_buffer');
 
 

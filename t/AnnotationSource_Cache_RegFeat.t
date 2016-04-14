@@ -31,16 +31,123 @@ use_ok('Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat');
 
 my $dir = $test_cfg->{cache_dir};
 
-my $c = Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat->new({dir => $dir});
+# need to get a config object for further tests
+use_ok('Bio::EnsEMBL::VEP::Config');
+
+my $cfg = Bio::EnsEMBL::VEP::Config->new($test_cfg->base_testing_cfg);
+ok($cfg, 'get new config object');
+
+my $c = Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat->new({
+  config => $cfg,
+  dir => $dir,
+});
 ok($c, 'new is defined');
 
 
 ## METHODS
 ##########
 
+is($c->serializer_type, 'storable', 'serializer_type');
+is($c->file_suffix, 'gz', 'file_suffix');
+
 is($c->get_dump_file_name(1, '1-100'), $dir.'/1/1-100_reg.gz', 'get_dump_file_name');
+is($c->get_dump_file_name(1, 1, 100), $dir.'/1/1-100_reg.gz', 'get_dump_file_name with end');
 
 throws_ok { $c->get_dump_file_name() } qr/No chromosome/, 'get_dump_file_name no chromosome';
 throws_ok { $c->get_dump_file_name(1) } qr/No region/, 'get_dump_file_name no region';
 
+# deserialization
+my $obj = $c->deserialize_from_file(
+  $c->get_dump_file_name(
+    $test_cfg->{cache_chr},
+    $test_cfg->{cache_region}
+  )
+);
+
+is(ref($obj), 'HASH', 'deserialize_from_file ref 1');
+is(ref($obj->{$test_cfg->{cache_chr}}), 'HASH', 'deserialize_from_file ref 2');
+
+is_deeply(
+  [sort keys %{$obj->{$test_cfg->{cache_chr}}}],
+  ['MotifFeature', 'RegulatoryFeature'],
+  'deserialize_from_file keys'
+);
+
+is(
+  ref($obj->{$test_cfg->{cache_chr}}->{RegulatoryFeature}->[0]),
+  'Bio::EnsEMBL::Funcgen::RegulatoryFeature',
+  'deserialize_from_file ref 3'
+);
+is(
+  ref($obj->{$test_cfg->{cache_chr}}->{MotifFeature}->[0]),
+  'Bio::EnsEMBL::Funcgen::MotifFeature',
+  'deserialize_from_file ref 4'
+);
+
+# processing deserialized object
+my $features = $c->deserialized_obj_to_features($obj);
+is(ref($features), 'ARRAY', 'deserialized_object_to_features ref 1');
+is(ref($features->[0]), 'Bio::EnsEMBL::Funcgen::RegulatoryFeature', 'deserialized_object_to_features ref 2');
+is(ref($features->[-1]), 'Bio::EnsEMBL::Funcgen::MotifFeature', 'deserialized_object_to_features ref 3');
+is(scalar @$features, 219, 'deserialized_object_to_features count');
+
+is(scalar @{$c->merge_features([@$features, @$features])}, 219, 'merge_features count');
+
+$features = $c->get_features_by_regions_from_disk([[$test_cfg->{cache_chr}, $test_cfg->{cache_s}]]);
+
+is(ref($features), 'ARRAY', 'get_features_by_regions_from_disk ref 1');
+is(ref($features->[0]), 'Bio::EnsEMBL::Funcgen::RegulatoryFeature', 'get_features_by_regions_from_disk ref 2');
+is($features->[0]->stable_id, 'ENSR00001565774', 'get_features_by_regions_from_disk stable_id');
+
+
+# now we should be able to retrieve the same from memory
+$features = $c->get_features_by_regions_from_memory([[$test_cfg->{cache_chr}, $test_cfg->{cache_s}]]);
+is(ref($features), 'ARRAY', 'get_features_by_regions_from_memory ref 1');
+is(ref($features->[0]), 'Bio::EnsEMBL::Funcgen::RegulatoryFeature', 'get_features_by_regions_from_memory ref 2');
+is($features->[0]->stable_id, 'ENSR00001565774', 'get_features_by_regions_from_memory stable_id');
+
+$c->clean_cache();
+is_deeply($c->cache, {}, 'clean_cache');
+
+## TESTS WITH AN INPUT BUFFER
+#############################
+
+use_ok('Bio::EnsEMBL::VEP::Parser::VCF');
+my $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}});
+ok($p, 'get parser object');
+
+use_ok('Bio::EnsEMBL::VEP::InputBuffer');
+my $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+is(ref($ib), 'Bio::EnsEMBL::VEP::InputBuffer', 'check class');
+
+is(ref($ib->next()), 'ARRAY', 'check buffer next');
+
+$features = $c->get_all_features_by_InputBuffer($ib);
+is(ref($features), 'ARRAY', 'get_all_features_by_InputBuffer ref 1');
+is(ref($features->[0]), 'Bio::EnsEMBL::Funcgen::RegulatoryFeature', 'get_all_features_by_InputBuffer ref 2');
+is(ref($features->[-1]), 'Bio::EnsEMBL::Funcgen::MotifFeature', 'get_all_features_by_InputBuffer ref 3');
+is($features->[0]->stable_id, 'ENSR00001565774', 'get_all_features_by_InputBuffer stable_id');
+is(scalar @$features, 219, 'get_all_features_by_InputBuffer count');
+
+$ib->next();
+is_deeply($c->get_all_features_by_InputBuffer($ib), [], 'get_all_features_by_InputBuffer on empty buffer');
+
+# reset
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}});
+$ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+$ib->next();
+
+$c->annotate_InputBuffer($ib);
+my $vf = $ib->buffer->[0];
+my $rfvs = $vf->get_all_RegulatoryFeatureVariations;
+
+is(scalar @$rfvs, 1, 'annotate_InputBuffer - get_all_RegulatoryFeatureVariations count');
+
+$vf->_finish_annotation;
+is($vf->display_consequence, 'regulatory_region_variant', 'annotate_InputBuffer - display_consequence');
+
+
+
+# done
 done_testing();
+

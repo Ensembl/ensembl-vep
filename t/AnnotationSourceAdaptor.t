@@ -49,28 +49,22 @@ ok($asa = Bio::EnsEMBL::VEP::AnnotationSourceAdaptor->new({config => $cfg}), 'ne
 ## METHOD CALLS
 ###############
 
-is_deeply(
-  $asa->get_all_from_cache(),
-  [
-    bless( {
-      'serializer_type' => 'storable',
-      'dir' => $test_cfg->{cache_dir}
-    }, 'Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript' )
-  ],
-  'get_all_from_cache'
-);
+my $exp = [
+  bless( {
+    '_config' => $cfg,
+    'serializer_type' => undef,
+    'dir' => $test_cfg->{cache_dir},
+    'cache_region_size' => $cfg->param('cache_region_size'),
+    'gencode_basic' => undef,
+    'all_refseq' => undef,
+    'source_type' => 'ensembl',
+    'compress' => 'gzip -dc',
+  }, 'Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript' )
+];
 
+is_deeply($asa->get_all_from_cache(), $exp, 'get_all_from_cache');
 
-is_deeply(
-  $asa->get_all(),
-  [
-    bless( {
-      'serializer_type' => 'storable',
-      'dir' => $test_cfg->{cache_dir}
-    }, 'Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript' )
-  ],
-  'get_all'
-);
+is_deeply($asa->get_all(), $exp, 'get_all');
 
 
 

@@ -38,9 +38,6 @@ ok($c, 'new is defined');
 ## METHODS
 ##########
 
-is($c->serializer_type, 'storable', 'serializer_type');
-is($c->file_suffix, 'gz', 'file_suffix');
-
 is($c->dir, $dir, 'dir get');
 is($c->dir('/tmp'), '/tmp', 'dir set');
 $c->dir($dir);

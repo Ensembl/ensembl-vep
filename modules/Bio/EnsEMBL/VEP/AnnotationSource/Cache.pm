@@ -57,9 +57,6 @@ sub new {
 
   $self->{$_} = $hashref->{$_} for keys %$hashref;
 
-  # set default serializer type
-  $self->{serializer_type} ||= 'storable';
-
   return $self;
 }
 
@@ -67,17 +64,6 @@ sub dir {
   my $self = shift;
   $self->{dir} = shift if @_;
   return $self->{dir};
-}
-
-sub serializer_type {
-  my $self = shift;
-  $self->{serializer_type} = shift if @_;
-  return $self->{serializer_type};
-}
-
-sub file_suffix {
-  my $self = shift;
-  return $self->{file_suffix} ||= $self->serializer_type eq 'sereal' ? 'sereal' : 'gz';
 }
 
 1;

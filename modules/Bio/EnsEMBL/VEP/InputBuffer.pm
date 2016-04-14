@@ -62,7 +62,7 @@ sub new {
     $self->parser($hashref->{parser}) if $hashref->{parser};
 
     if($hashref->{variation_features}) {
-      my $buffer = $self->_full_buffer;
+      my $buffer = $self->pre_buffer;
       push @$buffer, @{$hashref->{variation_features}};
     }
   }
@@ -87,13 +87,13 @@ sub next {
 
   $self->reset_buffer();
 
-  my $full_buffer = $self->_full_buffer();
+  my $pre_buffer = $self->pre_buffer();
   my $buffer = $self->buffer();
 
   my $buffer_size = $self->{buffer_size};
 
-  while(@$full_buffer && @$buffer < $buffer_size) {
-    push @$buffer, shift @$full_buffer;
+  while(@$pre_buffer && @$buffer < $buffer_size) {
+    push @$buffer, shift @$pre_buffer;
   }
 
   if(my $parser = $self->parser) {
@@ -105,16 +105,50 @@ sub next {
   return $buffer;
 }
 
+sub get_cache_regions {
+  my $self = shift;
+  my $size = shift;
+
+  $size ||= $self->param('cache_region_size');
+
+  if(!exists($self->{temp}->{cache_regions}->{$size})) {
+    my @regions = ();
+    my %seen = ();
+
+    foreach my $vf(@{$self->buffer}) {
+      my $chr = $vf->{chr} || $vf->slice->seq_region_name;
+      throw("ERROR: Cannot get chromosome from VariationFeature") unless $chr;
+
+      foreach my $region_start(map {int($vf->{$_} / $size)} qw(start end)) {
+        my $key = join(':', ($chr, $region_start));
+        next if $seen{$key};
+
+        push @regions, [$chr, $region_start];
+        $seen{$key} = 1;
+      }
+    }
+
+    $self->{temp}->{cache_regions}->{$size} = \@regions;
+  }
+
+  return $self->{temp}->{cache_regions}->{$size};
+}
+
+sub finish_annotation {
+  my $self = shift;
+  $_->_finish_annotation for @{$self->buffer};
+}
+
 sub reset_buffer {
-  $_[0]->{_buffer} = [];
+  $_[0]->{temp} = {};
 }
 
 sub buffer {
-  return $_[0]->{_buffer} ||= [];
+  return $_[0]->{temp}->{buffer} ||= [];
 }
 
-sub _full_buffer {
-  return $_[0]->{_full_buffer} ||= [];
+sub pre_buffer {
+  return $_[0]->{pre_buffer} ||= [];
 }
 
 1;

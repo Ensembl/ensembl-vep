@@ -44,8 +44,47 @@ use warnings;
 package Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat;
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
+use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
+use Bio::EnsEMBL::CoordSystem;
+use Bio::EnsEMBL::Funcgen::RegulatoryFeature;
+use Bio::EnsEMBL::Funcgen::MotifFeature;
+use Bio::EnsEMBL::Funcgen::BindingMatrix;
+use Bio::EnsEMBL::Variation::MotifFeatureVariation;
+use Bio::EnsEMBL::Variation::RegulatoryFeatureVariation;
 
 use base qw(Bio::EnsEMBL::VEP::AnnotationSource::Cache::BaseCache);
+
+our @REG_FEAT_TYPES = qw(
+  RegulatoryFeature
+  MotifFeature
+);
+
+sub annotate_InputBuffer {
+  my $self = shift;
+  my $buffer = shift;
+
+  foreach my $rf(@{$self->get_all_features_by_InputBuffer($buffer, $self->{cache_region_size})}) {
+    my $fs = $rf->{start};
+    my $fe = $rf->{end};
+
+    my $type = $rf->{_vep_feature_type} ||= (split('::', ref($rf)))[-1];
+    my $constructor = 'Bio::EnsEMBL::Variation::'.$type.'Variation';
+    my $add_method  = 'add_'.$type.'Variation';
+
+    foreach my $vf(grep { overlap($fs, $fe, $_->{start}, $_->{end}) } @{$buffer->buffer}) {
+      $vf->{slice} ||= $rf->{slice};
+
+      $vf->$add_method(
+        $constructor->new(
+          -variation_feature  => $vf,
+          -feature            => $rf,
+          -no_ref_check       => 1,
+          -no_transfer        => 1
+        )
+      );
+    }
+  }
+}
 
 sub get_dump_file_name {
   my $self = shift;
@@ -65,6 +104,73 @@ sub get_dump_file_name {
     $region,
     $self->file_suffix
   );
+}
+
+sub deserialized_obj_to_features {
+  my $self = shift;
+  my $obj = shift;
+
+  my @features;
+  my $sa = $self->get_adaptor('core', 'Slice');
+
+  # the regfeat cache is structured like this:
+  # $cache = {
+  #   chr => {
+  #     RegulatoryFeature => [
+  #       rf1,
+  #       rf2
+  #     ],
+  #     MotifFeature => [
+  #       mf1,
+  #       mf2
+  #     ]
+  #   }
+  # }
+
+  foreach my $chr(keys %$obj) {
+    my $first = 1;
+
+    foreach my $type(keys %{$obj->{$chr}}) {
+      foreach my $f(@{$obj->{$chr}->{$type}}) {
+
+        # reattach slice adaptor
+        # only need to do this for the first one as 
+        if($first) {
+          $f->{slice}->{adaptor} = $sa;
+          $first = 0;
+        }
+
+        $f->{_vep_feature_type} ||= $type;
+
+        push @features, $f;
+      }
+    }
+  }
+
+  return \@features;
+}
+
+sub merge_features {
+  my $self = shift;
+  my $features = shift;
+
+  my $seen = {};
+  my @return;
+
+  foreach my $f(@$features) {
+    my $dbID = $f->dbID;
+    my $type = $f->{_vep_feature_type};
+
+    # the regfeat cache contains two feature types
+    # each feature type has their own dbID namespace
+    next if $seen->{$type}->{$dbID};
+
+    push @return, $f;
+
+    $seen->{$type}->{$dbID} = 1;
+  }
+
+  return \@return;
 }
 
 1;

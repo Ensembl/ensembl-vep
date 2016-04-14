@@ -84,6 +84,49 @@ sub init {
   return $self->{_initialized} = 1;
 }
 
+# run
+# sub run {
+#   my $self = shift;
+
+#   $self->init();
+
+#   my $input_buffer = $self->input_buffer;
+
+#   while(my $vfs = $input_buffer->next()) {
+#     last unless scalar @$vfs;
+
+#     foreach my $as(@{$self->get_all_AnnotationSources}) {
+#       $as->annotate_buffer($input_buffer);
+#     }
+#   }
+# }
+
+# sub next {
+#   my $self = shift;
+
+#   my $output_buffer = $self->{_output_buffer} ||= [];
+
+#   return shift @$output_buffer if @$output_buffer;
+
+#   $self->init();
+
+#   my $input_buffer = $self->get_InputBuffer;
+
+#   while(my $vfs = $input_buffer->next()) {
+#     last unless scalar @$vfs;
+
+#     foreach my $as(@{$self->get_all_AnnotationSources}) {
+#       $as->annotate_buffer($input_buffer);
+#     }
+#     
+#     $input_buffer->finish_annotation;
+
+#     push @$output_buffer, map {$self->convert_VariationFeature_to_output($_)} for @$vfs;
+#   }
+
+#   return @$output_buffer ? shift @$output_buffer : undef;
+# }
+
 sub setup_db_connection {
   my $self = shift;
 

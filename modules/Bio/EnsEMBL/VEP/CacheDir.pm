@@ -78,11 +78,22 @@ sub get_all_AnnotationSources {
     my $dir = $self->dir;
     my $info = $self->info;
 
+    my @as;
+
     # initialise with transcript source
-    my @as = (Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript->new({dir => $dir}));
+    push @as, Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript->new({
+      config => $self->config,
+      dir => $dir,
+      serializer_type => $info->{serialiser_type} || undef,
+      source_type => $self->source_type,
+    });
 
     # add RegFeats if available
-    push @as, Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat->new({dir => $dir}) if $self->param('regulatory') and $info->{regulatory};
+    push @as, Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat->new({
+      config => $self->config,
+      dir => $dir,
+      serializer_type => $info->{serialiser_type} || undef}
+    ) if $self->param('regulatory') and $info->{regulatory};
 
     $self->{_annotation_sources} = \@as;
   }
@@ -268,6 +279,17 @@ sub read_cache_info_file {
 
 sub version_data {
   return $_[0]->info->{version_data} || {};
+}
+
+sub source_type {
+  my $self = shift;
+
+  if(!exists($self->{source_type})) {
+    ($self->{source_type}) = grep {$self->param($_)} qw(merged refseq);
+    $self->{source_type} ||= 'ensembl';
+  }
+
+  return $self->{source_type};
 }
 
 1;

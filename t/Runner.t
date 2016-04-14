@@ -46,8 +46,14 @@ is_deeply(
   $runner->get_all_AnnotationSources(),
   [
     bless( {
-      'serializer_type' => 'storable',
-      'dir' => $test_cfg->{cache_dir}
+      '_config' => $runner->config,
+      'cache_region_size' => 1000000,
+      'dir' => $test_cfg->{cache_dir},
+      'serializer_type' => undef,
+      'gencode_basic' => undef,
+      'source_type' => 'ensembl',
+      'compress' => 'gzip -dc',
+      'all_refseq' => undef
     }, 'Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript' )
   ],
   'get_all_AnnotationSources'
