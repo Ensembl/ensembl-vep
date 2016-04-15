@@ -112,16 +112,16 @@ is($tmp[0]->{_gene_symbol_source}, 'HGNC', 'merge_features refseq restores missi
 is($tmp[0]->{_gene_hgnc_id}, 'HGNC:14027', 'merge_features refseq restores missing _gene_hgnc_id');
 $c->{source_type} = 'ensembl';
 
-$features = $c->get_features_by_regions_from_disk([[$test_cfg->{cache_chr}, $test_cfg->{cache_s}]]);
-is(ref($features), 'ARRAY', 'get_features_by_regions_from_disk ref 1');
-is(ref($features->[0]), 'Bio::EnsEMBL::Transcript', 'get_features_by_regions_from_disk ref 2');
-is($features->[0]->stable_id, 'ENST00000441009', 'get_features_by_regions_from_disk stable_id');
+$features = $c->get_features_by_regions_uncached([[$test_cfg->{cache_chr}, $test_cfg->{cache_s}]]);
+is(ref($features), 'ARRAY', 'get_features_by_regions_uncached ref 1');
+is(ref($features->[0]), 'Bio::EnsEMBL::Transcript', 'get_features_by_regions_uncached ref 2');
+is($features->[0]->stable_id, 'ENST00000441009', 'get_features_by_regions_uncached stable_id');
 
 # now we should be able to retrieve the same from memory
-$features = $c->get_features_by_regions_from_memory([[$test_cfg->{cache_chr}, $test_cfg->{cache_s}]]);
-is(ref($features), 'ARRAY', 'get_features_by_regions_from_memory ref 1');
-is(ref($features->[0]), 'Bio::EnsEMBL::Transcript', 'get_features_by_regions_from_memory ref 2');
-is($features->[0]->stable_id, 'ENST00000441009', 'get_features_by_regions_from_memory stable_id');
+$features = $c->get_features_by_regions_cached([[$test_cfg->{cache_chr}, $test_cfg->{cache_s}]]);
+is(ref($features), 'ARRAY', 'get_features_by_regions_cached ref 1');
+is(ref($features->[0]), 'Bio::EnsEMBL::Transcript', 'get_features_by_regions_cached ref 2');
+is($features->[0]->stable_id, 'ENST00000441009', 'get_features_by_regions_cached stable_id');
 
 $c->clean_cache();
 is_deeply($c->cache, {}, 'clean_cache');
@@ -141,6 +141,12 @@ is(ref($ib), 'Bio::EnsEMBL::VEP::InputBuffer', 'check class');
 
 is(ref($ib->next()), 'ARRAY', 'check buffer next');
 
+is_deeply(
+  $c->get_all_regions_by_InputBuffer($ib),
+  [[21, 25]],
+  'get_all_regions_by_InputBuffer'
+);
+
 $features = $c->get_all_features_by_InputBuffer($ib);
 is(ref($features), 'ARRAY', 'get_all_features_by_InputBuffer ref 1');
 is(ref($features->[0]), 'Bio::EnsEMBL::Transcript', 'get_all_features_by_InputBuffer ref 2');
@@ -151,7 +157,6 @@ is(scalar @$features, 70, 'get_all_features_by_InputBuffer count');
 # do it again to get them from memory
 $features = $c->get_all_features_by_InputBuffer($ib);
 is($features->[0]->stable_id, 'ENST00000441009', 'get_all_features_by_InputBuffer again');
-
 
 $ib->next();
 is_deeply($c->get_all_features_by_InputBuffer($ib), [], 'get_all_features_by_InputBuffer on empty buffer');
