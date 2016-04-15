@@ -105,35 +105,6 @@ sub next {
   return $buffer;
 }
 
-sub get_cache_regions {
-  my $self = shift;
-  my $size = shift;
-
-  $size ||= $self->param('cache_region_size');
-
-  if(!exists($self->{temp}->{cache_regions}->{$size})) {
-    my @regions = ();
-    my %seen = ();
-
-    foreach my $vf(@{$self->buffer}) {
-      my $chr = $vf->{chr} || $vf->slice->seq_region_name;
-      throw("ERROR: Cannot get chromosome from VariationFeature") unless $chr;
-
-      foreach my $region_start(map {int($vf->{$_} / $size)} qw(start end)) {
-        my $key = join(':', ($chr, $region_start));
-        next if $seen{$key};
-
-        push @regions, [$chr, $region_start];
-        $seen{$key} = 1;
-      }
-    }
-
-    $self->{temp}->{cache_regions}->{$size} = \@regions;
-  }
-
-  return $self->{temp}->{cache_regions}->{$size};
-}
-
 sub finish_annotation {
   my $self = shift;
   $_->_finish_annotation for @{$self->buffer};

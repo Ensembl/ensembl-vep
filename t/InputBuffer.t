@@ -71,9 +71,6 @@ is_deeply($vfs->[0], bless( {
   'start' => '25585733'
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'next first variant');
 
-is_deeply($ib->get_cache_regions, [[21, 25]], 'get_cache_regions no size');
-is_deeply($ib->get_cache_regions(500000), [[21, 51]], 'get_cache_regions with size');
-
 
 $vfs = $ib->next();
 is(scalar @$vfs, $ib->param('buffer_size'), 'next again');
