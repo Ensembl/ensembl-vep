@@ -315,28 +315,24 @@ sub prefetch_translation_ids {
 
   # uniprot
   if($self->{uniprot}) {
+    
+    $tr->{_swissprot} = '-';
     my @entries = grep {$_->database eq 'Uniprot/SWISSPROT'} @{$tl->get_all_DBEntries};
     if(scalar @entries) {
       $tr->{_swissprot} = join ",", map {$_->display_id} @entries;
     }
-    else {
-      $tr->{_swissprot} = '-';
-    }
 
+    $tr->{_trembl} = '-';
     @entries = grep {$_->database eq 'Uniprot/SPTREMBL'} @{$tl->get_all_DBEntries};
     if(scalar @entries) {
       $tr->{_trembl} = join ",", map {$_->display_id} @entries;
     }
-    else {
-      $tr->{_trembl} = '-';
-    }
 
+
+    $tr->{_uniparc} = '-';
     @entries = grep {$_->database eq 'UniParc'} @{$tl->get_all_DBEntries};
     if(scalar @entries) {
       $tr->{_uniparc} = join ",", map {$_->display_id} @entries;
-    }
-    else {
-      $tr->{_uniparc} = '-';
     }
   }
 
