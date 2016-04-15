@@ -19,7 +19,7 @@ before_install:
     - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-io.git
     - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-funcgen.git
     - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-variation.git
-    - git clone -b bioperl-release-1-6-924 --depth 1 https://github.com/bioperl/bioperl-live.git
+    - git clone -b bioperl-release-1-6-1 --depth 1 https://github.com/bioperl/bioperl-live.git
     - git clone --branch master --depth 1 https://github.com/samtools/htslib.git
     - cd htslib
     - make
