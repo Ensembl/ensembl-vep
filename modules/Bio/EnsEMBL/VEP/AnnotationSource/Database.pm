@@ -47,4 +47,23 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
 use base qw(Bio::EnsEMBL::VEP::AnnotationSource);
 
+sub get_slice {
+  my $self = shift;
+  my $chr = shift;
+
+  if(!exists($self->{slice_cache}->{$chr})) {
+    my $sa = $self->get_adaptor(
+      $self->{core_type} || $self->param('core_type'),
+      'Slice'
+    );
+
+    my $slice = $sa->fetch_by_region(undef, $chr);
+    $slice->is_circular if $slice;
+
+    $self->{slice_cache}->{$chr} = $slice;
+  }
+
+  return $self->{slice_cache}->{$chr};
+}
+
 1;
