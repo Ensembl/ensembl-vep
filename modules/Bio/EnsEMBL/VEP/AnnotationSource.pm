@@ -47,6 +47,19 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
 use base qw(Bio::EnsEMBL::VEP::BaseVEP);
 
+sub new {  
+  my $caller = shift;
+  my $class = ref($caller) || $caller;
+  
+  my $self = $class->SUPER::new(@_);
+
+  my $hashref = $_[0];
+
+  $self->{$_} = $hashref->{$_} for keys %$hashref;
+
+  return $self;
+}
+
 sub get_all_features_by_InputBuffer {
   my $self = shift;
   my $buffer = shift;

@@ -47,19 +47,6 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
 use base qw(Bio::EnsEMBL::VEP::AnnotationSource);
 
-sub new {  
-  my $caller = shift;
-  my $class = ref($caller) || $caller;
-  
-  my $self = $class->SUPER::new(@_);
-
-  my $hashref = $_[0];
-
-  $self->{$_} = $hashref->{$_} for keys %$hashref;
-
-  return $self;
-}
-
 sub dir {
   my $self = shift;
   $self->{dir} = shift if @_;
