@@ -19,7 +19,8 @@ before_install:
     - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-io.git
     - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-funcgen.git
     - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-variation.git
-    - git clone -b bioperl-release-1-6-924 --depth 1 https://github.com/bioperl/bioperl-live.git
+    - wget https://github.com/bioperl/bioperl-live/archive/release-1-6-924.zip
+    - unzip release-1-6-924.zip
     - git clone --branch master --depth 1 https://github.com/samtools/htslib.git
     - cd htslib
     - make
@@ -31,7 +32,7 @@ install:
     - cpanm --installdeps --notest .
     - cpanm -n Devel::Cover::Report::Coveralls
     - export HTSLIB_DIR=$PWD/htslib
-    - export PERL5LIB=$PWD/bioperl-live
+    - export PERL5LIB=$PWD/bioperl-live-release-1-6-924
     - cpanm Bio::DB::HTS
     - cp travisci/MultiTestDB.conf.travisci  t/MultiTestDB.conf
 
