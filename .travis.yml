@@ -19,8 +19,7 @@ before_install:
     - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-io.git
     - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-funcgen.git
     - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-variation.git
-    - wget https://github.com/bioperl/bioperl-live/archive/release-1-6-924.zip
-    - unzip release-1-6-924.zip
+    - git clone -b bioperl-release-1-6-1 --depth 1 https://github.com/bioperl/bioperl-live.git
     - git clone --branch master --depth 1 https://github.com/samtools/htslib.git
     - cd htslib
     - make
@@ -28,8 +27,8 @@ before_install:
 
 
 install:
-    - cpanm -v --installdeps --with-recommends --notest --cpanfile ensembl/cpanfile .
-    - cpanm -v --installdeps --notest .
+    - cpanm --installdeps --with-recommends --notest --cpanfile ensembl/cpanfile .
+    - cpanm --installdeps --notest .
     - cpanm -n Devel::Cover::Report::Coveralls
     - export HTSLIB_DIR=$PWD/htslib
     - export PERL5LIB=$PWD/bioperl-live-release-1-6-924
