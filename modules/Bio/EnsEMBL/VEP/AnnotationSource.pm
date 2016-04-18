@@ -100,7 +100,7 @@ sub get_all_regions_by_InputBuffer {
 
   my @regions = ();
   my %seen = ();
-  my $up_down_size = $self->up_down_size();
+  my $up_down_size = $self->{up_down_size} // $self->up_down_size();
 
   foreach my $vf(@{$buffer->buffer}) {
     my $chr = $vf->{chr} || $vf->slice->seq_region_name;
@@ -111,7 +111,7 @@ sub get_all_regions_by_InputBuffer {
       ($vf->{end}   - $up_down_size, $vf->{start} + $up_down_size) :
       ($vf->{start} - $up_down_size, $vf->{end}   + $up_down_size);
 
-    foreach my $region_start(map {int($_ / $cache_region_size)} @region_starts) {
+    foreach my $region_start(map {int(($_ - 1)/ $cache_region_size)} @region_starts) {
       my $key = join(':', ($chr, $region_start));
       next if $seen{$key};
 
