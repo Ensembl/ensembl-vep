@@ -29,6 +29,13 @@ our %DEFAULTS = (
   cache_chr      => 21,
   cache_region   => '25000001-26000000',
   cache_s        => 25,
+  var_cols       => [qw(
+    variation_name failed somatic start end
+    allele_string strand minor_allele minor_allele_freq
+    clin_sig phenotype_or_disease pubmed
+    AFR AMR EAS EUR SAS AA EA
+    ExAC ExAC_AFR ExAC_AMR ExAC_Adj ExAC_EAS ExAC_FIN ExAC_NFE ExAC_OTH ExAC_SAS
+  )],
 
   sereal_dir     => $Bin.'/testdata/cache/sereal/homo_sapiens/84_GRCh38',
 
