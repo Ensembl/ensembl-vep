@@ -49,6 +49,8 @@ use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript;
 use Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat;
+use Bio::EnsEMBL::VEP::AnnotationSource::Cache::Variation;
+use Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix;
 
 sub new {
   my $caller = shift;
@@ -111,6 +113,7 @@ sub get_all_AnnotationSources {
         config => $self->config,
         dir => $dir,       
         cache_region_size => $info->{cache_region_size} || $self->param('cache_region_size'),
+        cols => $info->{variation_cols},
       }); 
     }
 

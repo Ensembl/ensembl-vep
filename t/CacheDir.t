@@ -214,4 +214,33 @@ ok($as = $cd->get_all_AnnotationSources, 'get_all_AnnotationSources with regulat
 is(scalar @$as, 2, 'get_all_AnnotationSources with regulatory count');
 is(ref($as->[1]), 'Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat', 'second AnnotationSource is RegFeat type');
 
+
+# switch on variation
+$cfg = Bio::EnsEMBL::VEP::Config->new({%$cfg_hash, check_existing => 1});
+ok($cd = Bio::EnsEMBL::VEP::CacheDir->new({config => $cfg, root_dir => $cfg_hash->{dir}}), 'new with variation');
+
+ok($as = $cd->get_all_AnnotationSources, 'get_all_AnnotationSources with variation');
+is(scalar @$as, 2, 'get_all_AnnotationSources with variation count');
+is(ref($as->[1]), 'Bio::EnsEMBL::VEP::AnnotationSource::Cache::Variation', 'second AnnotationSource is Variation type');
+
+
+# switch on both
+$cfg = Bio::EnsEMBL::VEP::Config->new({%$cfg_hash, check_existing => 1, regulatory => 1});
+ok($cd = Bio::EnsEMBL::VEP::CacheDir->new({config => $cfg, root_dir => $cfg_hash->{dir}}), 'new with both');
+ok($as = $cd->get_all_AnnotationSources, 'get_all_AnnotationSources with both');
+is_deeply([map {(split('::', ref($_)))[-1]} @{$cd->get_all_AnnotationSources}], [qw(Transcript RegFeat Variation)], 'get_all_AnnotationSources with both - types');
+
+# tabix type
+$cfg = Bio::EnsEMBL::VEP::Config->new({%$cfg_hash, check_existing => 1});
+$cd = Bio::EnsEMBL::VEP::CacheDir->new({config => $cfg, root_dir => $cfg_hash->{dir}});
+
+$cd->info->{var_type} = 'tabix';
+is(
+  ref($cd->get_all_AnnotationSources->[1]),
+  'Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix',
+  'VariationTabix type'
+);
+
+
+
 done_testing();
