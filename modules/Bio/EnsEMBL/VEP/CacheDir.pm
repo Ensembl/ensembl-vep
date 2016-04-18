@@ -86,14 +86,33 @@ sub get_all_AnnotationSources {
       dir => $dir,
       serializer_type => $info->{serialiser_type} || undef,
       source_type => $self->source_type,
+      cache_region_size => $info->{cache_region_size} || $self->param('cache_region_size'),
     });
 
     # add RegFeats if available
     push @as, Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat->new({
       config => $self->config,
       dir => $dir,
-      serializer_type => $info->{serialiser_type} || undef}
+      serializer_type => $info->{serialiser_type} || undef},
+      cache_region_size => $info->{cache_region_size} || $self->param('cache_region_size'),
     ) if $self->param('regulatory') and $info->{regulatory};
+
+    # add Variation if available
+    if($self->param('check_existing') && $info->{variation_cols}) {
+
+      my $class = 'Bio::EnsEMBL::VEP::AnnotationSource::Cache::Variation';
+
+      # tabix type?
+      if(($info->{var_type} || '') eq 'tabix') {
+        $class .= 'Tabix';
+      }
+
+      push @as, $class->new({
+        config => $self->config,
+        dir => $dir,       
+        cache_region_size => $info->{cache_region_size} || $self->param('cache_region_size'),
+      }); 
+    }
 
     $self->{_annotation_sources} = \@as;
   }

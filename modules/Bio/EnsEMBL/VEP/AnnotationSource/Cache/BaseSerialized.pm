@@ -59,7 +59,7 @@ sub new {
   my $self = $class->SUPER::new(@_);
 
   # add shortcuts to these params
-  $self->add_shortcuts([qw(compress cache_region_size)]);
+  $self->add_shortcuts([qw(compress)]);
 
   return $self;
 }

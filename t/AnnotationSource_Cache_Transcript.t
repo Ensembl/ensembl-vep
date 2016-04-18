@@ -40,7 +40,8 @@ ok($cfg, 'get new config object');
 my $c = Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript->new({
   config => $cfg,
   dir => $dir,
-  source_type => 'ensembl'
+  source_type => 'ensembl',
+  cache_region_size => 1000000,
 });
 ok($c, 'new is defined');
 

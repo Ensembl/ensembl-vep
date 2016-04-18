@@ -40,6 +40,7 @@ ok($cfg, 'get new config object');
 my $c = Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat->new({
   config => $cfg,
   dir => $dir,
+  cache_region_size => 1000000,
 });
 ok($c, 'new is defined');
 
