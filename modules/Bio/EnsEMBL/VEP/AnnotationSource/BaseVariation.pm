@@ -50,28 +50,32 @@ use Scalar::Util qw(weaken);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
 
+use Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation;
+
 use base qw(Bio::EnsEMBL::VEP::AnnotationSource);
 
-our @VAR_CACHE_COLS = qw(
-  variation_name
-  failed
-  somatic
-  start
-  end
-  allele_string
-  strand
-  minor_allele
-  minor_allele_freq
-  clin_sig
-  phenotype_or_disease
-);
+sub annotate_InputBuffer {
+  my $self = shift;
+  my $buffer = shift;
+
+  # this will be very slow
+  # better rewrite with Set::IntervalTree a good idea
+  foreach my $existing_vf(@{$self->get_all_features_by_InputBuffer($buffer)}) {
+    foreach my $vf(
+      grep { $existing_vf->{start} == $_->{start} && $existing_vf->{end} == $_->{end} }
+      @{$buffer->buffer}
+    ) {
+      push @{$vf->{existing}}, $existing_vf unless $self->is_var_novel($existing_vf, $vf);
+    }
+  }
+}
 
 # gets variation cache columns
 sub get_cache_columns {
   my $self = shift;
 
   if(!exists($self->{cols})) {
-    my @copy = @VAR_CACHE_COLS;
+    my @copy = @Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation::VAR_CACHE_COLS;
     $self->{cols} = \@copy;
     # push @{$self->{cols}}, 'pubmed' if $self->have_pubmed() && $self->param('pubmed');
     # push @{$self->{cols}}, @{$self->{freq_file_pops}} if defined($self->{freq_file_pops});

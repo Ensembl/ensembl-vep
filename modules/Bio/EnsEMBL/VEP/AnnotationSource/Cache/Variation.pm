@@ -52,22 +52,6 @@ use base qw(
   Bio::EnsEMBL::VEP::AnnotationSource::Cache::BaseCacheVariation
 );
 
-sub annotate_InputBuffer {
-  my $self = shift;
-  my $buffer = shift;
-
-  # this will be very slow
-  # better rewrite with Set::IntervalTree a good idea
-  foreach my $existing_vf(@{$self->get_all_features_by_InputBuffer($buffer)}) {
-    foreach my $vf(
-      grep { $existing_vf->{start} == $_->{start} && $existing_vf->{end} == $_->{end} }
-      @{$buffer->buffer}
-    ) {
-      push @{$vf->{existing}}, $existing_vf unless $self->is_var_novel($existing_vf, $vf);
-    }
-  }
-}
-
 sub get_features_by_regions_uncached {
   my $self = shift;
   my $regions = shift;
