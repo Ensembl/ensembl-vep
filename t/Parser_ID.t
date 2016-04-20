@@ -72,7 +72,13 @@ SKIP: {
     'display' => '1',
     'clinical_significance' => [],
     'minor_allele_count' => '5',
-    'evidence' => [],
+    'evidence' => [
+      'Multiple_observations',
+      'Frequency',
+      '1000Genomes',
+      'ESP',
+      'ExAC'
+    ],
     '_variation_id' => '28751744',
     'strand' => '1',
     'class_SO_term' => 'SNV',
@@ -89,6 +95,7 @@ SKIP: {
 
   $vf = $p->next();
   delete($vf->{$_}) for qw(adaptor variation slice variation_name);
+
   is_deeply($vf, $expected, 'basic input test');
 
   $vf = Bio::EnsEMBL::VEP::Parser::ID->new({

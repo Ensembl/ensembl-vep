@@ -101,15 +101,13 @@ sub get_features_by_regions_uncached {
     # no seq_region_id?
     next unless $sr_cache->{$chr};
 
-    my $maf_cols = $self->have_maf_cols ? 'vf.minor_allele, vf.minor_allele_freq' : 'NULL, NULL';
-
     my $phenotype_attrib_id = $self->phenotype_attrib_id || 0;
 
     my $sth = $self->var_dbc->prepare(qq{
       SELECT
         vf.variation_id, vf.variation_name, IF(fv.variation_id IS NULL, 0, 1),
         vf.somatic, vf.seq_region_start, vf.seq_region_end,
-        vf.allele_string, vf.seq_region_strand, $maf_cols,
+        vf.allele_string, vf.seq_region_strand, vf.minor_allele, vf.minor_allele_freq,
         REPLACE(vf.clinical_significance, " ", "_"),
         IF(FIND_IN_SET(?, evidence_attribs) > 0, 1, 0)
       FROM variation_feature vf
@@ -126,13 +124,7 @@ sub get_features_by_regions_uncached {
 
     my ($var_id, %vars_by_id);
     $sth->bind_col(1, \$var_id);
-
-    if($self->have_maf_cols) {
-      $sth->bind_col($_+2, \$v{$VAR_CACHE_COLS[$_]}) for (0..$#VAR_CACHE_COLS);
-    }
-    else {
-      $sth->bind_col($_+2, \$v{$VAR_CACHE_COLS[$_]}) for (0..4);
-    }
+    $sth->bind_col($_+2, \$v{$VAR_CACHE_COLS[$_]}) for (0..$#VAR_CACHE_COLS);
 
     my @vars;
 
@@ -171,26 +163,6 @@ sub seq_region_cache {
   }
 
   return $self->{seq_region_cache};
-}
-
-sub have_maf_cols {
-  my $self = shift;
-
-  if(!exists($self->{have_maf_cols})) {
-
-    my $sth = $self->var_dbc->prepare(qq{
-      DESCRIBE variation_feature
-    });
-
-    $sth->execute();
-    my @cols = map {$_->[0]} @{$sth->fetchall_arrayref};
-    $sth->finish();
-
-    $self->{have_maf_cols} = 0;
-    $self->{have_maf_cols} = 1 if grep {$_ eq 'minor_allele'} @cols;
-  }
-
-  return $self->{have_maf_cols};
 }
 
 sub have_pubmed {

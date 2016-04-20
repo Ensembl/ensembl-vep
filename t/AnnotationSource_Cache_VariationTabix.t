@@ -163,6 +163,82 @@ is_deeply($vf->{existing}, $exp, 'annotate_InputBuffer');
 
 is(scalar (grep {$_->{existing}} @{$ib->buffer}), 132, 'annotate_InputBuffer count annotated');
 
+# construct one to test phenotype_or_disease and clin_sig
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->create_input_file([qw(21 25891796 . C T . . .)])});
+$ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+$ib->next;
+
+$c->annotate_InputBuffer($ib);
+
+is_deeply(
+  $ib->buffer->[0]->{existing},
+  [
+    {
+      'phenotype_or_disease' => '1',
+      'ExAC_AMR' => 'T:0.0003457',
+      'SAS' => 'T:0.0000',
+      'failed' => 0,
+      'ExAC_NFE' => 'T:2.998e-05',
+      'AA' => undef,
+      'somatic' => 0,
+      'ExAC_SAS' => 'T:0',
+      'AFR' => 'T:0.0000',
+      'strand' => 1,
+      'allele_string' => 'C/T',
+      'ExAC_Adj' => 'T:5.768e-05',
+      'minor_allele_freq' => '0.0002',
+      'ExAC_FIN' => 'T:0',
+      'AMR' => 'T:0.0014',
+      'chr' => '21',
+      'EUR' => 'T:0.0000',
+      'clin_sig' => 'not_provided,pathogenic',
+      'EAS' => 'T:0.0000',
+      'end' => 25891796,
+      'ExAC' => 'T:5.765e-05',
+      'ExAC_OTH' => 'T:0.001101',
+      'ExAC_AFR' => 'T:0',
+      'variation_name' => 'rs63750066',
+      'ExAC_EAS' => 'T:0',
+      'minor_allele' => 'T',
+      'EA' => undef,
+      'start' => 25891796,
+      'pubmed' => undef
+    },
+    {
+      'phenotype_or_disease' => '1',
+      'ExAC_AMR' => undef,
+      'SAS' => undef,
+      'failed' => 0,
+      'ExAC_NFE' => undef,
+      'AA' => undef,
+      'somatic' => 0,
+      'ExAC_SAS' => undef,
+      'AFR' => undef,
+      'strand' => 1,
+      'allele_string' => 'HGMD_MUTATION',
+      'ExAC_Adj' => undef,
+      'minor_allele_freq' => undef,
+      'ExAC_FIN' => undef,
+      'AMR' => undef,
+      'chr' => '21',
+      'EUR' => undef,
+      'clin_sig' => undef,
+      'EAS' => undef,
+      'end' => 25891796,
+      'ExAC' => undef,
+      'ExAC_OTH' => undef,
+      'ExAC_AFR' => undef,
+      'variation_name' => 'CM930033',
+      'ExAC_EAS' => undef,
+      'minor_allele' => undef,
+      'EA' => undef,
+      'start' => 25891796,
+      'pubmed' => undef
+    }
+  ],
+  'annotate_InputBuffer - phenotype_or_disease'
+);
+
 
 # done
 done_testing();

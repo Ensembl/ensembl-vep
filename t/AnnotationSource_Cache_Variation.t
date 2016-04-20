@@ -176,5 +176,62 @@ $c->annotate_InputBuffer($ib);
 
 is($vf->{existing}, undef, 'annotate_InputBuffer - miss by one');
 
+# construct one to test phenotype_or_disease and clin_sig
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->create_input_file([qw(21 25891796 . C T . . .)])});
+$ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+$ib->next;
+
+$c->annotate_InputBuffer($ib);
+
+is_deeply(
+  $ib->buffer->[0]->{existing},
+  [
+    {
+      'phenotype_or_disease' => '1',
+      'ExAC_AMR' => 'T:0.0003457',
+      'SAS' => 'T:0.0000',
+      'failed' => 0,
+      'ExAC_NFE' => 'T:2.998e-05',
+      'AA' => undef,
+      'somatic' => 0,
+      'ExAC_SAS' => 'T:0',
+      'AFR' => 'T:0.0000',
+      'strand' => 1,
+      'allele_string' => 'C/T',
+      'ExAC_Adj' => 'T:5.768e-05',
+      'minor_allele_freq' => '0.0002',
+      'ExAC_FIN' => 'T:0',
+      'AMR' => 'T:0.0014',
+      'EUR' => 'T:0.0000',
+      'clin_sig' => 'not_provided,pathogenic',
+      'EAS' => 'T:0.0000',
+      'end' => 25891796,
+      'ExAC' => 'T:5.765e-05',
+      'ExAC_OTH' => 'T:0.001101',
+      'ExAC_AFR' => 'T:0',
+      'variation_name' => 'rs63750066',
+      'ExAC_EAS' => 'T:0',
+      'minor_allele' => 'T',
+      'EA' => undef,
+      'start' => 25891796,
+      'pubmed' => ''
+    },
+    {
+      'phenotype_or_disease' => '1',
+      'minor_allele_freq' => '',
+      'clin_sig' => '',
+      'failed' => 0,
+      'end' => 25891796,
+      'somatic' => 0,
+      'strand' => 1,
+      'variation_name' => 'CM930033',
+      'allele_string' => 'HGMD_MUTATION',
+      'minor_allele' => '',
+      'start' => 25891796
+    }
+  ],
+  'annotate_InputBuffer - phenotype_or_disease'
+);
+
 # done
 done_testing();
