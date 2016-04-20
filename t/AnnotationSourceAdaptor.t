@@ -58,7 +58,6 @@ my $exp = [
     'gencode_basic' => undef,
     'all_refseq' => undef,
     'source_type' => 'ensembl',
-    'compress' => 'gzip -dc',
   }, 'Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript' )
 ];
 

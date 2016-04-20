@@ -45,24 +45,13 @@ use warnings;
 
 package Bio::EnsEMBL::VEP::AnnotationSource::Cache::BaseSerialized;
 
-use Storable qw(nstore_fd fd_retrieve freeze thaw);
+use Storable qw(nstore_fd fd_retrieve);
+use Compress::Zlib;
 
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
 use base qw(Bio::EnsEMBL::VEP::AnnotationSource::Cache);
-
-sub new {
-  my $caller = shift;
-  my $class = ref($caller) || $caller;
-  
-  my $self = $class->SUPER::new(@_);
-
-  # add shortcuts to these params
-  $self->add_shortcuts([qw(compress)]);
-
-  return $self;
-}
 
 sub deserialize_from_file {
   my $self = shift;
@@ -77,9 +66,18 @@ sub deserialize_from_file_storable {
   my $self = shift;
   my $file = shift;
 
-  open my $fh, $self->{compress}." ".$file." |" or die "ERROR: $!";
-  my $obj = fd_retrieve($fh);
-  close $fh;
+  # use Compress::Zlib interface to slurp file contents into $serialized
+  my $gz = gzopen($file, 'rb');
+
+  my ($buffer, $serialized);
+  while($gz->gzread($buffer)) {
+    $serialized .= $buffer;
+  }
+
+  # now use fd_retrieve on a made-up filehandle to deserialize
+  open IN, '<', \$serialized;
+  my $obj = fd_retrieve(\*IN);
+  close IN;
 
   return $obj;
 }

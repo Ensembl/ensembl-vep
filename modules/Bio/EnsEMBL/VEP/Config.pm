@@ -74,7 +74,6 @@ our %DEFAULTS = (
   tmpdir            => '/tmp',
   format            => 'guess',
   terms             => 'SO',
-  compress          => 'gzip -dc',
   failed            => 0,
   core_type         => 'core',
   polyphen_analysis => 'humvar',

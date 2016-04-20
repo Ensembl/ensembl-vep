@@ -44,24 +44,13 @@ use warnings;
 package Bio::EnsEMBL::VEP::AnnotationSource::Cache::Variation;
 
 use Scalar::Util qw(weaken);
+use Compress::Zlib;
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
 use base qw(
   Bio::EnsEMBL::VEP::AnnotationSource::Cache::BaseCacheVariation
 );
-
-sub new {
-  my $caller = shift;
-  my $class = ref($caller) || $caller;
-  
-  my $self = $class->SUPER::new(@_);
-
-  # add shortcuts to these params
-  $self->add_shortcuts([qw(compress)]);
-
-  return $self;
-}
 
 sub annotate_InputBuffer {
   my $self = shift;
@@ -112,14 +101,16 @@ sub read_variations_from_file {
   my $file = shift;
 
   my @vars;
-  open IN, $self->{compress}." $file |";
 
-  while(<IN>) {
-    chomp;
-    my $var = $self->parse_variation($_);
+  # use Compress::Zlib interface
+  my $gz = gzopen($file, 'rb');
+
+  my $line;
+  while($gz->gzreadline($line)) {
+    chomp($line);
+    my $var = $self->parse_variation($line);
     push @vars, $var if $self->filter_variation($var);
   }
-  close IN;
 
   return \@vars;
 }

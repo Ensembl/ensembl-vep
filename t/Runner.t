@@ -52,7 +52,6 @@ is_deeply(
       'serializer_type' => undef,
       'gencode_basic' => undef,
       'source_type' => 'ensembl',
-      'compress' => 'gzip -dc',
       'all_refseq' => undef
     }, 'Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript' )
   ],
