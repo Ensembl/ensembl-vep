@@ -38,7 +38,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 52 unless $can_use_db;
+  skip 'No local database configured', 23 unless $can_use_db;
 
   my $multi;
 
