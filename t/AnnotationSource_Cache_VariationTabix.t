@@ -111,14 +111,6 @@ my $exp = [{
 
 is_deeply($vf->{existing}, $exp, '_annotate_cl');
 
-delete $vf->{existing};
-$vf_hash = {
-  21 => [$vf],
-};
-$c->_annotate_pm($vf_hash);
-
-is_deeply($vf->{existing}, $exp, '_annotate_pm');
-
 # no match
 $vf->{start}++;
 
@@ -128,29 +120,6 @@ $vf_hash = {
 };
 
 is_deeply($vf->{existing}, undef, 'miss by coord - _annotate_cl');
-
-delete $vf->{existing};
-$vf_hash = {
-  21 => [$vf],
-};
-$c->_annotate_pm($vf_hash);
-
-is_deeply($vf->{existing}, undef, 'miss by coord - _annotate_pm');
-
-
-$p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}});
-$ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
-$ib->next();
-
-$c->annotate_InputBuffer($ib);
-$vf = $ib->buffer->[0];
-
-is_deeply($vf->{existing}, $exp, 'annotate_InputBuffer');
-
-is(scalar (grep {$_->{existing}} @{$ib->buffer}), 132, 'annotate_InputBuffer count annotated');
-
-# do the same test with the "opposite" use of perl module vs command line
-$Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix::CAN_USE_TABIX_PM = 1 - $Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix::CAN_USE_TABIX_PM;
 
 $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}});
 $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
@@ -239,6 +208,48 @@ is_deeply(
   'annotate_InputBuffer - phenotype_or_disease'
 );
 
+
+SKIP: {
+
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  skip 'Bio::DB::HTS::Tabix module not available', 4 unless $Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix::CAN_USE_TABIX_PM;
+
+  $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}});
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+  $ib->next();
+  $vf = $ib->buffer->[0];
+
+  $vf_hash = {
+    21 => [$vf],
+  };
+  $c->_annotate_pm($vf_hash);
+
+  is_deeply($vf->{existing}, $exp, '_annotate_pm');
+
+  $vf->{start}++;
+  delete $vf->{existing};
+  $vf_hash = {
+    21 => [$vf],
+  };
+  $c->_annotate_pm($vf_hash);
+
+  is_deeply($vf->{existing}, undef, 'miss by coord - _annotate_pm');
+
+
+  # do the same test with the "opposite" use of perl module vs command line
+  $Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix::CAN_USE_TABIX_PM = 0;
+
+  $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}});
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+  $ib->next();
+
+  $c->annotate_InputBuffer($ib);
+  $vf = $ib->buffer->[0];
+
+  is_deeply($vf->{existing}, $exp, 'annotate_InputBuffer - _annotate_cl');
+
+  is(scalar (grep {$_->{existing}} @{$ib->buffer}), 132, 'annotate_InputBuffer count annotated');
+}
 
 # done
 done_testing();
