@@ -47,6 +47,18 @@ use base qw(Bio::EnsEMBL::VEP::BaseVEP);
 
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
+use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
+
+our $CAN_USE_INTERVAL_TREE = 0;
+
+BEGIN {
+  if (eval { require Set::IntervalTree; 1 }) {
+    $CAN_USE_INTERVAL_TREE = 1;
+  }
+  else {
+    $CAN_USE_INTERVAL_TREE = 0;
+  }
+}
 
 sub new {
   my $caller = shift;
@@ -103,6 +115,42 @@ sub next {
   }
 
   return $buffer;
+}
+
+sub get_overlapping_vfs {
+  my $self = shift;
+  my $start = shift;
+  my $end = shift;
+
+  ($start, $end) = ($end, $start) if $start > $end;
+
+  if(my $tree = $self->interval_tree) {
+    return $tree->fetch($start - 1, $end);
+  }
+  else {
+    return [grep {overlap($_->{start}, $_->{end}, $start, $end)} @{$self->buffer}];
+  }
+}
+
+sub interval_tree {
+  my $self = shift;
+
+  if(!exists($self->{temp}->{interval_tree})) {
+
+    return $self->{temp}->{interval_tree} = undef unless $CAN_USE_INTERVAL_TREE;
+
+    my $tree = Set::IntervalTree->new();
+
+    foreach my $vf(@{$self->buffer}) {
+      my ($s, $e) = ($vf->{start}, $vf->{end});
+      ($s, $e) = ($e, $s) if $s > $e;
+      $tree->insert($vf, $s - 1, $e);
+    }
+
+    $self->{temp}->{interval_tree} = $tree;
+  }
+
+  return $self->{temp}->{interval_tree};
 }
 
 sub finish_annotation {
