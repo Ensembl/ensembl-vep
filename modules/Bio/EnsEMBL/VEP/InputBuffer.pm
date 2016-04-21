@@ -49,7 +49,7 @@ use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
 
-our $CAN_USE_INTERVAL_TREE = 0;
+our $CAN_USE_INTERVAL_TREE;
 
 BEGIN {
   if (eval { require Set::IntervalTree; 1 }) {
