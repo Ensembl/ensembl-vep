@@ -100,7 +100,8 @@ sub deserialized_obj_to_features {
   foreach my $chr(keys %$obj) {
     my $first = 1;
 
-    foreach my $type(keys %{$obj->{$chr}}) {
+    # use reverse sort so RegulatoryFeature comes before MotifFeature
+    foreach my $type(reverse sort keys %{$obj->{$chr}}) {
       foreach my $f(@{$obj->{$chr}->{$type}}) {
 
         # reattach slice adaptor
