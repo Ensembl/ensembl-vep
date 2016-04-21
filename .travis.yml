@@ -32,12 +32,12 @@ before_install:
 
 
 install:
-    - cpanm --installdeps --with-recommends --notest --cpanfile ensembl/cpanfile .
-    - cpanm --installdeps --notest .
-    - cpanm -n Devel::Cover::Report::Coveralls
+    - cpanm --quiet --installdeps --with-recommends --notest --cpanfile ensembl/cpanfile .
+    - cpanm --quiet --installdeps --notest .
+    - cpanm --quiet -n Devel::Cover::Report::Coveralls
     - export HTSLIB_DIR=$PWD/htslib
     - export PERL5LIB=$PWD/bioperl-live-release-1-6-924
-    - cpanm Bio::DB::HTS
+    - cpanm --quiet Bio::DB::HTS
     - cp travisci/MultiTestDB.conf.travisci  t/MultiTestDB.conf
 
 script: "./travisci/harness.sh"
