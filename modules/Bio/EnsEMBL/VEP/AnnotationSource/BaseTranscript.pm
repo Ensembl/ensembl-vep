@@ -48,7 +48,6 @@ package Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript;
 use Scalar::Util qw(weaken);
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
-use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
 
 use base qw(Bio::EnsEMBL::VEP::AnnotationSource);
 
@@ -64,7 +63,7 @@ sub annotate_InputBuffer {
     my $fs = $tr->{start} - ($tr->strand == 1 ? $up_size : $down_size);
     my $fe = $tr->{end} + ($tr->strand == 1 ? $down_size : $up_size);
 
-    foreach my $vf(grep { overlap($fs, $fe, $_->{start}, $_->{end}) } @{$buffer->buffer}) {
+    foreach my $vf(@{$buffer->get_overlapping_vfs($fs, $fe)}) {
       my $tv = Bio::EnsEMBL::Variation::TranscriptVariation->new(
         -transcript        => $tr,
         -variation_feature => $vf,

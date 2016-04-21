@@ -58,13 +58,8 @@ sub annotate_InputBuffer {
   my $self = shift;
   my $buffer = shift;
 
-  # this will be very slow
-  # better rewrite with Set::IntervalTree a good idea
   foreach my $existing_vf(@{$self->get_all_features_by_InputBuffer($buffer)}) {
-    foreach my $vf(
-      grep { $existing_vf->{start} == $_->{start} && $existing_vf->{end} == $_->{end} }
-      @{$buffer->buffer}
-    ) {
+    foreach my $vf(@{$buffer->get_overlapping_vfs($existing_vf->{start}, $existing_vf->{end})}) {
       push @{$vf->{existing}}, $existing_vf unless $self->is_var_novel($existing_vf, $vf);
     }
   }
@@ -94,17 +89,17 @@ sub is_var_novel {
   $is_novel = 0 if $existing_var->{start} == $new_var->start && $existing_var->{end} == $new_var->end;
 
   if($self->{check_alleles}) {
-      my %existing_alleles;
+    my %existing_alleles;
 
-      $existing_alleles{$_} = 1 for split '\/', $existing_var->{allele_string};
+    $existing_alleles{$_} = 1 for split '\/', $existing_var->{allele_string};
 
-      my $seen_new = 0;
-      foreach my $a(split '\/', ($new_var->allele_string || "")) {
-          reverse_comp(\$a) if $new_var->strand ne $existing_var->{strand};
-          $seen_new = 1 unless defined $existing_alleles{$a};
-      }
+    my $seen_new = 0;
+    foreach my $a(split '\/', ($new_var->allele_string || "")) {
+      reverse_comp(\$a) if $new_var->strand ne $existing_var->{strand};
+      $seen_new = 1 unless defined $existing_alleles{$a};
+    }
 
-      $is_novel = 1 if $seen_new;
+    $is_novel = 1 if $seen_new;
   }
 
   return $is_novel;

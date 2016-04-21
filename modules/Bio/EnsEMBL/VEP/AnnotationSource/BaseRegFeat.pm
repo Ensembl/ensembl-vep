@@ -44,7 +44,6 @@ use warnings;
 package Bio::EnsEMBL::VEP::AnnotationSource::BaseRegFeat;
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
-use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
 
 use base qw(Bio::EnsEMBL::VEP::AnnotationSource);
 
@@ -58,14 +57,11 @@ sub annotate_InputBuffer {
   my $buffer = shift;
 
   foreach my $rf(@{$self->get_all_features_by_InputBuffer($buffer, $self->{cache_region_size})}) {
-    my $fs = $rf->{start};
-    my $fe = $rf->{end};
-
     my $type = $rf->{_vep_feature_type} ||= (split('::', ref($rf)))[-1];
     my $constructor = 'Bio::EnsEMBL::Variation::'.$type.'Variation';
     my $add_method  = 'add_'.$type.'Variation';
 
-    foreach my $vf(grep { overlap($fs, $fe, $_->{start}, $_->{end}) } @{$buffer->buffer}) {
+    foreach my $vf(@{$buffer->get_overlapping_vfs($rf->{start}, $rf->{end})}) {
       $vf->{slice} ||= $rf->{slice};
 
       $vf->$add_method(
