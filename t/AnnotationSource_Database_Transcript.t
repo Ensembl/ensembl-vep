@@ -108,23 +108,15 @@ SKIP: {
   );
 
   is_deeply(
-    $vep_cache->{protein_features},
+    [sort {$a->{start} <=> $b->{start}} @{$vep_cache->{protein_features}}],
     [
       bless( {
-        'end' => 267,
+        'end' => 324,
         'analysis' => bless( {
-          '_display_label' => 'Gene3D'
+          '_display_label' => 'hmmpanther'
         }, 'Bio::EnsEMBL::Analysis' ),
-        'hseqname' => '1tkeA03',
-        'start' => 226
-      }, 'Bio::EnsEMBL::ProteinFeature' ),
-      bless( {
-        'end' => 225,
-        'analysis' => bless( {
-          '_display_label' => 'Gene3D'
-        }, 'Bio::EnsEMBL::Analysis' ),
-        'hseqname' => '1tkeA02',
-        'start' => 138
+        'hseqname' => 'PTHR11451',
+        'start' => 38
       }, 'Bio::EnsEMBL::ProteinFeature' ),
       bless( {
         'end' => 132,
@@ -151,6 +143,22 @@ SKIP: {
         'start' => 136
       }, 'Bio::EnsEMBL::ProteinFeature' ),
       bless( {
+        'end' => 225,
+        'analysis' => bless( {
+          '_display_label' => 'Gene3D'
+        }, 'Bio::EnsEMBL::Analysis' ),
+        'hseqname' => '1tkeA02',
+        'start' => 138
+      }, 'Bio::EnsEMBL::ProteinFeature' ),
+      bless( {
+        'end' => 267,
+        'analysis' => bless( {
+          '_display_label' => 'Gene3D'
+        }, 'Bio::EnsEMBL::Analysis' ),
+        'hseqname' => '1tkeA03',
+        'start' => 226
+      }, 'Bio::EnsEMBL::ProteinFeature' ),
+      bless( {
         'end' => 341,
         'analysis' => bless( {
           '_display_label' => 'Low complexity (Seg)'
@@ -158,14 +166,6 @@ SKIP: {
         'hseqname' => 'seg',
         'start' => 329
       }, 'Bio::EnsEMBL::ProteinFeature' ),
-      bless( {
-        'end' => 324,
-        'analysis' => bless( {
-          '_display_label' => 'hmmpanther'
-        }, 'Bio::EnsEMBL::Analysis' ),
-        'hseqname' => 'PTHR11451',
-        'start' => 38
-      }, 'Bio::EnsEMBL::ProteinFeature' )
     ],
     'prefetch_translation_data - protein features'
   );
