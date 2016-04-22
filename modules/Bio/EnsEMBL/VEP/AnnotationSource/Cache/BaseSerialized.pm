@@ -53,6 +53,17 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
 use base qw(Bio::EnsEMBL::VEP::AnnotationSource::Cache);
 
+our $CAN_USE_SEREAL;
+
+BEGIN {
+  if (eval { require Sereal; 1 }) {
+    $CAN_USE_SEREAL = 1;
+  }
+  else {
+    $CAN_USE_SEREAL = 0;
+  }
+}
+
 sub deserialize_from_file {
   my $self = shift;
   
@@ -85,6 +96,8 @@ sub deserialize_from_file_storable {
 sub deserialize_from_file_sereal {
   my $self = shift;
   my $file = shift;
+
+  throw("ERROR: Unable to use Sereal; module not installed\n") unless $CAN_USE_SEREAL;
 
   $self->{decoder} ||= Sereal::Decoder->new();
   open IN, $file;
