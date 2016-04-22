@@ -95,9 +95,9 @@ sub get_all_AnnotationSources {
     push @as, Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat->new({
       config => $self->config,
       dir => $dir,
-      serializer_type => $info->{serialiser_type} || undef},
+      serializer_type => $info->{serialiser_type} || undef,
       cache_region_size => $info->{cache_region_size} || $self->param('cache_region_size'),
-    ) if $self->param('regulatory') and $info->{regulatory};
+    }) if $self->param('regulatory') and $info->{regulatory};
 
     # add Variation if available
     if($self->param('check_existing') && $info->{variation_cols}) {
@@ -111,7 +111,7 @@ sub get_all_AnnotationSources {
 
       push @as, $class->new({
         config => $self->config,
-        dir => $dir,       
+        dir => $dir,
         cache_region_size => $info->{cache_region_size} || $self->param('cache_region_size'),
         cols => $info->{variation_cols},
       }); 
