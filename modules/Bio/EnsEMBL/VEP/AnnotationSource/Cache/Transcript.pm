@@ -50,6 +50,8 @@ use Bio::EnsEMBL::Gene;
 use Bio::EnsEMBL::Transcript;
 use Bio::EnsEMBL::Translation;
 use Bio::EnsEMBL::Exon;
+use Bio::EnsEMBL::ProteinFeature;
+use Bio::EnsEMBL::Analysis;
 
 use base qw(
   Bio::EnsEMBL::VEP::AnnotationSource::Cache::BaseSerialized
