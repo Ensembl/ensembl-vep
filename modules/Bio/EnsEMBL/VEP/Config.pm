@@ -225,6 +225,13 @@ our @OPTION_SETS = (
   },
   
   {
+    flags => ['rest'],
+    set   => {
+      no_escape => 1,
+    }
+  },
+  
+  {
     flags => ['humdiv'],
     set   => {
       polyphen_analysis => 'humdiv',
