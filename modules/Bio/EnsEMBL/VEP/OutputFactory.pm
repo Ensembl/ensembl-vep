@@ -105,6 +105,7 @@ sub new {
     hgvs
     sift
     polyphen
+    polyphen_analysis
   )]);
 
   return $self;
@@ -489,7 +490,7 @@ sub VariationFeatureOverlapAllele_to_output_hash {
   }
 
   # picked?
-  $hash->{PICK} = 1 if defined($self->{PICK});
+  $hash->{PICK} = 1 if defined($vfoa->{PICK});
 
   # stats
   # unless(defined($self->{no_stats})) {
@@ -563,7 +564,7 @@ sub BaseTranscriptVariationAllele_to_output_hash {
   }
 
   # distance to transcript
-  if($hash->{Consequence} =~ /(up|down)stream/i) {
+  if(join("", @{$hash->{Consequence}}) =~ /(up|down)stream/i) {
     $hash->{DISTANCE} = $tv->distance_to_transcript;
   }
 
@@ -656,42 +657,46 @@ sub TranscriptVariationAllele_to_output_hash {
 
   my $pre = $vfoa->_pre_consequence_predicates();
 
-  # exonic only
-  if($pre->{exon}) {
-    $hash->{cDNA_position}  = format_coords($tv->cdna_start, $tv->cdna_end);
-    $hash->{cDNA_position} .= '/'.$tr->length if $self->{total_length};
-  }
+  if($pre->{within_feature}) {
 
-  # coding only
-  if($pre->{coding}) {
+    # exonic only
+    if($pre->{exon}) {
+      
+      $hash->{cDNA_position}  = format_coords($tv->cdna_start, $tv->cdna_end);
+      $hash->{cDNA_position} .= '/'.$tr->length if $self->{total_length};
 
-    $hash->{Amino_acids} = $vfoa->pep_allele_string;
-    $hash->{Codons}      = $vfoa->display_codon_allele_string;
+      # coding only
+      if($pre->{coding}) {
 
-    $hash->{CDS_position}  = format_coords($tv->cds_start, $tv->cds_end);
-    $hash->{CDS_position} .= '/'.length($vep_cache->{translateable_seq})
-      if $self->{total_length} && $vep_cache->{translateable_seq};
+        $hash->{Amino_acids} = $vfoa->pep_allele_string;
+        $hash->{Codons}      = $vfoa->display_codon_allele_string;
 
-    $hash->{Protein_position}  = format_coords($tv->translation_start, $tv->translation_end);
-    $hash->{Protein_position} .= '/'.length($vep_cache->{peptide})
-      if $self->{total_length} && $vep_cache->{peptide};
+        $hash->{CDS_position}  = format_coords($tv->cds_start, $tv->cds_end);
+        $hash->{CDS_position} .= '/'.length($vep_cache->{translateable_seq})
+          if $self->{total_length} && $vep_cache->{translateable_seq};
 
-    $self->add_sift_polyphen(@_);
-  }
+        $hash->{Protein_position}  = format_coords($tv->translation_start, $tv->translation_end);
+        $hash->{Protein_position} .= '/'.length($vep_cache->{peptide})
+          if $self->{total_length} && $vep_cache->{peptide};
 
-  # HGVS
-  if($self->{hgvs} && $pre->{within_feature}) {
-    my $hgvs_t = $vfoa->hgvs_transcript;
-    my $hgvs_p = $vfoa->hgvs_protein;
-    my $offset = $vfoa->hgvs_offset;
+        $self->add_sift_polyphen($vfoa, $hash);
+      }
+    }
 
-    # URI encode "="
-    $hgvs_p =~ s/\=/\%3D/g if $hgvs_p && !$self->{no_escape};
+    # HGVS
+    if($self->{hgvs}) {
+      my $hgvs_t = $vfoa->hgvs_transcript;
+      my $hgvs_p = $vfoa->hgvs_protein;
+      my $offset = $vfoa->hgvs_offset;
 
-    $hash->{HGVSc} = $hgvs_t if $hgvs_t;
-    $hash->{HGVSp} = $hgvs_p if $hgvs_p;
+      # URI encode "="
+      $hgvs_p =~ s/\=/\%3D/g if $hgvs_p && !$self->{no_escape};
 
-    $hash->{HGVS_OFFSET} = $offset if $offset;
+      $hash->{HGVSc} = $hgvs_t if $hgvs_t;
+      $hash->{HGVSp} = $hgvs_p if $hgvs_p;
+
+      $hash->{HGVS_OFFSET} = $offset if $offset;
+    }
   }
 
   return $hash;
