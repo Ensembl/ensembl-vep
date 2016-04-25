@@ -291,6 +291,8 @@ $of->get_all_output_hashes_by_VariationFeature($ib->buffer->[0]);
 ## pick_worst_VariationFeatureOverlapAllele
 ###########################################
 
+is($of->pick_worst_VariationFeatureOverlapAllele([]), undef, 'pick_worst_VariationFeatureOverlapAllele - empty list');
+
 $ib = get_annotated_buffer({
   input_file => $test_cfg->{test_vcf},
   regulatory => 1,
@@ -326,6 +328,13 @@ is(
   $of->pick_worst_VariationFeatureOverlapAllele(\@vfoas)->feature->stable_id,
   'ENST00000307301',
   'pick_worst_VariationFeatureOverlapAllele - canonical,biotype'
+);
+
+$of->{pick_order} = ['canonical'];
+is(
+  $of->pick_worst_VariationFeatureOverlapAllele(\@vfoas)->feature->stable_id,
+  'ENST00000307301',
+  'pick_worst_VariationFeatureOverlapAllele - canonical - bail out'
 );
 
 $of->{pick_order} = $orig_order;
@@ -707,6 +716,67 @@ foreach my $flag(@flags) {
   is($of->$method($vfoa)->{$flag->[1]}, $flag->[2], $method.' - '.$flag->[0]);
   $of->{$flag->[0]} = 0;
 }
+
+# REFSEQ_MATCH - use refseq cache
+$of->{refseq} = 1;
+
+$ib = get_annotated_buffer({
+  input_file => $test_cfg->{test_vcf},
+  species => 'homo_sapiens',
+  dir => $test_cfg->{cache_root_dir},
+  refseq => 1,
+});
+
+$vfoa = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[0];
+
+is_deeply(
+  $of->BaseTranscriptVariationAllele_to_output_hash($vfoa)->{REFSEQ_MATCH},
+  [
+    'rseq_ens_match_cds',
+    'rseq_mrna_nonmatch',
+    'rseq_cds_mismatch'
+  ],
+  'BaseTranscriptVariationAllele_to_output_hash - REFSEQ_MATCH'
+);
+$of->{refseq} = 0;
+
+# REFSEQ_MATCH - use merged cache
+$of->{merged} = 1;
+
+$ib = get_annotated_buffer({
+  input_file => $test_cfg->{test_vcf},
+  species => 'homo_sapiens',
+  dir => $test_cfg->{cache_root_dir},
+  merged => 1,
+});
+
+$vfoa = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[3];
+
+is_deeply(
+  $of->BaseTranscriptVariationAllele_to_output_hash($vfoa)->{REFSEQ_MATCH},
+  [
+    'rseq_ens_match_cds',
+    'rseq_mrna_nonmatch',
+    'rseq_cds_mismatch'
+  ],
+  'BaseTranscriptVariationAllele_to_output_hash - REFSEQ_MATCH merged'
+);
+
+is(
+  $of->BaseTranscriptVariationAllele_to_output_hash($vfoa)->{SOURCE},
+  'RefSeq',
+  'BaseTranscriptVariationAllele_to_output_hash - merged source 1'
+);
+
+is(
+  $of->BaseTranscriptVariationAllele_to_output_hash(
+    $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[0]
+  )->{SOURCE},
+  'Ensembl',
+  'BaseTranscriptVariationAllele_to_output_hash - merged source 2'
+);
+$of->{merged} = 0;
+
 
 
 ## TranscriptVariationAllele_to_output_hash

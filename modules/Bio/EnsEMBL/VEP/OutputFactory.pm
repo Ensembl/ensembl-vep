@@ -265,7 +265,7 @@ sub filter_VariationFeatureOverlapAlleles {
 # 7: transcript from RefSeq?
 sub pick_worst_VariationFeatureOverlapAllele {
   my $self = shift;
-  my $vfoas = shift;
+  my $vfoas = shift || [];
 
   my @vfoa_info;
 
@@ -358,6 +358,8 @@ sub pick_worst_VariationFeatureOverlapAllele {
       # this gives fewer to sort on the next round
       @vfoa_info = @tmp;
     }
+
+    print "whoa nanny\n";
 
     # probably shouldn't get here, but if we do, return the first
     return $vfoa_info[0]->{vfoa};
@@ -630,7 +632,7 @@ sub BaseTranscriptVariationAllele_to_output_hash {
   # refseq match info
   if($self->{refseq} || $self->{merged}) {
     my @rseq_attrs = grep {$_->code =~ /^rseq/} @attribs;
-    $hash->{REFSEQ_MATCH} = join(",", map {$_->code} @rseq_attrs) if scalar @rseq_attrs;
+    $hash->{REFSEQ_MATCH} = [map {$_->code} @rseq_attrs] if scalar @rseq_attrs;
   }
 
   # protein ID
