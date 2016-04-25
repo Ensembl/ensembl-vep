@@ -110,7 +110,7 @@ sub is_var_novel {
 
 sub filter_variation {
   my ($self, $var) = @_;
-  return 0 unless $var->{failed} <= ($self->{failed} // 0);
+  return 0 unless $var->{failed} <= (defined($self->{failed}) ? $self->{failed} : 0);
 }
 
 sub up_down_size {

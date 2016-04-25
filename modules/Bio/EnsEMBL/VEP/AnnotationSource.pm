@@ -100,7 +100,7 @@ sub get_all_regions_by_InputBuffer {
 
   my @regions = ();
   my %seen = ();
-  my $up_down_size = $self->{up_down_size} // $self->up_down_size();
+  my $up_down_size = defined($self->{up_down_size}) ? $self->{up_down_size} : $self->up_down_size();
 
   foreach my $vf(@{$buffer->buffer}) {
     my $chr = $vf->{chr} || $vf->slice->seq_region_name;
