@@ -119,7 +119,14 @@ sub get_all_output_hashes_by_VariationFeature {
 
   my @return;
 
-  foreach my $vfoa(@{$self->get_all_VariationFeatureOverlapAlleles($vf)}) {
+  my $method =  sprintf(
+    'get_all_%sOverlapAlleles',
+    ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature'
+      ? 'StructrualVariation'
+      : 'VariationFeature'
+  );
+
+  foreach my $vfoa(@{$self->$method($vf)}) {
 
     # copy the initial VF-based hash so we're not overwriting
     my %copy = %$hash;
@@ -164,6 +171,35 @@ sub get_all_VariationFeatureOverlapAlleles {
   my $method = $allele_method.'VariationFeatureOverlapAlleles';
 
   return $self->filter_VariationFeatureOverlapAlleles([map {@{$_->$method}} @{$vfos}]);
+}
+
+sub get_all_StructuralVariationOverlapAlleles {
+  my $self = shift;
+  my $svf = shift;
+
+  # no intergenic?
+  my $isv = $svf->get_IntergenicStructuralVariation(1);
+  return [] if $self->{no_intergenic} && $isv;
+
+  # get all VFOAs
+  # need to be sensitive to whether --coding_only is switched on
+  my $vfos;
+
+  # if coding only just get transcript & intergenic ones
+  if($self->{coding_only}) {
+    @$vfos = grep {defined($_)} (
+      @{$svf->get_all_TranscriptStructuralVariations},
+      $isv
+    );
+  }
+  else {
+    $vfos = $svf->get_all_StructuralVariationOverlaps;
+  }
+
+  # grep out non-coding?
+  @$vfos = grep {$_->can('affects_cds') && $_->affects_cds} @$vfos if $self->{coding_only};
+
+  return $self->filter_VariationFeatureOverlapAlleles([map {@{$_->get_all_StructuralVariationOverlapAlleles}} @{$vfos}]);
 }
 
 sub filter_VariationFeatureOverlapAlleles {
@@ -254,7 +290,7 @@ sub pick_worst_VariationFeatureOverlapAllele {
       refseq => 1,
     };
 
-    if(ref($vfoa) eq 'Bio::EnsEMBL::Variation::TranscriptVariationAllele') {
+    if($vfoa->isa('Bio::EnsEMBL::Variation::BaseTranscriptVariationAllele')) {
       my $tr = $vfoa->feature;
 
       # 0 is "best"
@@ -341,7 +377,7 @@ sub pick_VariationFeatureOverlapAllele_per_gene {
 
   # pick out TVAs
   foreach my $vfoa(@$vfoas) {
-    if(ref($vfoa) eq 'Bio::EnsEMBL::Variation::TranscriptVariationAllele') {
+    if($vfoa->isa('Bio::EnsEMBL::Variation::BaseTranscriptVariationAllele')) {
       push @tvas, $vfoa;
     }
     else {
@@ -661,7 +697,7 @@ sub TranscriptVariationAllele_to_output_hash {
 
     # exonic only
     if($pre->{exon}) {
-      
+
       $hash->{cDNA_position}  = format_coords($tv->cdna_start, $tv->cdna_end);
       $hash->{cDNA_position} .= '/'.$tr->length if $self->{total_length};
 
@@ -818,6 +854,89 @@ sub get_cell_types {
   ];
 }
 
-1;
+sub StructuralVariationOverlapAllele_to_output_hash {
+  my $self = shift;
+  my ($vfoa, $hash) = @_;
+
+  my $feature = $vfoa->feature;
+  my $svf = $vfoa->base_variation_feature;
+
+  # get feature type
+  my $feature_type = (split '::', ref($feature))[-1];
+
+  $hash->{Feature_type} = $feature_type;
+  $hash->{Feature}      = $feature_type eq 'MotifFeature' ? $feature->binding_matrix->name : $feature->stable_id;
+  $hash->{Allele}       = $svf->class_SO_term;
+
+  my @ocs = sort {$a->rank <=> $b->rank} @{$vfoa->get_all_OverlapConsequences};
+
+  # consequence type(s)
+  my $term_method = $self->{terms}.'_term';
+  $hash->{Consequence} = [map {$_->$term_method || $_->SO_term} @ocs];
+
+  # impact
+  $hash->{IMPACT} = $ocs[0]->impact() if @ocs;
+
+  # allele number
+  # if($self->{allele_number}) {
+  #   $hash->{ALLELE_NUM} = $vfoa->allele_number if $vfoa->can('allele_number');
+  # }
+
+  # picked?
+  $hash->{PICK} = 1 if defined($vfoa->{PICK});
+
+  # work out overlap amounts
+  my $overlap_start  = (sort {$a <=> $b} ($svf->start, $feature->start))[-1];
+  my $overlap_end    = (sort {$a <=> $b} ($svf->end, $feature->end))[0];
+  my $overlap_length = ($overlap_end - $overlap_start) + 1;
+  my $overlap_pc     = 100 * ($overlap_length / (($feature->end - $feature->start) + 1));
+
+  $hash->{OverlapBP} = $overlap_length if $overlap_length > 0;
+  $hash->{OverlapPC} = sprintf("%.2f", $overlap_pc) if $overlap_pc > 0;
+
+  # cell types
+  $hash->{CELL_TYPE} = $self->get_cell_types($feature)
+    if $self->{cell_type} && $feature_type =~ /(Motif|Regulatory)Feature/;
+
+  return $hash;
+}
+
+sub TranscriptStructuralVariationAllele_to_output_hash {
+  my $self = shift;
+  my ($vfoa, $hash) = @_;
+
+  # run "super" method
+  $hash = $self->StructuralVariationOverlapAllele_to_output_hash(@_);
+  return undef unless $hash;
+
+  my $svo = $vfoa->base_variation_feature_overlap;
+  my $pre = $vfoa->_pre_consequence_predicates;
+  my $tr  = $svo->transcript;
+  my $vep_cache = $tr->{_variation_effect_feature_cache};
+
+  if($pre->{within_feature}) {
+
+    # exonic only
+    if($pre->{exon}) {
+
+      $hash->{cDNA_position}  = format_coords($svo->cdna_start, $svo->cdna_end);
+      $hash->{cDNA_position} .= '/'.$tr->length if $self->{total_length};
+
+      # coding only
+      if($pre->{coding}) {
+
+        $hash->{CDS_position}  = format_coords($svo->cds_start, $svo->cds_end);
+        $hash->{CDS_position} .= '/'.length($vep_cache->{translateable_seq})
+          if $self->{total_length} && $vep_cache->{translateable_seq};
+
+        $hash->{Protein_position}  = format_coords($svo->translation_start, $svo->translation_end);
+        $hash->{Protein_position} .= '/'.length($vep_cache->{peptide})
+          if $self->{total_length} && $vep_cache->{peptide};
+      }
+    }
+  }
+
+  return $hash;
+}
 
 1;

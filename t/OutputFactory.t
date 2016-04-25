@@ -872,6 +872,242 @@ $of->{cell_type} = undef;
 
 
 
+
+
+##############################
+##############################
+#### STRUCTURAL VARIATION ####
+##############################
+##############################
+
+$ib = get_annotated_buffer({
+  input_file => $test_cfg->create_input_file([qw(21 25585733 sv_dup T . . . SVTYPE=DUP;END=25585735)]),
+  regulatory => 1,
+});
+
+is_deeply(
+  $of->VariationFeature_to_output_hash($ib->buffer->[0]),
+  {
+    'Uploaded_variation' => 'sv_dup',
+    'Location' => '21:25585734-25585735'
+  },
+  'SV - VariationFeature_to_output_hash'
+);
+
+@vfoas =
+  map {@{$_->get_all_alternate_StructuralVariationOverlapAlleles}}
+  @{$ib->buffer->[0]->get_all_StructuralVariationOverlaps};
+
+is(
+  $of->pick_worst_VariationFeatureOverlapAllele(\@vfoas)->feature->stable_id,
+  'ENST00000307301',
+  'SV - pick_worst_VariationFeatureOverlapAllele'
+);
+
+is_deeply(
+  [sort map {$_->feature->stable_id} @{$of->pick_VariationFeatureOverlapAllele_per_gene(\@vfoas)}],
+  ['ENSR00001963192', 'ENST00000307301', 'ENST00000567517'],
+  'SV - pick_VariationFeatureOverlapAllele_per_gene'
+);
+
+is(scalar @{$of->filter_VariationFeatureOverlapAlleles(\@vfoas)}, scalar @vfoas, 'SV - filter_VariationFeatureOverlapAlleles - no filter');
+
+$of->{pick} = 1;
+is_deeply(
+  [sort map {$_->feature->stable_id} @{$of->filter_VariationFeatureOverlapAlleles(\@vfoas)}],
+  ['ENST00000307301'],
+  'SV - filter_VariationFeatureOverlapAlleles - pick'
+);
+$of->{pick} = 0;
+
+
+## get_all_StructuralVariationOverlapAlleles
+############################################
+
+is(
+  scalar @{$of->get_all_StructuralVariationOverlapAlleles($ib->buffer->[0])},
+  4,
+  'SV - get_all_StructuralVariationOverlapAlleles'
+);
+
+$of->{coding_only} = 1;
+is(
+  scalar @{$of->get_all_StructuralVariationOverlapAlleles($ib->buffer->[0])},
+  1,
+  'SV - get_all_StructuralVariationOverlapAlleles - coding_only'
+);
+$of->{coding_only} = 0;
+
+$ib = get_annotated_buffer({
+  input_file => $test_cfg->create_input_file([qw(21 25832817 . C . . . SVTYPE=DUP;END=25832818)]),
+});
+
+is(
+  scalar @{$of->get_all_StructuralVariationOverlapAlleles($ib->buffer->[0])},
+  1,
+  'SV - get_all_StructuralVariationOverlapAlleles - no_intergenic off'
+);
+
+$of->{no_intergenic} = 1;
+is(
+  scalar @{$of->get_all_StructuralVariationOverlapAlleles($ib->buffer->[0])},
+  0,
+  'SV - get_all_StructuralVariationOverlapAlleles - no_intergenic on'
+);
+$of->{no_intergenic} = 0;
+
+
+## StructuralVariationOverlapAllele_to_output_hash
+##################################################
+
+$ib = get_annotated_buffer({
+  input_file => $test_cfg->create_input_file([qw(21 25585733 sv_dup T . . . SVTYPE=DUP;END=25585735)]),
+});
+
+$vfoa = $of->get_all_StructuralVariationOverlapAlleles($ib->buffer->[0])->[1];
+
+is_deeply(
+  $of->StructuralVariationOverlapAllele_to_output_hash($vfoa),
+  {
+    'IMPACT' => 'MODIFIER',
+    'Consequence' => [
+      'coding_sequence_variant',
+      'feature_elongation'
+    ],
+    'OverlapPC' => '0.01',
+    'Feature_type' => 'Transcript',
+    'OverlapBP' => 2,
+    'Feature' => 'ENST00000352957',
+    'Allele' => 'duplication'
+  },
+  'SV - StructuralVariationOverlapAllele_to_output_hash'
+);
+
+# $of->{allele_number} = 1;
+# is_deeply(
+#   $of->StructuralVariationOverlapAllele_to_output_hash($vfoa),
+#   {
+#     'IMPACT' => 'MODIFIER',
+#     'Consequence' => [
+#       'coding_sequence_variant',
+#       'feature_elongation'
+#     ],
+#     'OverlapPC' => '0.01',
+#     'Feature_type' => 'Transcript',
+#     'OverlapBP' => 2,
+#     'Feature' => 'ENST00000352957',
+#     'Allele' => 'duplication',
+#     'ALLELE_NUM' => 1,
+#   },
+#   'SV - StructuralVariationOverlapAllele_to_output_hash'
+# );
+# $of->{allele_number} = 0;
+
+$of->{flag_pick} = 1;
+($vfoa) = grep {$_->{PICK}} @{$of->get_all_StructuralVariationOverlapAlleles($ib->buffer->[0])};
+is_deeply(
+  $of->StructuralVariationOverlapAllele_to_output_hash($vfoa),  
+  {
+    'IMPACT' => 'MODIFIER',
+    'Consequence' => [
+      '3_prime_UTR_variant',
+      'feature_elongation'
+    ],
+    'OverlapPC' => '0.01',
+    'Feature_type' => 'Transcript',
+    'OverlapBP' => 2,
+    'Feature' => 'ENST00000307301',
+    'Allele' => 'duplication',
+    'PICK' => 1,
+  },
+  'SV - StructuralVariationOverlapAllele_to_output_hash - pick'
+);
+$of->{flag_pick} = 0;
+
+
+
+# regulatory
+$ib = get_annotated_buffer({
+  input_file => $test_cfg->create_input_file([qw(21 25734924 . C . . . SVTYPE=DUP;END=25734925)]),
+  regulatory => 1,
+});
+
+($vfoa) = grep {ref($_->feature) =~ /Motif/} @{$of->get_all_StructuralVariationOverlapAlleles($ib->buffer->[0])};
+
+is_deeply(
+  $of->StructuralVariationOverlapAllele_to_output_hash($vfoa),
+  {
+    'IMPACT' => 'MODIFIER',
+    'Consequence' => [
+      'TF_binding_site_variant'
+    ],
+    'OverlapPC' => '7.14',
+    'Feature_type' => 'MotifFeature',
+    'OverlapBP' => 1,
+    'Feature' => 'MA0162.2',
+    'Allele' => 'duplication'
+  },
+  'SV - StructuralVariationOverlapAllele_to_output_hash - MotifFeature'
+);
+
+($vfoa) = grep {ref($_->feature) =~ /Regulatory/} @{$of->get_all_StructuralVariationOverlapAlleles($ib->buffer->[0])};
+
+is_deeply(
+  $of->StructuralVariationOverlapAllele_to_output_hash($vfoa),
+  {
+    'IMPACT' => 'MODIFIER',
+    'Consequence' => [
+      'regulatory_region_variant'
+    ],
+    'OverlapPC' => '0.02',
+    'Feature_type' => 'RegulatoryFeature',
+    'OverlapBP' => 1,
+    'Feature' => 'ENSR00001963212',
+    'Allele' => 'duplication'
+  },
+  'SV - StructuralVariationOverlapAllele_to_output_hash - RegulatoryFeature'
+);
+
+$of->{cell_type} = ['HUVEC'];
+is_deeply(
+  $of->StructuralVariationOverlapAllele_to_output_hash($vfoa)->{CELL_TYPE},
+  ['HUVEC:Promoter'],
+  'SV - StructuralVariationOverlapAllele_to_output_hash - RegulatoryFeature cell_type'
+);
+$of->{cell_type} = undef;
+
+
+
+## TranscriptStructuralVariationAllele_to_output_hash
+#####################################################
+
+$ib = get_annotated_buffer({
+  input_file => $test_cfg->create_input_file([qw(21 25585733 sv_dup T . . . SVTYPE=DUP;END=25585735)]),
+});
+
+$vfoa = $of->get_all_StructuralVariationOverlapAlleles($ib->buffer->[0])->[1];
+
+is_deeply(
+  $of->TranscriptStructuralVariationAllele_to_output_hash($vfoa),
+  {
+    'IMPACT' => 'MODIFIER',
+    'Consequence' => [
+      'coding_sequence_variant',
+      'feature_elongation'
+    ],
+    'OverlapPC' => '0.01',
+    'Feature_type' => 'Transcript',
+    'OverlapBP' => 2,
+    'Feature' => 'ENST00000352957',
+    'Allele' => 'duplication',
+    'CDS_position' => '989-990',
+    'Protein_position' => '330',
+    'cDNA_position' => '1031-1032',
+  },
+  'SV - TranscriptStructuralVariationAllele_to_output_hash'
+);
+
+
 # done
 done_testing();
 

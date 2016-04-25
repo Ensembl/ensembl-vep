@@ -64,15 +64,28 @@ sub annotate_InputBuffer {
     my $fe = $tr->{end} + ($tr->strand == 1 ? $down_size : $up_size);
 
     foreach my $vf(@{$buffer->get_overlapping_vfs($fs, $fe)}) {
-      my $tv = Bio::EnsEMBL::Variation::TranscriptVariation->new(
-        -transcript        => $tr,
-        -variation_feature => $vf,
-        -adaptor           => $tva,
-        -no_ref_check      => 1,
-        -no_transfer       => 1
-      );
 
-      $vf->add_TranscriptVariation($tv);
+      if(ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature') {
+        my $svo = Bio::EnsEMBL::Variation::TranscriptStructuralVariation->new(
+          -transcript                   => $tr,
+          -structural_variation_feature => $vf,
+          -no_transfer                  => 1
+        );
+
+        $vf->add_TranscriptStructuralVariation($svo);
+      }
+
+      else {
+        my $tv = Bio::EnsEMBL::Variation::TranscriptVariation->new(
+          -transcript        => $tr,
+          -variation_feature => $vf,
+          -adaptor           => $tva,
+          -no_ref_check      => 1,
+          -no_transfer       => 1
+        );
+
+        $vf->add_TranscriptVariation($tv);
+      }
     }
   }
 }

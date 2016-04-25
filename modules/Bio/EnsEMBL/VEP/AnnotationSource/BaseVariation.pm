@@ -59,7 +59,10 @@ sub annotate_InputBuffer {
   my $buffer = shift;
 
   foreach my $existing_vf(@{$self->get_all_features_by_InputBuffer($buffer)}) {
-    foreach my $vf(@{$buffer->get_overlapping_vfs($existing_vf->{start}, $existing_vf->{end})}) {
+    foreach my $vf(
+      grep {ref($_) ne 'Bio::EnsEMBL::Variation::StructuralVariationFeature'}
+      @{$buffer->get_overlapping_vfs($existing_vf->{start}, $existing_vf->{end})}
+    ) {
       push @{$vf->{existing}}, $existing_vf unless $self->is_var_novel($existing_vf, $vf);
     }
   }

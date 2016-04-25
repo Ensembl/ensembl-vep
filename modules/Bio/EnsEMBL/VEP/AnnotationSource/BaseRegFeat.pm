@@ -64,14 +64,26 @@ sub annotate_InputBuffer {
     foreach my $vf(@{$buffer->get_overlapping_vfs($rf->{start}, $rf->{end})}) {
       $vf->{slice} ||= $rf->{slice};
 
-      $vf->$add_method(
-        $constructor->new(
-          -variation_feature  => $vf,
-          -feature            => $rf,
-          -no_ref_check       => 1,
-          -no_transfer        => 1
-        )
-      );
+      if(ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature') {
+        my $svo = Bio::EnsEMBL::Variation::StructuralVariationOverlap->new(
+          -feature                      => $rf,
+          -structural_variation_feature => $vf,
+          -no_transfer                  => 1
+        );
+
+        push @{$vf->{regulation_structural_variations}->{$type}}, $svo;
+      }
+      
+      else {
+        $vf->$add_method(
+          $constructor->new(
+            -variation_feature  => $vf,
+            -feature            => $rf,
+            -no_ref_check       => 1,
+            -no_transfer        => 1
+          )
+        );
+      }
     }
   }
 }

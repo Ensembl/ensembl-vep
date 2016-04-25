@@ -69,7 +69,7 @@ sub annotate_InputBuffer {
 
   # we only care about non-SVs here
   my %by_chr;
-  push @{$by_chr{$_->{chr}}}, $_ for grep {$_->isa('Bio::EnsEMBL::Variation::VariationFeature')} @{$buffer->buffer};
+  push @{$by_chr{$_->{chr}}}, $_ for grep {ref($_) eq 'Bio::EnsEMBL::Variation::VariationFeature'} @{$buffer->buffer};
 
   if($CAN_USE_TABIX_PM) {
     $self->_annotate_pm(\%by_chr);
