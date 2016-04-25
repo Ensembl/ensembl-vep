@@ -50,6 +50,7 @@ use vars qw(@ISA @EXPORT_OK);
 
 @EXPORT_OK = qw(
   &format_coords
+  &get_time
 );
 
 sub format_coords {
@@ -77,4 +78,28 @@ sub format_coords {
   else  {
     return '-';
   }
+}
+
+# gets time
+sub get_time {
+  my @time = localtime(time());
+
+  # increment the month (Jan = 0)
+  $time[4]++;
+
+  # add leading zeroes as required
+  for my $i(0..4) {
+    $time[$i] = "0".$time[$i] if $time[$i] < 10;
+  }
+
+  # put the components together in a string
+  my $time =
+    ($time[5] + 1900)."-".
+    $time[4]."-".
+    $time[3]." ".
+    $time[2].":".
+    $time[1].":".
+    $time[0];
+
+  return $time;
 }
