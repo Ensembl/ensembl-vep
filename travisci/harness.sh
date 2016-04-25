@@ -1,8 +1,10 @@
 #!/bin/bash
 
-export PERL5LIB=$PWD/bioperl-live-release-1-6-924:$PWD/ensembl-test/modules:$PWD/ensembl/modules:$PWD/modules:$PWD/ensembl-io/modules:$PWD/ensembl-funcgen/modules:$PWD/ensembl-variation/modules
+export PERL5LIB=$PWD/bioperl-live-release-1-6-924:$PWD/ensembl-test/modules:$PWD/ensembl/modules:$PWD/modules:$PWD/ensembl-io/modules:$PWD/ensembl-funcgen/modules:$PWD/ensembl-variation/modules:$PWD/Bio-HTS/lib
 
-export PATH=$PATH:$PWD/htslib
+export HTSLIB_DIR=$PWD/htslib
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/htslib
 
 echo "Running test suite"
 echo "Using $PERL5LIB"
