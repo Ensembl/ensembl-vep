@@ -6,6 +6,8 @@ export HTSLIB_DIR=$PWD/htslib
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/htslib
 
+export PATH=$PATH:$PWD/htslib
+
 echo "Running test suite"
 echo "Using $PERL5LIB"
 if [ "$COVERALLS" = 'true' ]; then
