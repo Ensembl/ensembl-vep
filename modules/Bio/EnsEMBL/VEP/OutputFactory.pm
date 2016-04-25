@@ -359,8 +359,6 @@ sub pick_worst_VariationFeatureOverlapAllele {
       @vfoa_info = @tmp;
     }
 
-    print "whoa nanny\n";
-
     # probably shouldn't get here, but if we do, return the first
     return $vfoa_info[0]->{vfoa};
   }
