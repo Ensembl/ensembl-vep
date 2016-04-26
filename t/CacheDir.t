@@ -42,6 +42,20 @@ ok($cd, 'new is defined');
 
 is(ref($cd), 'Bio::EnsEMBL::VEP::CacheDir', 'check class');
 
+# detects FASTA file
+$cd = Bio::EnsEMBL::VEP::CacheDir->new({config => $cfg, root_dir => $cfg_hash->{dir}});
+ok($cd->param('fasta') =~ /test\.fa/, 'detect FASTA');
+
+$cd = Bio::EnsEMBL::VEP::CacheDir->new({
+  root_dir => $cfg_hash->{dir},
+  config => Bio::EnsEMBL::VEP::Config->new({
+    %$cfg_hash,
+    no_fasta => 1,
+  })
+});
+ok(!$cd->param('fasta'), 'switch off detect FASTA');
+
+
 # should be able to work out the dir without species (uses default) or assembly (scans dir)
 ok(
   Bio::EnsEMBL::VEP::CacheDir->new({

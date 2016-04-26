@@ -127,7 +127,7 @@ sub init {
   my $self = shift;
 
   # check if there's a FASTA file in there
-  unless($self->param('fasta')) {
+  unless($self->param('fasta') || $self->param('no_fasta')) {
     my $dir = $self->dir;
 
     opendir CACHE, $dir;
