@@ -111,14 +111,21 @@ sub new {
   return $self;
 }
 
+# this method will be called by the child classes
+# it does the following:
+# 1) fetches all the VariationFeatureOverlapAllele objects
+# 2) filters them if any filtering options are applied
+# 3) converts them into a flat hashref with the relevant output data
 sub get_all_output_hashes_by_VariationFeature {
   my $self = shift;
   my $vf = shift;
 
+  # get the basic initial hash; this basically contains the location and ID
   my $hash = $self->VariationFeature_to_output_hash($vf);
 
   my @return;
 
+  # we want to handle StructuralVariationFeatures differently
   my $method =  sprintf(
     'get_all_%sOverlapAlleles',
     ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature'
@@ -202,6 +209,8 @@ sub get_all_StructuralVariationOverlapAlleles {
   return $self->filter_VariationFeatureOverlapAlleles([map {@{$_->get_all_StructuralVariationOverlapAlleles}} @{$vfos}]);
 }
 
+# this method chooses the appropriate filtering method
+# the "flag" options are not strictly filters, but they operate on the same logic
 sub filter_VariationFeatureOverlapAlleles {
   my $self = shift;
   my $vfoas = shift;
@@ -315,7 +324,7 @@ sub pick_worst_VariationFeatureOverlapAllele {
           my ($type, $grade) = ($1, $2);
 
           # values are principal1, principal2, ..., alternative1, alternative2
-          # so add 10 to grade if alternate
+          # so add 10 to grade if alternative
           $grade += 10 if substr($type, 0, 1) eq 'a';
 
           $info->{appris} = $grade if $grade;
