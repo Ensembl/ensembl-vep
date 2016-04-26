@@ -77,6 +77,12 @@ is_deeply($runner->get_InputBuffer, bless({
   'buffer_size' => $runner->param('buffer_size'),
 }, 'Bio::EnsEMBL::VEP::InputBuffer' ), 'get_InputBuffer');
 
+my $fasta_db = $runner->setup_fasta_db;
+ok(
+  ref($fasta_db) eq 'Bio::DB::HTS::Faidx' || ref($fasta_db) eq 'Bio::DB::Fasta',
+  'setup_fasta_db'
+);
+
 ok($runner->init, 'init');
 
 

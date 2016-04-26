@@ -782,6 +782,11 @@ $of->{merged} = 0;
 ## TranscriptVariationAllele_to_output_hash
 ###########################################
 
+$ib = get_annotated_buffer({
+  input_file => $test_cfg->{test_vcf},
+  dir => $test_cfg->{cache_root_dir},
+});
+
 $vfoa = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[1];
 
 is_deeply(
@@ -828,6 +833,19 @@ is_deeply(
 );
 $of->{total_length} = 0;
 
+$of->{hgvs} = 1;
+is(
+  $of->TranscriptVariationAllele_to_output_hash($vfoa)->{HGVSc},
+  'ENST00000352957.8:c.991G>A',
+  'TranscriptVariationAllele_to_output_hash - HGVSc'
+);
+is(
+  $of->TranscriptVariationAllele_to_output_hash($vfoa)->{HGVSp},
+  'ENSP00000284967.6:p.Ala331Thr',
+  'TranscriptVariationAllele_to_output_hash - HGVSp'
+);
+$of->{hgvs} = 0;
+
 $vfoa = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[0];
 is_deeply(
   $of->TranscriptVariationAllele_to_output_hash($vfoa),
@@ -845,6 +863,7 @@ is_deeply(
   },
   'TranscriptVariationAllele_to_output_hash - non-coding'
 );
+
 
 @flags = (
   [qw(sift     p SIFT     tolerated_low_confidence)],

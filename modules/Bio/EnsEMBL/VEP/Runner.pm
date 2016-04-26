@@ -47,6 +47,7 @@ use base qw(Bio::EnsEMBL::VEP::BaseVEP);
 
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
+use Bio::EnsEMBL::Variation::Utils::FastaSequence qw(setup_fasta);
 use Bio::EnsEMBL::VEP::Config;
 use Bio::EnsEMBL::VEP::Parser;
 use Bio::EnsEMBL::VEP::InputBuffer;
@@ -79,6 +80,9 @@ sub init {
   # get all annotation sources
   my $annotation_sources = $self->get_all_AnnotationSources();
 
+  # setup FASTA file DB
+  my $fasta_db = $self->setup_fasta_db();
+
   my $buffer = $self->get_InputBuffer();
 
   return $self->{_initialized} = 1;
@@ -96,7 +100,7 @@ sub init {
 #     last unless scalar @$vfs;
 
 #     foreach my $as(@{$self->get_all_AnnotationSources}) {
-#       $as->annotate_buffer($input_buffer);
+#       $as->annotate_InputBuffer($input_buffer);
 #     }
 #   }
 # }
@@ -116,7 +120,7 @@ sub init {
 #     last unless scalar @$vfs;
 
 #     foreach my $as(@{$self->get_all_AnnotationSources}) {
-#       $as->annotate_buffer($input_buffer);
+#       $as->annotate_InputBuffer($input_buffer);
 #     }
 #     
 #     $input_buffer->finish_annotation;
@@ -165,6 +169,27 @@ sub setup_db_connection {
   $self->species($reg->get_alias($self->param('species')));
 
   return 1;
+}
+
+sub setup_fasta_db {
+  my $self = shift;
+
+  if(!exists($self->{_fasta_db})) {
+    my $fasta_db;
+
+    if(my $fasta_file = $self->param('fasta')) {
+
+      $fasta_db = setup_fasta(
+        -FASTA => $fasta_file,
+        -ASSEMBLY => $self->param('assembly'),
+        -OFFLINE => $self->param('offline'),
+      );
+    }
+
+    $self->{_fasta_db} = $fasta_db;
+  }
+
+  return $self->{_fasta_db};
 }
 
 sub get_all_AnnotationSources {

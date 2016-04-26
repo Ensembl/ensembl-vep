@@ -63,7 +63,10 @@ sub annotate_InputBuffer {
     my $fs = $tr->{start} - ($tr->strand == 1 ? $up_size : $down_size);
     my $fe = $tr->{end} + ($tr->strand == 1 ? $down_size : $up_size);
 
+    my $slice = $tr->{slice};
+
     foreach my $vf(@{$buffer->get_overlapping_vfs($fs, $fe)}) {
+      $vf->{slice} ||= $slice;
 
       if(ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature') {
         my $svo = Bio::EnsEMBL::Variation::TranscriptStructuralVariation->new(
