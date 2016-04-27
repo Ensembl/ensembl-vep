@@ -18,6 +18,7 @@ use warnings;
 package VEPTestingConfig;
 
 use FindBin qw($Bin);
+use Archive::Extract;
 
 our %DEFAULTS = (
   cache_root_dir => $Bin.'/testdata/cache/',
@@ -55,7 +56,18 @@ sub new {
   # initialise self
   my $self = bless \%config, $class;
 
+  $self->unpack_fasta;
+
   return $self;
+}
+
+sub unpack_fasta {
+  my $self = shift;
+
+  unless(-e $self->{cache_dir}.'/test.fa') {
+    my $ae = Archive::Extract->new(archive => $self->{cache_dir}.'/test.fa.gz');
+    my $ok = $ae->extract(to => $self->{cache_dir});
+  }
 }
 
 # returns a hashref for general testing use
