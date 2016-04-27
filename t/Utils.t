@@ -18,7 +18,7 @@ use warnings;
 use Test::More;
 use Test::Exception;
 
-use Bio::EnsEMBL::VEP::Utils qw(format_coords get_time);
+use Bio::EnsEMBL::VEP::Utils qw(format_coords convert_arrayref get_time);
 
 ## format_coords
 ################
@@ -30,6 +30,13 @@ is(format_coords(2, 1), '1-2', 'format_coords - diff 2');
 is(format_coords(1), '1-?', 'format_coords - missing 1');
 is(format_coords(undef, 1), '?-1', 'format_coords - missing 2');
 is(format_coords(undef, undef), '-', 'format_coords - missing 3');
+
+
+## convert_arrayref
+###################
+
+is(convert_arrayref('foo'), 'foo', 'convert_arrayref - scalar');
+is(convert_arrayref(['foo', 'bar']), 'foo,bar', 'convert_arrayref - arrayref');
 
 
 ## get_time

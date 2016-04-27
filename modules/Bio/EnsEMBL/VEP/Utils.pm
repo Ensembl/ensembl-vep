@@ -51,6 +51,7 @@ use vars qw(@ISA @EXPORT_OK);
 @EXPORT_OK = qw(
   &format_coords
   &get_time
+  &convert_arrayref
 );
 
 sub format_coords {
@@ -77,6 +78,15 @@ sub format_coords {
   }
   else  {
     return '-';
+  }
+}
+
+sub convert_arrayref {
+  if(ref($_[0]) eq 'ARRAY') {
+    return join(",", @{$_[0]});
+  }
+  else {
+    return $_[0];
   }
 }
 
