@@ -48,6 +48,9 @@ use base qw(Bio::EnsEMBL::VEP::BaseVEP);
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::CacheDir;
+use Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript;
+# use Bio::EnsEMBL::VEP::AnnotationSource::Database::RegFeat;
+use Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation;
 
 # this method is called from VEP::Runner's init() method
 sub get_all {
@@ -55,6 +58,7 @@ sub get_all {
 
   return [
     @{$self->get_all_from_cache},
+    @{$self->get_all_from_database},
   ];
 }
 
@@ -69,6 +73,33 @@ sub get_all_from_cache {
   });
 
   return $cache_dir_obj->get_all_AnnotationSources();
+}
+
+sub get_all_from_database {
+  my $self = shift;
+
+  return [] if $self->param('offline');
+
+  my @as;
+
+  # we don't want to get e.g. transcript DB sources if we have cache
+  unless($self->param('cache')) {
+    push @as, Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript->new({
+      config => $self->config,
+    });
+
+    # push @as, Bio::EnsEMBL::VEP::AnnotationSource::Database::RegFeat->new({
+    #   config => $self->config,
+    # }) if $self->param('regulatory');
+
+    push @as, Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation->new({
+      config => $self->config,
+    }) if $self->param('check_existing');
+  }
+
+  ## overlapping SVs
+
+  return \@as;
 }
 
 1;
