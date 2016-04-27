@@ -109,7 +109,9 @@ sub species {
 sub registry {
   my $self = shift;
 
-  if(!exists($self->{_registry})) {
+  my $config = $self->config;
+
+  if(!exists($config->{_registry})) {
 
     my $reg = 'Bio::EnsEMBL::Registry';
     
@@ -146,10 +148,10 @@ sub registry {
       eval { $reg->set_reconnect_when_lost() };
     }
 
-    $self->{_registry} = $reg;
+    $config->{_registry} = $reg;
   }
 
-  return $self->{_registry};
+  return $config->{_registry};
 }
 
 sub get_adaptor {
