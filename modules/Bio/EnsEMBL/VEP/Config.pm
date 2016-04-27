@@ -73,6 +73,7 @@ our %DEFAULTS = (
   output_file       => "variant_effect_output.txt",
   tmpdir            => '/tmp',
   format            => 'guess',
+  output_format     => 'vep',
   terms             => 'SO',
   failed            => 0,
   core_type         => 'core',
@@ -112,6 +113,7 @@ our @LIST_FLAGS = qw(
   individual
   cell_type
   pick_order
+  fields
 );
 
 # these flags can be specified more than once on the command line
@@ -221,6 +223,7 @@ our @OPTION_SETS = (
     flags => ['json'],
     set   => {
       rest => 1,
+      output_format => 'json',
     }
   },
   
@@ -228,6 +231,27 @@ our @OPTION_SETS = (
     flags => ['rest'],
     set   => {
       no_escape => 1,
+    }
+  },
+  
+  {
+    flags => ['vcf'],
+    set   => {
+      output_format => 'vcf',
+    }
+  },
+  
+  {
+    flags => ['gvf'],
+    set   => {
+      output_format => 'gvf',
+    }
+  },
+  
+  {
+    flags => ['tab'],
+    set   => {
+      output_format => 'tab',
     }
   },
   
@@ -257,6 +281,10 @@ our %INCOMPATIBLE = (
   quiet       => [qw(verbose)],
   refseq      => [qw(gencode_basic merged)],
   merged      => [qw(database)],
+  json        => [qw(vcf gvf tab)],
+  vcf         => [qw(json gvf tab)],
+  gvf         => [qw(vcf json tab)],
+  tab         => [qw(vcf gvf json)],
 );
 
 
@@ -324,7 +352,14 @@ sub new {
   # apply option sets
   foreach my $set(@OPTION_SETS) {
     foreach my $flag(@{$set->{flags}}) {
-      if(defined($config->{$flag})) {
+      if(
+        defined($config->{$flag}) &&
+        (
+          ref($config->{$flag}) eq 'ARRAY' ?
+          scalar @{$config->{$flag}} :
+          $config->{$flag}
+        )
+      ) {
         $config->{$_} = $set->{set}->{$_} for keys %{$set->{set}};
       }
     }
@@ -350,7 +385,7 @@ sub check_config {
   }
   
   # turn off some options if using --everything and --database
-  if(defined($config->{everything}) && defined($config->{database})) {
+  if($config->{everything} && $config->{database}) {
     delete $config->{$_} for qw(maf_1kg maf_esp maf_exac pubmed);
   }
   
