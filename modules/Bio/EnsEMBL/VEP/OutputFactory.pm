@@ -129,7 +129,7 @@ sub get_all_output_hashes_by_VariationFeature {
   my $method =  sprintf(
     'get_all_%sOverlapAlleles',
     ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature'
-      ? 'StructrualVariation'
+      ? 'StructuralVariation'
       : 'VariationFeature'
   );
 
@@ -863,19 +863,18 @@ sub get_cell_types {
   ];
 }
 
-sub StructuralVariationOverlapAllele_to_output_hash {
+sub IntergenicVariationAllele_to_output_hash {
+  my $self = shift;
+  return $self->VariationFeatureOverlapAllele_to_output_hash(@_);
+}
+
+sub BaseStructuralVariationOverlapAllele_to_output_hash {
   my $self = shift;
   my ($vfoa, $hash) = @_;
 
-  my $feature = $vfoa->feature;
   my $svf = $vfoa->base_variation_feature;
 
-  # get feature type
-  my $feature_type = (split '::', ref($feature))[-1];
-
-  $hash->{Feature_type} = $feature_type;
-  $hash->{Feature}      = $feature_type eq 'MotifFeature' ? $feature->binding_matrix->name : $feature->stable_id;
-  $hash->{Allele}       = $svf->class_SO_term;
+  $hash->{Allele} = $svf->class_SO_term;
 
   my @ocs = sort {$a->rank <=> $b->rank} @{$vfoa->get_all_OverlapConsequences};
 
@@ -893,6 +892,26 @@ sub StructuralVariationOverlapAllele_to_output_hash {
 
   # picked?
   $hash->{PICK} = 1 if defined($vfoa->{PICK});
+
+  return $hash;
+}
+
+sub StructuralVariationOverlapAllele_to_output_hash {
+  my $self = shift;
+  my ($vfoa, $hash) = @_;
+
+  # run "super" method
+  $hash = $self->BaseStructuralVariationOverlapAllele_to_output_hash(@_);
+  return undef unless $hash;
+
+  my $feature = $vfoa->feature;
+  my $svf = $vfoa->base_variation_feature;
+
+  # get feature type
+  my $feature_type = (split '::', ref($feature))[-1];
+
+  $hash->{Feature_type} = $feature_type;
+  $hash->{Feature}      = $feature_type eq 'MotifFeature' ? $feature->binding_matrix->name : $feature->stable_id;
 
   # work out overlap amounts
   my $overlap_start  = (sort {$a <=> $b} ($svf->start, $feature->start))[-1];
@@ -946,6 +965,11 @@ sub TranscriptStructuralVariationAllele_to_output_hash {
   }
 
   return $hash;
+}
+
+sub IntergenicStructuralVariationAllele_to_output_hash {
+  my $self = shift;
+  return $self->BaseStructuralVariationOverlapAllele_to_output_hash(@_);
 }
 
 1;
