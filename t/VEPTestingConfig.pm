@@ -18,7 +18,7 @@ use warnings;
 package VEPTestingConfig;
 
 use FindBin qw($Bin);
-use Archive::Extract;
+use Compress::Zlib;
 
 our %DEFAULTS = (
   cache_root_dir => $Bin.'/testdata/cache/',
@@ -65,8 +65,14 @@ sub unpack_fasta {
   my $self = shift;
 
   unless(-e $self->{cache_dir}.'/test.fa') {
-    my $ae = Archive::Extract->new(archive => $self->{cache_dir}.'/test.fa.gz');
-    my $ok = $ae->extract(to => $self->{cache_dir});
+    my $gz = gzopen($self->{cache_dir}.'/test.fa.gz', 'rb');
+
+    my $buffer;
+    open OUT, ">".$self->{cache_dir}.'/test.fa';
+    while($gz->gzread($buffer)) {
+      print OUT $buffer;
+    }
+    close OUT;
   }
 }
 
