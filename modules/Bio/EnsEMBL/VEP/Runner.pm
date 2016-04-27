@@ -51,7 +51,17 @@ use Bio::EnsEMBL::Variation::Utils::FastaSequence qw(setup_fasta);
 use Bio::EnsEMBL::VEP::Config;
 use Bio::EnsEMBL::VEP::Parser;
 use Bio::EnsEMBL::VEP::InputBuffer;
+use Bio::EnsEMBL::VEP::OutputFactory;
 use Bio::EnsEMBL::VEP::AnnotationSourceAdaptor;
+
+# don't assert refs
+$Bio::EnsEMBL::Utils::Scalar::ASSERTIONS = 0;
+
+# don't use rearrange
+$Bio::EnsEMBL::Utils::Argument::NO_REARRANGE = 1;
+
+# avoid using transfer
+$Bio::EnsEMBL::Variation::TranscriptVariationAllele::NO_TRANSFER = 1;
 
 # has our own new method, does not use BaseVEP's
 # since this is the class users will be instantiating
@@ -105,31 +115,32 @@ sub init {
 #   }
 # }
 
-# sub next {
-#   my $self = shift;
+sub next_output_line {
+  my $self = shift;
 
-#   my $output_buffer = $self->{_output_buffer} ||= [];
+  my $output_buffer = $self->{_output_buffer} ||= [];
 
-#   return shift @$output_buffer if @$output_buffer;
+  return shift @$output_buffer if @$output_buffer;
 
-#   $self->init();
+  $self->init();
 
-#   my $input_buffer = $self->get_InputBuffer;
+  my $input_buffer = $self->get_InputBuffer;
 
-#   while(my $vfs = $input_buffer->next()) {
-#     last unless scalar @$vfs;
+  my $vfs = $input_buffer->next();
+  return undef unless @$vfs;
 
-#     foreach my $as(@{$self->get_all_AnnotationSources}) {
-#       $as->annotate_InputBuffer($input_buffer);
-#     }
-#     
-#     $input_buffer->finish_annotation;
+  my $output_factory = $self->get_OutputFactory;
 
-#     push @$output_buffer, map {$self->convert_VariationFeature_to_output($_)} for @$vfs;
-#   }
+  foreach my $as(@{$self->get_all_AnnotationSources}) {
+    $as->annotate_InputBuffer($input_buffer);
+  }
+    
+  $input_buffer->finish_annotation;
 
-#   return @$output_buffer ? shift @$output_buffer : undef;
-# }
+  push @$output_buffer, @{$output_factory->get_all_lines_by_InputBuffer($input_buffer)};
+
+  return @$output_buffer ? shift @$output_buffer : undef;
+}
 
 sub setup_db_connection {
   my $self = shift;
@@ -248,6 +259,19 @@ sub get_InputBuffer {
   }
 
   return $self->{input_buffer};
+}
+
+sub get_OutputFactory {
+  my $self = shift;
+
+  if(!exists($self->{output_factory})) {
+    $self->{output_factory} = Bio::EnsEMBL::VEP::OutputFactory->new({
+      config => $self->config,
+      format => $self->param('output_format') || 'ensembl',
+    });
+  }
+
+  return $self->{output_factory};
 }
 
 1;
