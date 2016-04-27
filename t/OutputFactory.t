@@ -962,6 +962,29 @@ $of->{cell_type} = undef;
 
 
 
+## IntergenicVariationAllele_to_output_hash
+###########################################
+
+$ib = get_annotated_buffer({
+  input_file => $test_cfg->create_input_file([qw(21 25832817 . C A . . .)]),
+});
+
+$vfoa = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[0];
+
+is_deeply(
+  $of->IntergenicVariationAllele_to_output_hash($vfoa),
+  {
+    'IMPACT' => 'MODIFIER',
+    'Consequence' => [
+      'intergenic_variant'
+    ],
+    'Allele' => 'A'
+  },
+  'IntergenicVariationAllele_to_output_hash'
+);
+
+
+
 
 ##############################
 ##############################
@@ -1044,6 +1067,29 @@ is(
   'SV - get_all_StructuralVariationOverlapAlleles - no_intergenic on'
 );
 $of->{no_intergenic} = 0;
+
+
+## BaseStructuralVariationOverlapAllele_to_output_hash
+######################################################
+
+$ib = get_annotated_buffer({
+  input_file => $test_cfg->create_input_file([qw(21 25585733 sv_dup T . . . SVTYPE=DUP;END=25585735)]),
+});
+
+$vfoa = $of->get_all_StructuralVariationOverlapAlleles($ib->buffer->[0])->[1];
+
+is_deeply(
+  $of->BaseStructuralVariationOverlapAllele_to_output_hash($vfoa),
+  {
+    'IMPACT' => 'MODIFIER',
+    'Consequence' => [
+      'coding_sequence_variant',
+      'feature_elongation'
+    ],
+    'Allele' => 'duplication'
+  },
+  'SV - BaseStructuralVariationOverlapAllele_to_output_hash'
+);
 
 
 ## StructuralVariationOverlapAllele_to_output_hash
@@ -1164,6 +1210,27 @@ is_deeply(
   'SV - StructuralVariationOverlapAllele_to_output_hash - RegulatoryFeature cell_type'
 );
 $of->{cell_type} = undef;
+
+# intergenic
+$ib = get_annotated_buffer({
+  input_file => $test_cfg->create_input_file([qw(21 25832817 . C . . . SVTYPE=DUP;END=25832818)]),
+});
+
+$vfoa = $of->get_all_StructuralVariationOverlapAlleles($ib->buffer->[0])->[0];
+
+is_deeply(
+  $of->IntergenicStructuralVariationAllele_to_output_hash($vfoa),
+  {
+    'IMPACT' => 'MODIFIER',
+    'Consequence' => [
+      'intergenic_variant'
+    ],
+    'Allele' => 'duplication'
+  },
+  'SV - IntergenicStructuralVariationAllele_to_output_hash'
+);
+
+
 
 
 
