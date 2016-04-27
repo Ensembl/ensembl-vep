@@ -49,10 +49,22 @@ use Scalar::Util qw(looks_like_number);
 
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
-use Bio::EnsEMBL::VEP::Utils qw(format_coords);
 use Bio::EnsEMBL::Variation::Utils::Constants;
+use Bio::EnsEMBL::VEP::Utils qw(format_coords);
+use Bio::EnsEMBL::VEP::Constants;
+
+use Bio::EnsEMBL::VEP::OutputFactory::VEP_output;
 
 my %SO_RANKS = map {$_->SO_term => $_->rank} values %Bio::EnsEMBL::Variation::Utils::Constants::OVERLAP_CONSEQUENCES;
+
+my %FORMAT_MAP = (
+  'vcf'     => 'VCF',
+  'ensembl' => 'VEP_output',
+  'vep'     => 'VEP_output',
+  'gvf'     => 'GVF',
+  'tab'     => 'Tab',
+  'json'    => 'JSON',
+);
 
 sub new {
   my $caller = shift;
@@ -108,7 +120,46 @@ sub new {
     polyphen_analysis
   )]);
 
+  my $hashref = $_[0];
+
+  if(my $format = $hashref->{format}) {
+
+    delete $hashref->{format};
+
+    $format = lc($format);
+    throw("ERROR: Unknown or unsupported format $format\n") unless $FORMAT_MAP{$format};
+
+    my $class = 'Bio::EnsEMBL::VEP::OutputFactory::'.$FORMAT_MAP{$format};
+    return $class->new({%$hashref, config => $self->config});
+  }
+
   return $self;
+}
+
+# sub print_InputBuffer {
+#   my $self = shift;
+#   my $buffer = shift;
+
+#   $self->print_line($_) for @{$self->get_all_lines_by_InputBuffer($buffer)};
+# }
+
+sub get_all_lines_by_InputBuffer {
+  my $self = shift;
+  my $buffer = shift;
+
+  return [
+    map {$self->output_hash_to_line($_)}
+    map {@{$self->get_all_output_hashes_by_VariationFeature($_)}}
+    @{$buffer->buffer}
+  ];
+}
+
+sub flag_fields {
+  return \@Bio::EnsEMBL::VEP::Constants::FLAG_FIELDS;
+}
+
+sub field_descriptions {
+  return \%Bio::EnsEMBL::VEP::Constants::FIELD_DESCRIPTIONS;
 }
 
 # this method will be called by the child classes
