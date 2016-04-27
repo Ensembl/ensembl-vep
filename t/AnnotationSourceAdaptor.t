@@ -67,4 +67,73 @@ is_deeply($asa->get_all(), $exp, 'get_all');
 
 
 
+
+## DATABASE TESTS
+#################
+
+SKIP: {
+  my $db_cfg = $test_cfg->db_cfg;
+  my $can_use_db = $db_cfg && scalar keys %$db_cfg;
+
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  skip 'No local database configured', 3 unless $can_use_db;
+
+  my $multi;
+
+  if($can_use_db) {
+    eval q{
+      use Bio::EnsEMBL::Test::TestUtils;
+      use Bio::EnsEMBL::Test::MultiTestDB;
+      1;
+    };
+
+    $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens');
+  }
+
+  $asa = Bio::EnsEMBL::VEP::AnnotationSourceAdaptor->new({
+    config => Bio::EnsEMBL::VEP::Config->new({
+      %$db_cfg,
+      database => 1,
+      offline => 0,
+      species => 'homo_vepiens',
+    })
+  });
+
+  $exp = [
+    bless( {
+      'polyphen' => undef,
+      'sift' => undef,
+      'uniprot' => undef,
+      '_config' => $asa->config,
+      'xref_refseq' => undef,
+      'polyphen_analysis' => 'humvar',
+      'cache_region_size' => 50000,
+      'protein' => undef,
+      'domains' => undef,
+      'gencode_basic' => undef,
+      'source_type' => 'ensembl',
+      'core_type' => 'core',
+      'all_refseq' => undef,
+      'assembly' => undef
+    }, 'Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript' )
+  ];
+
+  is_deeply($asa->get_all_from_database(), $exp, 'get_all_from_database');
+
+  is_deeply($asa->get_all(), $exp, 'get_all - DB');
+
+  $asa->param('check_existing', 1);
+  is_deeply(
+    $asa->get_all_from_database()->[1],
+    bless( {
+      '_config' => $asa->config,
+      'cache_region_size' => 50000
+    }, 'Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation' ),
+    'get_all_from_database - variation'
+  );
+  $asa->param('check_existing', 0);
+};
+
+
+
 done_testing();
