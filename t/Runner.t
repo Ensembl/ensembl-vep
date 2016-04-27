@@ -77,6 +77,50 @@ is_deeply($runner->get_InputBuffer, bless({
   'buffer_size' => $runner->param('buffer_size'),
 }, 'Bio::EnsEMBL::VEP::InputBuffer' ), 'get_InputBuffer');
 
+is_deeply($runner->get_OutputFactory, bless( {
+  '_config' => $runner->config,
+  'uniprot' => undef,
+  'xref_refseq' => undef,
+  'numbers' => undef,
+  'polyphen_analysis' => 'humvar',
+  'pick_allele' => undef,
+  'coding_only' => undef,
+  'refseq' => undef,
+  'no_escape' => undef,
+  'total_length' => undef,
+  'per_gene' => undef,
+  'sift' => undef,
+  'appris' => undef,
+  'canonical' => undef,
+  'symbol' => undef,
+  'pick_order' => $runner->param('pick_order'),
+  'pick' => undef,
+  'no_intergenic' => undef,
+  'gene_phenotype' => undef,
+  'flag_pick_allele' => undef,
+  'process_ref_homs' => undef,
+  'maf_esp' => undef,
+  'most_severe' => undef,
+  'terms' => 'SO',
+  'flag_pick_allele_gene' => undef,
+  'flag_pick' => undef,
+  'summary' => undef,
+  'maf_exac' => undef,
+  'polyphen' => undef,
+  'gmaf' => undef,
+  'biotype' => undef,
+  'protein' => undef,
+  'domains' => undef,
+  'pick_allele_gene' => undef,
+  'variant_class' => undef,
+  'ccds' => undef,
+  'hgvs' => undef,
+  'merged' => undef,
+  'maf_1kg' => undef,
+  'tsl' => undef,
+  'pubmed' => undef
+}, 'Bio::EnsEMBL::VEP::OutputFactory::VEP_output' ), 'get_OutputFactory');
+
 my $fasta_db = $runner->setup_fasta_db;
 ok(
   ref($fasta_db) eq 'Bio::DB::HTS::Faidx' || ref($fasta_db) eq 'Bio::DB::Fasta',
@@ -84,6 +128,23 @@ ok(
 );
 
 ok($runner->init, 'init');
+
+is(
+  $runner->next_output_line, 
+  join("\t", qw(
+    rs142513484
+    21:25585733
+    T
+    ENSG00000154719
+    ENST00000307301
+    Transcript
+    3_prime_UTR_variant
+    1122
+    - - - - -
+    IMPACT=MODIFIER;STRAND=-1
+  )),
+  'next_output_line'
+);
 
 
 

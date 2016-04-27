@@ -125,19 +125,19 @@ sub next_output_line {
   $self->init();
 
   my $input_buffer = $self->get_InputBuffer;
-
   my $vfs = $input_buffer->next();
-  return undef unless @$vfs;
 
-  my $output_factory = $self->get_OutputFactory;
+  if($vfs && scalar @$vfs) {
+    my $output_factory = $self->get_OutputFactory;
 
-  foreach my $as(@{$self->get_all_AnnotationSources}) {
-    $as->annotate_InputBuffer($input_buffer);
+    foreach my $as(@{$self->get_all_AnnotationSources}) {
+      $as->annotate_InputBuffer($input_buffer);
+    }
+      
+    $input_buffer->finish_annotation;
+
+    push @$output_buffer, @{$output_factory->get_all_lines_by_InputBuffer($input_buffer)};
   }
-    
-  $input_buffer->finish_annotation;
-
-  push @$output_buffer, @{$output_factory->get_all_lines_by_InputBuffer($input_buffer)};
 
   return @$output_buffer ? shift @$output_buffer : undef;
 }
@@ -235,19 +235,6 @@ sub get_Parser {
   return $self->{parser};
 }
 
-# sub get_Writer {
-#   my $self = shift;
-
-#   if(!exists($self->{writer})) {
-#     $self->{writer} = Bio::EnsEMBL::VEP::Writer->new({
-#       config => $self->config,
-#       format => $self->param('output_format'),
-#     })
-#   }
-
-#   return $self->{writer};
-# }
-
 sub get_InputBuffer {
   my $self = shift;
 
@@ -267,7 +254,7 @@ sub get_OutputFactory {
   if(!exists($self->{output_factory})) {
     $self->{output_factory} = Bio::EnsEMBL::VEP::OutputFactory->new({
       config => $self->config,
-      format => $self->param('output_format') || 'ensembl',
+      format => $self->param('output_format'),
     });
   }
 
