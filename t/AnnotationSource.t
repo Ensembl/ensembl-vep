@@ -65,6 +65,12 @@ is_deeply(
   'get_all_regions_by_InputBuffer'
 );
 
+is_deeply(
+  $ib->min_max,
+  [25585733, 25982445],
+  'InputBuffer min_max'
+);
+
 
 my $inputs = [
   [ [qw(1 999999 . A G . . .)],    [[1, 0]],         'before boundary 1'],

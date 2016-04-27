@@ -153,6 +153,33 @@ sub interval_tree {
   return $self->{temp}->{interval_tree};
 }
 
+sub min_max {
+  my $self = shift;
+
+  if(!exists($self->{temp}->{min_max})) {
+    return $self->{temp}->{min_max} = shift if @_;
+
+    my ($min, $max) = (1e10, 0);
+
+    foreach my $vf(@{$self->buffer}) {
+      my ($vf_s, $vf_e) = ($vf->{start}, $vf->{end});
+
+      if($vf_s > $vf_e) {
+        $min = $vf_e if $vf_e < $min;
+        $max = $vf_s if $vf_s > $max;
+      }
+      else {
+        $min = $vf_s if $vf_s < $min;
+        $max = $vf_e if $vf_e > $max;
+      }
+    }
+
+    $self->{temp}->{min_max} = [$min, $max];
+  }
+
+  return $self->{temp}->{min_max};
+}
+
 sub finish_annotation {
   my $self = shift;
   $_->_finish_annotation for @{$self->buffer};

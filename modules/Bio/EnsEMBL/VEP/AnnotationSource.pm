@@ -44,6 +44,7 @@ use warnings;
 package Bio::EnsEMBL::VEP::AnnotationSource;
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
+use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
 
 use base qw(Bio::EnsEMBL::VEP::BaseVEP);
 
@@ -90,7 +91,12 @@ sub get_all_features_by_InputBuffer {
   $self->clean_cache($regions);
 
   # use merge_features to remove duplicates
-  return $self->merge_features(\@features);
+  return $self->merge_features(
+
+    # use filter_by_min_max to filter out features we know are not overlapped
+    # do it here so we're not affecting the cache
+    $self->filter_features_by_min_max(\@features, @{$buffer->min_max})
+  );
 }
 
 sub get_all_regions_by_InputBuffer {
@@ -102,14 +108,27 @@ sub get_all_regions_by_InputBuffer {
   my %seen = ();
   my $up_down_size = defined($self->{up_down_size}) ? $self->{up_down_size} : $self->up_down_size();
 
+  my ($min, $max) = (1e10, 0);
+
   foreach my $vf(@{$buffer->buffer}) {
     my $chr = $vf->{chr} || $vf->slice->seq_region_name;
     throw("ERROR: Cannot get chromosome from VariationFeature") unless $chr;
 
-    my @region_starts =
-      $vf->{start} > $vf->{end} ?
-      ($vf->{end}   - $up_down_size, $vf->{start} + $up_down_size) :
-      ($vf->{start} - $up_down_size, $vf->{end}   + $up_down_size);
+    my ($vf_s, $vf_e) = ($vf->{start}, $vf->{end});
+    my @region_starts;
+
+    if($vf_s > $vf_e) {
+      @region_starts = ($vf_e - $up_down_size, $vf_s + $up_down_size);
+
+      $min = $vf_e if $vf_e < $min;
+      $max = $vf_s if $vf_s > $max;
+    }
+    else {
+      @region_starts = ($vf_s - $up_down_size, $vf_e + $up_down_size);
+
+      $min = $vf_s if $vf_s < $min;
+      $max = $vf_e if $vf_e > $max;
+    }
 
     foreach my $region_start(map {int(($_ - 1)/ $cache_region_size)} @region_starts) {
       my $key = join(':', ($chr, $region_start));
@@ -119,6 +138,8 @@ sub get_all_regions_by_InputBuffer {
       $seen{$key} = 1;
     }
   }
+
+  $buffer->min_max([$min, $max]);
 
   return \@regions;
 }
@@ -130,6 +151,22 @@ sub get_features_by_regions_cached {
   my $cache = $self->cache;
 
   return [map {@{$cache->{$_->[0]}->{$_->[1]} || []}} @$regions];
+}
+
+sub filter_features_by_min_max {
+  my $self = shift;
+  my $features = shift;
+  my $min = shift;
+  my $max = shift;
+
+  my $up_down_size = defined($self->{up_down_size}) ? $self->{up_down_size} : $self->up_down_size();
+  $min -= $up_down_size;
+  $max += $up_down_size;
+  
+  return [
+    grep {overlap($_->{start}, $_->{end}, $min, $max)}
+    @$features
+  ];
 }
 
 sub cache {

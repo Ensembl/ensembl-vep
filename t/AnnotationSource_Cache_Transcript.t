@@ -152,12 +152,12 @@ $features = $c->get_all_features_by_InputBuffer($ib);
 is(ref($features), 'ARRAY', 'get_all_features_by_InputBuffer ref 1');
 is(ref($features->[0]), 'Bio::EnsEMBL::Transcript', 'get_all_features_by_InputBuffer ref 2');
 is(ref($features->[-1]), 'Bio::EnsEMBL::Transcript', 'get_all_features_by_InputBuffer ref 3');
-is($features->[0]->stable_id, 'ENST00000441009', 'get_all_features_by_InputBuffer stable_id');
-is(scalar @$features, 70, 'get_all_features_by_InputBuffer count');
+is($features->[0]->stable_id, 'ENST00000567517', 'get_all_features_by_InputBuffer stable_id');
+is(scalar @$features, 44, 'get_all_features_by_InputBuffer count');
 
 # do it again to get them from memory
 $features = $c->get_all_features_by_InputBuffer($ib);
-is($features->[0]->stable_id, 'ENST00000441009', 'get_all_features_by_InputBuffer again');
+is($features->[0]->stable_id, 'ENST00000567517', 'get_all_features_by_InputBuffer again');
 
 $ib->next();
 is_deeply($c->get_all_features_by_InputBuffer($ib), [], 'get_all_features_by_InputBuffer on empty buffer');

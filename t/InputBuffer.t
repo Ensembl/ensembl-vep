@@ -87,6 +87,8 @@ is_deeply($vfs->[0], bless( {
   'start' => '25592911'
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'next again first variant');
 
+is_deeply($ib->min_max, [25592911, 25603910], 'min_max');
+
 SKIP: {
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!

@@ -117,7 +117,7 @@ is(ref($features), 'ARRAY', 'get_all_features_by_InputBuffer ref 1');
 is(ref($features->[0]), 'HASH', 'get_all_features_by_InputBuffer ref 2');
 is($features->[0]->{variation_name}, 'rs753123870', 'get_all_features_by_InputBuffer variation_name 1');
 is($features->[-1]->{variation_name}, 'rs773346245', 'get_all_features_by_InputBuffer variation_name 2');
-is(scalar @$features, 51797, 'get_all_features_by_InputBuffer count');
+is(scalar @$features, 23650, 'get_all_features_by_InputBuffer count');
 
 # do it again to get them from memory
 $features = $c->get_all_features_by_InputBuffer($ib);
