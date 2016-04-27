@@ -72,6 +72,10 @@ is_deeply($tmp->{plugin}, [qw(foo bar too)], 'read_config_from_file flag allowed
 $cfg = Bio::EnsEMBL::VEP::Config->new();
 is($cfg->param('species'), 'homo_sapiens', 'defaults applied');
 
+# empty arrayref type does not trigger option set
+$cfg = Bio::EnsEMBL::VEP::Config->new();
+is($cfg->param('regulatory'), undef, 'empty array ref (cell_type) does not trigger option set');
+
 # option sets
 $cfg = Bio::EnsEMBL::VEP::Config->new({genomes => 1});
 ok(($cfg->param('host') eq 'mysql-eg-publicsql.ebi.ac.uk' and $cfg->param('port') == 4157), 'option sets, one in multiple out');
