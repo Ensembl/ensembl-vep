@@ -19,6 +19,8 @@ use warnings;
 
 use base qw(Exporter);
 
+our $VERSION = 85;
+
 our @EXPORT_OK = qw(
   @FLAG_FIELDS
   %FIELD_DESCRIPTIONS
