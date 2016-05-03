@@ -83,7 +83,7 @@ sub format_coords {
 
 sub convert_arrayref {
   if(ref($_[0]) eq 'ARRAY') {
-    return join(",", @{$_[0]});
+    return join(($_[1] || ","), @{$_[0]});
   }
   else {
     return $_[0];

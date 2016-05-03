@@ -37,6 +37,7 @@ is(format_coords(undef, undef), '-', 'format_coords - missing 3');
 
 is(convert_arrayref('foo'), 'foo', 'convert_arrayref - scalar');
 is(convert_arrayref(['foo', 'bar']), 'foo,bar', 'convert_arrayref - arrayref');
+is(convert_arrayref(['foo', 'bar'], '&'), 'foo&bar', 'convert_arrayref - arrayref with separator');
 
 
 ## get_time
