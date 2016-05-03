@@ -81,10 +81,8 @@ sub headers {
 
     $self->{headers} = [
       map {[$_, $metadata->{$_}]}
-      $parser->{_metadata_order} ? @{$parser->{_metadata_order}} : sort keys %$metadata
+      $parser->{_metadata_order} ? (@{$parser->{_metadata_order}}, 'header') : sort keys %$metadata
     ];
-
-    push @{$self->{headers}}, ['header', $metadata->{header}];
   }
 
   return $self->{headers};
