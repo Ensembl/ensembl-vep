@@ -41,8 +41,11 @@ my $as = Bio::EnsEMBL::VEP::AnnotationSource->new({
   config => $cfg,
   cache_region_size => 1000000,
   up_down_size => 0,
+  info => { foo => 'bar' }
 });
 ok($as, 'new is defined');
+
+is_deeply($as->info, { foo => 'bar' }, 'info');
 
 
 

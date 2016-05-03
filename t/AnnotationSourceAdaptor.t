@@ -58,6 +58,19 @@ my $exp = [
     'gencode_basic' => undef,
     'all_refseq' => undef,
     'source_type' => 'ensembl',
+    'info' => {
+      'polyphen' => '2.2.2',
+      'sift' => 'sift5.2.2',
+      'COSMIC' => '75',
+      'ESP' => '20141103',
+      'gencode' => 'GENCODE 24',
+      'HGMD-PUBLIC' => '20154',
+      'genebuild' => '2014-07',
+      'regbuild' => '13.0',
+      'assembly' => 'GRCh38.p5',
+      'dbSNP' => '146',
+      'ClinVar' => '201601'
+    }
   }, 'Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript' )
 ];
 

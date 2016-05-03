@@ -89,6 +89,7 @@ sub get_all_AnnotationSources {
       serializer_type => $info->{serialiser_type} || undef,
       source_type => $self->source_type,
       cache_region_size => $info->{cache_region_size} || $self->param('cache_region_size'),
+      info => $self->version_data,
     });
 
     # add RegFeats if available
@@ -97,6 +98,7 @@ sub get_all_AnnotationSources {
       dir => $dir,
       serializer_type => $info->{serialiser_type} || undef,
       cache_region_size => $info->{cache_region_size} || $self->param('cache_region_size'),
+      info => $self->version_data,
     }) if $self->param('regulatory') and $info->{regulatory};
 
     # add Variation if available
@@ -114,6 +116,7 @@ sub get_all_AnnotationSources {
         dir => $dir,
         cache_region_size => $info->{cache_region_size} || $self->param('cache_region_size'),
         cols => $info->{variation_cols},
+        info => $self->version_data,
       }); 
     }
 

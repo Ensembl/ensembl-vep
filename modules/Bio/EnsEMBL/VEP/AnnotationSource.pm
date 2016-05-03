@@ -196,4 +196,8 @@ sub clean_cache {
   }
 }
 
+sub info {
+  return $_[0]->{info} || {};
+}
+
 1;
