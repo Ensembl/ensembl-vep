@@ -49,8 +49,30 @@ is(ref($p), 'Bio::EnsEMBL::VEP::Parser::VCF', 'check class');
 
 is(ref($p->parser), 'Bio::EnsEMBL::IO::Parser::VCF4', 'parser');
 
+is_deeply(
+  $p->headers,
+  [
+    ['fileformat', 'VCFv4.1'],
+    [
+      'header', [
+        'CHROM',
+        'POS',
+        'ID',
+        'REF',
+        'ALT',
+        'QUAL',
+        'FILTER',
+        'INFO',
+        'FORMAT',
+        'HG00096'
+      ],
+    ],
+  ],
+  'headers'
+);
+
 $vf = $p->next;
-delete($vf->{adaptor});
+delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, bless( {
   'chr' => '21',
   'strand' => 1,
@@ -76,7 +98,7 @@ $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
   file => $test_cfg->create_input_file([qw(21 25587759 test AC A . . .)])
 })->next();
-delete($vf->{adaptor});
+delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, bless( {
   'chr' => '21',
   'strand' => 1,
@@ -92,7 +114,7 @@ $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
   file => $test_cfg->create_input_file([qw(21 25587759 test A AC . . .)])
 })->next();
-delete($vf->{adaptor});
+delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, bless( {
   'chr' => '21',
   'strand' => 1,
@@ -108,7 +130,7 @@ $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
   file => $test_cfg->create_input_file([qw(21 25587759 test A C,G . . .)])
 })->next();
-delete($vf->{adaptor});
+delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, bless( {
   'chr' => '21',
   'strand' => 1,
@@ -124,7 +146,7 @@ $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
   file => $test_cfg->create_input_file([qw(21 25587759 test A C,GG . . .)])
 })->next();
-delete($vf->{adaptor});
+delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, bless( {
   'chr' => '21',
   'strand' => 1,
@@ -140,7 +162,7 @@ $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
   file => $test_cfg->create_input_file([qw(21 25587759 test G GC,GT . . .)])
 })->next();
-delete($vf->{adaptor});
+delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, bless( {
   'chr' => '21',
   'strand' => 1,
@@ -156,7 +178,7 @@ $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({allow_non_variant => 1}),
   file => $test_cfg->create_input_file([qw(21 25587759 test G . . . .)])
 })->next();
-delete($vf->{adaptor});
+delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, bless( {
   'chr' => '21',
   'strand' => 1,
@@ -179,7 +201,7 @@ $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
   file => $test_cfg->create_input_file([qw(21 25587759 test G C,* . . .)])
 })->next();
-delete($vf->{adaptor});
+delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, bless( {
   'chr' => '21',
   'strand' => 1,
@@ -194,7 +216,7 @@ $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
   file => $test_cfg->create_input_file([qw(21 25587759 test G C,<DEL:*> . . .)])
 })->next();
-delete($vf->{adaptor});
+delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, bless( {
   'chr' => '21',
   'strand' => 1,
@@ -209,7 +231,7 @@ $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
   file => $test_cfg->create_input_file([qw(21 25587759 test GC G,* . . .)])
 })->next();
-delete($vf->{adaptor});
+delete($vf->{adaptor}); delete($vf->{_line});
 
 is_deeply($vf, bless( {
   'chr' => '21',
@@ -225,7 +247,7 @@ $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
   file => $test_cfg->create_input_file([qw(21 25587759 test G GC,* . . .)])
 })->next();
-delete($vf->{adaptor});
+delete($vf->{adaptor}); delete($vf->{_line});
 
 is_deeply($vf, bless( {
   'chr' => '21',
@@ -256,35 +278,35 @@ $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
   file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DUP> . . SVTYPE=DUP;END=25587769)])
 })->next();
-delete($vf->{adaptor});
+delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, $expected, 'StructuralVariationFeature 1');
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
   file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T . . . SVTYPE=DUP;END=25587769)])
 })->next();
-delete($vf->{adaptor});
+delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, $expected, 'StructuralVariationFeature 2');
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
   file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DUP> . . END=25587769)])
 })->next();
-delete($vf->{adaptor});
+delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, $expected , 'StructuralVariationFeature no SVTYPE');
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
   file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DUP> . . SVLEN=11)])
 })->next();
-delete($vf->{adaptor});
+delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, $expected , 'StructuralVariationFeature SVLEN');
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
   file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DUP> . . SVLEN=11;CIPOS=-3,2;CIEND=-4,5)])
 })->next();
-delete($vf->{adaptor});
+delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, bless( {
   'outer_end' => 25587774,
   'chr' => '21',
@@ -322,7 +344,7 @@ $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({gp => 1}),
   file => $test_cfg->create_input_file([qw(21 25587759 test A G . . GP=21:25586000)])
 })->next();
-delete($vf->{adaptor});
+delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, bless( {
   'chr' => '21',
   'strand' => 1,
@@ -360,7 +382,7 @@ $p = Bio::EnsEMBL::VEP::Parser::VCF->new({
 });
 
 $vf = $p->next;
-delete($vf->{adaptor});
+delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, bless( {
   'chr' => '21',
   'strand' => 1,
@@ -375,7 +397,7 @@ is_deeply($vf, bless( {
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'individual 1');
 
 $vf = $p->next;
-delete($vf->{adaptor});
+delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, bless( {
   'chr' => '21',
   'strand' => 1,
@@ -390,7 +412,7 @@ is_deeply($vf, bless( {
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'individual 2');
 
 $vf = $p->next;
-delete($vf->{adaptor});
+delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, bless( {
   'chr' => '21',
   'strand' => 1,
@@ -417,7 +439,7 @@ $p = Bio::EnsEMBL::VEP::Parser::VCF->new({
 });
 
 $vf = $p->next;
-delete($vf->{adaptor});
+delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, bless( {
   'chr' => '21',
   'strand' => 1,

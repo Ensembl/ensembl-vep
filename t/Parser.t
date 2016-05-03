@@ -49,6 +49,8 @@ throws_ok {$p->file('foo')} qr/File.+does not exist/, 'file not exists';
 is($p->line_number, 0, 'line_number get');
 is($p->line_number(1), 1, 'line_number set');
 
+is_deeply($p->headers, [], 'headers');
+
 $p->file($test_cfg->{test_vcf});
 is($p->detect_format, 'vcf', 'detect_format - VCF');
 

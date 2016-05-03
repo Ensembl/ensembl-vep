@@ -97,6 +97,10 @@ sub new {
   return $self;
 }
 
+sub headers {
+  return [];
+}
+
 sub file {
   my $self = shift;
 

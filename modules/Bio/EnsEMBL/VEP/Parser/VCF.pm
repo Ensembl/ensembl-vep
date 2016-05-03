@@ -66,13 +66,46 @@ sub parser {
   return $self->{parser} ||= Bio::EnsEMBL::IO::Parser::VCF4->open($self->file);
 }
 
+sub headers {
+  my $self = shift;
+
+  if(!exists($self->{headers})) {
+    my $parser = $self->parser;
+
+    unless($self->{_have_read_next}) {
+      $parser->next;
+      $self->{_have_read_next} = 1;
+    }
+
+    my $metadata = $parser->get_all_metadata;
+
+    $self->{headers} = [
+      map {[$_, $metadata->{$_}]}
+      $parser->{_metadata_order} ? @{$parser->{_metadata_order}} : sort keys %$metadata
+    ];
+
+    push @{$self->{headers}}, ['header', $metadata->{header}];
+  }
+
+  return $self->{headers};
+}
+
 sub next {
   my $self = shift;
 
   my $cache = $self->{_vf_cache} ||= [];
 
   if(!scalar @$cache) {
-    $self->parser->next;
+
+    # getting the header requires we trigger next once
+    # so we don't want to trigger it again (once)
+    if($self->{_have_read_next}) {
+      delete $self->{_have_read_next};
+    }
+    else {
+      $self->parser->next;
+    }
+
     push @$cache, @{$self->create_VariationFeatures()};
 
     $self->line_number($self->line_number + 1) if scalar @$cache;
