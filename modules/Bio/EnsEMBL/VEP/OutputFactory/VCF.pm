@@ -1,0 +1,292 @@
+=head1 LICENSE
+
+Copyright [1999-2016] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+=cut
+
+
+=head1 CONTACT
+
+ Please email comments or questions to the public Ensembl
+ developers list at <http://lists.ensembl.org/mailman/listinfo/dev>.
+
+ Questions may also be sent to the Ensembl help desk at
+ <http://www.ensembl.org/Help/Contact>.
+
+=cut
+
+# EnsEMBL module for Bio::EnsEMBL::VEP::OutputFactory::VCF
+#
+#
+
+=head1 NAME
+
+Bio::EnsEMBL::VEP::OutputFactory::VCF - VCF format output factory
+
+=cut
+
+
+use strict;
+use warnings;
+
+package Bio::EnsEMBL::VEP::OutputFactory::VCF;
+
+use base qw(Bio::EnsEMBL::VEP::OutputFactory);
+
+use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
+use Bio::EnsEMBL::Utils::Exception qw(throw warning);
+use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
+use Bio::EnsEMBL::VEP::Utils qw(convert_arrayref);
+
+my @VCF_COLS = qw(
+  Allele
+  Consequence
+  IMPACT
+  SYMBOL
+  Gene
+  Feature_type
+  Feature
+  BIOTYPE
+  EXON
+  INTRON
+  HGVSc
+  HGVSp
+  cDNA_position
+  CDS_position
+  Protein_position
+  Amino_acids
+  Codons
+  Existing_variation
+);
+
+sub new {
+  my $caller = shift;
+  my $class = ref($caller) || $caller;
+  
+  my $self = $class->SUPER::new(@_);
+
+  # add shortcuts to these params
+  $self->add_shortcuts([qw(
+    fields
+    vcf_info_field
+    keep_csq
+  )]);
+
+  return $self;
+}
+
+sub get_all_lines_by_InputBuffer {
+  my $self = shift;
+  my $buffer = shift;
+
+  my @return;
+
+  foreach my $vf(@{$buffer->buffer}) {
+
+    my $line;
+    my $fieldname = $self->{vcf_info_field} || 'CSQ';
+
+    # if input was VCF then we get _line with the original contents
+    if($line = $vf->{_line}) {
+
+      if(!defined($line->[7]) || $line->[7] eq '.') {
+        $line->[7] = '';
+      }
+
+      # nuke existing CSQ field?
+      if($line->[7] =~ /$fieldname\=/ && !$self->{keep_csq}) {
+        $line->[7] =~ s/$fieldname\=\S+?(\;|$)(\S|$)/$2/;
+      }
+    }
+
+    # we have to create one if input wasnt VCF
+    else {
+      $line = $self->VariationFeature_to_VCF_record($vf);
+      $line->[7] = '';
+    }
+
+    $line->[7] .= ';' if $line->[7];
+
+    $line->[7] .= $fieldname.'='.join(",",
+      map {$self->output_hash_to_vcf_info_chunk($_, $vf->strand)} 
+      @{$self->get_all_output_hashes_by_VariationFeature($vf)}
+    );
+
+    push @return, join("\t", @$line);
+  }
+
+  return \@return;
+}
+
+
+sub output_hash_to_vcf_info_chunk {
+  my $self = shift;
+  my $hash = shift;
+  my $strand = shift || 1;
+
+  my @chunk;
+
+  # use the field list (can be user-defined by setting --fields)
+  for my $col(@{$self->fields}) {
+
+    # search for data in main line hash as well as extra field
+    if(my $data = $hash->{$col}) {
+      $data = convert_arrayref($data, '&');
+
+      if($col eq 'Allele') {
+        reverse_comp(\$data) if $strand < 0;
+      }
+      else {
+        $data = '' if $data eq '-';  
+      }
+      
+      $data =~ s/\;/\%3B/g if defined $data;
+
+      push @chunk, $data;
+    }
+    else {
+      push @chunk, '';
+    }
+  }
+
+  return join('|', @chunk);
+}
+
+sub fields {
+  my $self = shift;
+
+  if(!defined($self->{fields})) {
+
+    my @fields = @VCF_COLS;
+
+    my %vcf_cols = map {$_ => 1} @VCF_COLS;
+    
+    @fields = @VCF_COLS;
+    
+    push @fields, 
+      grep {!$vcf_cols{$_}}
+      map {@{$_->{fields}}}
+      map {$_->[0]}
+      grep {
+        ref($_->[1]) eq 'ARRAY' ? scalar @{$_->[1]} : $_->[1]
+      }
+      map {[$_, $self->param($_->{flag})]}
+      @{$self->flag_fields};
+    
+    # plugin headers
+    # foreach my $plugin_header(@{get_plugin_headers($config)}) {
+    #     my ($key, $value) = @$plugin_header;
+    #     push @vcf_info_strings, sprintf(##%s=%s, $key, $value);
+    #     push @new_headers, $key;
+    # }
+    
+    $self->{fields} = \@fields;
+  }
+
+  return $self->{fields};
+}
+
+sub VariationFeature_to_VCF_record {
+  my $self = shift;
+  my $vf = shift;
+
+  # look for imbalance in the allele string
+  if(ref($vf) eq 'Bio::EnsEMBL::Variation::VariationFeature') {
+    my %allele_lengths;
+    my @alleles = split '\/', $vf->allele_string;
+
+    map {reverse_comp(\$_)} @alleles if $vf->strand < 0;
+
+    foreach my $allele(@alleles) {
+      $allele =~ s/\-//g;
+      $allele_lengths{length($allele)} = 1;
+    }
+
+    # in/del/unbalanced
+    if(scalar keys %allele_lengths > 1) {
+
+      my $prev_base = $self->get_prev_base($vf);
+
+      for my $i(0..$#alleles) {
+        $alleles[$i] =~ s/\-//g;
+        $alleles[$i] = $prev_base.$alleles[$i];
+      }
+
+      return [
+        $vf->{chr} || $vf->seq_region_name,
+        $vf->start - 1,
+        $vf->variation_name || '.',
+        shift @alleles,
+        (join ",", @alleles),
+        '.', '.', '.'
+      ];
+
+    }
+
+    # balanced sub
+    else {
+      return [
+        $vf->{chr} || $vf->seq_region_name,
+        $vf->start,
+        $vf->variation_name || '.',
+        shift @alleles,
+        (join ",", @alleles),
+        '.', '.', '.'
+      ];
+    }
+  }
+
+  # SV
+  else {
+
+    # convert to SO term
+    my %terms = (
+      insertion => 'INS',
+      deletion => 'DEL',
+      tandem_duplication => 'TDUP',
+      duplication => 'DUP'
+    );
+
+    my $alt = '<'.($terms{$vf->class_SO_term} || $vf->class_SO_term).'>';
+
+    return [
+      $vf->{chr} || $vf->seq_region_name,
+      $vf->start - 1,
+      $vf->variation_name || '.',
+      $self->get_prev_base($vf),
+      $alt,
+      '.', '.',
+      'END='.$vf->end
+    ];
+  }
+}
+
+sub get_prev_base {
+  my $self = shift;
+  my $vf = shift;  
+
+  # we need the ref base before the variation
+  # default to N in case we cant get it
+  my $prev_base = 'N';
+
+  if(defined($vf->slice) && UNIVERSAL::isa($vf->slice,'can')) {
+    my $slice = $vf->slice->sub_Slice($vf->start - 1, $vf->start - 1);
+    $prev_base = $slice->seq if defined($slice);
+  }
+
+  return $prev_base;
+}
+
+1;

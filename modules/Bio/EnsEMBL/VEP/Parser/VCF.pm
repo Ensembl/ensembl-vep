@@ -194,6 +194,7 @@ sub create_VariationFeatures {
     adaptor        => $self->get_adaptor('variation', 'VariationFeature'),
     variation_name => @$ids ? $ids->[0] : undef,
     chr            => $chr,
+    _line          => $record,
   });
 
   # flag as non-variant
@@ -285,6 +286,7 @@ sub create_StructuralVariationFeatures {
     variation_name => @$ids ? $ids->[0] : undef,
     chr            => $chr,
     class_SO_term  => $so_term,
+    _line          => $record,
   });
 
   return [$svf];

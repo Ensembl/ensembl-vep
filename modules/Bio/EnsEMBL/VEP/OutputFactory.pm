@@ -54,6 +54,7 @@ use Bio::EnsEMBL::VEP::Utils qw(format_coords);
 use Bio::EnsEMBL::VEP::Constants;
 
 use Bio::EnsEMBL::VEP::OutputFactory::VEP_output;
+use Bio::EnsEMBL::VEP::OutputFactory::VCF;
 
 my %SO_RANKS = map {$_->SO_term => $_->rank} values %Bio::EnsEMBL::Variation::Utils::Constants::OVERLAP_CONSEQUENCES;
 
@@ -514,7 +515,7 @@ sub VariationFeature_to_output_hash {
 sub add_colocated_variant_info {
   my $self = shift;
   my $vf = shift;
-  my $hash = shift || $vf->{_vep_output_hash};
+  my $hash = shift;
 
   return unless $vf->{existing} && scalar @{$vf->{existing}};
 
@@ -623,7 +624,7 @@ sub BaseTranscriptVariationAllele_to_output_hash {
 
   # flags
   my @flags = grep {$_->code =~ /^cds_/} @attribs;
-  $hash->{FLAGS} = join(",", map {$_->code} @flags) if scalar @flags;
+  $hash->{FLAGS} = [map {$_->code} @flags] if scalar @flags;
 
   # exon/intron numbers
   if($self->{numbers}) {

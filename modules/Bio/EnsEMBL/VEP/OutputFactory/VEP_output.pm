@@ -109,7 +109,11 @@ sub field_order {
 
     my @extra_fields =
       map {@{$_->{fields}}}
-      grep {$self->param($_->{flag})}
+      map {$_->[0]}
+      grep {
+        ref($_->[1]) eq 'ARRAY' ? scalar @{$_->[1]} : $_->[1]
+      }
+      map {[$_, $self->param($_->{flag})]}
       @{$self->flag_fields};
     
     $self->{field_order}->{$extra_fields[$_]} = $_ for 0..$#extra_fields;
