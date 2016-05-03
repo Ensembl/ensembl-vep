@@ -87,24 +87,6 @@ our %DEFAULTS = (
   freq_filter       => 'exclude',
   freq_pop          => '1KG_ALL',
   freq_gt_lt        => 'gt',
-  
-  # output columns
-  fields            => [qw(
-    Uploaded_variation
-    Location
-    Allele
-    Gene
-    Feature
-    Feature_type
-    Consequence
-    cDNA_position
-    CDS_position
-    Protein_position
-    Amino_acids
-    Codons
-    Existing_variation
-    Extra
-  )],
 );
 
 # these flags take comma-separated lists
@@ -238,6 +220,9 @@ our @OPTION_SETS = (
     flags => ['vcf'],
     set   => {
       output_format => 'vcf',
+      symbol => 1,
+      biotype => 1,
+      numbers => 1
     }
   },
   
