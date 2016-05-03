@@ -38,7 +38,7 @@ use_ok('Bio::EnsEMBL::VEP::Config');
 use_ok('Bio::EnsEMBL::VEP::Runner');
 my $cfg = Bio::EnsEMBL::VEP::Config->new();
 
-my $of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({config => $cfg});
+my $of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({config => $cfg, header_info => $test_cfg->{header_info}});
 
 is(ref($of), 'Bio::EnsEMBL::VEP::OutputFactory::VCF', 'check class');
 
@@ -46,6 +46,17 @@ is(ref($of), 'Bio::EnsEMBL::VEP::OutputFactory::VCF', 'check class');
 
 ## METHOD TESTS
 ###############
+
+is_deeply(
+  $of->headers,
+  [
+    '##fileformat=VCFv4.1',
+    '##VEP="v1" time="test"',
+    '##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS">',
+    "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO"
+  ],
+  'headers'
+);
 
 is_deeply(
   $of->fields,

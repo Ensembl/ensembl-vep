@@ -134,6 +134,8 @@ sub new {
     return $class->new({%$hashref, config => $self->config});
   }
 
+  $self->{header_info} = $hashref->{header_info} if $hashref->{header_info};
+
   return $self;
 }
 
@@ -153,6 +155,15 @@ sub get_all_lines_by_InputBuffer {
     map {@{$self->get_all_output_hashes_by_VariationFeature($_)}}
     @{$buffer->buffer}
   ];
+}
+
+sub header_info {
+  my $self = shift;
+  return $self->{header_info} || {};
+}
+
+sub headers {
+  return [];
 }
 
 sub flag_fields {

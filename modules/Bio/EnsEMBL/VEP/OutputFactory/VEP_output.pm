@@ -67,6 +67,33 @@ my @OUTPUT_COLS = qw(
 
 my %OUTPUT_COLS_HASH = map {$_ => 1} @OUTPUT_COLS;
 
+sub headers {
+  my $self = shift;
+
+  my $info = $self->header_info();
+
+  my $field_descs = $self->field_descriptions;
+  
+  my @headers = (
+    '## ENSEMBL VARIANT EFFECT PREDICTOR v'.$info->{vep_version},
+    '## Output produced at '.$info->{time},
+  );
+
+  push @headers, sprintf("## Connected to %s on %s", $info->{db_name}, $info->{db_host}) if $info->{db_name};
+  push @headers, "## Using cache in ".$info->{cache_dir} if $info->{cache_dir};
+
+  push @headers, sprintf("## Using API version %i, DB version %s", $info->{api_version}, $info->{db_version} || '?');
+
+  push @headers, "## $_ version ".$info->{version_data}->{$_} for keys %{$info->{version_data} || {}};
+  
+  push @headers, '## Extra column keys:';
+  push @headers,
+    map {'## '.$_.' : '.$field_descs->{$_}}
+    @{$self->fields};
+
+  return \@headers;
+}
+
 sub output_hash_to_line {
   my $self = shift;
   my $hash = shift;
@@ -102,12 +129,12 @@ sub output_hash_to_line {
   return join("\t", @line);
 }
 
-sub field_order {
+sub fields {
   my $self = shift;
 
-  if(!exists($self->{field_order})) {
+  if(!defined($self->{fields})) {
 
-    my @extra_fields =
+    my @fields =
       map {@{$_->{fields}}}
       map {$_->[0]}
       grep {
@@ -116,7 +143,19 @@ sub field_order {
       map {[$_, $self->param($_->{flag})]}
       @{$self->flag_fields};
     
-    $self->{field_order}->{$extra_fields[$_]} = $_ for 0..$#extra_fields;
+    $self->{fields} = \@fields;
+  }
+
+  return $self->{fields};
+}
+
+sub field_order {
+  my $self = shift;
+
+  if(!exists($self->{field_order})) {
+    my @fields = @{$self->fields};
+    
+    $self->{field_order}->{$fields[$_]} = $_ for 0..$#fields;
   }
 
   return $self->{field_order};

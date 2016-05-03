@@ -35,7 +35,7 @@ use_ok('Bio::EnsEMBL::VEP::Config');
 use_ok('Bio::EnsEMBL::VEP::Runner');
 my $cfg = Bio::EnsEMBL::VEP::Config->new();
 
-my $of = Bio::EnsEMBL::VEP::OutputFactory::VEP_output->new({config => $cfg});
+my $of = Bio::EnsEMBL::VEP::OutputFactory::VEP_output->new({config => $cfg, header_info => $test_cfg->{header_info}});
 
 is(ref($of), 'Bio::EnsEMBL::VEP::OutputFactory::VEP_output', 'check class');
 
@@ -44,6 +44,8 @@ is(ref($of), 'Bio::EnsEMBL::VEP::OutputFactory::VEP_output', 'check class');
 ## METHOD TESTS
 ###############
 
+is_deeply($of->fields, [qw(IMPACT DISTANCE STRAND FLAGS)], 'fields');
+
 is_deeply($of->field_order, {
   'IMPACT' => 0,
   'DISTANCE' => 1,
@@ -51,6 +53,7 @@ is_deeply($of->field_order, {
   'FLAGS' => 3,
 }, 'field_order');
 delete($of->{field_order});
+delete($of->{fields});
 
 $of->param('sift', 'b');
 is_deeply($of->field_order, {
@@ -62,6 +65,22 @@ is_deeply($of->field_order, {
 }, 'field_order - test add flag');
 $of->param('sift', 0);
 delete($of->{field_order});
+delete($of->{fields});
+
+is_deeply(
+  $of->headers(),
+  [
+    '## ENSEMBL VARIANT EFFECT PREDICTOR v1',
+    '## Output produced at test',
+    '## Using API version 1, DB version 1',
+    '## Extra column keys:',
+    '## IMPACT : Subjective impact classification of consequence type',
+    '## DISTANCE : Shortest distance from variant to transcript',
+    '## STRAND : Strand of the feature (1/-1)',
+    '## FLAGS : Transcript quality flags'
+  ],
+  'headers'
+);
 
 
 is($of->output_hash_to_line({}), '-'.("\t\-" x 13), 'output_hash_to_line - empty');

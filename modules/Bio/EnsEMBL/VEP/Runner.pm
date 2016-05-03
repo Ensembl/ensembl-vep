@@ -48,6 +48,8 @@ use base qw(Bio::EnsEMBL::VEP::BaseVEP);
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Variation::Utils::FastaSequence qw(setup_fasta);
+use Bio::EnsEMBL::VEP::Utils qw(get_time);
+use Bio::EnsEMBL::VEP::Constants;
 use Bio::EnsEMBL::VEP::Config;
 use Bio::EnsEMBL::VEP::Parser;
 use Bio::EnsEMBL::VEP::InputBuffer;
@@ -253,12 +255,43 @@ sub get_OutputFactory {
 
   if(!exists($self->{output_factory})) {
     $self->{output_factory} = Bio::EnsEMBL::VEP::OutputFactory->new({
-      config => $self->config,
-      format => $self->param('output_format'),
+      config      => $self->config,
+      format      => $self->param('output_format'),
+      header_info => $self->get_output_header_info,
     });
   }
 
   return $self->{output_factory};
+}
+
+sub get_output_header_info {
+  my $self = shift;
+
+  if(!exists($self->{output_header_info})) {
+
+    my $info = {
+      time          => get_time,
+      vep_version   => $Bio::EnsEMBL::VEP::Constants::VERSION,
+      api_version   => $self->registry->software_version,
+      input_headers => $self->get_Parser->headers,
+    };
+
+    if(my $mca = $self->get_adaptor('core', 'MetaContainer')) {
+      $info->{db_name} = $mca->dbc->dbname;
+      $info->{db_host} = $mca->dbc->host;
+      $info->{db_version} = $mca->get_schema_version;
+    }
+
+    foreach my $as(@{$self->get_all_AnnotationSources}) {
+      my $as_info = $as->info;
+      $info->{version_data}->{$_} ||= $as_info->{$_} for keys %$as_info;
+      $info->{cache_dir} ||= $as->dir if $as->can('dir');
+    }
+
+    $self->{output_header_info} = $info;
+  }
+
+  return $self->{output_header_info};
 }
 
 1;

@@ -87,6 +87,57 @@ sub new {
   return $self;
 }
 
+sub headers {
+  my $self = shift;
+
+  my $info = $self->header_info;
+  my $field_descs = $self->field_descriptions;
+
+  # VCFs have metadata headers starting with ##
+  # and one line of column headers starting with #
+  my (@headers, $col_heading);
+  
+  # input was VCF
+  if($info->{input_headers} && scalar @{$info->{input_headers}}) {
+    my @input_headers = @{$info->{input_headers}};
+
+    my $col_heading_pair = pop @input_headers;
+    $col_heading = '#'.join("\t", @{$col_heading_pair->[1]});
+
+    # add the remaining headers
+    @headers = map {sprintf('##%s=%s', $_->[0], $_->[1])} @input_headers;
+  }
+
+  # input wasn't VCF
+  else {
+    @headers = ('##fileformat=VCFv4.1');
+    $col_heading = '#'.join("\t", qw(CHROM POS ID REF ALT QUAL FILTER INFO));
+  }
+
+  # add VEP version string
+  push @headers, sprintf(
+    '##VEP="v%i" time="%s"%s%s',
+    $info->{vep_version},
+    $info->{time},
+    $info->{cache_dir} ? ' cache="'.$info->{cache_dir}.'"' : '',
+  $info->{db_name} ? ' db="'.$info->{db_name}.'@'.$info->{db_host}.'"' : ''
+  );
+
+  # add misc version data
+  $headers[-1] .= ' '.join(' ', map {$_.'="'.$info->{version_data}->{$_}.'"'} sort keys %{$info->{version_data}}) if $info->{version_data};
+
+  # add VEP column def
+  push @headers, sprintf(
+    '##INFO=<ID=%s,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: %s">',
+    $self->{vcf_info_field},
+    join("|", @{$self->fields})
+  );
+
+  push @headers, $col_heading;
+
+  return \@headers;
+}
+
 sub get_all_lines_by_InputBuffer {
   my $self = shift;
   my $buffer = shift;

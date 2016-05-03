@@ -52,7 +52,20 @@ is_deeply(
       'serializer_type' => undef,
       'gencode_basic' => undef,
       'source_type' => 'ensembl',
-      'all_refseq' => undef
+      'all_refseq' => undef,
+      'info' => {
+        'polyphen' => '2.2.2',
+        'sift' => 'sift5.2.2',
+        'COSMIC' => '75',
+        'ESP' => '20141103',
+        'gencode' => 'GENCODE 24',
+        'HGMD-PUBLIC' => '20154',
+        'genebuild' => '2014-07',
+        'regbuild' => '13.0',
+        'assembly' => 'GRCh38.p5',
+        'dbSNP' => '146',
+        'ClinVar' => '201601'
+      },
     }, 'Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript' )
   ],
   'get_all_AnnotationSources'
@@ -76,6 +89,30 @@ is_deeply($runner->get_InputBuffer, bless({
   }, 'Bio::EnsEMBL::VEP::Parser::VEP_input' ),
   'buffer_size' => $runner->param('buffer_size'),
 }, 'Bio::EnsEMBL::VEP::InputBuffer' ), 'get_InputBuffer');
+
+my $info = $runner->get_output_header_info;
+ok($info->{time}, 'get_output_header_info - time');
+ok($info->{api_version} =~ /^\d+$/, 'get_output_header_info - api_version');
+ok($info->{vep_version} =~ /^\d+$/, 'get_output_header_info - vep_version');
+is(ref($info->{input_headers}), 'ARRAY', 'get_output_header_info - input_headers');
+
+is_deeply(
+  $info->{version_data}, 
+  {
+    'polyphen' => '2.2.2',
+    'sift' => 'sift5.2.2',
+    'COSMIC' => '75',
+    'ESP' => '20141103',
+    'gencode' => 'GENCODE 24',
+    'HGMD-PUBLIC' => '20154',
+    'genebuild' => '2014-07',
+    'regbuild' => '13.0',
+    'assembly' => 'GRCh38.p5',
+    'dbSNP' => '146',
+    'ClinVar' => '201601'
+  },
+  'get_output_header_info - version_data'
+);
 
 is_deeply($runner->get_OutputFactory, bless( {
   '_config' => $runner->config,
@@ -118,7 +155,8 @@ is_deeply($runner->get_OutputFactory, bless( {
   'merged' => undef,
   'maf_1kg' => undef,
   'tsl' => undef,
-  'pubmed' => undef
+  'pubmed' => undef,
+  'header_info' => $info,
 }, 'Bio::EnsEMBL::VEP::OutputFactory::VEP_output' ), 'get_OutputFactory');
 
 my $fasta_db = $runner->setup_fasta_db;

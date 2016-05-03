@@ -45,6 +45,13 @@ our %DEFAULTS = (
 
   test_vcf       => $Bin.'/testdata/input/test.vcf',
   user_file      => $Bin.'/testdata/user_file'.$$,
+
+  header_info    => {
+    time => 'test',
+    vep_version => 1,
+    api_version => 1,
+    db_version => 1,
+  }
 );
 
 sub new {
