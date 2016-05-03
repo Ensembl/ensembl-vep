@@ -60,7 +60,7 @@ $vfs = $ib->next();
 is(ref($vfs), 'ARRAY', 'next ref');
 is(scalar @$vfs, $ib->param('buffer_size'), 'next size');
 
-delete $vfs->[0]->{adaptor};
+delete $vfs->[0]->{adaptor}; delete $vfs->[0]->{_line};
 is_deeply($vfs->[0], bless( {
   'chr' => '21',
   'strand' => 1,
@@ -76,7 +76,7 @@ $vfs = $ib->next();
 is(scalar @$vfs, $ib->param('buffer_size'), 'next again');
 is(scalar @$vfs, $ib->param('buffer_size'), 'next again size');
 
-delete $vfs->[0]->{adaptor};
+delete $vfs->[0]->{adaptor}; delete $vfs->[0]->{_line};
 is_deeply($vfs->[0], bless( {
   'chr' => '21',
   'strand' => 1,
