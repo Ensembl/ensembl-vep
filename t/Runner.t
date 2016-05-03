@@ -194,7 +194,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 2 unless $can_use_db;
+  skip 'No local database configured', 5 unless $can_use_db;
 
   my $multi;
 
@@ -229,6 +229,12 @@ SKIP: {
   $runner->setup_db_connection;
 
   is($runner->species, 'homo_vepiens', 'db - species alias');
+
+  $info = $runner->get_output_header_info;
+
+  is($info->{db_host}, $db_cfg->{host}, 'get_output_header_info - db_host');
+  ok($info->{db_name} =~ /homo_vepiens_core.+/, 'get_output_header_info - db_name');
+  ok($info->{db_version}, 'get_output_header_info - db_version');
 };
 
 done_testing();
