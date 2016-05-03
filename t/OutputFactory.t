@@ -630,7 +630,7 @@ is_deeply(
     'Feature' => 'ENST00000419219',
     'Allele' => 'T',
     'Gene' => 'ENSG00000154719',
-    'FLAGS' => 'cds_end_NF',
+    'FLAGS' => ['cds_end_NF'],
     'DISTANCE' => 3953,
   },
   'BaseTranscriptVariationAllele_to_output_hash - check transcript FLAGS'
