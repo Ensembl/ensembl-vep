@@ -233,5 +233,15 @@ is_deeply(
   'annotate_InputBuffer - phenotype_or_disease'
 );
 
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}});
+$ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+$ib->next();
+
+$c->{old_maf} = 1;
+$c->clean_cache();
+$c->annotate_InputBuffer($ib);
+is($ib->buffer->[0]->{existing}->[0]->{AMR}, 0.0014, 'old_maf');
+$c->{old_maf} = 0;
+
 # done
 done_testing();

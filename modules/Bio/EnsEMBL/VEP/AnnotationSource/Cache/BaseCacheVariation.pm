@@ -75,9 +75,7 @@ sub parse_variation {
   my @data = split $delim, $line;
 
   # assumption fix for old cache files
-  if(scalar @data > scalar @cols) {
-    push @cols, ('AFR', 'AMR', 'ASN', 'EUR');
-  }
+  push @cols, ('AFR', 'AMR', 'ASN', 'EUR') if scalar @data > scalar @cols;
 
   my %v = map {$cols[$_] => $data[$_] eq '.' ? undef : $data[$_]} (0..$#data);
 
