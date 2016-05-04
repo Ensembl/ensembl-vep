@@ -187,7 +187,7 @@ sub setup_db_connection {
 sub setup_fasta_db {
   my $self = shift;
 
-  if(!exists($self->{_fasta_db})) {
+  if(!exists($self->config->{_fasta_db})) {
     my $fasta_db;
 
     if(my $fasta_file = $self->param('fasta')) {
@@ -199,10 +199,10 @@ sub setup_fasta_db {
       );
     }
 
-    $self->{_fasta_db} = $fasta_db;
+    $self->config->{_fasta_db} = $fasta_db;
   }
 
-  return $self->{_fasta_db};
+  return $self->config->{_fasta_db};
 }
 
 sub get_all_AnnotationSources {
