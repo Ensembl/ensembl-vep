@@ -55,6 +55,7 @@ use Bio::EnsEMBL::VEP::Constants;
 
 use Bio::EnsEMBL::VEP::OutputFactory::VEP_output;
 use Bio::EnsEMBL::VEP::OutputFactory::VCF;
+use Bio::EnsEMBL::VEP::OutputFactory::JSON;
 
 my %SO_RANKS = map {$_->SO_term => $_->rank} values %Bio::EnsEMBL::Variation::Utils::Constants::OVERLAP_CONSEQUENCES;
 
@@ -146,6 +147,8 @@ sub new {
 #   $self->print_line($_) for @{$self->get_all_lines_by_InputBuffer($buffer)};
 # }
 
+# this is the method that will be called by Runner
+# may be re-implemented by child classes to account for differing structure
 sub get_all_lines_by_InputBuffer {
   my $self = shift;
   my $buffer = shift;
@@ -174,8 +177,7 @@ sub field_descriptions {
   return \%Bio::EnsEMBL::VEP::Constants::FIELD_DESCRIPTIONS;
 }
 
-# this method will be called by the child classes
-# it does the following:
+# this wrapper method does the following:
 # 1) fetches all the VariationFeatureOverlapAllele objects
 # 2) filters them if any filtering options are applied
 # 3) converts them into a flat hashref with the relevant output data
@@ -185,6 +187,16 @@ sub get_all_output_hashes_by_VariationFeature {
 
   # get the basic initial hash; this basically contains the location and ID
   my $hash = $self->VariationFeature_to_output_hash($vf);
+
+  return $self->get_all_VariationFeatureOverlapAllele_output_hashes($vf, $hash);
+}
+
+# this method is separated out from get_all_output_hashes_by_VariationFeature
+# as the JSON sub-class needs this data _without_ that from VariationFeature_to_output_hash merged in
+sub get_all_VariationFeatureOverlapAllele_output_hashes {
+  my $self = shift;
+  my $vf = shift;
+  my $hash = shift;
 
   my @return;
 

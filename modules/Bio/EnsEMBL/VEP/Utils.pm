@@ -43,6 +43,7 @@ use warnings;
 
 package Bio::EnsEMBL::VEP::Utils;
 use Exporter;
+use Scalar::Util qw(looks_like_number);
 
 use vars qw(@ISA @EXPORT_OK);
 
@@ -52,6 +53,7 @@ use vars qw(@ISA @EXPORT_OK);
   &format_coords
   &get_time
   &convert_arrayref
+  &numberify
 );
 
 sub format_coords {
@@ -88,6 +90,34 @@ sub convert_arrayref {
   else {
     return $_[0];
   }
+}
+
+sub numberify {
+  my $ref = shift;
+  my $exempt = shift || {};
+
+  if(ref($ref) eq 'HASH') {
+    foreach my $k(keys %$ref) {
+      if(ref($ref->{$k}) =~ /HASH|ARRAY/) {
+        numberify($ref->{$k});
+      }
+      else {
+        $ref->{$k} = $ref->{$k} + 0 if defined($ref->{$k}) && !$exempt->{$k} && looks_like_number($ref->{$k});
+      }
+    }
+  }
+  elsif(ref($ref) eq 'ARRAY') {
+    foreach my $i(0..((scalar @$ref) - 1)) {
+      if(ref($ref->[$i]) =~ /HASH|ARRAY/) {
+        numberify($ref->[$i]);
+      }
+      else {
+        $ref->[$i] = $ref->[$i] + 0 if defined($ref->[$i]) && looks_like_number($ref->[$i]);
+      }
+    }
+  }
+
+  return $ref;
 }
 
 # gets time

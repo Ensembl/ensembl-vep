@@ -18,7 +18,7 @@ use warnings;
 use Test::More;
 use Test::Exception;
 
-use Bio::EnsEMBL::VEP::Utils qw(format_coords convert_arrayref get_time);
+use Bio::EnsEMBL::VEP::Utils qw(format_coords convert_arrayref numberify get_time);
 
 ## format_coords
 ################
@@ -38,6 +38,46 @@ is(format_coords(undef, undef), '-', 'format_coords - missing 3');
 is(convert_arrayref('foo'), 'foo', 'convert_arrayref - scalar');
 is(convert_arrayref(['foo', 'bar']), 'foo,bar', 'convert_arrayref - arrayref');
 is(convert_arrayref(['foo', 'bar'], '&'), 'foo&bar', 'convert_arrayref - arrayref with separator');
+
+
+## numberify
+############
+
+is_deeply(
+  numberify(['0', '1']),
+  [0, 1],
+  'numberify - arrayref'
+);
+
+is_deeply(
+  numberify({foo => '0', bar => '0.1'}),
+  {foo => 0, bar => 0.1},
+  'numberify - hashref'
+);
+
+is_deeply(
+  numberify({foo => '0', bar => ['1', '2']}),
+  {foo => 0, bar => [1,2]},
+  'numberify - mixed'
+);
+
+is_deeply(
+  numberify(['0.0001']),
+  [0.0001],
+  'numberify - float'
+);
+
+is_deeply(
+  numberify(['1e3']),
+  [1000],
+  'numberify - exponential'
+);
+
+is_deeply(
+  numberify({id => '123', seq_region_name => '123'}, {id => 1, seq_region_name => 1}),
+  {id => '123', seq_region_name => '123'},
+  'numberify - exempt keys intact'
+);
 
 
 ## get_time
