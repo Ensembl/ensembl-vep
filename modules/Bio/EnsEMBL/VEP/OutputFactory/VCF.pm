@@ -48,6 +48,7 @@ use base qw(Bio::EnsEMBL::VEP::OutputFactory);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
 use Bio::EnsEMBL::VEP::Utils qw(convert_arrayref);
+use Bio::EnsEMBL::VEP::Constants;
 
 my @VCF_COLS = qw(
   Allele
@@ -90,7 +91,7 @@ sub headers {
   my $self = shift;
 
   my $info = $self->header_info;
-  my $field_descs = $self->field_descriptions;
+  my $field_descs = \%Bio::EnsEMBL::VEP::Constants::FIELD_DESCRIPTIONS;
 
   # VCFs have metadata headers starting with ##
   # and one line of column headers starting with #
