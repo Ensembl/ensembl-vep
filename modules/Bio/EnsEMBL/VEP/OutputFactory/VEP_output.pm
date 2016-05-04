@@ -43,63 +43,19 @@ use warnings;
 
 package Bio::EnsEMBL::VEP::OutputFactory::VEP_output;
 
-use base qw(Bio::EnsEMBL::VEP::OutputFactory);
+use base qw(Bio::EnsEMBL::VEP::OutputFactory::BaseTab);
 
-use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
-use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::Utils qw(convert_arrayref);
+use Bio::EnsEMBL::VEP::Constants;
 
-my @OUTPUT_COLS = qw(
-  Uploaded_variation
-  Location
-  Allele
-  Gene
-  Feature
-  Feature_type
-  Consequence
-  cDNA_position
-  CDS_position
-  Protein_position
-  Amino_acids
-  Codons
-  Existing_variation
-);
-
-my %OUTPUT_COLS_HASH = map {$_ => 1} @OUTPUT_COLS;
-
-sub headers {
-  my $self = shift;
-
-  my $info = $self->header_info();
-
-  my $field_descs = $self->field_descriptions;
-  
-  my @headers = (
-    '## ENSEMBL VARIANT EFFECT PREDICTOR v'.$info->{vep_version},
-    '## Output produced at '.$info->{time},
-  );
-
-  push @headers, sprintf("## Connected to %s on %s", $info->{db_name}, $info->{db_host}) if $info->{db_name};
-  push @headers, "## Using cache in ".$info->{cache_dir} if $info->{cache_dir};
-
-  push @headers, sprintf("## Using API version %i, DB version %s", $info->{api_version}, $info->{db_version} || '?');
-
-  push @headers, "## $_ version ".$info->{version_data}->{$_} for keys %{$info->{version_data} || {}};
-  
-  push @headers, '## Extra column keys:';
-  push @headers,
-    map {'## '.$_.' : '.$field_descs->{$_}}
-    @{$self->fields};
-
-  return \@headers;
-}
+my %OUTPUT_COLS_HASH = map {$_ => 1} @Bio::EnsEMBL::VEP::Constants::DEFAULT_OUTPUT_COLS;
 
 sub output_hash_to_line {
   my $self = shift;
   my $hash = shift;
 
   # "core" fields
-  my @line = map {defined($hash->{$_}) ? convert_arrayref($hash->{$_}) : '-'} @OUTPUT_COLS;
+  my @line = map {defined($hash->{$_}) ? convert_arrayref($hash->{$_}) : '-'} @Bio::EnsEMBL::VEP::Constants::DEFAULT_OUTPUT_COLS;
 
   # add additional fields to "Extra" col at the end
   my %extra =
@@ -129,24 +85,32 @@ sub output_hash_to_line {
   return join("\t", @line);
 }
 
-sub fields {
+sub description_headers {
   my $self = shift;
 
-  if(!defined($self->{fields})) {
+  my $field_descs = \%Bio::EnsEMBL::VEP::Constants::FIELD_DESCRIPTIONS;
 
-    my @fields =
-      map {@{$_->{fields}}}
-      map {$_->[0]}
-      grep {
-        ref($_->[1]) eq 'ARRAY' ? scalar @{$_->[1]} : $_->[1]
-      }
-      map {[$_, $self->param($_->{flag})]}
-      @{$self->flag_fields};
-    
-    $self->{fields} = \@fields;
-  }
+  my @headers = '## Column descriptions:';
 
-  return $self->{fields};
+  push @headers,
+    map {'## '.$_.' : '.($field_descs->{$_} || '?')}
+    @Bio::EnsEMBL::VEP::Constants::DEFAULT_OUTPUT_COLS;
+  
+  push @headers, '## Extra column keys:';
+  push @headers,
+    map {'## '.$_.' : '.($field_descs->{$_} || '?')}
+    @{$self->fields};
+
+  return \@headers;
+}
+
+sub column_header {
+  return '#'.join("\t", (@Bio::EnsEMBL::VEP::Constants::DEFAULT_OUTPUT_COLS, 'Extra'));
+}
+
+sub fields {
+  my $self = shift;
+  return $self->{fields} ||= $self->flag_fields;
 }
 
 sub field_order {
@@ -160,6 +124,5 @@ sub field_order {
 
   return $self->{field_order};
 }
-
 
 return 1;

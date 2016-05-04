@@ -56,6 +56,7 @@ use Bio::EnsEMBL::VEP::Constants;
 use Bio::EnsEMBL::VEP::OutputFactory::VEP_output;
 use Bio::EnsEMBL::VEP::OutputFactory::VCF;
 use Bio::EnsEMBL::VEP::OutputFactory::JSON;
+use Bio::EnsEMBL::VEP::OutputFactory::Tab;
 
 my %SO_RANKS = map {$_->SO_term => $_->rank} values %Bio::EnsEMBL::Variation::Utils::Constants::OVERLAP_CONSEQUENCES;
 
@@ -170,11 +171,16 @@ sub headers {
 }
 
 sub flag_fields {
-  return \@Bio::EnsEMBL::VEP::Constants::FLAG_FIELDS;
-}
-
-sub field_descriptions {
-  return \%Bio::EnsEMBL::VEP::Constants::FIELD_DESCRIPTIONS;
+  my $self = shift;
+  return [
+    map {@{$_->{fields}}}
+    map {$_->[0]}
+    grep {
+      ref($_->[1]) eq 'ARRAY' ? scalar @{$_->[1]} : $_->[1]
+    }
+    map {[$_, $self->param($_->{flag})]}
+    @Bio::EnsEMBL::VEP::Constants::FLAG_FIELDS
+  ];
 }
 
 # this wrapper method does the following:

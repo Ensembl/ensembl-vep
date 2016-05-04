@@ -29,43 +29,44 @@ my $cfg_hash = $test_cfg->base_testing_cfg;
 ##############
 
 # use test
-use_ok('Bio::EnsEMBL::VEP::OutputFactory::VEP_output');
+use_ok('Bio::EnsEMBL::VEP::OutputFactory::Tab');
 
 use_ok('Bio::EnsEMBL::VEP::Config');
 use_ok('Bio::EnsEMBL::VEP::Runner');
 my $cfg = Bio::EnsEMBL::VEP::Config->new();
 
-my $of = Bio::EnsEMBL::VEP::OutputFactory::VEP_output->new({config => $cfg, header_info => $test_cfg->{header_info}});
+my $of = Bio::EnsEMBL::VEP::OutputFactory::Tab->new({config => $cfg, header_info => $test_cfg->{header_info}});
 
-is(ref($of), 'Bio::EnsEMBL::VEP::OutputFactory::VEP_output', 'check class');
+is(ref($of), 'Bio::EnsEMBL::VEP::OutputFactory::Tab', 'check class');
 
 
 
 ## METHOD TESTS
 ###############
 
-is_deeply($of->fields, [qw(IMPACT DISTANCE STRAND FLAGS)], 'fields');
-
-is_deeply($of->field_order, {
-  'IMPACT' => 0,
-  'DISTANCE' => 1,
-  'STRAND' => 2,
-  'FLAGS' => 3,
-}, 'field_order');
-delete($of->{field_order});
-delete($of->{fields});
-
-$of->param('sift', 'b');
-is_deeply($of->field_order, {
-  'IMPACT' => 0,
-  'DISTANCE' => 1,
-  'STRAND' => 2,
-  'FLAGS' => 3,
-  'SIFT' => 4,
-}, 'field_order - test add flag');
-$of->param('sift', 0);
-delete($of->{field_order});
-delete($of->{fields});
+is_deeply(
+  $of->fields,
+  [qw(
+    Uploaded_variation
+    Location
+    Allele
+    Gene
+    Feature
+    Feature_type
+    Consequence
+    cDNA_position
+    CDS_position
+    Protein_position
+    Amino_acids
+    Codons
+    Existing_variation
+    IMPACT
+    DISTANCE
+    STRAND
+    FLAGS
+  )],
+  'fields'
+);
 
 is_deeply(
   $of->headers(),
@@ -87,44 +88,24 @@ is_deeply(
     '## Amino_acids : Reference and variant amino acids',
     '## Codons : Reference and variant codon sequence',
     '## Existing_variation : Identifier(s) of co-located known variants',
-    '## Extra column keys:',
     '## IMPACT : Subjective impact classification of consequence type',
     '## DISTANCE : Shortest distance from variant to transcript',
     '## STRAND : Strand of the feature (1/-1)',
     '## FLAGS : Transcript quality flags',
-    "#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tExisting_variation\tExtra"
+    "#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tExisting_variation\tIMPACT\tDISTANCE\tSTRAND\tFLAGS"
   ],
   'headers'
 );
 
 
-is($of->output_hash_to_line({}), '-'.("\t\-" x 13), 'output_hash_to_line - empty');
+is($of->output_hash_to_line({}), '-'.("\t\-" x 16), 'output_hash_to_line - empty');
 
 is(
   $of->output_hash_to_line({
     Uploaded_variation => 0,
   }),
-  '0'.("\t\-" x 13),
+  '0'.("\t\-" x 16),
   'output_hash_to_line - test 0'
-);
-
-is(
-  $of->output_hash_to_line({
-    Existing_variation => 'rs123',
-    Foo => 'bar',
-  }),
-  '-'.("\t\-" x 11)."\trs123\tFoo\=bar",
-  'output_hash_to_line - test extra 1'
-);
-
-is(
-  $of->output_hash_to_line({
-    Existing_variation => 'rs123',
-    Foo => 'bar',
-    IMPACT => 'HIGH'
-  }),
-  '-'.("\t\-" x 11)."\trs123\tIMPACT\=HIGH;Foo\=bar",
-  'output_hash_to_line - test extra 2'
 );
 
 my $ib = get_annotated_buffer({input_file => $test_cfg->{test_vcf}});
@@ -145,7 +126,10 @@ is(
     3_prime_UTR_variant
     1122
     - - - - -
-    IMPACT=MODIFIER;STRAND=-1
+    MODIFIER
+    -
+    -1
+    -
   )),
   'get_all_lines_by_InputBuffer - check first'
 );
@@ -166,7 +150,10 @@ is(
     V/I
     Gtt/Att
     -
-    IMPACT=MODERATE;STRAND=-1;FLAGS=cds_start_NF
+    MODERATE
+    -
+    -1
+    cds_start_NF
   )),
   'get_all_lines_by_InputBuffer - check last'
 );
@@ -177,22 +164,33 @@ $ib = get_annotated_buffer({
   everything => 1,
   dir => $test_cfg->{cache_root_dir},
 });
-$of = Bio::EnsEMBL::VEP::OutputFactory::VEP_output->new({config => $ib->config});
+$of = Bio::EnsEMBL::VEP::OutputFactory::Tab->new({config => $ib->config});
 @lines = @{$of->get_all_lines_by_InputBuffer($ib)};
 
 is(
-  (split("\t", $lines[0]))[-1],
-  'IMPACT=MODIFIER;STRAND=-1;VARIANT_CLASS=SNV;SYMBOL=MRPL39;'.
-  'SYMBOL_SOURCE=HGNC;HGNC_ID=HGNC:14027;BIOTYPE=protein_coding;'.
-  'CANONICAL=YES;TSL=5;APPRIS=A2;CCDS=CCDS33522.1;ENSP=ENSP00000305682;'.
-  'SWISSPROT=Q9NYK5;UNIPARC=UPI00001AEAC0;EXON=11/11;'.
-  'HGVSc=ENST00000307301.11:c.*18G>A;GMAF=T:0.0010;AFR_MAF=T:0.0030;'.
-  'AMR_MAF=T:0.0014;EAS_MAF=T:0.0000;EUR_MAF=T:0.0000;SAS_MAF=T:0.0000;'.
-  'AA_MAF=T:0.005;EA_MAF=T:0;'.
-  'ExAC_MAF=T:4.119e-04;ExAC_Adj_MAF=T:0.0004133;ExAC_AFR_MAF=T:0.004681;'.
-  'ExAC_AMR_MAF=T:0.000173;ExAC_EAS_MAF=T:0;ExAC_FIN_MAF=T:0;'.
-  'ExAC_NFE_MAF=T:0;ExAC_OTH_MAF=T:0;ExAC_SAS_MAF=T:0',
+  $lines[0],
+  "rs142513484\t21:25585733\tT\tENSG00000154719\tENST00000307301\tTranscript\t3_prime_UTR_variant\t1122\t".
+  "-\t-\t-\t-\trs142513484\tMODIFIER\t-\t-1\t-\tSNV\tMRPL39\tHGNC\tHGNC:14027\tprotein_coding\tYES\t5\tA2\t".
+  "CCDS33522.1\tENSP00000305682\tQ9NYK5\t-\tUPI00001AEAC0\t-\t-\t-\t11/11\t-\t-\tENST00000307301.11:c.*18G>A\t".
+  "-\t-\tT:0.0010\tT:0.0030\tT:0.0014\tT:0.0000\tT:0.0000\tT:0.0000\tT:0.005\tT:0\tT:4.119e-04\tT:0.0004133\t".
+  "T:0.004681\tT:0.000173\tT:0\tT:0\tT:0\tT:0\tT:0\t-\t-\t-\t-\t-\t-\t-\t-",
   'get_all_lines_by_InputBuffer - everything'
+);
+
+
+$ib = get_annotated_buffer({
+  input_file => $test_cfg->{test_vcf},
+  everything => 1,
+  dir => $test_cfg->{cache_root_dir},
+  fields => 'Location,HGVSc'
+});
+$of = Bio::EnsEMBL::VEP::OutputFactory::Tab->new({config => $ib->config});
+@lines = @{$of->get_all_lines_by_InputBuffer($ib)};
+
+is(
+  $lines[0],
+  "21:25585733\tENST00000307301.11:c.*18G>A",
+  'get_all_lines_by_InputBuffer - configure fields'
 );
 
 done_testing();

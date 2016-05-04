@@ -231,12 +231,6 @@ sub fields {
     
     push @fields, 
       grep {!$vcf_cols{$_}}
-      map {@{$_->{fields}}}
-      map {$_->[0]}
-      grep {
-        ref($_->[1]) eq 'ARRAY' ? scalar @{$_->[1]} : $_->[1]
-      }
-      map {[$_, $self->param($_->{flag})]}
       @{$self->flag_fields};
     
     # plugin headers

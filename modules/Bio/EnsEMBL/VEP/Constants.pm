@@ -24,6 +24,7 @@ our $VERSION = 85;
 our @EXPORT_OK = qw(
   @FLAG_FIELDS
   %FIELD_DESCRIPTIONS
+  @DEFAULT_OUTPUT_COLS
 );
 
 # contains an ordered map between command line flags and output columns
@@ -157,6 +158,22 @@ our %FIELD_DESCRIPTIONS = (
   'GENE_PHENO'         => 'Indicates if gene is associated with a phenotype, disease or trait',
   'MINIMISED'          => 'Alleles in this variant have been converted to minimal representation before consequence calculation',
   'HGVS_OFFSET'        => 'Indicates by how many bases the HGVS notations for this variant have been shifted',
+);
+
+our @DEFAULT_OUTPUT_COLS = qw(
+  Uploaded_variation
+  Location
+  Allele
+  Gene
+  Feature
+  Feature_type
+  Consequence
+  cDNA_position
+  CDS_position
+  Protein_position
+  Amino_acids
+  Codons
+  Existing_variation
 );
 
 1;
