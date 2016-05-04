@@ -45,7 +45,6 @@ package Bio::EnsEMBL::VEP::OutputFactory::VCF;
 
 use base qw(Bio::EnsEMBL::VEP::OutputFactory);
 
-use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
 use Bio::EnsEMBL::VEP::Utils qw(convert_arrayref);
