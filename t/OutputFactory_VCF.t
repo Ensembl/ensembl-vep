@@ -231,11 +231,29 @@ is_deeply(
   'VariationFeature_to_VCF_record - SV'
 );
 
+# test with sequence fetch
+is_deeply(
+  get_runner({
+    input_file => $test_cfg->{test_vcf},
+    dir => $test_cfg->{cache_root_dir},
+    vcf => 1,
+  })->get_OutputFactory->VariationFeature_to_VCF_record(
+    get_vf({
+      allele_string => 'A/-',
+      start => 25585733,
+      end => 25585733,
+      chr => 21,
+    })
+  ),
+  [21, 25585732, '.', 'GA', 'G', '.', '.', '.'],
+  'VariationFeature_to_VCF_record - deletion - seq lookup'
+);
+
 
 ## get_all_lines_by_InputBuffer
 ###############################
 
-my $ib = get_annotated_buffer({input_file => $test_cfg->{test_vcf}});
+my $ib = get_runner({input_file => $test_cfg->{test_vcf}})->get_InputBuffer;
 
 my @lines = @{$of->get_all_lines_by_InputBuffer($ib)};
 
@@ -266,13 +284,14 @@ is(
   'get_all_lines_by_InputBuffer - check last'
 );
 
-
-$ib = get_annotated_buffer({
+$ib = get_runner({
   input_file => $test_cfg->{test_vcf},
   everything => 1,
   dir => $test_cfg->{cache_root_dir},
-});
+})->get_InputBuffer;
+
 $of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({config => $ib->config});
+
 @lines = @{$of->get_all_lines_by_InputBuffer($ib)};
 
 is(
@@ -297,6 +316,85 @@ is(
   'get_all_lines_by_InputBuffer - everything'
 );
 
+# test converting to VCF from different input
+$ib = get_runner({
+  input_file => $test_cfg->create_input_file([qw(21 25585733 25585733 C/T 1)]),
+  dir => $test_cfg->{cache_root_dir},
+})->get_InputBuffer;
+$of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({config => $ib->config});
+
+is_deeply(
+  $of->get_all_lines_by_InputBuffer($ib)->[0],
+  "21\t25585733\t.\tC\tT\t.\t.\t".
+  'CSQ=T|3_prime_UTR_variant|MODIFIER||ENSG00000154719|Transcript|ENST00000307301||||||1122|||||||-1|,T|missense_variant|MODERATE||ENSG00000154719|Transcript|ENST00000352957||||||1033|991|331|A/T|Gca/Aca|||-1|,T|upstream_gene_variant|MODIFIER||ENSG00000260583|Transcript|ENST00000567517||||||||||||2407|-1|',
+  "non-VCF input"
+);
+
+# test keep vs trash existing CSQ
+$ib = get_runner({
+  input_file => $test_cfg->create_input_file([qw(21 25585733 . C T . . CSQ=foo;BAR=blah)]),
+  dir => $test_cfg->{cache_root_dir},
+})->get_InputBuffer;
+$of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({config => $ib->config});
+
+is_deeply(
+  $of->get_all_lines_by_InputBuffer($ib)->[0],
+  "21\t25585733\t.\tC\tT\t.\t.\t".
+  'BAR=blah;CSQ=T|3_prime_UTR_variant|MODIFIER||ENSG00000154719|Transcript|ENST00000307301||||||1122|||||||-1|,T|missense_variant|MODERATE||ENSG00000154719|Transcript|ENST00000352957||||||1033|991|331|A/T|Gca/Aca|||-1|,T|upstream_gene_variant|MODIFIER||ENSG00000260583|Transcript|ENST00000567517||||||||||||2407|-1|',
+  "trash existing CSQ"
+);
+
+$of->{keep_csq} = 1;
+is_deeply(
+  $of->get_all_lines_by_InputBuffer($ib)->[0],
+  "21\t25585733\t.\tC\tT\t.\t.\t".
+  'CSQ=foo;BAR=blah;CSQ=T|3_prime_UTR_variant|MODIFIER||ENSG00000154719|Transcript|ENST00000307301||||||1122|||||||-1|,T|missense_variant|MODERATE||ENSG00000154719|Transcript|ENST00000352957||||||1033|991|331|A/T|Gca/Aca|||-1|,T|upstream_gene_variant|MODIFIER||ENSG00000260583|Transcript|ENST00000567517||||||||||||2407|-1|',
+  "keep existing CSQ"
+);
+
+# different VCF info field
+$ib = get_runner({
+  input_file => $test_cfg->create_input_file([qw(21 25585733 . C T . . .)]),
+  dir => $test_cfg->{cache_root_dir},
+  vcf_info_field => 'EFF',
+})->get_InputBuffer;
+$of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({config => $ib->config});
+
+@lines = @{$of->get_all_lines_by_InputBuffer($ib)};
+ok($lines[0] =~ /EFF/ && $lines[0] !~ /CSQ/, 'vcf_info_field');
+
+
+
+
+## test getting stuff from input
+################################
+
+my $runner = get_runner({
+  input_file => $test_cfg->{test_vcf},
+  dir => $test_cfg->{cache_root_dir},
+  vcf => 1,
+});
+
+$of = $runner->get_OutputFactory;
+
+is(
+  $of->headers->[0],
+  '##fileformat=VCFv4.1',
+  'headers - from input 1'
+);
+
+
+is(
+  $of->headers->[2],
+  '##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|SYMBOL_SOURCE|HGNC_ID">',
+  'headers - from input 2'
+);
+
+is(
+  $of->headers->[3],
+  "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tHG00096",
+  'headers - from input 3'
+);
 
 # done
 done_testing();
@@ -310,7 +408,7 @@ sub get_vf {
   return Bio::EnsEMBL::Variation::VariationFeature->new_fast($hashref);
 }
 
-sub get_annotated_buffer {
+sub get_runner {
   my $tmp_cfg = shift;
 
   my $runner = Bio::EnsEMBL::VEP::Runner->new({
@@ -326,5 +424,5 @@ sub get_annotated_buffer {
   $_->annotate_InputBuffer($ib) for @{$runner->get_all_AnnotationSources};
   $ib->finish_annotation();
 
-  return $ib;
+  return $runner;
 }

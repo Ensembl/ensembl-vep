@@ -187,6 +187,40 @@ sub get_adaptor {
   return $cache->{$group}->{$type};
 }
 
+sub get_slice {
+  my $self = shift;
+  my $chr = shift;
+
+  my $cache = $self->{_slice_cache} ||= {};
+
+  if(!exists($cache->{$chr})) {
+    my $slice;
+
+    if(my $sa = $self->get_adaptor($self->param('core_type'), 'Slice')) {
+      $slice = $sa->fetch_by_region(undef, $chr);
+    }
+
+    elsif(my $fasta_db = $self->config->{_fasta_db}) {
+      my $fa_length = $fasta_db->length($chr);
+      my $length = $fa_length && $fa_length > 0 ? $fa_length : 1;
+
+      $slice = Bio::EnsEMBL::Slice->new(
+        -COORD_SYSTEM      => $self->{_coord_system} ||= Bio::EnsEMBL::CoordSystem->new(-NAME => 'chromosome', -RANK => 1),
+        -START             => 1,
+        -END               => $length,
+        -SEQ_REGION_NAME   => $chr,
+        -SEQ_REGION_LENGTH => $length
+      );
+
+      $slice->{is_fake} = 1;
+    }
+
+    $cache->{$chr} = $slice;
+  }
+
+  return $cache->{$chr};
+}
+
 # adds shortcuts to named params to this object
 sub add_shortcuts {
   my $self = shift;

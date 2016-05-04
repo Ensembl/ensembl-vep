@@ -93,6 +93,38 @@ is($bv->{test}, 'hello', 'add_shortcuts arrayref');
 throws_ok { $bv->add_shortcuts('test') } qr/add_shortcuts would overwrite value/, 'add_shortcuts overwrite';
 
 
+$bv = Bio::EnsEMBL::VEP::BaseVEP->new({config => $cfg});
+is($bv->get_slice('1'), undef, 'get_slice - no fasta_db or database');
+
+use_ok('Bio::EnsEMBL::VEP::Runner');
+my $runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, offline => 1, database => 0, input_file => $test_cfg->{test_vcf}});
+$runner->init();
+$bv = Bio::EnsEMBL::VEP::BaseVEP->new({config => $runner->config});
+
+is_deeply(
+  $bv->get_slice('1'),
+  bless( {
+    'adaptor' => undef,
+    'is_fake' => 1,
+    'end' => 1,
+    'seq_region_name' => '1',
+    'coord_system' => bless( {
+      'adaptor' => undef,
+      'dbID' => undef,
+      'top_level' => 0,
+      'version' => undef,
+      'name' => 'chromosome',
+      'default' => 0,
+      'sequence_level' => 0,
+      'rank' => 1
+    }, 'Bio::EnsEMBL::CoordSystem' ),
+    'strand' => 1,
+    'seq_region_length' => 1,
+    'seq' => undef,
+    'start' => 1
+  }, 'Bio::EnsEMBL::Slice' ),
+  'get_slice - fasta_db'
+);
 
 ## status_msg tests require we mess with STDOUT
 ###############################################
@@ -162,7 +194,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 4 unless $can_use_db;
+  skip 'No local database configured', 5 unless $can_use_db;
 
   my $multi;
 
@@ -203,6 +235,8 @@ SKIP: {
   ok($bv->registry, 'db - registry from registry file');
 
   is(ref($bv->get_adaptor('core', 'slice')), 'Bio::EnsEMBL::DBSQL::SliceAdaptor', 'get_adaptor slice - registry file');
+
+  is(ref($bv->get_slice('21')), 'Bio::EnsEMBL::Slice', 'get_slice - database');
 
   1;
 };

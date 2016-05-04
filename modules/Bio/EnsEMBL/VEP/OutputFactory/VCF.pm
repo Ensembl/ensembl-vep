@@ -151,6 +151,10 @@ sub get_all_lines_by_InputBuffer {
     # if input was VCF then we get _line with the original contents
     if($line = $vf->{_line}) {
 
+      # array copy to keep original intact
+      my @tmp = @$line;
+      $line = \@tmp;
+
       if(!defined($line->[7]) || $line->[7] eq '.') {
         $line->[7] = '';
       }
@@ -331,7 +335,9 @@ sub get_prev_base {
   # default to N in case we cant get it
   my $prev_base = 'N';
 
-  if(defined($vf->slice) && UNIVERSAL::isa($vf->slice,'can')) {
+  $vf->{slice} ||= $self->get_slice($vf->{chr});
+
+  if(defined($vf->{slice})) {
     my $slice = $vf->slice->sub_Slice($vf->start - 1, $vf->start - 1);
     $prev_base = $slice->seq if defined($slice);
   }

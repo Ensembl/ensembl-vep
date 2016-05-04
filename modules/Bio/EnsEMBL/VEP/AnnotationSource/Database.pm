@@ -51,7 +51,7 @@ sub get_slice {
   my $self = shift;
   my $chr = shift;
 
-  if(!exists($self->{slice_cache}->{$chr})) {
+  if(!exists($self->{_slice_cache}->{$chr})) {
     my $sa = $self->get_adaptor(
       $self->{core_type} || $self->param('core_type'),
       'Slice'
@@ -60,10 +60,10 @@ sub get_slice {
     my $slice = $sa->fetch_by_region(undef, $chr);
     $slice->is_circular if $slice;
 
-    $self->{slice_cache}->{$chr} = $slice;
+    $self->{_slice_cache}->{$chr} = $slice;
   }
 
-  return $self->{slice_cache}->{$chr};
+  return $self->{_slice_cache}->{$chr};
 }
 
 1;
