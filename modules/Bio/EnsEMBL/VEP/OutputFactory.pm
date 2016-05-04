@@ -161,15 +161,18 @@ sub get_all_lines_by_InputBuffer {
   ];
 }
 
+# method to retrieve header info passed in on object creation
 sub header_info {
   my $self = shift;
   return $self->{header_info} || {};
 }
 
+# sub-classes will typically re-implement this
 sub headers {
   return [];
 }
 
+# this method returns all the fields that will be populated given user parameters
 sub flag_fields {
   my $self = shift;
   return [
