@@ -48,6 +48,8 @@ is(ref($of), 'Bio::EnsEMBL::VEP::OutputFactory::JSON', 'check class');
 ## METHOD TESTS
 ###############
 
+is_deeply($of->headers, [], 'headers - empty');
+
 my $ib = get_annotated_buffer({input_file => $test_cfg->{test_vcf}, check_existing => 1});
 
 my $vf = $ib->buffer->[0];
