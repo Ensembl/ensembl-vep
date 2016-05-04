@@ -89,6 +89,13 @@ is_deeply($vfs->[0], bless( {
 
 is_deeply($ib->min_max, [25592911, 25603910], 'min_max');
 
+my %tmp = %{$vfs->[0]};
+$tmp{start}++;
+my $tmp_ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, variation_features => [\%tmp]});
+$tmp_ib->next();
+is_deeply($tmp_ib->min_max, [25592911, 25592912], 'min_max with insertion');
+
+
 SKIP: {
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
