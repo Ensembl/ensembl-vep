@@ -63,6 +63,23 @@ $c->{info}->{sift} = '1';
 ok($c->check_sift_polyphen, 'check_sift_polyphen');
 $c->{info} = {};
 
+no warnings 'once';
+open(SAVE, ">&STDOUT") or die "Can't save STDOUT\n"; 
+
+close STDOUT;
+my $tmp;
+open STDOUT, '>', \$tmp;
+
+$c->{everything} = 1;
+ok($c->check_sift_polyphen, 'check_sift_polyphen - everything 1');
+is($c->{sift}, 0, 'check_sift_polyphen - everything 2');
+ok($tmp =~ /disabling SIFT/, 'check_sift_polyphen - everything status_msg');
+$c->{everything} = 0;
+$c->{sift} = 1;
+
+open(STDOUT, ">&SAVE") or die "Can't restore STDOUT\n";
+
+
 throws_ok { $c->check_sift_polyphen } qr/SIFT not available/, 'check_sift_polyphen - fail';
 delete($c->{sift});
 
