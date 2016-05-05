@@ -69,3 +69,6 @@
 76	\N	patch	patch_82_83_a.sql|schema version
 77	\N	patch	patch_82_83_b.sql|Add the evidence ExAC in variation and variation_feature
 78  \N  patch patch_83_84_a.sql|schema version
+105	1	sift_version	sift5.2.2
+103	1	polyphen_version	2.2.2
+101	1	HGVS_version	2.121101
