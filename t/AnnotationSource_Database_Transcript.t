@@ -39,7 +39,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 52 unless $can_use_db;
+  skip 'No local database configured', 69 unless $can_use_db;
 
   my $multi;
 
@@ -219,8 +219,63 @@ SKIP: {
 
 
 
+  ## TEST REFSEQ
+  ##############
+
+  $cfg = Bio::EnsEMBL::VEP::Config->new({
+    %$db_cfg,
+    database => 1,
+    offline => 0,
+    species => 'homo_vepiens',
+    refseq => 1,
+  });
+  ok($cfg, 'refseq - get new config object');
+  
+  $as = Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript->new({
+    config => $cfg
+  });
+
+  $ta = $multi->get_DBAdaptor('otherfeatures')->get_TranscriptAdaptor;
+  is(ref($ta), 'Bio::EnsEMBL::DBSQL::TranscriptAdaptor', 'refseq - get transcript adaptor');
+  $tr = $ta->fetch_by_stable_id('NM_201413.2');
+  is(ref($tr), 'Bio::EnsEMBL::Transcript', 'refseq - get transcript');
+
+  $as->prefetch_transcript_ids($tr);
+
+  is($tr->{_gene_symbol}, 'APP', 'refseq - prefetch_transcript_ids - gene symbol');
+
+  $features = $as->get_features_by_regions_uncached([[21, 511]]);
+  is(ref($features), 'ARRAY', 'refseq - get_features_by_regions_uncached ref 1');
+  is(scalar @$features, 8, 'refseq - get_features_by_regions_uncached count');
+  is(ref($features->[0]), 'Bio::EnsEMBL::Transcript', 'refseq - get_features_by_regions_uncached ref 2');
+  is($features->[0]->stable_id, 'NR_001458.3', 'refseq - get_features_by_regions_uncached stable_id');
+
+  # now we should be able to retrieve the same from memory
+  $features = $as->get_features_by_regions_cached([[21, 511]]);
+  is(ref($features), 'ARRAY', 'refseq - get_features_by_regions_cached ref 1');
+  is(ref($features->[0]), 'Bio::EnsEMBL::Transcript', 'refseq - get_features_by_regions_cached ref 2');
+  is($features->[0]->stable_id, 'NR_001458.3', 'refseq - get_features_by_regions_cached stable_id');
+
+  $as->clean_cache();
+
+
+
   ## TESTS WITH AN INPUT BUFFER
   #############################
+
+  $cfg = Bio::EnsEMBL::VEP::Config->new({
+    %$db_cfg,
+    database => 1,
+    offline => 0,
+    species => 'homo_vepiens',
+    everything => 1,
+    xref_refseq => 1,
+  });
+  
+  $as = Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript->new({
+    config => $cfg
+  });
+
 
   use_ok('Bio::EnsEMBL::VEP::Parser::VCF');
   my $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}});
@@ -298,6 +353,41 @@ SKIP: {
 
   $vf->_finish_annotation;
   is($vf->display_consequence, 'missense_variant', 'annotate_InputBuffer - display_consequence');
+
+
+  ## TEST REFSEQ
+  ##############
+
+  $cfg = Bio::EnsEMBL::VEP::Config->new({
+    %$db_cfg,
+    database => 1,
+    offline => 0,
+    species => 'homo_vepiens',
+    refseq => 1,
+  });
+  
+  $as = Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript->new({
+    config => $cfg
+  });
+
+  $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}});
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+  $ib->next();
+
+  $features = $as->get_all_features_by_InputBuffer($ib);
+  is(ref($features), 'ARRAY', 'refseq - get_all_features_by_InputBuffer ref 1');
+  is(ref($features->[0]), 'Bio::EnsEMBL::Transcript', 'refseq - get_all_features_by_InputBuffer ref 2');
+  is(ref($features->[-1]), 'Bio::EnsEMBL::Transcript', 'refseq - get_all_features_by_InputBuffer ref 3');
+  is($features->[0]->stable_id, 'NR_024092.1', 'refseq - get_all_features_by_InputBuffer stable_id');
+  is(scalar @$features, 35, 'refseq - get_all_features_by_InputBuffer count');
+
+  $as->clean_cache();
+  $as->{all_refseq} = 1;
+  $features = $as->get_all_features_by_InputBuffer($ib);
+  is(scalar @$features, 64, 'refseq - get_all_features_by_InputBuffer count - all_refseq');
+  $as->{all_refseq} = 0;
+
+
 
   1;
 }

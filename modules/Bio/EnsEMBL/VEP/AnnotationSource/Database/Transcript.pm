@@ -77,6 +77,8 @@ sub new {
   $self->{cache_region_size} = 50000;
   $self->{source_type} = ($self->{core_type} || '') eq 'otherfeatures' ? 'refseq' : 'ensembl';
 
+  $self->{assembly} ||= $self->get_database_assembly;
+
   return $self;
 }
 
@@ -137,6 +139,7 @@ sub get_features_by_regions_uncached {
 
         # in human and mouse otherfeatures DB, there may be duplicate genes
         # skip those from analysis refseq_human_import and refseq_mouse_import
+        $DB::single =1 if $self->{core_type} eq 'otherfeatures';
         next if $self->{core_type} eq 'otherfeatures' && $self->{assembly} !~ /GRCh37/i && $tr->analysis && $tr->analysis->logic_name =~ /^refseq_[a-z]+_import$/;
 
         $tr->{_gene_stable_id} = $gene_stable_id;

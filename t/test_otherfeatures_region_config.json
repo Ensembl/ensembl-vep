@@ -1,0 +1,13 @@
+{
+  "homo_sapiens" : {
+    "otherfeatures" : {
+      "regions" : [
+        ["21", 25000001, 26000000],
+      ],
+      "adaptors" : [
+        { "name" : "gene", "method" : "fetch_all_by_Slice", "args" : [], "filter_exceptions" : true },
+        { "name" : "transcript", "method" : "fetch_all_by_Slice", "args" : [], "filter_exceptions" : true },
+      ]
+    }
+  }
+}

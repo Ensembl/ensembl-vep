@@ -1,0 +1,4 @@
+gene	4	290579
+exon	4	3457
+transcript	4	5180
+dna_align_feature	4	492

@@ -34,12 +34,19 @@ use_ok('Bio::EnsEMBL::VEP::Parser::HGVS');
 # need to get a config object and DB connection for further tests
 use_ok('Bio::EnsEMBL::VEP::Config');
 
+throws_ok {
+  Bio::EnsEMBL::VEP::Parser::HGVS->new({
+    config => Bio::EnsEMBL::VEP::Config->new({offline => 1}),
+    file => $test_cfg->create_input_file('21:g.25585733C>T')
+  });
+} qr/Cannot use HGVS format in offline mode/, 'throw without DB';
+
 SKIP: {
   my $db_cfg = $test_cfg->db_cfg;
   my $can_use_db = $db_cfg && scalar keys %$db_cfg;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 5 unless $can_use_db;
+  skip 'No local database configured', 7 unless $can_use_db;
 
   my $multi;
 
@@ -137,6 +144,33 @@ SKIP: {
   ok($tmp =~ /Unable to parse HGVS notation/, 'invalid HGVS type warning msg');
 
   open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
+
+  ## REFSEQ
+  #########
+
+  $cfg = Bio::EnsEMBL::VEP::Config->new({
+    %$db_cfg,
+    database => 1,
+    offline => 0,
+    species => 'homo_vepiens',
+    refseq => 1,
+  });
+
+  $vf = Bio::EnsEMBL::VEP::Parser::HGVS->new({
+    config => $cfg,
+    file => $test_cfg->create_input_file('NM_017446.3:c.991G>A')
+  })->next();
+
+  delete($vf->{$_}) for qw(adaptor variation slice variation_name);
+  is_deeply($vf, $expected, 'refseq coding');
+
+  $vf = Bio::EnsEMBL::VEP::Parser::HGVS->new({
+    config => $cfg,
+    file => $test_cfg->create_input_file('NP_059142.2:p.Ala331Thr')
+  })->next();
+
+  delete($vf->{$_}) for qw(adaptor variation slice variation_name);
+  is_deeply($vf, $expected, 'refseq protein');
   
   1;
 };

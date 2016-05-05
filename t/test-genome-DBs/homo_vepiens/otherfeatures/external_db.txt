@@ -1,0 +1,415 @@
+211	VB_Community_Symbol	\N	KNOWN	50	VB Community Symbol	MISC	\N	\N	\N
+212	VB_External_Description	1	PRED	50	VB External Description	MISC	\N	\N	\N
+213	VB_RNA_Description	1	PRED	50	VB RNA Description	MISC	\N	\N	\N
+230	Ribosomal_Protein_Gene_Database	Dec.2010	XREF	50	Ribosomal Protein Gene DB	MISC	\N	\N	\N
+250	ImmunoDB	1	KNOWN	50	ImmunoDB	MISC	\N	\N	\N
+400	Celera_Gene	\N	PRED	5	Celera gene	MISC	\N	\N	\N
+410	Celera_Pep	\N	PRED	5	Celera peptide	MISC	\N	\N	\N
+420	Celera_Trans	\N	PRED	5	Celera transcript	MISC	\N	\N	\N
+700	EMBL	\N	KNOWNXREF	5	European Nucleotide Archive	MISC	\N	\N	\N
+701	EMBL_predicted	\N	PRED	119	Predicted European Nucleotide Archive	MISC	\N	\N	\N
+800	flybase_gene_id	\N	KNOWNXREF	5	Flybase Gene	MISC	\N	\N	\N
+801	flybase_translation_id	\N	KNOWNXREF	5	Flybase translation ID	MISC	\N	\N	\N
+804	flybase_annotation_id	\N	KNOWNXREF	5	Flybase Annotation ID	MISC	\N	\N	\N
+805	flybase_symbol	\N	KNOWNXREF	50	Flybase Symbol	MISC	\N	\N	\N
+808	flybase_transcript_id	\N	KNOWNXREF	299	Flybase transcript ID	MISC	\N	\N	\N
+812	gadfly_translation_cgid	\N	XREF	10	Gadfly translation CGID	MISC	\N	\N	\N
+821	FlyBaseName_gene	\N	KNOWN	5	FlyBase gene name	PRIMARY_DB_SYNONYM	\N	\N	\N
+824	FlyBaseName_translation	\N	KNOWN	5	FlyBase translation name	MISC	\N	\N	\N
+825	FlyBaseName_transcript	\N	XREF	50	FlyBase transcript name	MISC	\N	\N	\N
+826	FlyBaseCGID_gene	\N	XREF	5	FlyBase gene CGID	PRIMARY_DB_SYNONYM	\N	\N	\N
+827	FlyBaseCGID_transcript	\N	XREF	50	FlyBase transcript CGID	MISC	\N	\N	\N
+828	FlyBaseCGID_translation	\N	XREF	50	FlyBase translation CGID	MISC	\N	\N	\N
+829	BioGRID	\N	KNOWNXREF	5	BioGRID Interaction data, The General Repository for Interaction Datasets	MISC	\N	\N	\N
+831	GenomeRNAi	\N	KNOWNXREF	5	GenomeRNAi, a database for cell-based RNAi phenotypes	MISC	\N	\N	\N
+832	InteractiveFly	\N	KNOWNXREF	5	The Interactive Fly	MISC	\N	\N	\N
+833	MitoDrome	\N	KNOWNXREF	5	Nuclear genes encoding proteins targeted to the mitochondrion	MISC	\N	\N	\N
+883	FlyReactome	\N	KNOWNXREF	5	FlyReactome, a Curated Knowledgebase of Drosophila Melanogaster Pathways	MISC	\N	\N	\N
+1000	GO	\N	XREF	5	GO	MISC	\N	\N	\N
+1001	GO_REF	\N	KNOWN	5	GO Reference Collection	LIT	\N	\N	\N
+1100	HGNC	\N	KNOWNXREF	100	HGNC Symbol	PRIMARY_DB_SYNONYM	\N	\N	\N
+1200	Interpro	\N	XREF	5	InterPro	MISC	\N	\N	\N
+1300	EntrezGene	\N	KNOWNXREF	250	EntrezGene	PRIMARY_DB_SYNONYM	\N	\N	\N
+1400	MGI	\N	KNOWNXREF	270	MGI Symbol	PRIMARY_DB_SYNONYM	\N	\N	\N
+1510	MIM_GENE	\N	KNOWNXREF	5	MIM gene	MISC	\N	\N	\N
+1520	MIM_MORBID	\N	KNOWNXREF	150	MIM morbid	MISC	\N	\N	\N
+1600	PDB	\N	KNOWNXREF	5	PDB	MISC	\N	\N	\N
+1700	protein_id	\N	KNOWNXREF	5	INSDC protein ID	MISC	\N	\N	\N
+1701	protein_id_predicted	\N	PRED	4	Predicted INSDC Protein ID	MISC	\N	\N	\N
+1800	RefSeq_dna	\N	KNOWN	200	RefSeq DNA	MISC	\N	\N	\N
+1801	RefSeq_mRNA	\N	KNOWN	200	RefSeq mRNA	MISC	\N	\N	\N
+1803	RefSeq_ncRNA	\N	KNOWN	200	RefSeq ncRNA	MISC	\N	\N	\N
+1805	RefSeq_dna_predicted	\N	PRED	199	RefSeq DNA predicted	MISC	\N	\N	\N
+1806	RefSeq_mRNA_predicted	\N	PRED	199	RefSeq mRNA predicted	MISC	\N	\N	\N
+1808	RefSeq_ncRNA_predicted	\N	PRED	199	RefSeq ncRNA predicted	MISC	\N	\N	\N
+1810	RefSeq_peptide	\N	KNOWN	210	RefSeq peptide	MISC	\N	\N	\N
+1815	RefSeq_peptide_predicted	\N	PRED	197	RefSeq peptide predicted	MISC	\N	\N	\N
+1820	RefSeq_rna	\N	KNOWN	230	RefSeq RNA	MISC	\N	\N	\N
+1825	RefSeq_rna_predicted	\N	PRED	195	RefSeq RNA predicted	MISC	\N	\N	\N
+1830	RefSeq_genomic	\N	KNOWN	193	RefSeq Genomic	MISC	\N	\N	This external_db_id can be used in the seq_region_synonym table. For species such as human, cow, dog we store chromosome names (1-22, X,Y) in the name column of the seq_region table. The RefSeq_genomic is stored as a synonym. eg. NC_000011.10, NT_187365.1
+2000	Uniprot/SPTREMBL	\N	KNOWN	119	UniProtKB/TrEMBL	MISC	\N	\N	\N
+2200	Uniprot/SWISSPROT	\N	KNOWN	220	UniProtKB/Swiss-Prot	MISC	\N	\N	\N
+2202	Uniprot/Varsplic	\N	KNOWN	15	UniProtKB/SpliceVariant	MISC	\N	\N	\N
+2250	UniProtKB_all	\N	XREF	40	UniProtKB generic accession number (TrEMBL or SwissProt not differentiated)	MISC	\N	\N	\N
+2300	Vega_gene	\N	KNOWNXREF	5	Vega gene	MISC	\N	\N	\N
+2310	Vega_transcript	\N	KNOWNXREF	160	Vega transcript	MISC	\N	\N	\N
+2320	Vega_translation	\N	KNOWNXREF	5	Vega translation	MISC	\N	\N	\N
+2400	wormbase_gene	\N	KNOWN	5	WormBase Gene	MISC	\N	\N	\N
+2410	wormbase_transcript	\N	KNOWN	5	WormBase Transcript	MISC	\N	\N	\N
+2420	wormpep_id	\N	KNOWN	5	Wormpep ID	MISC	\N	\N	\N
+2440	wormbase_locus	\N	KNOWN	5	WormBase Locus	MISC	\N	\N	\N
+2510	ZFIN_ID	\N	KNOWNXREF	260	ZFIN	PRIMARY_DB_SYNONYM	\N	\N	\N
+2530	ZFIN_xpat	\N	KNOWNXREF	4	ZFIN expression patterns	MISC	\N	\N	\N
+2600	GeneDB	\N	KNOWN	5	GeneDB	MISC	\N	\N	\N
+2601	cint_jgi_v1	\N	KNOWN	10	JGI Gene ID (JGI 1.0)	MISC	\N	\N	\N
+2602	cint_jgi_v2	\N	KNOWN	5	JGI Gene ID (JGI 2.0)	MISC	\N	\N	\N
+2610	cint_aniseed_v1	\N	KNOWN	5	ANISEED (JGI 1.0)	MISC	\N	\N	\N
+2611	cint_aniseed_v2	\N	KNOWN	5	ANISEED (JGI 2.0)	MISC	\N	\N	\N
+2700	Ens_Hs_gene	\N	XREF	5	Ensembl Human Gene	MISC	\N	\N	\N
+2710	Ens_Hs_transcript	\N	XREF	170	Ensembl Human Transcript	MISC	\N	\N	\N
+2720	Ens_Hs_translation	\N	XREF	5	Ensembl Human Translation	MISC	\N	\N	\N
+2800	RGD	\N	KNOWNXREF	50	RGD Symbol	PRIMARY_DB_SYNONYM	\N	\N	\N
+2900	Genoscope_pred_gene	\N	XREF	38	Genoscope pred gene	MISC	\N	\N	\N
+2910	Genoscope_pred_transcript	\N	XREF	39	Genoscope pred transcript	MISC	\N	\N	\N
+2920	Genoscope_annotated_gene	\N	KNOWN	40	Genoscope annotated gene	MISC	\N	\N	\N
+2930	Genoscope_pred_translation	\N	XREF	40	Genoscope pred translation	MISC	\N	\N	\N
+2940	Genoscope_ann_transcript	\N	KNOWN	40	Genoscope annotated transcript	MISC	\N	\N	\N
+2950	Genoscope_ann_translation	\N	KNOWN	40	Genoscope annotated translation	MISC	\N	\N	\N
+3300	miRBase	\N	KNOWNXREF	180	miRBase	PRIMARY_DB_SYNONYM	\N	\N	\N
+3400	SGD	\N	KNOWN	50	SGD	PRIMARY_DB_SYNONYM	\N	\N	\N
+3500	IPI	\N	KNOWN	5	IPI	MISC	\N	\N	\N
+3800	CCDS	\N	KNOWN	240	CCDS	MISC	\N	\N	\N
+3900	PUBMED	\N	KNOWN	5	Sequence Publications	LIT	\N	\N	\N
+4100	UniGene	\N	KNOWN	5	UniGene	MISC	\N	\N	\N
+4200	RFAM	\N	XREF	190	RFAM	PRIMARY_DB_SYNONYM	\N	\N	\N
+4400	Xenbase	\N	KNOWN	1	Xenbase	PRIMARY_DB_SYNONYM	\N	\N	\N
+4600	OTTG	\N	XREF	1	Havana gene	ALT_GENE	\N	\N	\N
+4610	OTTT	\N	XREF	1	Havana transcript	ALT_TRANS	\N	\N	\N
+4620	OTTP	\N	XREF	1	Havana translation	MISC	\N	\N	\N
+4670	shares_CDS_with_OTTT	\N	XREF	1	Havana transcript having same CDS	ALT_TRANS	\N	\N	\N
+4680	shares_CDS_and_UTR_with_OTTT	\N	XREF	1	Transcript having exact match between ENSEMBL and HAVANA	ALT_TRANS	\N	\N	\N
+4690	ENSG	\N	XREF	1	Ensembl gene	ALT_GENE	\N	\N	\N
+4700	Medaka	\N	XREF	1	Medaka Genome Project	MISC	\N	\N	\N
+4810	ENST_ident	\N	XREF	1	Ensembl transcript having exact match with Havana	ALT_TRANS	\N	\N	\N
+4820	ENST_CDS	\N	XREF	1	Ensembl transcript sharing CDS with Havana	ALT_TRANS	\N	\N	\N
+5010	Ens_Mm_transcript	\N	XREF	40	Ensembl Mouse Transcript	MISC	\N	\N	\N
+5020	Ens_Mm_translation	\N	XREF	40	Ensembl Mouse Translation	MISC	\N	\N	\N
+5100	IMGT_HLA	\N	KNOWN	7	IMGT/HLA	MISC	\N	\N	\N
+5300	Oxford_FGU_Md_tscript	\N	PRED	1	Oxford Ponting Group Monodelphis predictions transcript id	MISC	\N	\N	Updated from alt_gene to misc due to user query
+5400	Oxford_FGU_Oa_gene	\N	PRED	1	Oxford Ponting Group Platypus predictions gene id	MISC	\N	\N	Updated from alt_gene to misc due to user query
+5500	Oxford_FGU_Oa_tscript	\N	PRED	1	Oxford Ponting Group Platypus predictions transcript id	MISC	\N	\N	\N
+5720	Ens_Cf_translation	\N	XREF	5	Ensembl Dog Translation	MISC	\N	\N	\N
+5810	Ens_Dr_transcript	\N	XREF	5	Ensembl Zebrafish Transcript	MISC	\N	\N	\N
+5820	Ens_Dr_translation	\N	XREF	5	Ensembl Zebrafish Translation	MISC	\N	\N	\N
+6400	Ens_Gg_gene	\N	XREF	40	Ensembl Chicken Gene	MISC	\N	\N	\N
+6410	Ens_Gg_transcript	\N	XREF	40	Ensembl Chicken Transcript	MISC	\N	\N	\N
+6420	Ens_Gg_translation	\N	XREF	40	Ensembl Chicken Translation	MISC	\N	\N	\N
+6500	IMCB_Tr_gene	\N	XREF	40	IMCB Fugu Gene	MISC	\N	\N	\N
+6820	Ens_Tr_transcript	\N	XREF	40	Ensembl Fugu Transcript	MISC	\N	\N	\N
+6900	Ens_Ga_translation	\N	XREF	5	Ensembl Stickleback Translation	MISC	\N	\N	\N
+7170	Ixodes_ManualAnnotation	\N	PRED	30	Ixodes ManualAnnotation	MISC	\N	\N	\N
+7180	VB_Community_Annotation	1	KNOWN	50	VB Community Annotation	MISC	\N	\N	\N
+7200	IMGT/LIGM_DB	\N	XREF	10	IMGT/LIGM-DB	MISC	\N	\N	\N
+7201	IMGT/GENE_DB	\N	KNOWN	40	IMGT/GENE-DB	MISC	\N	\N	\N
+7300	Ens_Mg_transcript	\N	XREF	40	Ensembl Turkey Transcript	MISC	\N	\N	\N
+7400	Ens_Tg_transcript	\N	XREF	40	Ensembl Zebrafinch Transcript	MISC	\N	\N	\N
+7620	Ens_Fc_translation	\N	XREF	40	Ensembl Cat Translation	MISC	\N	\N	\N
+8100	Platypus_olfactory_receptor	\N	XREF	40	Platypus olfactory receptor gene	MISC	\N	\N	\N
+8200	PRF	\N	XREF	5	PRF	MISC	\N	\N	\N
+8300	PIR	\N	XREF	5	PIR	MISC	\N	\N	\N
+8400	TetNig_cdna	\N	XREF	40	Genoscope tetraodon cDNA	MISC	\N	\N	\N
+8500	GasAcu_cdna	\N	XREF	40	Stickleback cDNA	MISC	\N	\N	\N
+8600	OrnAna_454_cdna	\N	XREF	40	Platypus 454 cDNA	MISC	\N	\N	\N
+8700	TakRub_cdna	\N	XREF	40	Takifugu cDNA	MISC	\N	\N	\N
+8800	CioInt_est	\N	XREF	40	Ciona intestinalis EST	MISC	\N	\N	\N
+8900	CioInt_cdna	\N	XREF	40	Ciona intestinalis cDNA	MISC	\N	\N	\N
+9200	TakRub_est	\N	XREF	40	Takifugu EST	MISC	\N	\N	\N
+9400	TetNig_mouse_econtig	\N	XREF	40	Genoscope mouse exofish econtig	MISC	\N	\N	\N
+9410	TetNig_fugu_econtig	\N	XREF	40	Genoscope fugu exofish econtig	MISC	\N	\N	\N
+9420	TetNig_human_econtig	\N	XREF	40	Genoscope human exofish econtig	MISC	\N	\N	\N
+9450	TetNig_rat_econtig	\N	XREF	40	Genoscope rat exofish econtig	MISC	\N	\N	\N
+9460	TetNig_chick_econtig	\N	XREF	40	Genoscope chicken exofish econtig	MISC	\N	\N	\N
+9500	OryLat_est	\N	XREF	40	Medaka EST	MISC	\N	\N	\N
+9600	Trace_archive	\N	XREF	40	Trace Archive id	MISC	\N	\N	\N
+9700	CioSav_est	\N	XREF	40	Ciona savignyi EST	MISC	\N	\N	\N
+10000	wormbase_id	\N	XREF	30	Generic exdb for WormBase id of any type for feature table	MISC	\N	\N	\N
+10100	EPD	\N	KNOWNXREF	5	Eukaryotic Promoter Database (Bucher)	MISC	\N	\N	\N
+10300	MEROPS	\N	KNOWNXREF	5	MEROPS - the Peptidase Database	MISC	\N	\N	\N
+10500	TransFac	\N	KNOWNXREF	5	TransFac, database of transcription factors and their binding sites	MISC	\N	\N	\N
+11000	UCSC	\N	KNOWNXREF	100	UCSC Stable ID	MISC	\N	\N	\N
+12310	Clone_based_vega_gene	\N	KNOWNXREF	5	Clone-based (Vega)	MISC	\N	\N	\N
+12315	Clone_based_ensembl_gene	\N	XREF	5	Clone-based (Ensembl)	MISC	\N	\N	\N
+12410	Clone_based_vega_transcript	\N	KNOWNXREF	5	Clone-based (Vega)	MISC	\N	\N	\N
+12415	Clone_based_ensembl_transcript	\N	XREF	5	Clone-based (Ensembl)	MISC	\N	\N	\N
+12500	DBASS3	\N	XREF	50	DataBase of Aberrant 3' Splice Sites	MISC	\N	\N	\N
+12505	DBASS5	\N	XREF	50	DataBase of Aberrant 5' Splice Sites	MISC	\N	\N	\N
+12510	HPA	\N	XREF	50	Human Protein Atlas	MISC	\N	\N	\N
+12600	WikiGene	\N	XREF	50	WikiGene	MISC	\N	\N	\N
+12601	Tgut_symbol	\N	KNOWNXREF	100	Tgut symbol - Prof. David Burt, Roslin Institute and Royal (Dick) School of Veterinary Studies, Edinburgh University, UK	PRIMARY_DB_SYNONYM	\N	\N	\N
+12620	Duck_consortium	\N	XREF	0	Duck consortium	MISC	\N	\N	\N
+12630	BGI_duck_transcriptome	\N	XREF	0	Beijing Genomics Institute (BGI) duck transcriptome	MISC	\N	\N	\N
+12700	goslim_goa	\N	XREF	5	GOSlim GOA	MISC	\N	\N	\N
+12710	WTSI_gorilla_transcriptome	\N	XREF	0	Wellcome Trust Sanger Institute (WTSI) gorilla transcriptome	MISC	\N	\N	\N
+20005	UniParc	\N	KNOWNXREF	0	UniParc	PRIMARY_DB_SYNONYM	\N	\N	\N
+20008	BRENDA	\N	KNOWNXREF	0	BRENDA	PRIMARY_DB_SYNONYM	\N	\N	\N
+20009	BioCyc	\N	KNOWNXREF	0	BioCyc	PRIMARY_DB_SYNONYM	\N	\N	\N
+20013	EchoBASE	\N	KNOWNXREF	0	EchoBASE	PRIMARY_DB_SYNONYM	\N	\N	\N
+20014	EcoGene	\N	KNOWNXREF	0	EcoGene	PRIMARY_DB_SYNONYM	\N	\N	\N
+20040	SubtiList	\N	KNOWNXREF	0	SubtiList	PRIMARY_DB_SYNONYM	\N	\N	\N
+20043	TubercuList	\N	KNOWNXREF	0	TubercuList	PRIMARY_DB_SYNONYM	\N	\N	\N
+20046	ArrayExpress	\N	XREF	0	Expression Atlas	MISC	\N	\N	\N
+20059	DIP	\N	KNOWNXREF	0	DIP	PRIMARY_DB_SYNONYM	\N	\N	\N
+20061	DisProt	\N	KNOWNXREF	0	DisProt	PRIMARY_DB_SYNONYM	\N	\N	\N
+20062	DrugBank	\N	KNOWNXREF	0	DrugBank	PRIMARY_DB_SYNONYM	\N	\N	\N
+20066	HAMAP	\N	KNOWNXREF	0	HAMAP	PRIMARY_DB_SYNONYM	\N	\N	\N
+20071	HSSP	\N	KNOWNXREF	0	HSSP	PRIMARY_DB_SYNONYM	\N	\N	\N
+20072	IntAct	\N	KNOWNXREF	0	IntAct	PRIMARY_DB_SYNONYM	\N	\N	\N
+20074	KEGG	\N	KNOWNXREF	0	KEGG	PRIMARY_DB_SYNONYM	\N	\N	\N
+20078	PDBsum	\N	KNOWNXREF	0	PDBsum	PRIMARY_DB_SYNONYM	\N	\N	\N
+20082	PeroxiBase	\N	KNOWNXREF	0	PeroxiBase	PRIMARY_DB_SYNONYM	\N	\N	\N
+20085	REBASE	\N	KNOWNXREF	0	REBASE	PRIMARY_DB_SYNONYM	\N	\N	\N
+20088	Reactome	\N	KNOWNXREF	0	Reactome	PRIMARY_DB_SYNONYM	\N	\N	\N
+20097	RegulonDb_Transcript	\N	KNOWNXREF	0	RegulonDb	PRIMARY_DB_SYNONYM	\N	\N	\N
+20101	IntEnz	\N	KNOWNXREF	0	EnzymeCommission	PRIMARY_DB_SYNONYM	\N	\N	\N
+20200	EMBLBANK_GENE	\N	KNOWNXREF	117	European Nucleotide Archive	PRIMARY_DB_SYNONYM	\N	\N	\N
+20215	phatr_jgi_v2	\N	KNOWNXREF	0	JGI ID (JGI 2.0)	PRIMARY_DB_SYNONYM	\N	\N	\N
+20216	phatr_jgi_v2_bd_gene	\N	KNOWNXREF	0	JGI Gene ID (JGI 2.0 unmapped sequence)	PRIMARY_DB_SYNONYM	\N	\N	\N
+20217	phatr_jgi_v2_gene	\N	KNOWNXREF	0	JGI Gene ID (JGI 2.0)	PRIMARY_DB_SYNONYM	\N	\N	\N
+20220	thaps_jgi_v2_bd	\N	KNOWNXREF	0	JGI ID (JGI 2.0 unmapped sequence)	PRIMARY_DB_SYNONYM	\N	\N	\N
+20221	thaps_jgi_v2	\N	KNOWNXREF	0	JGI ID (JGI 2.0)	PRIMARY_DB_SYNONYM	\N	\N	\N
+20228	CADRE_Afum_A1163	\N	KNOWNXREF	0	CADRE	PRIMARY_DB_SYNONYM	\N	\N	\N
+20301	RNAMMER	\N	KNOWNXREF	0	RNAmmer	MISC	\N	\N	\N
+20302	TRNASCAN_SE	\N	KNOWNXREF	0	tRNAScan-SE	MISC	\N	\N	\N
+20303	dictyBase	\N	KNOWNXREF	0	DictyBase	PRIMARY_DB_SYNONYM	\N	\N	\N
+20306	ASPGD	\N	KNOWNXREF	0	AspGD	PRIMARY_DB_SYNONYM	\N	\N	\N
+20307	ASPGD_GENE	\N	KNOWNXREF	0	AspGD	PRIMARY_DB_SYNONYM	\N	\N	\N
+20308	ASPGD_TRANSCRIPT	\N	KNOWNXREF	0	AspGD	PRIMARY_DB_SYNONYM	\N	\N	\N
+20309	CADRE	\N	KNOWNXREF	0	CADRE	PRIMARY_DB_SYNONYM	\N	\N	\N
+20310	CADRE_GENE	\N	KNOWNXREF	0	CADRE	PRIMARY_DB_SYNONYM	\N	\N	\N
+20311	CADRE_TRANSCRIPT	\N	KNOWNXREF	0	CADRE	PRIMARY_DB_SYNONYM	\N	\N	\N
+20312	SGD_GENE	\N	KNOWNXREF	0	SGD	PRIMARY_DB_SYNONYM	\N	\N	\N
+20313	SGD_TRANSCRIPT	\N	KNOWNXREF	0	SGD	PRIMARY_DB_SYNONYM	\N	\N	\N
+20317	phyra_jgi_v1.1	1.1	KNOWNXREF	0	JGI ID (JGI 1.1)	PRIMARY_DB_SYNONYM	\N	\N	\N
+20320	physo1_jgi_v1.1	1.1	KNOWNXREF	0	JGI ID (JGI 1.1)	PRIMARY_DB_SYNONYM	\N	\N	\N
+20325	BROAD_P_infestans	1	KNOWNXREF	0	Broad Institute	MISC	\N	\N	\N
+20329	triad_jgi_v1.0_gene	1	KNOWNXREF	0	JGI Gene ID (JGI Triad 1.0)	PRIMARY_DB_SYNONYM	\N	\N	\N
+20330	triad_jgi_v1.0_transcript	1	KNOWNXREF	0	JGI Transcript ID (JGI Triad 1.0)	PRIMARY_DB_SYNONYM	\N	\N	\N
+20331	triad_jgi_v1.0	1	KNOWNXREF	0	JGI ID (JGI Triad 1.0)	MISC	\N	\N	\N
+20334	SCHISTODB	1	KNOWNXREF	0	SchistoDB	MISC	\N	\N	\N
+20337	BROAD_F_oxysporum	1	KNOWNXREF	0	Broad Institute	MISC	\N	\N	\N
+20338	BROAD_F_oxysporum_GENE	1	KNOWNXREF	0	Broad Institute	PRIMARY_DB_SYNONYM	\N	\N	\N
+20339	BROAD_F_oxysporum_TRANSCRIPT	1	KNOWNXREF	0	Broad Institute	PRIMARY_DB_SYNONYM	\N	\N	\N
+20340	BROAD_G_zeae	1	KNOWNXREF	0	Broad Institute	MISC	\N	\N	\N
+20343	BROAD_G_moniliformis	1	KNOWNXREF	0	Broad Institute	MISC	\N	\N	\N
+20344	BROAD_G_moniliformis_GENE	1	KNOWNXREF	0	Broad Institute	PRIMARY_DB_SYNONYM	\N	\N	\N
+20345	BROAD_G_moniliformis_TRANSCRIPT	1	KNOWNXREF	0	Broad Institute	PRIMARY_DB_SYNONYM	\N	\N	\N
+20348	PGD_GENE	1	KNOWNXREF	0	Pythium genome database	PRIMARY_DB_SYNONYM	\N	\N	\N
+20354	BROAD_U_maydis	1	KNOWNXREF	0	Broad Institute	MISC	\N	\N	\N
+20355	BROAD_U_maydis_GENE	1	KNOWNXREF	0	Broad Institute	PRIMARY_DB_SYNONYM	\N	\N	\N
+20356	BROAD_U_maydis_TRANSCRIPT	1	KNOWNXREF	0	Broad Institute	PRIMARY_DB_SYNONYM	\N	\N	\N
+20357	BROAD_P_triticina	1	KNOWNXREF	0	Broad Institute	MISC	\N	\N	\N
+20358	BROAD_P_triticina_GENE	1	KNOWNXREF	0	Broad Institute	PRIMARY_DB_SYNONYM	\N	\N	\N
+20359	BROAD_P_triticina_TRANSCRIPT	1	KNOWNXREF	0	Broad Institute	PRIMARY_DB_SYNONYM	\N	\N	\N
+20360	SpBase	1	KNOWNXREF	0	SpBase	MISC	\N	\N	\N
+20362	necha_jgi_v2.0_gene	2	KNOWNXREF	0	Nectria JGI gene	PRIMARY_DB_SYNONYM	\N	\N	\N
+20363	necha_jgi_v2.0_transcript	2	KNOWNXREF	0	Nectria JGI transcript	PRIMARY_DB_SYNONYM	\N	\N	\N
+20364	necha_jgi_v2.0	2	KNOWNXREF	0	Nectria JGI	MISC	\N	\N	\N
+20365	tuber_genoscope_gene	1	KNOWNXREF	0	Tuber Genome Browser	PRIMARY_DB_SYNONYM	\N	\N	\N
+20368	Mycgr3_jgi_v2.0_gene	2	KNOWNXREF	0	Mycosphaerella JGI gene	PRIMARY_DB_SYNONYM	\N	\N	\N
+20372	BROAD_P_NODORUM_GENE	1	KNOWNXREF	0	Broad Institute	PRIMARY_DB_SYNONYM	\N	\N	\N
+20377	PomBase_TRANSCRIPT	\N	KNOWNXREF	0	PomBase	PRIMARY_DB_SYNONYM	\N	\N	\N
+20378	PomBase_TRANSLATION	1	KNOWNXREF	0	PomBase	PRIMARY_DB_SYNONYM	\N	\N	\N
+20380	CBS	\N	KNOWNXREF	0	CBS Server	MISC	\N	\N	\N
+20381	COG	\N	KNOWNXREF	0	Cluster of Orthologous Groups (NCBI)	MISC	\N	\N	\N
+20382	CGD	\N	KNOWN	0	Candida Genome Database	MISC	\N	\N	\N
+20383	ProSite	\N	XREF	0	ProSite ID	MISC	\N	\N	\N
+20385	SMART	\N	XREF	0	SMART ID	MISC	\N	\N	\N
+20386	SPD	\N	KNOWNXREF	0	SPD ID	MISC	\N	\N	\N
+20388	PBO	\N	KNOWNXREF	0	PomBase Ontology ID	MISC	\N	\N	\N
+20389	FYPO	\N	KNOWNXREF	0	Fission Yeast Phenotype Ontology	MISC	\N	\N	\N
+20390	MOD	\N	KNOWNXREF	0	PSI-MOD, Post Translational Modification Ontology	MISC	\N	\N	\N
+20391	AGD_GENE	1	KNOWNXREF	0	Ashbya Genome Database	PRIMARY_DB_SYNONYM	\N	\N	\N
+20392	AGD_TRANSCRIPT	1	KNOWNXREF	0	Ashbya Genome Database	PRIMARY_DB_SYNONYM	\N	\N	\N
+50000	BGI_EST_Cluster	\N	XREF	0	EST Cluster (BGI Indica)	MISC	\N	\N	\N
+50005	EC_NUMBER	\N	XREF	0	Enzyme EC Number	MISC	\N	\N	\N
+50010	FSTs	\N	XREF	0	Flanking Sequence Tag (FST)	MISC	\N	\N	\N
+50020	Gramene_Pathway	\N	XREF	0	Gramene Pathway	MISC	\N	\N	\N
+50035	Gramene_MarkersDB	\N	XREF	0	Gramene	MISC	\N	\N	\N
+50040	Gramene_MarkersDB_mRNA	\N	XREF	0	GenBank mRNA (Gramene)	MISC	\N	\N	\N
+50050	Gramene_MarkersDB_EST	\N	XREF	0	GenBank EST (Gramene)	MISC	\N	\N	\N
+50090	NASC_GENE_ID	\N	XREF	1	NASC Gene ID	MISC	\N	\N	\N
+50110	PlantGDB_PUT	\N	XREF	1	PlantGDB Transcript	MISC	\N	\N	\N
+50120	RAP_Gene	\N	XREF	0	IRGSP/RAP Gene	MISC	\N	\N	\N
+50140	TIGR_LOCUS	\N	XREF	1	MSU/TIGR Locus	MISC	\N	\N	\N
+50160	TAIR_LOCUS	\N	XREF	8	TAIR	MISC	\N	\N	\N
+50170	TAIR_LOCUS_MODEL	\N	XREF	8	TAIR Locus (Model)	MISC	\N	\N	\N
+50180	TIGR_GeneIndex	\N	XREF	0	Gene Index	MISC	\N	\N	\N
+50185	TO	\N	XREF	0	Plant Trait Ontology	MISC	\N	\N	\N
+50190	PO	\N	XREF	0	Plant Structure Ontology	MISC	\N	\N	\N
+50196	GO_to_gene	\N	XREF	0	Gene Ontology	MISC	\N	\N	\N
+50200	GRO	\N	XREF	0	Plant Growth Stage	MISC	\N	\N	\N
+50541	LRG	\N	KNOWN	10	Locus Reference Genomic	MISC	\N	\N	\N
+50542	ENS_LRG_gene	\N	KNOWN	10	LRG display in Ensembl	MISC	\N	\N	\N
+50543	ENS_LRG_transcript	\N	KNOWN	10	LRG display in Ensembl	MISC	\N	\N	\N
+50607	miRBase_trans_name	\N	KNOWNXREF	5	miRBase transcript name	MISC	\N	\N	transcript name from miRBase
+50608	RFAM_trans_name	\N	KNOWNXREF	5	RFAM transcript name	MISC	\N	\N	transcript name from RFAM
+50609	HGNC_trans_name	\N	KNOWNXREF	5	HGNC transcript name	MISC	\N	\N	transcript name from HGNC
+50610	MGI_trans_name	\N	KNOWNXREF	5	MGI transcript name	MISC	\N	\N	transcript name from MGI
+50611	ZFIN_ID_trans_name	\N	KNOWNXREF	5	ZFIN transcript name	MISC	\N	\N	transcript name from ZFIN
+50620	Illumina_Bodymap_transcriptome	\N	XREF	0	Illumina Bodymap transcriptome	MISC	\N	\N	\N
+50621	Uniprot_gn	\N	KNOWN	116	UniProtKB Gene Name	MISC	\N	\N	\N
+50622	GGSC	\N	KNOWNXREF	0	Gibbon Genome Sequencing Consortium	MISC	\N	\N	Gibbon Genome Sequencing Consortium
+50623	Broad Institute	\N	KNOWN	5	Broad Institute of MIT and Harvard	MISC	\N	\N	\N
+50624	PFAM	\N	XREF	0	PFAM	MISC	\N	\N	Pfam from Vega
+50625	SGSC	\N	KNOWN	5	Swine Genome Sequencing Consortium	MISC	\N	\N	\N
+50626	RIKEN	\N	KNOWN	5	Riken Institute	MISC	\N	\N	\N
+50627	SHSC	\N	KNOWNXREF	0	Tasmanian Devil Sequencing Consortium	MISC	\N	\N	Tasmanian Devil Genome Sequencing Consortium
+50628	PFAM	22	XREF	0	PFAM	MISC	\N	\N	Pfam release 22, from Vega
+50629	PFAM	23	XREF	0	PFAM	MISC	\N	\N	Pfam release 23, from Vega
+50630	PFAM	24	XREF	0	PFAM	MISC	\N	\N	Pfam release 24, from Vega
+50631	PFAM	25	XREF	0	PFAM	MISC	\N	\N	Pfam release 25, from Vega
+50632	PFAM	26	XREF	0	PFAM	MISC	\N	\N	Pfam release 26, from Vega
+50633	GRC_primary_assembly	\N	XREF	0	GRC primary assembly	MISC	\N	\N	Primary assembly of this species genome from the GRC
+50634	Ens_Ga_gene	\N	XREF	5	Ensembl Stickleback Gene	MISC	\N	\N	\N
+50635	Ens_Ga_transcript	\N	XREF	170	Ensembl Stickleback Transcript	MISC	\N	\N	\N
+50637	CSAC	\N	KNOWN	5	Chimpanzee Sequencing and Analysis Consortium	MISC	\N	\N	\N
+50640	PomBase_Interaction_GENETIC	1	KNOWNXREF	5	PomBase Interaction Genetic	MISC	\N	\N	\N
+50641	PomBase_Interaction_PHYSICAL	1	KNOWNXREF	5	PomBase Interaction Physical	MISC	\N	\N	\N
+50642	PomBase_Gene_Name	1	KNOWNXREF	5	PomBase Gene Name	MISC	\N	\N	\N
+50643	PomBase_Systematic_ID	1	KNOWNXREF	5	PomBase Systematic ID	MISC	\N	\N	\N
+50644	PomBase_Ortholog	1	KNOWNXREF	5	Orthologous Gene	MISC	\N	\N	\N
+50645	Ens_Ss_translation	\N	XREF	5	Ensembl Pig Translation	MISC	\N	\N	\N
+50646	Psinensis_sequencing_consortium	\N	KNOWN	5	Pelodiscus sinensis sequencing consortium	MISC	\N	\N	\N
+50647	BROAD_Magnaporthe_DB	1	KNOWNXREF	0	Magnaporthe comparative DB	MISC	\N	\N	Broad Institute Magnaporthe comparative Database
+50648	BROAD_Magnaporthe_DB_GENE	1	KNOWNXREF	0	Magnaporthe comparative DB	PRIMARY_DB_SYNONYM	\N	\N	Broad Institute Magnaporthe comparative Database
+50649	BROAD_Magnaporthe_DB_TRANSCRIPT	1	KNOWNXREF	0	Magnaporthe comparative DB	PRIMARY_DB_SYNONYM	\N	\N	Broad Institute Magnaporthe comparative Database
+50650	BGI Shenzhen	\N	KNOWN	5	Beijing Genomics Institute, Shenzhen	MISC	\N	\N	\N
+50651	ICGSC	\N	KNOWN	5	International Cat Genome Sequencing Consortium	MISC	\N	\N	\N
+50653	WashingtonUniversity	\N	KNOWN	5	The Genome Institute, Washington University School of Medicine	MISC	\N	\N	\N
+50654	BDGP_cDNA	1	KNOWN	50	Fly cDNA	MISC	\N	\N	cDNA from the Berkeley Drosophila Genome Project
+50655	BDGP_cDNA_Gold_Collection	1	KNOWN	50	Fly gold cDNA	MISC	\N	\N	Gold Collection cDNA from the Berkeley Drosophila Genome Project
+50656	Ens_Tg_translation	\N	KNOWN	5	Ensembl Zebrafinch Translation	MISC	\N	\N	\N
+50658	ToxoDB	1	KNOWNXREF	1	ToxoDB	PRIMARY_DB_SYNONYM	\N	\N	Toxoplasma Genomic Resource Database.
+50660	SO	1	KNOWNXREF	0	Sequence Ontology	MISC	\N	\N	Sequence Ontology
+50661	BRAD_GENE	1	XREF	5	BrassEnsembl	MISC	\N	\N	The Brassica Genome Database
+50662	BRAD_TRANSCRIPT	1	XREF	5	BrassEnsembl	MISC	\N	\N	The Brassica Genome Database
+50663	Quick_Go	\N	KNOWN	1	GOA	MISC	\N	\N	Resource to show GOA records for Uniprot Accessions
+50664	Quick_Go_Evidence	\N	KNOWN	1	Quick Go	MISC	\N	\N	Resource to show GOA view of original annotation sources
+50666	IGDBCAS-v1.4_GENE	1.4	KNOWN	1	IGDBCAS v1.4 Gene	MISC	\N	\N	\N
+50667	IGDBCAS-v1.4_TRANSCRIPT	1.4	KNOWN	1	IGDBCAS v1.4 Transcript	MISC	\N	\N	\N
+50668	JGI_GENE	1	XREF	1	JGI Gene	MISC	\N	\N	gene ID/NAME in the JGI gff3 file
+50669	JGI_TRANSCRIPT	1	XREF	1	JGI Transcript	MISC	\N	\N	transcript/mRNA ID/NAME in the JGI gff3 file
+50672	IRGSPv1_GENE	1	KNOWNXREF	1	IRGSP v1 Gene	MISC	\N	\N	\N
+50673	IRGSPv1_TRANSCRIPT	1	KNOWNXREF	1	IRGSP v1 Transcript	MISC	\N	\N	\N
+50674	Ens_Lc_gene	\N	XREF	5	Ensembl Coelacanth Gene	MISC	\N	\N	\N
+50677	RGSC	\N	KNOWNXREF	0	Rat Genome Sequencing Consortium	MISC	\N	\N	Rat Genome Sequencing Consortium
+50678	BROAD_coelacanth_transcriptome	\N	XREF	0	BROAD Institute coelacanth transcriptome	MISC	\N	\N	\N
+50679	Ens_Ac_translation	\N	XREF	40	Ensembl Anole Lizard Translation	MISC	\N	\N	\N
+50682	BGI_Gene	1	XREF	50	BGI Gene	MISC	\N	\N	BGI gene identifier
+50683	GeneIndex	1	XREF	50	GeneIndex	MISC	\N	\N	\N
+50684	EO	1	XREF	0	Environment Ontology	MISC	\N	\N	Plant environmental conditions ontology terms.\
+More information in there:\
+http://www.gramene.org/plant_ontology/ontology_browse.html#eo
+50687	Uppsala University	\N	KNOWN	5	Uppsala University	MISC	\N	\N	\N
+50688	GenBank	1	XREF	1	GenBank	MISC	\N	\N	GenBank identifier
+50690	RefSeq_gene_name	\N	KNOWN	200	RefSeq gene name	MISC	\N	\N	This is read out of the *.gff files provided to us by the NCBI when we do a RefSeq import or a CCDS comparison. It has the key "gene_id" and is found at the start of the 9th field.
+50691	SGN	1	KNOWNXREF	1	Sol Genomics Network	MISC	\N	\N	\N
+50692	GRC_alignment_import	\N	XREF	0	GRC alignment import	MISC	\N	\N	Imported alignments from the Genome Reference Consortium.
+50693	BROAD_monodelphis_transcriptome	\N	XREF	0	Broad Institute transcriptome data for monodelphis	MISC	\N	\N	\N
+50694	SIB_mondelphis_transcriptome	\N	XREF	0	Swiss Institute of Bioinformatics transcriptome data for monodelphis	MISC	\N	\N	\N
+50695	SIB_platypus_transcriptome	\N	XREF	0	Swiss Institute of Bioinformatics transcriptome data for platypus	MISC	\N	\N	\N
+50696	SIB_orangutan_transcriptome	\N	XREF	0	Swiss Institute of Bioinformatics transcriptome data for orangutan	MISC	\N	\N	\N
+50697	NCBI_TAXONOMY	1	KNOWNXREF	1	NCBI species	MISC	\N	\N	Organism listed in NCBI
+50698	PHI	1	KNOWNXREF	1	PHI-base accession	MISC	\N	\N	Parasite-host interaction identifiers from PHI-base
+50700	AnoXcel	2	KNOWN	50	AnoXcel	MISC	\N	\N	VectorBase xref.
+50701	PGSC_GENE	1	XREF	1	PGSC	MISC	\N	\N	Potato Genome Sequencing Consortium database
+50703	Uniprot_gn_trans_name	\N	KNOWNXREF	5	UniProt transcript name	MISC	\N	\N	transcript name projected from UniProt gene name
+50708	GMGC_GENE	1	KNOWNXREF	1	GMGC	PRIMARY_DB_SYNONYM	\N	\N	Global Musa Genomics Consortium gene cross-references
+50709	tamu_vibs	\N	KNOWN	0	TAMU VIBS	MISC	\N	\N	The Texas A&M College of Veterinary Medicine & Biomedical Sciences, Department of Veterinary Integrative Biosciences.
+50710	INSDC	0	KNOWNXREF	5	International Nucleotide Sequence Database Collaboration	MISC	INSDC	\N	This external_db_id was initially made for use in the seq_region_synonym table. For species such as human, cow, dog we store chromosome names (1-22, X,Y) in the name column of the seq_region table. The INSDC accession is stored as a synonym.
+50711	ISGC	\N	KNOWNXREF	0	International Sheep Genome Consortium	MISC	\N	\N	International Sheep Genome Consortium
+50713	TAIR_SYMBOL	10	KNOWN	60	TAIR Gene Name	PRIMARY_DB_SYNONYM	\N	\N	TAIR gene names
+50715	TIGR_ID	1	XREF	1	TIGR Internal ID	MISC	\N	\N	cross-references to TIGR internal identifiers, attached to genes.
+50717	GOA	1	KNOWNXREF	1	GOA	MISC	\N	\N	GOA xrefs (to UniProt identifiers)
+50718	ENA_GENE	1	KNOWNXREF	1	European Nucleotide Archive	MISC	\N	\N	Cross-references to the source gene model when importing from ENA.
+50719	ENA_TRANSCRIPT	1	KNOWNXREF	1	European Nucleotide Archive	MISC	\N	\N	Cross-references to the source transcript model when importing from ENA.
+50720	LGBPratt_EST_Cluster	1	KNOWNXREF	1	LGBPratt_EST_Cluster	MISC	\N	\N	\N
+50721	BaylorCollege	\N	KNOWN	5	Baylor College of Medicine, Texas Medical Center	MISC	\N	\N	\N
+50722	Rhea	1	KNOWNXREF	1	Rhea	MISC	\N	\N	Cross-references to Rhea attached to translation objects
+50723	Ens_Bt_translation	\N	XREF	5	Ensembl Cow Translation	MISC	\N	\N	\N
+50726	ENA_FEATURE_GENE	1	KNOWNXREF	1	ENA	MISC	\N	\N	Cross-reference to the ENA object from which the gene has been inferred, when loading a genome from ENA records.
+50727	ENA_FEATURE_TRANSCRIPT	1	KNOWNXREF	1	ENA	MISC	\N	\N	Cross-reference to the ENA object from which the transcript has been inferred, when loading a genome from ENA records.
+50728	ENA_FEATURE_PROTEIN	1	KNOWNXREF	1	ENA	MISC	\N	\N	Cross-reference to the ENA object from which the translation has been inferred, when loading a genome from ENA records.
+50730	AGP	\N	KNOWN	5	Anolis Genome Project	MISC	\N	\N	\N
+50731	Turkey Genome Consortium	\N	KNOWN	5	Turkey Genome Consortium	MISC	\N	\N	Turkey Genome Consortium
+50732	Yutaka_Satou_Kyoto_University	\N	KNOWN	5	Yutaka Satou Kyoto University	MISC	\N	\N	Yutaka Satou Kyoto University
+50733	Chicken_Genome_Consortium	\N	KNOWN	5	International Chicken Genome Consortium	MISC	\N	\N	\N
+50734	TAIR_TRANSLATION	1	XREF	1	TAIR Translation identifier	MISC	\N	\N	TAIR identifier to link to Ensembl Translation entities.\
+The main requirement behind this entry, is to be able to link TAIR GO annotations to Ensembl Translation objects.
+50735	AGI_GENE	1	XREF	1	AGI Gene	MISC	\N	\N	annotation provided by Arizona Genome Institute
+50736	AGI_TRANSCRIPT	1	XREF	1	AGI Transcript	MISC	\N	\N	annotation provided by Arizona Genome Institute
+50737	CGNC	\N	KNOWNXREF	100	CGNC Symbol	PRIMARY_DB_SYNONYM	\N	\N	\N
+50738	MetaCyc	1	KNOWNXREF	1	MetaCyc	MISC	\N	\N	MetaCyc database of metabolic pathways
+50739	PHIP	1	KNOWNXREF	1	PHI-base phenotype ontology	MISC	\N	\N	PHI-base phenotype ontology for genes proven to affect the outcome of pathogen-host interactions
+50740	PHIE	1	KNOWNXREF	1	PHI-base condition ontology	MISC	\N	\N	PHI-base experimental evidence ontology for genes proven to affect the outcome of pathogen-host interactions
+50742	PubMedCentral	\N	KNOWN	5	PubMedCentral	LIT	\N	\N	PMC identifier for use with PubMedCentral (http://www.ncbi.nlm.nih.gov/pmc and http://europepmc.org/)
+50743	PFAM	27	XREF	0	PFAM	MISC	\N	\N	Pfam release 27, from Vega
+50744	EntrezGene_trans_name	\N	KNOWNXREF	250	EntrezGene transcript name	MISC	\N	\N	transcript name projected from EntrezGene gene name
+50745	BROAD_M_violaceum	1	KNOWNXREF	0	Broad Institute	MISC	\N	\N	Broad Institute Microbotryum violaceum Database
+50746	BROAD_M_violaceum_GENE	1	KNOWNXREF	0	Broad Institute	PRIMARY_DB_SYNONYM	\N	\N	Broad Institute Microbotryum violaceum Database
+50747	BROAD_M_violaceum_TRANSCRIPT	1	KNOWNXREF	0	Broad Institute	PRIMARY_DB_SYNONYM	\N	\N	Broad Institute Microbotryum violaceum Database
+50748	Ensembl_Plants	1	XREF	1	Ensembl Plants	ENSEMBL	\N	\N	Ensembl Plants identifiers serving GO projections from a reference species to other plants species.
+50749	ChEMBL	\N	KNOWNXREF	5	ChEMBL	MISC	\N	\N	ChEMBL external references imported via Uniprot mappings
+50750	IBSC	1	KNOWNXREF	50	IBSC Gene ID	MISC	\N	\N	International Barley Sequencing Consortium gene identifier
+50752	PRIDE	\N	XREF	0	PRIDE	MISC	\N	\N	\N
+50753	LegioList	\N	XREF	0	LegioList	MISC	\N	\N	Database dedicated to the analysis of the genomes of Legionella
+50755	BindingDB	\N	XREF	0	BindingDB	MISC	\N	\N	BindingDB is a public, web-accessible database of measured binding affinities
+50756	STRING	\N	XREF	0	STRING	MISC	\N	\N	STRING - Known and Predicted Protein-Protein Interactions
+50757	UniPathway	\N	XREF	0	UniPathway	MISC	\N	\N	UniPathway is a manually curated resource of enzyme-catalyzed and spontaneous chemical reactions.
+50759	SWISS_MODEL	\N	XREF	0	SWISS-MODEL	MISC	\N	\N	The SWISS-MODEL Repository is a database of annotated three-dimensional comparative protein structure models generated by the fully automated homology-modelling pipeline SWISS-MODEL.
+50762	CYGD	\N	XREF	0	CYGD	MISC	\N	\N	The MIPS Comprehensive Yeast Genome Database (CYGD) aims to present information on the molecular structure and functional network of the entirely sequenced, well-studied model eukaryote, the budding yeast Saccharomyces cerevisiae.
+50770	PseudoCAP	\N	XREF	0	Pseudomonas Genome Database	MISC	\N	\N	The Pseudomonas Genome database has been a resource for peer-reviewed, continually-updated annotations for the Pseudomonas aeruginosa PAO1 reference strain's genome and, more recently, comparative analyses of several related Pseudomonas species.
+50771	MINT	\N	XREF	0	MINT	MISC	\N	\N	MINT, the Molecular INTeraction database, focuses on experimentally verified protein-protein interactions mined from the scientific literature by expert curators.
+50772	Ant Genomes Portal	\N	KNOWNXREF	0	Ant Genomes Portal	MISC	\N	\N	\N
+50775	Ens_Mg_translation	\N	XREF	40	Ensembl Turkey Translation	MISC	\N	\N	\N
+50776	LNCC	\N	XREF	30	LNCC	MISC	\N	\N	The National Laboratory of Scientific Computation (Laboratorio Nacional de Computacao Cientifica: LNCC), Brazil
+50777	RGD_trans_name	\N	KNOWNXREF	50	RGD transcript name	MISC	\N	\N	transcript name from RGD
+50778	Xenbase_trans_name	\N	KNOWNXREF	1	Xenbase transcript name	MISC	\N	\N	transcript name from Xenbase
+50779	NasoniaBase	\N	KNOWN	0	NasoniaBase	MISC	\N	\N	\N
+50780	wormbase_gseqname	\N	KNOWN	6	WormBase Gene Sequence-name	MISC	\N	\N	\N
+50782	Sanger	\N	KNOWN	5	Sanger Wellcome Trust Institute	MISC	\N	\N	\N
+50783	ENSP_ident	\N	XREF	1	Ensembl translation having exact match with Havana	ALT_TRANS	\N	\N	\N
+50784	Ensembl_Metazoa	1	XREF	1	Ensembl Metazoa	ENSEMBL	\N	\N	Ensembl Metazoa identifiers serving GO projections from a reference species to other metazoa species.
+50785	Ens_Mmu_translation	\N	XREF	40	Ensembl Macaque Translation	MISC	\N	\N	\N
+50786	PomBase_GO_AnnotationExtensions	\N	KNOWN	1	PomBase GO AnnotationExtensions	MISC	\N	\N	Specific accession used by PomBase for ontology annoation extensions
+50788	SP_SL	\N	KNOWN	0	UniProtKB/SwissProt Subcellular Locatisation	MISC	\N	\N	UniProt Subcellular Location (http://www.uniprot.org/manual/subcellular_location)
+50789	PR	\N	KNOWNXREF	0	Protein Ontology	MISC	\N	\N	Protein Ontology term (previously PR) - http://pir.georgetown.edu/pro/pro.shtml
+50790	PUBMED_POMBASE	\N	KNOWN	1	PomBase PubMed ID	LIT	\N	\N	PomBase specific publications
+50792	CL	\N	KNOWNXREF	0	Cell Type Ontology	MISC	\N	\N	Cell type ontology annotations (http://cellontology.org/)
+50793	ChEBI	\N	KNOWNXREF	0	ChEBI Chemical Database	MISC	\N	\N	ChEBI chemical database
+50794	FYPO_EXT	\N	KNOWNXREF	1	FYPO Extensions	MISC	\N	\N	Annotation extension terms for the Fission Yeast Phenotype Ontology (FYPO)
+50795	EcoCyc	\N	KNOWNXREF	1	EcoCyc	MISC	\N	\N	Scientific database for E. coli and a division of MetaCyc (http://ecocyc.org/)
+50796	PATO	\N	KNOWNXREF	1	Phenotypic Qualities Ontology	MISC	\N	\N	http://obofoundry.org/wiki/index.php/PATO:Main_Page
+50797	UniProtKB-KW	\N	KNOWNXREF	0	UniProtKB Keywords	MISC	\N	\N	UniProtKB Keywords for describing UniProt annotations
+50798	PBQ	\N	KNOWNXREF	0	PomBase Quiescence Ontology	MISC	\N	\N	Used in the annotation of quiescent cell phenotypes.
+50799	University of Texas	\N	KNOWN	5	University of Texas	MISC	\N	\N	\N
+50801	KEGG_Enzyme	\N	XREF	0	KEGG	MISC	\N	\N	KEGG pathway and enzyme
+50802	gfbgp	\N	KNOWN	0	Glanville Fritillary Butterfly Genome Project	MISC	\N	\N	\N
+50803	ensembl_internal_synonym	\N	KNOWNXREF	100	Ensembl internal synonym	MISC	\N	\N	\N
+50808	DOI	\N	KNOWN	5	Digital Object Identifier	LIT	\N	\N	Digital Object Identifier used to uniquely identify an object such as an electronic document.
+50809	zngp	\N	KNOWNXREF	0	Zootermopsis nevadensis Genome Project	MISC	\N	\N	\N
+50814	FGDB	\N	KNOWNXREF	0	FGDB	ALT_GENE	\N	\N	MIPS Fusarium graminearum Genome Database
+50815	Ensembl_Fungi	1	XREF	1	Ensembl Fungi	ENSEMBL	\N	\N	Ensembl Fungi identifiers serving GO projections from a reference species to other fungal species.
+50817	RNACentral	\N	KNOWNXREF	0	RNACentral	PRIMARY_DB_SYNONYM	\N	\N	Sequence identity to RNACentral ids
+50818	Smar_Community_Annotation	\N	KNOWN	50	Strigamia maritima Community Annotation	MISC	\N	\N	\N
+50819	RFAM_GENE	\N	KNOWN	0	Rfam Gene Name	MISC	\N	\N	Name for gene assigned from Rfam alignment
+50820	PGSB_WHEAT_GENE	2.2	KNOWNXREF	1	Wheat survey sequence PGSB gene identifier	MISC	\N	\N	Bread wheat survey sequence gene models from PGSB Wheat Genome Database (formerly MIPS). Release 2.2
+50821	GDEC_GENE	1.0	KNOWNXREF	1	GDEC 3B gene identifier	MISC	\N	\N	Bread wheat 3B pseudomolecule gene models from INRA GDEC group.\
+
+50822	ARAPORT_GENE	1	KNOWNXREF	0	Araport	MISC	\N	\N	Gene identifiers from Araport, the Arabidopsis information portal (formerly TAIR).
+50823	MTGD	4.0	KNOWNXREF	0	MTGD	PRIMARY_DB_SYNONYM	\N	\N	The Medicago truncatula Genome Database (MTGD), maintained by JCVI.
+50824	Reactome_gene	\N	KNOWNXREF	0	Reactome	PRIMARY_DB_SYNONYM	\N	\N	Reactome entries linked to genes
+50825	Reactome_transcript	\N	KNOWNXREF	0	Reactome	PRIMARY_DB_SYNONYM	\N	\N	Reactome entries linked to transcripts
+50826	PB_REF	\N	KNOWNXREF	1	PomBase Reference	MISC	\N	\N	Specific accession used by PomBase for source reference
+50827	GEO	\N	XREF	0	Gene Expression Omnibus	MISC	\N	\N	\N
+50828	GigaDB_A_tauschii	1	KNOWNXREF	1	Aegilops tauschii GigaDB identifier	MISC	\N	\N	Aegilops tauschii GigaDB gene identifier
