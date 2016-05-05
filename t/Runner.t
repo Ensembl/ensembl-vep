@@ -53,6 +53,9 @@ is_deeply(
       'gencode_basic' => undef,
       'source_type' => 'ensembl',
       'all_refseq' => undef,
+      'polyphen' => undef,
+      'sift' => undef,
+      'everything' => undef,
       'info' => {
         'polyphen' => '2.2.2',
         'sift' => 'sift5.2.2',
@@ -159,12 +162,6 @@ is_deeply($runner->get_OutputFactory, bless( {
   'header_info' => $info,
 }, 'Bio::EnsEMBL::VEP::OutputFactory::VEP_output' ), 'get_OutputFactory');
 
-my $fasta_db = $runner->setup_fasta_db;
-ok(
-  ref($fasta_db) eq 'Bio::DB::HTS::Faidx' || ref($fasta_db) eq 'Bio::DB::Fasta',
-  'setup_fasta_db'
-);
-
 ok($runner->init, 'init');
 
 is(
@@ -183,6 +180,74 @@ is(
   )),
   'next_output_line'
 );
+
+
+## post_setup_checks
+####################
+
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  dir => $test_cfg->{cache_root_dir}.'/sereal',
+  hgvs => 1,
+  offline => 1,
+});
+throws_ok {$runner->post_setup_checks} qr/Cannot generate HGVS coordinates in offline mode/, 'post_setup_checks - hgvs + offline with no fasta';
+
+
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  dir => $test_cfg->{cache_root_dir}.'/sereal',
+  check_ref => 1,
+  offline => 1,
+});
+throws_ok {$runner->post_setup_checks} qr/Cannot check reference sequences/, 'post_setup_checks - check_ref + offline with no fasta';
+
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  lrg => 1,
+  offline => 1,
+});
+throws_ok {$runner->post_setup_checks} qr/Cannot map to LRGs in offline mode/, 'post_setup_checks - lrg + offline';
+
+## status_msg tests require we mess with STDOUT
+###############################################
+
+# status_msg prints to STDOUT
+no warnings 'once';
+open(SAVE, ">&STDOUT") or die "Can't save STDOUT\n"; 
+
+close STDOUT;
+my $tmp;
+open STDOUT, '>', \$tmp;
+
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  dir => $test_cfg->{cache_root_dir}.'/sereal',
+  everything => 1,
+  offline => 1,
+});
+is($runner->param('hgvs'), 1, 'post_setup_checks - everything + offline with no fasta disables hgvs - before');
+$runner->post_setup_checks();
+is($runner->param('hgvs'), 0, 'post_setup_checks - everything + offline with no fasta disables hgvs - after');
+ok($tmp =~ /Disabling --hgvs/, 'post_setup_checks - status_msg for above');
+$tmp = '';
+
+foreach my $flag(qw(lrg check_sv check_ref hgvs)) {
+  $runner = Bio::EnsEMBL::VEP::Runner->new({
+    %$cfg_hash,
+    dir => $test_cfg->{cache_root_dir}.'/sereal',
+    $flag => 1,
+    cache => 1,
+    offline => 0,
+    database => 0,
+  });
+  $runner->post_setup_checks();
+  ok($tmp =~ /Database will be accessed when using --$flag/, 'post_setup_checks - info - '.$flag);
+  $tmp = '';
+}
+
+open(STDOUT, ">&SAVE") or die "Can't restore STDOUT\n";
+
 
 
 

@@ -47,7 +47,6 @@ use base qw(Bio::EnsEMBL::VEP::BaseVEP);
 
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
-use Bio::EnsEMBL::Variation::Utils::FastaSequence qw(setup_fasta);
 use Bio::EnsEMBL::VEP::Utils qw(get_time);
 use Bio::EnsEMBL::VEP::Constants;
 use Bio::EnsEMBL::VEP::Config;
@@ -93,9 +92,11 @@ sub init {
   my $annotation_sources = $self->get_all_AnnotationSources();
 
   # setup FASTA file DB
-  my $fasta_db = $self->setup_fasta_db();
+  my $fasta_db = $self->fasta_db();
 
   my $buffer = $self->get_InputBuffer();
+
+  $self->post_setup_checks();
 
   return $self->{_initialized} = 1;
 }
@@ -144,6 +145,52 @@ sub next_output_line {
   return @$output_buffer ? shift @$output_buffer : undef;
 }
 
+sub post_setup_checks {
+  my $self = shift;
+
+  # disable HGVS if no FASTA file found and it was switched on by --everything
+  if(
+    $self->param('hgvs') &&
+    $self->param('offline') &&
+    $self->param('everything') &&
+    !$self->fasta_db
+  ) {
+    $self->status_msg("INFO: Disabling --hgvs; using --offline and no FASTA file found\n");
+    $self->param('hgvs', 0);
+  }
+  
+  # offline needs cache, can't use HGVS
+  if($self->param('offline')) {
+    unless($self->fasta_db) {
+      die("ERROR: Cannot generate HGVS coordinates in offline mode without a FASTA file (see --fasta)\n") if $self->param('hgvs');
+      die("ERROR: Cannot check reference sequences without a FASTA file (see --fasta)\n") if $self->param('check_ref')
+    }
+    
+    # die("ERROR: Cannot do frequency filtering in offline mode\n") if defined($config->{check_frequency}) && $config->{freq_pop} !~ /1kg.*(all|afr|amr|asn|eur)/i;
+    die("ERROR: Cannot map to LRGs in offline mode\n") if $self->param('lrg');
+  }
+    
+  # warn user DB will be used for SIFT/PolyPhen/HGVS/frequency/LRG
+  if($self->param('cache')) {
+        
+    # these two def depend on DB
+    foreach my $param(grep {$self->param($_)} qw(lrg check_sv)) {
+      $self->status_msg("INFO: Database will be accessed when using --$param");
+    }
+
+    # and these depend on either DB or FASTA DB
+    unless($self->fasta_db) {
+      foreach my $param(grep {$self->param($_)} qw(hgvs check_ref)) {
+        $self->status_msg("INFO: Database will be accessed when using --$param");
+      }
+    }
+        
+    # $self->status_msg("INFO: Database will be accessed when using --check_frequency with population ".$config->{freq_pop}) if defined($config->{check_frequency}) && $config->{freq_pop} !~ /1kg.*(all|afr|amr|asn|eur)/i;
+  }
+
+  return 1;
+}
+
 sub setup_db_connection {
   my $self = shift;
 
@@ -180,27 +227,6 @@ sub setup_db_connection {
   $self->species($reg->get_alias($self->param('species')));
 
   return 1;
-}
-
-sub setup_fasta_db {
-  my $self = shift;
-
-  if(!exists($self->config->{_fasta_db})) {
-    my $fasta_db;
-
-    if(my $fasta_file = $self->param('fasta')) {
-
-      $fasta_db = setup_fasta(
-        -FASTA => $fasta_file,
-        -ASSEMBLY => $self->param('assembly'),
-        -OFFLINE => $self->param('offline'),
-      );
-    }
-
-    $self->config->{_fasta_db} = $fasta_db;
-  }
-
-  return $self->config->{_fasta_db};
 }
 
 sub get_all_AnnotationSources {

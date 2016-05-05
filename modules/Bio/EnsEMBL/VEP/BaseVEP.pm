@@ -47,6 +47,7 @@ use Bio::EnsEMBL::Registry;
 use Bio::EnsEMBL::Variation::DBSQL::VariationFeatureAdaptor;
 use Bio::EnsEMBL::Variation::DBSQL::StructuralVariationFeatureAdaptor;
 use Bio::EnsEMBL::Variation::DBSQL::TranscriptVariationAdaptor;
+use Bio::EnsEMBL::Variation::Utils::FastaSequence qw(setup_fasta);
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::Utils qw(get_time);
@@ -200,7 +201,7 @@ sub get_slice {
       $slice = $sa->fetch_by_region(undef, $chr);
     }
 
-    elsif(my $fasta_db = $self->config->{_fasta_db}) {
+    elsif(my $fasta_db = $self->fasta_db) {
       my $fa_length = $fasta_db->length($chr);
       my $length = $fa_length && $fa_length > 0 ? $fa_length : 1;
 
@@ -238,6 +239,27 @@ sub get_database_assembly {
   }
 
   return $config->{_database_assembly};
+}
+
+sub fasta_db {
+  my $self = shift;
+
+  if(!exists($self->config->{_fasta_db})) {
+    my $fasta_db;
+
+    if(my $fasta_file = $self->param('fasta')) {
+
+      $fasta_db = setup_fasta(
+        -FASTA => $fasta_file,
+        -ASSEMBLY => $self->param('assembly'),
+        -OFFLINE => $self->param('offline'),
+      );
+    }
+
+    $self->config->{_fasta_db} = $fasta_db;
+  }
+
+  return $self->config->{_fasta_db};
 }
 
 # adds shortcuts to named params to this object
