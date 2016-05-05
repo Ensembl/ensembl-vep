@@ -64,7 +64,6 @@ my %FORMAT_MAP = (
   'vcf'     => 'VCF',
   'ensembl' => 'VEP_output',
   'vep'     => 'VEP_output',
-  'gvf'     => 'GVF',
   'tab'     => 'Tab',
   'json'    => 'JSON',
 );
