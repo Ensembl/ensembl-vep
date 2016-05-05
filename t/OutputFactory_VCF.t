@@ -32,7 +32,7 @@ my $cfg_hash = $test_cfg->base_testing_cfg;
 ##############
 
 # use test
-use_ok('Bio::EnsEMBL::VEP::OutputFactory::VEP_output');
+use_ok('Bio::EnsEMBL::VEP::OutputFactory::VCF');
 
 use_ok('Bio::EnsEMBL::VEP::Config');
 use_ok('Bio::EnsEMBL::VEP::Runner');
