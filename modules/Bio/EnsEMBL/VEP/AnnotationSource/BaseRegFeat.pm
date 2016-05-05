@@ -52,6 +52,28 @@ our @REG_FEAT_TYPES = qw(
   MotifFeature
 );
 
+sub check_cell_types {
+  my $self = shift;
+
+  my $given_cell_types = $self->{cell_type};
+
+  return unless $given_cell_types && scalar @$given_cell_types;
+
+  my %available = map {$_ => 1} @{$self->get_available_cell_types};
+
+  foreach my $ct(@$given_cell_types) {
+    throw(
+      sprintf(
+        "ERROR: Cell type \"%s\" unavailable; available cell types are:\n%s\n",
+        $ct,
+        join(",", @{$self->get_available_cell_types})
+      )
+    ) unless $available{$ct};
+  }
+
+  return 1;
+}
+
 sub annotate_InputBuffer {
   my $self = shift;
   my $buffer = shift;

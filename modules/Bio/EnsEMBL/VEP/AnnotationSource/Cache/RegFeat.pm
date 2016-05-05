@@ -56,6 +56,26 @@ use base qw(
   Bio::EnsEMBL::VEP::AnnotationSource::BaseRegFeat
 );
 
+sub new {
+  my $caller = shift;
+  my $class = ref($caller) || $caller;
+  
+  my $self = $class->SUPER::new(@_);
+
+  # add shortcuts to these params
+  $self->add_shortcuts([qw(
+    cell_type
+  )]);
+
+  $self->check_cell_types();
+
+  return $self;
+}
+
+sub get_available_cell_types {
+  return $_[0]->{available_cell_types} || [];
+}
+
 sub get_dump_file_name {
   my $self = shift;
   my $chr  = shift;

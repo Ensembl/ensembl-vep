@@ -39,7 +39,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 28 unless $can_use_db;
+  skip 'No local database configured', 31 unless $can_use_db;
 
   my $multi;
 
@@ -77,7 +77,59 @@ SKIP: {
 
 
   ## METHODS
-  ##########  
+  ##########
+
+  is_deeply(
+    $as->get_available_cell_types,
+    [
+      'A549',
+      'CD14+CD16-Monocyte:CordBlood:hist',
+      'CD14+CD16-Monocyte:VenousBlood:hist',
+      'CD4+abTcell:VenousBlood:hist',
+      'CD8+abTcell:CordBlood:hist',
+      'CMCD4+abTcell:VenousBlood:hist',
+      'DND-41',
+      'eosinophil:VenousBlood:hist',
+      'EPC:VenousBlood:hist',
+      'erythroblast:CordBlood:hist',
+      'GM12878',
+      'H1ESC',
+      'HeLa-S3',
+      'HepG2',
+      'HMEC',
+      'HSMM',
+      'HSMMtube',
+      'HUVEC',
+      'HUVECprol:CordBlood:hist',
+      'IMR90',
+      'K562',
+      'M0Macrophage:CordBlood:hist',
+      'M0Macrophage:VenousBlood:hist',
+      'M1Macrophage:CordBlood:hist',
+      'M1Macrophage:VenousBlood:hist',
+      'M2Macrophage:CordBlood:hist',
+      'M2Macrophage:VenousBlood:hist',
+      'Monocytes-CD14+',
+      'MSC:VenousBlood:hist',
+      'naiveBcell:VenousBlood:hist',
+      'neutroMyelocyte:BoneMarrow:hist',
+      'neutrophil:CordBlood:hist',
+      'neutrophil:VenousBlood:hist',
+      'NH-A',
+      'NHDF-AD',
+      'NHEK',
+      'NHLF',
+      'Osteobl',
+      'MultiCell'
+    ],
+    'get_available_cell_types - empty'
+  );
+
+  $as->{cell_type} = ['HUVEC'];
+  ok($as->check_cell_types, 'check_cell_types');
+
+  $as->{cell_type} = ['JUVEC'];
+  throws_ok {$as->check_cell_types} qr/Cell type .* unavailable/, 'check_cell_types - fail';
 
   $features = $as->get_features_by_regions_uncached([[21, 511]]);
 

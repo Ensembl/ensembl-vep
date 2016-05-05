@@ -57,6 +57,15 @@ is($c->get_dump_file_name(1, 1, 100), $dir.'/1/1-100_reg.gz', 'get_dump_file_nam
 throws_ok { $c->get_dump_file_name() } qr/No chromosome/, 'get_dump_file_name no chromosome';
 throws_ok { $c->get_dump_file_name(1) } qr/No region/, 'get_dump_file_name no region';
 
+is_deeply($c->get_available_cell_types, [], 'get_available_cell_types - empty');
+
+$c->{available_cell_types} = ['foo', 'bar'];
+$c->{cell_type} = ['foo'];
+ok($c->check_cell_types, 'check_cell_types');
+
+$c->{cell_type} = ['boo'];
+throws_ok {$c->check_cell_types} qr/Cell type .* unavailable/, 'check_cell_types - fail';
+
 # deserialization
 my $obj = $c->deserialize_from_file(
   $c->get_dump_file_name(

@@ -219,6 +219,7 @@ ok($as = $cd->get_all_AnnotationSources, 'get_all_AnnotationSources');
 is(ref($as), 'ARRAY', 'get_all_AnnotationSources return type');
 is(scalar @$as, 1, 'get_all_AnnotationSources count');
 is(ref($as->[0]), 'Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript', 'first AnnotationSource is Transcript type');
+is_deeply($as->[0]->info, $cd->version_data, 'version_data added to annotation source');
 
 # switch on regulatory
 $cfg = Bio::EnsEMBL::VEP::Config->new({%$cfg_hash, regulatory => 1});
@@ -227,6 +228,51 @@ ok($cd = Bio::EnsEMBL::VEP::CacheDir->new({config => $cfg, root_dir => $cfg_hash
 ok($as = $cd->get_all_AnnotationSources, 'get_all_AnnotationSources with regulatory');
 is(scalar @$as, 2, 'get_all_AnnotationSources with regulatory count');
 is(ref($as->[1]), 'Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat', 'second AnnotationSource is RegFeat type');
+is_deeply(
+  $as->[1]->{available_cell_types},
+  [
+    'A549',
+    'CD14+CD16-Monocyte:CordBlood:hist',
+    'CD14+CD16-Monocyte:VenousBlood:hist',
+    'CD4+abTcell:VenousBlood:hist',
+    'CD8+abTcell:CordBlood:hist',
+    'CMCD4+abTcell:VenousBlood:hist',
+    'DND-41',
+    'eosinophil:VenousBlood:hist',
+    'EPC:VenousBlood:hist',
+    'erythroblast:CordBlood:hist',
+    'GM12878',
+    'H1ESC',
+    'HeLa-S3',
+    'HepG2',
+    'HMEC',
+    'HSMM',
+    'HSMMtube',
+    'HUVEC',
+    'HUVECprol:CordBlood:hist',
+    'IMR90',
+    'K562',
+    'M0Macrophage:CordBlood:hist',
+    'M0Macrophage:VenousBlood:hist',
+    'M1Macrophage:CordBlood:hist',
+    'M1Macrophage:VenousBlood:hist',
+    'M2Macrophage:CordBlood:hist',
+    'M2Macrophage:VenousBlood:hist',
+    'Monocytes-CD14+',
+    'MSC:VenousBlood:hist',
+    'naiveBcell:VenousBlood:hist',
+    'neutroMyelocyte:BoneMarrow:hist',
+    'neutrophil:CordBlood:hist',
+    'neutrophil:VenousBlood:hist',
+    'NH-A',
+    'NHDF-AD',
+    'NHEK',
+    'NHLF',
+    'Osteobl',
+    'MultiCell'
+  ],
+  'cell types added from info'
+);
 
 
 # switch on variation

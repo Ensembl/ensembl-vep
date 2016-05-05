@@ -99,6 +99,7 @@ sub get_all_AnnotationSources {
       serializer_type => $info->{serialiser_type} || undef,
       cache_region_size => $info->{cache_region_size} || $self->param('cache_region_size'),
       info => $self->version_data,
+      available_cell_types => [split(',', ($info->{cell_types} || ''))],
     }) if $self->param('regulatory') and $info->{regulatory};
 
     # add Variation if available

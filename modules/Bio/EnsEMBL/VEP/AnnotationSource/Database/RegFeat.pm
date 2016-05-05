@@ -61,7 +61,22 @@ sub new {
     cell_type
   )]);
 
+  $self->check_cell_types();
+
   return $self;
+}
+
+sub get_available_cell_types {
+  my $self = shift;
+
+  if(!exists($self->{available_cell_types})) {
+    my $aa = $self->get_adaptor('funcgen', 'Analysis');
+    my $analysis = $aa->fetch_by_logic_name('Regulatory_Build');
+    my $fsa = $self->get_adaptor('funcgen', 'FeatureSet');
+    $self->{available_cell_types} = [map {$_->cell_type->name} @{$fsa->fetch_all_by_Analysis($analysis)}];
+  }
+
+  return $self->{available_cell_types};
 }
 
 sub get_features_by_regions_uncached {
