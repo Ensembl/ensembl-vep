@@ -58,6 +58,9 @@ my $exp = [
     'gencode_basic' => undef,
     'all_refseq' => undef,
     'source_type' => 'ensembl',
+    'sift' => undef,
+    'polyphen' => undef,
+    'everything' => undef,
     'info' => {
       'polyphen' => '2.2.2',
       'sift' => 'sift5.2.2',
@@ -116,6 +119,7 @@ SKIP: {
     bless( {
       'polyphen' => undef,
       'sift' => undef,
+      'everything' => undef,
       'uniprot' => undef,
       '_config' => $asa->config,
       'xref_refseq' => undef,
@@ -127,13 +131,20 @@ SKIP: {
       'source_type' => 'ensembl',
       'core_type' => 'core',
       'all_refseq' => undef,
-      'assembly' => undef
+      'assembly' => undef,
+      '_species' => 'homo_vepiens',
     }, 'Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript' )
   ];
 
-  is_deeply($asa->get_all_from_database(), $exp, 'get_all_from_database');
+  my $asas = $asa->get_all_from_database();
+  delete $asas->[0]->{_adaptors};
 
-  is_deeply($asa->get_all(), $exp, 'get_all - DB');
+  is_deeply($asas, $exp, 'get_all_from_database');
+
+  $asas = $asa->get_all();
+  delete $asas->[0]->{_adaptors};
+
+  is_deeply($asas, $exp, 'get_all - DB');
 
   $asa->param('check_existing', 1);
   is_deeply(

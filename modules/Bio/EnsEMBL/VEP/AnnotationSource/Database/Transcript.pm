@@ -67,6 +67,7 @@ sub new {
     all_refseq
     sift
     polyphen
+    everything
     polyphen_analysis
     xref_refseq
     protein
@@ -76,7 +77,50 @@ sub new {
 
   $self->{source_type} = ($self->{core_type} || '') eq 'otherfeatures' ? 'refseq' : 'ensembl';
 
+  $self->check_sift_polyphen();
+
   return $self;
+}
+
+sub check_sift_polyphen {
+  my $self = shift;
+
+  my $var_mca = $self->get_adaptor('variation', 'MetaContainer');
+
+  foreach my $tool(qw(SIFT PolyPhen)) {
+    my $lc_tool = lc($tool);
+
+    my $sth = $var_mca->db->dbc->prepare(qq{
+      SELECT meta_value
+      FROM meta
+      WHERE meta_key = ?
+    });
+    $sth->execute($tool.'_version');
+
+    my $v;
+    $sth->bind_columns(\$v);
+    $sth->fetch();
+    $sth->finish();
+
+    if($self->{$lc_tool}) {
+
+      unless($v) {
+
+        # dont die if user set "everything" param on a species with no SIFT/PolyPhen
+        if($self->{everything}) {
+          $self->status_msg("INFO: disabling $tool");
+          $self->param($lc_tool, 0);
+          $self->{$lc_tool} = 0;
+        }
+
+        else {
+          throw("ERROR: $tool not available\n");
+        }
+      }
+    }
+  }
+
+  return 1;
 }
 
 sub assembly {

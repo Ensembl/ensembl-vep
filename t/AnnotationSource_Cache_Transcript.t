@@ -58,6 +58,14 @@ is($c->get_dump_file_name(1, 1, 100), $dir.'/1/1-100.gz', 'get_dump_file_name wi
 throws_ok { $c->get_dump_file_name() } qr/No chromosome/, 'get_dump_file_name no chromosome';
 throws_ok { $c->get_dump_file_name(1) } qr/No region/, 'get_dump_file_name no region';
 
+$c->{sift} = 1;
+$c->{info}->{sift} = '1';
+ok($c->check_sift_polyphen, 'check_sift_polyphen');
+$c->{info} = {};
+
+throws_ok { $c->check_sift_polyphen } qr/SIFT not available/, 'check_sift_polyphen - fail';
+delete($c->{sift});
+
 # deserialization
 my $obj = $c->deserialize_from_file(
   $c->get_dump_file_name(

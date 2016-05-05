@@ -80,6 +80,16 @@ SKIP: {
   ## METHODS
   ##########
 
+  ok($as->check_sift_polyphen, 'check_sift_polyphen - not specified');
+
+  $as->{sift} = 1;
+  ok($as->check_sift_polyphen, 'check_sift_polyphen - SIFT');
+  $as->{sift} = 0;
+
+  $as->{polyphen} = 1;
+  ok($as->check_sift_polyphen, 'check_sift_polyphen - PolyPhen');
+  $as->{polyphen} = 0;
+
   my $ta = $multi->get_DBAdaptor('core')->get_TranscriptAdaptor;
   is(ref($ta), 'Bio::EnsEMBL::DBSQL::TranscriptAdaptor', 'get transcript adaptor');
   my $tr = $ta->fetch_by_stable_id('ENST00000307301');
