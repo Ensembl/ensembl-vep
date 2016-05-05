@@ -92,14 +92,21 @@ is($bv->{test}, 'hello', 'add_shortcuts arrayref');
 
 throws_ok { $bv->add_shortcuts('test') } qr/add_shortcuts would overwrite value/, 'add_shortcuts overwrite';
 
+is($bv->fasta_db, undef, 'fasta_db - no file');
 
 $bv = Bio::EnsEMBL::VEP::BaseVEP->new({config => $cfg});
 is($bv->get_slice('1'), undef, 'get_slice - no fasta_db or database');
 
 use_ok('Bio::EnsEMBL::VEP::Runner');
 my $runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, offline => 1, database => 0, input_file => $test_cfg->{test_vcf}});
-$runner->init();
+$runner->get_all_AnnotationSources();
 $bv = Bio::EnsEMBL::VEP::BaseVEP->new({config => $runner->config});
+
+my $fasta_db = $bv->fasta_db;
+ok(
+  ref($fasta_db) eq 'Bio::DB::HTS::Faidx' || ref($fasta_db) eq 'Bio::DB::Fasta',
+  'fasta_db'
+);
 
 is_deeply(
   $bv->get_slice('1'),
