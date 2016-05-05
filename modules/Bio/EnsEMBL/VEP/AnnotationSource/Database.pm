@@ -47,6 +47,17 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
 use base qw(Bio::EnsEMBL::VEP::AnnotationSource);
 
+sub new {
+  my $caller = shift;
+  my $class = ref($caller) || $caller;
+  
+  my $self = $class->SUPER::new(@_);
+
+  $self->{cache_region_size} ||= 50000;
+
+  return $self;
+}
+
 sub get_slice {
   my $self = shift;
   my $chr = shift;

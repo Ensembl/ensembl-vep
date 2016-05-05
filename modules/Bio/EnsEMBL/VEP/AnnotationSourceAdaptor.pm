@@ -49,7 +49,7 @@ use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::CacheDir;
 use Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript;
-# use Bio::EnsEMBL::VEP::AnnotationSource::Database::RegFeat;
+use Bio::EnsEMBL::VEP::AnnotationSource::Database::RegFeat;
 use Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation;
 
 # this method is called from VEP::Runner's init() method
@@ -88,9 +88,9 @@ sub get_all_from_database {
       config => $self->config,
     });
 
-    # push @as, Bio::EnsEMBL::VEP::AnnotationSource::Database::RegFeat->new({
-    #   config => $self->config,
-    # }) if $self->param('regulatory');
+    push @as, Bio::EnsEMBL::VEP::AnnotationSource::Database::RegFeat->new({
+      config => $self->config,
+    }) if $self->param('regulatory');
 
     push @as, Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation->new({
       config => $self->config,

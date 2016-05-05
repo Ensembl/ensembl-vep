@@ -1,0 +1,71 @@
+1	0000-00-00 00:00:00	VendorMap	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL
+2	0000-00-00 00:00:00	RawValue	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL
+3	0000-00-00 00:00:00	VSN_GLOG	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL
+6	0000-00-00 00:00:00	LiftOver	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL
+7	0000-00-00 00:00:00	Nessie	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL
+8	0000-00-00 00:00:00	SangerPCR	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL
+14	2007-05-30 15:14:33	Nessie_NG_STD_2	\N	\N	\N	nessie	0.13	nessie	 --distribution="weibull" --fit-method="slope"  --replicates=2  --onestep="/nfs/acari/graef/bin/train_state.para"	Nessie	\N	\N	\N
+10	2007-05-11 10:01:29	AlignProbe	\N	\N	\N	exonerate	0.9.0	exonerate-0.9.0	\N	AlignProbes	\N	\N	\N
+11	0000-00-00 00:00:00	Parzen	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL
+12	0000-00-00 00:00:00	Wiggle	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL
+13	0000-00-00 00:00:00	HitList	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL
+15	0000-00-00 00:00:00	Co-occurrence_Overlap	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL
+16	0000-00-00 00:00:00	Regulatory_Build	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL
+67	2014-01-27 15:58:33	TarBase_v6.0	\N	6.0	\N	\N	\N	\N	\N	\N	\N	\N	\N
+18	0000-00-00 00:00:00	cisRED	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+19	0000-00-00 00:00:00	VISTA	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+22	0000-00-00 00:00:00	T.Biweight	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL
+23	0000-00-00 00:00:00	SWEmbl_default	\N	\N	\N	SWEmbl	2008-08-03	SWEmbl	-f 150 -m 8 -p 0.04 -P 0.5 -d 70	Bio::EnsEMBL::Funcgen::Sequencing::PeakCaller::SWEmbl	\N	\N	\N
+24	2008-11-04 16:54:27	SWEmbl_R015_f150_d150	\N	\N	\N	SWEmbl	2.7	SWEMBL.2.7	-R 0.015 -f 150 -d 150	Bio::EnsEMBL::Funcgen::Sequencing::PeakCaller::SWEmbl	\N	\N	\N
+25	2009-01-26 22:30:27	ILLUMINA_WG_ProbeAlign	\N	\N	\N	exonerate	2.2.0	/lustre/work1/ensembl/gs2/local/x86_64/bin/exonerate	\N	ProbeAlign	\N	\N	\N
+26	2009-01-26 22:30:27	ILLUMINA_WG_ProbeTranscriptAlign	\N	\N	\N	exonerate	2.2.0	/lustre/work1/ensembl/gs2/local/x86_64/bin/exonerate	\N	ProbeAlign	\N	\N	\N
+27	2009-01-27 16:48:46	probe2transcript	\N	\N	\N	probe2transcript.pl	\N	\N	\N	\N	\N	\N	\N
+28	2009-02-26 10:24:56	AFFY_UTR_ProbeTranscriptAlign	\N	\N	\N	exonerate	2.2.0	/lustre/work1/ensembl/gs2/local/x86_64/bin/exonerate	\N	ProbeAlign	\N	\N	\N
+29	2009-02-26 10:24:56	AFFY_ST_ProbeTranscriptAlign	\N	\N	\N	exonerate	2.2.0	/lustre/work1/ensembl/gs2/local/x86_64/bin/exonerate	\N	ProbeAlign	\N	\N	\N
+30	2009-02-26 10:24:56	AFFY_ST_ProbeAlign	\N	\N	\N	exonerate	2.2.0	/lustre/work1/ensembl/gs2/local/x86_64/bin/exonerate	\N	ProbeAlign	\N	\N	\N
+31	2009-02-26 10:24:56	AFFY_UTR_ProbeAlign	\N	\N	\N	exonerate	2.2.0	/lustre/work1/ensembl/gs2/local/x86_64/bin/exonerate	\N	ProbeAlign	\N	\N	\N
+32	2009-05-11 14:43:34	AGILENT_ProbeAlign	\N	\N	\N	exonerate	2.2.0	/lustre/work1/ensembl/gs2/local/x86_64/bin/exonerate	\N	ProbeAlign	\N	\N	\N
+33	2009-05-11 14:43:34	PHALANX_ProbeAlign	\N	\N	\N	exonerate	2.2.0	/lustre/work1/ensembl/gs2/local/x86_64/bin/exonerate	\N	ProbeAlign	\N	\N	\N
+34	2009-05-11 14:43:34	CODELINK_ProbeAlign	\N	\N	\N	exonerate	2.2.0	/lustre/work1/ensembl/gs2/local/x86_64/bin/exonerate	\N	ProbeAlign	\N	\N	\N
+35	2009-05-20 16:17:37	PHALANX_ProbeTranscriptAlign	\N	\N	\N	exonerate	2.2.0	/lustre/work1/ensembl/gs2/local/x86_64/bin/exonerate	\N	ProbeAlign	\N	\N	\N
+36	2009-05-20 16:17:37	AGILENT_ProbeTranscriptAlign	\N	\N	\N	exonerate	2.2.0	/lustre/work1/ensembl/gs2/local/x86_64/bin/exonerate	\N	ProbeAlign	\N	\N	\N
+37	2009-05-20 16:17:37	CODELINK_ProbeTranscriptAlign	\N	\N	\N	exonerate	2.2.0	/lustre/work1/ensembl/gs2/local/x86_64/bin/exonerate	\N	ProbeAlign	\N	\N	\N
+38	0000-00-00 00:00:00	SWEmbl_default_Broad_Control	\N	\N	\N	SWEmbl	2008-08-03	SWEmbl	-f 150 -m 8 -p 0.04 -P 0.5 -d 70 -r /lustre/scratch103/ensembl/ds19/tmp/human/raw_fastq/ENCODE/BroadChipSeq/bwa/K562_Control.bed.sorted.gz	Bio::EnsEMBL::Funcgen::Sequencing::PeakCaller::SWEmbl	\N	\N	\N
+39	2010-01-26 16:33:16	SWEmbl_default_Yale_Control	\N	\N	\N	SWEmbl	2008-08-03	SWEmbl	-f 150 -m 8 -p 0.04 -P 0.5 -d 70 -r /lustre/scratch103/ensembl/ds19/tmp/human/raw_fastq/ENCODE/YaleChipSeq/bwa/K562_Control.bed.sorted.gz	Bio::EnsEMBL::Funcgen::Sequencing::PeakCaller::SWEmbl	\N	\N	\N
+40	2010-01-26 17:46:38	SWEmbl_default_Hudsonalpha_Control	\N	\N	\N	SWEmbl	2008-08-03	SWEmbl	-f 150 -m 8 -p 0.04 -P 0.5 -d 70 -r /lustre/scratch103/ensembl/ds19/tmp/human/raw_fastq/ENCODE/HudsonalphaChipSeq/bwa/K562_Control.bed.sorted.gz	Bio::EnsEMBL::Funcgen::Sequencing::PeakCaller::SWEmbl	\N	\N	\N
+41	2010-03-25 13:02:05	SWEmbl_R015_D150	\N	\N	\N	SWEmbl	2008-08-03	SWEmbl	-f 150 -R 0.015 -d 150	Bio::EnsEMBL::Funcgen::Sequencing::PeakCaller::SWEmbl	\N	\N	\N
+42	2010-03-25 15:18:19	SWEmbl_R0025_D150	\N	\N	\N	SWEmbl	2008-08-03	SWEmbl	-f 150 -R 0.0025 -d 150	Bio::EnsEMBL::Funcgen::Sequencing::PeakCaller::SWEmbl	\N	\N	\N
+43	0000-00-00 00:00:00	bwa_samse	\N	\N	\N	bwa	\N	bwa	\N	Bio::EnsEMBL::Funcgen::Sequencing::Aligner::BWA	\N	\N	\N
+44	2010-06-02 09:58:38	SWEmbl_DNase	\N	\N	\N	SWEmbl	\N	SWEmbl	-f 150 -R 0.0025 -d 150	Bio::EnsEMBL::Funcgen::Sequencing::PeakCaller::SWEmbl	\N	\N	\N
+45	0000-00-00 00:00:00	RegulatoryBuild_TFBS_Motifs	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL
+46	2010-08-13 00:00:00	SWEmbl_R0025	\N	\N	3.3	SWEmbl	2008-08-03	SWEmbl	-f 150 -R 0.0025	Bio::EnsEMBL::Funcgen::Sequencing::PeakCaller::SWEmbl	\N	\N	\N
+47	2010-08-13 00:00:00	SWEmbl_R015	\N	\N	3.3	SWEmbl	2008-08-03	SWEmbl	-f 150 -R 0.015	Bio::EnsEMBL::Funcgen::Sequencing::PeakCaller::SWEmbl	\N	\N	\N
+48	2011-11-09 17:00:00	Manual_Antibody-Gene_Annotation	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+49	2010-11-20 15:00:00	Jaspar	jaspar.genereg.net	JASPAR_2010	all_data/matrix_only/matrix_only.txt	\N	\N	\N	\N	\N	\N	\N	\N
+50	2011-03-04 10:01:37	illumina_infinium_probealign	\N	\N	\N	exonerate	2.2.0	/software/ensembl/compara/exonerate/exonerate	\N	ProbeAlign	\N	\N	\N
+51	2011-04-07 00:00:00	ccat_histone	\N	\N	\N	CCAT	3.0	CCAT	fragmentSize 200 slidingWinSize 150 movingStep 20 isStrandSensitiveMode 0 minCount 10 outputNum 100000 randomSeed 123456 minScore 4.0 bootstrapPass 50	Bio::EnsEMBL::Funcgen::Sequencing::PeakCaller::CCAT	\N	\N	\N
+52	0000-00-00 00:00:00	comb11.concord4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+53	2011-11-01 10:05:55	chromhmm.segway.K562.comb11.concord4	\N	\N	\N	chromhmm/segway	???	\N	???	\N	\N	\N	\N
+54	2011-11-01 12:48:08	chromhmm.segway.GM12878.comb11.concord4	\N	\N	\N	chromhmm/segway	???	\N	???	\N	\N	\N	\N
+55	2011-11-01 14:26:42	chromhmm.segway.H1ESC.comb11.concord4	\N	\N	\N	chromhmm/segway	???	\N	???	\N	\N	\N	\N
+56	2011-11-01 16:27:16	chromhmm.segway.HeLa-S3.comb11.concord4	\N	\N	\N	chromhmm/segway	???	\N	???	\N	\N	\N	\N
+57	2011-11-02 08:48:57	chromhmm.segway.HepG2.comb11.concord4	\N	\N	\N	chromhmm/segway	???	\N	???	\N	\N	\N	\N
+58	2011-11-02 16:30:02	chromhmm.segway.HUVEC.comb11.concord4	\N	\N	\N	chromhmm/segway	???	\N	???	\N	\N	\N	\N
+59	2012-08-16 12:52:42	RRBS_merged_filtered_10	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+60	2012-08-16 12:52:52	WGBS_merged	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+61	2013-10-30 13:21:36	ChIP-Seq	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+62	2013-10-30 13:21:36	DNase-Seq	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+64	2013-10-30 13:21:36	FAIRE	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+65	2013-10-30 13:21:36	RRBS	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+66	2013-10-30 13:21:36	WGBS	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+68	2014-04-25 16:05:23	SWEmbl_R0005	\N	\N	\N	SWEmbl	3.5	SWEmbl	-f 150 -R 0.0005 -d 150	Bio::EnsEMBL::Funcgen::Sequencing::PeakCaller::SWEmbl	\N	\N	\N
+69	2014-05-27 11:10:56	SWEmbl_R0005_IDR	\N	\N	\N	SWEmbl	3.5	SWEmbl	-f 150 -R 0.0005 -d 150	Bio::EnsEMBL::Funcgen::Sequencing::PeakCaller::SWEmbl	\N	\N	\N
+70	2014-06-18 13:45:40	JASPAR_v5_0	\N	5.0	\N	\N	\N	\N	\N	\N	\N	\N	\N
+71	2014-06-23 13:38:06	FANTOM_v5	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N
+72	2016-01-29 20:03:47	TarBase_v7.0	\N	7.0	\N	\N	\N	\N	\N	\N	\N	\N	\N
+73	2016-02-05 15:14:27	ChromHMM_1.11_25	\N	\N	\N	ChromHMM	1.11	/software/ensembl/funcgen/ChromHMM/ChromHMM.jar	LearnModel -p 12 -l GRCh38.chr.lengths binarized_bam output 25 hg38	\N	\N	\N	\N
+74	2016-02-05 15:17:41	ChromHMM_1.0.3_25	\N	\N	\N	ChromHMM	1.0.3	/software/ensembl/funcgen/ChromHMM/ChromHMM.jar	LearnModel -p 12 -l GRChm38.chr.lengths binarized_bam output 25 GRCm38	\N	\N	\N	\N
+77	2016-02-05 15:39:42	Segway_1.1.0_25_10_200_GRCh38	\N	\N	\N	Segway	1.1.0	/homes/swilder/arch/Linux-x86_64/bin/segway	--num-labels=25" "--num-instances=10" "--resolution=200" "-t" "DNase" "-t" "CTCF" "-t" "H3K4me1" "-t" "H3K4me2" "-t" "H3K4me3" "-t" "H3K9ac" "-t" "H3K27ac" "-t" "H3K27me3" "-t" "H3K36me3" "-t" "H4K20me1" "-t" "Control" "--prior-strength=1000" "--seg-table=/nfs/nobackup_tmp/ensembl/swilder/Encode/regions/seg_table_min_200_res.tab" "--ruler-scale=200" "-m" "5,6,7,8,9,10,11,12" "--exclude-coords=regions/CHR_dukeExcludedRegions.bed" "--recover=GRCh38EnsemblSegwayIdentify6" "identify" "genomedata.GRCh38" "GRCh38EnsemblSegway8" "GRCh38EnsemblSegwayIdentify7	\N	\N	\N	\N
+78	2016-02-05 15:43:59	Segway_1.1.0_25_10_200_GRCh37	\N	\N	\N	Segway	1.1.0	/homes/swilder/arch/Linux-x86_64/bin/segway	"--num-labels=25" "--num-instances=10" "--resolution=200" "-t" "DNase" "-t" "CTCF" "-t" "H3K4me1" "-t" "H3K4me2" "-t" "H3K4me3" "-t" "H3K9ac" "-t" "H3K27ac" "-t" "H3K27me3" "-t" "H3K36me3" "-t" "H4K20me1" "-t" "Control" "--prior-strength=1000" "--seg-table=/nfs/nobackup_tmp/ensembl/swilder/Encode/regions/seg_table_min_200_res.tab" "--ruler-scale=200" "--recover=ENS17ENCregsegwaytrain4" "-m" "1,2,3,4,5,6,7,8,9,10,11,12" "--cluster-opt= -u swilder " "train" "ENCchr/genomedata.ENS17.ENCreg" "ENS17ENCregsegwaytrain5"	\N	\N	\N	\N
+79	2016-02-08 13:58:11	WGBS_FDR_1e-4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+80	2016-02-08 13:58:22	RRBS_FDR_1e-4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N

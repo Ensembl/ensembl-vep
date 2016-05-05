@@ -67,17 +67,6 @@ our @VAR_CACHE_COLS = qw(
   phenotype_or_disease
 );
 
-sub new {
-  my $caller = shift;
-  my $class = ref($caller) || $caller;
-  
-  my $self = $class->SUPER::new(@_);
-
-  $self->{cache_region_size} ||= 50000;
-
-  return $self;
-}
-
 sub get_features_by_regions_uncached {
   my $self = shift;
   my $regions = shift;
