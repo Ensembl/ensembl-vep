@@ -153,25 +153,23 @@ sub setup_db_connection {
   my $reg = $self->registry();
 
   # check assembly
-  if(my $csa = $self->get_adaptor('core', 'CoordSystem')) {
-    my ($highest_cs) = @{$csa->fetch_all()};
-    my $assembly = $highest_cs->version();
+  if(my $db_assembly = $self->get_database_assembly) {
 
     my $config_assembly = $self->param('assembly');
 
     throw(
       "ERROR: Assembly version specified by --assembly (".$config_assembly.
-      ") and assembly version in coord_system table (".$assembly.") do not match\n".
+      ") and assembly version in coord_system table (".$db_assembly.") do not match\n".
       (
         $self->param('host') eq 'ensembldb.ensembl.org' ?
         "\nIf using human GRCh37 add \"--port 3337\"".
         " to use the GRCh37 database, or --offline to avoid database connection entirely\n" :
         ''
       )
-    ) if $config_assembly && $config_assembly ne $assembly;
+    ) if $config_assembly && $config_assembly ne $db_assembly;
 
     # update to database version
-    $self->param('assembly', $assembly);
+    $self->param('assembly', $db_assembly);
 
     if(!$self->param('assembly')) {
       throw("ERROR: No assembly version specified, use --assembly [version] or check the coord_system table in your core database\n");

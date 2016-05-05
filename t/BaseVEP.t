@@ -184,6 +184,8 @@ ok($tmp =~ /Hello/, 'warning_msg to STDERR');
 
 open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
+is($bv->get_database_assembly, undef, 'get_database_assembly - no DB');
+
 
 
 ## DATABASE TESTS
@@ -194,7 +196,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 5 unless $can_use_db;
+  skip 'No local database configured', 6 unless $can_use_db;
 
   my $multi;
 
@@ -237,6 +239,8 @@ SKIP: {
   is(ref($bv->get_adaptor('core', 'slice')), 'Bio::EnsEMBL::DBSQL::SliceAdaptor', 'get_adaptor slice - registry file');
 
   is(ref($bv->get_slice('21')), 'Bio::EnsEMBL::Slice', 'get_slice - database');
+
+  is($bv->get_database_assembly, 'GRCh38', 'get_database_assembly');
 
   1;
 };

@@ -221,6 +221,25 @@ sub get_slice {
   return $cache->{$chr};
 }
 
+sub get_database_assembly {
+  my $self = shift;
+
+  my $config = $self->config;
+
+  if(!exists($config->{_database_assembly})) {
+    my $assembly;
+
+    if(my $csa = $self->get_adaptor('core', 'CoordSystem')) {
+      my ($highest_cs) = @{$csa->fetch_all()};
+      $assembly = $highest_cs->version();
+    }
+
+    $config->{_database_assembly} = $assembly;
+  }
+
+  return $config->{_database_assembly};
+}
+
 # adds shortcuts to named params to this object
 sub add_shortcuts {
   my $self = shift;
