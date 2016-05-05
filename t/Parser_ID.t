@@ -34,6 +34,13 @@ use_ok('Bio::EnsEMBL::VEP::Parser::ID');
 # need to get a config object and DB connection for further tests
 use_ok('Bio::EnsEMBL::VEP::Config');
 
+throws_ok {
+  Bio::EnsEMBL::VEP::Parser::ID->new({
+    config => Bio::EnsEMBL::VEP::Config->new({offline => 1}),
+    file => $test_cfg->create_input_file('rs123')
+  });
+} qr/Cannot use ID format in offline mode/, 'throw without DB';
+
 SKIP: {
   my $db_cfg = $test_cfg->db_cfg;
   my $can_use_db = $db_cfg && scalar keys %$db_cfg;
