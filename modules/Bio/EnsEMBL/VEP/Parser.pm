@@ -69,7 +69,7 @@ sub new {
   
   my $self = $class->SUPER::new(@_);
 
-  $self->add_shortcuts([qw(check_ref chr)]);
+  $self->add_shortcuts([qw(dont_skip check_ref chr)]);
 
   my $hashref = $_[0];
 
@@ -234,50 +234,6 @@ sub validate_vf {
     return 0;
   }
 
-  # check chromosome exists
-  # transform if necessary
-  # if(defined($config->{cache})) {
-
-  #   my $valid_chrs = get_cache_chromosomes($config);
-
-  #   if(!$valid_chrs->{$vf->{chr}}) {
-
-  #     # slice adaptor required
-  #     if(defined($config->{sa})) {
-  #       $vf->{slice} ||= get_slice($config, $vf->{chr}, undef, 1);
-
-  #       if($vf->{slice}) {
-  #       my $transformed = $vf->transform('toplevel');
-
-  #       # copy to VF
-  #       if($transformed) {
-  #         $vf->{$_} = $transformed->{$_} for keys %$transformed;
-  #         $vf->{original_chr} = $vf->{chr};
-  #         $vf->{chr} = $vf->{slice}->seq_region_name;
-  #       }
-
-  #       # could not transform
-  #       else {
-  #         $self->warning_msg("WARNING: Chromosome ".$vf->{chr}." not found in cache and could not transform to toplevel on line ".$config->{line_number});
-  #         return 0;
-  #       }
-  #       }
-
-  #       # no slice
-  #       else {
-  #         $self->warning_msg("WARNING: Could not fetch slice for chromosome ".$vf->{chr}." on line ".$config->{line_number});
-  #         return 0;
-  #       }
-  #     }
-
-  #     # offline, can't transform
-  #     else {
-  #       $self->warning_msg("WARNING: Chromosome ".$vf->{chr}." not found in cache on line ".$config->{line_number});
-  #       return 0;
-  #     }
-  #   }
-  # }
-
   # check start <= end + 1
   if($vf->{start} > $vf->{end} + 1) {
     $self->warning_msg(
@@ -314,23 +270,10 @@ sub validate_vf {
   # check length of reference matches seq length spanned
   my @alleles = split '\/', $vf->{allele_string};
   my $ref_allele = shift @alleles;
-  my $tmp_ref_allele = $ref_allele;
-  $tmp_ref_allele =~ s/\-//g;
-
-  #if(($vf->{end} - $vf->{start}) + 1 != length($tmp_ref_allele)) {
-  #  warning_msg(
-  #    $config,
-  #    "WARNING: Length of reference allele (".$ref_allele.
-  #    " length ".length($tmp_ref_allele).") does not match co-ordinates ".$vf->{start}."-".$vf->{end}.
-  #    " on line ".$config->{line_number}
-  #  );
-  #  return 0;
-  #}
 
   # flag as unbalanced
   foreach my $allele(@alleles) {
     $allele =~ s/\-//g;
-    $vf->{indel} = 1 unless length($allele) == length($tmp_ref_allele);
   }
 
   # check reference allele if requested
