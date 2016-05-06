@@ -40,6 +40,8 @@ our %DEFAULTS = (
 
   sereal_dir     => $Bin.'/testdata/cache/sereal/homo_sapiens/84_GRCh38',
 
+  fasta          => $Bin.'/testdata/cache/homo_sapiens/84_GRCh38/test.fa',
+
   test_ini_file  => $Bin.'/testdata/vep.ini',
   registry_file  => $Bin.'/testdata/vep.registry',
 

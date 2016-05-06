@@ -96,6 +96,7 @@ our @LIST_FLAGS = qw(
   cell_type
   pick_order
   fields
+  chr
 );
 
 # these flags can be specified more than once on the command line

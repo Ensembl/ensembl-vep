@@ -53,7 +53,7 @@ use Bio::EnsEMBL::VEP::Parser::VEP_input;
 use Bio::EnsEMBL::VEP::Parser::ID;
 use Bio::EnsEMBL::VEP::Parser::HGVS;
 
-use Scalar::Util qw(openhandle);
+use Scalar::Util qw(openhandle looks_like_number);
 use FileHandle;
 
 my %FORMAT_MAP = (
@@ -68,6 +68,8 @@ sub new {
   my $class = ref($caller) || $caller;
   
   my $self = $class->SUPER::new(@_);
+
+  $self->add_shortcuts([qw(check_ref chr)]);
 
   my $hashref = $_[0];
 
@@ -210,6 +212,168 @@ sub detect_format {
   }
 
   return $format;
+}
+
+# takes VFs created from input, fixes and checks various things
+sub validate_vf {
+  my $self = shift;
+  my $vf = shift;
+
+  # user specified chr skip list
+  if($self->{chr}) {
+    return 0 unless grep {$vf->{chr} eq $_} @{$self->{chr}};
+  }
+
+  # fix inputs
+  $vf->{chr} =~ s/^chr//ig unless $vf->{chr} =~ /^chromosome$/i || $vf->{chr} =~ /^CHR\_/;
+  $vf->{chr} = 'MT' if $vf->{chr} eq 'M';
+
+  # sanity checks
+  unless(looks_like_number($vf->{start}) && looks_like_number($vf->{end})) {
+    $self->warning_msg("WARNING: Start ".$vf->{start}." or end ".$vf->{end}." coordinate invalid on line ".$self->line_number);
+    return 0;
+  }
+
+  # check chromosome exists
+  # transform if necessary
+  # if(defined($config->{cache})) {
+
+  #   my $valid_chrs = get_cache_chromosomes($config);
+
+  #   if(!$valid_chrs->{$vf->{chr}}) {
+
+  #     # slice adaptor required
+  #     if(defined($config->{sa})) {
+  #       $vf->{slice} ||= get_slice($config, $vf->{chr}, undef, 1);
+
+  #       if($vf->{slice}) {
+  #       my $transformed = $vf->transform('toplevel');
+
+  #       # copy to VF
+  #       if($transformed) {
+  #         $vf->{$_} = $transformed->{$_} for keys %$transformed;
+  #         $vf->{original_chr} = $vf->{chr};
+  #         $vf->{chr} = $vf->{slice}->seq_region_name;
+  #       }
+
+  #       # could not transform
+  #       else {
+  #         $self->warning_msg("WARNING: Chromosome ".$vf->{chr}." not found in cache and could not transform to toplevel on line ".$config->{line_number});
+  #         return 0;
+  #       }
+  #       }
+
+  #       # no slice
+  #       else {
+  #         $self->warning_msg("WARNING: Could not fetch slice for chromosome ".$vf->{chr}." on line ".$config->{line_number});
+  #         return 0;
+  #       }
+  #     }
+
+  #     # offline, can't transform
+  #     else {
+  #       $self->warning_msg("WARNING: Chromosome ".$vf->{chr}." not found in cache on line ".$config->{line_number});
+  #       return 0;
+  #     }
+  #   }
+  # }
+
+  # check start <= end + 1
+  if($vf->{start} > $vf->{end} + 1) {
+    $self->warning_msg(
+      "WARNING: start > end+1 : (START=".$vf->{start}.
+      ", END=".$vf->{end}.
+      ") on line ".$self->line_number."\n"
+    );
+    return 0;
+  }
+
+  # structural variation?
+  return $self->validate_svf($vf) if ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature';
+
+  # uppercase allele string
+  $vf->{allele_string} =~ tr/[a-z]/[A-Z]/;
+
+  unless($vf->{allele_string} =~ /([ACGT-]+\/*)+/) {
+    $self->warning_msg("WARNING: Invalid allele string ".$vf->{allele_string}." on line ".$self->line_number." or possible parsing error\n");
+    return 0;
+  }
+
+  # insertion should have start = end + 1
+  if($vf->{allele_string} =~ /^\-\// && $vf->{start} != $vf->{end} + 1) {
+    $self->warning_msg(
+      "WARNING: Alleles look like an insertion (".
+      $vf->{allele_string}.
+      ") but coordinates are not start = end + 1 (START=".
+      $vf->{start}.", END=".$vf->{end}.
+      ") on line ".$self->line_number."\n"
+    );
+    return 0;
+  }
+
+  # check length of reference matches seq length spanned
+  my @alleles = split '\/', $vf->{allele_string};
+  my $ref_allele = shift @alleles;
+  my $tmp_ref_allele = $ref_allele;
+  $tmp_ref_allele =~ s/\-//g;
+
+  #if(($vf->{end} - $vf->{start}) + 1 != length($tmp_ref_allele)) {
+  #  warning_msg(
+  #    $config,
+  #    "WARNING: Length of reference allele (".$ref_allele.
+  #    " length ".length($tmp_ref_allele).") does not match co-ordinates ".$vf->{start}."-".$vf->{end}.
+  #    " on line ".$config->{line_number}
+  #  );
+  #  return 0;
+  #}
+
+  # flag as unbalanced
+  foreach my $allele(@alleles) {
+    $allele =~ s/\-//g;
+    $vf->{indel} = 1 unless length($allele) == length($tmp_ref_allele);
+  }
+
+  # check reference allele if requested
+  if($self->{check_ref}) {
+    my $ok = 0;
+    my $slice_ref_allele;
+
+    # insertion, therefore no ref allele to check
+    if($ref_allele eq '-') {
+      $ok = 1;
+    }
+    else {
+      $vf->{slice} ||= $self->get_slice($vf->{chr});
+
+      my $slice_ref = $vf->{slice}->sub_Slice($vf->{start}, $vf->{end}, $vf->{strand});
+
+      if(!defined($slice_ref)) {
+        $self->warning_msg("WARNING: Could not fetch sub-slice from ".$vf->{chr}.":".$vf->{start}."\-".$vf->{end}."\(".$vf->{strand}."\) on line ".$self->line_number);
+      }
+
+      else {
+        $slice_ref_allele = $slice_ref->seq;
+        $ok = (uc($slice_ref_allele) eq uc($ref_allele) ? 1 : 0);
+      }
+    }
+
+    if(!$ok) {
+      $self->warning_msg(
+        "WARNING: Specified reference allele $ref_allele ".
+        "does not match Ensembl reference allele".
+        ($slice_ref_allele ? " $slice_ref_allele" : "").
+        " on line ".$self->line_number
+      );
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+# validate a structural variation
+sub validate_svf {
+  return 1;
 }
 
 1;

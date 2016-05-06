@@ -51,6 +51,8 @@ use Bio::EnsEMBL::Variation::Utils::FastaSequence qw(setup_fasta);
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::Utils qw(get_time);
+use Bio::EnsEMBL::Slice;
+use Bio::EnsEMBL::CoordSystem;
 use FileHandle;
 
 # new method, may or may not be reused by child classes
@@ -266,6 +268,8 @@ sub fasta_db {
 sub add_shortcuts {
   my $self = shift;
 
+  return unless $self->config;
+
   foreach my $param(map {ref($_) eq 'ARRAY' ? @$_ : $_} @_) {
     throw("ERROR: add_shortcuts would overwrite value for \"$param\"\n") if exists($self->{$param});
     $self->{$param} = $self->param($param); 
@@ -291,7 +295,7 @@ sub warning_msg {
   $text = 'WARNING: '.$text unless $text =~ /^warn/i;
   $text = $text."\n" unless $text =~ /\n$/;
 
-  $self->config->{warning_count}++;
+  # $self->config->{warning_count}++ if $self->config;
 
   my $fh = $self->warning_fh;
 

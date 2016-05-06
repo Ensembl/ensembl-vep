@@ -21,6 +21,7 @@ use FindBin qw($Bin);
 
 use lib $Bin;
 use VEPTestingConfig;
+use Bio::EnsEMBL::Variation::VariationFeature;
 my $test_cfg = VEPTestingConfig->new();
 my $cfg_hash = $test_cfg->base_testing_cfg;
 
@@ -35,6 +36,10 @@ my $p = Bio::EnsEMBL::VEP::Parser->new({file => $test_cfg->{test_vcf}});
 ok($p, 'new is defined');
 
 is(ref($p), 'Bio::EnsEMBL::VEP::Parser', 'check class');
+
+# need config object to use new with format
+use_ok('Bio::EnsEMBL::VEP::Config');
+my $cfg = Bio::EnsEMBL::VEP::Config->new({fasta => $test_cfg->{fasta}, offline => 1});
 
 
 
@@ -53,6 +58,85 @@ is_deeply($p->headers, [], 'headers');
 
 $p->file($test_cfg->{test_vcf});
 is($p->detect_format, 'vcf', 'detect_format - VCF');
+
+
+## VALIDATION CHECKS
+####################
+
+is($p->validate_svf(), 1, 'validate_svf - not implemented yet');
+
+is($p->validate_vf(get_vf({allele_string => 'G/C'})), 1, 'validate_vf - ok');
+
+$p->{chr} = ['1'];
+is($p->validate_vf(get_vf({allele_string => 'G/C'})), 1, 'validate_vf - chr list include');
+is($p->validate_vf(get_vf({allele_string => 'G/C', chr => 2})), 0, 'validate_vf - chr list exclude');
+delete($p->{chr});
+
+my $vf = get_vf({allele_string => 'G/C', chr => 'chr1'});
+$p->validate_vf($vf);
+is($vf->{chr}, '1', 'validate_vf - strip "chr"');
+
+$vf = get_vf({allele_string => 'G/C', chr => 'chromosome'});
+$p->validate_vf($vf);
+is($vf->{chr}, 'chromosome', 'validate_vf - dont strip "chr" if chromosome');
+
+$vf = get_vf({allele_string => 'G/C', chr => 'CHR_1'});
+$p->validate_vf($vf);
+is($vf->{chr}, 'CHR_1', 'validate_vf - dont strip "chr" if CHR_');
+
+$vf = get_vf({allele_string => 'G/C', chr => 'M'});
+$p->validate_vf($vf);
+is($vf->{chr}, 'MT', 'validate_vf - convert M to MT');
+
+$vf = get_vf({allele_string => 'g/c'});
+$p->validate_vf($vf);
+is($vf->{allele_string}, 'G/C', 'validate_vf - uppercase allele_string');
+
+
+# warning_msg prints to STDERR
+no warnings 'once';
+open(SAVE, ">&STDERR") or die "Can't save STDERR\n"; 
+
+close STDERR;
+my $tmp;
+open STDERR, '>', \$tmp;
+
+$p = Bio::EnsEMBL::VEP::Parser->new({file => $test_cfg->{test_vcf}, config => $cfg});
+
+is($p->validate_vf(get_vf({allele_string => 'G/C', start => 'foo'})), 0, 'validate_vf - start is not number 1');
+ok($tmp =~ /coordinate invalid/, 'validate_vf - start is not number 2');
+
+is($p->validate_vf(get_vf({allele_string => 'G/C', end => 'foo'})), 0, 'validate_vf - end is not number 1');
+ok($tmp =~ /coordinate invalid/, 'validate_vf - end is not number 2');
+
+is($p->validate_vf(get_vf({allele_string => 'G/C', start => 3, end => 1})), 0, 'validate_vf - start > end+1 1');
+ok($tmp =~ /start \> end\+1/, 'validate_vf - start > end+1 2');
+
+is($p->validate_vf(get_vf({allele_string => 'Q/R'})), 0, 'validate_vf - invalid allele string 1');
+ok($tmp =~ /Invalid allele string/, 'validate_vf - invalid allele string 2');
+
+is($p->validate_vf(get_vf({allele_string => '-/C'})), 0, 'validate_vf - alleles look like an insertion 1');
+ok($tmp =~ /Alleles look like an insertion/, 'validate_vf - alleles look like an insertion 2');
+
+# check_ref
+$p->{check_ref} = 1;
+
+is($p->validate_vf(get_vf({allele_string => '-/T', start => 2, end => 1})), 1, 'validate_vf - check_ref insertion');
+
+$vf = get_vf({allele_string => 'C/T', chr => 21, start => 25585733, end => 25585733});
+is($p->validate_vf($vf), 1, 'validate_vf - check_ref ok');
+
+$vf->{allele_string} = 'G/T';
+is($p->validate_vf($vf), 0, 'validate_vf - check_ref fail');
+ok($tmp =~ /Specified reference allele.+does not match Ensembl reference allele/, 'validate_vf - check_ref fail msg');
+
+$vf = get_vf({allele_string => 'CTT/TCC', chr => 21, start => 25585733, end => 25585735});
+is($p->validate_vf($vf), 1, 'validate_vf - check_ref long ok');
+
+$p->{check_ref} = 0;
+
+# restore STDERR
+open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
 
 
@@ -102,16 +186,13 @@ is($p->detect_format, undef, 'detect_format - incomplete');
 ##############
 
 # new using string as input data
-my $tmp = '21 25587759 25587759 C/A + test';
+$tmp = '21 25587759 25587759 C/A + test';
 open IN, '<', \$tmp;
 ok($p->file(*IN), 'use string fed to FH as input data');
 is($p->detect_format, 'ensembl', 'detect format of string');
 is(<IN>, '21 25587759 25587759 C/A + test', 'FH position reset');
 
 
-# need config object to use new with format
-use_ok('Bio::EnsEMBL::VEP::Config');
-my $cfg = Bio::EnsEMBL::VEP::Config->new();
 
 # new with format configured
 $p = Bio::EnsEMBL::VEP::Parser->new({config => $cfg, file => $test_cfg->{test_vcf}, format => 'vcf'});
@@ -137,3 +218,12 @@ throws_ok {
 
 
 done_testing();
+
+
+sub get_vf {
+  my $hashref = shift;
+
+  $hashref->{$_} ||= 1 for qw(chr start end strand);
+
+  return Bio::EnsEMBL::Variation::VariationFeature->new_fast($hashref);
+}
