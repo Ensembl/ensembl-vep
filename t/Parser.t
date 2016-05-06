@@ -101,6 +101,7 @@ close STDERR;
 my $tmp;
 open STDERR, '>', \$tmp;
 
+$cfg->param('warning_file', 'STDERR');
 $p = Bio::EnsEMBL::VEP::Parser->new({file => $test_cfg->{test_vcf}, config => $cfg});
 
 is($p->validate_vf(get_vf({allele_string => 'G/C', start => 'foo'})), 0, 'validate_vf - start is not number 1');

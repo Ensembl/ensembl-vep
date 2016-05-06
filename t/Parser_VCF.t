@@ -464,6 +464,8 @@ open(SAVE, ">&STDERR") or die "Can't save STDERR\n";
 close STDERR;
 open STDERR, '>', \$tmp;
 
+$cfg->param('warning_file', 'STDERR');
+
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
   file => $test_cfg->create_input_file([
