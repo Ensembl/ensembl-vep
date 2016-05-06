@@ -100,6 +100,10 @@ sub next {
 
   # add chr attrib
   $vf->{chr} = $vf->slice->seq_region_name;
+  
+  unless($self->validate_vf($vf) || $self->{dont_skip}) {
+    return $self->next();
+  }
 
   return $vf;
 }

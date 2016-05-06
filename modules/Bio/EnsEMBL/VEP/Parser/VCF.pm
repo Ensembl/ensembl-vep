@@ -109,7 +109,14 @@ sub next {
     $self->line_number($self->line_number + 1) if scalar @$cache;
   }
 
-  return shift @$cache;
+  my $vf = shift @$cache;
+  return $vf unless $vf;
+  
+  unless($self->validate_vf($vf) || $self->{dont_skip}) {
+    return $self->next();
+  }
+
+  return $vf;
 }
 
 sub create_VariationFeatures {

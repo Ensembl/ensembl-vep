@@ -73,6 +73,7 @@ sub next {
     $parser->get_id
   );
 
+  # check strand
   $strand = ($strand || '') =~ /\-/ ? -1 : 1;
 
   my $vf;
@@ -114,6 +115,10 @@ sub next {
       variation_name => $var_name,
       chr            => $chr,
     });
+  }
+  
+  unless($self->validate_vf($vf) || $self->{dont_skip}) {
+    return $self->next();
   }
 
   return $vf;

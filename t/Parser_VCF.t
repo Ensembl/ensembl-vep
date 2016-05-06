@@ -455,5 +455,40 @@ is_deeply($vf, bless( {
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'individual - process_ref_homs');
 
 
+
+
+# warning_msg prints to STDERR
+no warnings 'once';
+open(SAVE, ">&STDERR") or die "Can't save STDERR\n"; 
+
+close STDERR;
+open STDERR, '>', \$tmp;
+
+$vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $cfg,
+  file => $test_cfg->create_input_file([
+    [qw(21 foo . C A . . .)],
+    [qw(21 25587759 . C A . . .)],
+  ])
+})->next();
+
+is($vf->{start}, 25587759, 'skip VF that fails validation');
+
+$cfg->param('dont_skip', 1);
+
+$vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $cfg,
+  file => $test_cfg->create_input_file([
+    [qw(21 foo . C A . . .)],
+    [qw(21 25587759 . C A . . .)],
+  ]),
+})->next();
+
+is($vf->{start}, 'foo', 'dont skip VF that fails validation with dont_skip');
+
+# restore STDERR
+open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
+
+
 # done
 done_testing();
