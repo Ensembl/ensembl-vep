@@ -284,6 +284,35 @@ is_deeply($ib, bless( {
 }, 'Bio::EnsEMBL::VEP::InputBuffer' ), 'finished buffer empty after reset_buffer');
 
 
+# check buffer shorts out at chromosome change
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $cfg,
+  file => $test_cfg->create_input_file([
+    [qw(1 123 . A G . . .)],
+    [qw(2 123 . A G . . .)],
+    [qw(3 123 . A G . . .)],
+  ])
+});
+$ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+
+$vfs = $ib->next();
+
+is(scalar @$vfs, 1, 'split buffer at chromosome change - count');
+is($vfs->[0]->{chr}, 1, 'split buffer at chromosome change - check first');
+is(scalar @{$ib->pre_buffer}, 1, 'split buffer at chromosome change - check next put into pre_buffer');
+
+$vfs = $ib->next();
+is(scalar @$vfs, 1, 'split buffer at chromosome change - count 2');
+is($vfs->[0]->{chr}, 2, 'split buffer at chromosome change - check first 2');
+is(scalar @{$ib->pre_buffer}, 1, 'split buffer at chromosome change - check next put into pre_buffer 2');
+
+$vfs = $ib->next();
+is(scalar @$vfs, 1, 'split buffer at chromosome change - count 3');
+is($vfs->[0]->{chr}, 3, 'split buffer at chromosome change - check first 3');
+is(scalar @{$ib->pre_buffer}, 0, 'split buffer at chromosome change - check pre_buffer now empty');
+
+$vfs = $ib->next();
+is(scalar @$vfs, 0, 'split buffer at chromosome change - final next leaves everything empty');
 
 # done
 done_testing();

@@ -104,13 +104,44 @@ sub next {
 
   my $buffer_size = $self->{buffer_size};
 
+  # We do a bit of trickery here to help memory usage later.
+  # Basically we don't want the buffer to contain variants
+  # from more than one chromosome, so we "shortcut" out
+  # filling the buffer before it hits $buffer_size.
+  my $prev_chr;
+
   while(@$pre_buffer && @$buffer < $buffer_size) {
-    push @$buffer, shift @$pre_buffer;
+    my $vf = $pre_buffer->[0];
+    
+    # new chromosome
+    if($prev_chr && $vf->{chr} ne $prev_chr) {
+      return $buffer;
+    }
+
+    # same chromosome
+    else {
+      push @$buffer, shift @$pre_buffer;
+      $prev_chr = $vf->{chr};
+    }
   }
 
   if(my $parser = $self->parser) {
     while(@$buffer < $buffer_size && (my $vf = $parser->next)) {
-      push @$buffer, $vf;
+
+      # new chromosome
+      if($prev_chr && $vf->{chr} ne $prev_chr) {
+
+        # we can't push the VF back onto the parser, so add it to $pre_buffer
+        # and it will get picked up on the following next() call
+        push @$pre_buffer, $vf;
+        return $buffer;
+      }
+
+      # same chromosome
+      else {
+        push @$buffer, $vf;
+        $prev_chr = $vf->{chr};
+      }
     }
   }
 
