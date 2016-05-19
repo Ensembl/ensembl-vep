@@ -269,11 +269,21 @@ sub validate_vf {
 
   # check length of reference matches seq length spanned
   my @alleles = split '\/', $vf->{allele_string};
-  my $ref_allele = shift @alleles;
 
   # flag as unbalanced
   foreach my $allele(@alleles) {
     $allele =~ s/\-//g;
+  }
+
+  my $ref_allele = shift @alleles;
+
+  if($ref_allele =~ /^[ACGT]*$/ && ($vf->{end} - $vf->{start}) + 1 != length($ref_allele)) {
+    $self->warning_msg(
+       "WARNING: Length of reference allele (".$ref_allele.
+       " length ".length($ref_allele).") does not match co-ordinates ".$vf->{start}."-".$vf->{end}.
+       " on line ".$self->line_number
+    );
+    return 0;
   }
 
   # check reference allele if requested
@@ -282,7 +292,7 @@ sub validate_vf {
     my $slice_ref_allele;
 
     # insertion, therefore no ref allele to check
-    if($ref_allele eq '-') {
+    if($ref_allele eq '') {
       $ok = 1;
     }
     else {

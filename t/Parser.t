@@ -119,6 +119,9 @@ ok($tmp =~ /Invalid allele string/, 'validate_vf - invalid allele string 2');
 is($p->validate_vf(get_vf({allele_string => '-/C'})), 0, 'validate_vf - alleles look like an insertion 1');
 ok($tmp =~ /Alleles look like an insertion/, 'validate_vf - alleles look like an insertion 2');
 
+is($p->validate_vf(get_vf({allele_string => 'AA/C', start => 1, end => 1})), 0, 'validate_vf - ref allele length doesnt match coords 1');
+ok($tmp =~ /Length of reference allele/, 'validate_vf - ref allele length doesnt match coords 1');
+
 # check_ref
 $p->{check_ref} = 1;
 
