@@ -35,7 +35,7 @@ use_ok('Bio::EnsEMBL::VEP::InputBuffer');
 use_ok('Bio::EnsEMBL::VEP::Config');
 use_ok('Bio::EnsEMBL::VEP::Parser::VCF');
 
-my $cfg = Bio::EnsEMBL::VEP::Config->new({buffer_size => 10});
+my $cfg = Bio::EnsEMBL::VEP::Config->new({%{$test_cfg->base_testing_cfg}, buffer_size => 10});
 ok($cfg, 'get new config object');
 
 my $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}});

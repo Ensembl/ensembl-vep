@@ -22,6 +22,7 @@ use FindBin qw($Bin);
 use lib $Bin;
 use VEPTestingConfig;
 my $test_cfg = VEPTestingConfig->new();
+my $base_testing_cfg = $test_cfg->base_testing_cfg;
 
 my ($vf, $tmp, $expected);
 
@@ -34,7 +35,7 @@ use_ok('Bio::EnsEMBL::VEP::Parser::VEP_input');
 # need to get a config object for further tests
 use_ok('Bio::EnsEMBL::VEP::Config');
 
-my $cfg = Bio::EnsEMBL::VEP::Config->new();
+my $cfg = Bio::EnsEMBL::VEP::Config->new($base_testing_cfg);
 ok($cfg, 'get new config object');
 
 my $p = Bio::EnsEMBL::VEP::Parser::VEP_input->new({

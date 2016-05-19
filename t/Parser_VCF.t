@@ -22,6 +22,7 @@ use FindBin qw($Bin);
 use lib $Bin;
 use VEPTestingConfig;
 my $test_cfg = VEPTestingConfig->new();
+my $base_testing_cfg = $test_cfg->base_testing_cfg;
 
 my ($vf, $tmp, $expected);
 
@@ -34,7 +35,7 @@ use_ok('Bio::EnsEMBL::VEP::Parser::VCF');
 # need to get a config object for further tests
 use_ok('Bio::EnsEMBL::VEP::Config');
 
-my $cfg = Bio::EnsEMBL::VEP::Config->new();
+my $cfg = Bio::EnsEMBL::VEP::Config->new($base_testing_cfg);
 ok($cfg, 'get new config object');
 
 my $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}});
@@ -175,7 +176,7 @@ is_deeply($vf, bless( {
 
 # non-variant
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
-  config => Bio::EnsEMBL::VEP::Config->new({allow_non_variant => 1}),
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, allow_non_variant => 1}),
   file => $test_cfg->create_input_file([qw(21 25587759 test G . . . .)])
 })->next();
 delete($vf->{adaptor}); delete($vf->{_line});
@@ -191,7 +192,7 @@ is_deeply($vf, bless( {
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'non-variant');
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
-  config => Bio::EnsEMBL::VEP::Config->new({allow_non_variant => 0}),
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, allow_non_variant => 0}),
   file => $test_cfg->create_input_file([qw(21 25587759 test G . . . .)])
 })->next();
 is($vf, undef, 'non-variant without allow_non_variant');
@@ -327,7 +328,7 @@ close STDERR;
 open STDERR, '>', \$tmp;
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
-  config => Bio::EnsEMBL::VEP::Config->new({gp => 1, warning_file => 'STDERR'}),
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1, warning_file => 'STDERR'}),
   file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DEL> . . .)])
 })->next();
 ok($tmp =~ /VCF line.+looks incomplete/, 'StructuralVariationFeature del without end or length');
@@ -341,7 +342,7 @@ open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
 # GP flag
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
-  config => Bio::EnsEMBL::VEP::Config->new({gp => 1}),
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1}),
   file => $test_cfg->create_input_file([qw(21 25587759 test A G . . GP=21:25586000)])
 })->next();
 delete($vf->{adaptor}); delete($vf->{_line});
@@ -363,7 +364,7 @@ close STDERR;
 open STDERR, '>', \$tmp;
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
-  config => Bio::EnsEMBL::VEP::Config->new({gp => 1, warning_file => 'STDERR'}),
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1, warning_file => 'STDERR'}),
   file => $test_cfg->create_input_file([qw(21 25587759 test A G . . .)])
 })->next();
 ok($tmp =~ /No GP flag found in INFO column/, 'gp - not found');
@@ -373,7 +374,7 @@ open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
 # individual data
 $p = Bio::EnsEMBL::VEP::Parser::VCF->new({
-  config => Bio::EnsEMBL::VEP::Config->new({allow_non_variant => 1, individual => 'all'}),
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, allow_non_variant => 1, individual => 'all'}),
   file => $test_cfg->create_input_file([
     ['##fileformat=VCFv4.1'],
     [qw(#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT dave barry jeff)],
@@ -430,7 +431,7 @@ is_deeply($vf, bless( {
 
 
 $p = Bio::EnsEMBL::VEP::Parser::VCF->new({
-  config => Bio::EnsEMBL::VEP::Config->new({allow_non_variant => 1, process_ref_homs => 1, individual => 'jeff'}),
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, allow_non_variant => 1, process_ref_homs => 1, individual => 'jeff'}),
   file => $test_cfg->create_input_file([
     ['##fileformat=VCFv4.1'],
     [qw(#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT jeff)],

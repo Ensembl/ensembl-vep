@@ -36,7 +36,7 @@ use_ok('Bio::EnsEMBL::VEP::OutputFactory::VCF');
 
 use_ok('Bio::EnsEMBL::VEP::Config');
 use_ok('Bio::EnsEMBL::VEP::Runner');
-my $cfg = Bio::EnsEMBL::VEP::Config->new();
+my $cfg = Bio::EnsEMBL::VEP::Config->new($cfg_hash);
 
 my $of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({config => $cfg, header_info => $test_cfg->{header_info}});
 
