@@ -81,6 +81,9 @@ is_deeply($runner->get_Parser, bless({
   '_config' => $runner->config,
   'file' => *Bio::EnsEMBL::VEP::Runner::IN,
   'line_number' => 0,
+  'check_ref' => undef,
+  'chr' => undef,
+  'dont_skip' => undef,
 }, 'Bio::EnsEMBL::VEP::Parser::VEP_input' ), 'get_Parser');
 
 is_deeply($runner->get_InputBuffer, bless({
@@ -89,6 +92,9 @@ is_deeply($runner->get_InputBuffer, bless({
     '_config' => $runner->config,
     'file' => *Bio::EnsEMBL::VEP::Runner::IN,
     'line_number' => 0,
+    'check_ref' => undef,
+    'chr' => undef,
+    'dont_skip' => undef,
   }, 'Bio::EnsEMBL::VEP::Parser::VEP_input' ),
   'buffer_size' => $runner->param('buffer_size'),
 }, 'Bio::EnsEMBL::VEP::InputBuffer' ), 'get_InputBuffer');
