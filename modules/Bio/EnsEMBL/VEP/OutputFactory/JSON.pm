@@ -70,6 +70,7 @@ my %RENAME_KEYS = (
   'ensp' => 'protein_id',
   'chr' => 'seq_region_name',
   'variation_name' => 'id',
+  'sv' => 'colocated_structural_variants',
 );
 
 my %NUMBERIFY_EXEMPT = (
@@ -125,6 +126,13 @@ sub get_all_lines_by_InputBuffer {
     $self->add_colocated_variant_info($vf, $hash);
 
     numberify($hash, \%NUMBERIFY_EXEMPT);
+
+    # rename
+    my %rename = %RENAME_KEYS;
+    foreach my $key(grep {defined($hash->{$_})} keys %rename) {
+      $hash->{$rename{$key}} = $hash->{$key};
+      delete $hash->{$key};
+    }
     
     push @return, $self->{json_obj}->encode($hash);
   }

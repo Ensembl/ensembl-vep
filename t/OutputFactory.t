@@ -260,6 +260,18 @@ is_deeply(
 );
 $of->{variant_class} = 0;
 
+$ib->buffer->[0]->{overlapping_svs} = {'sv1' => 1, 'sv2' => 2};
+is_deeply(
+  $of->VariationFeature_to_output_hash($ib->buffer->[0]),
+  {
+    'Uploaded_variation' => 'rs142513484',
+    'Location' => '21:25585733',
+    'SV' => ['sv1', 'sv2'],
+  },
+  'VariationFeature_to_output_hash - overlapping_svs'
+);
+
+
 no warnings 'qw';
 $ib = get_annotated_buffer({
   input_file => $test_cfg->create_input_file([

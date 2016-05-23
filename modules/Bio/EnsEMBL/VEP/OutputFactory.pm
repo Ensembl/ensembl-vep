@@ -506,9 +506,9 @@ sub VariationFeature_to_output_hash {
   $self->add_colocated_variant_info($vf, $hash);
 
   # overlapping SVs
-  # if($self->{check_svs} && defined $vf->{overlapping_svs}) {
-  #   $hash->{SV} = $vf->{overlapping_svs};
-  # }
+  if($vf->{overlapping_svs}) {
+    $hash->{SV} = [sort keys %{$vf->{overlapping_svs}}];
+  }
 
   # frequencies?
   # $hash->{FREQS} = join ",", @{$vf->{freqs}} if defined($vf->{freqs});
