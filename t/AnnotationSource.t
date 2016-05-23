@@ -53,7 +53,7 @@ is_deeply($as->info, { foo => 'bar' }, 'info');
 #############################
 
 use_ok('Bio::EnsEMBL::VEP::Parser::VCF');
-my $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}});
+my $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}, valid_chromosomes => [21, 1]});
 ok($p, 'get parser object');
 
 use_ok('Bio::EnsEMBL::VEP::InputBuffer');
@@ -112,6 +112,7 @@ sub get_regions_from_input {
     parser => Bio::EnsEMBL::VEP::Parser::VCF->new({
       config => $cfg,
       file => $test_cfg->create_input_file($input),
+      valid_chromosomes => [1]
     })
   });
   $ib->next();

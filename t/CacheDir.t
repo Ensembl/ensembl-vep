@@ -140,7 +140,7 @@ is($cd->dir, $test_cfg->{cache_dir}, 'dir');
 
 is_deeply(
   $cd->info,
-    {
+  {
     'polyphen' => 'b',
     'sift' => 'b',
     'species' => 'homo_sapiens',
@@ -190,7 +190,8 @@ is_deeply(
       'ExAC_OTH',
       'ExAC_SAS'
     ],
-    'assembly' => 'GRCh38'
+    'assembly' => 'GRCh38',
+    'valid_chromosomes' => [21],
   },
   'info'
 );

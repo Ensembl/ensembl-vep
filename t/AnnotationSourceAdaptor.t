@@ -73,7 +73,8 @@ my $exp = [
       'assembly' => 'GRCh38.p5',
       'dbSNP' => '146',
       'ClinVar' => '201601'
-    }
+    },
+    'valid_chromosomes' => [21],
   }, 'Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript' )
 ];
 

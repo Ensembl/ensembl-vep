@@ -123,7 +123,7 @@ is_deeply($c->cache, {}, 'clean_cache');
 #############################
 
 use_ok('Bio::EnsEMBL::VEP::Parser::VCF');
-my $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}});
+my $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}, valid_chromosomes => [21]});
 ok($p, 'get parser object');
 
 use_ok('Bio::EnsEMBL::VEP::InputBuffer');
@@ -152,7 +152,7 @@ $ib->next();
 is_deeply($c->get_all_features_by_InputBuffer($ib), [], 'get_all_features_by_InputBuffer on empty buffer');
 
 # reset
-$p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}});
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}, valid_chromosomes => [21]});
 $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
 $ib->next();
 

@@ -42,6 +42,7 @@ my $c = Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript->new({
   dir => $dir,
   source_type => 'ensembl',
   cache_region_size => 1000000,
+  valid_chromosomes => [21],
 });
 ok($c, 'new is defined');
 
@@ -51,6 +52,8 @@ ok($c, 'new is defined');
 
 is($c->serializer_type, 'storable', 'serializer_type');
 is($c->file_suffix, 'gz', 'file_suffix');
+
+is_deeply($c->get_valid_chromosomes, [21], 'get_valid_chromosomes');
 
 is($c->get_dump_file_name(1, '1-100'), $dir.'/1/1-100.gz', 'get_dump_file_name');
 is($c->get_dump_file_name(1, 1, 100), $dir.'/1/1-100.gz', 'get_dump_file_name with end');
@@ -158,7 +161,7 @@ is_deeply($c->cache, {}, 'clean_cache');
 #############################
 
 use_ok('Bio::EnsEMBL::VEP::Parser::VCF');
-my $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}});
+my $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}, valid_chromosomes => [21]});
 ok($p, 'get parser object');
 
 use_ok('Bio::EnsEMBL::VEP::InputBuffer');
@@ -188,7 +191,7 @@ $ib->next();
 is_deeply($c->get_all_features_by_InputBuffer($ib), [], 'get_all_features_by_InputBuffer on empty buffer');
 
 # reset
-$p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}});
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}, valid_chromosomes => [21]});
 $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
 $ib->next();
 

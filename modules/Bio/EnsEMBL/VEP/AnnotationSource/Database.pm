@@ -77,4 +77,19 @@ sub get_slice {
   return $self->{_slice_cache}->{$chr};
 }
 
+sub get_valid_chromosomes {
+  my $self = shift;
+
+  if(!exists($self->{valid_chromosomes})) {
+    my $sa = $self->get_adaptor(
+      $self->{core_type} || $self->param('core_type'),
+      'Slice'
+    );
+
+    $self->{valid_chromosomes} = [map {$_->seq_region_name} @{$sa->fetch_all('toplevel')}];
+  }
+
+  return $self->{valid_chromosomes};
+}
+
 1;

@@ -60,7 +60,7 @@ is($c->delimiter, "\t", 'delimiter');
 #############################
 
 use_ok('Bio::EnsEMBL::VEP::Parser::VCF');
-my $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}});
+my $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}, valid_chromosomes => [21]});
 ok($p, 'get parser object');
 
 use_ok('Bio::EnsEMBL::VEP::InputBuffer');
@@ -121,7 +121,7 @@ $vf_hash = {
 
 is_deeply($vf->{existing}, undef, 'miss by coord - _annotate_cl');
 
-$p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}});
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}, valid_chromosomes => [21]});
 $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
 $ib->next();
 
@@ -133,7 +133,7 @@ is_deeply($vf->{existing}, $exp, 'annotate_InputBuffer');
 is(scalar (grep {$_->{existing}} @{$ib->buffer}), 132, 'annotate_InputBuffer count annotated');
 
 # construct one to test phenotype_or_disease and clin_sig
-$p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->create_input_file([qw(21 25891796 . C T . . .)])});
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, valid_chromosomes => [21], file => $test_cfg->create_input_file([qw(21 25891796 . C T . . .)])});
 $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
 $ib->next;
 
@@ -214,7 +214,7 @@ SKIP: {
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
   skip 'Bio::DB::HTS::Tabix module not available', 4 unless $Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix::CAN_USE_TABIX_PM;
 
-  $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}});
+  $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}, valid_chromosomes => [21]});
   $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
   $ib->next();
   $vf = $ib->buffer->[0];
@@ -239,7 +239,7 @@ SKIP: {
   # do the same test with the "opposite" use of perl module vs command line
   $Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix::CAN_USE_TABIX_PM = 0;
 
-  $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}});
+  $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}, valid_chromosomes => [21]});
   $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
   $ib->next();
 

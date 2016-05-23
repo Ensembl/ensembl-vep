@@ -69,7 +69,8 @@ SKIP: {
 
   my $p = Bio::EnsEMBL::VEP::Parser::ID->new({
     config => $cfg,
-    file => $test_cfg->create_input_file('rs142513484')
+    file => $test_cfg->create_input_file('rs142513484'),
+    valid_chromosomes => [21],
   });
 
   is(ref($p), 'Bio::EnsEMBL::VEP::Parser::ID', 'class ref');
@@ -107,7 +108,7 @@ SKIP: {
 
   $vf = Bio::EnsEMBL::VEP::Parser::ID->new({
     config => $cfg,
-    file => $test_cfg->create_input_file('rs699')
+    file => $test_cfg->create_input_file('rs699'),
   })->next;
   is($vf, undef, 'missing ID');
 

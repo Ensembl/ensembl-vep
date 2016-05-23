@@ -70,7 +70,8 @@ SKIP: {
 
   my $p = Bio::EnsEMBL::VEP::Parser::HGVS->new({
     config => $cfg,
-    file => $test_cfg->create_input_file('21:g.25585733C>T')
+    file => $test_cfg->create_input_file('21:g.25585733C>T'),
+    valid_chromosomes => [21],
   });
 
   is(ref($p), 'Bio::EnsEMBL::VEP::Parser::HGVS', 'class ref');
@@ -110,21 +111,24 @@ SKIP: {
 
   $vf = Bio::EnsEMBL::VEP::Parser::HGVS->new({
     config => $cfg,
-    file => $test_cfg->create_input_file('ENST00000352957.8:c.991G>A')
+    file => $test_cfg->create_input_file('ENST00000352957.8:c.991G>A'),
+    valid_chromosomes => [21],
   })->next();
   delete($vf->{$_}) for qw(adaptor variation slice variation_name);
   is_deeply($vf, $expected, 'coding');
 
   $vf = Bio::EnsEMBL::VEP::Parser::HGVS->new({
     config => $cfg,
-    file => $test_cfg->create_input_file('ENST00000307301.11:c.*18G>A')
+    file => $test_cfg->create_input_file('ENST00000307301.11:c.*18G>A'),
+    valid_chromosomes => [21],
   })->next();
   delete($vf->{$_}) for qw(adaptor variation slice variation_name);
   is_deeply($vf, $expected, 'coding - UTR');
 
   $vf = Bio::EnsEMBL::VEP::Parser::HGVS->new({
     config => $cfg,
-    file => $test_cfg->create_input_file('ENSP00000284967.6:p.Ala331Thr')
+    file => $test_cfg->create_input_file('ENSP00000284967.6:p.Ala331Thr'),
+    valid_chromosomes => [21],
   })->next();
   delete($vf->{$_}) for qw(adaptor variation slice variation_name);
   is_deeply($vf, $expected, 'protein');
@@ -138,7 +142,8 @@ SKIP: {
 
   $vf = Bio::EnsEMBL::VEP::Parser::HGVS->new({
     config => $cfg,
-    file => $test_cfg->create_input_file('21:k.25585733C>T')
+    file => $test_cfg->create_input_file('21:k.25585733C>T'),
+    valid_chromosomes => [21],
   })->next();
   is($vf, undef, 'invalid HGVS type');
   ok($tmp =~ /Unable to parse HGVS notation/, 'invalid HGVS type warning msg');
@@ -158,7 +163,8 @@ SKIP: {
 
   $vf = Bio::EnsEMBL::VEP::Parser::HGVS->new({
     config => $cfg,
-    file => $test_cfg->create_input_file('NM_017446.3:c.991G>A')
+    file => $test_cfg->create_input_file('NM_017446.3:c.991G>A'),
+    valid_chromosomes => [21],
   })->next();
 
   delete($vf->{$_}) for qw(adaptor variation slice variation_name);
@@ -166,7 +172,8 @@ SKIP: {
 
   $vf = Bio::EnsEMBL::VEP::Parser::HGVS->new({
     config => $cfg,
-    file => $test_cfg->create_input_file('NP_059142.2:p.Ala331Thr')
+    file => $test_cfg->create_input_file('NP_059142.2:p.Ala331Thr'),
+    valid_chromosomes => [21],
   })->next();
 
   delete($vf->{$_}) for qw(adaptor variation slice variation_name);

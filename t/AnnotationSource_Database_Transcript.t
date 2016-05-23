@@ -80,6 +80,8 @@ SKIP: {
   ## METHODS
   ##########
 
+  is_deeply($as->get_valid_chromosomes, [21], 'get_valid_chromosomes');
+
   ok($as->check_sift_polyphen, 'check_sift_polyphen - not specified');
 
   $as->{sift} = 1;

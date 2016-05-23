@@ -78,6 +78,8 @@ sub new {
 
   $self->line_number(0);
 
+  $self->valid_chromosomes({map {$_ => 1} @{$hashref->{valid_chromosomes} || []}});
+
   if(my $format = $hashref->{format}) {
 
     delete $hashref->{format};
@@ -126,6 +128,12 @@ sub line_number {
   my $self = shift;
   $self->{line_number} = shift if @_;
   return $self->{line_number};
+}
+
+sub valid_chromosomes {
+  my $self = shift;
+  $self->{valid_chromosomes} = shift if @_;
+  return $self->{valid_chromosomes};
 }
 
 sub detect_format {
@@ -244,6 +252,50 @@ sub validate_vf {
     return 0;
   }
 
+  # map to top level?
+  unless($self->valid_chromosomes->{$vf->{chr}}) {
+
+    # slice adaptor required
+    if(my $sa = $self->get_adaptor('core', 'Slice')) {
+      $vf->{slice} ||= $self->get_slice($vf->{chr});
+
+      if($vf->{slice}) {
+        my $transformed = $vf->transform('toplevel');
+
+        # copy to VF
+        if($transformed) {
+          $vf->{$_} = $transformed->{$_} for keys %$transformed;
+          $vf->{original_chr} = $vf->{chr};
+          $vf->{chr} = $vf->{slice}->seq_region_name;
+        }
+
+        # could not transform
+        else {
+          $self->warning_msg(
+            "WARNING: Chromosome ".$vf->{chr}." not found in cache or database and could not transform to toplevel on line ".$self->line_number
+          );
+          return 0;
+        }
+      }
+
+      # no slice
+      else {
+        $self->warning_msg(
+          "WARNING: Could not fetch slice for chromosome ".$vf->{chr}." on line ".$self->line_number
+        );
+        return 0;
+      }
+    }
+
+    # offline, can't transform
+    else {
+      $self->warning_msg(
+        "WARNING: Chromosome ".$vf->{chr}." not found in cache or database on line ".$self->line_number
+      );
+      return 0;
+    }
+  }
+
   # structural variation?
   return $self->validate_svf($vf) if ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature';
 
@@ -327,6 +379,38 @@ sub validate_vf {
 # validate a structural variation
 sub validate_svf {
   return 1;
+}
+
+# post process VFs - remapping etc
+sub post_process_vfs {
+  my $self = shift;
+  my $vfs = shift;
+
+  # map to LRGs
+  $vfs = $self->map_to_lrg($vfs);
+
+  # minimise alleles?
+  $vfs = $self->minimise_alleles($vfs);
+
+  return $vfs;
+}
+
+sub map_to_lrg {
+  my $self = shift;
+  my $vfs = shift;
+
+  my @return;
+
+  return \@return;
+}
+
+sub minimise_alleles {
+  my $self = shift;
+  my $vfs = shift;
+
+  my @return;
+
+  return \@return;
 }
 
 1;

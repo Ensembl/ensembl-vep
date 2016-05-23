@@ -51,7 +51,8 @@ is(ref($p), 'Bio::EnsEMBL::VEP::Parser::VEP_input', 'check class');
 ###############
 
 $vf = Bio::EnsEMBL::VEP::Parser::VEP_input->new({
-  config => $cfg, file => $test_cfg->create_input_file([qw(21 25587759 25587759 C/A + test)])
+  config => $cfg, file => $test_cfg->create_input_file([qw(21 25587759 25587759 C/A + test)]),
+  valid_chromosomes => [21]
 })->next();
 delete($vf->{adaptor});
 is_deeply($vf, bless( {
@@ -65,7 +66,8 @@ is_deeply($vf, bless( {
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'basic next test');
 
 $vf = Bio::EnsEMBL::VEP::Parser::VEP_input->new({
-  config => $cfg, file => $test_cfg->create_input_file([qw(21 25587759 25587759 C/A - test)])
+  config => $cfg, file => $test_cfg->create_input_file([qw(21 25587759 25587759 C/A - test)]),
+  valid_chromosomes => [21]
 })->next();
 delete($vf->{adaptor});
 is_deeply($vf, bless( {
@@ -79,7 +81,8 @@ is_deeply($vf, bless( {
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'negative strand');
 
 $vf = Bio::EnsEMBL::VEP::Parser::VEP_input->new({
-  config => $cfg, file => $test_cfg->create_input_file([qw(21 25587759 25587759 C/A)])
+  config => $cfg, file => $test_cfg->create_input_file([qw(21 25587759 25587759 C/A)]),
+  valid_chromosomes => [21]
 })->next();
 delete($vf->{adaptor});
 is_deeply($vf, bless( {
@@ -93,7 +96,8 @@ is_deeply($vf, bless( {
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'stubby');
 
 $vf = Bio::EnsEMBL::VEP::Parser::VEP_input->new({
-  config => $cfg, file => $test_cfg->create_input_file([qw(21 25587759 25587769 DUP + test)])
+  config => $cfg, file => $test_cfg->create_input_file([qw(21 25587759 25587769 DUP + test)]),
+  valid_chromosomes => [21]
 })->next();
 delete($vf->{adaptor});
 is_deeply($vf, bless( {
@@ -120,7 +124,8 @@ $vf = Bio::EnsEMBL::VEP::Parser::VEP_input->new({
   file => $test_cfg->create_input_file([
     [qw(21 foo bar C/A 1)],
     [qw(21 25587759 25587759 C/A 1)],
-  ])
+  ]),
+  valid_chromosomes => [21]
 })->next();
 
 is($vf->{start}, 25587759, 'skip VF that fails validation');
@@ -133,6 +138,7 @@ $vf = Bio::EnsEMBL::VEP::Parser::VEP_input->new({
     [qw(21 foo bar C/A 1)],
     [qw(21 25587759 25587759 C/A 1)],
   ]),
+  valid_chromosomes => [21]
 })->next();
 
 is($vf->{start}, 'foo', 'dont skip VF that fails validation with dont_skip');

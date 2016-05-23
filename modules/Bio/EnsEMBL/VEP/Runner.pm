@@ -252,9 +252,10 @@ sub get_Parser {
     }
 
     $self->{parser} = Bio::EnsEMBL::VEP::Parser->new({
-      config => $self->config,
-      format => $self->param('format'),
-      file   => $self->param('input_file')
+      config            => $self->config,
+      format            => $self->param('format'),
+      file              => $self->param('input_file'),
+      valid_chromosomes => $self->get_valid_chromosomes,
     })
   }
 
@@ -316,6 +317,24 @@ sub get_output_header_info {
   }
 
   return $self->{output_header_info};
+}
+
+sub get_valid_chromosomes {
+  my $self = shift;
+
+  if(!exists($self->{valid_chromosomes})) {
+
+    my %valid = ();
+
+    foreach my $as(@{$self->get_all_AnnotationSources}) {
+      next unless $as->can('get_valid_chromosomes');
+      $valid{$_} = 1 for @{$as->get_valid_chromosomes};
+    }
+
+    $self->{valid_chromosomes} = [keys %valid];
+  }
+
+  return $self->{valid_chromosomes};
 }
 
 1;

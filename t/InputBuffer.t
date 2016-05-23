@@ -38,7 +38,7 @@ use_ok('Bio::EnsEMBL::VEP::Parser::VCF');
 my $cfg = Bio::EnsEMBL::VEP::Config->new({%{$test_cfg->base_testing_cfg}, buffer_size => 10});
 ok($cfg, 'get new config object');
 
-my $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}});
+my $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}, valid_chromosomes => [21]});
 ok($p, 'get parser object');
 
 my $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
@@ -291,7 +291,8 @@ $p = Bio::EnsEMBL::VEP::Parser::VCF->new({
     [qw(1 123 . A G . . .)],
     [qw(2 123 . A G . . .)],
     [qw(3 123 . A G . . .)],
-  ])
+  ]),
+  valid_chromosomes => [1, 2, 3]
 });
 $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
 

@@ -38,7 +38,7 @@ use_ok('Bio::EnsEMBL::VEP::Config');
 my $cfg = Bio::EnsEMBL::VEP::Config->new($base_testing_cfg);
 ok($cfg, 'get new config object');
 
-my $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}});
+my $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}, valid_chromosomes => [21]});
 ok($p, 'new is defined');
 
 is(ref($p), 'Bio::EnsEMBL::VEP::Parser::VCF', 'check class');
@@ -97,7 +97,8 @@ no warnings 'qw';
 # deletion
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
-  file => $test_cfg->create_input_file([qw(21 25587759 test AC A . . .)])
+  file => $test_cfg->create_input_file([qw(21 25587759 test AC A . . .)]),
+  valid_chromosomes => [21]
 })->next();
 delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, bless( {
@@ -113,7 +114,8 @@ is_deeply($vf, bless( {
 # insertion
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
-  file => $test_cfg->create_input_file([qw(21 25587759 test A AC . . .)])
+  file => $test_cfg->create_input_file([qw(21 25587759 test A AC . . .)]),
+  valid_chromosomes => [21]
 })->next();
 delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, bless( {
@@ -129,7 +131,8 @@ is_deeply($vf, bless( {
 # multiple alts
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
-  file => $test_cfg->create_input_file([qw(21 25587759 test A C,G . . .)])
+  file => $test_cfg->create_input_file([qw(21 25587759 test A C,G . . .)]),
+  valid_chromosomes => [21]
 })->next();
 delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, bless( {
@@ -145,7 +148,8 @@ is_deeply($vf, bless( {
 # mixed types - different first base
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
-  file => $test_cfg->create_input_file([qw(21 25587759 test A C,GG . . .)])
+  file => $test_cfg->create_input_file([qw(21 25587759 test A C,GG . . .)]),
+  valid_chromosomes => [21]
 })->next();
 delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, bless( {
@@ -161,7 +165,8 @@ is_deeply($vf, bless( {
 # mixed types - different first base
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
-  file => $test_cfg->create_input_file([qw(21 25587759 test G GC,GT . . .)])
+  file => $test_cfg->create_input_file([qw(21 25587759 test G GC,GT . . .)]),
+  valid_chromosomes => [21]
 })->next();
 delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, bless( {
@@ -177,7 +182,8 @@ is_deeply($vf, bless( {
 # non-variant
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, allow_non_variant => 1}),
-  file => $test_cfg->create_input_file([qw(21 25587759 test G . . . .)])
+  file => $test_cfg->create_input_file([qw(21 25587759 test G . . . .)]),
+  valid_chromosomes => [21]
 })->next();
 delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, bless( {
@@ -193,14 +199,16 @@ is_deeply($vf, bless( {
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, allow_non_variant => 0}),
-  file => $test_cfg->create_input_file([qw(21 25587759 test G . . . .)])
+  file => $test_cfg->create_input_file([qw(21 25587759 test G . . . .)]),
+  valid_chromosomes => [21]
 })->next();
 is($vf, undef, 'non-variant without allow_non_variant');
 
 # *-type as produced by GATK
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
-  file => $test_cfg->create_input_file([qw(21 25587759 test G C,* . . .)])
+  file => $test_cfg->create_input_file([qw(21 25587759 test G C,* . . .)]),
+  valid_chromosomes => [21]
 })->next();
 delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, bless( {
@@ -215,7 +223,8 @@ is_deeply($vf, bless( {
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
-  file => $test_cfg->create_input_file([qw(21 25587759 test G C,<DEL:*> . . .)])
+  file => $test_cfg->create_input_file([qw(21 25587759 test G C,<DEL:*> . . .)]),
+  valid_chromosomes => [21]
 })->next();
 delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, bless( {
@@ -230,7 +239,8 @@ is_deeply($vf, bless( {
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
-  file => $test_cfg->create_input_file([qw(21 25587759 test GC G,* . . .)])
+  file => $test_cfg->create_input_file([qw(21 25587759 test GC G,* . . .)]),
+  valid_chromosomes => [21]
 })->next();
 delete($vf->{adaptor}); delete($vf->{_line});
 
@@ -246,7 +256,8 @@ is_deeply($vf, bless( {
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
-  file => $test_cfg->create_input_file([qw(21 25587759 test G GC,* . . .)])
+  file => $test_cfg->create_input_file([qw(21 25587759 test G GC,* . . .)]),
+  valid_chromosomes => [21]
 })->next();
 delete($vf->{adaptor}); delete($vf->{_line});
 
@@ -277,35 +288,40 @@ $expected = bless( {
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
-  file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DUP> . . SVTYPE=DUP;END=25587769)])
+  file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DUP> . . SVTYPE=DUP;END=25587769)]),
+  valid_chromosomes => [21]
 })->next();
 delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, $expected, 'StructuralVariationFeature 1');
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
-  file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T . . . SVTYPE=DUP;END=25587769)])
+  file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T . . . SVTYPE=DUP;END=25587769)]),
+  valid_chromosomes => [21]
 })->next();
 delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, $expected, 'StructuralVariationFeature 2');
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
-  file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DUP> . . END=25587769)])
+  file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DUP> . . END=25587769)]),
+  valid_chromosomes => [21]
 })->next();
 delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, $expected , 'StructuralVariationFeature no SVTYPE');
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
-  file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DUP> . . SVLEN=11)])
+  file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DUP> . . SVLEN=11)]),
+  valid_chromosomes => [21]
 })->next();
 delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, $expected , 'StructuralVariationFeature SVLEN');
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
-  file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DUP> . . SVLEN=11;CIPOS=-3,2;CIEND=-4,5)])
+  file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DUP> . . SVLEN=11;CIPOS=-3,2;CIEND=-4,5)]),
+  valid_chromosomes => [21]
 })->next();
 delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, bless( {
@@ -329,7 +345,8 @@ open STDERR, '>', \$tmp;
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1, warning_file => 'STDERR'}),
-  file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DEL> . . .)])
+  file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DEL> . . .)]),
+  valid_chromosomes => [21]
 })->next();
 ok($tmp =~ /VCF line.+looks incomplete/, 'StructuralVariationFeature del without end or length');
 
@@ -343,7 +360,8 @@ open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 # GP flag
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1}),
-  file => $test_cfg->create_input_file([qw(21 25587759 test A G . . GP=21:25586000)])
+  file => $test_cfg->create_input_file([qw(21 25587759 test A G . . GP=21:25586000)]),
+  valid_chromosomes => [21]
 })->next();
 delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, bless( {
@@ -365,7 +383,8 @@ open STDERR, '>', \$tmp;
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1, warning_file => 'STDERR'}),
-  file => $test_cfg->create_input_file([qw(21 25587759 test A G . . .)])
+  file => $test_cfg->create_input_file([qw(21 25587759 test A G . . .)]),
+  valid_chromosomes => [21]
 })->next();
 ok($tmp =~ /No GP flag found in INFO column/, 'gp - not found');
 
@@ -379,7 +398,8 @@ $p = Bio::EnsEMBL::VEP::Parser::VCF->new({
     ['##fileformat=VCFv4.1'],
     [qw(#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT dave barry jeff)],
     [qw(21 25587759 indtest A G . . . GT 0|1 1/1 0/0)],
-  ])
+  ]),
+  valid_chromosomes => [21]
 });
 
 $vf = $p->next;
@@ -436,7 +456,8 @@ $p = Bio::EnsEMBL::VEP::Parser::VCF->new({
     ['##fileformat=VCFv4.1'],
     [qw(#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT jeff)],
     [qw(21 25587759 indtest A G . . . GT 0/0)],
-  ])
+  ]),
+  valid_chromosomes => [21]
 });
 
 $vf = $p->next;
@@ -472,7 +493,8 @@ $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   file => $test_cfg->create_input_file([
     [qw(21 foo . C A . . .)],
     [qw(21 25587759 . C A . . .)],
-  ])
+  ]),
+  valid_chromosomes => [21]
 })->next();
 
 is($vf->{start}, 25587759, 'skip VF that fails validation');
@@ -485,6 +507,7 @@ $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
     [qw(21 foo . C A . . .)],
     [qw(21 25587759 . C A . . .)],
   ]),
+  valid_chromosomes => [21]
 })->next();
 
 is($vf->{start}, 'foo', 'dont skip VF that fails validation with dont_skip');

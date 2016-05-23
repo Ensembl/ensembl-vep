@@ -90,6 +90,7 @@ sub get_all_AnnotationSources {
       source_type => $self->source_type,
       cache_region_size => $info->{cache_region_size} || $self->param('cache_region_size'),
       info => $self->version_data,
+      valid_chromosomes => $info->{valid_chromosomes},
     });
 
     # add RegFeats if available
@@ -100,6 +101,7 @@ sub get_all_AnnotationSources {
       cache_region_size => $info->{cache_region_size} || $self->param('cache_region_size'),
       info => $self->version_data,
       available_cell_types => [split(',', ($info->{cell_types} || ''))],
+      valid_chromosomes => $info->{valid_chromosomes},
     }) if $self->param('regulatory') and $info->{regulatory};
 
     # add Variation if available
@@ -118,6 +120,7 @@ sub get_all_AnnotationSources {
         cache_region_size => $info->{cache_region_size} || $self->param('cache_region_size'),
         cols => $info->{variation_cols},
         info => $self->version_data,
+        valid_chromosomes => $info->{valid_chromosomes},
       }); 
     }
 
@@ -265,6 +268,12 @@ sub info {
     #     throw("ERROR: Unable to use --".$disabled." with this cache\n");
     #   }
     # }
+
+    # get valid chromosomes
+    if(opendir DIR, $self->dir) {
+      $info->{valid_chromosomes} = [sort grep {!/^\./ && -d $self->dir.'/'.$_} readdir DIR];
+      closedir DIR;
+    }
 
     $self->{info} = $info;
   }

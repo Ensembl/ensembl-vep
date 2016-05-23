@@ -59,9 +59,17 @@ is_deeply($p->headers, [], 'headers');
 $p->file($test_cfg->{test_vcf});
 is($p->detect_format, 'vcf', 'detect_format - VCF');
 
+is_deeply($p->valid_chromosomes, {}, 'valid_chromosomes empty');
+
+$p = Bio::EnsEMBL::VEP::Parser->new({file => $test_cfg->{test_vcf}, valid_chromosomes => [21]});
+is_deeply($p->valid_chromosomes, {21 => 1}, 'valid_chromosomes');
+
 
 ## VALIDATION CHECKS
 ####################
+
+$p = Bio::EnsEMBL::VEP::Parser->new({file => $test_cfg->{test_vcf}, config => $cfg});
+$p->{valid_chromosomes} = {1 => 1, 21 => 1, CHR_1 => 1, M => 1, MT => 1, chromosome => 1};
 
 is($p->validate_svf(), 1, 'validate_svf - not implemented yet');
 
@@ -103,6 +111,10 @@ open STDERR, '>', \$tmp;
 
 $cfg->param('warning_file', 'STDERR');
 $p = Bio::EnsEMBL::VEP::Parser->new({file => $test_cfg->{test_vcf}, config => $cfg});
+$p->{valid_chromosomes} = {1 => 1, 21 => 1};
+
+is($p->validate_vf(get_vf({allele_string => 'A/C', chr => 2})), 0, 'validate_vf - chromosome not in valid list 1');
+ok($tmp =~ /Chromosome .* not found in cache or database/, 'validate_vf - chromosome not in valid list 2');
 
 is($p->validate_vf(get_vf({allele_string => 'G/C', start => 'foo'})), 0, 'validate_vf - start is not number 1');
 ok($tmp =~ /coordinate invalid/, 'validate_vf - start is not number 2');
@@ -219,6 +231,63 @@ throws_ok {
     format => 'guess'
   })
 } qr/Unknown or unsupported format/, 'new with unsupported format';
+
+
+
+## DATABASE TESTS
+#################
+
+SKIP: {
+  my $db_cfg = $test_cfg->db_cfg;
+  my $can_use_db = $db_cfg && scalar keys %$db_cfg;
+
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  skip 'No local database configured', 7 unless $can_use_db;
+
+  my $multi;
+
+  if($can_use_db) {
+    eval q{
+      use Bio::EnsEMBL::Test::TestUtils;
+      use Bio::EnsEMBL::Test::MultiTestDB;
+      1;
+    };
+
+    $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens');
+  }
+  
+  $cfg = Bio::EnsEMBL::VEP::Config->new({
+    %$cfg_hash,
+    %$db_cfg,
+    database => 1,
+    offline => 0,
+    species => 'homo_vepiens',
+  });
+
+  $p = Bio::EnsEMBL::VEP::Parser->new({config => $cfg, file => $test_cfg->{test_vcf}});
+
+  my $vf = get_vf({allele_string => 'A/C', chr => 'AP000235.3'});
+  is($p->validate_vf($vf), 1, 'DB - validate_vf - successful transform 1');
+  is($vf->{chr}, 21, 'DB - validate_vf - successful transform 2');
+  is($vf->{start}, 25043669, 'DB - validate_vf - successful transform 3');
+
+  # warning_msg prints to STDERR
+  no warnings 'once';
+  open(SAVE, ">&STDERR") or die "Can't save STDERR\n"; 
+
+  close STDERR;
+  my $tmp;
+  open STDERR, '>', \$tmp;
+
+  is($p->validate_vf(get_vf({allele_string => 'A/C', chr => 2})), 0, 'DB - validate_vf - chromosome not in valid list 1');
+  ok($tmp =~ /Could not fetch slice for chromosome/, 'DB - validate_vf - chromosome not in valid list 2');
+
+  is($p->validate_vf(get_vf({allele_string => 'A/C', chr => 21, start => 125000001, end => 125000001})), 0, 'DB - validate_vf - unsuccessful transform to toplevel 1');
+  ok($tmp =~ /could not transform to toplevel/, 'DB - validate_vf - unsuccessful transform to toplevel 2');
+
+  # restore STDERR
+  open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
+}
 
 
 done_testing();
