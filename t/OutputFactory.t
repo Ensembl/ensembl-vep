@@ -1103,6 +1103,13 @@ is_deeply(
   'SV - BaseStructuralVariationOverlapAllele_to_output_hash'
 );
 
+$of->{allele_number} = 1;
+is(
+  $of->BaseStructuralVariationOverlapAllele_to_output_hash($vfoa)->{ALLELE_NUM},
+  1,
+  'SV - BaseStructuralVariationOverlapAllele_to_output_hash - allele_number'
+);
+$of->{allele_number} = 0;
 
 ## StructuralVariationOverlapAllele_to_output_hash
 ##################################################

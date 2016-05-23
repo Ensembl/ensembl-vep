@@ -613,9 +613,7 @@ sub VariationFeatureOverlapAllele_to_output_hash {
   $hash->{Allele} = $vfoa->variation_feature_seq;
 
   # allele number
-  if($self->{allele_number}) {
-    $hash->{ALLELE_NUM} = $vfoa->allele_number if $vfoa->can('allele_number');
-  }
+  $hash->{ALLELE_NUM} = $vfoa->allele_number if $self->{allele_number};
 
   # picked?
   $hash->{PICK} = 1 if defined($vfoa->{PICK});
@@ -958,6 +956,9 @@ sub BaseStructuralVariationOverlapAllele_to_output_hash {
   my $svf = $vfoa->base_variation_feature;
 
   $hash->{Allele} = $svf->class_SO_term;
+
+  # allele number
+  $hash->{ALLELE_NUM} = $vfoa->allele_number if $self->{allele_number};
 
   my @ocs = sort {$a->rank <=> $b->rank} @{$vfoa->get_all_OverlapConsequences};
 
