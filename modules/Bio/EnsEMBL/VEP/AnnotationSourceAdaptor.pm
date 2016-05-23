@@ -51,6 +51,7 @@ use Bio::EnsEMBL::VEP::CacheDir;
 use Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript;
 use Bio::EnsEMBL::VEP::AnnotationSource::Database::RegFeat;
 use Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation;
+use Bio::EnsEMBL::VEP::AnnotationSource::Database::StructuralVariation;
 
 # this method is called from VEP::Runner's init() method
 sub get_all {
@@ -97,7 +98,11 @@ sub get_all_from_database {
     }) if $self->param('check_existing');
   }
 
-  ## overlapping SVs
+  # overlapping SVs
+  # this has no cache equivalent
+  push @as, Bio::EnsEMBL::VEP::AnnotationSource::Database::StructuralVariation->new({
+    config => $self->config,
+  }) if $self->param('check_svs');
 
   return \@as;
 }

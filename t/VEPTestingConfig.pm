@@ -95,6 +95,7 @@ sub base_testing_cfg {
     cache_version => $self->{cache_version},
     assembly      => $self->{cache_assembly},
     offline       => 1,
+    database      => 0,
   }
 }
 

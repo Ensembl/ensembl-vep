@@ -92,7 +92,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 4 unless $can_use_db;
+  skip 'No local database configured', 5 unless $can_use_db;
 
   my $multi;
 
@@ -168,6 +168,17 @@ SKIP: {
     'get_all_from_database - regfeat'
   );
   $asa->param('regulatory', 0);
+
+  $asa->param('check_svs', 1);
+  is_deeply(
+    $asa->get_all_from_database()->[1],
+    bless( {
+      '_config' => $asa->config,
+      'cache_region_size' => 50000,
+    }, 'Bio::EnsEMBL::VEP::AnnotationSource::Database::StructuralVariation' ),
+    'get_all_from_database - SV'
+  );
+  $asa->param('check_svs', 0);
 };
 
 
