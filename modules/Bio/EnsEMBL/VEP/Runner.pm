@@ -331,7 +331,7 @@ sub get_valid_chromosomes {
       $valid{$_} = 1 for @{$as->get_valid_chromosomes};
     }
 
-    $self->{valid_chromosomes} = [keys %valid];
+    $self->{valid_chromosomes} = [sort keys %valid];
   }
 
   return $self->{valid_chromosomes};
