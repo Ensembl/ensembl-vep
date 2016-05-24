@@ -242,7 +242,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 7 unless $can_use_db;
+  skip 'No local database configured', 11 unless $can_use_db;
 
   my $multi;
 
@@ -262,6 +262,7 @@ SKIP: {
     database => 1,
     offline => 0,
     species => 'homo_vepiens',
+    warning_file => 'STDERR',
   });
 
   $p = Bio::EnsEMBL::VEP::Parser->new({config => $cfg, file => $test_cfg->{test_vcf}});
@@ -287,6 +288,18 @@ SKIP: {
 
   # restore STDERR
   open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
+
+
+  # map to/from LRG
+  $vf = get_vf({chr => '21', start => 43774213, end =>43774213, allele_string => 'T/C'});
+  my $mapped = $p->map_to_lrg([$vf]);
+  is(scalar @$mapped, 2, 'map_to_lrg - count');
+  is($mapped->[1]->{chr}, 'LRG_485', 'map_to_lrg - check chr');
+
+  $vf = get_vf({chr => 'LRG_485', start => 7166, end =>7166, allele_string => 'T/C'});
+  $mapped = $p->map_to_lrg([$vf]);
+  is(scalar @$mapped, 2, 'map_to_lrg - from LRG - count');
+  is($mapped->[1]->{chr}, '21', 'map_to_lrg - from LRG - check chr');
 }
 
 

@@ -118,3 +118,8 @@
 10423975	407	Overlapping RefSeq annotation not matched
 10423976	142	33.33
 10423976	407	Overlapping RefSeq annotation not matched
+10423977	4	CSTB
+10423977	52	Havana
+10423977	53	vega@sanger.ac.uk
+10423977	142	54.22
+10423977	407	Overlapping RefSeq Gene ID 1476 matches and has similar biotype of protein_coding

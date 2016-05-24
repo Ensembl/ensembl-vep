@@ -3,6 +3,8 @@
     "core" : {
       "regions" : [
         ["21", 25000001, 26000000],
+        ["21", 43771940, 43781388],
+        ["LRG_485", 1, 941],
       ],
       "adaptors" : [
         { "name" : "gene", "method" : "fetch_all_by_Slice", "args" : [], "filter_exceptions" : true },

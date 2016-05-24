@@ -69,7 +69,7 @@ sub new {
   
   my $self = $class->SUPER::new(@_);
 
-  $self->add_shortcuts([qw(dont_skip check_ref chr)]);
+  $self->add_shortcuts([qw(dont_skip check_ref chr lrg)]);
 
   my $hashref = $_[0];
 
@@ -387,10 +387,7 @@ sub post_process_vfs {
   my $vfs = shift;
 
   # map to LRGs
-  $vfs = $self->map_to_lrg($vfs);
-
-  # minimise alleles?
-  $vfs = $self->minimise_alleles($vfs);
+  $vfs = $self->map_to_lrg($vfs) if $self->{lrg};
 
   return $vfs;
 }
@@ -401,14 +398,26 @@ sub map_to_lrg {
 
   my @return;
 
-  return \@return;
-}
+  foreach my $vf(@$vfs) {
 
-sub minimise_alleles {
-  my $self = shift;
-  my $vfs = shift;
+    # add the unmapped VF to the array
+    push @return, $vf;
 
-  my @return;
+    # make sure the VF has an attached slice
+    $vf->{slice} ||= $self->get_slice($vf->{chr});
+    next unless defined($vf->{slice});
+
+    # transform LRG <-> chromosome
+    my $new_vf = $vf->transform($vf->{slice}->coord_system->name eq 'lrg' ? 'chromosome' : 'lrg');
+
+    # add it to the array if transformation worked
+    if(defined($new_vf)) {
+
+      # update new VF's chr entry
+      $new_vf->{chr} = $new_vf->seq_region_name;
+      push @return, $new_vf;
+    }
+  }
 
   return \@return;
 }
