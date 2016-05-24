@@ -247,6 +247,13 @@ our @OPTION_SETS = (
       polyphen_analysis => 'humdiv',
     }
   },
+  
+  {
+    flags => ['minimal'],
+    set   => {
+      allele_number => 1,
+    }
+  },
 );
 
 # valid values for certain flags
