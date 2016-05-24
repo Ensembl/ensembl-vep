@@ -69,7 +69,7 @@ is_deeply(
         'dbSNP' => '146',
         'ClinVar' => '201601'
       },
-      'valid_chromosomes' => [21],
+      'valid_chromosomes' => [21, 'LRG_485'],
     }, 'Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript' )
   ],
   'get_all_AnnotationSources'
@@ -78,7 +78,7 @@ is_deeply(
 # setup_db_connection should return silently in offline mode
 ok(!$runner->setup_db_connection(), 'setup_db_connection');
 
-is_deeply($runner->get_valid_chromosomes, [21], 'get_valid_chromosomes');
+is_deeply($runner->get_valid_chromosomes, [21, 'LRG_485'], 'get_valid_chromosomes');
 
 is_deeply($runner->get_Parser, bless({
   '_config' => $runner->config,
@@ -87,7 +87,9 @@ is_deeply($runner->get_Parser, bless({
   'check_ref' => undef,
   'chr' => undef,
   'dont_skip' => undef,
-  'valid_chromosomes' => {21 => 1},
+  'valid_chromosomes' => {21 => 1, LRG_485 => 1},
+  'minimal' => undef,
+  'lrg' => undef,
 }, 'Bio::EnsEMBL::VEP::Parser::VEP_input' ), 'get_Parser');
 
 is_deeply($runner->get_InputBuffer, bless({
@@ -99,9 +101,12 @@ is_deeply($runner->get_InputBuffer, bless({
     'check_ref' => undef,
     'chr' => undef,
     'dont_skip' => undef,
-    'valid_chromosomes' => {21 => 1},
+    'valid_chromosomes' => {21 => 1, LRG_485 => 1},
+    'minimal' => undef,
+    'lrg' => undef,
   }, 'Bio::EnsEMBL::VEP::Parser::VEP_input' ),
   'buffer_size' => $runner->param('buffer_size'),
+  'minimal' => undef,
 }, 'Bio::EnsEMBL::VEP::InputBuffer' ), 'get_InputBuffer');
 
 my $info = $runner->get_output_header_info;

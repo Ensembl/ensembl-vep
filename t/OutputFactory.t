@@ -1283,6 +1283,97 @@ is_deeply(
 );
 
 
+
+## minimal restoration etc
+##########################
+
+$ib = get_annotated_buffer({
+  input_file => $test_cfg->create_input_file([qw(21 25741665 . CAGAAGAAAG TAGAAGAAAG,C . . .)]),
+  minimal => 1,
+});
+
+is(scalar @{$ib->buffer}, 2, 'minimal - expanded count');
+is($ib->buffer->[0]->allele_string, 'C/T', 'minimal - expanded first allele string');
+
+$of->rejoin_variants_in_InputBuffer($ib);
+
+is(scalar @{$ib->buffer}, 1, 'minimal - rejoined count');
+is($ib->buffer->[0]->allele_string, 'CAGAAGAAAG/TAGAAGAAAG/C', 'minimal - rejoined allele string');
+
+my %by_allele =
+  map {$_->{Allele} => $_}
+  grep {$_->{Feature} eq 'ENST00000400075'}
+  @{$of->get_all_output_hashes_by_VariationFeature($ib->buffer->[0])};
+
+is_deeply(
+  \%by_allele,
+  {
+    '-' => {
+      'STRAND' => 1,
+      'IMPACT' => 'MODERATE',
+      'Consequence' => [
+        'inframe_deletion',
+        'splice_region_variant'
+      ],
+      'MINIMISED' => 1,
+      'Feature_type' => 'Transcript',
+      'Uploaded_variation' => '.',
+      'Allele' => '-',
+      'CDS_position' => '68-76',
+      'Gene' => 'ENSG00000154727',
+      'cDNA_position' => '289-297',
+      'Protein_position' => '23-26',
+      'Amino_acids' => 'KKKG/S',
+      'Feature' => 'ENST00000400075',
+      'Codons' => 'aAGAAGAAAGgc/agc',
+      'Location' => '21:25741665-25741674'
+    },
+    'T' => {
+      'STRAND' => 1,
+      'IMPACT' => 'MODERATE',
+      'Consequence' => [
+        'missense_variant'
+      ],
+      'MINIMISED' => 1,
+      'Feature_type' => 'Transcript',
+      'Uploaded_variation' => '.',
+      'Allele' => 'T',
+      'CDS_position' => 67,
+      'Gene' => 'ENSG00000154727',
+      'cDNA_position' => 288,
+      'Protein_position' => 23,
+      'Amino_acids' => 'P/S',
+      'Feature' => 'ENST00000400075',
+      'Codons' => 'Cca/Tca',
+      'Location' => '21:25741665-25741674'
+    }
+  },
+  'minimal - output hashes'
+);
+
+
+# test case where minimal resolves two ALTs to the same thing
+# allele_num should keep track of them
+$ib = get_annotated_buffer({
+  input_file => $test_cfg->create_input_file([qw(21 25606454 test G GC,C . . .)]),
+  minimal => 1
+});
+
+$of->rejoin_variants_in_InputBuffer($ib);
+
+$of->{allele_number} = 1;
+
+%by_allele =
+  map {$_->{Consequence}->[0] => $_}
+  grep {$_->{Feature} eq 'ENST00000419219'}
+  @{$of->get_all_output_hashes_by_VariationFeature($ib->buffer->[0])};
+
+is(scalar keys %{{map {$_->{Allele} => 1} values %by_allele}}, 1, "minimal - allele num where two alts resolve to same allele (check allele)");
+is($by_allele{frameshift_variant}->{ALLELE_NUM}, 1, "minimal - allele num where two alts resolve to same allele (frameshift)");
+is($by_allele{missense_variant}->{ALLELE_NUM}, 2, "minimal - allele num where two alts resolve to same allele (missense)");
+
+$of->{allele_number} = 0;
+
 # done
 done_testing();
 

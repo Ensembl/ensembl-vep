@@ -422,6 +422,80 @@ is_deeply(
   'get_all_lines_by_InputBuffer - everything'
 );
 
+
+# check rejoin on minimal
+no warnings 'qw';
+$ib = get_annotated_buffer({
+  input_file => $test_cfg->create_input_file([qw(21 25741665 . CAGAAGAAAG TAGAAGAAAG,C . . .)]),
+  minimal => 1,
+  pick_allele => 1,
+});
+$of = Bio::EnsEMBL::VEP::OutputFactory::JSON->new({config => $ib->config});
+
+is(scalar @{$ib->buffer}, 2, 'minimal - expanded count');
+is($ib->buffer->[0]->allele_string, 'C/T', 'minimal - expanded first allele string');
+
+$of->rejoin_variants_in_InputBuffer($ib);
+
+is(scalar @{$ib->buffer}, 1, 'minimal - rejoined count');
+is($ib->buffer->[0]->allele_string, 'CAGAAGAAAG/TAGAAGAAAG/C', 'minimal - rejoined allele string');
+
+is_deeply(
+  $json->decode($of->get_all_lines_by_InputBuffer($ib)->[0]),
+  {
+    'input' => "21\t25741665\t.\tCAGAAGAAAG\tTAGAAGAAAG,C\t.\t.\t.",
+    'minimised' => 1,
+    'assembly_name' => 'GRCh38',
+    'end' => 25741674,
+    'seq_region_name' => '21',
+    'transcript_consequences' => [
+      {
+        'cds_start' => 68,
+        'gene_id' => 'ENSG00000154727',
+        'variant_allele' => '-',
+        'cdna_end' => 603,
+        'protein_start' => 23,
+        'codons' => 'aAGAAGAAAGgc/agc',
+        'cds_end' => 76,
+        'consequence_terms' => [
+          'inframe_deletion',
+          'splice_region_variant'
+        ],
+        'protein_end' => 26,
+        'strand' => 1,
+        'amino_acids' => 'KKKG/S',
+        'cdna_start' => 595,
+        'transcript_id' => 'ENST00000354828',
+        'impact' => 'MODERATE'
+      },
+      {
+        'cds_start' => 67,
+        'gene_id' => 'ENSG00000154727',
+        'variant_allele' => 'T',
+        'cdna_end' => 594,
+        'protein_start' => 23,
+        'codons' => 'Cca/Tca',
+        'cds_end' => 67,
+        'consequence_terms' => [
+          'missense_variant'
+        ],
+        'protein_end' => 23,
+        'strand' => 1,
+        'amino_acids' => 'P/S',
+        'cdna_start' => 594,
+        'transcript_id' => 'ENST00000354828',
+        'impact' => 'MODERATE'
+      }
+    ],
+    'strand' => 1,
+    'id' => '.',
+    'allele_string' => 'CAGAAGAAAG/TAGAAGAAAG/C',
+    'most_severe_consequence' => 'inframe_deletion',
+    'start' => 25741665
+  },
+  'minimal - get_all_lines_by_InputBuffer'
+);
+
 # done
 done_testing();
 

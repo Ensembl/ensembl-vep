@@ -69,7 +69,7 @@ sub new {
   
   my $self = $class->SUPER::new(@_);
 
-  $self->add_shortcuts([qw(dont_skip check_ref chr lrg)]);
+  $self->add_shortcuts([qw(dont_skip check_ref chr lrg minimal)]);
 
   my $hashref = $_[0];
 
@@ -389,6 +389,9 @@ sub post_process_vfs {
   # map to LRGs
   $vfs = $self->map_to_lrg($vfs) if $self->{lrg};
 
+  # minimise alleles?
+  $vfs = $self->minimise_alleles($vfs) if $self->{minimal};
+
   return $vfs;
 }
 
@@ -416,6 +419,71 @@ sub map_to_lrg {
       # update new VF's chr entry
       $new_vf->{chr} = $new_vf->seq_region_name;
       push @return, $new_vf;
+    }
+  }
+
+  return \@return;
+}
+
+sub minimise_alleles {
+  my $self = shift;
+  my $vfs = shift;
+
+  my @return;
+
+  foreach my $vf(@$vfs) {
+
+    # skip VFs with more than one alt
+    # they get taken care of later by split_variants/rejoin_variants
+    if(!$vf->{allele_string} || $vf->{allele_string} =~ /.+\/.+\/.+/ || $vf->{allele_string} !~ /.+\/.+/) {
+      push @return, $vf;
+    }
+
+    else {
+      my @alleles = split('/', $vf->{allele_string});
+      my $ref = shift @alleles;
+      my $changed = 0;
+
+      foreach my $alt(@alleles) {
+
+        my $start = $vf->{start};
+        my $end   = $vf->{end};
+
+        # trim from left
+        while($ref && $alt && substr($ref, 0, 1) eq substr($alt, 0, 1)) {
+          $ref = substr($ref, 1);
+          $alt = substr($alt, 1);
+          $start++;
+          $changed = 1;
+        }
+
+        # trim from right
+        while($ref && $alt && substr($ref, -1, 1) eq substr($alt, -1, 1)) {
+          $ref = substr($ref, 0, length($ref) - 1);
+          $alt = substr($alt, 0, length($alt) - 1);
+          $end--;
+          $changed = 1;
+        }
+
+        $ref ||= '-';
+        $alt ||= '-';
+
+        # create a copy
+        my $new_vf;
+        %$new_vf = %{$vf};
+        bless $new_vf, ref($vf);
+
+        # give it a new allele string and coords
+        $new_vf->{allele_string}          = $ref.'/'.$alt;
+        $new_vf->{start}                  = $start;
+        $new_vf->{end}                    = $end;
+        $new_vf->{original_allele_string} = $vf->{allele_string};
+        $new_vf->{original_start}         = $vf->{start};
+        $new_vf->{original_end}           = $vf->{end};
+        $new_vf->{minimised}              = 1;
+
+        push @return, $new_vf;
+      }
     }
   }
 

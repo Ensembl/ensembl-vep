@@ -153,6 +153,8 @@ sub get_all_lines_by_InputBuffer {
   my $self = shift;
   my $buffer = shift;
 
+  $self->rejoin_variants_in_InputBuffer($buffer) if $buffer->rejoin_required;
+
   return [
     map {$self->output_hash_to_line($_)}
     map {@{$self->get_all_output_hashes_by_VariationFeature($_)}}
@@ -528,7 +530,7 @@ sub VariationFeature_to_output_hash {
   }
 
   # minimised?
-  # $hash->{MINIMISED} = 1 if $vf->{minimised};
+  $hash->{MINIMISED} = 1 if $vf->{minimised};
 
   # add custom info
   # if(defined($config->{custom}) && scalar @{$config->{custom}}) {
@@ -1054,6 +1056,85 @@ sub TranscriptStructuralVariationAllele_to_output_hash {
 sub IntergenicStructuralVariationAllele_to_output_hash {
   my $self = shift;
   return $self->BaseStructuralVariationOverlapAllele_to_output_hash(@_);
+}
+
+sub rejoin_variants_in_InputBuffer {
+  my $self = shift;
+  my $buffer = shift;
+
+  my @joined_list = ();
+
+  # backup stats here as methods below will increment stats counts
+  # my %stats_backup = %{$config->{stats} || {}};
+
+  foreach my $vf(@{$buffer->buffer}) {
+
+    # reset original one
+    if(defined($vf->{original_allele_string})) {
+
+      # do consequence stuff
+      $self->get_all_output_hashes_by_VariationFeature($vf);
+
+      $vf->{allele_string} = $vf->{original_allele_string};
+      $vf->{start}         = $vf->{original_start};
+      $vf->{end}           = $vf->{original_end};
+
+      push @joined_list, $vf;
+    }
+
+    # this one needs to be merged in
+    elsif(defined($vf->{merge_with})) {
+      my $original = $vf->{merge_with};
+
+      # do consequence stuff
+      $self->get_all_output_hashes_by_VariationFeature($vf);
+
+      # now we have to copy the [Feature]Variation objects
+      # we can't simply copy the alleles as the coords will be different
+      # better to make new keys
+      # we also have to set the VF pointer to the original
+
+      # copy transcript variations etc
+      foreach my $type(map {$_.'_variations'} qw(transcript motif_feature regulatory_feature)) {
+        foreach my $key(keys %{$vf->{$type} || {}}) {
+          my $val = $vf->{$type}->{$key};
+          $val->base_variation_feature($original);
+
+          # rename the key they're stored under
+          $original->{$type}->{$vf->{alt_allele}.'_'.$key} = $val;
+        }
+      }
+
+      # intergenic variation is a bit different
+      # there is only one, and no reference feature to key on
+      # means we have to copy over alleles manually
+      if(my $iv = $vf->{intergenic_variation}) {
+
+        $iv->base_variation_feature($original);
+
+        if(my $oiv = $original->{intergenic_variation}) {
+            push @{$oiv->{alt_alleles}}, @{$iv->{alt_alleles}};
+            $oiv->{_alleles_by_seq}->{$_->variation_feature_seq} = $_ for @{$oiv->{alt_alleles}};
+        }
+
+        # this probably won't happen, but can't hurt to cover all bases
+        else {
+            $original->{intergenic_variation} = $iv;
+        }
+      }
+
+      # reset these keys, they can be recalculated
+      delete $original->{$_} for qw(overlap_consequences _most_severe_consequence);
+    }
+
+    # normal
+    else {
+      push @joined_list, $vf;
+    }
+  }
+
+  # $config->{stats} = \%stats_backup if $config->{stats};
+  $buffer->buffer(\@joined_list);
 }
 
 1;

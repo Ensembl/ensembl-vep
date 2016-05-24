@@ -74,7 +74,7 @@ my $exp = [
       'dbSNP' => '146',
       'ClinVar' => '201601'
     },
-    'valid_chromosomes' => [21],
+    'valid_chromosomes' => [21, 'LRG_485'],
   }, 'Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript' )
 ];
 

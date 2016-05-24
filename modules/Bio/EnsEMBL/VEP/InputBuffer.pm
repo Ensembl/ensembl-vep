@@ -67,7 +67,7 @@ sub new {
   my $self = $class->SUPER::new(@_);
 
   # add shortcuts to these params
-  $self->add_shortcuts([qw(buffer_size)]);
+  $self->add_shortcuts([qw(buffer_size minimal)]);
 
   my $hashref = $_[0];
   if($hashref) {
@@ -114,7 +114,7 @@ sub next {
     my $vf = $pre_buffer->[0];
     
     # new chromosome
-    if($prev_chr && $vf->{chr} ne $prev_chr) {
+    if($prev_chr && $vf->{chr} ne $prev_chr && $vf->{chr} !~ /LRG/ && $prev_chr !~ /LRG/) {
       return $buffer;
     }
 
@@ -129,7 +129,7 @@ sub next {
     while(@$buffer < $buffer_size && (my $vf = $parser->next)) {
 
       # new chromosome
-      if($prev_chr && $vf->{chr} ne $prev_chr) {
+      if($prev_chr && $vf->{chr} ne $prev_chr && $vf->{chr} !~ /LRG/ && $prev_chr !~ /LRG/) {
 
         # we can't push the VF back onto the parser, so add it to $pre_buffer
         # and it will get picked up on the following next() call
@@ -144,6 +144,8 @@ sub next {
       }
     }
   }
+
+  $self->split_variants() if $self->{minimal};
 
   return $buffer;
 }
@@ -221,11 +223,115 @@ sub reset_buffer {
 }
 
 sub buffer {
-  return $_[0]->{temp}->{buffer} ||= [];
+  my $self = shift;
+  $self->{temp}->{buffer} = shift if @_;
+  return $self->{temp}->{buffer} ||= [];
 }
 
 sub pre_buffer {
   return $_[0]->{pre_buffer} ||= [];
+}
+
+sub rejoin_required {
+  my $self = shift;
+  $self->{temp}->{rejoin_required} = shift if @_;
+  return $self->{temp}->{rejoin_required} ||= 0;
+}
+
+sub split_variants {
+  my $self = shift;
+  my $listref = $self->buffer;
+
+  my $original_vf_count = scalar @$listref;
+
+  # split and link multi-allele VFs
+  my @split_list;
+
+  foreach my $original_vf(@$listref)  {
+    if($original_vf->{allele_string} =~ /.+\/.+\/.+/) {
+
+      my @alleles = split('/', $original_vf->{allele_string});
+      my $original_ref = shift @alleles;
+      my $first;
+
+      my @tmp;
+      my $changed = 0;
+      my $base_allele_number = 1;
+
+      foreach my $alt(@alleles) {
+
+        my $ref   = $original_ref;
+        my $start = $original_vf->{start};
+        my $end   = $original_vf->{end};
+
+        # trim from left
+        while($ref && $alt && substr($ref, 0, 1) eq substr($alt, 0, 1)) {
+          $ref = substr($ref, 1);
+          $alt = substr($alt, 1);
+          $start++;
+          $changed = 1;
+        }
+
+        # trim from right
+        while($ref && $alt && substr($ref, -1, 1) eq substr($alt, -1, 1)) {
+          $ref = substr($ref, 0, length($ref) - 1);
+          $alt = substr($alt, 0, length($alt) - 1);
+          $end--;
+          $changed = 1;
+        }
+
+        $ref ||= '-';
+        $alt ||= '-';
+
+        # create a copy
+        my $new_vf;
+        %$new_vf = %{$original_vf};
+        bless $new_vf, ref($original_vf);
+
+        # give it a new allele string and coords
+        $new_vf->{allele_string} = $ref.'/'.$alt;
+        $new_vf->{start} = $start;
+        $new_vf->{end} = $end;
+        $new_vf->{alt_allele} = $alt;
+
+        # $new_vf->{variation_name} = 'merge_'.$alt;
+
+        # not the first one ($first already exists)
+        if($first) {
+          $new_vf->{merge_with} = $first;
+          $new_vf->{_base_allele_number} = $base_allele_number++;
+        }
+
+        # this is the first one
+        else {
+          $first = $new_vf;
+
+          # $new_vf->{variation_name} = 'first_'.$alt;
+
+          # store the original allele string and coords
+          $first->{original_allele_string} = $original_vf->{allele_string};
+          $first->{original_start}         = $original_vf->{start};
+          $first->{original_end}           = $original_vf->{end};
+          $first->{minimised}              = 1
+        }
+
+        push @tmp, $new_vf;
+      }
+
+      if($changed) {
+        push @split_list, @tmp;
+      }
+      else {
+        push @split_list, $original_vf;
+      }
+    }
+    else {
+      push @split_list, $original_vf;
+    }
+  }
+
+  $self->buffer(\@split_list);
+  $self->rejoin_required(scalar @split_list != $original_vf_count);
 }
 
 1;

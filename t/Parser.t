@@ -64,6 +64,35 @@ is_deeply($p->valid_chromosomes, {}, 'valid_chromosomes empty');
 $p = Bio::EnsEMBL::VEP::Parser->new({file => $test_cfg->{test_vcf}, valid_chromosomes => [21]});
 is_deeply($p->valid_chromosomes, {21 => 1}, 'valid_chromosomes');
 
+# allele minimising
+is_deeply(
+  $p->minimise_alleles([get_vf({allele_string => 'GA/GT'})])->[0],
+  bless( {
+    'chr' => 1,
+    'minimised' => 1,
+    'original_allele_string' => 'GA/GT',
+    'original_end' => 1,
+    'end' => 1,
+    'original_start' => 1,
+    'strand' => 1,
+    'allele_string' => 'A/T',
+    'start' => 2
+  }, 'Bio::EnsEMBL::Variation::VariationFeature'),
+  "minimal"
+);
+
+is(
+  $p->minimise_alleles([get_vf({allele_string => 'GAC/GTC'})])->[0]->{allele_string},
+  'A/T',
+  "minimal - trim both ends"
+);
+
+is_deeply(
+  $p->minimise_alleles([get_vf({allele_string => 'TTCCTTCCGACGGTACACACACACA/TTCCTTCCGTCGGTACACACACACA'})])->[0]->{allele_string},
+  'A/T',
+  "minimal - long trim"
+);
+
 
 ## VALIDATION CHECKS
 ####################

@@ -97,6 +97,8 @@ sub get_all_lines_by_InputBuffer {
   my $self = shift;
   my $buffer = shift;
 
+  $self->rejoin_variants_in_InputBuffer($buffer) if $buffer->rejoin_required;
+
   my @return;
 
   $self->{json_obj} ||= JSON->new;
@@ -156,7 +158,7 @@ sub add_VariationFeatureOverlapAllele_info {
       my $tmp = $vfoa_hash->{$key};
       delete $vfoa_hash->{$key};
 
-      next if !defined($tmp) || $tmp eq '-';
+      next if !defined($tmp) || ($key ne 'Allele' && $tmp eq '-');
 
       # convert YES to 1
       $tmp = 1 if $tmp eq 'YES';

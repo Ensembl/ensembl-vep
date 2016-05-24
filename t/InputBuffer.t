@@ -52,6 +52,8 @@ is(ref($ib), 'Bio::EnsEMBL::VEP::InputBuffer', 'check class');
 is_deeply($ib->buffer, [], '_buffer');
 is_deeply($ib->pre_buffer, [], 'pre_buffer');
 
+is($ib->rejoin_required, 0, 'rejoin_required');
+
 push @{$ib->buffer}, 'hello';
 $ib->reset_buffer;
 is_deeply($ib->buffer, [], 'reset_buffer');
@@ -281,6 +283,7 @@ is_deeply($ib, bless( {
   'buffer_size' => 5,
   'pre_buffer' => [],
   'temp' => {},
+  'minimal' => undef,
 }, 'Bio::EnsEMBL::VEP::InputBuffer' ), 'finished buffer empty after reset_buffer');
 
 
@@ -314,6 +317,104 @@ is(scalar @{$ib->pre_buffer}, 0, 'split buffer at chromosome change - check pre_
 
 $vfs = $ib->next();
 is(scalar @$vfs, 0, 'split buffer at chromosome change - final next leaves everything empty');
+
+
+# check LRG doesnt do this
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $cfg,
+  file => $test_cfg->create_input_file([
+    [qw(1 123 . A G . . .)],
+    [qw(LRG_1 123 . A G . . .)],
+  ]),
+  valid_chromosomes => [1, 'LRG_1']
+});
+$ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+$vfs = $ib->next();
+is(scalar @$vfs, 2, 'split buffer at chromosome change - LRG doesnt cause split');
+is(scalar @{$ib->pre_buffer}, 0, 'split buffer at chromosome change - LRG doesnt cause split - check pre_buffer now empty');
+
+$vfs = $ib->next();
+
+
+
+# split variants deals with complex VCF entries
+no warnings 'qw';
+
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $cfg,
+  file => $test_cfg->create_input_file([
+    [qw(1 1 . CAGAAGAAAG TAGAAGAAAG,C . . .)]
+  ]),
+  valid_chromosomes => [1]
+});
+$ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+
+$ib->{minimal} = 1;
+$ib->next();
+
+foreach my $vf(@{$ib->buffer}) {
+  delete $vf->{$_} for qw(adaptor _line);
+}
+
+is_deeply($ib->buffer, [
+  bless( {
+    'chr' => '1',
+    'minimised' => 1,
+    'original_allele_string' => 'CAGAAGAAAG/TAGAAGAAAG/C',
+    'original_end' => 10,
+    'end' => 1,
+    'original_start' => 1,
+    'strand' => 1,
+    'variation_name' => '.',
+    'alt_allele' => 'T',
+    'map_weight' => 1,
+    'allele_string' => 'C/T',
+    'start' => 1
+  }, 'Bio::EnsEMBL::Variation::VariationFeature' ),
+  bless( {
+    'chr' => '1',
+    'end' => 10,
+    '_base_allele_number' => 1,
+    'merge_with' => $ib->buffer->[0],
+    'strand' => 1,
+    'variation_name' => '.',
+    'alt_allele' => '-',
+    'map_weight' => 1,
+    'allele_string' => 'AGAAGAAAG/-',
+    'start' => 2
+  }, 'Bio::EnsEMBL::Variation::VariationFeature' )
+], 'minimal - split_variants');
+
+is($ib->rejoin_required, 1, 'minimal - rejoin_required');
+
+
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $cfg,
+  file => $test_cfg->create_input_file([
+    [qw(1 1 . CAG TAG,T . . .)]
+  ]),
+  valid_chromosomes => [1]
+});
+$ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+$ib->next();
+
+foreach my $vf(@{$ib->buffer}) {
+  delete $vf->{$_} for qw(adaptor _line);
+}
+
+is_deeply(
+  $ib->buffer->[0],
+  bless( {
+    'chr' => '1',
+    'strand' => 1,
+    'variation_name' => '.',
+    'map_weight' => 1,
+    'allele_string' => 'CAG/TAG/T',
+    'end' => 3,
+    'start' => 1
+  }, 'Bio::EnsEMBL::Variation::VariationFeature' ),
+  'minimal - doesnt affect non-minimisable'
+);
 
 # done
 done_testing();
