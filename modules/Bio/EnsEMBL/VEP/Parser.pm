@@ -101,6 +101,27 @@ sub new {
   return $self;
 }
 
+# generic next method
+# sub-classes may override it
+sub next {
+  my $self = shift;
+
+  my $cache = $self->{_vf_cache} ||= [];
+
+  if(!scalar @$cache) {
+    push @$cache, @{$self->create_VariationFeatures()};
+  }
+
+  my $vf = shift @$cache;
+  return $vf unless $vf;
+  
+  unless($self->validate_vf($vf) || $self->{dont_skip}) {
+    return $self->next();
+  }
+
+  return $vf;
+}
+
 sub headers {
   return [];
 }

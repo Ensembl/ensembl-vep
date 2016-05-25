@@ -46,7 +46,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 7 unless $can_use_db;
+  skip 'No local database configured', 14 unless $can_use_db;
 
   my $multi;
 
@@ -150,6 +150,7 @@ SKIP: {
 
   open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
+
   ## REFSEQ
   #########
 
@@ -178,6 +179,116 @@ SKIP: {
 
   delete($vf->{$_}) for qw(adaptor variation slice variation_name);
   is_deeply($vf, $expected, 'refseq protein');
+
+
+
+
+  ## LRG
+  ######
+
+  $cfg = Bio::EnsEMBL::VEP::Config->new({
+    %$db_cfg,
+    database => 1,
+    offline => 0,
+    species => 'homo_vepiens',
+  });
+
+  $expected = bless( {
+    'source' => undef,
+    'is_somatic' => undef,
+    'clinical_significance' => undef,
+    'display' => undef,
+    'dbID' => undef,
+    'minor_allele_count' => undef,
+    'seqname' => undef,
+    'strand' => 1,
+    'evidence' => undef,
+    '_variation_id' => undef,
+    'class_SO_term' => undef,
+    'allele_string' => 'G/A',
+    'map_weight' => 1,
+    'chr' => 'LRG_485',
+    '_source_id' => undef,
+    'analysis' => undef,
+    'end' => 6674,
+    'minor_allele_frequency' => undef,
+    'overlap_consequences' => undef,
+    'minor_allele' => undef,
+    'start' => 6674
+  }, 'Bio::EnsEMBL::Variation::VariationFeature' );
+
+  $vf = Bio::EnsEMBL::VEP::Parser::HGVS->new({
+    config => $cfg,
+    file => $test_cfg->create_input_file('LRG_485:g.6674G>A'),
+    valid_chromosomes => [21, 'LRG_485'],
+  })->next();
+  delete($vf->{$_}) for qw(adaptor variation slice variation_name);
+  is_deeply($vf, $expected, 'LRG genomic');
+
+  $vf = Bio::EnsEMBL::VEP::Parser::HGVS->new({
+    config => $cfg,
+    file => $test_cfg->create_input_file('LRG_485t1:c.121G>A'),
+    valid_chromosomes => [21, 'LRG_485'],
+  })->next();
+  delete($vf->{$_}) for qw(adaptor variation slice variation_name);
+  is_deeply($vf, $expected, 'LRG coding');
+
+  $vf = Bio::EnsEMBL::VEP::Parser::HGVS->new({
+    config => $cfg,
+    file => $test_cfg->create_input_file('LRG_485p1:p.Val41Met'),
+    valid_chromosomes => [21, 'LRG_485'],
+  })->next();
+  delete($vf->{$_}) for qw(adaptor variation slice variation_name);
+  is_deeply($vf, $expected, 'LRG protein');
+
+
+  # test mapping LRG<->chr
+
+  $cfg = Bio::EnsEMBL::VEP::Config->new({
+    %$db_cfg,
+    database => 1,
+    offline => 0,
+    species => 'homo_vepiens',
+    lrg => 1,
+  });
+
+  $p = Bio::EnsEMBL::VEP::Parser::HGVS->new({
+    config => $cfg,
+    file => $test_cfg->create_input_file('LRG_485:g.6674G>A'),
+    valid_chromosomes => [21, 'LRG_485'],
+  });
+
+  my $expected_chr = bless( {
+    'source' => undef,
+    'is_somatic' => undef,
+    'display' => undef,
+    'clinical_significance' => undef,
+    'dbID' => undef,
+    'minor_allele_count' => undef,
+    '_variation_id' => undef,
+    'evidence' => undef,
+    'seqname' => undef,
+    'strand' => -1,
+    'class_SO_term' => undef,
+    'map_weight' => 1,
+    'allele_string' => 'G/A',
+    '_source_id' => undef,
+    'chr' => '21',
+    'end' => 43774705,
+    'analysis' => undef,
+    'minor_allele_frequency' => undef,
+    'overlap_consequences' => undef,
+    'minor_allele' => undef,
+    'start' => 43774705
+  }, 'Bio::EnsEMBL::Variation::VariationFeature' );
+
+  $vf = $p->next;
+  delete($vf->{$_}) for qw(adaptor variation slice variation_name);
+  is_deeply($vf, $expected, 'LRG mapping 1');
+
+  $vf = $p->next;
+  delete($vf->{$_}) for qw(adaptor variation slice variation_name);
+  is_deeply($vf, $expected_chr, 'LRG mapping 2');
   
   1;
 };

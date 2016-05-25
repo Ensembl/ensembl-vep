@@ -105,8 +105,6 @@ sub next {
     }
 
     push @$cache, @{$self->create_VariationFeatures()};
-
-    $self->line_number($self->line_number + 1) if scalar @$cache;
   }
 
   my $vf = shift @$cache;
@@ -126,6 +124,8 @@ sub create_VariationFeatures {
   my $record = $parser->{record};
 
   return [] unless $record;
+
+  $self->line_number($self->line_number + 1);
 
   # get the data we need to decide if this is an SV
   my ($alts, $info) = (
@@ -239,10 +239,15 @@ sub create_VariationFeatures {
   $vf->{non_variant} = 1 if $non_variant;
 
   # individual data?
-  return $self->create_individual_VariationFeatures($vf) if $self->{individual};
+  if($self->{individual}) {
+    return [
+      map {@{$self->create_individual_VariationFeatures($_)}}
+      @{$self->post_process_vfs([$vf])}
+    ];
+  }
 
   # normal return
-  return [$vf];
+  return $self->post_process_vfs([$vf]);
 }
 
 sub create_StructuralVariationFeatures {
@@ -327,7 +332,7 @@ sub create_StructuralVariationFeatures {
     _line          => $record,
   });
 
-  return [$svf];
+  return $self->post_process_vfs([$svf]);
 }
 
 sub create_individual_VariationFeatures {

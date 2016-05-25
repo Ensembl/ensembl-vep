@@ -68,34 +68,14 @@ sub parser {
   return $self->{parser} ||= Bio::EnsEMBL::IO::ListBasedParser->open($self->file);
 }
 
-sub next {
-  my $self = shift;
-
-  my $cache = $self->{_vf_cache} ||= [];
-
-  if(!scalar @$cache) {
-    $self->parser->next;
-    push @$cache, @{$self->create_VariationFeatures()};
-
-    $self->line_number($self->line_number + 1) if scalar @$cache;
-  }
-
-  my $vf = shift @$cache;
-  return $vf unless $vf;
-  
-  unless($self->validate_vf($vf) || $self->{dont_skip}) {
-    return $self->next();
-  }
-
-  return $vf;
-}
-
 sub create_VariationFeatures {
   my $self = shift;
 
   my $parser = $self->parser;
 
   return [] unless $parser->{record};
+
+  $self->line_number($self->line_number + 1);
 
   my $id = $parser->get_value;
 
@@ -121,7 +101,7 @@ sub create_VariationFeatures {
   # restore state
   $ad->db->include_failed_variations($prev);
 
-  return \@vfs;
+  return $self->post_process_vfs(\@vfs);
 }
 
 1;

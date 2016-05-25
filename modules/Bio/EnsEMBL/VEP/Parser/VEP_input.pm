@@ -54,13 +54,13 @@ sub parser {
   return $self->{parser} ||= Bio::EnsEMBL::IO::Parser::VEP_input->open($self->file);
 }
 
-sub next {
+sub create_VariationFeatures {
   my $self = shift;
 
   my $parser = $self->parser;
   $parser->next();
 
-  return undef unless $parser->{record};
+  return [] unless $parser->{record};
 
   $self->line_number($self->line_number + 1);
 
@@ -116,12 +116,8 @@ sub next {
       chr            => $chr,
     });
   }
-  
-  unless($self->validate_vf($vf) || $self->{dont_skip}) {
-    return $self->next();
-  }
 
-  return $vf;
+  return $self->post_process_vfs([$vf]);
 }
 
 return 1;

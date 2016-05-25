@@ -66,13 +66,15 @@ sub parser {
   return $self->{parser} ||= Bio::EnsEMBL::IO::ListBasedParser->open($self->file);
 }
 
-sub next {
+sub create_VariationFeatures {
   my $self = shift;
 
   my $parser = $self->parser;
   $parser->next();
 
-  return undef unless $parser->{record};
+  return [] unless $parser->{record};
+
+  $self->line_number($self->line_number + 1);
 
   my $hgvs = $parser->get_value;
 
@@ -89,7 +91,7 @@ sub next {
 
   if(!defined($vf) || (defined $@ && length($@) > 1)) {
     $self->warning_msg("WARNING: Unable to parse HGVS notation \'$hgvs\'\n$@");
-    return undef;
+    return [];
   }
 
   # transfer to whole chromosome slice
@@ -100,12 +102,8 @@ sub next {
 
   # add chr attrib
   $vf->{chr} = $vf->slice->seq_region_name;
-  
-  unless($self->validate_vf($vf) || $self->{dont_skip}) {
-    return $self->next();
-  }
 
-  return $vf;
+  return $self->post_process_vfs([$vf]);
 }
 
 1;

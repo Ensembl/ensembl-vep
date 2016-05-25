@@ -271,6 +271,44 @@ is_deeply($vf, bless( {
   'start' => 25587760,
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), '*-type with insertion');
 
+# minimal
+$vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, minimal => 1}),
+  file => $test_cfg->create_input_file([qw(21 25587758 test CAT CCT . . .)]),
+  valid_chromosomes => [21],
+})->next();
+delete($vf->{adaptor}); delete($vf->{_line});
+is_deeply($vf, bless( {
+  'chr' => '21',
+  'minimised' => 1,
+  'original_allele_string' => 'CAT/CCT',
+  'original_end' => 25587760,
+  'end' => 25587759,
+  'original_start' => '25587758',
+  'strand' => 1,
+  'variation_name' => 'test',
+  'map_weight' => 1,
+  'allele_string' => 'A/C',
+  'start' => 25587759
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'minimal');
+
+
+$vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, minimal => 1}),
+  file => $test_cfg->create_input_file([qw(21 25587758 test C T,CAA . . .)]),
+  valid_chromosomes => [21],
+})->next();
+delete($vf->{adaptor}); delete($vf->{_line});
+is_deeply($vf, bless( {
+  'chr' => '21',
+  'strand' => 1,
+  'variation_name' => 'test',
+  'map_weight' => 1,
+  'allele_string' => 'C/T/CAA',
+  'end' => 25587758,
+  'start' => 25587758
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'minimal - multiple alts pass through here');
+
 
 # basic SV coord tests
 $expected = bless( {
