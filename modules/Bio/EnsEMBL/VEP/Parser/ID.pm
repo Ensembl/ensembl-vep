@@ -72,6 +72,7 @@ sub create_VariationFeatures {
   my $self = shift;
 
   my $parser = $self->parser;
+  $parser->next();
 
   return [] unless $parser->{record};
 
