@@ -180,6 +180,59 @@ is_deeply($runner->get_OutputFactory, bless( {
 
 ok($runner->init, 'init');
 
+is_deeply(
+  $runner->_buffer_to_output($runner->get_InputBuffer),
+  [
+    join("\t", qw(
+      rs142513484
+      21:25585733
+      T
+      ENSG00000154719
+      ENST00000307301
+      Transcript
+      3_prime_UTR_variant
+      1122
+      - - - - -
+      IMPACT=MODIFIER;STRAND=-1
+    )),
+    join("\t", qw(
+      rs142513484
+      21:25585733
+      T
+      ENSG00000154719
+      ENST00000352957
+      Transcript
+      missense_variant
+      1033
+      991
+      331
+      A/T
+      Gca/Aca
+      -
+      IMPACT=MODERATE;STRAND=-1
+    )),
+    join("\t", qw(
+      rs142513484
+      21:25585733
+      T
+      ENSG00000260583
+      ENST00000567517
+      Transcript
+      upstream_gene_variant
+      -
+      -
+      -
+      -
+      -
+      -
+      IMPACT=MODIFIER;DISTANCE=2407;STRAND=-1
+    )),
+  ],
+  '_buffer_to_output'
+);
+
+$runner = Bio::EnsEMBL::VEP::Runner->new($cfg_hash);
+
 is(
   $runner->next_output_line, 
   join("\t", qw(
@@ -264,6 +317,126 @@ foreach my $flag(qw(lrg check_sv check_ref hgvs)) {
 
 open(STDOUT, ">&SAVE") or die "Can't restore STDOUT\n";
 
+
+
+## FORKING
+##########
+
+my $input = [
+  [qw(21 25585733 rs142513484 C T . . . GT 0|0)],
+  [qw(21 25587701 rs187353664 T C . . . GT 0|0)],
+  [qw(21 25587758 rs116645811 G A . . . GT 0|0)],
+  [qw(21 25588859 rs199510789 C T . . . GT 0|0)],
+];
+
+my $exp = [
+  'rs142513484 T ENST00000307301',
+  'rs142513484 T ENST00000352957',
+  'rs142513484 T ENST00000567517',
+  'rs187353664 C ENST00000307301',
+  'rs187353664 C ENST00000352957',
+  'rs187353664 C ENST00000567517',
+  'rs116645811 A ENST00000307301',
+  'rs116645811 A ENST00000352957',
+  'rs116645811 A ENST00000567517',
+  'rs199510789 T ENST00000307301',
+  'rs199510789 T ENST00000352957',
+  'rs199510789 T ENST00000419219'
+];
+
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  offline => 1,
+  input_file => $test_cfg->create_input_file($input),
+  input_data => undef,
+});
+
+my @lines;
+while(my $line = $runner->next_output_line) {
+  my @split = split("\t", $line);
+  push @lines, join(" ", $split[0], $split[2], $split[4]);
+}
+
+is_deeply(
+  \@lines,
+  $exp,
+  'fork - check no fork'
+);
+
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  offline => 1,
+  input_file => $test_cfg->create_input_file($input),
+  input_data => undef,
+  fork => 2,
+});
+
+@lines = ();
+while(my $line = $runner->next_output_line) {
+  my @split = split("\t", $line);
+  push @lines, join(" ", $split[0], $split[2], $split[4]);
+}
+
+is_deeply(
+  \@lines,
+  $exp,
+  'fork - check fork 2'
+);
+
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  offline => 1,
+  input_file => $test_cfg->create_input_file($input),
+  input_data => undef,
+  fork => 4,
+});
+
+@lines = ();
+while(my $line = $runner->next_output_line) {
+  my @split = split("\t", $line);
+  push @lines, join(" ", $split[0], $split[2], $split[4]);
+}
+
+is_deeply(
+  \@lines,
+  $exp,
+  'fork - check fork 4'
+);
+
+
+# warning_msg prints to STDERR
+no warnings 'once';
+open(SAVE, ">&STDERR") or die "Can't save STDERR\n"; 
+
+close STDERR;
+open STDERR, '>', \$tmp;
+
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  offline => 1,
+  fork => 2,
+});
+
+$runner->param('warning_file', 'STDERR');
+
+$runner->{_test_warning} = 1;
+
+$runner->next_output_line();
+ok($tmp =~ 'TEST WARNING', 'fork - test warning');
+
+
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  offline => 1,
+  fork => 1,
+});
+$runner->param('warning_file', 'STDERR');
+$runner->{_test_die} = 1;
+
+throws_ok {$runner->next_output_line} qr/TEST DIE/, 'fork - test die';
+
+# restore STDERR
+open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
 
 

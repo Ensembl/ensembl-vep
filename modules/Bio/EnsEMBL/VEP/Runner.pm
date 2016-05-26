@@ -45,6 +45,10 @@ package Bio::EnsEMBL::VEP::Runner;
 
 use base qw(Bio::EnsEMBL::VEP::BaseVEP);
 
+use Storable qw(freeze thaw);
+use IO::Socket;
+use IO::Select;
+
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::Utils qw(get_time);
@@ -127,7 +131,21 @@ sub next_output_line {
 
   $self->init();
 
-  my $input_buffer = $self->get_InputBuffer;
+  if($self->param('fork')) {
+    push @$output_buffer, @{$self->_forked_buffer_to_output($self->get_InputBuffer)};
+  }
+  else {
+    push @$output_buffer, @{$self->_buffer_to_output($self->get_InputBuffer)};
+  }
+
+  return @$output_buffer ? shift @$output_buffer : undef;
+}
+
+sub _buffer_to_output {
+  my $self = shift;
+  my $input_buffer = shift;
+
+  my @output;
   my $vfs = $input_buffer->next();
 
   if($vfs && scalar @$vfs) {
@@ -139,10 +157,168 @@ sub next_output_line {
       
     $input_buffer->finish_annotation;
 
-    push @$output_buffer, @{$output_factory->get_all_lines_by_InputBuffer($input_buffer)};
+    push @output, @{$output_factory->get_all_lines_by_InputBuffer($input_buffer)};
   }
 
-  return @$output_buffer ? shift @$output_buffer : undef;
+  return \@output;
+}
+
+sub _forked_buffer_to_output {
+  my $self = shift;
+  my $buffer = shift;
+
+  # get a buffer-sized chunk of VFs to split and fork on
+  my $vfs = $buffer->next();
+  return [] unless $vfs && scalar @$vfs;
+
+  my $fork_number = $self->param('fork');
+  my $buffer_size = $self->param('buffer_size');
+  my $delta = 0.5;
+  my $minForkSize = 50;
+  my $maxForkSize = int($buffer_size / (2 * $fork_number));
+  my $active_forks = 0;
+  my (@pids, %by_pid);
+  my $sel = IO::Select->new;
+
+  # loop while variants in @$vfs or forks running
+  while(@$vfs or $active_forks) {
+
+    # only spawn new forks if we have space
+    if($active_forks <= $fork_number) {
+      my $numLines = scalar @$vfs;
+      my $forkSize = int($numLines / ($fork_number + ($delta * $fork_number)) + $minForkSize ) + 1;
+
+      $forkSize = $maxForkSize if $forkSize > $maxForkSize;
+
+      while(@$vfs && $active_forks <= $fork_number) {
+
+        # create sockets for IPC
+        my ($child, $parent);
+        socketpair($child, $parent, AF_UNIX, SOCK_STREAM, PF_UNSPEC) or throw("ERROR: Failed to open socketpair: $!");
+        $child->autoflush(1);
+        $parent->autoflush(1);
+        $sel->add($child);
+
+        # readjust forkSize if it's bigger than the remaining buffer
+        # otherwise the input buffer will read more from the parser
+        $forkSize = scalar @$vfs if $forkSize > scalar @$vfs;
+        my @tmp = splice(@$vfs, 0, $forkSize);
+
+        # fork
+        my $pid = fork;
+        if(!defined($pid)) {
+          throw("ERROR: Failed to fork\n");
+        }
+        elsif($pid) {
+          push @pids, $pid;
+          $active_forks++;
+        }
+        elsif($pid == 0) {
+          $self->_run_forked($buffer, \@tmp, $forkSize, $parent);
+        }
+      }
+    }
+
+    # read child input
+    while(my @ready = $sel->can_read()) {
+      my $no_read = 1;
+
+      foreach my $fh(@ready) {
+        $no_read++;
+
+        my $line = join('', $fh->getlines());
+        next unless $line;
+        $no_read = 0;
+
+        my $data = thaw($line);
+        next unless $data && $data->{pid};
+
+        # data
+        $by_pid{$data->{pid}} = $data->{output} if $data->{output};
+
+        # stderr
+        $self->warning_msg($data->{stderr}) if $data->{stderr};
+
+        # finish up
+        $sel->remove($fh);
+        $fh->close;
+        $active_forks--;
+
+        throw("ERROR: Forked process(es) died\n".$data->{die}) if $data->{die};
+      }
+
+      # read-through detected, DIE
+      throw("\nERROR: Forked process(es) died\n") if $no_read;
+
+      last if $active_forks < $fork_number;
+    }
+  }
+
+  waitpid($_, 0) for @pids;
+
+  # sort data by dispatched PID order and return
+  return [map {@{$by_pid{$_} || []}} @pids];
+}
+
+sub _run_forked {
+  my $self = shift;
+  my $buffer = shift;
+  my $vfs = shift;
+  my $forkSize = shift;
+  my $parent = shift;
+
+  # redirect and capture STDERR
+  $self->config->{warning_fh} = *STDERR;
+  close STDERR;
+  my $stderr;
+  open STDERR, '>', \$stderr;
+
+  # reset the input buffer and add a chunk of data to its pre-buffer
+  # this way it gets read in on the following next() call
+  # which will be made by _buffer_to_output()
+  $buffer->{buffer_size} = $forkSize;
+  $buffer->reset_buffer();
+  push @{$buffer->pre_buffer}, @$vfs;
+
+  # force reinitialise FASTA
+  # the XS code doesn't seem to like being forked
+  delete $self->config->{_fasta_db};
+
+  # we want to capture any deaths and accurately report any errors
+  # so we use eval to run the core chunk of the code (_buffer_to_output)
+  my $output;
+  eval {
+    # for testing
+    $self->warning_msg('TEST WARNING') if $self->{_test_warning};
+    throw('TEST DIE') if $self->{_test_die};
+
+    # the real thing
+    $output = $self->_buffer_to_output($buffer);
+  };
+
+  # send everything we've captured to the parent process
+  # PID allows parent process to re-sort output to correct order
+  print $parent freeze({
+    pid => $$,
+    output => $output,
+    stderr => $stderr,
+    die => $@,
+  });
+
+  # some plugins may cache stuff, check for this and try and
+  # reconstitute it into parent's plugin cache
+  # foreach my $plugin(@{$config->{plugins}}) {
+  #   next unless defined($plugin->{has_cache});
+
+  #   # delete unnecessary stuff and stuff that can't be serialised
+  #   delete $plugin->{$_} for qw(config feature_types variant_feature_types version feature_types_wanted variant_feature_types_wanted params);
+  #   print PARENT $$." PLUGIN ".ref($plugin)." ".encode_base64(freeze($plugin), "\t")."\n";
+  # }
+
+  # # tell parent about stats
+  # print PARENT $$." STATS ".encode_base64(freeze($config->{stats}), "\t")."\n" if defined($config->{stats});
+
+  exit(0);
 }
 
 sub post_setup_checks {
