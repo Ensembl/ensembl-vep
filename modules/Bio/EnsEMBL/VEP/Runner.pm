@@ -214,7 +214,7 @@ sub _forked_buffer_to_output {
           $active_forks++;
         }
         elsif($pid == 0) {
-          $self->_run_forked($buffer, \@tmp, $forkSize, $parent);
+          $self->_run_forked($buffer, \@tmp, $parent);
         }
       }
     }
@@ -264,7 +264,6 @@ sub _run_forked {
   my $self = shift;
   my $buffer = shift;
   my $vfs = shift;
-  my $forkSize = shift;
   my $parent = shift;
 
   # redirect and capture STDERR
@@ -276,13 +275,9 @@ sub _run_forked {
   # reset the input buffer and add a chunk of data to its pre-buffer
   # this way it gets read in on the following next() call
   # which will be made by _buffer_to_output()
-  $buffer->{buffer_size} = $forkSize;
+  $buffer->{buffer_size} = scalar @$vfs;
   $buffer->reset_buffer();
   push @{$buffer->pre_buffer}, @$vfs;
-
-  # force reinitialise FASTA
-  # the XS code doesn't seem to like being forked
-  delete $self->config->{_fasta_db};
 
   # we want to capture any deaths and accurately report any errors
   # so we use eval to run the core chunk of the code (_buffer_to_output)
