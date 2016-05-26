@@ -86,6 +86,8 @@ open(STDOUT, ">&SAVE") or die "Can't restore STDOUT\n";
 throws_ok { $c->check_sift_polyphen } qr/SIFT not available/, 'check_sift_polyphen - fail';
 delete($c->{sift});
 
+
+
 # deserialization
 my $obj = $c->deserialize_from_file(
   $c->get_dump_file_name(
@@ -93,9 +95,40 @@ my $obj = $c->deserialize_from_file(
     $test_cfg->{cache_region}
   )
 );
-is(ref($obj), 'HASH', 'deserialize_from_file ref 1');
-is(ref($obj->{$test_cfg->{cache_chr}}), 'ARRAY', 'deserialize_from_file ref 2');
-is(ref($obj->{$test_cfg->{cache_chr}}->[0]), 'Bio::EnsEMBL::Transcript', 'deserialize_from_file ref 3');
+is(ref($obj), 'HASH', 'deserialize_from_file ref 1 - PerlIO::gzip');
+is(ref($obj->{$test_cfg->{cache_chr}}), 'ARRAY', 'deserialize_from_file ref 2 - PerlIO::gzip');
+is(ref($obj->{$test_cfg->{cache_chr}}->[0]), 'Bio::EnsEMBL::Transcript', 'deserialize_from_file ref 3 - PerlIO::gzip');
+
+my $perlio_gzip_bak = $Bio::EnsEMBL::VEP::AnnotationSource::Cache::BaseSerialized::CAN_USE_PERLIO_GZIP;
+$Bio::EnsEMBL::VEP::AnnotationSource::Cache::BaseSerialized::CAN_USE_PERLIO_GZIP = 0;
+
+$obj = $c->deserialize_from_file(
+  $c->get_dump_file_name(
+    $test_cfg->{cache_chr},
+    $test_cfg->{cache_region}
+  )
+);
+is(ref($obj), 'HASH', 'deserialize_from_file ref 1 - gzip');
+is(ref($obj->{$test_cfg->{cache_chr}}), 'ARRAY', 'deserialize_from_file ref 2 - gzip');
+is(ref($obj->{$test_cfg->{cache_chr}}->[0]), 'Bio::EnsEMBL::Transcript', 'deserialize_from_file ref 3 - gzip');
+
+my $gzip_bak = $Bio::EnsEMBL::VEP::AnnotationSource::Cache::BaseSerialized::CAN_USE_GZIP;
+$Bio::EnsEMBL::VEP::AnnotationSource::Cache::BaseSerialized::CAN_USE_GZIP = 0;
+
+$obj = $c->deserialize_from_file(
+  $c->get_dump_file_name(
+    $test_cfg->{cache_chr},
+    $test_cfg->{cache_region}
+  )
+);
+is(ref($obj), 'HASH', 'deserialize_from_file ref 1 - Compress::Zlib');
+is(ref($obj->{$test_cfg->{cache_chr}}), 'ARRAY', 'deserialize_from_file ref 2 - Compress::Zlib');
+is(ref($obj->{$test_cfg->{cache_chr}}->[0]), 'Bio::EnsEMBL::Transcript', 'deserialize_from_file ref 3 - Compress::Zlib');
+
+$Bio::EnsEMBL::VEP::AnnotationSource::Cache::BaseSerialized::CAN_USE_PERLIO_GZIP = $perlio_gzip_bak;
+$Bio::EnsEMBL::VEP::AnnotationSource::Cache::BaseSerialized::CAN_USE_GZIP = $gzip_bak;
+
+
 
 # processing deserialized object
 my $features = $c->deserialized_obj_to_features($obj);

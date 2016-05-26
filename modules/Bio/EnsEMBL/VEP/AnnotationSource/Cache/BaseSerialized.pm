@@ -53,23 +53,38 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
 use base qw(Bio::EnsEMBL::VEP::AnnotationSource::Cache);
 
-our $CAN_USE_SEREAL;
+our ($CAN_USE_PERLIO_GZIP, $CAN_USE_GZIP, $CAN_USE_SEREAL);
 
 BEGIN {
+
+  # check Sereal
   if (eval { require Sereal; 1 }) {
     $CAN_USE_SEREAL = 1;
   }
   else {
     $CAN_USE_SEREAL = 0;
   }
+
+  # check PerlIO::gzip
+  if (eval { require PerlIO::gzip; 1 }) {
+    $CAN_USE_PERLIO_GZIP = 1;
+  }
+  else {
+    $CAN_USE_PERLIO_GZIP = 0;
+  }
+
+  # check gzip
+  if (`which gzip` =~ /\/gzip/) {
+    $CAN_USE_GZIP = 1;
+  }
+  else {
+    $CAN_USE_GZIP = 0;
+  }
 }
 
 sub deserialize_from_file {
   my $self = shift;
-  
-  my $type = $self->serializer_type;
-  my $method = 'deserialize_from_file_'.$type;
-
+  my $method = 'deserialize_from_file_'.$self->serializer_type;
   return $self->$method(@_);
 }
 
@@ -77,18 +92,35 @@ sub deserialize_from_file_storable {
   my $self = shift;
   my $file = shift;
 
-  # use Compress::Zlib interface to slurp file contents into $serialized
-  my $gz = gzopen($file, 'rb');
+  # we have three options to decompress, try in order of speed:
+  my $obj;
 
-  my ($buffer, $serialized);
-  while($gz->gzread($buffer)) {
-    $serialized .= $buffer;
+  # 1) PerlIO::gzip
+  if($CAN_USE_PERLIO_GZIP) {
+    open my $fh, "<:gzip", $file or throw("ERROR: $!");
+    $obj = fd_retrieve($fh);
   }
 
-  # now use fd_retrieve on a made-up filehandle to deserialize
-  open IN, '<', \$serialized;
-  my $obj = fd_retrieve(\*IN);
-  close IN;
+  # 2) gzip binary
+  elsif($CAN_USE_GZIP) {
+    open my $fh, "gzip -dc $file |" or throw("ERROR: $!");
+    $obj = fd_retrieve($fh);
+  }
+
+  # 3) Compress::Zlib
+  else {
+    my $gz = gzopen($file, 'rb') or throw("ERROR: $!");
+
+    my ($buffer, $serialized);
+    while($gz->gzread($buffer)) {
+      $serialized .= $buffer;
+    }
+
+    # now use fd_retrieve on a made-up filehandle to deserialize
+    open IN, '<', \$serialized;
+    $obj = fd_retrieve(\*IN);
+    close IN;
+  }
 
   return $obj;
 }
