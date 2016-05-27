@@ -18,7 +18,7 @@ use warnings;
 use Test::More;
 use Test::Exception;
 
-use Bio::EnsEMBL::VEP::Utils qw(format_coords convert_arrayref numberify get_time);
+use Bio::EnsEMBL::VEP::Utils qw(format_coords convert_arrayref numberify merge_hashes get_time);
 
 ## format_coords
 ################
@@ -77,6 +77,35 @@ is_deeply(
   numberify({id => '123', seq_region_name => '123'}, {id => 1, seq_region_name => 1}),
   {id => '123', seq_region_name => '123'},
   'numberify - exempt keys intact'
+);
+
+
+
+## merge_hashes
+###############
+
+is_deeply(
+  merge_hashes({a => 1}, {b => 2}),
+  {a => 1, b => 2},
+  'merge_hashes - simple'
+);
+
+is_deeply(
+  merge_hashes({a => 1, b => {c => [1, 2], d => 3}}, {b => {e => 5}, f => 6}),
+  {a => 1, b => {c => [1, 2], d => 3, e => 5}, f => 6},
+  'merge_hashes - complex'
+);
+
+is_deeply(
+  merge_hashes({a => 1}, {a => 2}),
+  {a => 2},
+  'merge_hashes - overwrite'
+);
+
+is_deeply(
+  merge_hashes({a => [1, 2]}, {a => [3, 4]}),
+  {a => [1, 2, 3, 4]},
+  'merge_hashes - array'
 );
 
 
