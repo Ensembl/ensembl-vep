@@ -291,19 +291,14 @@ $runner = Bio::EnsEMBL::VEP::Runner->new({
 ok($runner->get_all_Plugins, 'get_all_Plugins - failed to compile');
 ok($tmp =~ /Failed to compile plugin/, 'get_all_Plugins - failed to compile message');
 
-SKIP: {
-  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip "Fails on 5.8", 1 if $^V =~ /v5\.8/;
-
-  $runner = Bio::EnsEMBL::VEP::Runner->new({
-    %$cfg_hash,
-    warning_file => 'STDERR',
-    plugin => ['TestPluginNoCompile'],
-    quiet => 1,
-    safe => 1
-  });
-  throws_ok {$runner->get_all_Plugins} qr/Failed to compile plugin/, 'get_all_Plugins - failed to compile safe die';
-}
+# $runner = Bio::EnsEMBL::VEP::Runner->new({
+#   %$cfg_hash,
+#   warning_file => 'STDERR',
+#   plugin => ['TestPluginNoCompile'],
+#   quiet => 1,
+#   safe => 1
+# });
+# throws_ok {$runner->get_all_Plugins} qr/Failed to compile plugin/, 'get_all_Plugins - failed to compile safe die';
 
 
 # plugin new method fails
