@@ -279,9 +279,7 @@ sub add_shortcuts {
 # prints a status message to STDOUT
 sub status_msg {
   my $self = shift;
-  my $config = $self->config();
-  
-  return if defined($config->{quiet});
+  return if $self->param('quiet');
   
   my $msg = (@_ ? (join "", @_) : "No message");
   print get_time()." - ".$msg.($msg =~ /\n$/ ? "" : "\n");
