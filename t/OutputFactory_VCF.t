@@ -58,6 +58,17 @@ is_deeply(
   'headers'
 );
 
+my $headers = get_runner({plugin => ['TestPlugin'], quiet => 1, input_file => $test_cfg->{test_vcf}, vcf => 1})->get_OutputFactory->headers;
+is_deeply(
+  [$headers->[-3], $headers->[-2], $headers->[-1]],
+  [
+    '##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|SYMBOL_SOURCE|HGNC_ID|test">',
+    '##test=header',
+    "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tHG00096"
+  ],
+  'headers - plugin'
+);
+
 is_deeply(
   $of->fields,
   [

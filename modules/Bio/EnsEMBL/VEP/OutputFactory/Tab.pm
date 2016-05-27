@@ -91,7 +91,8 @@ sub fields {
 
     my @fields = (
       @Bio::EnsEMBL::VEP::Constants::DEFAULT_OUTPUT_COLS,
-      @{$self->flag_fields}
+      @{$self->flag_fields},
+      map {$_->[0]} @{$self->get_plugin_headers}
     );
     
     $self->{fields} = \@fields;

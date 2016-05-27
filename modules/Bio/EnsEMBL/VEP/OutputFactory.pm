@@ -137,6 +137,8 @@ sub new {
 
   $self->{header_info} = $hashref->{header_info} if $hashref->{header_info};
 
+  $self->{plugins} = $hashref->{plugins} if $hashref->{plugins};
+
   return $self;
 }
 
@@ -226,6 +228,9 @@ sub get_all_VariationFeatureOverlapAllele_output_hashes {
     # we have a method defined for each sub-class of VariationFeatureOverlapAllele
     my $method = (split('::', ref($vfoa)))[-1].'_to_output_hash';
     my $output = $self->$method($vfoa, \%copy);
+
+    # run plugins
+    $output = $self->run_plugins($vfoa, $output, $vf);
 
     push @return, $output if $output;
   }
@@ -1056,6 +1061,72 @@ sub TranscriptStructuralVariationAllele_to_output_hash {
 sub IntergenicStructuralVariationAllele_to_output_hash {
   my $self = shift;
   return $self->BaseStructuralVariationOverlapAllele_to_output_hash(@_);
+}
+
+sub plugins {
+  return $_[0]->{plugins} || [];
+}
+
+sub get_plugin_headers {
+  my $self = shift;
+
+  my @headers = ();
+
+  for my $plugin (@{$self->plugins}) {
+    if (my $hdr = $plugin->get_header_info) {
+      for my $key (sort keys %$hdr) {
+        push @headers, [$key, $hdr->{$key}];
+      }
+    }
+  }
+
+  return \@headers;
+}
+
+sub run_plugins {
+  my ($self, $bvfoa, $line_hash, $vf) = @_;
+
+  my $skip_line = 0;
+
+  for my $plugin (@{ $self->plugins || [] }) {
+
+    # check that this plugin is interested in this type of variation feature
+    if($plugin->check_variant_feature_type(ref($vf || $bvfoa->base_variation_feature))) {
+
+      # check that this plugin is interested in this type of feature
+      if($plugin->check_feature_type(ref($bvfoa->feature) || 'Intergenic')) {
+
+        eval {
+          my $plugin_results = $plugin->run($bvfoa, $line_hash);
+
+          if (defined $plugin_results) {
+            if (ref $plugin_results eq 'HASH') {
+              for my $key (keys %$plugin_results) {
+                $line_hash->{$key} = $plugin_results->{$key};
+              }
+            }
+            else {
+              $self->warning_msg("Plugin '".(ref $plugin)."' did not return a hashref, output ignored!");
+            }
+          }
+          else {
+            # if a plugin returns undef, that means it want to filter out this line
+            $skip_line = 1;
+          }
+        };
+        if($@) {
+          $self->warning_msg("Plugin '".(ref $plugin)."' went wrong: $@");
+        }
+
+        # there's no point running any other plugins if we're filtering this line,
+        # because the first plugin to skip the line wins, so we might as well last
+        # out of the loop now and avoid any unnecessary computation
+        last if $skip_line;
+      }
+    }
+  }
+
+  return $skip_line ? undef : $line_hash;
 }
 
 sub rejoin_variants_in_InputBuffer {

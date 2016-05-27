@@ -64,6 +64,8 @@ sub headers {
 
   push @headers, @{$self->description_headers};
 
+  push @headers, map {sprintf("## %s : %s", @{$_})} @{$self->get_plugin_headers()};
+
   push @headers, $self->column_header;
 
   return \@headers;

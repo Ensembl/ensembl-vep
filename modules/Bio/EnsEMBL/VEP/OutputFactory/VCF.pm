@@ -133,6 +133,9 @@ sub headers {
     join("|", @{$self->fields})
   );
 
+  # plugin headers
+  push @headers, map {sprintf('##%s=%s', $_->[0], $_->[1])} @{$self->get_plugin_headers};
+
   push @headers, $col_heading;
 
   return \@headers;
@@ -233,13 +236,8 @@ sub fields {
     push @fields, 
       grep {!$vcf_cols{$_}}
       @{$self->flag_fields};
-    
-    # plugin headers
-    # foreach my $plugin_header(@{get_plugin_headers($config)}) {
-    #     my ($key, $value) = @$plugin_header;
-    #     push @vcf_info_strings, sprintf(##%s=%s, $key, $value);
-    #     push @new_headers, $key;
-    # }
+
+    push @fields, map {$_->[0]} @{$self->get_plugin_headers};
     
     $self->{fields} = \@fields;
   }

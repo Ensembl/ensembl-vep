@@ -51,7 +51,7 @@ use IO::Select;
 
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
-use Bio::EnsEMBL::VEP::Utils qw(get_time);
+use Bio::EnsEMBL::VEP::Utils qw(get_time merge_hashes);
 use Bio::EnsEMBL::VEP::Constants;
 use Bio::EnsEMBL::VEP::Config;
 use Bio::EnsEMBL::VEP::Parser;
@@ -91,6 +91,8 @@ sub init {
 
   # setup DB connection
   $self->setup_db_connection();
+
+  my $plugins = $self->get_all_Plugins();
 
   # get all annotation sources
   my $annotation_sources = $self->get_all_AnnotationSources();
@@ -214,7 +216,7 @@ sub _forked_buffer_to_output {
           $active_forks++;
         }
         elsif($pid == 0) {
-          $self->_run_forked($buffer, \@tmp, $parent);
+          $self->_forked_process($buffer, \@tmp, $parent);
         }
       }
     }
@@ -235,6 +237,14 @@ sub _forked_buffer_to_output {
 
         # data
         $by_pid{$data->{pid}} = $data->{output} if $data->{output};
+
+        # plugin data
+        foreach my $plugin_name(keys %{$data->{plugin_data} || {}}) {
+          my ($parent_plugin) = grep {ref($_) eq $plugin_name} @{$self->get_all_Plugins};
+          next unless $parent_plugin;
+
+          merge_hashes($parent_plugin, $data->{plugin_name}->{$plugin_name});
+        }
 
         # stderr
         $self->warning_msg($data->{stderr}) if $data->{stderr};
@@ -260,7 +270,7 @@ sub _forked_buffer_to_output {
   return [map {@{$by_pid{$_} || []}} @pids];
 }
 
-sub _run_forked {
+sub _forked_process {
   my $self = shift;
   my $buffer = shift;
   my $vfs = shift;
@@ -290,25 +300,30 @@ sub _run_forked {
     # the real thing
     $output = $self->_buffer_to_output($buffer);
   };
+  my $die = $@;
+
+  # some plugins may cache stuff, check for this and try and
+  # reconstitute it into parent's plugin cache
+  my $plugin_data;
+
+  foreach my $plugin(@{$self->get_all_Plugins}) {
+    next unless $plugin->{has_cache};
+
+    # delete unnecessary stuff and stuff that can't be serialised
+    delete $plugin->{$_} for qw(config feature_types variant_feature_types version feature_types_wanted variant_feature_types_wanted params);
+
+    $plugin_data->{ref($plugin)} = $plugin;
+  }
 
   # send everything we've captured to the parent process
   # PID allows parent process to re-sort output to correct order
   print $parent freeze({
     pid => $$,
     output => $output,
+    plugin_data => $plugin_data,
     stderr => $stderr,
-    die => $@,
+    die => $die,
   });
-
-  # some plugins may cache stuff, check for this and try and
-  # reconstitute it into parent's plugin cache
-  # foreach my $plugin(@{$config->{plugins}}) {
-  #   next unless defined($plugin->{has_cache});
-
-  #   # delete unnecessary stuff and stuff that can't be serialised
-  #   delete $plugin->{$_} for qw(config feature_types variant_feature_types version feature_types_wanted variant_feature_types_wanted params);
-  #   print PARENT $$." PLUGIN ".ref($plugin)." ".encode_base64(freeze($plugin), "\t")."\n";
-  # }
 
   # # tell parent about stats
   # print PARENT $$." STATS ".encode_base64(freeze($config->{stats}), "\t")."\n" if defined($config->{stats});
@@ -454,10 +469,103 @@ sub get_OutputFactory {
       config      => $self->config,
       format      => $self->param('output_format'),
       header_info => $self->get_output_header_info,
+      plugins     => $self->get_all_Plugins,
     });
   }
 
   return $self->{output_factory};
+}
+
+sub get_all_Plugins {
+  my $self = shift;
+
+  if(!exists($self->{plugins})) {
+    my @plugins = ();
+
+    unshift @INC, $self->param('dir_plugins') || $self->param('dir').'/Plugins';
+
+    PLUGIN: foreach my $plugin_config(@{$self->param('plugin') || []}) {
+
+      # parse out the module name and parameters
+      my ($module, @params) = split /,/, $plugin_config;
+
+      # check we can use the module      
+      eval qq{
+        use $module;
+      };
+      if($@) {
+        my $msg = "Failed to compile plugin $module: $@\n";
+        throw($msg) if $self->param('safe');
+        $self->warning_msg($msg);
+        next;
+      }
+      
+      # now check we can instantiate it, passing any parameters to the constructor      
+      my $instance;
+      
+      eval {
+        $instance = $module->new($self->config, @params);
+      };
+      if($@) {
+        my $msg = "Failed to instantiate plugin $module: $@\n";
+        throw($msg) if $self->param('safe');
+        $self->warning_msg($msg);
+        next;
+      }
+
+      # check that the versions match
+      
+      #my $plugin_version;
+      #
+      #if ($instance->can('version')) {
+      #  $plugin_version = $instance->version;
+      #}
+      #
+      #my $version_ok = 1;
+      #
+      #if ($plugin_version) {
+      #  my ($plugin_major, $plugin_minor, $plugin_maintenance) = split /\./, $plugin_version;
+      #  my ($major, $minor, $maintenance) = split /\./, $VERSION;
+      #
+      #  if ($plugin_major != $major) {
+      #    debug("Warning: plugin $plugin version ($plugin_version) does not match the current VEP version ($VERSION)") unless defined($config->{quiet});
+      #    $version_ok = 0;
+      #  }
+      #}
+      #else {
+      #  debug("Warning: plugin $plugin does not define a version number") unless defined($config->{quiet});
+      #  $version_ok = 0;
+      #}
+      #
+      #debug("You may experience unexpected behaviour with this plugin") unless defined($config->{quiet}) || $version_ok;
+
+      # check that it implements all necessary methods
+      
+      for my $required(qw(run get_header_info check_feature_type check_variant_feature_type feature_types)) {
+        unless($instance->can($required)) {
+          my $msg = "Plugin $module doesn't implement a required method '$required', does it inherit from BaseVepPlugin?\n";
+          throw($msg) if $self->param('safe');
+          $self->warning_msg($msg);
+          next PLUGIN;
+        }
+      }
+       
+      # all's good, so save the instance in our list of plugins      
+      push @plugins, $instance;
+      
+      $self->status_msg("Loaded plugin: $module");
+
+      # for convenience, check if the plugin wants regulatory stuff and turn on the config option if so
+      if (grep { $_ =~ /motif|regulatory/i } @{ $instance->feature_types }) {
+        $self->status_msg("Fetching regulatory features for plugin: $module");
+        $self->param('regulatory') = 1;
+      }
+    }
+
+    $self->{plugins} = \@plugins;
+  }
+
+  return $self->{plugins};
 }
 
 sub get_output_header_info {

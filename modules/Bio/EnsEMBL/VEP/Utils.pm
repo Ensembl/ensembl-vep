@@ -54,6 +54,7 @@ use vars qw(@ISA @EXPORT_OK);
   &get_time
   &convert_arrayref
   &numberify
+  &merge_hashes
 );
 
 sub format_coords {
@@ -118,6 +119,35 @@ sub numberify {
   }
 
   return $ref;
+}
+
+sub merge_hashes {
+  my ($x, $y, $add) = @_;
+
+  foreach my $k (keys %$y) {
+    if (!defined($x->{$k})) {
+      $x->{$k} = $y->{$k};
+    } else {
+      if(ref($x->{$k}) eq 'ARRAY') {
+        $x->{$k} = merge_arrays($x->{$k}, $y->{$k});
+      }
+      elsif(ref($x->{$k}) eq 'HASH') {
+        $x->{$k} = merge_hashes($x->{$k}, $y->{$k}, $add);
+      }
+      else {
+        $x->{$k} = ($add && $x->{$k} =~ /^[0-9\.]+$/ && $y->{$k} =~ /^[0-9\.]+$/ ? $x->{$k} + $y->{$k} : $y->{$k});
+      }
+    }
+  }
+  return $x;
+}
+
+sub merge_arrays {
+  my ($x, $y) = @_;
+
+  my %tmp = map {$_ => 1} (@$x, @$y);
+
+  return [keys %tmp];
 }
 
 # gets time

@@ -1374,6 +1374,78 @@ is($by_allele{missense_variant}->{ALLELE_NUM}, 2, "minimal - allele num where tw
 
 $of->{allele_number} = 0;
 
+
+
+## plugins
+##########
+
+$runner = get_annotated_buffer_runner({
+  input_file => $test_cfg->create_input_file([qw(21 25606454 test G C . . .)]),
+  plugin => ['TestPlugin'],
+  quiet => 1,
+  warning_file => 'STDERR',
+});
+
+$of = $runner->get_OutputFactory();
+$ib = $runner->get_InputBuffer();
+
+is_deeply(
+  $of->get_plugin_headers,
+  [['test', 'header']],
+  'get_plugin_headers'
+);
+
+is_deeply(
+  $of->run_plugins($of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[0], {}),
+  {test => 'Hello'},
+  'run_plugins'
+);
+
+is_deeply(
+  $of->run_plugins($of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[0], 'skip'),
+  undef,
+  'run_plugins - skip'
+);
+
+
+# warning_msg prints to STDERR
+no warnings 'once';
+open(SAVE, ">&STDERR") or die "Can't save STDERR\n";
+
+my $tmp;
+close STDERR;
+open STDERR, '>', \$tmp;
+
+is_deeply(
+  $of->run_plugins($of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[0], 'not_hash'),
+  'not_hash',
+  'run_plugins - return is not hash'
+);
+ok($tmp =~ /did not return a hashref/, 'run_plugins - return is not hash message');
+
+$runner = get_annotated_buffer_runner({
+  input_file => $test_cfg->create_input_file([qw(21 25606454 test G C . . .)]),
+  plugin => ['TestPluginRunFails'],
+  quiet => 1,
+  warning_file => 'STDERR',
+});
+
+$of = $runner->get_OutputFactory();
+$ib = $runner->get_InputBuffer();
+
+is_deeply(
+  $of->run_plugins($of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[0], {}),
+  {},
+  'run_plugins - new fails'
+);
+
+ok($tmp =~ /went wrong/, 'run_plugins - new fails message');
+
+# restore STDERR
+open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
+
+
+
 # done
 done_testing();
 
@@ -1394,4 +1466,23 @@ sub get_annotated_buffer {
   $ib->finish_annotation();
 
   return $ib;
+}
+
+sub get_annotated_buffer_runner {
+  my $tmp_cfg = shift;
+
+  my $runner = Bio::EnsEMBL::VEP::Runner->new({
+    %$cfg_hash,
+    dir => $test_cfg->{cache_root_dir}.'/sereal',
+    %$tmp_cfg,
+  });
+
+  $runner->init;
+
+  my $ib = $runner->get_InputBuffer;
+  $ib->next();
+  $_->annotate_InputBuffer($ib) for @{$runner->get_all_AnnotationSources};
+  $ib->finish_annotation();
+
+  return $runner;
 }

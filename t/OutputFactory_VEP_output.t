@@ -97,6 +97,18 @@ is_deeply(
   'headers'
 );
 
+my $runner = get_annotated_buffer_runner({
+  input_file => $test_cfg->{test_vcf},
+  plugin => ['TestPlugin'],
+  quiet => 1,
+});
+is(
+  $runner->get_OutputFactory->headers->[-2].$runner->get_OutputFactory->headers->[-1],
+  "## test : header".
+  "#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tExisting_variation\tExtra",
+  'headers - plugin'
+);
+
 
 is($of->output_hash_to_line({}), '-'.("\t\-" x 13), 'output_hash_to_line - empty');
 
@@ -215,4 +227,24 @@ sub get_annotated_buffer {
 
   return $ib;
 }
+
+sub get_annotated_buffer_runner {
+  my $tmp_cfg = shift;
+
+  my $runner = Bio::EnsEMBL::VEP::Runner->new({
+    %$cfg_hash,
+    dir => $test_cfg->{cache_root_dir}.'/sereal',
+    %$tmp_cfg,
+  });
+
+  $runner->init;
+
+  my $ib = $runner->get_InputBuffer;
+  $ib->next();
+  $_->annotate_InputBuffer($ib) for @{$runner->get_all_AnnotationSources};
+  $ib->finish_annotation();
+
+  return $runner;
+}
+
 

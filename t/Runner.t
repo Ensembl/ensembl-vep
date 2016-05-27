@@ -176,6 +176,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'tsl' => undef,
   'pubmed' => undef,
   'header_info' => $info,
+  'plugins' => [],
 }, 'Bio::EnsEMBL::VEP::OutputFactory::VEP_output' ), 'get_OutputFactory');
 
 ok($runner->init, 'init');
@@ -251,6 +252,100 @@ is(
 );
 
 
+# plugins
+$runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, plugin => ['TestPlugin'], quiet => 1});
+
+is_deeply(
+  $runner->get_all_Plugins,
+  [
+    bless( {
+      'params' => [],
+      'variant_feature_types' => [
+        'VariationFeature'
+      ],
+      'feature_types' => [
+        'Transcript'
+      ],
+      'version' => '2.3',
+      'config' => $runner->config,
+    }, 'TestPlugin' )
+  ],
+  'get_all_Plugins'
+);
+
+# warning_msg prints to STDERR
+no warnings 'once';
+open(SAVE, ">&STDERR") or die "Can't save STDERR\n"; 
+
+my $tmp;
+close STDERR;
+open STDERR, '>', \$tmp;
+
+# plugin doesn't compile
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  warning_file => 'STDERR',
+  plugin => ['TestPluginNoCompile'],
+  quiet => 1,
+});
+ok($runner->get_all_Plugins, 'get_all_Plugins - failed to compile');
+ok($tmp =~ /Failed to compile plugin/, 'get_all_Plugins - failed to compile message');
+
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  warning_file => 'STDERR',
+  plugin => ['TestPluginNoCompile'],
+  quiet => 1,
+  safe => 1
+});
+throws_ok {$runner->get_all_Plugins} qr/Failed to compile plugin/, 'get_all_Plugins - failed to compile safe die';
+
+
+# plugin new method fails
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  warning_file => 'STDERR',
+  plugin => ['TestPluginNewFails'],
+  quiet => 1,
+});
+ok($runner->get_all_Plugins, 'get_all_Plugins - new fails');
+ok($tmp =~ /Failed to instantiate plugin/, 'get_all_Plugins - new fails message');
+
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  warning_file => 'STDERR',
+  plugin => ['TestPluginNewFails'],
+  quiet => 1,
+  safe => 1
+});
+throws_ok {$runner->get_all_Plugins} qr/Failed to instantiate plugin/, 'get_all_Plugins - new fails safe die';
+
+
+# plugin missing required methods
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  warning_file => 'STDERR',
+  plugin => ['TestPluginNoMethods'],
+  quiet => 1,
+});
+ok($runner->get_all_Plugins, 'get_all_Plugins - missing methods');
+ok($tmp =~ /required method/, 'get_all_Plugins - missing methods message');
+
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  warning_file => 'STDERR',
+  plugin => ['TestPluginNoMethods'],
+  quiet => 1,
+  safe => 1
+});
+throws_ok {$runner->get_all_Plugins} qr/required method/, 'get_all_Plugins - missing methods safe die';
+
+
+# restore STDERR
+open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
+
+
+
 ## post_setup_checks
 ####################
 
@@ -286,7 +381,6 @@ no warnings 'once';
 open(SAVE, ">&STDOUT") or die "Can't save STDOUT\n"; 
 
 close STDOUT;
-my $tmp;
 open STDOUT, '>', \$tmp;
 
 $runner = Bio::EnsEMBL::VEP::Runner->new({

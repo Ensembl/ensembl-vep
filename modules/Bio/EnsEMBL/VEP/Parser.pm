@@ -181,6 +181,7 @@ sub detect_format {
     chomp;
 
     my @data = split /\s+/, $_;
+    next unless @data;
 
     # HGVS: ENST00000285667.3:c.1047_1048insC
     if (
