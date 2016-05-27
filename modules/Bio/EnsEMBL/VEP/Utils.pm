@@ -145,9 +145,10 @@ sub merge_hashes {
 sub merge_arrays {
   my ($x, $y) = @_;
 
-  my %tmp = map {$_ => 1} (@$x, @$y);
+  my %tmp = map {$_ => 1} @$x;
+  push @$x, grep {!$tmp{$_}} @$y;
 
-  return [keys %tmp];
+  return $x;
 }
 
 # gets time
