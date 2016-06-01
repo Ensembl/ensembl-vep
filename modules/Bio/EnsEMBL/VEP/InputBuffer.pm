@@ -215,11 +215,16 @@ sub min_max {
 
 sub finish_annotation {
   my $self = shift;
+  $self->stats->log_lines_read($self->parser->line_number) if $self->parser;
   $_->_finish_annotation for @{$self->buffer};
 }
 
 sub reset_buffer {
   $_[0]->{temp} = {};
+}
+
+sub reset_pre_buffer {
+  $_[0]->{pre_buffer} = [];
 }
 
 sub buffer {

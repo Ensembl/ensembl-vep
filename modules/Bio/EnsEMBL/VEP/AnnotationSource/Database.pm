@@ -86,7 +86,17 @@ sub get_valid_chromosomes {
       'Slice'
     );
 
-    $self->{valid_chromosomes} = [map {$_->seq_region_name} @{$sa->fetch_all('toplevel')}];
+    my @valid_chromosomes;
+    my %chr_lengths;
+
+    foreach my $slice(@{$sa->fetch_all('toplevel')}) {
+      my $chr = $slice->seq_region_name;
+      push @valid_chromosomes, $chr;
+      $chr_lengths{$chr} = $slice->length;
+    }
+
+    $self->{valid_chromosomes} = \@valid_chromosomes;
+    $self->stats->log_db_chromosomes(\%chr_lengths);
   }
 
   return $self->{valid_chromosomes};

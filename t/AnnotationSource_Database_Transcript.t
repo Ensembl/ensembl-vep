@@ -82,6 +82,12 @@ SKIP: {
 
   is_deeply($as->get_valid_chromosomes, [21], 'get_valid_chromosomes');
 
+  is_deeply(
+    $as->stats->{stats}->{chr_lengths},
+    {21 => 46709983},
+    'get_valid_chromosomes - stored chr lengths'
+  );
+
   ok($as->check_sift_polyphen, 'check_sift_polyphen - not specified');
 
   $as->{sift} = 1;

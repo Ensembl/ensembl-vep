@@ -177,6 +177,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'pubmed' => undef,
   'header_info' => $info,
   'plugins' => [],
+  'no_stats' => undef,
 }, 'Bio::EnsEMBL::VEP::OutputFactory::VEP_output' ), 'get_OutputFactory');
 
 ok($runner->init, 'init');
@@ -474,7 +475,7 @@ while(my $line = $runner->next_output_line) {
 is_deeply(
   \@lines,
   $exp,
-  'fork - check fork 2'
+  'fork - check fork (2)'
 );
 
 $runner = Bio::EnsEMBL::VEP::Runner->new({
@@ -494,8 +495,79 @@ while(my $line = $runner->next_output_line) {
 is_deeply(
   \@lines,
   $exp,
-  'fork - check fork 4'
+  'fork - check fork (4)'
 );
+
+
+# check whole input file
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  offline => 1,
+  input_file => $test_cfg->{test_vcf},
+  input_data => undef,
+});
+
+$exp = [];
+while(my $line = $runner->next_output_line) {
+  push @$exp, $line;
+}
+
+# lets check stats aswell
+my $exp_stats = $runner->stats->{stats}->{counters};
+
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  offline => 1,
+  input_file => $test_cfg->{test_vcf},
+  input_data => undef,
+  fork => 2,
+});
+
+@lines = ();
+while(my $line = $runner->next_output_line) {
+  push @lines, $line;
+}
+
+is_deeply(
+  \@lines,
+  $exp,
+  'fork - full file check (2)'
+);
+
+is_deeply(
+  $runner->stats->{stats}->{counters},
+  $exp_stats,
+  'fork - stats (2)'
+);
+
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  offline => 1,
+  input_file => $test_cfg->{test_vcf},
+  input_data => undef,
+  fork => 4,
+});
+
+@lines = ();
+while(my $line = $runner->next_output_line) {
+  push @lines, $line;
+}
+
+is_deeply(
+  \@lines,
+  $exp,
+  'fork - full file check (4)'
+);
+
+is_deeply(
+  $runner->stats->{stats}->{counters},
+  $exp_stats,
+  'fork - stats (4)'
+);
+
+
+
+
 
 
 # warning_msg prints to STDERR

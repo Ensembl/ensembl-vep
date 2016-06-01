@@ -176,4 +176,68 @@ our @DEFAULT_OUTPUT_COLS = qw(
   Existing_variation
 );
 
+our %TS_TV = (
+  'A/G' => 'Ts',
+  'G/A' => 'Ts',
+  'C/T' => 'Ts',
+  'T/C' => 'Ts',
+  'A/C' => 'Tv',
+  'C/A' => 'Tv',
+  'G/T' => 'Tv',
+  'T/G' => 'Tv',
+  'C/G' => 'Tv',
+  'G/C' => 'Tv',
+  'A/T' => 'Tv',
+  'T/A' => 'Tv',
+);
+
+our %COLOUR_KEYS = (
+  'polyphen' => {
+    'unknown' => 'blue',
+    'benign' => 'green',
+    'possibly damaging' => 'orange',
+    'probably damaging' => 'red',
+  },
+  'sift' => {
+    'tolerated' => 'green',
+    'deleterious' => 'red',
+  },
+  
+  # copied from COLOUR.ini in web code via browser to check colours
+  'consequences' => {
+    'intergenic_variant'                => 'gray',
+    'intron_variant'                    => '#02599c',
+    'upstream_gene_variant'             => '#a2b5cd',
+    'downstream_gene_variant'           => '#a2b5cd',
+    '5_prime_utr_variant'               => '#7ac5cd',
+    '3_prime_utr_variant'               => '#7ac5cd',
+    'splice_region_variant'             => '#ff7f50',
+    'splice_donor_variant'              => '#ff7f50',
+    'splice_acceptor_variant'           => '#ff7f50',
+    'frameshift_variant'                => '#ff69b4',
+    'transcript_ablation'               => '#ff0000',
+    'transcript_amplification'          => '#ff69b4',
+    'inframe_insertion'                 => '#ff69b4',
+    'inframe_deletion'                  => '#ff69b4',
+    'synonymous_variant'                => '#76ee00',
+    'stop_retained_variant'             => '#76ee00',
+    'missense_variant'                  => '#ffd700',
+    'initiator_codon_variant'           => '#ffd700',
+    'stop_gained'                       => '#ff0000',
+    'stop_lost'                         => '#ff0000',
+    'mature_mirna_variant'              => '#458b00',
+    'non_coding_exon_variant'           => '#32cd32',
+    'nc_transcript_variant'             => '#32cd32',
+    'incomplete_terminal_codon_variant' => '#ff00ff',
+    'nmd_transcript_variant'            => '#ff4500',
+    'coding_sequence_variant'           => '#458b00',
+    'tfbs_ablation'                     => 'brown',
+    'tfbs_amplification'                => 'brown',
+    'tf_binding_site_variant'           => 'brown',
+    'regulatory_region_variant'         => 'brown',
+    'regulatory_region_ablation'        => 'brown',
+    'regulatory_region_amplification'   => 'brown',
+  },
+);
+
 1;

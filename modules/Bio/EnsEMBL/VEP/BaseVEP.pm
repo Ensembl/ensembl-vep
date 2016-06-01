@@ -53,6 +53,7 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::Utils qw(get_time);
 use Bio::EnsEMBL::Slice;
 use Bio::EnsEMBL::CoordSystem;
+use Bio::EnsEMBL::VEP::Stats;
 use FileHandle;
 
 # new method, may or may not be reused by child classes
@@ -92,6 +93,19 @@ sub config {
 sub param {
   my $self = shift;
   return $self->config->param(@_);
+}
+
+# get stats object
+sub stats {
+  my $self = shift;
+
+  my $config = $self->config;
+
+  if(!exists($config->{_stats})) {
+    $config->{_stats} = Bio::EnsEMBL::VEP::Stats->new({config => $self->config});
+  }
+
+  return $config->{_stats};
 }
 
 sub species {
@@ -257,6 +271,8 @@ sub fasta_db {
         -OFFLINE => $self->param('offline'),
       );
     }
+
+    $self->stats->log_fasta_chromosomes($fasta_db);
 
     $self->config->{_fasta_db} = $fasta_db;
   }

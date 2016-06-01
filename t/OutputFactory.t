@@ -611,16 +611,14 @@ $ib = get_annotated_buffer({
 $vfoa = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[2];
 
 is_deeply(
-  $of->BaseTranscriptVariationAllele_to_output_hash($vfoa),
+  $of->BaseTranscriptVariationAllele_to_output_hash($vfoa, {Consequence => ['upstream_gene_variant']}),
   {
     'STRAND' => -1,
-    'IMPACT' => 'MODIFIER',
     'Consequence' => [
       'upstream_gene_variant'
     ],
     'Feature_type' => 'Transcript',
     'Feature' => 'ENST00000567517',
-    'Allele' => 'T',
     'Gene' => 'ENSG00000260583',
     'DISTANCE' => 2407,
   },
@@ -634,16 +632,10 @@ is_deeply(
   $of->BaseTranscriptVariationAllele_to_output_hash($vfoa),
   {
     'STRAND' => -1,
-    'IMPACT' => 'MODIFIER',
-    'Consequence' => [
-      'downstream_gene_variant'
-    ],
     'Feature_type' => 'Transcript',
     'Feature' => 'ENST00000419219',
-    'Allele' => 'T',
     'Gene' => 'ENSG00000154719',
     'FLAGS' => ['cds_end_NF'],
-    'DISTANCE' => 3953,
   },
   'BaseTranscriptVariationAllele_to_output_hash - check transcript FLAGS'
 );
@@ -683,14 +675,9 @@ is_deeply(
   {
     'STRAND' => -1,
     'HGNC_ID' => 'HGNC:14027',
-    'IMPACT' => 'MODIFIER',
-    'Consequence' => [
-      '3_prime_UTR_variant'
-    ],
     'SYMBOL' => 'MRPL39',
     'Feature_type' => 'Transcript',
     'SYMBOL_SOURCE' => 'HGNC',
-    'Allele' => 'T',
     'Gene' => 'ENSG00000154719',
     'Feature' => 'ENST00000307301'
   },
@@ -802,7 +789,7 @@ $ib = get_annotated_buffer({
 $vfoa = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[1];
 
 is_deeply(
-  $of->TranscriptVariationAllele_to_output_hash($vfoa),
+  $of->TranscriptVariationAllele_to_output_hash($vfoa, {}),
   {
     'STRAND' => -1,
     'IMPACT' => 'MODERATE',
@@ -824,7 +811,7 @@ is_deeply(
 
 $of->{total_length} = 1;
 is_deeply(
-  $of->TranscriptVariationAllele_to_output_hash($vfoa),
+  $of->TranscriptVariationAllele_to_output_hash($vfoa, {}),
   {
     'STRAND' => -1,
     'IMPACT' => 'MODERATE',
@@ -860,7 +847,7 @@ $of->{hgvs} = 0;
 
 $vfoa = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[0];
 is_deeply(
-  $of->TranscriptVariationAllele_to_output_hash($vfoa),
+  $of->TranscriptVariationAllele_to_output_hash($vfoa, {}),
   {
     'STRAND' => -1,
     'IMPACT' => 'MODIFIER',
@@ -1137,25 +1124,25 @@ is_deeply(
   'SV - StructuralVariationOverlapAllele_to_output_hash'
 );
 
-# $of->{allele_number} = 1;
-# is_deeply(
-#   $of->StructuralVariationOverlapAllele_to_output_hash($vfoa),
-#   {
-#     'IMPACT' => 'MODIFIER',
-#     'Consequence' => [
-#       'coding_sequence_variant',
-#       'feature_elongation'
-#     ],
-#     'OverlapPC' => '0.01',
-#     'Feature_type' => 'Transcript',
-#     'OverlapBP' => 2,
-#     'Feature' => 'ENST00000352957',
-#     'Allele' => 'duplication',
-#     'ALLELE_NUM' => 1,
-#   },
-#   'SV - StructuralVariationOverlapAllele_to_output_hash'
-# );
-# $of->{allele_number} = 0;
+$of->{allele_number} = 1;
+is_deeply(
+  $of->StructuralVariationOverlapAllele_to_output_hash($vfoa),
+  {
+    'IMPACT' => 'MODIFIER',
+    'Consequence' => [
+      'coding_sequence_variant',
+      'feature_elongation'
+    ],
+    'OverlapPC' => '0.01',
+    'Feature_type' => 'Transcript',
+    'OverlapBP' => 2,
+    'Feature' => 'ENST00000352957',
+    'Allele' => 'duplication',
+    'ALLELE_NUM' => 1,
+  },
+  'SV - StructuralVariationOverlapAllele_to_output_hash'
+);
+$of->{allele_number} = 0;
 
 $of->{flag_pick} = 1;
 ($vfoa) = grep {$_->{PICK}} @{$of->get_all_StructuralVariationOverlapAlleles($ib->buffer->[0])};
@@ -1263,8 +1250,9 @@ $ib = get_annotated_buffer({
 $vfoa = $of->get_all_StructuralVariationOverlapAlleles($ib->buffer->[0])->[1];
 
 is_deeply(
-  $of->TranscriptStructuralVariationAllele_to_output_hash($vfoa),
+  $of->TranscriptStructuralVariationAllele_to_output_hash($vfoa, {}),
   {
+    'STRAND' => -1,
     'IMPACT' => 'MODIFIER',
     'Consequence' => [
       'coding_sequence_variant',
@@ -1272,12 +1260,13 @@ is_deeply(
     ],
     'OverlapPC' => '0.01',
     'Feature_type' => 'Transcript',
-    'OverlapBP' => 2,
-    'Feature' => 'ENST00000352957',
     'Allele' => 'duplication',
     'CDS_position' => '989-990',
-    'Protein_position' => '330',
+    'Gene' => 'ENSG00000154719',
     'cDNA_position' => '1031-1032',
+    'Protein_position' => 330,
+    'Feature' => 'ENST00000352957',
+    'OverlapBP' => 2
   },
   'SV - TranscriptStructuralVariationAllele_to_output_hash'
 );

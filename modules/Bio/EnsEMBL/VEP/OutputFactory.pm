@@ -76,6 +76,7 @@ sub new {
 
   # add shortcuts to these params
   $self->add_shortcuts([qw(
+    no_stats
     no_intergenic
     process_ref_homs
     coding_only
@@ -231,6 +232,9 @@ sub get_all_VariationFeatureOverlapAllele_output_hashes {
 
     # run plugins
     $output = $self->run_plugins($vfoa, $output, $vf);
+
+    # log stats
+    $self->stats->log_VariationFeatureOverlapAllele($vfoa, $output) unless $self->{no_stats};
 
     push @return, $output if $output;
   }
@@ -547,6 +551,8 @@ sub VariationFeature_to_output_hash {
   #   }
   # }
 
+  $self->stats->log_VariationFeature($vf, $hash);
+
   return $hash;
 }
 
@@ -625,22 +631,12 @@ sub VariationFeatureOverlapAllele_to_output_hash {
   # picked?
   $hash->{PICK} = 1 if defined($vfoa->{PICK});
 
-  # stats
-  # unless(defined($self->{no_stats})) {
-  #   $self->{stats}->{gene}->{$hash->{Gene}}++ if defined($hash->{Gene});
-  #   $self->{stats}->{lc($hash->{Feature_type})}->{$hash->{Feature}}++ if defined($hash->{Feature_type}) && defined($hash->{Feature});
-  # }
-
   return $hash;
 }
 
 sub BaseTranscriptVariationAllele_to_output_hash {
   my $self = shift;
   my ($vfoa, $hash) = @_;
-
-  # run "super" method
-  $hash = $self->VariationFeatureOverlapAllele_to_output_hash(@_);
-  return undef unless $hash;
 
   my $tv = $vfoa->base_variation_feature_overlap;
   my $tr = $tv->transcript;
@@ -697,7 +693,7 @@ sub BaseTranscriptVariationAllele_to_output_hash {
   }
 
   # distance to transcript
-  if(join("", @{$hash->{Consequence}}) =~ /(up|down)stream/i) {
+  if(join("", @{$hash->{Consequence} || []}) =~ /(up|down)stream/i) {
     $hash->{DISTANCE} = $tv->distance_to_transcript;
   }
 
@@ -780,7 +776,8 @@ sub TranscriptVariationAllele_to_output_hash {
   my $self = shift;
   my ($vfoa, $hash) = @_;
 
-  # run "super" method
+  # run "super" methods
+  $hash = $self->VariationFeatureOverlapAllele_to_output_hash(@_);
   $hash = $self->BaseTranscriptVariationAllele_to_output_hash(@_);
   return undef unless $hash;
 
@@ -881,6 +878,9 @@ sub add_sift_polyphen {
           }
         }
       }
+
+      # update stats
+      $self->stats->log_sift_polyphen($tool, $pred) if $pred && !$self->{no_stats};
     }
   }
 
@@ -1024,8 +1024,9 @@ sub TranscriptStructuralVariationAllele_to_output_hash {
   my $self = shift;
   my ($vfoa, $hash) = @_;
 
-  # run "super" method
+  # run "super" methods
   $hash = $self->StructuralVariationOverlapAllele_to_output_hash(@_);
+  $hash = $self->BaseTranscriptVariationAllele_to_output_hash(@_);
   return undef unless $hash;
 
   my $svo = $vfoa->base_variation_feature_overlap;
@@ -1135,8 +1136,9 @@ sub rejoin_variants_in_InputBuffer {
 
   my @joined_list = ();
 
-  # backup stats here as methods below will increment stats counts
-  # my %stats_backup = %{$config->{stats} || {}};
+  # backup stat logging status
+  my $no_stats = $self->{no_stats};
+  $self->{no_stats} = 1;
 
   foreach my $vf(@{$buffer->buffer}) {
 
@@ -1204,7 +1206,8 @@ sub rejoin_variants_in_InputBuffer {
     }
   }
 
-  # $config->{stats} = \%stats_backup if $config->{stats};
+  $self->{no_stats} = $no_stats;
+
   $buffer->buffer(\@joined_list);
 }
 

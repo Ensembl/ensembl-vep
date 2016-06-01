@@ -65,6 +65,18 @@ is($bv->species, 'homo_sapiens', 'species get');
 is($bv->species('human'), 'human', 'species set');
 $bv->species('homo_sapiens');
 
+is_deeply(
+  $bv->stats,
+  bless({
+    stats => {
+      counters => {}
+    },
+    no_stats => undef,
+    _config => $bv->config,
+  }, 'Bio::EnsEMBL::VEP::Stats'),
+  'stats'
+);
+
 # get_adaptor should work offline for some var adaptors using new_fake
 $bv->param('offline', 1);
 is(ref($bv->get_adaptor('variation', 'VariationFeature')), 'Bio::EnsEMBL::Variation::DBSQL::VariationFeatureAdaptor', 'get_adaptor - offline');
@@ -106,6 +118,12 @@ my $fasta_db = $bv->fasta_db;
 ok(
   ref($fasta_db) eq 'Bio::DB::HTS::Faidx' || ref($fasta_db) eq 'Bio::DB::Fasta',
   'fasta_db'
+);
+
+is_deeply(
+  $bv->stats->{stats}->{chr_lengths},
+  {21 => 46709983},
+  'fasta_db - stored chr lengths'
 );
 
 is_deeply(

@@ -57,6 +57,9 @@ is($ib->rejoin_required, 0, 'rejoin_required');
 push @{$ib->buffer}, 'hello';
 $ib->reset_buffer;
 is_deeply($ib->buffer, [], 'reset_buffer');
+push @{$ib->pre_buffer}, 'hello';
+$ib->reset_pre_buffer;
+is_deeply($ib->pre_buffer, [], 'reset_pre_buffer');
 
 $vfs = $ib->next();
 is(ref($vfs), 'ARRAY', 'next ref');

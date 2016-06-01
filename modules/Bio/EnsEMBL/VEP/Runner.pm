@@ -89,6 +89,8 @@ sub init {
 
   return 1 if $self->{_initialized};
 
+  $self->stats->start_time();
+
   # setup DB connection
   $self->setup_db_connection();
 
@@ -103,6 +105,8 @@ sub init {
   my $buffer = $self->get_InputBuffer();
 
   $self->post_setup_checks();
+
+  $self->stats->info($self->get_output_header_info);
 
   return $self->{_initialized} = 1;
 }
@@ -246,6 +250,9 @@ sub _forked_buffer_to_output {
           merge_hashes($parent_plugin, $data->{plugin_name}->{$plugin_name});
         }
 
+        # stats
+        merge_hashes($self->stats->{stats}->{counters}, $data->{stats}, 1) if $data->{stats};
+
         # stderr
         $self->warning_msg($data->{stderr}) if $data->{stderr};
 
@@ -287,7 +294,11 @@ sub _forked_process {
   # which will be made by _buffer_to_output()
   $buffer->{buffer_size} = scalar @$vfs;
   $buffer->reset_buffer();
+  $buffer->reset_pre_buffer();
   push @{$buffer->pre_buffer}, @$vfs;
+
+  # reset stats
+  $self->stats->{stats}->{counters} = {};
 
   # we want to capture any deaths and accurately report any errors
   # so we use eval to run the core chunk of the code (_buffer_to_output)
@@ -323,10 +334,8 @@ sub _forked_process {
     plugin_data => $plugin_data,
     stderr => $stderr,
     die => $die,
+    stats => $self->stats->{stats}->{counters},
   });
-
-  # # tell parent about stats
-  # print PARENT $$." STATS ".encode_base64(freeze($config->{stats}), "\t")."\n" if defined($config->{stats});
 
   exit(0);
 }
