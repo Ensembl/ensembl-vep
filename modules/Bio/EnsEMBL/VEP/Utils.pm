@@ -135,7 +135,7 @@ sub merge_hashes {
         $x->{$k} = merge_hashes($x->{$k}, $y->{$k}, $add);
       }
       else {
-        $x->{$k} = ($add && $x->{$k} =~ /^[0-9\.]+$/ && $y->{$k} =~ /^[0-9\.]+$/ ? $x->{$k} + $y->{$k} : $y->{$k});
+        $x->{$k} = ($add && looks_like_number($x->{$k}) && looks_like_number($y->{$k}) ? $x->{$k} + $y->{$k} : $y->{$k});
       }
     }
   }

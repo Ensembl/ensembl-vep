@@ -97,9 +97,21 @@ is_deeply(
 );
 
 is_deeply(
+  merge_hashes({b => {e => 5}, f => 6}, {a => 1, b => {c => [1, 2], d => 3}}),
+  {a => 1, b => {c => [1, 2], d => 3, e => 5}, f => 6},
+  'merge_hashes - complex inverted'
+);
+
+is_deeply(
   merge_hashes({a => 1}, {a => 2}),
   {a => 2},
   'merge_hashes - overwrite'
+);
+
+is_deeply(
+  merge_hashes({a => 1}, {a => 2}, 1),
+  {a => 3},
+  'merge_hashes - add'
 );
 
 is_deeply(
