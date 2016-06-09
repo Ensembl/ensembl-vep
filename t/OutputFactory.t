@@ -547,6 +547,47 @@ $of->{process_ref_homs} = 0;
 
 
 
+## summary_only
+###############
+
+$ib = get_annotated_buffer({
+  input_file => $test_cfg->{test_vcf},
+});
+
+# most_severe
+$of->{most_severe} = 1;
+is_deeply(
+  $of->summary_only($ib->buffer->[0], {}, $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])),
+  [
+    {
+      'Consequence' => [
+        'missense_variant'
+      ]
+    }
+  ],
+  'summary_only - most_severe'
+);
+$of->{most_severe} = 0;
+
+# summary
+$of->{summary} = 1;
+is_deeply(
+  $of->summary_only($ib->buffer->[0], {}, $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])),
+  [
+    {
+      'Consequence' => [
+        'missense_variant',
+        '3_prime_UTR_variant',
+        'upstream_gene_variant'
+      ]
+    }
+  ],
+  'summary_only - most_severe'
+);
+$of->{summary} = 0;
+
+
+
 ## VariationFeatureOverlapAllele_to_output_hash
 ###############################################
 

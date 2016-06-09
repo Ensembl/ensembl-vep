@@ -221,7 +221,12 @@ sub get_all_VariationFeatureOverlapAllele_output_hashes {
       : 'VariationFeature'
   );
 
-  foreach my $vfoa(@{$self->$method($vf)}) {
+  my $vfoas = $self->$method($vf);
+
+  # summary, most_severe don't need most of the downstream logic from hereon
+  return $self->summary_only($vf, $hash, $vfoas) if $self->{summary} || $self->{most_severe};
+
+  foreach my $vfoa(@$vfoas) {
 
     # copy the initial VF-based hash so we're not overwriting
     my %copy = %$hash;
@@ -240,6 +245,41 @@ sub get_all_VariationFeatureOverlapAllele_output_hashes {
   }
 
   return \@return;
+}
+
+sub summary_only {
+  my ($self, $vf, $hash, $vfoas) = @_;
+
+  my $term_method = $self->{terms}.'_term';
+
+  my @ocs = sort {$a->rank <=> $b->rank} map {@{$_->get_all_OverlapConsequences}} @$vfoas;
+
+  if(@ocs) {
+
+    # summary is just all unique consequence terms
+    if($self->{summary}) {
+      my (@cons, %seen);
+      foreach my $con(map {$_->$term_method || $_->SO_term} @ocs) {
+        push @cons, $con unless $seen{$con};
+        $seen{$con} = 1;
+      }
+      $hash->{Consequence} = \@cons;
+    }
+
+    # most severe is the consequence term with the lowest rank
+    else {
+      $hash->{Consequence} = [$ocs[0]->$term_method || $ocs[0]->SO_term];
+    }
+
+    # unless(defined($config->{no_stats})) {
+    #   $config->{stats}->{consequences}->{$_}++ for split(',', $hash->{Consequence});
+    # }
+  }
+  else {
+    $self->warning_msg("Unable to assign consequence type");
+  }
+
+  return [$hash];
 }
 
 sub get_all_VariationFeatureOverlapAlleles {
