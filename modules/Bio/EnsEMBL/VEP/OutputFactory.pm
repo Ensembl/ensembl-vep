@@ -594,7 +594,6 @@ sub add_colocated_variant_info {
     push @{$tmp->{SOMATIC}}, $ex->{somatic} ? 1 : 0;
 
     # phenotype or disease
-    my @p_or_d = map {$_->{phenotype_or_disease}} @{$vf->{existing}};
     push @{$tmp->{PHENO}}, $ex->{phenotype_or_disease} ? 1 : 0;
   }
 
