@@ -86,7 +86,8 @@ is_deeply(
     },
     'allele_changes' => {
       'C/T' => 1
-    }
+    },
+    'var_count' => 1,
   },
   'log_VariationFeature 1'
 );
@@ -109,7 +110,8 @@ is_deeply(
     'allele_changes' => {
       'T/C' => 1,
       'C/T' => 1
-    }
+    },
+    'var_count' => 2,
   },
   'log_VariationFeature 2'
 );
@@ -234,6 +236,149 @@ is_deeply(
   'log_sift_polyphen'
 );
 
+
+$runner = get_annotated_buffer_runner({
+  input_file => $test_cfg->create_input_file([qw(21 25585733 . C T . . .)])
+});
+$runner->get_OutputFactory->get_all_lines_by_InputBuffer($runner->get_InputBuffer);
+$s = $runner->stats;
+
+my $finished = $s->finished_stats;
+
+is_deeply(
+  $finished->{general_stats},
+  [
+    [
+      'Lines of input read',
+      1
+    ],
+    [
+      'Variants processed',
+      1
+    ],
+    [
+      'Novel / existing variants',
+      '-'
+    ],
+    [
+      'Overlapped genes',
+      2
+    ],
+    [
+      'Overlapped transcripts',
+      3
+    ],
+    [
+      'Overlapped regulatory features',
+      '-'
+    ]
+  ],
+  'finished_stats - general_stats'
+);
+
+is_deeply(
+  [map {$_->{data}} @{$finished->{charts}}],
+  [
+    {
+      'SNV' => 1
+    },
+    {
+      'missense_variant' => 1
+    },
+    {
+      'missense_variant' => 1,
+      'upstream_gene_variant' => 1,
+      '3_prime_UTR_variant' => 1
+    },
+    {
+      'missense_variant' => 1
+    },
+    {
+      '21' => 1
+    },
+    {
+      '33' => 0,
+      '32' => 0,
+      '21' => 0,
+      '7' => 0,
+      '26' => 0,
+      '17' => 0,
+      '2' => 0,
+      '1' => 0,
+      '18' => 0,
+      '30' => 0,
+      '16' => 0,
+      '44' => 0,
+      '27' => 0,
+      '25' => 1,
+      '28' => 0,
+      '40' => 0,
+      '20' => 0,
+      '14' => 0,
+      '24' => 0,
+      '10' => 0,
+      '31' => 0,
+      '35' => 0,
+      '11' => 0,
+      '42' => 0,
+      '22' => 0,
+      '46' => 0,
+      '0' => 0,
+      '13' => 0,
+      '23' => 0,
+      '29' => 0,
+      '6' => 0,
+      '39' => 0,
+      '36' => 0,
+      '3' => 0,
+      '9' => 0,
+      '41' => 0,
+      '12' => 0,
+      '15' => 0,
+      '38' => 0,
+      '8' => 0,
+      '4' => 0,
+      '34' => 0,
+      '45' => 0,
+      '37' => 0,
+      '43' => 0,
+      '19' => 0,
+      '5' => 0
+    },
+    {
+      '40-50%' => 0,
+      '70-80%' => 0,
+      '50-60%' => 0,
+      '90-100%' => 1,
+      '10-20%' => 0,
+      '20-30%' => 0,
+      '30-40%' => 0,
+      '00-10%' => 0,
+      '60-70%' => 0,
+      '80-90%' => 0
+    }
+  ],
+  'finished_stats - charts data'
+);
+
+
+my @tmp = map {$_->[0]} @{$finished->{run_stats}};
+
+ok((shift @tmp) =~ /VEP version \(API\) \d+ \(\d+\)/, 'finished_stats - run_stats - version');
+is_deeply(
+  \@tmp,
+  [
+    'Cache/Database',
+    'Species',
+    'Command line options',
+    'Start time',
+    'End time',
+    'Run time',
+    'Input file',
+    'Output file'
+  ],
+  'finished_stats - run_stats - remaining headers'
+);
 
 
 sub get_annotated_buffer_runner {
