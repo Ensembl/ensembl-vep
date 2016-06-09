@@ -115,8 +115,11 @@ sub log_VariationFeature {
 
   my $stats = $self->{stats}->{counters};
 
+  # basic count
+  $stats->{var_count}++;
+
   # position
-  $stats->{chr}->{$vf->{chr}}->{1e6 * int($vf->start / 1e6)}++;
+  $stats->{chr}->{$vf->{chr}}->{1e6 * int($vf->{start} / 1e6)}++;
 
   # most severe consequence
   $stats->{var_cons}->{$vf->display_consequence}++;
@@ -236,6 +239,7 @@ sub finished_stats {
     
     # coding cons
     foreach my $con(
+      map {$_->SO_term}
       grep {$_->{include} && $_->{include}->{coding}}
       values %Bio::EnsEMBL::Variation::Utils::Constants::OVERLAP_CONSEQUENCES
     ) {
@@ -388,7 +392,7 @@ sub generate_general_stats {
 
   return [
     ['Lines of input read', $stats->{lines_read}],
-    # ['Variants processed', $stats->{var_count}],
+    ['Variants processed', $stats->{var_count}],
     # ['Variants remaining after filtering', $stats->{filter_count}],
     # ['Lines of output written', $stats->{out_count}],
     [
