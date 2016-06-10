@@ -734,7 +734,7 @@ sub BaseTranscriptVariationAllele_to_output_hash {
   }
 
   # distance to transcript
-  if(grep {$DISTANCE_CONS{$_}} @{$hash->{Consequence}}) {
+  if(grep {$DISTANCE_CONS{$_}} @{$hash->{Consequence} || []}) {
     $hash->{DISTANCE} = $tv->distance_to_transcript;
   }
 
