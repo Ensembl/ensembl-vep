@@ -178,7 +178,9 @@ sub log_BaseTranscriptVariationAllele {
       length($tr->{_variation_effect_feature_cache}->{peptide}) :
       $tr->translation->length;
 
-    $stats->{protein_pos}->{int(10 * ($vfoa->base_transcript_variation->translation_start / $protein_length))}++;
+    if(my $protein_pos = $vfoa->base_transcript_variation->translation_start) {
+      $stats->{protein_pos}->{int(10 * ($protein_pos / $protein_length))}++ if $protein_length;
+    }
   }
 
   # gene counts
