@@ -60,8 +60,9 @@ sub annotate_InputBuffer {
   my $tva = $self->get_adaptor('variation', 'TranscriptVariation');
 
   foreach my $tr(@{$self->get_all_features_by_InputBuffer($buffer)}) {
-    my $fs = $tr->{start} - ($tr->strand == 1 ? $up_size : $down_size);
-    my $fe = $tr->{end} + ($tr->strand == 1 ? $down_size : $up_size);
+    my $tr_strand = $tr->strand;
+    my $fs = $tr->{start} - ($tr_strand == 1 ? $up_size : $down_size);
+    my $fe = $tr->{end} + ($tr_strand == 1 ? $down_size : $up_size);
 
     my $slice = $tr->{slice};
 

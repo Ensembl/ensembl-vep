@@ -68,6 +68,8 @@ my %FORMAT_MAP = (
   'json'    => 'JSON',
 );
 
+my %DISTANCE_CONS = (upstream_gene_variant => 1, downstream_gene_variant => 1);
+
 sub new {
   my $caller = shift;
   my $class = ref($caller) || $caller;
@@ -591,7 +593,7 @@ sub VariationFeature_to_output_hash {
   #   }
   # }
 
-  $self->stats->log_VariationFeature($vf, $hash);
+  $self->stats->log_VariationFeature($vf, $hash) unless $self->{no_stats};
 
   return $hash;
 }
@@ -694,8 +696,8 @@ sub BaseTranscriptVariationAllele_to_output_hash {
   my @attribs = @{$tr->get_all_Attributes()};
 
   # flags
-  my @flags = grep {$_->code =~ /^cds_/} @attribs;
-  $hash->{FLAGS} = [map {$_->code} @flags] if scalar @flags;
+  my @flags = grep {substr($_, 0, 4) eq 'cds_'} map {$_->{code}} @attribs;
+  $hash->{FLAGS} = \@flags if scalar @flags;
 
   # exon/intron numbers
   if($self->{numbers}) {
@@ -732,7 +734,7 @@ sub BaseTranscriptVariationAllele_to_output_hash {
   }
 
   # distance to transcript
-  if(join("", @{$hash->{Consequence} || []}) =~ /(up|down)stream/i) {
+  if(grep {$DISTANCE_CONS{$_}} @{$hash->{Consequence}}) {
     $hash->{DISTANCE} = $tv->distance_to_transcript;
   }
 
