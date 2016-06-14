@@ -300,6 +300,10 @@ sub _forked_process {
   # reset stats
   $self->stats->{stats}->{counters} = {};
 
+  # reset FASTA DB
+  delete($self->config->{_fasta_db});
+  $self->fasta_db;
+
   # we want to capture any deaths and accurately report any errors
   # so we use eval to run the core chunk of the code (_buffer_to_output)
   my $output;
