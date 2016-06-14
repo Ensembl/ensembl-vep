@@ -179,6 +179,23 @@ is_deeply($vf, bless( {
   'start' => 25587760
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'mixed types - same first base');
 
+# stubby - nothing after ALT
+$vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $cfg,
+  file => $test_cfg->create_input_file([qw(21 25587759 test G C)]),
+  valid_chromosomes => [21]
+})->next();
+delete($vf->{adaptor}); delete($vf->{_line});
+is_deeply($vf, bless( {
+  'chr' => '21',
+  'strand' => 1,
+  'variation_name' => 'test',
+  'map_weight' => 1,
+  'allele_string' => 'G/C',
+  'end' => 25587759,
+  'start' => 25587759
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'stubby');
+
 # non-variant
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, allow_non_variant => 1}),
