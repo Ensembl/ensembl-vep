@@ -270,9 +270,9 @@ sub fasta_db {
         -ASSEMBLY => $self->param('assembly'),
         -OFFLINE => $self->param('offline'),
       );
-    }
 
-    $self->stats->log_fasta_chromosomes($fasta_db);
+      $self->stats->log_fasta_chromosomes($fasta_db);
+    }
 
     $self->config->{_fasta_db} = $fasta_db;
   }
