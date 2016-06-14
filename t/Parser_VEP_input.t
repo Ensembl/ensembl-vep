@@ -88,7 +88,7 @@ delete($vf->{adaptor});
 is_deeply($vf, bless( {
   'chr' => '21',
   'strand' => '1',
-  'variation_name' => undef,
+  'variation_name' => '21_25587759_C/A',
   'map_weight' => 1,
   'allele_string' => 'C/A',
   'end' => '25587759',

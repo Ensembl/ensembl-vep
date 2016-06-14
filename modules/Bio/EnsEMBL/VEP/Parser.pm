@@ -249,6 +249,14 @@ sub validate_vf {
   my $self = shift;
   my $vf = shift;
 
+  # create name
+  $vf->{variation_name} ||= sprintf(
+    '%s_%i_%s',
+    $vf->{original_chr} || $vf->{chr},
+    $vf->{start},
+    $vf->{allele_string} || $vf->{class_SO_term}
+  );
+
   # user specified chr skip list
   if($self->{chr}) {
     return 0 unless grep {$vf->{chr} eq $_} @{$self->{chr}};

@@ -104,12 +104,16 @@ is($p->validate_svf(), 1, 'validate_svf - not implemented yet');
 
 is($p->validate_vf(get_vf({allele_string => 'G/C'})), 1, 'validate_vf - ok');
 
+my $vf = get_vf({allele_string => 'G/C'});
+$p->validate_vf($vf);
+is($vf->{variation_name}, '1_1_G/C', 'validate_vf - create variation_name');
+
 $p->{chr} = ['1'];
 is($p->validate_vf(get_vf({allele_string => 'G/C'})), 1, 'validate_vf - chr list include');
 is($p->validate_vf(get_vf({allele_string => 'G/C', chr => 2})), 0, 'validate_vf - chr list exclude');
 delete($p->{chr});
 
-my $vf = get_vf({allele_string => 'G/C', chr => 'chr1'});
+$vf = get_vf({allele_string => 'G/C', chr => 'chr1'});
 $p->validate_vf($vf);
 is($vf->{chr}, '1', 'validate_vf - strip "chr"');
 
