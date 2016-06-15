@@ -445,7 +445,11 @@ sub pick_worst_VariationFeatureOverlapAllele {
       $info->{lc($tr->{_source_cache})} = 0 if exists($tr->{_source_cache});
 
       # "invert" length so longer is best
-      $info->{length} = 0 - $tr->length();
+      $info->{length} = 0 - (
+        $tr->translation ?
+        length($tr->{_variation_effect_feature_cache}->{translateable_seq} || $tr->translateable_seq) :
+        $tr->length()
+      );
 
       # lower TSL is best
       if(my ($tsl) = @{$tr->get_all_Attributes('TSL')}) {
