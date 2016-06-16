@@ -59,6 +59,10 @@ is_deeply($p->headers, [], 'headers');
 $p->file($test_cfg->{test_vcf});
 is($p->detect_format, 'vcf', 'detect_format - VCF');
 
+ok($p->file($test_cfg->{test_gzvcf}) =~ /GLOB/, 'gzipped VCF');
+is($p->detect_format, 'vcf', 'detect_format - gzipped VCF');
+$p->file($test_cfg->{test_vcf});
+
 is_deeply($p->valid_chromosomes, {}, 'valid_chromosomes empty');
 
 $p = Bio::EnsEMBL::VEP::Parser->new({file => $test_cfg->{test_vcf}, valid_chromosomes => [21]});
