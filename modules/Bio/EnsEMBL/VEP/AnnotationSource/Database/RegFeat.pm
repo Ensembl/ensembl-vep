@@ -156,4 +156,35 @@ sub get_features_by_regions_uncached {
   return \@return;
 }
 
+sub info {
+  my $self = shift;
+
+  if(!exists($self->{info})) {
+    my $version;
+
+    if(my $fg_mca = $self->get_adaptor('funcgen', 'metacontainer')) {
+      foreach my $meta_key(qw(regbuild.version)) {
+        my $meta_version = $fg_mca->list_value_by_key($meta_key);
+        $version = $meta_version->[0] if defined($meta_version) && scalar @$meta_version;
+      }
+
+      # from 85 version is in regulatory_build table
+      unless($version) {
+        my $sth = $fg_mca->db->dbc->prepare(qq{
+          SELECT version FROM regulatory_build 
+        });
+        $sth->execute;
+
+        $sth->bind_columns(\$version);
+        $sth->fetch;
+        $sth->finish;
+      }
+    }
+
+    $self->{info}->{regbuild} = $version;
+  }
+
+  return $self->{info};
+}
+
 1;

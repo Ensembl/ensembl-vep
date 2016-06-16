@@ -80,6 +80,14 @@ SKIP: {
   ##########
 
   is_deeply(
+    $as->info,
+    {
+      'regbuild' => '13.0'
+    },
+    'info'
+  );
+
+  is_deeply(
     $as->get_available_cell_types,
     [
       'A549',
