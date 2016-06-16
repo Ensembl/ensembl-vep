@@ -392,4 +392,63 @@ sub prefetch_translation_ids {
   return $tr;
 }
 
+sub info {
+  my $self = shift;
+
+  if(!exists($self->{info})) {
+    my %info;
+
+    # core source versions
+    if(my $core_mca = $self->get_adaptor('core', 'metacontainer')) {
+      foreach my $meta_key(qw(assembly.name gencode.version genebuild.initial_release_date)) {
+        my $version = $core_mca->list_value_by_key($meta_key);
+
+        my $new_key = $meta_key;
+        $new_key =~ s/\..+//;
+        $info{$new_key} = $version->[0] if defined($version) && scalar @$version;
+      }
+    }
+
+    # sift/polyphen versions
+    if(my $var_mca = $self->get_adaptor('variation', 'metacontainer')) {
+      foreach my $tool(grep {$self->{$_}} qw(sift polyphen)) {
+        my $sth = $var_mca->db->dbc->prepare(qq{
+          SELECT meta_value
+          FROM meta
+          WHERE meta_key = ?
+        });
+        $sth->execute($tool.'_version');
+
+        my $version;
+        $sth->bind_columns(\$version);
+        $sth->fetch();
+        $sth->finish();
+        
+        $info{$tool} = $version if defined($version);
+      }
+    }
+
+    # refseq
+    if($self->{source_type} eq 'refseq') {
+      if(my $refseq_mca = $self->get_adaptor('otherfeatures', 'metacontainer')) {
+        my $sth = $refseq_mca->db->dbc->prepare(qq{
+          SELECT CONCAT(db_version, ' - ', db_file) FROM analysis WHERE logic_name = 'refseq_import' 
+        });
+        $sth->execute;
+
+        my $version;
+        $sth->bind_columns(\$version);
+        $sth->fetch;
+        $sth->finish;
+
+        $info{refseq} = $version if defined($version);
+      }
+    }
+
+    $self->{info} = \%info;
+  }
+
+  return $self->{info};
+}
+
 1;

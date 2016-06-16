@@ -77,6 +77,15 @@ SKIP: {
   ## METHOD TESTS
   ###############
 
+  is_deeply(
+    $as->info,
+    {
+      'COSMIC' => '67',
+      'dbSNP' => '138'
+    },
+    'info'
+  );
+
   is($as->have_pubmed, 1, 'have_pubmed');
   is($as->phenotype_attrib_id, '418', 'phenotype_attrib_id');
 

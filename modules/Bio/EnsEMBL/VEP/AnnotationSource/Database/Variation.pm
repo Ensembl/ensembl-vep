@@ -211,4 +211,24 @@ sub merge_features {
   return $_[1];
 }
 
+sub info {
+  my $self = shift;
+
+  if(!exists($self->{info})) {
+    my %info;
+
+    # variation source versions
+    if(my $sa = $self->get_adaptor('variation', 'source')) {
+      foreach my $source_name(qw(dbSNP COSMIC ClinVar ESP HGMD-PUBLIC)) {
+        my $version = $sa->get_source_version($source_name);
+        $info{$source_name} = $version if $version;
+      }
+    }
+
+    $self->{info} = \%info;
+  }
+
+  return $self->{info};
+}
+
 1;

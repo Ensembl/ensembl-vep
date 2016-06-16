@@ -39,7 +39,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 69 unless $can_use_db;
+  skip 'No local database configured', 75 unless $can_use_db;
 
   my $multi;
 
@@ -86,6 +86,18 @@ SKIP: {
     $as->stats->{stats}->{chr_lengths},
     {21 => 46709983},
     'get_valid_chromosomes - stored chr lengths'
+  );
+
+  is_deeply(
+    $as->info,
+    {
+      'genebuild' => '2014-07',
+      'gencode' => 'GENCODE 24',
+      'assembly' => 'GRCh38.p5',
+      'polyphen' => '2.2.2',
+      'sift' => 'sift5.2.2',
+    },
+    'info'
   );
 
   ok($as->check_sift_polyphen, 'check_sift_polyphen - not specified');
