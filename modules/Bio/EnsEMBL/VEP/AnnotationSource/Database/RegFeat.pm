@@ -70,10 +70,14 @@ sub get_available_cell_types {
   my $self = shift;
 
   if(!exists($self->{available_cell_types})) {
-    my $aa = $self->get_adaptor('funcgen', 'Analysis');
-    my $analysis = $aa->fetch_by_logic_name('Regulatory_Build');
-    my $fsa = $self->get_adaptor('funcgen', 'FeatureSet');
-    $self->{available_cell_types} = [map {$_->cell_type->name} @{$fsa->fetch_all_by_Analysis($analysis)}];
+    my $regulatory_build_adaptor = $self->get_adaptor('funcgen', 'RegulatoryBuild');
+    my $regulatory_build = $regulatory_build_adaptor->fetch_current_regulatory_build;
+    $self->{available_cell_types} = [
+      sort
+      map {s/ /\_/g; $_}
+      map {$_->display_label}
+      @{$regulatory_build->get_all_Epigenomes}
+    ];
   }
 
   return $self->{available_cell_types};
@@ -124,19 +128,18 @@ sub get_features_by_regions_uncached {
 
           my %cl;
 
-          # get cell type by fetching all from stable ID
+          # get cell type using regulatory_activity objects
           if($type eq 'RegulatoryFeature') {
-            %cl = map {
-              $_->feature_set->cell_type->name => $_->feature_type->name
-            } @{$rf->adaptor->fetch_all_by_stable_ID($rf->stable_id)};
+            $DB::single = 1;
+            %cl = map { $_->epigenome->display_label => $_->activity } @{$rf->regulatory_activity};
           }
 
           # get cell type by fetching regfeats that contain this MotifFeature
-          elsif($type eq 'MotifFeature') {
-            %cl = map {
-              $_->feature_set->cell_type->name => $_->feature_type->name
-            } @{$self->get_adaptor('funcgen', 'RegulatoryFeature')->fetch_all_by_attribute_feature($rf)};
-          }
+          # elsif($type eq 'MotifFeature') {
+          #   %cl = map {
+          #     $_->feature_set->cell_type->name => $_->feature_type->name
+          #   } @{$self->get_adaptor('funcgen', 'RegulatoryFeature')->fetch_all_by_attribute_feature($rf)};
+          # }
 
           $rf->{cell_types} = \%cl;
         }

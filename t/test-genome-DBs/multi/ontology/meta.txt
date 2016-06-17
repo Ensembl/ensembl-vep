@@ -20,3 +20,5 @@
 23	patch	patch_81_82_a.sql|schema_version	\N
 24	patch	patch_82_83_a.sql|schema_version	\N
 25	patch	patch_83_84_a.sql|schema_version	\N
+26	patch	patch_84_85_b.sql|confident_relationship	\N
+27	patch	patch_84_85_c.sql| add synonym dbxref	\N
