@@ -49,7 +49,7 @@ use Bio::EnsEMBL::Variation::Utils::Constants;
 use Bio::EnsEMBL::VEP::Constants;
 use Bio::EnsEMBL::VEP::Utils qw(get_time);
 
-# use CGI qw/:standard/;
+use CGI;
 
 sub new {
   my $caller = shift;
@@ -374,12 +374,23 @@ sub generate_run_stats {
   my $stats = shift;
 
   my $info = $self->{info};
+
+  # process command line opts
+  my %raw = %{$self->config->_raw_config};
+  my @opts;
+  foreach my $key(sort keys %raw) {
+    my $val = $raw{$key};
+    next if ref($val) eq 'ARRAY' && !scalar @$val;
+    next if $val eq '0';
+    push @opts, '--'.$key;
+    push @opts, $val unless $val eq '1';
+  }
     
   return [
-    [sprintf('VEP version (API) %i (%i)', $info->{vep_version}, $info->{api_version})],
+    ['VEP version (API)', sprintf(' %i (%i)', $info->{vep_version}, $info->{api_version})],
     ['Cache/Database', ($info->{cache_dir} ? $info->{cache_dir} : sprintf('%s on %s', $info->{db_name}, $info->{db_host}))],
     ['Species', $self->species],
-    ['Command line options', '<pre>'.join(" ", %{$self->config->_raw_config}).'</pre>'],
+    ['Command line options', '<pre>'.join(" ", @opts).'</pre>'],
     ['Start time', $self->start_time],
     ['End time', $self->end_time],
     ['Run time', $self->run_time." seconds"],
@@ -405,7 +416,7 @@ sub generate_general_stats {
     [
       'Novel / existing variants',
       defined($stats->{existing}) ?
-      sprintf("%s (%.1f\%) / %s (%.1f\%)",
+      sprintf('%s (%.1f) / %s (%.1f)',
         $stats->{var_count} - $stats->{existing},
         100 * (($stats->{var_count} - $stats->{existing}) / $stats->{var_count}),
         $stats->{existing},
@@ -466,6 +477,265 @@ sub dump_text {
 sub dump_html {
   my $self = shift;
   my $fh = shift;
+
+  my $finished_stats = $self->finished_stats;
+
+  my $cgi = CGI->new();
+
+  print $fh $self->stats_html_head($finished_stats->{charts});
+      
+  # create menu
+  print $fh $cgi->div(
+    {class => 'sidemenu'},
+    $cgi->div(
+      {class => 'sidemenu_head'},
+      "Links"
+    ),
+    $cgi->div(
+      {class => 'sidemenu_body'},
+      $cgi->ul(
+        $cgi->li([
+          $cgi->a({href => '#masthead'}, "Top of page"),
+          $cgi->a({href => '#run_stats'}, "VEP run statistics"),
+          $cgi->a({href => '#gen_stats'}, "General statistics"),
+          map {
+            $cgi->a({href => '#'.$_->{id}}, $_->{title})
+          } grep { !$_->{no_link} } @{$finished_stats->{charts}},
+        ])
+      ),
+    )
+  );
+  
+  print $fh "<div class='main_content'>";
+  
+  print $fh $cgi->h3({id => 'run_stats'}, "VEP run statistics");
+
+  print $fh $cgi->table({class => 'stats_table'}, $cgi->Tr([map {$cgi->td($_)} @{$finished_stats->{run_stats}}]));
+  
+  # vars in/out stats
+  print $fh $cgi->h3({id => 'gen_stats'}, "General statistics");
+  print $fh $cgi->table({class => 'stats_table'}, $cgi->Tr([map {$cgi->td($_)} @{$finished_stats->{general_stats}}]));
+  
+  foreach my $chart(@{$finished_stats->{charts}}) {
+    my $height = $chart->{height} || ($chart->{type} eq 'pie' ? '400' : '200');
+    
+    print $fh $cgi->hr();
+    print $fh $cgi->h3({id => $chart->{id}}, $chart->{title});
+    print $fh $cgi->div({id => $chart->{id}."_".$chart->{type}, style => 'width: 800px; height: '.$height.'px'}, '&nbsp;');
+    print $fh $cgi->div({id => $chart->{id}."_table", style => 'width: 800px; height: 200px'}, '&nbsp;') unless $chart->{no_table};
+  }
+  
+  print $fh '</div>';
+  print $fh "\n</div></body>\n</html>\n";
+}
+
+sub stats_html_head {
+  my $self = shift;
+  my $charts = shift;
+  
+  my ($js);
+  foreach my $chart(@$charts) {
+    my @keys = @{$self->sort_keys($chart->{data}, $chart->{sort})};
+    
+    my $type = ucfirst($chart->{type});
+    
+    # add colour
+    if(defined($chart->{colours})) {
+      my $co = 'slices: ['.join(", ", map { $chart->{colours}->{$_} ? '{color: "'.$chart->{colours}->{$_}.'"}' : '{}' } @keys).']';
+      
+      if(defined($chart->{options})) {
+        $chart->{options} =~ s/}$/, $co}/;
+      }
+      else {
+        $chart->{options} = "{$co}";
+      }
+    }
+    
+    # code to draw chart
+    $js .= sprintf(
+      "var %s = draw$type('%s', '%s', google.visualization.arrayToDataTable([['%s','%s'],%s]), %s);\n",
+      $chart->{id}.'_'.$chart->{type},
+      $chart->{id}.'_'.$chart->{type},
+      $chart->{title},
+      $chart->{header}->[0], $chart->{header}->[1],
+      join(",", map {"['".$_."',".$chart->{data}->{$_}."]"} @keys),
+      $chart->{options} || 'null',
+    );
+    
+    unless($chart->{no_table}) {
+      
+      # code to draw table
+      $js .= sprintf(
+        "var %s = drawTable('%s', '%s', google.visualization.arrayToDataTable([['%s','%s'],%s]));\n",
+        $chart->{id}.'_table',
+        $chart->{id}.'_table',
+        $chart->{title},
+        $chart->{header}->[0], $chart->{header}->[1],
+        join(",", map {"['".$_."',".$chart->{data}->{$_}."]"} @keys)
+      );
+      
+      # interaction between table/chart
+      $js .= sprintf(
+        qq{
+          google.visualization.events.addListener(%s, 'select', function() {
+            %s.setSelection(%s.getSelection());
+          });
+          google.visualization.events.addListener(%s, 'select', function() {
+            %s.setSelection(%s.getSelection());
+          });
+        },
+        $chart->{id}.'_'.$chart->{type},
+        $chart->{id}.'_table',
+        $chart->{id}.'_'.$chart->{type},
+        $chart->{id}.'_table',
+        $chart->{id}.'_'.$chart->{type},
+        $chart->{id}.'_table',
+      );
+    }
+  }
+  
+  my $html =<<SHTML;
+<html>
+<head>
+  <title>VEP summary</title>
+  <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+  <script type="text/javascript">
+    google.load('visualization', '1', {packages: ['corechart','table']});
+  </script>
+  <script type="text/javascript">
+    
+    function init() {
+      // charts
+      $js
+    }
+    
+    function drawPie(id, title, data, options) {    
+      var pie = new google.visualization.PieChart(document.getElementById(id));
+      pie.draw(data, options);
+      return pie;
+    }
+    function drawBar(id, title, data, options) {
+      var bar = new google.visualization.ColumnChart(document.getElementById(id));
+      bar.draw(data, options);
+      return bar;
+    }
+    function drawTable(id, title, data) {
+      var table = new google.visualization.Table(document.getElementById(id));
+      table.draw(data, null);
+      return table;
+    }
+    function drawLine(id, title, data, options) {
+      var line = new google.visualization.LineChart(document.getElementById(id));
+      line.draw(data, options);
+      return line;
+    }
+    function drawArea(id, title, data, options) {
+      var area = new google.visualization.AreaChart(document.getElementById(id));
+      area.draw(data, options);
+      return area;
+    }
+    google.setOnLoadCallback(init);
+  </script>
+  
+  
+  <style type="text/css">
+    body {
+      font-family: arial, sans-serif;
+      margin: 0px;
+      padding: 0px;
+    }
+    
+    a {color: #36b;}
+    a.visited {color: #006;}
+    
+    .stats_table {
+      margin: 5px;
+    }
+    
+    td {
+      padding: 5px;
+    }
+
+    th.gradient {
+      height: auto;
+    }
+
+    .stats_table tr:nth-child(odd) {
+      background-color: #f0f0f0;
+    }
+    
+    h3 {
+      color: #666;
+    }
+    
+    .masthead {
+      background-color: white;
+      color: rgb(204, 221, 255);
+      height: 80px;
+      width: 100%;
+      padding: 0px;
+    }
+    
+    .main {
+      padding: 10px;
+    }
+    
+    .gradient {
+      background: #333366; /* Old browsers */
+      background: -moz-linear-gradient(left,  #333366 0%, #ffffff 100%); /* FF3.6+ */
+      background: -webkit-gradient(linear, left top, right top, color-stop(0%,#333366), color-stop(100%,#ffffff)); /* Chrome,Safari4+ */
+      background: -webkit-linear-gradient(left,  #333366 0%,#ffffff 100%); /* Chrome10+,Safari5.1+ */
+      background: -o-linear-gradient(left,  #333366 0%,#ffffff 100%); /* Opera 11.10+ */
+      background: -ms-linear-gradient(left,  #333366 0%,#ffffff 100%); /* IE10+ */
+      background: linear-gradient(to right,  #333366 0%,#ffffff 100%); /* W3C */
+      filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#333366', endColorstr='#ffffff',GradientType=1 ); /* IE6-9 */
+      
+      padding: 0px;
+      height: 80px;
+      width: 700px;
+    }
+    
+    .main_content {
+      margin-left: 300px;
+    }
+    
+    .sidemenu {
+      width: 260px;
+      position: fixed;
+      border-style: solid;
+      border-width: 2px;
+      border-color: rgb(51, 51, 102);
+    }
+    
+    .sidemenu_head {
+      width: 250px;
+      background-color: rgb(51, 51, 102);
+      color: rgb(204, 221, 255);
+      padding: 5px;
+    }
+    
+    .sidemenu_body {
+      width: 250px;
+      padding: 5px;
+    }
+  </style>
+</head>
+<body>
+<div id="masthead" class="masthead">
+  <div style="float: left; display: inline; padding: 10px; height: 80px;">
+    <a href="http://www.ensembl.org/"><img src="http://static.ensembl.org/i/e-ensembl.png"></a>
+  </div>
+  
+  <div style="float: right; display: inline; height: 80px; background: white; padding: 10px;">
+    <a href="http://www.ensembl.org/info/docs/variation/vep/vep_script.html"><img src="http://www.ensembl.org/img/vep_logo.png"></a>
+  </div>
+  <div class="gradient">
+  </div>
+</div>
+<div class="main">
+SHTML
+
+    return $html;
 }
 
 1;
