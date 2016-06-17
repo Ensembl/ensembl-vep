@@ -192,6 +192,11 @@ sub log_sift_polyphen {
   $self->{stats}->{counters}->{$tool}->{$pred}++;
 }
 
+sub increment_filtered_variants {
+  my ($self, $count) = @_;
+  $self->{stats}->{counters}->{filtered_variants} += $count;
+}
+
 sub finished_stats {
   my $self = shift;
 
@@ -395,7 +400,7 @@ sub generate_general_stats {
   return [
     ['Lines of input read', $stats->{lines_read}],
     ['Variants processed', $stats->{var_count}],
-    # ['Variants remaining after filtering', $stats->{filter_count}],
+    ['Variants filtered out', $stats->{filtered_variants} || 0],
     # ['Lines of output written', $stats->{out_count}],
     [
       'Novel / existing variants',

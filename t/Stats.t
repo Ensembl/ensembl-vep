@@ -63,6 +63,16 @@ is($s->end_time, get_time(), 'end_time');
 $s->log_lines_read(10);
 is($s->{stats}->{lines_read}, 10, 'log_lines_read');
 
+$s->increment_filtered_variants(5);
+is_deeply(
+  $s->{stats}->{counters},
+  {
+    filtered_variants => 5
+  },
+  'increment_filtered_variants'
+);
+
+
 
 # we need full setup now
 my $runner = get_annotated_buffer_runner({input_file => $test_cfg->{test_vcf}});
@@ -255,6 +265,10 @@ is_deeply(
     [
       'Variants processed',
       1
+    ],
+    [
+      'Variants filtered out',
+      0,
     ],
     [
       'Novel / existing variants',

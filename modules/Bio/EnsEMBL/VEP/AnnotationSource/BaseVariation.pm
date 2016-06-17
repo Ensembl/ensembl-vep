@@ -209,6 +209,9 @@ sub frequency_check_buffer {
     $buffer->reset_buffer();
 
     $buffer->buffer(\@passed);
+
+    # update stats
+    $self->stats->increment_filtered_variants($filtered_count);
   }
 }
 
