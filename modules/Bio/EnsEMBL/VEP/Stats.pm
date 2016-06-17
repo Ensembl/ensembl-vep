@@ -472,6 +472,8 @@ sub dump_text {
     print $fh "\n[".$chart->{title}."]\n";
     print $fh join("\t", ($_, $chart->{data}->{$_}))."\n" for @{$self->sort_keys($chart->{data}, $chart->{sort})};
   }
+
+  return 1;
 }
 
 sub dump_html {
@@ -527,6 +529,8 @@ sub dump_html {
   
   print $fh '</div>';
   print $fh "\n</div></body>\n</html>\n";
+
+  return 1;
 }
 
 sub stats_html_head {
@@ -723,11 +727,11 @@ sub stats_html_head {
 <body>
 <div id="masthead" class="masthead">
   <div style="float: left; display: inline; padding: 10px; height: 80px;">
-    <a href="http://www.ensembl.org/"><img src="http://static.ensembl.org/i/e-ensembl.png"></a>
+    <a href="http://www.ensembl.org/"><img src="http://static.ensembl.org/i/e-ensembl.png" width="185" height="45" alt="Ensembl"></a>
   </div>
   
   <div style="float: right; display: inline; height: 80px; background: white; padding: 10px;">
-    <a href="http://www.ensembl.org/info/docs/variation/vep/vep_script.html"><img src="http://www.ensembl.org/img/vep_logo.png"></a>
+    <a href="http://www.ensembl.org/info/docs/variation/vep/vep_script.html"><img src="http://www.ensembl.org/img/vep_logo.png" width="111" height="50" alt="VEP"></a>
   </div>
   <div class="gradient">
   </div>
@@ -735,7 +739,7 @@ sub stats_html_head {
 <div class="main">
 SHTML
 
-    return $html;
+  return $html;
 }
 
 1;

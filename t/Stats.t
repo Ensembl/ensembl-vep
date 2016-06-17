@@ -376,12 +376,11 @@ is_deeply(
 );
 
 
-my @tmp = map {$_->[0]} @{$finished->{run_stats}};
-
-ok((shift @tmp) =~ /VEP version \(API\) \d+ \(\d+\)/, 'finished_stats - run_stats - version');
+ok($finished->{run_stats}->[0]->[1] =~ /\d+ \(\d+\)/, 'finished_stats - run_stats - version');
 is_deeply(
-  \@tmp,
+  [map {$_->[0]} @{$finished->{run_stats}}],
   [
+    'VEP version (API)',
     'Cache/Database',
     'Species',
     'Command line options',
@@ -393,6 +392,32 @@ is_deeply(
   ],
   'finished_stats - run_stats - remaining headers'
 );
+
+
+my $tmp;
+open STATS, '>', \$tmp;
+ok($s->dump_text(*STATS), 'dump_text');
+ok($tmp =~ /^\[VEP run statistics\]/, 'dump_text - content');
+close STATS;
+
+open STATS, '>', \$tmp;
+ok($s->dump_html(*STATS), 'dump_html');
+ok($tmp =~ /^\<html\>/, 'dump_html - content');
+close STATS;
+
+my $can_use_lint = eval { require HTML::Lint; 1 };
+
+if($can_use_lint) {
+  my $lint = HTML::Lint->new();
+
+  open STATS, '>', \$tmp;
+  $s->dump_html(*STATS);
+
+  $lint->parse($tmp);
+  ok(!$lint->errors, 'dump_html - HTML::Lint check no errors') or diag(map {$_->as_string."\n"} $lint->errors);
+
+  close STATS;
+}
 
 
 sub get_annotated_buffer_runner {
