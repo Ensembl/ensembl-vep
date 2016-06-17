@@ -731,7 +731,7 @@ sub stats_html_head {
   </div>
   
   <div style="float: right; display: inline; height: 80px; background: white; padding: 10px;">
-    <a href="http://www.ensembl.org/info/docs/variation/vep/vep_script.html"><img src="http://www.ensembl.org/img/vep_logo.png" width="111" height="50" alt="VEP"></a>
+    <a href="http://www.ensembl.org/vep"><img src="http://www.ensembl.org/img/vep_logo.png" width="111" height="50" alt="VEP"></a>
   </div>
   <div class="gradient">
   </div>
