@@ -177,6 +177,27 @@ is_deeply(
 $of->{maf_esp} = 0;
 
 
+# frequency data from --check_frequency
+$ib->buffer->[0]->{_freq_check_freqs} = {
+  '1KG_ALL' => {
+    A => 0.1
+  }
+};
+is_deeply(
+  $of->add_colocated_variant_info($ib->buffer->[0], {}),
+  {
+    'Existing_variation' => [
+      'rs148180403',
+    ],
+    'FREQS' => [
+      '1KG_ALL:A:0.1',
+    ],
+  },
+  'add_colocated_variant_info - _freq_check_freqs',
+);
+delete($ib->buffer->[0]->{_freq_check_freqs});
+
+
 
 ## pubmed
 #########

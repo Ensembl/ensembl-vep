@@ -58,8 +58,11 @@ sub get_all {
   my $self = shift;
 
   return [
-    @{$self->get_all_from_cache},
-    @{$self->get_all_from_database},
+    sort {($b->{can_filter_vfs} || 0) <=> ($a->{can_filter_vfs} || 0)}
+    (
+      @{$self->get_all_from_cache},
+      @{$self->get_all_from_database},
+    )
   ];
 }
 

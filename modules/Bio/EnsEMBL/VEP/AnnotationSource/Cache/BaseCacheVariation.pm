@@ -48,6 +48,7 @@ package Bio::EnsEMBL::VEP::AnnotationSource::Cache::BaseCacheVariation;
 use Scalar::Util qw(weaken);
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
+use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
 
 use base qw(
   Bio::EnsEMBL::VEP::AnnotationSource::BaseVariation
@@ -61,7 +62,10 @@ sub new {
   my $self = $class->SUPER::new(@_);
 
   # add shortcuts to these params
-  $self->add_shortcuts([qw(old_maf check_alleles failed)]);
+  $self->add_shortcuts([qw(old_maf)]);
+
+  # checks on frequency filters
+  $self->check_frequency_filter if $self->{check_frequency};
 
   return $self;
 }
@@ -98,6 +102,71 @@ sub parse_variation {
   }
 
   return \%v;
+}
+
+sub get_valid_populations {
+  return $_[0]->get_cache_columns;
+}
+
+sub get_frequency_data {
+  my $self = shift;
+  my $vf = shift;
+
+  my $freq_pop_full = uc($self->{freq_pop});
+  $freq_pop_full =~ s/EXAC/ExAC/;
+  my ($freq_group, $freq_pop) = split('_', $freq_pop_full);
+
+  my $vf_strand = $vf->{strand} || 1;
+
+  my %freq_data;
+
+  foreach my $ex(@{$vf->{existing}}) {
+    my $ex_strand = $ex->{strand} || 1;
+
+    my %ex_alleles;
+    foreach my $a(split('/', $ex->{allele_string})) {
+      reverse_comp(\$a) unless $vf_strand == $ex_strand;
+      $ex_alleles{$a} = 1;
+    }
+
+    my $total_freq = 0;
+
+    # special case 1KG_ALL
+    if($freq_pop_full eq '1KG_ALL' && defined($ex->{minor_allele_freq}) && defined($ex->{minor_allele})) {
+      my $a = $ex->{minor_allele};
+      my $f = $ex->{minor_allele_freq};
+      
+      reverse_comp(\$a) unless $vf_strand == $ex_strand;
+      $freq_data{$a} = $f;
+
+      # track total and delete observed alleles
+      $total_freq += $f;
+      delete($ex_alleles{$a});
+    }
+    # otherwise check match on first full pop name (e.g. ExAC_AMR, then last part e.g. AMR)
+    elsif(my $tmp = ($ex->{$freq_pop_full} || $ex->{$freq_pop || ''})) {
+      foreach my $a_f(split(',', $tmp)) {
+        my ($a, $f) = split(':', $a_f);
+
+        reverse_comp(\$a) unless $vf_strand == $ex_strand;
+        $freq_data{$a} = $f;
+        
+        # track total and delete observed alleles
+        $total_freq += $f;
+        delete($ex_alleles{$a});
+      }
+    }
+
+    # "fill in" by subtracting
+    # but we can only do this if we have one remaining allele
+    # (typically the REF in a biallelic SNP)
+    if(scalar keys %ex_alleles == 1) {
+      my $a = (keys %ex_alleles)[0];
+      $freq_data{$a} = 1 - $total_freq;
+    }
+  }
+
+  $self->_add_check_freq_data_to_vf($vf, \%freq_data) if %freq_data;
 }
 
 sub delimiter {

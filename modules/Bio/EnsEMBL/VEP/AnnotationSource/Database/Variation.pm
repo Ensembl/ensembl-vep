@@ -67,6 +67,24 @@ our @VAR_CACHE_COLS = qw(
   phenotype_or_disease
 );
 
+sub new {
+  my $caller = shift;
+  my $class = ref($caller) || $caller;
+  
+  my $self = $class->SUPER::new(@_);
+
+  # add shortcuts to these params
+  $self->add_shortcuts([qw(check_alleles failed)]);# check_frequency freq_pop freq_freq freq_gt_lt freq_filter)]);
+
+  # add this flag to tell VEP runner to use this first
+  # $self->{can_filter_vfs} = 1;
+
+  # frequency filtering not supported, probably won't be unless someone asks for it
+  throw("ERROR: --check_frequency is not supported using database variation annotation source") if $self->param('check_frequency');
+
+  return $self;
+}
+
 sub get_features_by_regions_uncached {
   my $self = shift;
   my $regions = shift;

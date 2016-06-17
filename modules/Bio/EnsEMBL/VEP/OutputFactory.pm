@@ -567,9 +567,6 @@ sub VariationFeature_to_output_hash {
     $hash->{SV} = [sort keys %{$vf->{overlapping_svs}}];
   }
 
-  # frequencies?
-  # $hash->{FREQS} = join ",", @{$vf->{freqs}} if defined($vf->{freqs});
-
   # variant class
   $hash->{VARIANT_CLASS} = $vf->class_SO_term() if $self->{variant_class};
 
@@ -650,6 +647,24 @@ sub add_colocated_variant_info {
 
   # copy to hash
   $hash->{$_} = $tmp->{$_} for keys %$tmp;
+
+  # frequencies used to filter will appear here
+  if($vf->{_freq_check_freqs}) {
+    my @freqs;
+
+    foreach my $p(keys %{$vf->{_freq_check_freqs}}) {
+      foreach my $a(keys %{$vf->{_freq_check_freqs}->{$p}}) {
+        push @freqs, sprintf(
+          '%s:%s:%g',
+          $p,
+          $a,
+          $vf->{_freq_check_freqs}->{$p}->{$a}
+        )
+      }
+    }
+
+    $hash->{FREQS} = \@freqs;
+  }
 
   return $hash;
 }

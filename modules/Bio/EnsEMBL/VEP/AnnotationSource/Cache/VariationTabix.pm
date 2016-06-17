@@ -77,6 +77,8 @@ sub annotate_InputBuffer {
   else {
     $self->_annotate_cl(\%by_chr);
   }
+
+  $self->frequency_check_buffer($buffer) if $self->{check_frequency};
 }
 
 # uses command line tabix util

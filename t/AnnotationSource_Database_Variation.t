@@ -38,7 +38,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 23 unless $can_use_db;
+  skip 'No local database configured', 25 unless $can_use_db;
 
   my $multi;
 
@@ -60,8 +60,6 @@ SKIP: {
     database => 1,
     offline => 0,
     species => 'homo_vepiens',
-    everything => 1,
-    xref_refseq => 1,
   });
   ok($cfg, 'get new config object');
   
@@ -73,6 +71,21 @@ SKIP: {
 
   is(ref($as), 'Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation', 'check class');
 
+  throws_ok {
+    Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation->new({
+      config => Bio::EnsEMBL::VEP::Config->new({
+        %$db_cfg,
+        database => 1,
+        offline => 0,
+        species => 'homo_vepiens',
+        check_frequency => 1,
+      })
+    })
+  } qr/not supported using database/, 'check_frequency not supported';
+
+  $as = Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation->new({
+    config => $cfg
+  });
 
   ## METHOD TESTS
   ###############

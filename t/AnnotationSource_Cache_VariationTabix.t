@@ -209,6 +209,165 @@ is_deeply(
 );
 
 
+## FREQUENCY STUFF
+##################
+
+# new checks
+ok(
+  $c->check_frequency_filter,
+  'check_frequency_filter'
+);
+
+my $bak = $c->{freq_pop};
+$c->{freq_pop} = 'foo';
+throws_ok { $c->check_frequency_filter } qr/Invalid population/, 'check_frequency_filter - fails on missing pop';
+$c->{freq_pop} = $bak;
+
+# get_frequency_data
+$vf = $ib->buffer->[0];
+$c->get_frequency_data($vf);
+
+is_deeply(
+  $vf->{_freq_check_freqs},
+  {
+    '1KG_ALL' => {
+      'T' => '0.0002'
+    },
+  },
+  'get_frequency_data - _freq_check_freqs'
+);
+
+is_deeply(
+  $vf->{_freq_check_pass},
+  {
+    'T' => 0
+  },
+  'get_frequency_data - _freq_check_pass'
+);
+
+is($vf->{_freq_check_all_failed}, 1, 'get_frequency_data - _freq_check_all_failed');
+
+my %orig = %$c;
+
+# test switching gt_lt
+$c->{freq_gt_lt} = 'lt';
+$c->get_frequency_data($vf);
+
+is_deeply(
+  $vf->{_freq_check_pass},
+  {
+    'T' => 1
+  },
+  'get_frequency_data - gt_lt'
+);
+is($vf->{_freq_check_all_passed}, 1, 'get_frequency_data - gt_lt - _freq_check_all_passed');
+
+$c->{freq_gt_lt} = $orig{freq_gt_lt};
+
+# test adjusting freq
+$c->{freq_freq} = 0.0001;
+$c->get_frequency_data($vf);
+
+is_deeply(
+  $vf->{_freq_check_pass},
+  {
+    'T' => 1
+  },
+  'get_frequency_data - freq'
+);
+is($vf->{_freq_check_all_passed}, 1, 'get_frequency_data - freq - _freq_check_all_passed');
+$c->{freq_freq} = $orig{freq_freq};
+
+# test another pop
+$c->{freq_pop} = '1KG_AMR';
+delete($vf->{_freq_check_freqs});
+$c->get_frequency_data($vf);
+
+is_deeply(
+  $vf->{_freq_check_freqs},
+  {
+    '1KG_AMR' => {
+      'T' => '0.0014'
+    },
+  },
+  'get_frequency_data - pop _freq_check_freqs'
+);
+$c->{freq_pop} = $orig{freq_pop};
+
+# test strand switching
+$vf->{strand} = -1;
+$vf->{allele_string} = 'G/A';
+delete($vf->{_freq_check_freqs});
+delete($vf->{_alt_alleles});
+$c->get_frequency_data($vf);
+
+is_deeply(
+  $vf->{_freq_check_freqs},
+  {
+    '1KG_ALL' => {
+      'A' => '0.0002'
+    },
+  },
+  'get_frequency_data - rev strand'
+);
+
+
+## frequency_check_buffer
+
+# exclude (default)
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, valid_chromosomes => [21], file => $test_cfg->{test_vcf}});
+$ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+$ib->next;
+$c->annotate_InputBuffer($ib);
+$c->frequency_check_buffer($ib);
+is(scalar @{$ib->buffer}, 114, 'frequency_check_buffer - exclude count');
+
+# include
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, valid_chromosomes => [21], file => $test_cfg->{test_vcf}});
+$ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+$ib->next;
+$c->annotate_InputBuffer($ib);
+$c->{freq_filter} = 'include';
+$c->frequency_check_buffer($ib);
+is(scalar @{$ib->buffer}, 18, 'frequency_check_buffer - include count');
+$c->{freq_filter} = $orig{freq_filter};
+
+# test removing single allele
+$c->{freq_freq} = 0.0001;
+
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, valid_chromosomes => [21], file => $test_cfg->{test_vcf}});
+$ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+$ib->next;
+
+$vf = $ib->buffer->[0];
+$vf->{allele_string} = 'C/T/G';
+$ib->reset_buffer();
+$ib->buffer([$vf]);
+
+$c->annotate_InputBuffer($ib);
+$c->frequency_check_buffer($ib);
+is($vf->{allele_string}, 'C/G', 'frequency_check_buffer - remove allele 1');
+
+# include
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, valid_chromosomes => [21], file => $test_cfg->{test_vcf}});
+$ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+$ib->next;
+
+$vf = $ib->buffer->[0];
+$vf->{allele_string} = 'C/T/G';
+$ib->buffer([$vf]);
+
+$c->{freq_filter} = 'include';
+$c->annotate_InputBuffer($ib);
+$c->frequency_check_buffer($ib);
+is($vf->{allele_string}, 'C/T', 'frequency_check_buffer - remove allele 2');
+$c->{freq_filter} = $orig{freq_filter};
+
+# reset
+$c->{freq_freq} = $orig{freq_freq};
+
+
+
 SKIP: {
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!

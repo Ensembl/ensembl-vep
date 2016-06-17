@@ -82,6 +82,9 @@ is_deeply($asa->get_all_from_cache(), $exp, 'get_all_from_cache');
 
 is_deeply($asa->get_all(), $exp, 'get_all');
 
+$asa->param('check_existing', 1);
+is_deeply(ref($asa->get_all()->[0]), 'Bio::EnsEMBL::VEP::AnnotationSource::Cache::Variation', 'get_all - var comes first');
+$asa->param('check_existing', 0);
 
 
 
@@ -152,7 +155,9 @@ SKIP: {
     $asa->get_all_from_database()->[1],
     bless( {
       '_config' => $asa->config,
-      'cache_region_size' => 50000
+      'cache_region_size' => 50000,
+      'failed' => 0,
+      'check_alleles' => undef,
     }, 'Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation' ),
     'get_all_from_database - variation'
   );
