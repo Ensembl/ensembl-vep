@@ -73,7 +73,7 @@ sub info {
 
 sub start_time {
   my $self = shift;
-  $self->{stats}->{run_time_start} = time();
+  $self->{stats}->{run_time_start} ||= time();
   return $self->{stats}->{start_time} ||= get_time();
 }
 

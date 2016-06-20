@@ -89,6 +89,7 @@ sub init {
 
   return 1 if $self->{_initialized};
 
+  # log start time
   $self->stats->start_time();
 
   # setup DB connection
