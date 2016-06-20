@@ -1403,6 +1403,28 @@ is_deeply(
 );
 
 
+# test intergenic
+$ib = get_annotated_buffer({
+  input_file => $test_cfg->create_input_file([
+    [qw(21 25832817 . G GC,C . . .)],
+    [qw(21 25832815 . G C . . .)]
+  ]),
+  minimal => 1
+});
+
+is(scalar @{$ib->buffer}, 3, 'minimal - intergenic - expanded count');
+
+$of->rejoin_variants_in_InputBuffer($ib);
+
+is(scalar @{$ib->buffer}, 2, 'minimal - intergenic - rejoined count');
+
+is_deeply(
+  [map {$_->display_consequence} @{$ib->buffer}],
+  ['intergenic_variant', 'intergenic_variant'],
+  'minimal - intergenic - display_consequence check'
+);
+
+
 # test case where minimal resolves two ALTs to the same thing
 # allele_num should keep track of them
 $ib = get_annotated_buffer({
