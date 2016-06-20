@@ -118,6 +118,8 @@ sub get_features_by_regions_uncached {
 
     my @region_features;
 
+    my $rfa = $self->get_adaptor('funcgen', 'RegulatoryFeature');
+
     foreach my $type(qw(RegulatoryFeature MotifFeature)) {
       my $features = $self->get_adaptor('funcgen', $type)->fetch_all_by_Slice($sub_slice);
       next unless defined($features);
@@ -130,16 +132,17 @@ sub get_features_by_regions_uncached {
 
           # get cell type using regulatory_activity objects
           if($type eq 'RegulatoryFeature') {
-            $DB::single = 1;
-            %cl = map { $_->epigenome->display_label => $_->activity } @{$rf->regulatory_activity};
+            %cl = map { $_->epigenome->display_label => $_->activity } grep {!$_->_is_multicell} @{$rf->regulatory_activity};
           }
 
           # get cell type by fetching regfeats that contain this MotifFeature
-          # elsif($type eq 'MotifFeature') {
-          #   %cl = map {
-          #     $_->feature_set->cell_type->name => $_->feature_type->name
-          #   } @{$self->get_adaptor('funcgen', 'RegulatoryFeature')->fetch_all_by_attribute_feature($rf)};
-          # }
+          elsif($type eq 'MotifFeature') {
+            %cl =
+              map { $_->epigenome->display_label => $_->activity }
+              grep {!$_->_is_multicell}
+              map {@{$_->regulatory_activity}}
+              @{$rfa->fetch_all_by_attribute_feature($rf)};
+          }
 
           $rf->{cell_types} = \%cl;
         }
