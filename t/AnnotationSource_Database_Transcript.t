@@ -400,6 +400,17 @@ SKIP: {
     config => $cfg
   });
 
+  is_deeply(
+    $as->info,
+    {
+      'refseq' => '2015-10-26 11:20:17 - GCF_000001405.31_GRCh38.p5_genomic.gff',
+      'genebuild' => '2014-07',
+      'gencode' => 'GENCODE 24',
+      'assembly' => 'GRCh38.p5'
+    },
+    'refseq - info'
+  );
+
   $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}});
   $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
   $ib->next();
