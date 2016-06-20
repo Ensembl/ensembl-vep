@@ -571,7 +571,7 @@ sub get_all_Plugins {
       # for convenience, check if the plugin wants regulatory stuff and turn on the config option if so
       if (grep { $_ =~ /motif|regulatory/i } @{ $instance->feature_types }) {
         $self->status_msg("Fetching regulatory features for plugin: $module");
-        $self->param('regulatory') = 1;
+        $self->param('regulatory', 1);
       }
     }
 
