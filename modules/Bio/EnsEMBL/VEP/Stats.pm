@@ -214,18 +214,20 @@ sub finished_stats {
     }
     
     # tot up chromosome counts
-    foreach my $chr(keys %{$stats->{chr}}) {
-      $stats->{chr_totals}->{$chr} += $stats->{chr}->{$chr}->{$_} for keys %{$stats->{chr}->{$chr}};
-      
-      my $start = 0;
-      my %tmp;
-      
-      while($start <= $stats->{chr_lengths}->{$chr}) {
-        $tmp{$start / 1e6} = $stats->{chr}->{$chr}->{$start} || 0;
-        $start += 1e6;
+    if($stats->{chr_lengths}) {
+      foreach my $chr(keys %{$stats->{chr}}) {
+        $stats->{chr_totals}->{$chr} += $stats->{chr}->{$chr}->{$_} for keys %{$stats->{chr}->{$chr}};
+        
+        my $start = 0;
+        my %tmp;
+        
+        while($start <= $stats->{chr_lengths}->{$chr}) {
+          $tmp{$start / 1e6} = $stats->{chr}->{$chr}->{$start} || 0;
+          $start += 1e6;
+        }
+        
+        $stats->{chr}->{$chr} = \%tmp;
       }
-      
-      $stats->{chr}->{$chr} = \%tmp;
     }
     
     # convert allele changes to Ts/Tv
