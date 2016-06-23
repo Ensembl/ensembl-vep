@@ -132,7 +132,7 @@ sub new {
     delete $hashref->{format};
 
     $format = lc($format);
-    throw("ERROR: Unknown or unsupported format $format\n") unless $FORMAT_MAP{$format};
+    throw("ERROR: Unknown or unsupported output format $format\n") unless $FORMAT_MAP{$format};
 
     my $class = 'Bio::EnsEMBL::VEP::OutputFactory::'.$FORMAT_MAP{$format};
     return $class->new({%$hashref, config => $self->config});
