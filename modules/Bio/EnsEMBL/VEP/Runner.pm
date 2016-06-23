@@ -253,7 +253,7 @@ sub _forked_buffer_to_output {
           my ($parent_plugin) = grep {ref($_) eq $plugin_name} @{$self->get_all_Plugins};
           next unless $parent_plugin;
 
-          merge_hashes($parent_plugin, $data->{plugin_name}->{$plugin_name});
+          merge_hashes($parent_plugin, $data->{plugin_data}->{$plugin_name});
         }
 
         # stats
