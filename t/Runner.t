@@ -252,6 +252,71 @@ is(
   'next_output_line'
 );
 
+# output file
+$runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, output_file => $test_cfg->{user_file}.'.out'});
+is(ref($runner->get_output_file_handle), 'FileHandle', 'get_output_file_handle - ref');
+
+$runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, output_file => $test_cfg->{user_file}.'.out'});
+throws_ok {$runner->get_output_file_handle} qr/Output file .+ already exists/, 'get_output_file_handle - fail on existing';
+
+$runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, output_file => 'stdout'});
+is($runner->get_output_file_handle, '*main::STDOUT', 'get_output_file_handle - stdout');
+
+unlink($test_cfg->{user_file}.'.out');
+
+# stats file
+$runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, output_file => $test_cfg->{user_file}.'.out'});
+is(ref($runner->get_stats_file_handle('txt')), 'FileHandle', 'get_stats_file_handle - txt ref');
+ok(-e $test_cfg->{user_file}.'.out_summary.txt', 'get_stats_file_handle - txt file exists');
+
+throws_ok {$runner->get_stats_file_handle('txt')} qr/Stats file .+ already exists/, 'get_stats_file_handle - fail on existing';
+unlink($test_cfg->{user_file}.'.out_summary.txt');
+
+is(ref($runner->get_stats_file_handle('html')), 'FileHandle', 'get_stats_file_handle - html ref');
+ok(-e $test_cfg->{user_file}.'.out_summary.html', 'get_stats_file_handle - html file exists');
+unlink($test_cfg->{user_file}.'.out_summary.html');
+
+$runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, stats_file => $test_cfg->{user_file}.'.stats'});
+$runner->get_stats_file_handle('txt');
+ok(-e $test_cfg->{user_file}.'.stats.txt', 'get_stats_file_handle - extension handling 1');
+unlink($test_cfg->{user_file}.'.stats.txt');
+
+$runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, stats_file => $test_cfg->{user_file}.'.txt'});
+$runner->get_stats_file_handle('txt');
+ok(-e $test_cfg->{user_file}.'.txt', 'get_stats_file_handle - extension handling 2');
+
+$runner->get_stats_file_handle('html');
+ok(-e $test_cfg->{user_file}.'.html', 'get_stats_file_handle - extension handling 3');
+unlink($test_cfg->{user_file}.'.txt');
+unlink($test_cfg->{user_file}.'.html');
+
+# run method
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  output_file => $test_cfg->{user_file}.'.out',
+});
+
+ok($runner->run, 'run - ok');
+
+open IN, $test_cfg->{user_file}.'.out';
+my @tmp_lines = <IN>;
+is(scalar @tmp_lines, 38, 'run - count lines');
+
+is_deeply(
+  [grep {!/^\#/} @tmp_lines],
+  [
+    "rs142513484\t21:25585733\tT\tENSG00000154719\tENST00000307301\tTranscript\t3_prime_UTR_variant\t1122\t-\t-\t-\t-\t-\tIMPACT=MODIFIER;STRAND=-1\n",
+    "rs142513484\t21:25585733\tT\tENSG00000154719\tENST00000352957\tTranscript\tmissense_variant\t1033\t991\t331\tA/T\tGca/Aca\t-\tIMPACT=MODERATE;STRAND=-1\n",
+    "rs142513484\t21:25585733\tT\tENSG00000260583\tENST00000567517\tTranscript\tupstream_gene_variant\t-\t-\t-\t-\t-\t-\tIMPACT=MODIFIER;DISTANCE=2407;STRAND=-1\n",
+  ],
+  'run - lines content'
+);
+
+ok(-e $test_cfg->{user_file}.'.out_summary.html', 'run - summary HTML created');
+
+unlink($test_cfg->{user_file}.'.out');
+unlink($test_cfg->{user_file}.'.out_summary.html');
+
 
 # plugins
 $runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, plugin => ['TestPlugin'], quiet => 1});

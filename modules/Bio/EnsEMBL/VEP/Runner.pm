@@ -48,6 +48,7 @@ use base qw(Bio::EnsEMBL::VEP::BaseVEP);
 use Storable qw(freeze thaw);
 use IO::Socket;
 use IO::Select;
+use FileHandle;
 
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
@@ -113,21 +114,25 @@ sub init {
 }
 
 # run
-# sub run {
-#   my $self = shift;
+sub run {
+  my $self = shift;
 
-#   $self->init();
+  $self->init();
 
-#   my $input_buffer = $self->input_buffer;
+  my $fh = $self->get_output_file_handle();
 
-#   while(my $vfs = $input_buffer->next()) {
-#     last unless scalar @$vfs;
+  print $fh "$_\n" for @{$self->get_OutputFactory->headers};
 
-#     foreach my $as(@{$self->get_all_AnnotationSources}) {
-#       $as->annotate_InputBuffer($input_buffer);
-#     }
-#   }
-# }
+  while(my $line = $self->next_output_line) {
+    print $fh "$line\n";
+  }
+
+  close $fh;
+
+  $self->dump_stats;
+
+  return 1;
+}
 
 sub next_output_line {
   my $self = shift;
@@ -388,6 +393,11 @@ sub post_setup_checks {
     # $self->status_msg("INFO: Database will be accessed when using --check_frequency with population ".$config->{freq_pop}) if defined($config->{check_frequency}) && $config->{freq_pop} !~ /1kg.*(all|afr|amr|asn|eur)/i;
   }
 
+  # stats_html should be default, but don't mess if user has already selected one or both
+  unless($self->param('stats_html') || $self->param('stats_text')) {
+    $self->param('stats_html', 1);
+  }
+
   return 1;
 }
 
@@ -580,6 +590,87 @@ sub get_all_Plugins {
   }
 
   return $self->{plugins};
+}
+
+sub get_output_file_handle {
+  my $self = shift;
+
+  unless(exists($self->{output_file_handle})) {
+
+    my $output_file_handle = FileHandle->new();
+
+    my $output_file_name = $self->param('output_file');
+      
+    # check if file exists
+    if(-e $output_file_name && !$self->param('force_overwrite')) {
+      throw("ERROR: Output file $output_file_name already exists. Specify a different output file with --output_file or overwrite existing file with --force_overwrite\n");
+    }
+    
+    if(uc($output_file_name) eq 'STDOUT') {
+      $output_file_handle = *STDOUT;
+    }
+    else {
+      $output_file_handle->open(">$output_file_name") or throw("ERROR: Could not write to output file $output_file_name\n");
+    }
+
+    $self->{output_file_handle} = $output_file_handle;
+  }
+
+  return $self->{output_file_handle};
+}
+
+sub get_stats_file_handle {
+  my $self = shift;
+  my $type = shift;
+
+  my $stats_file_root = $self->param('stats_file') || $self->param('output_file').'_summary';
+
+  my $file_name;
+
+  if($stats_file_root =~ m/^(.+?)\.(.+)$/) {
+    my ($root, $ext) = ($1, $2);
+    if(lc($ext) eq $type) {
+      $file_name = $stats_file_root;
+    }
+    elsif(lc($ext) =~ /^(txt|html)$/) {
+      $file_name = $root.'.'.$type;
+    }
+    else {
+      $file_name = $stats_file_root.'.'.$type;
+    }
+  }
+  else {
+    $file_name = $stats_file_root.'.'.$type;
+  }
+      
+  # check if file exists
+  if(-e $file_name && !$self->param('force_overwrite')) {
+    throw("ERROR: Stats file $file_name already exists. Specify a different output file with --stats_file or overwrite existing file with --force_overwrite\n");
+  }
+  
+  my $fh = FileHandle->new();
+  $fh->open(">$file_name") or throw("ERROR: Could not write to stats file $file_name\n");
+
+  return $fh;
+}
+
+sub dump_stats {
+  my $self = shift;
+
+  unless($self->param('no_stats')) {
+
+    if($self->param('stats_text')) {
+      my $fh = $self->get_stats_file_handle('txt');
+      $self->stats->dump_text($fh);
+      close $fh;
+    }
+
+    if($self->param('stats_html')) {
+      my $fh = $self->get_stats_file_handle('html');
+      $self->stats->dump_html($fh);
+      close $fh;
+    }
+  }
 }
 
 sub get_output_header_info {
