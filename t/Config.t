@@ -116,8 +116,6 @@ is($cfg->param('verbose'), undef, 'STDOUT output turns off verbose');
 $cfg = Bio::EnsEMBL::VEP::Config->new({everything => 1, database => 1});
 is($cfg->param($_), undef, 'everything with database turns off '.$_) for qw(maf_1kg maf_esp maf_exac pubmed);
 
-throws_ok { Bio::EnsEMBL::VEP::Config->new({tabix => 1}) } qr/Output must be vcf/, 'output must be vcf to use --tabix';
-
 throws_ok { Bio::EnsEMBL::VEP::Config->new({original => 1}) } qr/provide output filters/, 'must provide --filters with --original';
 
 

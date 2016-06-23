@@ -431,9 +431,6 @@ Cache: http://www.ensembl.org/info/docs/tools/vep/script/index.html#cache
     }
   };
   
-  # output format has to be VCF for tabix
-  throw("ERROR: Output must be vcf (--vcf) to use --tabix\n") if defined($config->{tabix}) && !defined($config->{vcf});
-  
   # check if using filter and original
   throw("ERROR: You must also provide output filters using --filter to use --original\n") if defined($config->{original}) && !defined($config->{filter});
 }
