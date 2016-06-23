@@ -28,6 +28,7 @@ GetOptions(
   'config=s',                # config file name
   'input_file|i=s',          # input file name
   'format=s',                # input file format
+  'output_format=s',         # output file format
   
   # DB options
   'species=s',               # species e.g. human, homo_sapiens
@@ -43,8 +44,8 @@ GetOptions(
   'merged',                  # use merged cache
   'all_refseq',              # report consequences on all transcripts in RefSeq cache, includes CCDS, EST etc
   'gencode_basic',           # limit to using just GenCode basic transcript set
- 
   'is_multispecies=i',       # '1' for a multispecies database (e.g protists_euglenozoa1_collection_core_29_82_1)
+
   # runtime options
   'minimal',                 # convert input alleles to minimal representation
   'most_severe',             # only return most severe consequence
@@ -90,12 +91,12 @@ GetOptions(
   # output options
   'everything|e',            # switch on EVERYTHING :-)
   'output_file|o=s',         # output file name
-  'tabix',                   # bgzip and tabix-index output
   'html',                    # generate an HTML version of output
   'stats_file|sf=s',         # stats file name
   'stats_text',              # write stats as text
-  'warning_file=s',          # file to write warnings to
+  'stats_html',              # write stats as html
   'no_stats',                # don't write stats file
+  'warning_file=s',          # file to write warnings to
   'force_overwrite',         # force overwrite of output file if already exists
   'terms|t=s',               # consequence terms to use e.g. NCBI, SO
   'coding_only',             # only return results for consequences in coding regions
@@ -121,7 +122,7 @@ GetOptions(
   'cell_type=s' => ($config->{cell_type} ||= []),             # filter cell types for regfeats
   'convert=s',               # convert input to another format (doesn't run VEP)
   'no_intergenic',           # don't print out INTERGENIC consequences
-  'gvf',                     # produce gvf output
+  # 'gvf',                     # produce gvf output
   'vcf',                     # produce vcf output
   'solr',                    # produce XML output for Solr
   'json',                    # produce JSON document output
@@ -142,21 +143,16 @@ GetOptions(
   'database',                # must specify this to use DB now
   'cache',                   # use cache
   'cache_version=i',         # specify a different cache version
-  'write_cache',             # enables writing to the cache
   'show_cache_info',         # print cache info and quit
   'dir=s',                   # dir where cache is found (defaults to $HOME/.vep/)
   'dir_cache=s',             # specific directory for cache
   'dir_plugins=s',           # specific directory for plugins
-  'cache_region_size=i',     # size of region in bases for each cache file
   'offline',                 # offline mode uses minimal set of modules installed in same dir, no DB connection
-  'skip_db_check',           # don't compare DB parameters with cached
   'custom=s' => ($config->{custom} ||= []), # specify custom tabixed bgzipped file with annotation
   'tmpdir=s',                # tmp dir used for BigWig retrieval
   'plugin=s' => ($config->{plugin} ||= []), # specify a method in a module in the plugins directory
   'safe',                    # die if plugins don't compile or spit warnings
   'fasta=s',                 # file or dir containing FASTA files with reference sequence
-  'freq_file=s',             # file containing freqs to add to cache build
-  'freq_vcf=s' => ($config->{freq_vcf} ||= []), # VCF file containing freqs
   'sereal',                  # user Sereal instead of Storable for the cache
   
   # debug
@@ -167,25 +163,8 @@ GetOptions(
 
 $config->{database} ||= 0;
 
-my $runner = Bio::EnsEMBL::VEP::Runner->new($config, \@argv_copy);
-$runner->init();
-
-# $| = 1;
-# my $count = 0;
-# my $bs = $runner->param('buffer_size');
-
-print "$_\n" for @{$runner->get_OutputFactory->headers};
-
-while(my $line = $runner->next_output_line) {
-  print "$line\n";
-  # print STDERR "." if ++$count % $bs == 0;
-}
-
-# print STDERR "\n";
-
-open OUT, ">vep_stats.html";
-$runner->stats->dump_html(*OUT);
-close OUT;
+my $runner = Bio::EnsEMBL::VEP::Runner->new($config);
+$runner->run();
 
 
 
