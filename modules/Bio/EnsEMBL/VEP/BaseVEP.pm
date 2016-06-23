@@ -150,13 +150,21 @@ sub registry {
 
       # otherwise manually connect to DB server
       else {
+        my $species;
+
+        unless($self->param('is_multispecies')) {
+          if($self->param('species') =~ /^[a-z]+\_[a-z]+/i) {
+            $species = $self->param('species');
+          }
+        }
+
         $reg->load_registry_from_db(
           -host       => $self->param('host'),
           -user       => $self->param('user'),
           -pass       => $self->param('password'),
           -port       => $self->param('port'),
           -db_version => $self->param('db_version'),
-          -species    => $self->param('species') =~ /^[a-z]+\_[a-z]+/i ? $self->param('species') : undef,
+          -species    => $species,
           -verbose    => $self->param('verbose'),
           -no_cache   => $self->param('no_slice_cache'),
         );
