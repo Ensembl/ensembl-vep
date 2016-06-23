@@ -290,10 +290,20 @@ ok(-e $test_cfg->{user_file}.'.html', 'get_stats_file_handle - extension handlin
 unlink($test_cfg->{user_file}.'.txt');
 unlink($test_cfg->{user_file}.'.html');
 
+$runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, stats_file => $test_cfg->{user_file}.'_stats'});
+$runner->get_stats_file_handle('txt');
+ok(-e $test_cfg->{user_file}.'_stats.txt', 'get_stats_file_handle - extension handling 4');
+unlink($test_cfg->{user_file}.'_stats.txt');
+
+
+
 # run method
 $runner = Bio::EnsEMBL::VEP::Runner->new({
   %$cfg_hash,
   output_file => $test_cfg->{user_file}.'.out',
+  stats_file => $test_cfg->{user_file}.'.txt',
+  stats_html => 1,
+  stats_text => 1,
 });
 
 ok($runner->run, 'run - ok');
@@ -312,10 +322,12 @@ is_deeply(
   'run - lines content'
 );
 
-ok(-e $test_cfg->{user_file}.'.out_summary.html', 'run - summary HTML created');
+ok(-e $test_cfg->{user_file}.'.txt', 'dump_stats - text exists');
+ok(-e $test_cfg->{user_file}.'.html', 'dump_stats - html exists');
 
+unlink($test_cfg->{user_file}.'.txt');
+unlink($test_cfg->{user_file}.'.html');
 unlink($test_cfg->{user_file}.'.out');
-unlink($test_cfg->{user_file}.'.out_summary.html');
 
 
 # plugins
@@ -405,6 +417,13 @@ $runner = Bio::EnsEMBL::VEP::Runner->new({
   safe => 1
 });
 throws_ok {$runner->get_all_Plugins} qr/required method/, 'get_all_Plugins - missing methods safe die';
+
+
+$runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, plugin => ['TestPluginRegFeat'], quiet => 1});
+is($runner->param('regulatory'), undef, 'get_all_Plugins - switch on regulatory 1');
+$runner->get_all_Plugins;
+is($runner->param('regulatory'), 1, 'get_all_Plugins - switch on regulatory 2');
+
 
 
 # restore STDERR
@@ -631,6 +650,24 @@ is_deeply(
 );
 
 
+
+# check plugin cache data
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  offline => 1,
+  input_file => $test_cfg->{test_vcf},
+  input_data => undef,
+  fork => 2,
+  quiet => 1,
+  plugin => ['TestPluginCache'],
+});
+
+while(my $line = $runner->next_output_line) {
+  1;
+}
+
+ok($runner->get_all_Plugins->[0]->{cache}, 'fork - plugin cache exists');
+is(scalar keys %{$runner->get_all_Plugins->[0]->{cache}}, 132, 'fork - plugin cache check');
 
 
 
