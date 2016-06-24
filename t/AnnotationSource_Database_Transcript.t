@@ -39,7 +39,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 76 unless $can_use_db;
+  skip 'No local database configured', 82 unless $can_use_db;
 
   my $multi;
 
@@ -429,6 +429,46 @@ SKIP: {
   $as->{all_refseq} = 0;
 
 
+
+  ## TEST ANOTHER SPECIES
+  #######################
+
+  $multi = Bio::EnsEMBL::Test::MultiTestDB->new('mus_muscuvep');
+
+  $cfg = Bio::EnsEMBL::VEP::Config->new({
+    %$db_cfg,
+    database => 1,
+    offline => 0,
+    species => 'mus_muscuvep',
+    everything => 1,
+    quiet => 1,
+  });
+  ok($cfg, 'get new config object');
+
+  ok($cfg->param('sift'), 'other species - sift on before setup with --everything');
+  ok($cfg->param('polyphen'), 'other species - polyphen on before setup with --everything');
+  
+  # instantiating this should switch off --sift and --polyphen that are passively switched on by --everything
+  $as = Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript->new({
+    config => $cfg
+  });
+
+  ok(!$cfg->param('sift'), 'other species - sift off after setup with --everything');
+  ok(!$cfg->param('polyphen'), 'other species - polyphen off after setup with --everything');
+
+  $cfg = Bio::EnsEMBL::VEP::Config->new({
+    %$db_cfg,
+    database => 1,
+    offline => 0,
+    species => 'mus_muscuvep',
+    sift => 'b',
+    quiet => 1,
+  });
+
+  throws_ok {
+    $as = Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript->new({
+    config => $cfg
+  })} qr/SIFT not available/, 'other species - throws on PolyPhen request';
 
   1;
 }
