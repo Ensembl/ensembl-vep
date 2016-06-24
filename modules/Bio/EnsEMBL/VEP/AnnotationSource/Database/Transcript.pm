@@ -85,37 +85,22 @@ sub new {
 sub check_sift_polyphen {
   my $self = shift;
 
-  my $var_mca = $self->get_adaptor('variation', 'MetaContainer');
+  my $info = $self->info;
 
-  foreach my $tool(qw(SIFT PolyPhen)) {
+  foreach my $tool(grep {$self->{lc($_)}} qw(SIFT PolyPhen)) {
     my $lc_tool = lc($tool);
 
-    my $sth = $var_mca->db->dbc->prepare(qq{
-      SELECT meta_value
-      FROM meta
-      WHERE meta_key = ?
-    });
-    $sth->execute($tool.'_version');
+    unless($info->{$lc_tool}) {
 
-    my $v;
-    $sth->bind_columns(\$v);
-    $sth->fetch();
-    $sth->finish();
+      # dont die if user set "everything" param on a species with no SIFT/PolyPhen
+      if($self->{everything}) {
+        $self->status_msg("INFO: disabling $tool");
+        $self->param($lc_tool, 0);
+        $self->{$lc_tool} = 0;
+      }
 
-    if($self->{$lc_tool}) {
-
-      unless($v) {
-
-        # dont die if user set "everything" param on a species with no SIFT/PolyPhen
-        if($self->{everything}) {
-          $self->status_msg("INFO: disabling $tool");
-          $self->param($lc_tool, 0);
-          $self->{$lc_tool} = 0;
-        }
-
-        else {
-          throw("ERROR: $tool not available\n");
-        }
+      else {
+        throw("ERROR: $tool not available\n");
       }
     }
   }
