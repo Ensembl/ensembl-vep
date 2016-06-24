@@ -137,6 +137,11 @@ SKIP: {
       'all_refseq' => undef,
       'assembly' => undef,
       '_species' => 'homo_vepiens',
+      'info' => {
+        'genebuild' => '2014-07',
+        'gencode' => 'GENCODE 24',
+        'assembly' => 'GRCh38.p5'
+      }
     }, 'Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript' )
   ];
 
