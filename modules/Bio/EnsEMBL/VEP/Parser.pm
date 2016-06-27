@@ -97,6 +97,8 @@ sub new {
   throw("ERROR: No file given\n") unless $hashref->{file};
   $self->file($hashref->{file});
 
+  $self->delimiter($hashref->{delimiter}) if $hashref->{delimiter};
+
   $self->line_number(0);
 
   $self->valid_chromosomes({map {$_ => 1} @{$hashref->{valid_chromosomes} || []}});
@@ -116,7 +118,7 @@ sub new {
     throw("ERROR: Unknown or unsupported format $format\n") unless $FORMAT_MAP{$format};
 
     my $class = 'Bio::EnsEMBL::VEP::Parser::'.$FORMAT_MAP{$format};
-    return $class->new({%$hashref, config => $self->config});
+    return $class->new({%$hashref, config => $self->config, delimiter => $self->delimiter});
   }
 
   return $self;
@@ -193,6 +195,15 @@ sub valid_chromosomes {
   return $self->{valid_chromosomes};
 }
 
+sub delimiter {
+  my $self = shift;
+
+  $self->{delimiter} = shift if @_;
+  $self->{delimiter} ||= "\t";
+
+  return $self->{delimiter};
+}
+
 sub detect_format {
   my $self = shift;
 
@@ -202,6 +213,7 @@ sub detect_format {
   my $file_was_fh = 0;
 
   if(openhandle($file)) {
+    throw("Cannot detect format from STDIN - specify format with --format [format]") if $file =~ /STDIN$/;
     $fh = $file;
     $file_was_fh = 1;
   }
@@ -211,12 +223,23 @@ sub detect_format {
   }
 
   my $format;
+  my $delimiter = "\t";
 
   while(<$fh>) {
     next if /^\#/;
     chomp;
 
-    my @data = split /\s+/, $_;
+    # try to detect delimiter
+    if(!/$delimiter/) {
+      # try space
+      if(/ /) {
+        $delimiter = " ";
+      }
+    }
+
+    $self->delimiter($delimiter);
+
+    my @data = split $delimiter, $_;
     next unless @data;
 
     # HGVS: ENST00000285667.3:c.1047_1048insC

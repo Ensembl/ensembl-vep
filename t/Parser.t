@@ -75,6 +75,9 @@ $Bio::EnsEMBL::VEP::Parser::CAN_USE_PERLIO_GZIP = $orig1;
 $Bio::EnsEMBL::VEP::Parser::CAN_USE_GZIP = $orig2;
 $p->file($test_cfg->{test_vcf});
 
+is($p->delimiter("\t"), "\t", 'delimiter - set');
+is($p->delimiter(), "\t", 'delimiter - get');
+
 is_deeply($p->valid_chromosomes, {}, 'valid_chromosomes empty');
 
 $p = Bio::EnsEMBL::VEP::Parser->new({file => $test_cfg->{test_vcf}, valid_chromosomes => [21]});
@@ -257,7 +260,11 @@ ok($p->file(*IN), 'use string fed to FH as input data');
 is($p->detect_format, 'ensembl', 'detect format of string');
 is(<IN>, '21 25587759 25587759 C/A + test', 'FH position reset');
 
-
+# detect format from STDIN dies
+$tmp = '21 25587759 25587759 C/A + test';
+open STDIN, '<', \$tmp;
+$p->file('STDIN');
+throws_ok {$p->detect_format} qr/Cannot detect format from STDIN/, 'fail detect format from STDIN';
 
 # new with format configured
 $p = Bio::EnsEMBL::VEP::Parser->new({config => $cfg, file => $test_cfg->{test_vcf}, format => 'vcf'});

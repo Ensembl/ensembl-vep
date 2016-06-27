@@ -51,7 +51,13 @@ use Bio::EnsEMBL::IO::Parser::VEP_input;
 
 sub parser {
   my $self = shift;
-  return $self->{parser} ||= Bio::EnsEMBL::IO::Parser::VEP_input->open($self->file);
+
+  if(!exists($self->{parser})) {
+    $self->{parser} = Bio::EnsEMBL::IO::Parser::VEP_input->open($self->file);
+    $self->{parser}->{delimiter} = $self->delimiter;
+  }
+
+  return $self->{parser};
 }
 
 sub create_VariationFeatures {

@@ -90,6 +90,7 @@ is_deeply($runner->get_Parser, bless({
   'valid_chromosomes' => {21 => 1, LRG_485 => 1},
   'minimal' => undef,
   'lrg' => undef,
+  'delimiter' => ' ',
 }, 'Bio::EnsEMBL::VEP::Parser::VEP_input' ), 'get_Parser');
 
 is_deeply($runner->get_InputBuffer, bless({
@@ -104,6 +105,7 @@ is_deeply($runner->get_InputBuffer, bless({
     'valid_chromosomes' => {21 => 1, LRG_485 => 1},
     'minimal' => undef,
     'lrg' => undef,
+    'delimiter' => ' ',
   }, 'Bio::EnsEMBL::VEP::Parser::VEP_input' ),
   'buffer_size' => $runner->param('buffer_size'),
   'minimal' => undef,

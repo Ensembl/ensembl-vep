@@ -63,7 +63,13 @@ sub new {
 
 sub parser {
   my $self = shift;
-  return $self->{parser} ||= Bio::EnsEMBL::IO::Parser::VCF4->open($self->file);
+
+  if(!exists($self->{parser})) {
+    $self->{parser} = Bio::EnsEMBL::IO::Parser::VCF4->open($self->file);
+    $self->{parser}->{delimiter} = $self->delimiter;
+  }
+
+  return $self->{parser};
 }
 
 sub headers {
