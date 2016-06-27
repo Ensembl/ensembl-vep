@@ -126,6 +126,32 @@ is_deeply(
   'log_VariationFeature 2'
 );
 
+$runner->get_InputBuffer->buffer->[1]->{allele_string} .= '/G';
+$s->log_VariationFeature($runner->get_InputBuffer->buffer->[1]);
+is_deeply(
+  $s->{stats}->{counters},
+  {
+    'classes' => {
+      'SNV' => 3
+    },
+    'var_cons' => {
+      'missense_variant' => 3
+    },
+    'chr' => {
+      '21' => {
+        '25000000' => 3
+      }
+    },
+    'allele_changes' => {
+      'T/C' => 2,
+      'T/G' => 1,
+      'C/T' => 1
+    },
+    'var_count' => 3,
+  },
+  'log_VariationFeature 3'
+);
+
 $s = Bio::EnsEMBL::VEP::Stats->new;
 my $vfoa = $runner->get_OutputFactory->get_all_VariationFeatureOverlapAlleles($vf)->[1];
 my $hash = $runner->get_OutputFactory->get_all_output_hashes_by_VariationFeature($vf)->[1];

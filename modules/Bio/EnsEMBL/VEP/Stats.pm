@@ -131,7 +131,12 @@ sub log_VariationFeature {
   my $so_term = $vf->class_SO_term;
   if(defined($so_term)) {
     $stats->{classes}->{$so_term}++;
-    $stats->{allele_changes}->{$vf->allele_string}++ if $so_term eq 'SNV';
+
+    if($so_term eq 'SNV') {
+      my @alleles = split('/', $vf->allele_string);
+      my $ref_allele = shift @alleles;
+      $stats->{allele_changes}->{$ref_allele.'/'.$_}++ for @alleles;
+    }
   }
 }
 
