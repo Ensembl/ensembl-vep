@@ -91,7 +91,7 @@ GetOptions(
   # output options
   'everything|e',            # switch on EVERYTHING :-)
   'output_file|o=s',         # output file name
-  'html',                    # generate an HTML version of output
+  # 'html',                    # generate an HTML version of output
   'stats_file|sf=s',         # stats file name
   'stats_text',              # write stats as text
   'stats_html',              # write stats as html
@@ -120,7 +120,7 @@ GetOptions(
   'variant_class',           # get SO variant type
   'regulatory',              # enable regulatory stuff
   'cell_type=s' => ($config->{cell_type} ||= []),             # filter cell types for regfeats
-  'convert=s',               # convert input to another format (doesn't run VEP)
+  # 'convert=s',               # convert input to another format (doesn't run VEP)
   'no_intergenic',           # don't print out INTERGENIC consequences
   # 'gvf',                     # produce gvf output
   'vcf',                     # produce vcf output
@@ -164,6 +164,14 @@ GetOptions(
 $config->{database} ||= 0;
 
 my $runner = Bio::EnsEMBL::VEP::Runner->new($config);
+
+if($config->{show_cache_info}) {
+  my $info = $runner->get_output_header_info->{version_data};
+  print "$_\t$info->{$_}\n" for keys %$info;
+  exit(0);
+}
+
+
 $runner->run();
 
 
