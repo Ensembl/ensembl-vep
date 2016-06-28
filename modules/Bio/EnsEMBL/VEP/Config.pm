@@ -179,6 +179,14 @@ our @OPTION_SETS = (
       check_existing => 1,
     },
   },
+
+  {
+    flags => [qw(show_cache_info)],
+    set   => {
+      offline => 1,
+      format => 'ensembl',
+    }
+  },
   
   {
     flags => [qw(offline)],
