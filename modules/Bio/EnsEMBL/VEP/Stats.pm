@@ -223,6 +223,11 @@ sub finished_stats {
       foreach my $chr(keys %{$stats->{chr}}) {
         $stats->{chr_totals}->{$chr} += $stats->{chr}->{$chr}->{$_} for keys %{$stats->{chr}->{$chr}};
         
+        unless($stats->{chr_lengths}->{$chr}) {
+          delete $stats->{chr}->{$chr};
+          next;
+        }
+
         my $start = 0;
         my %tmp;
         
