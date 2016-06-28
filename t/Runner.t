@@ -83,6 +83,7 @@ is_deeply($runner->get_valid_chromosomes, [21, 'LRG_485'], 'get_valid_chromosome
 is_deeply($runner->get_Parser, bless({
   '_config' => $runner->config,
   'file' => *Bio::EnsEMBL::VEP::Runner::IN,
+  'file_bak' => *Bio::EnsEMBL::VEP::Runner::IN,
   'line_number' => 0,
   'check_ref' => undef,
   'chr' => undef,
@@ -98,6 +99,7 @@ is_deeply($runner->get_InputBuffer, bless({
   'parser' => bless({
     '_config' => $runner->config,
     'file' => *Bio::EnsEMBL::VEP::Runner::IN,
+    'file_bak' => *Bio::EnsEMBL::VEP::Runner::IN,
     'line_number' => 0,
     'check_ref' => undef,
     'chr' => undef,
