@@ -180,6 +180,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'header_info' => $info,
   'plugins' => [],
   'no_stats' => undef,
+  'allele_number' => undef,
 }, 'Bio::EnsEMBL::VEP::OutputFactory::VEP_output' ), 'get_OutputFactory');
 
 ok($runner->init, 'init');

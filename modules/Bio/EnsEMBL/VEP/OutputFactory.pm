@@ -85,6 +85,7 @@ sub new {
     terms
     no_escape
     pick_order
+    allele_number
 
     most_severe
     summary
