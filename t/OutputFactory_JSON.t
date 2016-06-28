@@ -460,7 +460,8 @@ is_deeply(
       'amino_acids' => 'KKKG/S',
       'cdna_start' => 595,
       'transcript_id' => 'ENST00000354828',
-      'impact' => 'MODERATE'
+      'impact' => 'MODERATE',
+      'allele_num' => 2,
     },
     'T' => {
       'cds_start' => 67,
@@ -478,7 +479,8 @@ is_deeply(
       'amino_acids' => 'P/S',
       'cdna_start' => 594,
       'transcript_id' => 'ENST00000354828',
-      'impact' => 'MODERATE'
+      'impact' => 'MODERATE',
+      'allele_num' => 1,
     }
   },
   'minimal - get_all_lines_by_InputBuffer'
