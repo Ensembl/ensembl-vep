@@ -61,8 +61,8 @@ is($p->detect_format, 'vcf', 'detect_format - VCF');
 
 ok($p->file($test_cfg->{test_gzvcf}) =~ /GLOB/, 'gzipped VCF');
 is($p->detect_format, 'vcf', 'detect_format - gzipped VCF');
-my $orig1 = $Bio::EnsEMBL::VEP::Parser::CAN_USE_PERLIO_GZIP;
-$Bio::EnsEMBL::VEP::Parser::CAN_USE_PERLIO_GZIP = 0;
+my $orig1 = $Bio::EnsEMBL::VEP::Parser::CAN_USE_IO_UNCOMPRESS;
+$Bio::EnsEMBL::VEP::Parser::CAN_USE_IO_UNCOMPRESS = 0;
 
 ok($p->file($test_cfg->{test_gzvcf}) =~ /GLOB/, 'gzipped VCF using gzip');
 is($p->detect_format, 'vcf', 'detect_format - gzipped VCF using gzip');
@@ -71,7 +71,7 @@ my $orig2 = $Bio::EnsEMBL::VEP::Parser::CAN_USE_GZIP;
 $Bio::EnsEMBL::VEP::Parser::CAN_USE_GZIP = 0;
 throws_ok {$p->file($test_cfg->{test_gzvcf})} qr/Cannot read from compressed or binary file/, 'gzipped VCF file throws';
 
-$Bio::EnsEMBL::VEP::Parser::CAN_USE_PERLIO_GZIP = $orig1;
+$Bio::EnsEMBL::VEP::Parser::CAN_USE_IO_UNCOMPRESS = $orig1;
 $Bio::EnsEMBL::VEP::Parser::CAN_USE_GZIP = $orig2;
 $p->file($test_cfg->{test_vcf});
 

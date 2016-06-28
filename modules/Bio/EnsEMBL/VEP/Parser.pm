@@ -56,17 +56,17 @@ use Bio::EnsEMBL::VEP::Parser::HGVS;
 use Scalar::Util qw(openhandle looks_like_number);
 use FileHandle;
 
-our ($CAN_USE_PERLIO_GZIP, $CAN_USE_GZIP);
+our ($CAN_USE_PERLIO_GZIP, $CAN_USE_GZIP, $CAN_USE_IO_UNCOMPRESS);
 
 BEGIN {
 
   # check PerlIO::gzip
-  if (eval { require PerlIO::gzip; 1 }) {
-    $CAN_USE_PERLIO_GZIP = 1;
-  }
-  else {
-    $CAN_USE_PERLIO_GZIP = 0;
-  }
+  # if (eval { require PerlIO::gzip; 1 }) {
+  #   $CAN_USE_PERLIO_GZIP = 1;
+  # }
+  # else {
+  #   $CAN_USE_PERLIO_GZIP = 0;
+  # }
 
   # check gzip
   if (`which gzip` =~ /\/gzip/) {
@@ -74,6 +74,14 @@ BEGIN {
   }
   else {
     $CAN_USE_GZIP = 0;
+  }
+
+  # check IO::Uncompress::Gunzip 
+  if(eval { use IO::Uncompress::Gunzip qw($GunzipError); 1}) {
+    $CAN_USE_IO_UNCOMPRESS = 1;
+  }
+  else {
+    $CAN_USE_IO_UNCOMPRESS = 0;
   }
 }
 
@@ -155,6 +163,8 @@ sub file {
   if(@_) {
     my $file = shift;
 
+    $self->{file_bak} = $file;
+
     if(uc($file) eq 'STDIN') {
       $file = *STDIN;
     }
@@ -163,8 +173,8 @@ sub file {
 
       # check if file is compressed
       if(-B $file) {
-        if($CAN_USE_PERLIO_GZIP) {
-          open my $fh, "<:gzip", $file or throw("ERROR: $!");
+        if($CAN_USE_IO_UNCOMPRESS) {
+          my $fh = IO::Uncompress::Gunzip->new($file, MultiStream => 1) or throw("ERROR: $GunzipError");
           $file = $fh;
         }
         elsif($CAN_USE_GZIP) {
@@ -296,7 +306,14 @@ sub detect_format {
     }
 
     # reset file handle if it was a handle
-    seek $fh, 0, 0 if $file_was_fh;
+    eval {
+      seek $fh, 0, 0 if $file_was_fh;
+    };
+    if($@) {
+      close $fh;
+      $self->file($self->{file_bak});
+    }
+
     last;
   }
 
