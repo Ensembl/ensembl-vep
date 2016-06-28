@@ -132,13 +132,20 @@ sub get_features_by_regions_uncached {
 
           # get cell type using regulatory_activity objects
           if($type eq 'RegulatoryFeature') {
-            %cl = map { $_->epigenome->display_label => $_->activity } grep {!$_->_is_multicell} @{$rf->regulatory_activity};
+            %cl =
+              map {$_->[0] => $_->[1]}
+              map {$_->[0] =~ s/ /\_/g; $_}
+              map {[$_->epigenome->display_label, $_->activity]}
+              grep {!$_->_is_multicell}
+              @{$rf->regulatory_activity};
           }
 
           # get cell type by fetching regfeats that contain this MotifFeature
           elsif($type eq 'MotifFeature') {
             %cl =
-              map { $_->epigenome->display_label => $_->activity }
+              map {$_->[0] => $_->[1]}
+              map {$_->[0] =~ s/ /\_/g; $_}
+              map {[$_->epigenome->display_label, $_->activity]}
               grep {!$_->_is_multicell}
               map {@{$_->regulatory_activity}}
               @{$rfa->fetch_all_by_attribute_feature($rf)};
