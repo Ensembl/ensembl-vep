@@ -49,7 +49,7 @@
 57	\N	patch	patch_77_78_c.sql|Drop the table study_variation
 58	\N	patch	patch_77_78_d.sql|Extend the index type_val_idx in the table attrib
 59	\N	patch	patch_77_78_e.sql|add indexes on father_ and mother_individual_id and population name
-2	\N	schema_version	84
+2	\N	schema_version	85
 60	\N	patch	patch_78_79_a.sql|schema version
 61	\N	patch	patch_78_79_b.sql|change the column attrib_type_id by attrib_id in the variation_attrib table
 62	\N	patch	patch_78_79_c.sql|Store more detailed Sift information
@@ -68,7 +68,14 @@
 75	\N	patch	patch_81_82_c.sql|new entry in the failed_description table
 76	\N	patch	patch_82_83_a.sql|schema version
 77	\N	patch	patch_82_83_b.sql|Add the evidence ExAC in variation and variation_feature
-78  \N  patch patch_83_84_a.sql|schema version
+78	0		
 105	1	sift_version	sift5.2.2
 103	1	polyphen_version	2.2.2
 101	1	HGVS_version	2.121101
+106	\N	patch	patch_84_85_a.sql|schema version
+107	\N	patch	patch_84_85_b.sql|create sample_synonym
+108	\N	patch	patch_84_85_c.sql|drop column moltype from variation_synonym
+109	\N	patch	patch_84_85_d.sql|Making attrib_id auto_increment
+110	\N	patch	patch_84_85_e.sql|drop the table tagged_variation_feature
+111	\N	patch	patch_84_85_f.sql|add phenotype_ontology_accession
+112	\N	patch	patch_84_85_g.sql|allow the column description to store more text in the source table
