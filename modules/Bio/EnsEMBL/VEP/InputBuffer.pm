@@ -269,10 +269,12 @@ sub split_variants {
         my $ref   = $original_ref;
         my $start = $original_vf->{start};
         my $end   = $original_vf->{end};
+        my $this_changed = 0;
 
-        ($ref, $alt, $start, $end, $changed) = @{trim_sequences($ref, $alt, $start, $end)};
+        ($ref, $alt, $start, $end, $this_changed) = @{trim_sequences($ref, $alt, $start, $end)};
         $ref ||= '-';
         $alt ||= '-';
+        $changed += $this_changed;
 
         # create a copy
         my $new_vf;
@@ -280,7 +282,7 @@ sub split_variants {
         bless $new_vf, ref($original_vf);
 
         # give it a new allele string and coords
-        $new_vf->{allele_string} = $ref.'/'.$alt;
+        $new_vf->allele_string($ref.'/'.$alt);
         $new_vf->{start} = $start;
         $new_vf->{end} = $end;
         $new_vf->{alt_allele} = $alt;
