@@ -48,6 +48,7 @@ use base qw(Bio::EnsEMBL::VEP::BaseVEP);
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
+use Bio::EnsEMBL::VEP::Utils qw(trim_sequences);
 
 our $CAN_USE_INTERVAL_TREE;
 
@@ -269,22 +270,7 @@ sub split_variants {
         my $start = $original_vf->{start};
         my $end   = $original_vf->{end};
 
-        # trim from left
-        while($ref && $alt && substr($ref, 0, 1) eq substr($alt, 0, 1)) {
-          $ref = substr($ref, 1);
-          $alt = substr($alt, 1);
-          $start++;
-          $changed = 1;
-        }
-
-        # trim from right
-        while($ref && $alt && substr($ref, -1, 1) eq substr($alt, -1, 1)) {
-          $ref = substr($ref, 0, length($ref) - 1);
-          $alt = substr($alt, 0, length($alt) - 1);
-          $end--;
-          $changed = 1;
-        }
-
+        ($ref, $alt, $start, $end, $changed) = @{trim_sequences($ref, $alt, $start, $end)};
         $ref ||= '-';
         $alt ||= '-';
 
