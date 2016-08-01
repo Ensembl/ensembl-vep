@@ -51,6 +51,7 @@ use vars qw(@ISA @EXPORT_OK);
 
 @EXPORT_OK = qw(
   &format_coords
+  &trim_sequences
   &get_time
   &convert_arrayref
   &numberify
@@ -82,6 +83,33 @@ sub format_coords {
   else  {
     return '-';
   }
+}
+
+sub trim_sequences {
+  my ($ref, $alt, $start, $end) = @_;
+
+  $start ||= 0;
+  $end ||= $start + (length($ref) - 1);
+
+  my $changed = 0;
+
+  # trim from left
+  while($ref && $alt && substr($ref, 0, 1) eq substr($alt, 0, 1)) {
+    $ref = substr($ref, 1);
+    $alt = substr($alt, 1);
+    $start++;
+    $changed = 1;
+  }
+
+  # trim from right
+  while($ref && $alt && substr($ref, -1, 1) eq substr($alt, -1, 1)) {
+    $ref = substr($ref, 0, length($ref) - 1);
+    $alt = substr($alt, 0, length($alt) - 1);
+    $end--;
+    $changed = 1;
+  }
+
+  return [$ref, $alt, $start, $end, $changed];
 }
 
 sub convert_arrayref {

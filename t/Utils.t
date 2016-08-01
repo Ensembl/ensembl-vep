@@ -18,7 +18,7 @@ use warnings;
 use Test::More;
 use Test::Exception;
 
-use Bio::EnsEMBL::VEP::Utils qw(format_coords convert_arrayref numberify merge_hashes get_time);
+use Bio::EnsEMBL::VEP::Utils qw(format_coords convert_arrayref numberify merge_hashes get_time trim_sequences);
 
 ## format_coords
 ################
@@ -30,6 +30,46 @@ is(format_coords(2, 1), '1-2', 'format_coords - diff 2');
 is(format_coords(1), '1-?', 'format_coords - missing 1');
 is(format_coords(undef, 1), '?-1', 'format_coords - missing 2');
 is(format_coords(undef, undef), '-', 'format_coords - missing 3');
+
+
+## trim_sequences
+#################
+
+is_deeply(
+  trim_sequences(qw(A B)),
+  [qw(A B 0 0 0)],
+  'trim_sequences - no change'
+);
+
+is_deeply(
+  trim_sequences(qw(CA CB)),
+  [qw(A B 1 1 1)],
+  'trim_sequences - beginning'
+);
+
+is_deeply(
+  trim_sequences(qw(AC BC)),
+  [qw(A B 0 0 1)],
+  'trim_sequences - end'
+);
+
+is_deeply(
+  trim_sequences(qw(DAC DBC)),
+  [qw(A B 1 1 1)],
+  'trim_sequences - both'
+);
+
+is_deeply(
+  trim_sequences(qw(FOOABAR FOOBBAR)),
+  [qw(A B 3 3 1)],
+  'trim_sequences - both long'
+);
+
+is_deeply(
+  trim_sequences(qw(DAC DBC 10)),
+  [qw(A B 11 11 1)],
+  'trim_sequences - coords'
+);
 
 
 ## convert_arrayref
