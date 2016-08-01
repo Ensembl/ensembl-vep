@@ -186,3 +186,5 @@
 630	\N	patch	patch_84_85_x.sql|Remove unused columns in the experiment table
 631	\N	patch	patch_84_85_y.sql|Table for storing epigenomes used in the regulatory build
 632	\N	patch	patch_84_85_z.sql|Move segmentation entries from result_set table into the new segmentation_file table.
+633	\N	patch	patch_84_85_za.sql|Move entries provided by external sources from the result_set table into the new external_feature_file table.
+634	\N	patch	patch_84_85_zb.sql|Bugfix, the primary key was wrongly named.

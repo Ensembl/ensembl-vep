@@ -229,6 +229,20 @@ CREATE TABLE `external_feature` (
   KEY `seq_region_idx` (`seq_region_id`,`seq_region_start`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 MAX_ROWS=100000000 AVG_ROW_LENGTH=80;
 
+CREATE TABLE `external_feature_file` (
+  `external_feature_file_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) DEFAULT NULL,
+  `analysis_id` smallint(5) unsigned NOT NULL,
+  `epigenome_id` int(10) unsigned DEFAULT NULL,
+  `feature_type_id` int(10) unsigned DEFAULT NULL,
+  `experiment_id` int(10) unsigned DEFAULT NULL,
+  `result_set_id` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`external_feature_file_id`),
+  UNIQUE KEY `name_idx` (`name`),
+  KEY `epigenome_idx` (`epigenome_id`),
+  KEY `analysis_idx` (`analysis_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=48 DEFAULT CHARSET=latin1;
+
 CREATE TABLE `external_synonym` (
   `xref_id` int(10) unsigned NOT NULL,
   `synonym` varchar(100) NOT NULL,
@@ -315,7 +329,7 @@ CREATE TABLE `meta` (
   PRIMARY KEY (`meta_id`),
   UNIQUE KEY `species_key_value_idx` (`species_id`,`meta_key`,`meta_value`),
   KEY `species_value_idx` (`species_id`,`meta_value`)
-) ENGINE=MyISAM AUTO_INCREMENT=633 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=635 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `meta_coord` (
   `table_name` varchar(40) NOT NULL,
@@ -518,12 +532,12 @@ CREATE TABLE `segmentation_feature` (
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 MAX_ROWS=100000000;
 
 CREATE TABLE `segmentation_file` (
-  `segmentation_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `segmentation_file_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `regulatory_build_id` int(10) DEFAULT NULL,
   `name` varchar(100) DEFAULT NULL,
   `analysis_id` smallint(5) unsigned NOT NULL,
   `epigenome_id` int(10) unsigned DEFAULT NULL,
-  PRIMARY KEY (`segmentation_id`),
+  PRIMARY KEY (`segmentation_file_id`),
   UNIQUE KEY `name_idx` (`name`),
   KEY `epigenome_idx` (`epigenome_id`),
   KEY `analysis_idx` (`analysis_id`)
