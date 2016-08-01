@@ -168,10 +168,10 @@ sub frequency_check_buffer {
       }
       else {
         # new alt alleles
-        @{$vf->{_alt_alleles}} = grep {$vf->{_freq_check_pass}->{$_}} @{$vf->{_alt_alleles}};
+        my @alts = grep {$vf->{_freq_check_pass}->{$_}} @{$vf->alt_alleles};
 
         # new allele_string
-        $vf->{allele_string} = join('/', $vf->{_ref_allele}, @{$vf->{_alt_alleles}});
+        $vf->allele_string(join('/', $vf->ref_allele_string, @alts));
       }
     }
 
@@ -190,10 +190,10 @@ sub frequency_check_buffer {
       }
       elsif(!$vf->{_freq_check_all_passed}) {
         # new alt alleles
-        @{$vf->{_alt_alleles}} = grep {!$vf->{_freq_check_pass}->{$_}} @{$vf->{_alt_alleles}};
+        my @alts = grep {!$vf->{_freq_check_pass}->{$_}} @{$vf->alt_alleles};
 
         # new allele_string
-        $vf->{allele_string} = join('/', $vf->{_ref_allele}, @{$vf->{_alt_alleles}});
+        $vf->allele_string(join('/', $vf->ref_allele_string, @alts));
 
         push @passed, $vf;
       }
@@ -224,17 +224,13 @@ sub _add_check_freq_data_to_vf {
   my $freq_gt_lt    = $self->{freq_gt_lt};
   my $freq_pop_full = uc($self->{freq_pop});
 
-  if(!exists($vf->{_alt_alleles})) {
-    my @alleles = split('/', $vf->{allele_string});
-    $vf->{_ref_allele} = shift @alleles;
-    $vf->{_alt_alleles} = \@alleles;
-  }
+  my $alts = $vf->alt_alleles();
 
   my %pass;
   my %used_freqs;
   my $pass_count = 0;
 
-  foreach my $alt(@{$vf->{_alt_alleles}}) {
+  foreach my $alt(@$alts) {
     my $pass = 0;
 
     # set freq to 0 if it hasn't been observed
@@ -253,7 +249,7 @@ sub _add_check_freq_data_to_vf {
   $vf->{_freq_check_pass} = \%pass;
 
   # all passed or failed?
-  $vf->{_freq_check_all_passed} = 1 if $pass_count == scalar @{$vf->{_alt_alleles}};
+  $vf->{_freq_check_all_passed} = 1 if $pass_count == scalar @$alts;
   $vf->{_freq_check_all_failed} = 1 if $pass_count == 0;
 }
 
