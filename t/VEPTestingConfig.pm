@@ -49,6 +49,9 @@ our %DEFAULTS = (
   test_gzvcf     => $Bin.'/testdata/input/test.vcf.gz',
   user_file      => $Bin.'/testdata/user_file'.$$,
 
+  custom_bed     => $Bin.'/testdata/custom/test.bed.gz',
+  custom_vcf     => $Bin.'/testdata/custom/test.vcf.gz',
+
   header_info    => {
     time => 'test',
     vep_version => 1,
