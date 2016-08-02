@@ -94,7 +94,7 @@ is_deeply(
   $ib->buffer->[0]->{_custom_annotations},
   {
     'test.vcf.gz' => [
-      { name => 'test1', 'FOO' => ['BAR'], 'GOO' => ['CAR,STAR'] }
+      { name => 'test1', 'FOO' => 'BAR', 'GOO' => 'CAR,STAR' }
     ]
   },
   'annotate_InputBuffer - fields'
@@ -110,10 +110,10 @@ is_deeply(
   $ib->buffer->[0]->{_custom_annotations},
   {
     'test.vcf.gz' => [
-      { name => 'test1', 'FOO' => ['BAR'], 'GOO' => ['CAR,STAR'] }
+      { name => 'test1', 'FOO' => 'BAR', 'GOO' => 'CAR,STAR' }
     ],
     'foo' => [
-      { name => 'test1', 'GOO' => ['CAR'] }
+      { name => 'test1', allele => 'T', 'GOO' => 'CAR' }
     ]
   },
   'annotate_InputBuffer - exact, info keyed on allele'
@@ -135,7 +135,8 @@ is_deeply(
   $ib->buffer->[0]->{_custom_annotations},
   {
     'foo' => [
-      { name => 'test1', 'GOO' => ['CAR','STAR'] }
+      { name => 'test1', 'GOO' => 'CAR', allele => 'A' },
+      { name => 'test1', 'GOO' => 'STAR', allele => 'C' }
     ]
   },
   'annotate_InputBuffer - exact, multiple, rev strand input'
@@ -157,8 +158,8 @@ is_deeply(
   $ib->buffer->[0]->{_custom_annotations},
   {
     'foo' => [
-      { name => 'del1', 'GOO' => ['B'] },
-      { name => 'del2' }
+      { name => 'del1', 'GOO' => 'B', allele => '-' },
+      { name => 'del2', allele => '-' }
     ]
   },
   'annotate_InputBuffer - deletion'

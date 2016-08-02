@@ -164,11 +164,11 @@ sub annotate_VariationFeature {
 
   my $overlap_result = $self->_record_overlaps_VF($vf);
 
-  push @{$vf->{_custom_annotations}->{$self->short_name}}, $self->_create_record($overlap_result) if $overlap_result;
+  push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$self->_create_records($overlap_result)} if $overlap_result;
 }
 
-sub _create_record {
-  return {name => $_[0]->_get_record_name};
+sub _create_records {
+  return [{name => $_[0]->_get_record_name}];
 }
 
 sub _get_record_name {

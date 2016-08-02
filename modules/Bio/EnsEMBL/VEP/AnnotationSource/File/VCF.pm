@@ -74,37 +74,72 @@ sub parser {
   return $self->{parser} ||= Bio::EnsEMBL::IO::Parser::VCF4Tabix->open($self->file);
 }
 
-sub _create_record {
+sub _create_records {
   my $self = shift;
   my $overlap_result = shift;
 
-  my $record = {
-    name => $self->_get_record_name
-  };
+  my @records;
+
+  # get the fields data from the parser
+  my $fields_data = {};
 
   if(my $fields = $self->fields) {
     my $parser = $self->parser;
     my $info = $parser->get_info;
 
-    my @indexes = split(',', $overlap_result);
-
     foreach my $field(grep {exists($info->{$_})} @$fields) {
       my $value = $info->{$field};
       my @return;
 
-      if($self->type eq 'exact' && $value =~ /\,/) {
+      if($value =~ /\,/) {
         my @split = split(',', $value);
-        push @return, $split[$_ - 1] for @indexes;
+        $fields_data->{$field}->{$_} = $split[$_] for 0..$#split;
       }
       else {
-        push @return, $value;
+        $fields_data->{$field} = $value;
       }
-
-      $record->{$field} = \@return;
     }
   }
 
-  return $record;
+  # exact match returns a hashref
+  if(ref($overlap_result) eq 'HASH') {
+
+    while(my $allele = shift @{$overlap_result->{alleles}}) {
+      my $index = shift @{$overlap_result->{indexes}};
+
+      my $record = {
+        name => $self->_get_record_name,
+        allele => $allele
+      };
+
+      foreach my $field(keys %$fields_data) {
+        my $data = $fields_data->{$field};
+        $record->{$field} = ref($data) eq 'HASH' ? $data->{$index} : $data;
+      }
+
+      push @records, $record;
+    }
+  }
+  else {
+    my $record = {
+      name => $self->_get_record_name,
+    };
+
+    foreach my $field(keys %$fields_data) {
+      my $data = $fields_data->{$field};
+
+      if(ref($data) eq 'HASH') {
+        $record->{$field} = join(',', map {$data->{$_}} sort {$a <=> $b} keys %{$fields_data->{$field}});
+      }
+      else {
+        $record->{$field} = $data;
+      }
+    }
+
+    push @records, $record;
+  }
+
+  return \@records;
 }
 
 sub _get_record_name {
@@ -139,11 +174,11 @@ sub _record_overlaps_VF {
   my $orig_start = $parser->get_raw_start;
   my $orig_ref   = $parser->get_reference;
 
-  # we're going to return a string containing the matched allele indexes
+  # we're going to return a hashref containing the matched allele indexes and alleles
   # that way it also passes a boolean check
-  # start the index at 1 so a single return value of 0 doesn't fail bool check
-  my @matched;
-  my $i = 1;
+  my @matched_indexes;
+  my @matched_vf_alleles;
+  my $i = 0;
   foreach my $alt(@{$parser->get_alternatives}) {
 
     # we're going to minimise the VCF alleles one by one and compare the coords
@@ -162,12 +197,15 @@ sub _record_overlaps_VF {
         reverse_comp(\$alt);
       }
 
-      push @matched, $i if $vf_ref eq $ref && $vf_alts{$alt};
+      if($vf_ref eq $ref && $vf_alts{$alt}) {
+        push @matched_indexes, $i;
+        push @matched_vf_alleles, $alt;
+      }
     }
     $i++;
   }
 
-  return @matched ? join(",", @matched) : 0;
+  return @matched_indexes ? {indexes => \@matched_indexes, alleles => \@matched_vf_alleles} : 0;
 }
 
 
