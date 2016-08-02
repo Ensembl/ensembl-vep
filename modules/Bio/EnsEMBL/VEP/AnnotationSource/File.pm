@@ -46,6 +46,7 @@ package Bio::EnsEMBL::VEP::AnnotationSource::File;
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
 use Bio::EnsEMBL::VEP::AnnotationSource::File::BED;
+use Bio::EnsEMBL::VEP::AnnotationSource::File::VCF;
 
 use base qw(Bio::EnsEMBL::VEP::AnnotationSource);
 
@@ -197,8 +198,6 @@ sub _record_overlaps_VF {
   elsif($type eq 'exact') {
     return $parser->get_start == $vf->{start} && $parser->get_end == $vf->{end};
   }
-
-  return 0;
 }
 
 1;

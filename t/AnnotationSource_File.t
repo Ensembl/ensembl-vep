@@ -72,4 +72,35 @@ throws_ok {$as->type('foo')} qr/New type .+ is not valid/, 'type - invalid set';
 is($as->report_coords, 0, 'report_coords - get default');
 is($as->report_coords(1), 1, 'report_coords - set');
 
+use_ok('Bio::EnsEMBL::VEP::Config');
+$as = Bio::EnsEMBL::VEP::AnnotationSource::File->new({
+  file => 'test',
+  format => 'vcf',
+  config => my $cfg = Bio::EnsEMBL::VEP::Config->new($test_cfg->base_testing_cfg)
+});
+is(ref($as), 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF', 'new with format');
+
+throws_ok {
+  $as = Bio::EnsEMBL::VEP::AnnotationSource::File->new({
+    file => 'test',
+    format => 'foo',
+    config => my $cfg = Bio::EnsEMBL::VEP::Config->new($test_cfg->base_testing_cfg)
+  });
+} qr/Unknown or unsupported format/, 'new - invalid format';
+
+my $bak = $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+$Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM = 0;
+
+throws_ok {
+  $as = Bio::EnsEMBL::VEP::AnnotationSource::File->new({
+    file => 'test',
+    format => 'vcf',
+    config => my $cfg = Bio::EnsEMBL::VEP::Config->new($test_cfg->base_testing_cfg)
+  });
+} qr/Cannot use format .+ without .+ module installed/, 'new - tabix PM unavailable';
+
+$Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM = $bak;
+
+
+
 done_testing();
