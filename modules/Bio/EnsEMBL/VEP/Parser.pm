@@ -549,14 +549,13 @@ sub minimise_alleles {
     else {
       my @alleles = split('/', $vf->{allele_string});
       my $ref = shift @alleles;
-      my $changed = 0;
 
       foreach my $alt(@alleles) {
 
         my $start = $vf->{start};
         my $end   = $vf->{end};
 
-        ($ref, $alt, $start, $end, $changed) = @{trim_sequences($ref, $alt, $start, $end)};
+        ($ref, $alt, $start, $end) = @{trim_sequences($ref, $alt, $start, $end)};
         $ref ||= '-';
         $alt ||= '-';
 
@@ -566,7 +565,7 @@ sub minimise_alleles {
         bless $new_vf, ref($vf);
 
         # give it a new allele string and coords
-        $new_vf->{allele_string}          = $ref.'/'.$alt;
+        $new_vf->allele_string($ref.'/'.$alt);
         $new_vf->{start}                  = $start;
         $new_vf->{end}                    = $end;
         $new_vf->{original_allele_string} = $vf->{allele_string};
