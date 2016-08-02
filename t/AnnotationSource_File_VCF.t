@@ -166,36 +166,4 @@ is_deeply(
 );
 
 
-# # out by one
-# delete($ib->buffer->[0]->{_custom_annotations});
-
-# $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
-#   config => $cfg,
-#   parser => Bio::EnsEMBL::VEP::Parser::VCF->new({
-#     config => $cfg,
-#     file => $test_cfg->create_input_file([qw(21 25585732 rs142513484 C T . . .)]),
-#     valid_chromosomes => [21]
-#   })
-# });
-# $ib->next();
-
-# $as->annotate_InputBuffer($ib);
-# ok(!$ib->buffer->[0]->{_custom_annotations}, 'annotate_InputBuffer - out by 1 (5\')');
-
-
-
-# $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
-#   config => $cfg,
-#   parser => Bio::EnsEMBL::VEP::Parser::VCF->new({
-#     config => $cfg,
-#     file => $test_cfg->create_input_file([qw(21 25585735 rs142513484 C T . . .)]),
-#     valid_chromosomes => [21]
-#   })
-# });
-# $ib->next();
-
-# $as->annotate_InputBuffer($ib);
-# ok(!$ib->buffer->[0]->{_custom_annotations}, 'annotate_InputBuffer - out by 1 (3\')');
-
-
 done_testing();
