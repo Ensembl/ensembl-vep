@@ -99,7 +99,7 @@ sub new {
   
   my $self = $class->SUPER::new(@_);
 
-  $self->add_shortcuts([qw(dont_skip check_ref chr lrg minimal)]);
+  $self->add_shortcuts([qw(dont_skip check_ref chr lrg minimal delimiter)]);
 
   my $hashref = $_[0];
 
@@ -208,10 +208,7 @@ sub valid_chromosomes {
 
 sub delimiter {
   my $self = shift;
-
   $self->{delimiter} = shift if @_;
-  $self->{delimiter} ||= "\t";
-
   return $self->{delimiter};
 }
 
@@ -242,8 +239,13 @@ sub detect_format {
 
     # try to detect delimiter
     if(!/$delimiter/) {
-      # try space
-      if(/ /) {
+
+      # try spaces
+      if(/  /) {
+        $delimiter = " +";
+      }
+      # try single space
+      elsif(/ /) {
         $delimiter = " ";
       }
     }

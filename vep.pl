@@ -29,6 +29,7 @@ GetOptions(
   'input_file|i=s',          # input file name
   'format=s',                # input file format
   'output_format=s',         # output file format
+  'delimiter=s',             # delimiter between fields in input
   
   # DB options
   'species=s',               # species e.g. human, homo_sapiens
