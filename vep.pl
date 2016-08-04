@@ -51,11 +51,13 @@ GetOptions(
   'minimal',                 # convert input alleles to minimal representation
   'most_severe',             # only return most severe consequence
   'summary',                 # only return one line per variation with all consquence types
-  'per_gene',                # only return most severe per gene
   'pick',                    # used defined criteria to return most severe line
-  'flag_pick',               # like --pick but just adds a flag to picked line
-  'pick_allele',             # like --pick but chooses one con per allele
-  'flag_pick_allele',        # like --flag_pick but flags one con per allele
+  'pick_allele',             # choose one con per allele
+  'per_gene',                # choose one con per gene
+  'pick_allele_gene',        # choose one con per gene, allele
+  'flag_pick',               # flag one con per line
+  'flag_pick_allele',        # flag one con per allele
+  'flag_pick_allele_gene',   # flag one con per gene, allele
   'pick_order=s',            # define the order of categories used by the --*pick* flags
   'buffer_size=i',           # number of variations to read in before analysis
   'failed=i',                # include failed variations when finding existing
