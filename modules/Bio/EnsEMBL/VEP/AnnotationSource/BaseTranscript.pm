@@ -148,6 +148,8 @@ sub merge_features {
   my %seen_trs;
   my @return;
 
+  my $source_type_is_refseq = $self->{source_type} && ($self->{source_type} eq 'refseq' || $self->{source_type} eq 'merged') ? 1 : 0;
+
   while(my $tr = shift @$features) {
 
     # there are some transcripts in the otherfeatures DB with no stable ID!
@@ -164,7 +166,7 @@ sub merge_features {
     $hgnc_ids{$tr->{_gene_symbol}} = $tr->{_gene_hgnc_id} if defined($tr->{_gene_hgnc_id});
 
     ## hack to copy RefSeq gene stuff
-    if($self->{source_type} eq 'refseq' || $self->{source_type} eq 'merged') {
+    if($source_type_is_refseq) {
       $refseq_stuff{$tr->{_gene}->stable_id}->{$_} ||= $tr->{$_} for qw(_gene_symbol _gene_symbol_source _gene_hgnc_id);
     }
 
@@ -177,7 +179,7 @@ sub merge_features {
   foreach my $tr(@return) {
     $tr->{_gene_hgnc_id} = $hgnc_ids{$tr->{_gene_symbol}} if defined($tr->{_gene_symbol}) && defined($hgnc_ids{$tr->{_gene_symbol}});
 
-    if($self->{source_type} eq 'refseq' || $self->{source_type} eq 'merged') {
+    if($source_type_is_refseq) {
       $tr->{$_} ||= $refseq_stuff{$tr->{_gene}->stable_id}->{$_} for qw(_gene_symbol _gene_symbol_source _gene_hgnc_id);
     }
   }
