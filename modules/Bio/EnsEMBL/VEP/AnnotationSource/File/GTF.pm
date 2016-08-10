@@ -46,11 +46,51 @@ package Bio::EnsEMBL::VEP::AnnotationSource::File::GTF;
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::IO::Parser::GTFTabix;
 
-use base qw(Bio::EnsEMBL::VEP::AnnotationSource::File);
+use base qw(Bio::EnsEMBL::VEP::AnnotationSource::File::BaseGXF);
+
+my %PARENTS = (
+  'exon' => 'transcript',
+  'cds' => 'transcript',
+  'transcript' => 'gene',
+);
+
+my %INCLUDE_FEATURE_TYPES = map {$_ => 1} qw(
+  cds
+  CDS
+  exon
+  gene
+  transcript
+);
 
 sub parser {
   my $self = shift;
-  return $self->{parser} ||= Bio::EnsEMBL::IO::Parser::GTFTabix->open($self->file);
+  if(!exists($self->{parser})) {
+    $self->{parser} = Bio::EnsEMBL::IO::Parser::GTFTabix->open($self->file);
+  }
+  return $self->{parser};
+  # return $self->{parser} ||= Bio::EnsEMBL::IO::Parser::GTFTabix->open($self->file);
+}
+
+sub include_feature_types {
+  return \%INCLUDE_FEATURE_TYPES;
+}
+
+sub _record_get_parent_id {
+  my ($self, $record) = @_;
+  if(!exists($record->{_parent_id})) {
+    my $type = lc($record->{type});
+    $record->{_parent_id} = $PARENTS{$type} ? $record->{attributes}->{$PARENTS{$type}.'_id'} : undef;
+  }
+  return $record->{_parent_id};
+}
+
+sub _record_get_id {
+  my ($self, $record) = @_;
+  return $record->{_id} ||= $record->{attributes}->{$record->{type}.'_id'} || $record->{md5};
+}
+
+sub _record_get_biotype {
+  return $_[1]->{attributes}->{transcript_biotype} || $_[1]->{attributes}->{biotype} || $_[1]->{source};
 }
 
 1;

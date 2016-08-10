@@ -48,6 +48,7 @@ use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
 use Bio::EnsEMBL::VEP::AnnotationSource::File::BED;
 use Bio::EnsEMBL::VEP::AnnotationSource::File::VCF;
 use Bio::EnsEMBL::VEP::AnnotationSource::File::GFF;
+use Bio::EnsEMBL::VEP::AnnotationSource::File::GTF;
 
 use base qw(Bio::EnsEMBL::VEP::AnnotationSource);
 
