@@ -46,11 +46,59 @@ package Bio::EnsEMBL::VEP::AnnotationSource::File::GFF;
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::IO::Parser::GFF3Tabix;
 
-use base qw(Bio::EnsEMBL::VEP::AnnotationSource::File);
+use base qw(Bio::EnsEMBL::VEP::AnnotationSource::File::BaseGXF);
+
+my %INCLUDE_FEATURE_TYPES = map {$_ => 1} qw(
+  aberrant_processed_transcript
+  CDS
+  C_gene_segment
+  exon
+  gene
+  J_gene_segment
+  lincRNA
+  lincRNA_gene
+  miRNA
+  miRNA_gene
+  mt_gene
+  NMD_transcript_variant
+  processed_pseudogene
+  processed_transcript
+  pseudogene
+  pseudogenic_transcript
+  RNA
+  rRNA
+  rRNA_gene
+  snoRNA
+  snoRNA_gene
+  snRNA
+  snRNA_gene
+  supercontig
+  transcript
+  VD_gene_segment
+  V_gene_segment
+
+  CDS
+  C_gene_segment
+  D_gene_segment
+  exon
+  gene
+  J_gene_segment
+  mRNA
+  ncRNA
+  primary_transcript
+  rRNA
+  transcript
+  tRNA
+  V_gene_segment
+);
 
 sub parser {
   my $self = shift;
   return $self->{parser} ||= Bio::EnsEMBL::IO::Parser::GFF3Tabix->open($self->file);
+}
+
+sub include_feature_types {
+  return \%INCLUDE_FEATURE_TYPES;
 }
 
 1;
