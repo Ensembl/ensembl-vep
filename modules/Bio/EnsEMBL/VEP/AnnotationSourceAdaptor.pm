@@ -52,6 +52,7 @@ use Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript;
 use Bio::EnsEMBL::VEP::AnnotationSource::Database::RegFeat;
 use Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation;
 use Bio::EnsEMBL::VEP::AnnotationSource::Database::StructuralVariation;
+use Bio::EnsEMBL::VEP::AnnotationSource::File;
 
 # this method is called from VEP::Runner's init() method
 sub get_all {
@@ -62,6 +63,7 @@ sub get_all {
     (
       @{$self->get_all_from_cache},
       @{$self->get_all_from_database},
+      @{$self->get_all_custom},
     )
   ];
 }
@@ -90,7 +92,7 @@ sub get_all_from_database {
   unless($self->param('cache')) {
     push @as, Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript->new({
       config => $self->config,
-    });
+    }) if $self->param('database');
 
     push @as, Bio::EnsEMBL::VEP::AnnotationSource::Database::RegFeat->new({
       config => $self->config,
@@ -106,6 +108,31 @@ sub get_all_from_database {
   push @as, Bio::EnsEMBL::VEP::AnnotationSource::Database::StructuralVariation->new({
     config => $self->config,
   }) if $self->param('check_svs');
+
+  return \@as;
+}
+
+sub get_all_custom {
+  my $self = shift;
+
+  my @as;
+
+  foreach my $custom_string(@{$self->param('custom') || []}) {
+    my ($file, $short_name, $format, $type, $report_coords, @fields) = split /\,/, $custom_string;
+
+    my $opts = {
+      config => $self->config,
+      file => $file,
+      short_name => $short_name,
+      format => $format,
+      type => $type,
+      report_coords => $report_coords,
+    };
+
+    $opts->{fields} = \@fields if @fields;
+    
+    push @as, Bio::EnsEMBL::VEP::AnnotationSource::File->new($opts);
+  }
 
   return \@as;
 }
