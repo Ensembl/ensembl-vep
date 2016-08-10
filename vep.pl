@@ -157,6 +157,7 @@ GetOptions(
   'safe',                    # die if plugins don't compile or spit warnings
   'fasta=s',                 # file or dir containing FASTA files with reference sequence
   'sereal',                  # user Sereal instead of Storable for the cache
+  'synonyms=s',              # file of chromosome synonyms
   
   # debug
   'debug',                   # print out debug info
