@@ -147,10 +147,6 @@ sub get_all_regions_by_InputBuffer {
   return \@regions;
 }
 
-sub get_valid_chromosomes {
-  return $_[0]->{valid_chromosomes} || [];
-}
-
 sub get_source_chr_name {
   my $self = shift;
   my $chr = shift;
