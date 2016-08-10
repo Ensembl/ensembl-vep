@@ -428,63 +428,6 @@ sub _add_translation {
   return $translation;
 }
 
-sub _record_get_parent_id {
-  my ($self, $record) = @_;
-
-  if(!exists($record->{_parent_id})) {
-    my $attributes = $record->{attributes};
-    $record->{_parent_id} = $attributes->{Parent} || $attributes->{parent};
-  }
-
-  return $record->{_parent_id};
-}
-
-sub _record_get_id {
-  my ($self, $record) = @_;
-
-  if(!exists($record->{_id})) {
-    my $attributes = $record->{attributes};
-    $record->{_id} = $attributes->{ID} || $attributes->{Name} || $attributes->{id} || $attributes->{name};
-  }
-
-  return $record->{_id};
-}
-
-sub _record_get_biotype {
-  my ($self, $record, $gene_record) = @_;
-
-  if(!exists($record->{_biotype})) {
-
-    # Ensembl-y GFFs have biotype as an attribute
-    my $biotype = $record->{attributes}->{biotype};
-
-    # others we need to (guess) work it out
-    if(!$biotype) {
-      my $type = lc($record->{type});
-
-      if($type eq 'mrna') {
-        $biotype = 'protein_coding';
-      }
-      elsif($type eq 'ncrna') {
-        $biotype = $record->{attributes}->{ncrna_class};
-      }
-      elsif($type =~ /^([a-z]+)_gene_segment$/) {
-        $biotype = 'IG_'.uc($1).'_gene';
-      }
-      elsif($gene_record && ($gene_record->{attributes}->{description} || '') =~ /^microRNA/) {
-        $biotype = 'miRNA';
-      }
-      elsif($record->{attributes}->{gbkey}) {
-        $biotype = $record->{attributes}->{gbkey};
-      }
-    }
-
-    $record->{_biotype} = $biotype;
-  }
-
-  return $record->{_biotype};
-}
-
 sub _record_is_gene {
   my ($self, $record) = @_;
 
