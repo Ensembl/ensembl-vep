@@ -413,8 +413,8 @@ sub check_config {
     }
   }
   
-  # check one of database/cache/offline/build
-  if(!grep {$config->{$_}} qw(database cache offline build convert)) {
+  # check one of database/cache/offline/custom
+  if(!grep {$config->{$_}} qw(database cache offline custom)) {
     die qq{
 IMPORTANT INFORMATION:
 
