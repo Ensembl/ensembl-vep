@@ -361,8 +361,24 @@ sub validate_vf {
     return 0;
   }
 
-  # map to top level?
-  unless($self->valid_chromosomes->{$vf->{chr}}) {
+  # check we have this chr in any of the annotation sources
+  my $have_chr = 0;
+  my $valid = $self->valid_chromosomes;
+
+  if($valid->{$vf->{chr}}) {
+    $have_chr = 1;
+  }
+  else {
+    foreach my $alt(keys %{$self->chromosome_synonyms->{$vf->{chr}} || {}}) {
+      if($valid->{$alt}) {
+        $have_chr = 1;
+        last;
+      }
+    }
+  }
+
+  # map to top level?  
+  unless($have_chr) {
 
     # slice adaptor required
     if(my $sa = $self->get_adaptor('core', 'Slice')) {
@@ -381,7 +397,7 @@ sub validate_vf {
         # could not transform
         else {
           $self->warning_msg(
-            "WARNING: Chromosome ".$vf->{chr}." not found in cache or database and could not transform to toplevel on line ".$self->line_number
+            "WARNING: Chromosome ".$vf->{chr}." not found in annotation sources or synonyms and could not transform to toplevel on line ".$self->line_number
           );
           return 0;
         }
@@ -399,7 +415,7 @@ sub validate_vf {
     # offline, can't transform
     else {
       $self->warning_msg(
-        "WARNING: Chromosome ".$vf->{chr}." not found in cache or database on line ".$self->line_number
+        "WARNING: Chromosome ".$vf->{chr}." not found in annotation sources or synonyms on line ".$self->line_number
       );
       return 0;
     }

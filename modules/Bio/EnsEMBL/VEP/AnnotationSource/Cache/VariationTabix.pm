@@ -91,7 +91,8 @@ sub _annotate_cl {
 
   foreach my $chr(keys %$by_chr) {
     my $list = $by_chr->{$chr};
-    my $file = $self->get_dump_file_name($chr);
+    my $source_chr = $self->get_source_chr_name($chr);
+    my $file = $self->get_dump_file_name($source_chr);
     next unless -e $file;
 
     while(scalar @$list) {
@@ -99,7 +100,7 @@ sub _annotate_cl {
       $p += scalar @tmp_list;
 
       my $region_string = join " ", map {
-        $_->{chr}.':'.($_->{start} > $_->{end} ?
+        $source_chr.':'.($_->{start} > $_->{end} ?
         $_->{end}.'-'.$_->{start} :
         $_->{start}.'-'.$_->{end})
       } @tmp_list;
@@ -143,13 +144,14 @@ sub _annotate_pm {
 
   foreach my $chr(keys %$by_chr) {
 
-    my $file = $self->get_dump_file_name($chr);
+    my $source_chr = $self->get_source_chr_name($chr);
+    my $file = $self->get_dump_file_name($source_chr);
     next unless -e $file;
     my $tabix_obj = $self->{tabix_obj}->{$chr} ||= Bio::DB::HTS::Tabix->new(filename => $file);
     next unless $tabix_obj;
 
     foreach my $vf(@{$by_chr->{$chr}}) {
-      my $iter = $tabix_obj->query(sprintf("%s:%i-%i", $vf->{chr}, $vf->{start} - 1, $vf->{end} + 1));
+      my $iter = $tabix_obj->query(sprintf("%s:%i-%i", $source_chr, $vf->{start} - 1, $vf->{end} + 1));
       next unless $iter;
 
       while(my $line = $iter->next) {

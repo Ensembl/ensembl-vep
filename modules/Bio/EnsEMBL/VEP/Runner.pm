@@ -96,13 +96,16 @@ sub init {
   # setup DB connection
   $self->setup_db_connection();
 
+  # get chromosome synoyms
+  $self->chromosome_synonyms($self->param('synonyms'));
+
   my $plugins = $self->get_all_Plugins();
 
   # get all annotation sources
   my $annotation_sources = $self->get_all_AnnotationSources();
 
   # setup FASTA file DB
-  my $fasta_db = $self->fasta_db();
+  $self->fasta_db();
 
   my $buffer = $self->get_InputBuffer();
 
@@ -405,6 +408,7 @@ sub setup_db_connection {
   my $self = shift;
 
   return if $self->param('offline');
+  return unless $self->param('database') || $self->param('cache');
 
   # doing this inits the registry and DB connection
   my $reg = $self->registry();

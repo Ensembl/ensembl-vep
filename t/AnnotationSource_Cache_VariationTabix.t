@@ -72,7 +72,7 @@ is(ref($ib->next()), 'ARRAY', 'check buffer next');
 # the two methods in this class use a hashref of lists of VFs keyed on chr
 my $vf = $ib->buffer->[0];
 my $vf_hash = {
-  21 => [$vf],
+  $vf->{chr} => [$vf],
 };
 
 $c->_annotate_cl($vf_hash);
@@ -111,12 +111,30 @@ my $exp = [{
 
 is_deeply($vf->{existing}, $exp, '_annotate_cl');
 
+# check synonyms
+$c->chromosome_synonyms($test_cfg->{chr_synonyms});
+$c->{valid_chromosomes} = [21];
+$vf->{chr} = 'NC_000021.9';
+
+delete $vf->{existing};
+$vf_hash = {
+  $vf->{chr} => [$vf],
+};
+
+$c->_annotate_cl($vf_hash);
+
+is_deeply($vf->{existing}, $exp, 'chr synonym');
+
+$vf->{chr} = 21;
+
+
+
 # no match
 $vf->{start}++;
 
 delete $vf->{existing};
 $vf_hash = {
-  21 => [$vf],
+  $vf->{chr} => [$vf],
 };
 
 is_deeply($vf->{existing}, undef, 'miss by coord - _annotate_cl');

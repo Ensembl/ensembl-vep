@@ -114,6 +114,9 @@ sub get_all_regions_by_InputBuffer {
     my $chr = $vf->{chr} || $vf->slice->seq_region_name;
     throw("ERROR: Cannot get chromosome from VariationFeature") unless $chr;
 
+    # find actual chromosome name used by AnnotationSource
+    my $source_chr = $self->get_source_chr_name($chr);
+
     my ($vf_s, $vf_e) = ($vf->{start}, $vf->{end});
     my @region_starts;
 
@@ -131,10 +134,10 @@ sub get_all_regions_by_InputBuffer {
     }
 
     foreach my $region_start(map {int(($_ - 1)/ $cache_region_size)} @region_starts) {
-      my $key = join(':', ($chr, $region_start));
+      my $key = join(':', ($source_chr, $region_start));
       next if $seen{$key};
 
-      push @regions, [$chr, $region_start];
+      push @regions, [$source_chr, $region_start];
       $seen{$key} = 1;
     }
   }
@@ -142,6 +145,55 @@ sub get_all_regions_by_InputBuffer {
   $buffer->min_max([$min, $max]);
 
   return \@regions;
+}
+
+sub get_valid_chromosomes {
+  return $_[0]->{valid_chromosomes} || [];
+}
+
+sub get_source_chr_name {
+  my $self = shift;
+  my $chr = shift;
+
+  my $chr_name_map = $self->{_chr_name_map} ||= {};
+
+  if(!exists($chr_name_map->{$chr})) {
+    my $mapped_name = $chr;
+
+    my %valid = map {$_ => 1} @{$self->can('get_valid_chromosomes') ? $self->get_valid_chromosomes : []};
+
+    unless($valid{$chr}) {
+
+      # try synonyms first
+      my $synonyms = $self->chromosome_synonyms;
+
+      foreach my $syn(keys %{$synonyms->{$chr} || {}}) {
+        if($valid{$syn}) {
+          $mapped_name = $syn;
+          last;
+        }
+      }
+
+      # still haven't got it
+      if($mapped_name eq $chr) {
+
+        # try adding/removing "chr"
+        if($chr =~ /^chr/i) {
+          my $tmp = $chr;
+          $tmp =~ s/^chr//i;
+
+          $mapped_name = $tmp if $valid{$tmp};
+        }
+        elsif($valid{'chr'.$chr}) {
+          $mapped_name = 'chr'.$chr;
+        }
+      }
+    }
+
+    $chr_name_map->{$chr} = $mapped_name;
+  }
+
+  return $chr_name_map->{$chr};
 }
 
 sub get_features_by_regions_cached {

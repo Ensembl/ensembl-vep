@@ -106,7 +106,7 @@ throws_ok { $bv->add_shortcuts('test') } qr/add_shortcuts would overwrite value/
 
 is($bv->fasta_db, undef, 'fasta_db - no file');
 
-$bv = Bio::EnsEMBL::VEP::BaseVEP->new({config => $cfg});
+$bv = Bio::EnsEMBL::VEP::BaseVEP->new({config => Bio::EnsEMBL::VEP::Config->new($cfg_hash)});
 is($bv->get_slice('1'), undef, 'get_slice - no fasta_db or database');
 
 use_ok('Bio::EnsEMBL::VEP::Runner');
@@ -149,6 +149,18 @@ is_deeply(
     'start' => 1
   }, 'Bio::EnsEMBL::Slice' ),
   'get_slice - fasta_db'
+);
+
+is_deeply($bv->chromosome_synonyms, {}, 'chromosome_syonyms - empty');
+my $syns = $bv->chromosome_synonyms($test_cfg->{chr_synonyms});
+is(ref($syns), 'HASH', 'chromosome_syonyms - ref');
+is_deeply(
+  $syns->{21}, {
+    'CM000683.2' => 1,
+    'NC_000021.9' => 1,
+    'chr21' => 1
+  },
+  'chromosome_syonyms - content check'
 );
 
 ## status_msg tests require we mess with STDOUT

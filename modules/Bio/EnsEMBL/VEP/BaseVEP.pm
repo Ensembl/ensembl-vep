@@ -132,7 +132,7 @@ sub registry {
 
     my $reg = 'Bio::EnsEMBL::Registry';
     
-    unless($self->param('offline')) {
+    if($self->param('database') || ($self->param('cache') && !$self->param('offline'))) {
       # suppress warnings that the FeatureAdpators spit if using no_slice_cache
       Bio::EnsEMBL::Utils::Exception::verbose(1999) if $self->param('no_slice_cache');
 
@@ -192,7 +192,7 @@ sub get_adaptor {
   if(!exists($cache->{$group}) || !exists($cache->{$group}->{$type})) {
     my $ad;
 
-    if($self->param('offline')) {
+    unless($self->param('database') || ($self->param('cache') && !$self->param('offline'))) {
       my $module_name = sprintf(
         "Bio::EnsEMBL::%sDBSQL::%sAdaptor",
         (lc($group) eq 'core' ? '' : ucfirst($group).'::'),
@@ -277,6 +277,7 @@ sub fasta_db {
         -FASTA => $fasta_file,
         -ASSEMBLY => $self->param('assembly'),
         -OFFLINE => $self->param('offline'),
+        -SYNONYMS => $self->chromosome_synonyms,
       );
 
       $self->stats->log_fasta_chromosomes($fasta_db);
@@ -286,6 +287,33 @@ sub fasta_db {
   }
 
   return $self->config->{_fasta_db};
+}
+
+sub chromosome_synonyms {
+  my $self = shift;
+  my $file = shift;
+
+  if($file) {
+    open IN, $file or throw("ERROR: Could not read synonyms file $file: $!");
+
+    my $synonyms = $self->config->{_chromosome_synonyms} ||= {};
+
+    while(<IN>) {
+      chomp;
+      my @split = split(/\s+/, $_);
+
+      my $ref = shift @split;
+
+      foreach my $syn(@split) {
+        $synonyms->{$ref}->{$syn} = 1;
+        $synonyms->{$syn}->{$ref} = 1;
+      }
+    }
+
+    close IN;
+  }
+
+  return $self->config->{_chromosome_synonyms} ||= {};
 }
 
 # adds shortcuts to named params to this object

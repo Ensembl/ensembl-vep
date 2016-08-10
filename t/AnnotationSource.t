@@ -91,6 +91,21 @@ my $inputs = [
 
 is_deeply(get_regions_from_input($_->[0]), $_->[1], $_->[2] || join(" ", @{$_->[0]})) for @$inputs;
 
+# load synonyms to test
+$as->chromosome_synonyms($test_cfg->{chr_synonyms});
+$as->{valid_chromosomes} = [keys %{$p->{valid_chromosomes}}];
+
+is($as->get_source_chr_name(21), 21, 'get_source_chr_name - valid, same');
+is($as->get_source_chr_name('foo'), 'foo', 'get_source_chr_name - invalid, same');
+is($as->get_source_chr_name('NC_000021.9'), 21, 'get_source_chr_name - synonym');
+
+$_->{chr} = 'NC_000021.9' for @{$ib->buffer};
+is_deeply(
+  $as->get_all_regions_by_InputBuffer($ib),
+  [[21, 25]],
+  'get_all_regions_by_InputBuffer - synonym'
+);
+
 # done
 done_testing();
 

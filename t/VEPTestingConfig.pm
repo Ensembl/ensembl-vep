@@ -38,6 +38,8 @@ our %DEFAULTS = (
     ExAC ExAC_AFR ExAC_AMR ExAC_Adj ExAC_EAS ExAC_FIN ExAC_NFE ExAC_OTH ExAC_SAS
   )],
 
+  chr_synonyms   => $Bin.'/testdata/chr_synonyms.txt',
+
   sereal_dir     => $Bin.'/testdata/cache/sereal/homo_sapiens/84_GRCh38',
 
   fasta          => $Bin.'/testdata/cache/homo_sapiens/84_GRCh38/test.fa',

@@ -147,7 +147,7 @@ sub annotate_InputBuffer {
   foreach my $chr(keys %by_chr) {
     foreach my $vf(@{$by_chr{$chr}}) {
       my ($vf_start, $vf_end) = ($vf->{start}, $vf->{end});
-      $parser->seek($chr, $vf_start - 1, $vf_end + 1);
+      $parser->seek($self->get_source_chr_name($chr), $vf_start - 1, $vf_end + 1);
       $parser->next();
 
       while($parser->{record} && $parser->get_start <= $vf_end) {
@@ -156,6 +156,11 @@ sub annotate_InputBuffer {
       }
     }
   }
+}
+
+sub get_valid_chromosomes {
+  my $self = shift;
+  return $self->{valid_chromosomes} ||= $self->parser->{tabix_file}->seqnames;
 }
 
 sub annotate_VariationFeature {
