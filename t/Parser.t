@@ -166,7 +166,7 @@ $p = Bio::EnsEMBL::VEP::Parser->new({file => $test_cfg->{test_vcf}, config => $c
 $p->{valid_chromosomes} = {1 => 1, 21 => 1};
 
 is($p->validate_vf(get_vf({allele_string => 'A/C', chr => 2})), 0, 'validate_vf - chromosome not in valid list 1');
-ok($tmp =~ /Chromosome .* not found in cache or database/, 'validate_vf - chromosome not in valid list 2');
+ok($tmp =~ /Chromosome .* not found/, 'validate_vf - chromosome not in valid list 2');
 
 is($p->validate_vf(get_vf({allele_string => 'G/C', start => 'foo'})), 0, 'validate_vf - start is not number 1');
 ok($tmp =~ /coordinate invalid/, 'validate_vf - start is not number 2');
