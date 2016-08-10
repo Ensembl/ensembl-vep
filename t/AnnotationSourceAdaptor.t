@@ -87,6 +87,71 @@ is_deeply(ref($asa->get_all()->[0]), 'Bio::EnsEMBL::VEP::AnnotationSource::Cache
 $asa->param('check_existing', 0);
 
 
+$asa->param('custom', [$test_cfg->{custom_vcf}.',test,vcf,exact']);
+is_deeply(
+  $asa->get_all_custom(),
+  [
+    bless( {
+      'short_name' => 'test',
+      '_config' => $asa->config,
+      'report_coords' => 0,
+      'file' => '/nfs/users/nfs_w/wm2/Ensembl/git/ensembl-vep/t/testdata/custom/test.vcf.gz',
+      'type' => 'exact'
+    }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
+  ],
+  'get_all_custom'
+);
+
+$asa->param('custom', [$test_cfg->{custom_vcf}.',test,vcf']);
+is_deeply(
+  $asa->get_all_custom(),
+  [
+    bless( {
+      'short_name' => 'test',
+      '_config' => $asa->config,
+      'report_coords' => 0,
+      'file' => '/nfs/users/nfs_w/wm2/Ensembl/git/ensembl-vep/t/testdata/custom/test.vcf.gz',
+      'type' => 'overlap'
+    }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
+  ],
+  'get_all_custom - default overlap type'
+);
+
+$asa->param('custom', [$test_cfg->{custom_vcf}.',test,vcf,overlap,1']);
+is_deeply(
+  $asa->get_all_custom(),
+  [
+    bless( {
+      'short_name' => 'test',
+      '_config' => $asa->config,
+      'report_coords' => 1,
+      'file' => '/nfs/users/nfs_w/wm2/Ensembl/git/ensembl-vep/t/testdata/custom/test.vcf.gz',
+      'type' => 'overlap'
+    }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
+  ],
+  'get_all_custom - report_coords'
+);
+
+$asa->param('custom', [$test_cfg->{custom_vcf}.',test,vcf,overlap,1,FOO,BAR']);
+is_deeply(
+  $asa->get_all_custom(),
+  [
+    bless( {
+      'short_name' => 'test',
+      '_config' => $asa->config,
+      'report_coords' => 1,
+      'fields' => ['FOO', 'BAR'],
+      'file' => '/nfs/users/nfs_w/wm2/Ensembl/git/ensembl-vep/t/testdata/custom/test.vcf.gz',
+      'type' => 'overlap'
+    }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
+  ],
+  'get_all_custom - fields'
+);
+
+$asa->param('custom', [$test_cfg->{custom_vcf}.',test,foo,exact']);
+throws_ok {$asa->get_all_custom} qr/Unknown or unsupported format foo/, 'get_all_custom - invalid format';
+
+$asa->param('custom', []);
 
 ## DATABASE TESTS
 #################
