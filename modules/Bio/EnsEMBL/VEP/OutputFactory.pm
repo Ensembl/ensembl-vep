@@ -158,11 +158,17 @@ sub new {
 sub get_all_lines_by_InputBuffer {
   my $self = shift;
   my $buffer = shift;
+  return [map {$self->output_hash_to_line($_)} @{$self->get_all_output_hashes_by_InputBuffer($buffer)}];
+}
+
+# this method can also be called by Runner if unprocessed output is required
+sub get_all_output_hashes_by_InputBuffer {
+  my $self = shift;
+  my $buffer = shift;
 
   $self->rejoin_variants_in_InputBuffer($buffer) if $buffer->rejoin_required;
 
   return [
-    map {$self->output_hash_to_line($_)}
     map {@{$self->get_all_output_hashes_by_VariationFeature($_)}}
     @{$buffer->buffer}
   ];

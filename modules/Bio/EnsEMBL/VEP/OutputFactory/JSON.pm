@@ -93,15 +93,21 @@ sub new {
   return $self;
 }
 
-sub get_all_lines_by_InputBuffer {
+sub output_hash_to_line {
+  my $self = shift;
+  my $hash = shift;
+
+  $self->{json_obj} ||= JSON->new;
+  return $self->{json_obj}->encode($hash);
+}
+
+sub get_all_output_hashes_by_InputBuffer {
   my $self = shift;
   my $buffer = shift;
 
   $self->rejoin_variants_in_InputBuffer($buffer) if $buffer->rejoin_required;
 
   my @return;
-
-  $self->{json_obj} ||= JSON->new;
 
   foreach my $vf(@{$buffer->buffer}) {
 
@@ -137,8 +143,8 @@ sub get_all_lines_by_InputBuffer {
       $hash->{$rename{$key}} = $hash->{$key};
       delete $hash->{$key};
     }
-    
-    push @return, $self->{json_obj}->encode($hash);
+
+    push @return, $hash;
   }
 
   return \@return;
