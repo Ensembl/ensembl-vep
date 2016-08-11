@@ -92,6 +92,7 @@ is_deeply(
     '## DISTANCE : Shortest distance from variant to transcript',
     '## STRAND : Strand of the feature (1/-1)',
     '## FLAGS : Transcript quality flags',
+    '## custom_test : test.vcf.gz (overlap)',
     "#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tExisting_variation\tExtra"
   ],
   'headers'
@@ -205,6 +206,34 @@ is(
   'ExAC_AMR_MAF=T:0.000173;ExAC_EAS_MAF=T:0;ExAC_FIN_MAF=T:0;'.
   'ExAC_NFE_MAF=T:0;ExAC_OTH_MAF=T:0;ExAC_SAS_MAF=T:0',
   'get_all_lines_by_InputBuffer - everything'
+);
+
+
+# custom
+$runner = get_annotated_buffer_runner({
+  input_file => $test_cfg->{test_vcf},
+  custom => [$test_cfg->{custom_vcf}.',test,vcf,exact,,FOO'],
+  output_format => 'vep',
+});
+$of = $runner->get_OutputFactory;
+
+@lines = @{$of->get_all_lines_by_InputBuffer($runner->get_InputBuffer)};
+
+is(
+  $lines[0],
+  join("\t", qw(
+    rs142513484
+    21:25585733
+    T
+    ENSG00000154719
+    ENST00000307301
+    Transcript
+    3_prime_UTR_variant
+    1122
+    - - - - -
+    IMPACT=MODIFIER;STRAND=-1;test=test1;test_FOO=BAR
+  )),
+  'get_all_lines_by_InputBuffer - custom'
 );
 
 done_testing();

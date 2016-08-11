@@ -52,7 +52,8 @@ is_deeply(
   [
     '##fileformat=VCFv4.1',
     '##VEP="v1" time="test"',
-    '##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS">',
+    '##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|custom_test">',
+    '##INFO=<ID=custom_test,Number=.,Type=String,Description="test.vcf.gz (overlap)">',
     "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO"
   ],
   'headers'
@@ -92,7 +93,8 @@ is_deeply(
     'Existing_variation',
     'DISTANCE',
     'STRAND',
-    'FLAGS'
+    'FLAGS',
+    'custom_test'
   ],
   'fields - default'
 );
@@ -327,6 +329,23 @@ is(
   'get_all_lines_by_InputBuffer - everything'
 );
 
+# custom
+my $runner = get_runner({
+  input_file => $test_cfg->{test_vcf},
+  custom => [$test_cfg->{custom_vcf}.',test,vcf,exact,,FOO'],
+  output_format => 'vcf',
+});
+$of = $runner->get_OutputFactory;
+
+is(
+  $of->get_all_lines_by_InputBuffer($runner->get_InputBuffer)->[0],
+  "21\t25585733\trs142513484\tC\tT\t.\t.\t".
+  "CSQ=T|3_prime_UTR_variant|MODIFIER||ENSG00000154719|Transcript|ENST00000307301||||||1122|||||||-1|||test1|BAR,".
+  "T|missense_variant|MODERATE||ENSG00000154719|Transcript|ENST00000352957||||||1033|991|331|A/T|Gca/Aca|||-1|||test1|BAR,".
+  "T|upstream_gene_variant|MODIFIER||ENSG00000260583|Transcript|ENST00000567517||||||||||||2407|-1|||test1|BAR\tGT\t0|0",
+  'get_all_lines_by_InputBuffer - custom'
+);
+
 # test converting to VCF from different input
 $ib = get_runner({
   input_file => $test_cfg->create_input_file([qw(21 25585733 25585733 C/T 1)]),
@@ -380,7 +399,7 @@ ok($lines[0] =~ /EFF/ && $lines[0] !~ /CSQ/, 'vcf_info_field');
 ## test getting stuff from input
 ################################
 
-my $runner = get_runner({
+$runner = get_runner({
   input_file => $test_cfg->{test_vcf},
   dir => $test_cfg->{cache_root_dir},
   vcf => 1,

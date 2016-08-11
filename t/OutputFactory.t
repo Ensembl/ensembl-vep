@@ -1448,6 +1448,30 @@ is($by_allele{missense_variant}->{ALLELE_NUM}, 2, "minimal - allele num where tw
 $of->{allele_number} = 0;
 
 
+## custom headers
+#################
+
+$runner = get_annotated_buffer_runner({
+  input_file => $test_cfg->create_input_file([qw(21 25606454 test G C . . .)]),
+  custom => [$test_cfg->{custom_vcf}.',test,vcf'],
+  quiet => 1,
+  warning_file => 'STDERR',
+});
+
+$of = $runner->get_OutputFactory();
+$ib = $runner->get_InputBuffer();
+
+is_deeply(
+  $of->get_custom_headers,
+  [
+    [
+      'test',
+      $test_cfg->{custom_vcf}.' (overlap)'
+    ]
+  ],
+  'get_custom_headers'
+);
+
 
 ## plugins
 ##########

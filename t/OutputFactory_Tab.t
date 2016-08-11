@@ -64,6 +64,7 @@ is_deeply(
     DISTANCE
     STRAND
     FLAGS
+    custom_test
   )],
   'fields'
 );
@@ -92,7 +93,8 @@ is_deeply(
     '## DISTANCE : Shortest distance from variant to transcript',
     '## STRAND : Strand of the feature (1/-1)',
     '## FLAGS : Transcript quality flags',
-    "#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tExisting_variation\tIMPACT\tDISTANCE\tSTRAND\tFLAGS"
+    '## custom_test : test.vcf.gz (overlap)',
+    "#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tExisting_variation\tIMPACT\tDISTANCE\tSTRAND\tFLAGS\tcustom_test"
   ],
   'headers'
 );
@@ -110,17 +112,18 @@ is(
   'headers - plugin'
 );
 
-is($of->output_hash_to_line({}), '-'.("\t\-" x 16), 'output_hash_to_line - empty');
+is($of->output_hash_to_line({}), '-'.("\t\-" x 17), 'output_hash_to_line - empty');
 
 is(
   $of->output_hash_to_line({
     Uploaded_variation => 0,
   }),
-  '0'.("\t\-" x 16),
+  '0'.("\t\-" x 17),
   'output_hash_to_line - test 0'
 );
 
 my $ib = get_annotated_buffer({input_file => $test_cfg->{test_vcf}});
+$of = Bio::EnsEMBL::VEP::OutputFactory::Tab->new({config => $ib->config});
 
 my @lines = @{$of->get_all_lines_by_InputBuffer($ib)};
 
@@ -168,6 +171,40 @@ is(
     cds_start_NF
   )),
   'get_all_lines_by_InputBuffer - check last'
+);
+
+
+# custom
+$runner = get_annotated_buffer_runner({
+  input_file => $test_cfg->{test_vcf},
+  custom => [$test_cfg->{custom_vcf}.',test,vcf,exact,,FOO'],
+  output_format => 'tab',
+});
+$of = $runner->get_OutputFactory;
+
+@lines = @{$of->get_all_lines_by_InputBuffer($runner->get_InputBuffer)};
+
+is(
+  $lines[0],
+  join("\t", qw(
+    rs142513484
+    21:25585733
+    T
+    ENSG00000154719
+    ENST00000307301
+    Transcript
+    3_prime_UTR_variant
+    1122
+    - - - - -
+    MODIFIER
+    -
+    -1
+    -
+    -
+    test1
+    BAR
+  )),
+  'get_all_lines_by_InputBuffer - custom'
 );
 
 

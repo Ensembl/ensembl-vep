@@ -62,6 +62,11 @@ our %DEFAULTS = (
     vep_version => 1,
     api_version => 1,
     db_version => 1,
+    custom_info => [{
+      'short_name' => 'custom_test',
+      'file' => 'test.vcf.gz',
+      'type' => 'overlap',
+    }],
   }
 );
 
