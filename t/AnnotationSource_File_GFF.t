@@ -84,6 +84,7 @@ is(
   '_get_records_by_coords - non-overlapping sub-features count'
 );
 
+
 my $trs = $as->_create_transcripts($records);
 
 is(scalar @$trs, 3, "_create_transcripts - count");
@@ -93,6 +94,7 @@ is($trs->[0]->{_gene_symbol}, "MRPL39", "_gene_symbol");
 is(scalar @{$trs->[0]->get_all_Exons}, 11, "count exons");
 my $prot_seq = 'MEALAMGSRALRLWLVAPGGGIKWRFIATSSASQLSPTELTEMRNDLFNKEKARQLSLTPRTEKIEVKHVGKTDPGTVFVMNKNISTPYSCAMHLSEWYCRKSILALVDGQPWDMYKPLTKSCEIKFLTFKDCDPGEVNKAYWRSCAMMMGCVIERAFKDEYMVNLVRAPEVPVISGAFCYDVVLDSKLDEWMPTKENLRSFTKDAHALIYKDLPFETLEVEAKVALEIFQHSKYKVDFIEEKASQNPERIVKLHRIGDFIDVSEGPLIPRTSICFQYEVSAVHNLQPTQPSLIRRFQGVSLPVHLRAHFTIWDKLLERSRKMTPFPILLLFTTQSFFTTSPESYLLHGTVSE';
 is($trs->[0]->translation->seq, $prot_seq, "translate");
+
 
 $trs = $as->_create_transcripts($as->_get_records_by_coords(21, 255e5, 26e6));
 is_deeply(
@@ -157,6 +159,54 @@ is_deeply(
   },
   '_create_transcripts - big fetch check biotypes'
 );
+
+
+$records = $as->_get_records_by_coords(21, 25585733, 25585733);
+delete $records->[3]->{attributes}->{gene_id};
+delete $records->[2]->{attributes}->{gene_id};
+is($as->_create_transcripts($records)->[0]->{_gene_stable_id}, 'ENSG00000154719', 'gene_stable_id from gene object ID not gene_id');
+
+## TEST SOME FAILSAFES
+######################
+
+# parent/child structure broken
+throws_ok {
+  $as->_get_parent_child_structure([
+    {
+      md5 => 1,
+      attributes => { parent => 'foo', id => 'test1' }
+    }
+  ])
+} qr/Parent record for the following not found/, '_get_parent_child_structure - parent not found';
+
+# invalid child type
+$records = $as->_get_records_by_coords(21, 25585733, 25585733);
+$records->[0]->{type} = 'foo';
+throws_ok { $as->_create_transcripts($records) } qr/unexpected type of child record/, '_create_transcripts - unexpected type of child';
+
+no warnings 'once';
+open(SAVE, ">&STDERR") or die "Can't save STDERR\n"; 
+
+my $tmp;
+close STDERR;
+open STDERR, '>', \$tmp;
+
+$records = $as->_get_records_by_coords(21, 25585733, 25585733);
+delete $records->[3]->{attributes}->{biotype};
+is(scalar @{$as->_create_transcripts($records)}, 2, 'no biotype skips transcript');
+ok($tmp =~ /Unable to determine biotype/, 'no biotype warning message');
+
+# overlapping exons
+$records = $as->_get_records_by_coords(21, 25585733, 25585733);
+$records->[0]->{end} += 1e5;
+is(scalar @{$as->_create_transcripts($records)}, 2, 'overlapping exons skips transcript');
+ok($tmp =~ /Failed to add exon to transcript/, 'overlapping exons warning message');
+
+# restore STDERR
+open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
+
+
+
 
 
 ## TESTS WITH INPUT BUFFER
