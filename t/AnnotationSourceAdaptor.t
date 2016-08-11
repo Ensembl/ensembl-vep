@@ -95,7 +95,7 @@ is_deeply(
       'short_name' => 'test',
       '_config' => $asa->config,
       'report_coords' => 0,
-      'file' => '/nfs/users/nfs_w/wm2/Ensembl/git/ensembl-vep/t/testdata/custom/test.vcf.gz',
+      'file' => $test_cfg->{custom_vcf},
       'type' => 'exact'
     }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
   ],
@@ -110,7 +110,7 @@ is_deeply(
       'short_name' => 'test',
       '_config' => $asa->config,
       'report_coords' => 0,
-      'file' => '/nfs/users/nfs_w/wm2/Ensembl/git/ensembl-vep/t/testdata/custom/test.vcf.gz',
+      'file' => $test_cfg->{custom_vcf},
       'type' => 'overlap'
     }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
   ],
@@ -125,7 +125,7 @@ is_deeply(
       'short_name' => 'test',
       '_config' => $asa->config,
       'report_coords' => 1,
-      'file' => '/nfs/users/nfs_w/wm2/Ensembl/git/ensembl-vep/t/testdata/custom/test.vcf.gz',
+      'file' => $test_cfg->{custom_vcf},
       'type' => 'overlap'
     }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
   ],
@@ -141,7 +141,7 @@ is_deeply(
       '_config' => $asa->config,
       'report_coords' => 1,
       'fields' => ['FOO', 'BAR'],
-      'file' => '/nfs/users/nfs_w/wm2/Ensembl/git/ensembl-vep/t/testdata/custom/test.vcf.gz',
+      'file' => $test_cfg->{custom_vcf},
       'type' => 'overlap'
     }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
   ],
