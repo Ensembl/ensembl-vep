@@ -43,6 +43,14 @@ is_deeply(
     type => 'exact',
     short_name => 'bar',
     report_coords => 1,
+    info => {
+      custom_info => {
+        file => 'foo/bar',
+        type => 'exact',
+        short_name => 'bar',
+        report_coords => 1,
+      }
+    }
   }, 'Bio::EnsEMBL::VEP::AnnotationSource::File'),
   'new - test settings'
 );
