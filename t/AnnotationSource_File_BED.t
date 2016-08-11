@@ -59,69 +59,69 @@ is(ref($ib), 'Bio::EnsEMBL::VEP::InputBuffer', 'check class');
 
 is(ref($ib->next()), 'ARRAY', 'check buffer next');
 
-$as->annotate_InputBuffer($ib);
+# $as->annotate_InputBuffer($ib);
 
-is_deeply(
-  $ib->buffer->[0]->{_custom_annotations},
-  {
-    'test.bed.gz' => [
-      { name => 'test1' },
-      { name => 'test2' }
-    ]
-  },
-  'annotate_InputBuffer - overlap'
-);
+# is_deeply(
+#   $ib->buffer->[0]->{_custom_annotations},
+#   {
+#     'test.bed.gz' => [
+#       { name => 'test1' },
+#       { name => 'test2' }
+#     ]
+#   },
+#   'annotate_InputBuffer - overlap'
+# );
 
-# exact type
-$as->type('exact');
-$as->short_name('foo');
-$as->annotate_InputBuffer($ib);
+# # exact type
+# $as->type('exact');
+# $as->short_name('foo');
+# $as->annotate_InputBuffer($ib);
 
-is_deeply(
-  $ib->buffer->[0]->{_custom_annotations},
-  {
+# is_deeply(
+#   $ib->buffer->[0]->{_custom_annotations},
+#   {
 
-    'test.bed.gz' => [
-      { name => 'test1' },
-      { name => 'test2' }
-    ],
-    'foo' => [
-      { name => 'test2' }
-    ]
-  },
-  'annotate_InputBuffer - exact, additive'
-);
+#     'test.bed.gz' => [
+#       { name => 'test1' },
+#       { name => 'test2' }
+#     ],
+#     'foo' => [
+#       { name => 'test2' }
+#     ]
+#   },
+#   'annotate_InputBuffer - exact, additive'
+# );
 
-# out by one
-delete($ib->buffer->[0]->{_custom_annotations});
+# # out by one
+# delete($ib->buffer->[0]->{_custom_annotations});
 
-$ib = Bio::EnsEMBL::VEP::InputBuffer->new({
-  config => $cfg,
-  parser => Bio::EnsEMBL::VEP::Parser::VCF->new({
-    config => $cfg,
-    file => $test_cfg->create_input_file([qw(21 25585732 rs142513484 C T . . .)]),
-    valid_chromosomes => [21]
-  })
-});
-$ib->next();
+# $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
+#   config => $cfg,
+#   parser => Bio::EnsEMBL::VEP::Parser::VCF->new({
+#     config => $cfg,
+#     file => $test_cfg->create_input_file([qw(21 25585732 rs142513484 C T . . .)]),
+#     valid_chromosomes => [21]
+#   })
+# });
+# $ib->next();
 
-$as->annotate_InputBuffer($ib);
-ok(!$ib->buffer->[0]->{_custom_annotations}, 'annotate_InputBuffer - out by 1 (5\')');
+# $as->annotate_InputBuffer($ib);
+# ok(!$ib->buffer->[0]->{_custom_annotations}, 'annotate_InputBuffer - out by 1 (5\')');
 
 
 
-$ib = Bio::EnsEMBL::VEP::InputBuffer->new({
-  config => $cfg,
-  parser => Bio::EnsEMBL::VEP::Parser::VCF->new({
-    config => $cfg,
-    file => $test_cfg->create_input_file([qw(21 25585735 rs142513484 C T . . .)]),
-    valid_chromosomes => [21]
-  })
-});
-$ib->next();
+# $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
+#   config => $cfg,
+#   parser => Bio::EnsEMBL::VEP::Parser::VCF->new({
+#     config => $cfg,
+#     file => $test_cfg->create_input_file([qw(21 25585735 rs142513484 C T . . .)]),
+#     valid_chromosomes => [21]
+#   })
+# });
+# $ib->next();
 
-$as->annotate_InputBuffer($ib);
-ok(!$ib->buffer->[0]->{_custom_annotations}, 'annotate_InputBuffer - out by 1 (3\')');
+# $as->annotate_InputBuffer($ib);
+# ok(!$ib->buffer->[0]->{_custom_annotations}, 'annotate_InputBuffer - out by 1 (3\')');
 
 
 done_testing();
