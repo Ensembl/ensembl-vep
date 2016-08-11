@@ -96,7 +96,15 @@ is_deeply(
       '_config' => $asa->config,
       'report_coords' => 0,
       'file' => $test_cfg->{custom_vcf},
-      'type' => 'exact'
+      'type' => 'exact',
+      'info' => {
+        'custom_info' => {
+          'short_name' => 'test',
+          'report_coords' => undef,
+          'file' => $test_cfg->{custom_vcf},
+          'type' => 'exact'
+        }
+      }
     }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
   ],
   'get_all_custom'
@@ -111,7 +119,15 @@ is_deeply(
       '_config' => $asa->config,
       'report_coords' => 0,
       'file' => $test_cfg->{custom_vcf},
-      'type' => 'overlap'
+      'type' => 'overlap',
+      'info' => {
+        'custom_info' => {
+          'short_name' => 'test',
+          'report_coords' => undef,
+          'file' => $test_cfg->{custom_vcf},
+          'type' => 'overlap'
+        }
+      }
     }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
   ],
   'get_all_custom - default overlap type'
@@ -126,7 +142,15 @@ is_deeply(
       '_config' => $asa->config,
       'report_coords' => 1,
       'file' => $test_cfg->{custom_vcf},
-      'type' => 'overlap'
+      'type' => 'overlap',
+      'info' => {
+        'custom_info' => {
+          'short_name' => 'test',
+          'report_coords' => 1,
+          'file' => $test_cfg->{custom_vcf},
+          'type' => 'overlap',
+        }
+      }
     }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
   ],
   'get_all_custom - report_coords'
@@ -142,7 +166,16 @@ is_deeply(
       'report_coords' => 1,
       'fields' => ['FOO', 'BAR'],
       'file' => $test_cfg->{custom_vcf},
-      'type' => 'overlap'
+      'type' => 'overlap',
+      'info' => {
+        'custom_info' => {
+          'short_name' => 'test',
+          'report_coords' => 1,
+          'fields' => ['FOO', 'BAR'],
+          'file' => $test_cfg->{custom_vcf},
+          'type' => 'overlap',
+        }
+      }
     }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
   ],
   'get_all_custom - fields'
