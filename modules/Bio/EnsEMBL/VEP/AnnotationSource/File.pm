@@ -87,10 +87,10 @@ sub new {
   throw("ERROR: No file given\n") unless $hashref->{file};
   $self->file($hashref->{file});
 
-  $self->short_name($hashref->{short_name} || (split '/', $self->file)[-1]);
-  $self->type($hashref->{type} || 'overlap');
+  $hashref->{short_name} = $self->short_name($hashref->{short_name} || (split '/', $self->file)[-1]);
+  $hashref->{type} = $self->type($hashref->{type} || 'overlap');
   $self->report_coords(defined($hashref->{report_coords}) ? $hashref->{report_coords} : 0);
-  
+
   $self->{info} = { custom_info => $hashref };
 
   if(my $format = $hashref->{format}) {
