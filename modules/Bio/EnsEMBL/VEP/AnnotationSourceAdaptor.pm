@@ -120,6 +120,8 @@ sub get_all_custom {
   foreach my $custom_string(@{$self->param('custom') || []}) {
     my ($file, $short_name, $format, $type, $report_coords, @fields) = split /\,/, $custom_string;
 
+    throw("ERROR: No format specified for custom annotation source $file\n") unless $format;
+
     my $opts = {
       config => $self->config,
       file => $file,

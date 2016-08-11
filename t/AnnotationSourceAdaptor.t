@@ -86,6 +86,8 @@ $asa->param('check_existing', 1);
 is_deeply(ref($asa->get_all()->[0]), 'Bio::EnsEMBL::VEP::AnnotationSource::Cache::Variation', 'get_all - var comes first');
 $asa->param('check_existing', 0);
 
+$asa->param('custom', [$test_cfg->{custom_vcf}]);
+throws_ok {$asa->get_all_custom} qr/No format/, 'get_all_custom - no format';
 
 $asa->param('custom', [$test_cfg->{custom_vcf}.',test,vcf,exact']);
 is_deeply(
