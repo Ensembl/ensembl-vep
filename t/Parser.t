@@ -152,6 +152,11 @@ $vf = get_vf({allele_string => 'g/c'});
 $p->validate_vf($vf);
 is($vf->{allele_string}, 'G/C', 'validate_vf - uppercase allele_string');
 
+ok($p->chromosome_synonyms($test_cfg->{chr_synonyms}), "load chr_synonyms");
+
+$vf = get_vf({allele_string => 'G/C', chr => 'NC_000021.9'});
+ok($p->validate_vf($vf), 'use chr synonym');
+is($vf->{chr}, 'NC_000021.9', 'chr unchanged after synonym check');
 
 # warning_msg prints to STDERR
 no warnings 'once';
@@ -235,6 +240,9 @@ is($p->detect_format, 'hgvs', 'detect_format - HGVSp');
 
 $p->file($test_cfg->create_input_file('21 25587759 25587759 C/A + test'));
 is($p->detect_format, 'ensembl', 'detect_format - VEP_input');
+
+$p->file($test_cfg->create_input_file('21   25587759 25587759     C/A  +  test'));
+is($p->detect_format, 'ensembl', 'detect_format - multiple spaces delimiter');
 
 $p->file($test_cfg->create_input_file('21 25587759 25587759 C/A/G + test'));
 is($p->detect_format, 'ensembl', 'detect_format - VEP_input multiple');
