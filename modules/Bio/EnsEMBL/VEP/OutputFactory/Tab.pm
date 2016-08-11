@@ -73,9 +73,11 @@ sub description_headers {
 
   my $field_descs = \%Bio::EnsEMBL::VEP::Constants::FIELD_DESCRIPTIONS;
 
+  my %other_descs = map {$_->[0] => $_->[1]} @{$self->get_plugin_headers}, @{$self->get_custom_headers};
+
   return [
     '## Column descriptions:',
-    map {'## '.$_.' : '.($field_descs->{$_} || '?')}
+    map {'## '.$_.' : '.($field_descs->{$_} || $other_descs{$_} || '?')}
     @{$self->fields}
   ];
 }
@@ -92,7 +94,7 @@ sub fields {
     my @fields = (
       @Bio::EnsEMBL::VEP::Constants::DEFAULT_OUTPUT_COLS,
       @{$self->flag_fields},
-      map {$_->[0]} @{$self->get_plugin_headers}
+      map {$_->[0]} (@{$self->get_plugin_headers}, @{$self->get_custom_headers})
     );
     
     $self->{fields} = \@fields;

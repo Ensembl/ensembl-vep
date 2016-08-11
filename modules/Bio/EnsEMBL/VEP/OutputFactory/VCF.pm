@@ -120,7 +120,7 @@ sub headers {
     $info->{vep_version},
     $info->{time},
     $info->{cache_dir} ? ' cache="'.$info->{cache_dir}.'"' : '',
-  $info->{db_name} ? ' db="'.$info->{db_name}.'@'.$info->{db_host}.'"' : ''
+    $info->{db_name} ? ' db="'.$info->{db_name}.'@'.$info->{db_host}.'"' : ''
   );
 
   # add misc version data
@@ -135,6 +135,9 @@ sub headers {
 
   # plugin headers
   push @headers, map {sprintf('##%s=%s', $_->[0], $_->[1])} @{$self->get_plugin_headers};
+
+  # custom headers
+  push @headers, map {sprintf('##INFO=<ID=%s,Number=.,Type=String,Description="%s">', $_->[0], $_->[1])} @{$self->get_custom_headers};
 
   push @headers, $col_heading;
 
@@ -237,7 +240,7 @@ sub fields {
       grep {!$vcf_cols{$_}}
       @{$self->flag_fields};
 
-    push @fields, map {$_->[0]} @{$self->get_plugin_headers};
+    push @fields, map {$_->[0]} @{$self->get_plugin_headers}, @{$self->get_custom_headers};
     
     $self->{fields} = \@fields;
   }

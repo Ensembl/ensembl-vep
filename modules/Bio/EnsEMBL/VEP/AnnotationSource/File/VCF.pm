@@ -114,7 +114,7 @@ sub _create_records {
 
       foreach my $field(keys %$fields_data) {
         my $data = $fields_data->{$field};
-        $record->{$field} = ref($data) eq 'HASH' ? $data->{$index} : $data;
+        $record->{fields}->{$field} = ref($data) eq 'HASH' ? $data->{$index} : $data;
       }
 
       push @records, $record;
@@ -129,10 +129,10 @@ sub _create_records {
       my $data = $fields_data->{$field};
 
       if(ref($data) eq 'HASH') {
-        $record->{$field} = join(',', map {$data->{$_}} sort {$a <=> $b} keys %{$fields_data->{$field}});
+        $record->{fields}->{$field} = join(',', map {$data->{$_}} sort {$a <=> $b} keys %{$fields_data->{$field}});
       }
       else {
-        $record->{$field} = $data;
+        $record->{fields}->{$field} = $data;
       }
     }
 

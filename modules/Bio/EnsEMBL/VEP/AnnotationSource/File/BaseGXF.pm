@@ -72,6 +72,8 @@ sub new {
 
   $self->{cache_region_size} = 1e6;
 
+  delete($self->{info});
+
   return $self;
 }
 

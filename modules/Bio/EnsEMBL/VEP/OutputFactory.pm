@@ -179,6 +179,41 @@ sub headers {
   return [];
 }
 
+sub get_plugin_headers {
+  my $self = shift;
+
+  my @headers = ();
+
+  for my $plugin (@{$self->plugins}) {
+    if (my $hdr = $plugin->get_header_info) {
+      for my $key (sort keys %$hdr) {
+        push @headers, [$key, $hdr->{$key}];
+      }
+    }
+  }
+
+  return \@headers;
+}
+
+sub get_custom_headers {
+  my $self = shift;
+
+  my @headers;
+
+  foreach my $custom(@{$self->header_info->{custom_info} || []}) {
+    push @headers, [$custom->{short_name}, sprintf("%s (%s)", $custom->{file}, $custom->{type})];
+    
+    foreach my $field(@{$custom->{fields} || []}) {
+      push @headers, [
+        sprintf("%s_%s", $custom->{short_name}, $field),
+        sprintf("%s field from %s", $field, $custom->{file})
+      ];
+    }
+  }
+
+  return \@headers;
+}
+
 # this method returns all the fields that will be populated given user parameters
 sub flag_fields {
   my $self = shift;
@@ -236,7 +271,7 @@ sub get_all_VariationFeatureOverlapAllele_output_hashes {
 
     # we have a method defined for each sub-class of VariationFeatureOverlapAllele
     my $method = (split('::', ref($vfoa)))[-1].'_to_output_hash';
-    my $output = $self->$method($vfoa, \%copy);
+    my $output = $self->$method($vfoa, \%copy, $vf);
 
     # run plugins
     $output = $self->run_plugins($vfoa, $output, $vf);
@@ -585,15 +620,17 @@ sub VariationFeature_to_output_hash {
   # minimised?
   $hash->{MINIMISED} = 1 if $vf->{minimised};
 
-  # add custom info
-  # if(defined($config->{custom}) && scalar @{$config->{custom}}) {
-  #   # merge the custom hash with the extra hash
-  #   my $custom = get_custom_annotation($config, $vf);
-
-  #   for my $key (keys %$custom) {
-  #     $hash->{$key} = $custom->{$key};
-  #   }
-  # }
+  # custom annotations
+  foreach my $custom_name(keys %{$vf->{_custom_annotations} || {}}) {
+    $self->_add_custom_annotations_to_hash(
+      $hash,
+      $custom_name,
+      [
+        grep {!exists($_->{allele})}
+        @{$vf->{_custom_annotations}->{$custom_name}}
+      ]
+    );
+  }
 
   $self->stats->log_VariationFeature($vf, $hash) unless $self->{no_stats};
 
@@ -670,9 +707,21 @@ sub add_colocated_variant_info {
   return $hash;
 }
 
+sub _add_custom_annotations_to_hash {
+  my ($self, $hash, $custom_name, $annots) = @_;
+
+  foreach my $annot(@$annots) {
+    $hash->{$custom_name} = $annot->{name};
+
+    foreach my $field(keys %{$annot->{fields} || {}}) {
+      $hash->{$custom_name.'_'.$field} = $annot->{fields}->{$field};
+    }
+  }
+}
+
 sub VariationFeatureOverlapAllele_to_output_hash {
   my $self = shift;
-  my ($vfoa, $hash) = @_;
+  my ($vfoa, $hash, $vf) = @_;
 
   my @ocs = sort {$a->rank <=> $b->rank} @{$vfoa->get_all_OverlapConsequences};
 
@@ -691,6 +740,18 @@ sub VariationFeatureOverlapAllele_to_output_hash {
 
   # picked?
   $hash->{PICK} = 1 if defined($vfoa->{PICK});
+
+  # custom annotations
+  foreach my $custom_name(keys %{$vf->{_custom_annotations} || {}}) {
+    $self->_add_custom_annotations_to_hash(
+      $hash,
+      $custom_name,
+      [
+        grep {$_->{allele} && ($_->{allele} eq $hash->{Allele})}
+        @{$vf->{_custom_annotations}->{$custom_name}}
+      ]
+    );
+  }
 
   return $hash;
 }
@@ -809,7 +870,7 @@ sub BaseTranscriptVariationAllele_to_output_hash {
   $hash->{BIOTYPE} = $tr->biotype if $self->{biotype} && $tr->biotype;
 
   # source cache self transcript if using --merged
-  $hash->{SOURCE} = $tr->{_source_cache} if $self->{merged} && defined $tr->{_source_cache};
+  $hash->{SOURCE} = $tr->{_source_cache} if defined $tr->{_source_cache};
 
   # gene phenotype
   $hash->{GENE_PHENO} = 1 if $self->{gene_phenotype} && $tr->{_gene_phenotype};
@@ -1127,22 +1188,6 @@ sub IntergenicStructuralVariationAllele_to_output_hash {
 
 sub plugins {
   return $_[0]->{plugins} || [];
-}
-
-sub get_plugin_headers {
-  my $self = shift;
-
-  my @headers = ();
-
-  for my $plugin (@{$self->plugins}) {
-    if (my $hdr = $plugin->get_header_info) {
-      for my $key (sort keys %$hdr) {
-        push @headers, [$key, $hdr->{$key}];
-      }
-    }
-  }
-
-  return \@headers;
 }
 
 sub run_plugins {

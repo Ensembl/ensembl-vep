@@ -101,6 +101,8 @@ sub description_headers {
     map {'## '.$_.' : '.($field_descs->{$_} || '?')}
     @{$self->fields};
 
+  push @headers, map {'## '.$_->[0].' : '.$_->[1]} @{$self->get_plugin_headers}, @{$self->get_custom_headers};
+
   return \@headers;
 }
 

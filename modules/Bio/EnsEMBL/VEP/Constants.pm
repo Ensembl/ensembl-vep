@@ -50,7 +50,8 @@ our @FLAG_FIELDS = (
   { flag => 'uniprot',         fields => ['SWISSPROT', 'TREMBL', 'UNIPARC'] },
   { flag => 'xref_refseq',     fields => ['RefSeq'] },
   { flag => 'refseq',          fields => ['REFSEQ_MATCH'] },
-  { flag => 'merged',          fields => ['REFSEQ_MATCH'] },
+  { flag => 'merged',          fields => ['REFSEQ_MATCH', 'SOURCE'] },
+  { flag => 'custom',          fields => ['SOURCE'] },
   { flag => 'gene_phenotype',  fields => ['GENE_PHENO'] },
 
   # non-synonymous predictions
@@ -103,7 +104,7 @@ our %FIELD_DESCRIPTIONS = (
   'CCDS'               => 'Indicates if transcript is a CCDS transcript',
   'SYMBOL'             => 'Gene symbol (e.g. HGNC)',
   'SYMBOL_SOURCE'      => 'Source of gene symbol',
-  'SOURCE'             => 'Source of transcript in merged gene set',
+  'SOURCE'             => 'Source of transcript',
   'HGNC_ID'            => 'Stable identifer of HGNC gene symbol',
   'ENSP'               => 'Protein identifer',
   'FLAGS'              => 'Transcript quality flags',

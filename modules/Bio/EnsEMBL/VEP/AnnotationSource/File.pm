@@ -90,6 +90,8 @@ sub new {
   $self->short_name($hashref->{short_name} || (split '/', $self->file)[-1]);
   $self->type($hashref->{type} || 'overlap');
   $self->report_coords(defined($hashref->{report_coords}) ? $hashref->{report_coords} : 0);
+  
+  $self->{info} = { custom_info => $hashref };
 
   if(my $format = $hashref->{format}) {
 

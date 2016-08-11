@@ -699,6 +699,7 @@ sub get_output_header_info {
       my $as_info = $as->info;
       $info->{version_data}->{$_} ||= $as_info->{$_} for keys %$as_info;
       $info->{cache_dir} ||= $as->dir if $as->can('dir');
+      push @{$info->{custom_info}}, $as_info->{custom_info} if $as_info->{custom_info};
     }
 
     $self->{output_header_info} = $info;

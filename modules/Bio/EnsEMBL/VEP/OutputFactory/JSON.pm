@@ -127,6 +127,8 @@ sub get_all_lines_by_InputBuffer {
 
     $self->add_colocated_variant_info($vf, $hash);
 
+    $hash->{custom_annotations} = $vf->{_custom_annotations} if $vf->{_custom_annotations};
+
     numberify($hash, \%NUMBERIFY_EXEMPT);
 
     # rename
