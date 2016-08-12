@@ -56,9 +56,7 @@ sub parser {
 
 sub get_valid_chromosomes {
   my $self = shift;
-
-  ## PLACEHOLDER UNTIL WE GET A VALID CALL TO GET CHRS FROM A BIGWIG
-  return $self->{valid_chromosomes} ||= [(1..40), qw(X Y MT)];
+  return $self->{valid_chromosomes} ||= [keys %{$self->parser->{cache}->{chromosomes}}];
 }
 
 sub _get_record_name {
