@@ -44,6 +44,7 @@ use warnings;
 package Bio::EnsEMBL::VEP::AnnotationSource::File::BigWig;
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
+use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
 use Bio::EnsEMBL::IO::Parser::BigWig;
 
 use base qw(Bio::EnsEMBL::VEP::AnnotationSource::File);
@@ -51,6 +52,42 @@ use base qw(Bio::EnsEMBL::VEP::AnnotationSource::File);
 sub parser {
   my $self = shift;
   return $self->{parser} ||= Bio::EnsEMBL::IO::Parser::BigWig->open($self->file);
+}
+
+sub get_valid_chromosomes {
+  my $self = shift;
+
+  ## PLACEHOLDER UNTIL WE GET A VALID CALL TO GET CHRS FROM A BIGWIG
+  return $self->{valid_chromosomes} ||= [(1..40), qw(X Y MT)];
+}
+
+sub _get_record_name {
+  my $self = shift;
+  my $parser = $self->parser;
+
+  return $self->report_coords ?
+    sprintf(
+      '%s:%i-%i',
+      $parser->get_seqname,
+      $parser->get_start,
+      $parser->get_end
+    ) :
+    $parser->get_score;
+}
+
+sub _record_overlaps_VF {
+  my $self = shift;
+  my $vf = shift;
+
+  my $parser = $self->parser();
+  my $type = $self->type();
+
+  if($type eq 'overlap') {
+    return overlap($parser->get_start + 1, $parser->get_end, $vf->{start}, $vf->{end});
+  }
+  elsif($type eq 'exact') {
+    return $parser->get_start + 1 == $vf->{start} && $parser->get_end == $vf->{end};
+  }
 }
 
 1;

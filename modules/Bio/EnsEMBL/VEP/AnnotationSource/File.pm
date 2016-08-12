@@ -49,6 +49,7 @@ use Bio::EnsEMBL::VEP::AnnotationSource::File::BED;
 use Bio::EnsEMBL::VEP::AnnotationSource::File::VCF;
 use Bio::EnsEMBL::VEP::AnnotationSource::File::GFF;
 use Bio::EnsEMBL::VEP::AnnotationSource::File::GTF;
+use Bio::EnsEMBL::VEP::AnnotationSource::File::BigWig;
 
 use base qw(Bio::EnsEMBL::VEP::AnnotationSource);
 

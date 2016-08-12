@@ -56,6 +56,7 @@ our %DEFAULTS = (
   custom_gff     => $Bin.'/testdata/custom/test.gff.gz',
   custom_refseq_gff => $Bin.'/testdata/custom/refseq.gff.gz',
   custom_gtf     => $Bin.'/testdata/custom/test.gtf.gz',
+  custom_bigwig  => $Bin.'/testdata/custom/test.bw',
 
   header_info    => {
     time => 'test',
