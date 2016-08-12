@@ -37,9 +37,12 @@ before_install:
     - cp blib/arch/auto/Bio/DB/HTS/Faidx/Faidx.so ..
     - cp blib/arch/auto/Bio/DB/HTS/HTS.so ..
     - cd ../
+    - wget http://hgdownload.cse.ucsc.edu/admin/jksrc.zip
+    - unzip -q jksrc.zip
 
 
 install:
+    - export KENT_SRC="kent/src"
     - cpanm --quiet --installdeps --with-recommends --notest --cpanfile ensembl/cpanfile .
     - cpanm --quiet --installdeps --notest .
     - cpanm --quiet -n Devel::Cover::Report::Coveralls
