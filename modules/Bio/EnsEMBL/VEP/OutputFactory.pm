@@ -502,7 +502,7 @@ sub pick_worst_VariationFeatureOverlapAllele {
 
       # lower APPRIS is best
       if(my ($appris) = @{$tr->get_all_Attributes('appris')}) {
-        if($appris->value =~ m/([A-Za-z]+)(\d+)/) {
+        if($appris->value =~ m/([A-Za-z]).+(\d+)/) {
           my ($type, $grade) = ($1, $2);
 
           # values are principal1, principal2, ..., alternative1, alternative2
