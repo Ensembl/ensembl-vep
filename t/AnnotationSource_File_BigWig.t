@@ -31,14 +31,14 @@ use_ok('Bio::EnsEMBL::VEP::AnnotationSource::File::BigWig');
 
 my $file = $test_cfg->{custom_bigwig};
 
-my $as = Bio::EnsEMBL::VEP::AnnotationSource::File::BigWig->new({file => $file});
-ok($as, 'new is defined');
-
 # need to get a config object for further tests
 use_ok('Bio::EnsEMBL::VEP::Config');
 
 my $cfg = Bio::EnsEMBL::VEP::Config->new($test_cfg->base_testing_cfg);
 ok($cfg, 'get new config object');
+
+my $as = Bio::EnsEMBL::VEP::AnnotationSource::File::BigWig->new({file => $file, config => $cfg});
+ok($as, 'new is defined');
 
 
 ## TESTS WITH INPUT BUFFER
