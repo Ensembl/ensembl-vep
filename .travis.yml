@@ -42,7 +42,17 @@ before_install:
 
 
 install:
+    - export CWD=$PWD
     - export KENT_SRC="kent/src"
+    - export MACHTYPE=$(uname -m)
+    - export MYSQLINC=`mysql_config --include | sed -e 's/^-I//g'`
+    - export MYSQLLIBS=`mysql_config --libs`
+    - cd kent/src/lib
+    - echo 'CFLAGS="-fPIC"' > ../inc/localEnvironment.mk
+    - make
+    - cd ../jkOwnLib
+    - make
+    - cd $CWD
     - cpanm --quiet --installdeps --with-recommends --notest --cpanfile ensembl/cpanfile .
     - cpanm --quiet --installdeps --notest .
     - cpanm --quiet -n Devel::Cover::Report::Coveralls
