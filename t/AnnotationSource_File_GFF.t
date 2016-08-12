@@ -207,8 +207,6 @@ open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
 
 
-
-
 ## TESTS WITH INPUT BUFFER
 ##########################
 
@@ -232,6 +230,16 @@ $ib->finish_annotation();
 is($ib->buffer->[0]->display_consequence, 'missense_variant', 'annotate_InputBuffer - display_consequence');
 
 
+## get_source_chr_name tests
+############################
+
+$as = Bio::EnsEMBL::VEP::AnnotationSource::File::GFF->new({file => $test_cfg->{custom_gff}, config => $runner->config});
+
+is($as->get_source_chr_name(21), 21, 'get_source_chr_name - exists, same');
+is($as->get_source_chr_name('chr21'), 21, 'get_source_chr_name - strip chr');
+
+push @{$as->{valid_chromosomes}}, 'chrFoo';
+is($as->get_source_chr_name('Foo'), 'chrFoo', 'get_source_chr_name - add chr');
 
 
 ## REFSEQ FILE
