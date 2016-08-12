@@ -13,50 +13,58 @@ env:
 sudo: false
 
 addons:
-    apt:
-        packages:
-        - unzip
+  apt:
+    packages:
+      - unzip
+      - mysql-server-5.5
+      - apache2
+      - libmysqlclient-dev
+      - libpng12-dev
+      - libssl-dev
+      - openssl
+      - mysql-client-5.5
+      - mysql-client-core-5.5
 
 before_install:
-    - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-test.git
-    - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl.git
-    - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-io.git
-    - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-funcgen.git
-    - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-variation.git
-    - wget https://github.com/bioperl/bioperl-live/archive/release-1-6-924.zip
-    - unzip release-1-6-924.zip
-    - git clone --branch master --depth 1 https://github.com/samtools/htslib.git
-    - cd htslib
-    - make
-    - export HTSLIB_DIR=$(pwd -P)
-    - cd ../
-    - git clone --branch master --depth 1 https://github.com/Ensembl/Bio-HTS
-    - cd Bio-HTS
-    - perl Build.PL --htslib $HTSLIB_DIR
-    - ./Build
-    - cp blib/arch/auto/Bio/DB/HTS/Faidx/Faidx.so ..
-    - cp blib/arch/auto/Bio/DB/HTS/HTS.so ..
-    - cd ../
-    - wget http://hgdownload.cse.ucsc.edu/admin/jksrc.zip
-    - unzip -q jksrc.zip
+  - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-test.git
+  - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl.git
+  - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-io.git
+  - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-funcgen.git
+  - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-variation.git
+  - wget https://github.com/bioperl/bioperl-live/archive/release-1-6-924.zip
+  - unzip release-1-6-924.zip
+  - git clone --branch master --depth 1 https://github.com/samtools/htslib.git
+  - cd htslib
+  - make
+  - export HTSLIB_DIR=$(pwd -P)
+  - cd ../
+  - git clone --branch master --depth 1 https://github.com/Ensembl/Bio-HTS
+  - cd Bio-HTS
+  - perl Build.PL --htslib $HTSLIB_DIR
+  - ./Build
+  - cp blib/arch/auto/Bio/DB/HTS/Faidx/Faidx.so ..
+  - cp blib/arch/auto/Bio/DB/HTS/HTS.so ..
+  - cd ../
+  - wget http://hgdownload.cse.ucsc.edu/admin/jksrc.zip
+  - unzip -q jksrc.zip
 
 
 install:
-    - export CWD=$PWD
-    - export KENT_SRC="kent/src"
-    - export MACHTYPE=$(uname -m)
-    - export MYSQLINC=`mysql_config --include | sed -e 's/^-I//g'`
-    - export MYSQLLIBS=`mysql_config --libs`
-    - cd kent/src/lib
-    - echo 'CFLAGS="-fPIC"' > ../inc/localEnvironment.mk
-    - make
-    - cd ../jkOwnLib
-    - make
-    - cd $CWD
-    - cpanm --quiet --installdeps --with-recommends --notest --cpanfile ensembl/cpanfile .
-    - cpanm --quiet --installdeps --notest .
-    - cpanm --quiet -n Devel::Cover::Report::Coveralls
-    - cp travisci/MultiTestDB.conf.travisci  t/MultiTestDB.conf
+  - export CWD=$PWD
+  - export KENT_SRC="kent/src"
+  - export MACHTYPE=$(uname -m)
+  - export MYSQLINC=`mysql_config --include | sed -e 's/^-I//g'`
+  - export MYSQLLIBS=`mysql_config --libs`
+  - cd kent/src/lib
+  - echo 'CFLAGS="-fPIC"' > ../inc/localEnvironment.mk
+  - make
+  - cd ../jkOwnLib
+  - make
+  - cd $CWD
+  - cpanm --quiet --installdeps --with-recommends --notest --cpanfile ensembl/cpanfile .
+  - cpanm --quiet --installdeps --notest .
+  - cpanm --quiet -n Devel::Cover::Report::Coveralls
+  - cp travisci/MultiTestDB.conf.travisci  t/MultiTestDB.conf
 
 script: "./travisci/harness.sh"
 
