@@ -5,3 +5,4 @@ requires 'PerlIO::gzip';
 requires 'IO::Uncompress::Gunzip';
 requires 'CGI';
 requires 'HTML::Lint';
+requires 'Bio::DB::BigFile';

@@ -45,22 +45,35 @@ package Bio::EnsEMBL::VEP::AnnotationSource::File;
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
-use Bio::EnsEMBL::VEP::AnnotationSource::File::BED;
-use Bio::EnsEMBL::VEP::AnnotationSource::File::VCF;
-use Bio::EnsEMBL::VEP::AnnotationSource::File::GFF;
-use Bio::EnsEMBL::VEP::AnnotationSource::File::GTF;
-use Bio::EnsEMBL::VEP::AnnotationSource::File::BigWig;
 
 use base qw(Bio::EnsEMBL::VEP::AnnotationSource);
 
-our $CAN_USE_TABIX_PM;
+our ($CAN_USE_TABIX_PM, $CAN_USE_BIGWIG);
 
 BEGIN {
   if (eval { require Bio::DB::HTS::Tabix; 1 }) {
     $CAN_USE_TABIX_PM = 1;
+
+    eval q{
+      use Bio::EnsEMBL::VEP::AnnotationSource::File::BED;
+      use Bio::EnsEMBL::VEP::AnnotationSource::File::VCF;
+      use Bio::EnsEMBL::VEP::AnnotationSource::File::GFF;
+      use Bio::EnsEMBL::VEP::AnnotationSource::File::GTF;
+    };
   }
   else {
     $CAN_USE_TABIX_PM = 0;
+  }
+
+  if (eval { require Bio::DB::BigFile; 1 }) {
+    $CAN_USE_BIGWIG = 1;
+
+    eval q{
+      use Bio::EnsEMBL::VEP::AnnotationSource::File::BigWig;
+    };
+  }
+  else {
+    $CAN_USE_BIGWIG = 0;
   }
 }
 
@@ -101,7 +114,12 @@ sub new {
     $format = lc($format);
     throw("ERROR: Unknown or unsupported format $format\n") unless $FORMAT_MAP{$format};
 
-    throw("ERROR: Cannot use format $format without Bio::DB::HTS::Tabix module installed\n") unless $format eq 'bigwig' || $CAN_USE_TABIX_PM;
+    if($format eq 'bigwig') {
+      throw("ERROR: Cannot use format $format without Bio::DB::BigFile module installed\n") unless $CAN_USE_BIGWIG;
+    }
+    else {
+      throw("ERROR: Cannot use format $format without Bio::DB::HTS::Tabix module installed\n") unless $CAN_USE_TABIX_PM;
+    }
 
     my $class = 'Bio::EnsEMBL::VEP::AnnotationSource::File::'.$FORMAT_MAP{$format};
     return $class->new({%$hashref, config => $self->config});

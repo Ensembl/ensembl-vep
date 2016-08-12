@@ -81,13 +81,6 @@ is($as->report_coords, 0, 'report_coords - get default');
 is($as->report_coords(1), 1, 'report_coords - set');
 
 use_ok('Bio::EnsEMBL::VEP::Config');
-$as = Bio::EnsEMBL::VEP::AnnotationSource::File->new({
-  file => 'test',
-  format => 'vcf',
-  config => my $cfg = Bio::EnsEMBL::VEP::Config->new($test_cfg->base_testing_cfg)
-});
-is(ref($as), 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF', 'new with format');
-
 throws_ok {
   $as = Bio::EnsEMBL::VEP::AnnotationSource::File->new({
     file => 'test',
@@ -95,6 +88,34 @@ throws_ok {
     config => my $cfg = Bio::EnsEMBL::VEP::Config->new($test_cfg->base_testing_cfg)
   });
 } qr/Unknown or unsupported format/, 'new - invalid format';
+
+SKIP: {
+
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  skip 'Bio::DB::HTS::Tabix module not available', 4 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+
+  for my $format(qw(BED GFF GTF VCF)) {  
+    $as = Bio::EnsEMBL::VEP::AnnotationSource::File->new({
+      file => 'test',
+      format => lc($format),
+      config => my $cfg = Bio::EnsEMBL::VEP::Config->new($test_cfg->base_testing_cfg)
+    });
+    is(ref($as), 'Bio::EnsEMBL::VEP::AnnotationSource::File::'.$format, 'new with format - '.$format);
+  }
+}
+
+SKIP: {
+
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  skip 'Bio::DB::BigFile module not available', 1 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_BIGWIG;
+
+  $as = Bio::EnsEMBL::VEP::AnnotationSource::File->new({
+    file => 'test',
+    format => 'bigwig',
+    config => my $cfg = Bio::EnsEMBL::VEP::Config->new($test_cfg->base_testing_cfg)
+  });
+  is(ref($as), 'Bio::EnsEMBL::VEP::AnnotationSource::File::BigWig', 'new with format - BigWig');
+}
 
 my $bak = $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
 $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM = 0;
@@ -108,6 +129,19 @@ throws_ok {
 } qr/Cannot use format .+ without .+ module installed/, 'new - tabix PM unavailable';
 
 $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM = $bak;
+
+$bak = $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_BIGWIG;
+$Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_BIGWIG = 0;
+
+throws_ok {
+  $as = Bio::EnsEMBL::VEP::AnnotationSource::File->new({
+    file => 'test',
+    format => 'bigwig',
+    config => my $cfg = Bio::EnsEMBL::VEP::Config->new($test_cfg->base_testing_cfg)
+  });
+} qr/Cannot use format .+ without .+ module installed/, 'new - bigwig PM unavailable';
+
+$Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_BIGWIG = $bak;
 
 
 
