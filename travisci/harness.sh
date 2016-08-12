@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export PERL5LIB=$PWD/bioperl-live-release-1-6-924:$PWD/ensembl-test/modules:$PWD/ensembl/modules:$PWD/modules:$PWD/ensembl-io/modules:$PWD/ensembl-funcgen/modules:$PWD/ensembl-variation/modules:$PWD/Bio-HTS/lib
+export PERL5LIB=$PWD/bioperl-live-release-1-6-924:$PWD/ensembl-test/modules:$PWD/ensembl/modules:$PWD/modules:$PWD/ensembl-io/modules:$PWD/ensembl-funcgen/modules:$PWD/ensembl-variation/modules:$PWD/Bio-HTS/lib:$DEPS/Bio-HTS/blib/lib/:$DEPS/Bio-HTS/blib/arch:
 
 export HTSLIB_DIR=$PWD/htslib
 
