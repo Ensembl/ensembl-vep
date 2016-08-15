@@ -36,8 +36,7 @@ before_install:
   - wget https://github.com/bioperl/bioperl-live/archive/release-1-6-924.zip
   - unzip release-1-6-924.zip
   - cd $CWD
-  - export DEPS=$HOME/dependencies
-  - mkdir -p $DEPS
+  - export DEPS=$HOME
   - cd $DEPS
   - $CWD/ensembl-io/travisci/get_dependencies.sh
   - cd $CWD
@@ -45,7 +44,7 @@ before_install:
 
 install:
   - export CWD=$PWD
-  - export DEPS=$HOME/dependencies
+  - export DEPS=$HOME
   - export KENT_SRC="$DEPS/kent/src"
   - export HTSLIB_DIR=$DEPS/htslib
   - export MACHTYPE=$(uname -m)
