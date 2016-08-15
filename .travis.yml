@@ -32,7 +32,6 @@ addons:
       - mysql-client-core-5.5
 
 before_install:
-  - export CWD=$PWD
   - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-test.git
   - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl.git
   - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-io.git
@@ -41,29 +40,25 @@ before_install:
   # - git clone --branch master --depth 1 https://github.com/Ensembl/Bio-HTS
   # - wget https://github.com/bioperl/bioperl-live/archive/release-1-6-924.zip
   # - unzip release-1-6-924.zip
+  - export CWD=$PWD
   - export DEPS=$HOME/dependencies
   - mkdir -p $DEPS
   - cd $DEPS
-  - $CWD/ensembl-io/travisci/get_dependencies.sh
+  - $CWD/travisci/get_dependencies.sh
   - cd $CWD
 
 install:
   - export CWD=$PWD
+  - export DEPS=$HOME/dependencies
   - export KENT_SRC="$DEPS/kent/src"
-  - export HTSLIB_DIR=$DEPS/htslib
+  - export HTSLIB_DIR="$DEPS/htslib"
   - export MACHTYPE=$(uname -m)
   - export CFLAGS="-fPIC"
-  - export PERL5LIB=$CWD/bioperl-live-bioperl-release-1-2-3:$PERL5LIB
   - cd $DEPS
-  - $CWD/ensembl-io/travisci/build_c.sh
-  # - cd $CWD/Bio-HTS
-  # - perl Build.PL --htslib $HTSLIB_DIR
-  # - ./Build
-  # - ./Build install
+  - $CWD/travisci/build_c.sh
   - cd $CWD
   - cpanm --quiet --installdeps --with-recommends --notest --cpanfile ensembl/cpanfile .
   - cpanm --quiet --installdeps --notest .
-  - cpanm Bio::DB::HTS
   - cpanm --quiet -n Devel::Cover::Report::Coveralls
   - cp travisci/MultiTestDB.conf.travisci  t/MultiTestDB.conf
 
