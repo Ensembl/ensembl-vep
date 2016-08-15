@@ -12,6 +12,12 @@ env:
 
 sudo: false
 
+cache:
+  apt: false
+  directories:
+    - $HOME/perl5/perlbrew
+    - $HOME/dependencies
+
 addons:
   apt:
     packages:
@@ -32,13 +38,17 @@ before_install:
   - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-io.git
   - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-funcgen.git
   - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-variation.git
-  - git clone --branch master --depth 1 https://github.com/Ensembl/Bio-HTS
+  # - git clone --branch master --depth 1 https://github.com/Ensembl/Bio-HTS
   # - wget https://github.com/bioperl/bioperl-live/archive/release-1-6-924.zip
   # - unzip release-1-6-924.zip
   - export DEPS=$HOME/dependencies
   - mkdir -p $DEPS
   - cd $DEPS
   - $CWD/ensembl-io/travisci/get_dependencies.sh
+  - cd $CWD
+
+install:
+  - export CWD=$PWD
   - export KENT_SRC="$DEPS/kent/src"
   - export HTSLIB_DIR=$DEPS/htslib
   - export MACHTYPE=$(uname -m)
@@ -51,8 +61,6 @@ before_install:
   # - ./Build
   # - ./Build install
   - cd $CWD
-
-install:
   - cpanm --quiet --installdeps --with-recommends --notest --cpanfile ensembl/cpanfile .
   - cpanm --quiet --installdeps --notest .
   - cpanm Bio::DB::HTS
