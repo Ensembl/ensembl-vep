@@ -32,19 +32,9 @@ before_install:
   - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-io.git
   - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-funcgen.git
   - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-variation.git
+  - git clone --branch master --depth 1 https://github.com/Ensembl/Bio-HTS
   - wget https://github.com/bioperl/bioperl-live/archive/release-1-6-924.zip
   - unzip release-1-6-924.zip
-  - git clone --branch master --depth 1 https://github.com/samtools/htslib.git
-  - cd htslib
-  - make
-  - export HTSLIB_DIR=$(pwd -P)
-  - cd ../
-  - git clone --branch master --depth 1 https://github.com/Ensembl/Bio-HTS
-  - cd Bio-HTS
-  - perl Build.PL --htslib $HTSLIB_DIR
-  - ./Build
-  - cp blib/arch/auto/Bio/DB/HTS/Faidx/Faidx.so ..
-  - cp blib/arch/auto/Bio/DB/HTS/HTS.so ..
   - cd $CWD
   - export DEPS=$HOME/dependencies
   - mkdir -p $DEPS
@@ -63,6 +53,9 @@ install:
   - cd $DEPS
   - $CWD/ensembl-io/travisci/build_c.sh
   - cd $CWD
+  - cd Bio-HTS
+  - perl Build.PL --htslib $HTSLIB_DIR
+  - ./Build
   - cpanm --quiet --installdeps --with-recommends --notest --cpanfile ensembl/cpanfile .
   - cpanm --quiet --installdeps --notest .
   - cpanm --quiet -n Devel::Cover::Report::Coveralls
