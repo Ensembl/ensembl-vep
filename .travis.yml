@@ -49,6 +49,8 @@ before_install:
   - cd $CWD/Bio-HTS
   - perl Build.PL --htslib $HTSLIB_DIR
   - ./Build
+  - cp blib/arch/auto/Bio/DB/HTS/Faidx/Faidx.so ..
+  - cp blib/arch/auto/Bio/DB/HTS/HTS.so ..
   - cd $CWD
 
 install:
