@@ -2,7 +2,11 @@
 
 # export DEPS=$HOME/dependencies
 
-export PERL5LIB=$DEPS/bioperl-live-release-1-6-924:$PWD/ensembl-test/modules:$PWD/ensembl/modules:$PWD/modules:$PWD/ensembl-io/modules:$PWD/ensembl-funcgen/modules:$PWD/ensembl-variation/modules:$PWD/Bio-HTS/blib/lib/:$PWD/Bio-HTS/blib/arch:$PERL5LIB
+for ensdir in $DEPS/bioperl-live-release-1-6-924 $PWD/ensembl-test/modules $PWD/ensembl/modules $PWD/modules $PWD/ensembl-io/modules $PWD/ensembl-funcgen/modules $PWD/ensembl-variation/modules $PWD/Bio-HTS/blib/lib/ $PWD/Bio-HTS/blib/arch $DEPS/Bio-HTS/blib/lib $DEPS/Bio-HTS/blib/arch; do
+  echo $ensdir
+  ls $ensdir
+  export PERL5LIB=$ensdir:$PERL5LIB
+done
 
 # export HTSLIB_DIR=$DEPS/htslib
 
