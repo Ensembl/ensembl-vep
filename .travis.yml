@@ -33,8 +33,8 @@ before_install:
   - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-funcgen.git
   - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-variation.git
   - git clone --branch master --depth 1 https://github.com/Ensembl/Bio-HTS
-  - wget https://github.com/bioperl/bioperl-live/archive/release-1-6-924.zip
-  - unzip release-1-6-924.zip
+  # - wget https://github.com/bioperl/bioperl-live/archive/release-1-6-924.zip
+  # - unzip release-1-6-924.zip
   - export DEPS=$HOME/dependencies
   - mkdir -p $DEPS
   - cd $DEPS
@@ -43,7 +43,7 @@ before_install:
   - export HTSLIB_DIR=$DEPS/htslib
   - export MACHTYPE=$(uname -m)
   - export CFLAGS="-fPIC"
-  - export PERL5LIB=$CWD/bioperl-live-release-1-6-924:$PERL5LIB
+  - export PERL5LIB=$CWD/bioperl-live-bioperl-release-1-2-3:$PERL5LIB
   - cd $DEPS
   - $CWD/ensembl-io/travisci/build_c.sh
   # - cd $CWD/Bio-HTS
