@@ -46,15 +46,16 @@ before_install:
   - export PERL5LIB=$CWD/bioperl-live-release-1-6-924:$PERL5LIB
   - cd $DEPS
   - $CWD/ensembl-io/travisci/build_c.sh
-  - cd $CWD/Bio-HTS
-  - perl Build.PL --htslib $HTSLIB_DIR
-  - ./Build
-  - ./Build install
+  # - cd $CWD/Bio-HTS
+  # - perl Build.PL --htslib $HTSLIB_DIR
+  # - ./Build
+  # - ./Build install
   - cd $CWD
 
 install:
   - cpanm --quiet --installdeps --with-recommends --notest --cpanfile ensembl/cpanfile .
   - cpanm --quiet --installdeps --notest .
+  - cpanm Bio::DB::HTS
   - cpanm --quiet -n Devel::Cover::Report::Coveralls
   - cp travisci/MultiTestDB.conf.travisci  t/MultiTestDB.conf
 
