@@ -12,12 +12,6 @@ env:
 
 sudo: false
 
-cache:
-  apt: false
-  directories:
-    - $HOME/perl5/perlbrew
-    - $HOME/dependencies
-
 addons:
   apt:
     packages:
