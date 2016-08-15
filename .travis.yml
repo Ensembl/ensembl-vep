@@ -35,26 +35,19 @@ before_install:
   - git clone --branch master --depth 1 https://github.com/Ensembl/Bio-HTS
   - wget https://github.com/bioperl/bioperl-live/archive/release-1-6-924.zip
   - unzip release-1-6-924.zip
-  - cd $CWD
-  - export DEPS=$HOME
-  - cd $DEPS
-  - $CWD/ensembl-io/travisci/get_dependencies.sh
-  - cd $CWD
-
-
-install:
-  - export CWD=$PWD
-  - export DEPS=$HOME
-  - export KENT_SRC="$DEPS/kent/src"
-  - export HTSLIB_DIR=$DEPS/htslib
+  - ensembl-io/travisci/get_dependencies.sh
+  - export KENT_SRC="$CWD/kent/src"
+  - export HTSLIB_DIR=$CWD/htslib
   - export MACHTYPE=$(uname -m)
   - export CFLAGS="-fPIC"
-  - cd $DEPS
-  - $CWD/ensembl-io/travisci/build_c.sh
-  - cd $CWD
+  - export PERL5LIB=$CWD/bioperl-live-release-1-6-924:$PERL5LIB
+  - ensembl-io/travisci/build_c.sh
   - cd Bio-HTS
   - perl Build.PL --htslib $HTSLIB_DIR
   - ./Build
+  - cd $CWD
+
+install:
   - cpanm --quiet --installdeps --with-recommends --notest --cpanfile ensembl/cpanfile .
   - cpanm --quiet --installdeps --notest .
   - cpanm --quiet -n Devel::Cover::Report::Coveralls
