@@ -49,7 +49,6 @@ use Bio::EnsEMBL::VEP::AnnotationSource::File::BED;
 use Bio::EnsEMBL::VEP::AnnotationSource::File::VCF;
 use Bio::EnsEMBL::VEP::AnnotationSource::File::GFF;
 use Bio::EnsEMBL::VEP::AnnotationSource::File::GTF;
-use Bio::EnsEMBL::VEP::AnnotationSource::File::BigWig;
 
 use base qw(Bio::EnsEMBL::VEP::AnnotationSource);
 
@@ -114,7 +113,7 @@ sub new {
     else {
       throw("ERROR: Cannot use format $format without Bio::DB::HTS::Tabix module installed\n") unless $CAN_USE_TABIX_PM;
     }
-    
+
     my $class = 'Bio::EnsEMBL::VEP::AnnotationSource::File::'.$FORMAT_MAP{$format};
     return $class->new({%$hashref, config => $self->config});
   }
