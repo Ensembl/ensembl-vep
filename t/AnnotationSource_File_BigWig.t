@@ -23,129 +23,139 @@ use lib $Bin;
 use VEPTestingConfig;
 my $test_cfg = VEPTestingConfig->new();
 
-## BASIC TESTS
-##############
+use_ok('Bio::EnsEMBL::VEP::AnnotationSource::File');
 
-# use test
-use_ok('Bio::EnsEMBL::VEP::AnnotationSource::File::BigWig');
+SKIP: {
 
-my $file = $test_cfg->{custom_bigwig};
-
-# need to get a config object for further tests
-use_ok('Bio::EnsEMBL::VEP::Config');
-
-my $cfg = Bio::EnsEMBL::VEP::Config->new($test_cfg->base_testing_cfg);
-ok($cfg, 'get new config object');
-
-my $as = Bio::EnsEMBL::VEP::AnnotationSource::File::BigWig->new({file => $file, config => $cfg});
-ok($as, 'new is defined');
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  no warnings 'once';
+  skip 'Bio::DB::BigFile module not available', 14 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_BIGWIG;
 
 
-## TESTS WITH INPUT BUFFER
-##########################
+  ## BASIC TESTS
+  ##############
 
-use_ok('Bio::EnsEMBL::VEP::Parser::VCF');
-my $p = Bio::EnsEMBL::VEP::Parser::VCF->new({
-  config => $cfg,
-  file => $test_cfg->create_input_file([qw(21 25585733 rs142513484 C T . . .)]),
-  valid_chromosomes => [21]
-});
-ok($p, 'get parser object');
+  # use test
+  use_ok('Bio::EnsEMBL::VEP::AnnotationSource::File::BigWig');
 
-use_ok('Bio::EnsEMBL::VEP::InputBuffer');
-my $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
-is(ref($ib), 'Bio::EnsEMBL::VEP::InputBuffer', 'check class');
+  my $file = $test_cfg->{custom_bigwig};
 
-is(ref($ib->next()), 'ARRAY', 'check buffer next');
+  # need to get a config object for further tests
+  use_ok('Bio::EnsEMBL::VEP::Config');
 
-$as->annotate_InputBuffer($ib);
+  my $cfg = Bio::EnsEMBL::VEP::Config->new($test_cfg->base_testing_cfg);
+  ok($cfg, 'get new config object');
 
-is_deeply(
-  $ib->buffer->[0]->{_custom_annotations},
-  {
-    'test.bw' => [
-      { name => 10 },
-    ]
-  },
-  'annotate_InputBuffer - overlap'
-);
+  my $as = Bio::EnsEMBL::VEP::AnnotationSource::File::BigWig->new({file => $file, config => $cfg});
+  ok($as, 'new is defined');
 
-# exact type
-$as->type('exact');
-$as->short_name('foo');
-$as->annotate_InputBuffer($ib);
 
-is_deeply(
-  $ib->buffer->[0]->{_custom_annotations},
-  {
+  ## TESTS WITH INPUT BUFFER
+  ##########################
 
-    'test.bw' => [
-      { name => 10 },
-    ],
-    'foo' => [
-      { name => 10 }
-    ]
-  },
-  'annotate_InputBuffer - exact, additive'
-);
-
-# out by one
-delete($ib->buffer->[0]->{_custom_annotations});
-
-$ib = Bio::EnsEMBL::VEP::InputBuffer->new({
-  config => $cfg,
-  parser => Bio::EnsEMBL::VEP::Parser::VCF->new({
+  use_ok('Bio::EnsEMBL::VEP::Parser::VCF');
+  my $p = Bio::EnsEMBL::VEP::Parser::VCF->new({
     config => $cfg,
-    file => $test_cfg->create_input_file([qw(21 25585732 rs142513484 C T . . .)]),
+    file => $test_cfg->create_input_file([qw(21 25585733 rs142513484 C T . . .)]),
     valid_chromosomes => [21]
-  })
-});
-$ib->next();
+  });
+  ok($p, 'get parser object');
 
-$as->annotate_InputBuffer($ib);
-ok(!$ib->buffer->[0]->{_custom_annotations}, 'annotate_InputBuffer - out by 1 (5\')');
+  use_ok('Bio::EnsEMBL::VEP::InputBuffer');
+  my $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+  is(ref($ib), 'Bio::EnsEMBL::VEP::InputBuffer', 'check class');
 
+  is(ref($ib->next()), 'ARRAY', 'check buffer next');
 
+  $as->annotate_InputBuffer($ib);
 
-$ib = Bio::EnsEMBL::VEP::InputBuffer->new({
-  config => $cfg,
-  parser => Bio::EnsEMBL::VEP::Parser::VCF->new({
+  is_deeply(
+    $ib->buffer->[0]->{_custom_annotations},
+    {
+      'test.bw' => [
+        { name => 10 },
+      ]
+    },
+    'annotate_InputBuffer - overlap'
+  );
+
+  # exact type
+  $as->type('exact');
+  $as->short_name('foo');
+  $as->annotate_InputBuffer($ib);
+
+  is_deeply(
+    $ib->buffer->[0]->{_custom_annotations},
+    {
+
+      'test.bw' => [
+        { name => 10 },
+      ],
+      'foo' => [
+        { name => 10 }
+      ]
+    },
+    'annotate_InputBuffer - exact, additive'
+  );
+
+  # out by one
+  delete($ib->buffer->[0]->{_custom_annotations});
+
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
     config => $cfg,
-    file => $test_cfg->create_input_file([qw(21 25585735 rs142513484 C T . . .)]),
-    valid_chromosomes => [21]
-  })
-});
-$ib->next();
+    parser => Bio::EnsEMBL::VEP::Parser::VCF->new({
+      config => $cfg,
+      file => $test_cfg->create_input_file([qw(21 25585732 rs142513484 C T . . .)]),
+      valid_chromosomes => [21]
+    })
+  });
+  $ib->next();
 
-$as->annotate_InputBuffer($ib);
-ok(!$ib->buffer->[0]->{_custom_annotations}, 'annotate_InputBuffer - out by 1 (3\')');
+  $as->annotate_InputBuffer($ib);
+  ok(!$ib->buffer->[0]->{_custom_annotations}, 'annotate_InputBuffer - out by 1 (5\')');
 
 
 
-$ib = Bio::EnsEMBL::VEP::InputBuffer->new({
-  config => $cfg,
-  parser => Bio::EnsEMBL::VEP::Parser::VCF->new({
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
     config => $cfg,
-    file => $test_cfg->create_input_file([qw(21 25592821 rs142513484 C T . . .)]),
-    valid_chromosomes => [21]
-  })
-});
-$ib->next();
+    parser => Bio::EnsEMBL::VEP::Parser::VCF->new({
+      config => $cfg,
+      file => $test_cfg->create_input_file([qw(21 25585735 rs142513484 C T . . .)]),
+      valid_chromosomes => [21]
+    })
+  });
+  $ib->next();
 
-$as->type('overlap');
-$as->annotate_InputBuffer($ib);
+  $as->annotate_InputBuffer($ib);
+  ok(!$ib->buffer->[0]->{_custom_annotations}, 'annotate_InputBuffer - out by 1 (3\')');
 
-is_deeply(
-  $ib->buffer->[0]->{_custom_annotations},
-  {
-    'foo' => [
-      {
-        'name' => '11'
-      }
-    ]
-  },
-  'overlap fixedStep'
-);
+
+
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
+    config => $cfg,
+    parser => Bio::EnsEMBL::VEP::Parser::VCF->new({
+      config => $cfg,
+      file => $test_cfg->create_input_file([qw(21 25592821 rs142513484 C T . . .)]),
+      valid_chromosomes => [21]
+    })
+  });
+  $ib->next();
+
+  $as->type('overlap');
+  $as->annotate_InputBuffer($ib);
+
+  is_deeply(
+    $ib->buffer->[0]->{_custom_annotations},
+    {
+      'foo' => [
+        {
+          'name' => '11'
+        }
+      ]
+    },
+    'overlap fixedStep'
+  );
+}
 
 
 done_testing();
