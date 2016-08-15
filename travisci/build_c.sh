@@ -4,6 +4,7 @@
 cd htslib
 if [ ! -f libhts.a ]; then
   make
+  make install
 fi
 cd $DEPS
 
