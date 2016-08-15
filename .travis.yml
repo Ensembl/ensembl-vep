@@ -48,7 +48,7 @@ install:
   - export HTSLIB_DIR="$DEPS/htslib"
   - export MACHTYPE=$(uname -m)
   - export CFLAGS="-fPIC"
-  - export PERL5LIB=$CWD/bioperl-live-release-1-6-924:$PERL5LIB
+  - export PERL5LIB=$DEPS/bioperl-live-release-1-6-924:$PERL5LIB
   - cd $DEPS
   - $CWD/travisci/build_c.sh
   - cd $CWD
