@@ -330,21 +330,31 @@ is(
 );
 
 # custom
-my $runner = get_runner({
-  input_file => $test_cfg->{test_vcf},
-  custom => [$test_cfg->{custom_vcf}.',test,vcf,exact,,FOO'],
-  output_format => 'vcf',
-});
-$of = $runner->get_OutputFactory;
+my $runner;
+use_ok('Bio::EnsEMBL::VEP::AnnotationSource::File');
 
-is(
-  $of->get_all_lines_by_InputBuffer($runner->get_InputBuffer)->[0],
-  "21\t25585733\trs142513484\tC\tT\t.\t.\t".
-  "CSQ=T|3_prime_UTR_variant|MODIFIER||ENSG00000154719|Transcript|ENST00000307301||||||1122|||||||-1|||test1|BAR,".
-  "T|missense_variant|MODERATE||ENSG00000154719|Transcript|ENST00000352957||||||1033|991|331|A/T|Gca/Aca|||-1|||test1|BAR,".
-  "T|upstream_gene_variant|MODIFIER||ENSG00000260583|Transcript|ENST00000567517||||||||||||2407|-1|||test1|BAR\tGT\t0|0",
-  'get_all_lines_by_InputBuffer - custom'
-);
+SKIP: {
+  no warnings 'once';
+
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  skip 'Bio::DB::HTS::Tabix module not available', 1 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+
+  $runner = get_runner({
+    input_file => $test_cfg->{test_vcf},
+    custom => [$test_cfg->{custom_vcf}.',test,vcf,exact,,FOO'],
+    output_format => 'vcf',
+  });
+  $of = $runner->get_OutputFactory;
+
+  is(
+    $of->get_all_lines_by_InputBuffer($runner->get_InputBuffer)->[0],
+    "21\t25585733\trs142513484\tC\tT\t.\t.\t".
+    "CSQ=T|3_prime_UTR_variant|MODIFIER||ENSG00000154719|Transcript|ENST00000307301||||||1122|||||||-1|||test1|BAR,".
+    "T|missense_variant|MODERATE||ENSG00000154719|Transcript|ENST00000352957||||||1033|991|331|A/T|Gca/Aca|||-1|||test1|BAR,".
+    "T|upstream_gene_variant|MODIFIER||ENSG00000260583|Transcript|ENST00000567517||||||||||||2407|-1|||test1|BAR\tGT\t0|0",
+    'get_all_lines_by_InputBuffer - custom'
+  );
+}
 
 # test converting to VCF from different input
 $ib = get_runner({

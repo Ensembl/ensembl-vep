@@ -23,8 +23,11 @@ use lib $Bin;
 use VEPTestingConfig;
 my $test_cfg = VEPTestingConfig->new();
 
+# use test
+use_ok('Bio::EnsEMBL::VEP::AnnotationSource::File');
 
 SKIP: {
+  no warnings 'once';
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
   skip 'Bio::DB::HTS::Tabix module not available', 13 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;

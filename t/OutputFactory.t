@@ -1451,26 +1451,36 @@ $of->{allele_number} = 0;
 ## custom headers
 #################
 
-$runner = get_annotated_buffer_runner({
-  input_file => $test_cfg->create_input_file([qw(21 25606454 test G C . . .)]),
-  custom => [$test_cfg->{custom_vcf}.',test,vcf'],
-  quiet => 1,
-  warning_file => 'STDERR',
-});
+# use test
+use_ok('Bio::EnsEMBL::VEP::AnnotationSource::File');
 
-$of = $runner->get_OutputFactory();
-$ib = $runner->get_InputBuffer();
+SKIP: {
+  no warnings 'once';
 
-is_deeply(
-  $of->get_custom_headers,
-  [
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  skip 'Bio::DB::HTS::Tabix module not available', 1 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+
+  $runner = get_annotated_buffer_runner({
+    input_file => $test_cfg->create_input_file([qw(21 25606454 test G C . . .)]),
+    custom => [$test_cfg->{custom_vcf}.',test,vcf'],
+    quiet => 1,
+    warning_file => 'STDERR',
+  });
+
+  $of = $runner->get_OutputFactory();
+  $ib = $runner->get_InputBuffer();
+
+  is_deeply(
+    $of->get_custom_headers,
     [
-      'test',
-      $test_cfg->{custom_vcf}.' (overlap)'
-    ]
-  ],
-  'get_custom_headers'
-);
+      [
+        'test',
+        $test_cfg->{custom_vcf}.' (overlap)'
+      ]
+    ],
+    'get_custom_headers'
+  );
+}
 
 
 ## plugins

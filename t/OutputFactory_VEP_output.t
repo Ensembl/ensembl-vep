@@ -210,31 +210,40 @@ is(
 
 
 # custom
-$runner = get_annotated_buffer_runner({
-  input_file => $test_cfg->{test_vcf},
-  custom => [$test_cfg->{custom_vcf}.',test,vcf,exact,,FOO'],
-  output_format => 'vep',
-});
-$of = $runner->get_OutputFactory;
+use_ok('Bio::EnsEMBL::VEP::AnnotationSource::File');
 
-@lines = @{$of->get_all_lines_by_InputBuffer($runner->get_InputBuffer)};
+SKIP: {
+  no warnings 'once';
 
-is(
-  $lines[0],
-  join("\t", qw(
-    rs142513484
-    21:25585733
-    T
-    ENSG00000154719
-    ENST00000307301
-    Transcript
-    3_prime_UTR_variant
-    1122
-    - - - - -
-    IMPACT=MODIFIER;STRAND=-1;test=test1;test_FOO=BAR
-  )),
-  'get_all_lines_by_InputBuffer - custom'
-);
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  skip 'Bio::DB::HTS::Tabix module not available', 1 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+
+  $runner = get_annotated_buffer_runner({
+    input_file => $test_cfg->{test_vcf},
+    custom => [$test_cfg->{custom_vcf}.',test,vcf,exact,,FOO'],
+    output_format => 'vep',
+  });
+  $of = $runner->get_OutputFactory;
+
+  @lines = @{$of->get_all_lines_by_InputBuffer($runner->get_InputBuffer)};
+
+  is(
+    $lines[0],
+    join("\t", qw(
+      rs142513484
+      21:25585733
+      T
+      ENSG00000154719
+      ENST00000307301
+      Transcript
+      3_prime_UTR_variant
+      1122
+      - - - - -
+      IMPACT=MODIFIER;STRAND=-1;test=test1;test_FOO=BAR
+    )),
+    'get_all_lines_by_InputBuffer - custom'
+  );
+}
 
 done_testing();
 

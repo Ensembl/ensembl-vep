@@ -489,30 +489,39 @@ is_deeply(
 
 
 # test custom
-$ib = get_annotated_buffer({
-  input_file => $test_cfg->{test_vcf},
-  everything => 1,
-  dir => $test_cfg->{cache_root_dir},
-  custom => [$test_cfg->{custom_vcf}.',test,vcf,exact,,FOO'],
-});
-$of = Bio::EnsEMBL::VEP::OutputFactory::JSON->new({config => $ib->config});
-@lines = @{$of->get_all_lines_by_InputBuffer($ib)};
+use_ok('Bio::EnsEMBL::VEP::AnnotationSource::File');
 
-is_deeply(
-  $json->decode($lines[0])->{custom_annotations},
-  {
-    "test" => [
-      {
-        "fields" => {
-          "FOO" => "BAR"
-        },
-        "name" => "test1",
-        "allele" => "T"
-      }
-    ]
-  },
-  'custom_annotations'
-);
+SKIP: {
+  no warnings 'once';
+
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  skip 'Bio::DB::HTS::Tabix module not available', 1 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+
+  $ib = get_annotated_buffer({
+    input_file => $test_cfg->{test_vcf},
+    everything => 1,
+    dir => $test_cfg->{cache_root_dir},
+    custom => [$test_cfg->{custom_vcf}.',test,vcf,exact,,FOO'],
+  });
+  $of = Bio::EnsEMBL::VEP::OutputFactory::JSON->new({config => $ib->config});
+  @lines = @{$of->get_all_lines_by_InputBuffer($ib)};
+
+  is_deeply(
+    $json->decode($lines[0])->{custom_annotations},
+    {
+      "test" => [
+        {
+          "fields" => {
+            "FOO" => "BAR"
+          },
+          "name" => "test1",
+          "allele" => "T"
+        }
+      ]
+    },
+    'custom_annotations'
+  );
+}
 
 # done
 done_testing();
