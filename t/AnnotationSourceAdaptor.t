@@ -89,102 +89,112 @@ $asa->param('check_existing', 0);
 $asa->param('custom', [$test_cfg->{custom_vcf}]);
 throws_ok {$asa->get_all_custom} qr/No format/, 'get_all_custom - no format';
 
-$asa->param('custom', [$test_cfg->{custom_vcf}.',test,vcf,exact']);
-is_deeply(
-  $asa->get_all_custom(),
-  [
-    bless( {
-      'short_name' => 'test',
-      '_config' => $asa->config,
-      'report_coords' => 0,
-      'file' => $test_cfg->{custom_vcf},
-      'type' => 'exact',
-      'info' => {
-        'custom_info' => {
-          'short_name' => 'test',
-          'report_coords' => undef,
-          'file' => $test_cfg->{custom_vcf},
-          'type' => 'exact'
-        }
-      }
-    }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
-  ],
-  'get_all_custom'
-);
-
-$asa->param('custom', [$test_cfg->{custom_vcf}.',test,vcf']);
-is_deeply(
-  $asa->get_all_custom(),
-  [
-    bless( {
-      'short_name' => 'test',
-      '_config' => $asa->config,
-      'report_coords' => 0,
-      'file' => $test_cfg->{custom_vcf},
-      'type' => 'overlap',
-      'info' => {
-        'custom_info' => {
-          'short_name' => 'test',
-          'report_coords' => undef,
-          'file' => $test_cfg->{custom_vcf},
-          'type' => 'overlap'
-        }
-      }
-    }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
-  ],
-  'get_all_custom - default overlap type'
-);
-
-$asa->param('custom', [$test_cfg->{custom_vcf}.',test,vcf,overlap,1']);
-is_deeply(
-  $asa->get_all_custom(),
-  [
-    bless( {
-      'short_name' => 'test',
-      '_config' => $asa->config,
-      'report_coords' => 1,
-      'file' => $test_cfg->{custom_vcf},
-      'type' => 'overlap',
-      'info' => {
-        'custom_info' => {
-          'short_name' => 'test',
-          'report_coords' => 1,
-          'file' => $test_cfg->{custom_vcf},
-          'type' => 'overlap',
-        }
-      }
-    }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
-  ],
-  'get_all_custom - report_coords'
-);
-
-$asa->param('custom', [$test_cfg->{custom_vcf}.',test,vcf,overlap,1,FOO,BAR']);
-is_deeply(
-  $asa->get_all_custom(),
-  [
-    bless( {
-      'short_name' => 'test',
-      '_config' => $asa->config,
-      'report_coords' => 1,
-      'fields' => ['FOO', 'BAR'],
-      'file' => $test_cfg->{custom_vcf},
-      'type' => 'overlap',
-      'info' => {
-        'custom_info' => {
-          'short_name' => 'test',
-          'report_coords' => 1,
-          'fields' => ['FOO', 'BAR'],
-          'file' => $test_cfg->{custom_vcf},
-          'type' => 'overlap',
-        }
-      }
-    }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
-  ],
-  'get_all_custom - fields'
-);
-
 $asa->param('custom', [$test_cfg->{custom_vcf}.',test,foo,exact']);
 throws_ok {$asa->get_all_custom} qr/Unknown or unsupported format foo/, 'get_all_custom - invalid format';
+
+# use test
+use_ok('Bio::EnsEMBL::VEP::AnnotationSource::File');
+
+SKIP: {
+  no warnings 'once';
+
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  skip 'Bio::DB::HTS::Tabix module not available', 4 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+
+  $asa->param('custom', [$test_cfg->{custom_vcf}.',test,vcf,exact']);
+  is_deeply(
+    $asa->get_all_custom(),
+    [
+      bless( {
+        'short_name' => 'test',
+        '_config' => $asa->config,
+        'report_coords' => 0,
+        'file' => $test_cfg->{custom_vcf},
+        'type' => 'exact',
+        'info' => {
+          'custom_info' => {
+            'short_name' => 'test',
+            'report_coords' => undef,
+            'file' => $test_cfg->{custom_vcf},
+            'type' => 'exact'
+          }
+        }
+      }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
+    ],
+    'get_all_custom'
+  );
+
+  $asa->param('custom', [$test_cfg->{custom_vcf}.',test,vcf']);
+  is_deeply(
+    $asa->get_all_custom(),
+    [
+      bless( {
+        'short_name' => 'test',
+        '_config' => $asa->config,
+        'report_coords' => 0,
+        'file' => $test_cfg->{custom_vcf},
+        'type' => 'overlap',
+        'info' => {
+          'custom_info' => {
+            'short_name' => 'test',
+            'report_coords' => undef,
+            'file' => $test_cfg->{custom_vcf},
+            'type' => 'overlap'
+          }
+        }
+      }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
+    ],
+    'get_all_custom - default overlap type'
+  );
+
+  $asa->param('custom', [$test_cfg->{custom_vcf}.',test,vcf,overlap,1']);
+  is_deeply(
+    $asa->get_all_custom(),
+    [
+      bless( {
+        'short_name' => 'test',
+        '_config' => $asa->config,
+        'report_coords' => 1,
+        'file' => $test_cfg->{custom_vcf},
+        'type' => 'overlap',
+        'info' => {
+          'custom_info' => {
+            'short_name' => 'test',
+            'report_coords' => 1,
+            'file' => $test_cfg->{custom_vcf},
+            'type' => 'overlap',
+          }
+        }
+      }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
+    ],
+    'get_all_custom - report_coords'
+  );
+
+  $asa->param('custom', [$test_cfg->{custom_vcf}.',test,vcf,overlap,1,FOO,BAR']);
+  is_deeply(
+    $asa->get_all_custom(),
+    [
+      bless( {
+        'short_name' => 'test',
+        '_config' => $asa->config,
+        'report_coords' => 1,
+        'fields' => ['FOO', 'BAR'],
+        'file' => $test_cfg->{custom_vcf},
+        'type' => 'overlap',
+        'info' => {
+          'custom_info' => {
+            'short_name' => 'test',
+            'report_coords' => 1,
+            'fields' => ['FOO', 'BAR'],
+            'file' => $test_cfg->{custom_vcf},
+            'type' => 'overlap',
+          }
+        }
+      }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
+    ],
+    'get_all_custom - fields'
+  );
+}
 
 $asa->param('custom', []);
 
