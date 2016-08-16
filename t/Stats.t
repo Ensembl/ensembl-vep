@@ -407,7 +407,7 @@ is_deeply(
   [map {$_->[0]} @{$finished->{run_stats}}],
   [
     'VEP version (API)',
-    'Cache/Database',
+    'Annotation sources',
     'Species',
     'Command line options',
     'Start time',

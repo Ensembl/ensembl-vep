@@ -697,7 +697,7 @@ sub get_output_header_info {
 
     foreach my $as(@{$self->get_all_AnnotationSources}) {
       my $as_info = $as->info;
-      $info->{version_data}->{$_} ||= $as_info->{$_} for keys %$as_info;
+      $info->{version_data}->{$_} ||= $as_info->{$_} for grep {$_ ne 'custom_info'} keys %$as_info;
       $info->{cache_dir} ||= $as->dir if $as->can('dir');
       push @{$info->{custom_info}}, $as_info->{custom_info} if $as_info->{custom_info};
     }

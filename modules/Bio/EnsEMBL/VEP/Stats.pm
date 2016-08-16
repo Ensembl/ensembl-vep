@@ -392,15 +392,18 @@ sub generate_run_stats {
   my @opts;
   foreach my $key(sort keys %raw) {
     my $val = $raw{$key};
-    next if ref($val) eq 'ARRAY' && !scalar @$val;
-    next if $val eq '0';
-    push @opts, '--'.$key;
-    push @opts, $val unless $val eq '1';
+    if(ref($val) eq 'ARRAY') {
+      next unless scalar @$val;
+      push @opts, '--'.$key, $_ for @$val;
+    }
+    else {
+      next if $val eq '0';
+      push @opts, '--'.$key;
+      push @opts, $val unless $val eq '1';
+    }
   }
-    
-  return [
-    ['VEP version (API)', sprintf(' %i (%i)', $info->{vep_version}, $info->{api_version})],
-    ['Cache/Database', ($info->{cache_dir} ? $info->{cache_dir} : sprintf('%s on %s', $info->{db_name}, $info->{db_host}))],
+
+  my @return = (
     ['Species', $self->species],
     ['Command line options', '<pre>'.join(" ", @opts).'</pre>'],
     ['Start time', $self->start_time],
@@ -413,7 +416,23 @@ sub generate_run_stats {
       # (defined($config->{html}) ? ' '.a({href => $config->{output_file}.'.html'}, '[HTML]') : '').
       # ' '.a({href => $config->{output_file}}, '[text]')
     ],
-  ];
+  );
+
+  my @cache_db_strings;
+  if($info->{cache_dir}) {
+    push @cache_db_strings, "Cache: ".$info->{cache_dir};
+  }
+  if($self->param('database') or ($self->param('cache') && !$self->param('offline'))) {
+    push @cache_db_strings, sprintf('%s on %s', $info->{db_name}, $info->{db_host});
+  }
+  foreach my $custom(@{$info->{custom_info} || []}) {
+    push @cache_db_strings, sprintf('Custom: %s (%s)', $custom->{file}, $custom->{type});
+  }
+
+  unshift @return, ['Annotation sources', join("; ", @cache_db_strings)];
+  unshift @return, ['VEP version (API)', sprintf(' %i (%i)', $info->{vep_version}, $info->{api_version})];
+
+  return \@return;
 }
 
 sub generate_general_stats {

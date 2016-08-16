@@ -64,15 +64,13 @@ sub new {
   my $caller = shift;
   my $class = ref($caller) || $caller;
   
-  my $self = $class->SUPER::new(@_);
+  my $self = $class->Bio::EnsEMBL::VEP::AnnotationSource::File::new(@_);
 
   # requires sequence
   throw("ERROR: GXF annotation requires either database access (--database or --cache) or a FASTA file (--fasta)")
     unless $self->param('fasta') or $self->param('cache') or $self->param('database');
 
   $self->{cache_region_size} = 1e6;
-
-  delete($self->{info});
 
   return $self;
 }
