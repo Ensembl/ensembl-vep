@@ -124,6 +124,7 @@ SKIP: {
       'ENST00000457143' => 'protein_coding',
       'ENST00000415997' => 'protein_coding',
       'ENST00000284971' => 'protein_coding',
+      'ENST00000384075' => 'snRNA',
       'ENST00000460679' => 'nonsense_mediated_decay',
       'ENST00000400094' => 'protein_coding',
       'ENST00000600590' => 'antisense',

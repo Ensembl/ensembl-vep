@@ -70,7 +70,7 @@ sub new {
   throw("ERROR: GXF annotation requires either database access (--database or --cache) or a FASTA file (--fasta)")
     unless $self->param('fasta') or $self->param('cache') or $self->param('database');
 
-  $self->{cache_region_size} = 1e6;
+  $self->{cache_region_size} = 5e5;
 
   return $self;
 }
@@ -123,8 +123,12 @@ sub _get_records_by_coords {
     if($include->{$parser->get_type}) {
       my ($r_start, $r_end) = ($parser->get_start, $parser->get_end);
       
-      # if this is a rescan, don't change min/max so we don't get repeated iterations
-      unless($no_rescan) {
+      # if this is a rescan, only change min/max in the appropriate "direction"
+      if($no_rescan) {
+        $min = $r_start if $r_start < $min && $no_rescan == 1;
+        $max = $r_end if $r_end > $max && $no_rescan == 2;
+      }
+      else {
         $min = $r_start if $r_start < $min;
         $max = $r_end if $r_end > $max;
       }
@@ -137,12 +141,13 @@ sub _get_records_by_coords {
 
   # we have to be a bit clever, because sub-features e.g. exons may not come back
   # as they dont overlap our input coords, even if the parent feature does!
-  # so rerun this method but set no_rescan so we don't keep re-iterating
+  # so rerun this method but set no_rescan to an int value representing the "direction"
+  # so we don't keep re-iterating up/down/up/down
   if($min < $s) {
     unshift @records, @{$self->_get_records_by_coords($c, $min, $s - 1, 1)};
   }
   if($max > $e) {
-    push @records, @{$self->_get_records_by_coords($c, $e + 1, $max, 1)};
+    push @records, @{$self->_get_records_by_coords($c, $e + 1, $max, 2)};
   }
 
   return \@records;
