@@ -263,14 +263,14 @@ sub _forked_buffer_to_output {
         merge_hashes($self->stats->{stats}->{counters}, $data->{stats}, 1) if $data->{stats};
 
         # stderr
-        $self->warning_msg($data->{stderr}) if $data->{stderr};
+        $self->warning_msg($data->{pid}." : ".$data->{stderr}) if $data->{stderr};
 
         # finish up
         $sel->remove($fh);
         $fh->close;
         $active_forks--;
 
-        throw("ERROR: Forked process(es) died\n".$data->{die}) if $data->{die};
+        throw("ERROR: Forked process(es) died\n".$data->{pid}." : ".$data->{die}) if $data->{die};
       }
 
       # read-through detected, DIE
@@ -312,6 +312,10 @@ sub _forked_process {
   # reset FASTA DB
   delete($self->config->{_fasta_db});
   $self->fasta_db;
+
+  # reset custom sources' parsers
+  # otherwise we get cross-pollution between forks reading from the same filehandles (I think)
+  delete $_->{parser} for @{$self->get_all_AnnotationSources};
 
   # we want to capture any deaths and accurately report any errors
   # so we use eval to run the core chunk of the code (_buffer_to_output)

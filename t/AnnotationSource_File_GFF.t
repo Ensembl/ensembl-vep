@@ -209,6 +209,7 @@ SKIP: {
   # overlapping exons
   $records = $as->_get_records_by_coords(21, 25585733, 25585733);
   $records->[0]->{end} += 1e5;
+  delete($records->[0]->{attributes}->{rank});
   is(scalar @{$as->_create_transcripts($records)}, 2, 'overlapping exons skips transcript');
   ok($tmp =~ /Failed to add exon to transcript/, 'overlapping exons warning message');
 

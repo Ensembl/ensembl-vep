@@ -89,8 +89,8 @@ sub get_features_by_regions_uncached {
 
     my $features = $self->_get_transcripts_by_coords(
       $c,
-      $s * $cache_region_size,
-      (($s + 1) * $cache_region_size) - 1
+      ($s * $cache_region_size) + 1,
+      ($s + 1) * $cache_region_size
     );
 
     $cache->{$c}->{$s} = $features;
@@ -276,6 +276,8 @@ sub _create_transcript {
     -STRAND    => $tr_record->{strand},
     -VERSION   => 1,
     -dbID      => $self->{_tr_dbID}++,
+    -START     => $tr_record->{start},
+    -END       => $tr_record->{end},
   );
 
   $self->_add_identifiers($tr, $tr_record, $gene_record);
@@ -332,7 +334,7 @@ sub _create_transcript {
 
     # add it to the transcript
     # sometimes this can fail if the coordinates overlap
-    eval {$tr->add_Exon($exon);};
+    eval {$tr->add_Exon($exon, $exon_record->{attributes}->{rank});};
     if($@) {
       warn("WARNING: Failed to add exon to transcript ".$tr->stable_id."\n$@");
       return;

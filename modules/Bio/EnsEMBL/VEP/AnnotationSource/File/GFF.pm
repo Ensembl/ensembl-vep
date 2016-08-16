@@ -94,7 +94,7 @@ my %INCLUDE_FEATURE_TYPES = map {$_ => 1} qw(
 
 sub parser {
   my $self = shift;
-  return $self->{parser} ||= Bio::EnsEMBL::IO::Parser::GFF3Tabix->open($self->file);
+  return $self->{parser} ||= Bio::EnsEMBL::IO::Parser::GFF3Tabix->open($self->file, must_parse_metadata => 0);
 }
 
 sub include_feature_types {
