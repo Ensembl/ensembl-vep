@@ -230,6 +230,9 @@ is_deeply(
 ## FREQUENCY STUFF
 ##################
 
+# for now this requires we switch off allele checking
+$c->{no_check_alleles} = 1;
+
 # new checks
 ok(
   $c->check_frequency_filter,

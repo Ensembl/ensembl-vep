@@ -173,9 +173,16 @@ our @OPTION_SETS = (
       check_frequency => 1,
     },
   },
+
+  {
+    flags => ['check_frequency'],
+    set => {
+      no_check_alleles => 1,
+    }
+  },
   
   {
-    flags => [qw(check_frequency check_alleles af af_1kg af_esp af_exac pubmed)],
+    flags => [qw(check_frequency af af_1kg af_esp af_exac pubmed)],
     set   => {
       check_existing => 1,
     },
@@ -295,6 +302,7 @@ our %DEPRECATED = (
   'maf_1kg'  => 'af_1kg',
   'maf_esp'  => 'af_1kg',
   'maf_exac' => 'af_exac',
+  'check_alleles' => undef,
   'html'     => undef,
   'gvf'      => undef,
   'convert'  => undef,

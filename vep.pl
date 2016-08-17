@@ -66,7 +66,8 @@ GetOptions(
   'check_ref',               # check supplied reference allele against DB
   'check_existing',          # find existing co-located variations
   'check_svs',               # find overlapping structural variations
-  'check_alleles',           # only attribute co-located if alleles are the same
+  'no_check_alleles',        # attribute co-located regardless of alleles
+  'check_alleles',           # DEPRECATED
   'check_frequency',         # enable frequency checking
   'gmaf',                    # DEPRECATED: USE af
   'maf_1kg',                 # DEPRECATED: USE af_1kg

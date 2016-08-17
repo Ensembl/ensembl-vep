@@ -59,7 +59,7 @@ sub new {
   my $self = $class->SUPER::new(@_);
 
   # add shortcuts to these params
-  $self->add_shortcuts([qw(check_alleles failed check_frequency freq_pop freq_freq freq_gt_lt freq_filter)]);
+  $self->add_shortcuts([qw(no_check_alleles failed check_frequency freq_pop freq_freq freq_gt_lt freq_filter)]);
 
   # add this flag to tell VEP runner to use this first
   $self->{can_filter_vfs} = 1;
@@ -103,10 +103,14 @@ sub is_var_novel {
   my $new_var = shift;
 
   my $is_novel = 1;
+  
+  my $matched_coords = $existing_var->{start} == $new_var->start && $existing_var->{end} == $new_var->end;
+  $is_novel = 0 if $matched_coords;
 
-  $is_novel = 0 if $existing_var->{start} == $new_var->start && $existing_var->{end} == $new_var->end;
+  # can't compare alleles with e.g. HGMD_MUTATION so just include it
+  return 0 if $matched_coords && $existing_var->{allele_string} !~ /\//;
 
-  if($self->{check_alleles}) {
+  unless($self->{no_check_alleles}) {
     my %existing_alleles;
 
     $existing_alleles{$_} = 1 for split '\/', $existing_var->{allele_string};

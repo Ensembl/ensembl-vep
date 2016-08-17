@@ -83,7 +83,7 @@ ok(($cfg->param('host') eq 'mysql-eg-publicsql.ebi.ac.uk' and $cfg->param('port'
 $cfg = Bio::EnsEMBL::VEP::Config->new({af => 1});
 is($cfg->param('check_existing'), 1, 'option sets, multiple in same out 1');
 
-$cfg = Bio::EnsEMBL::VEP::Config->new({check_alleles => 1});
+$cfg = Bio::EnsEMBL::VEP::Config->new({check_frequency => 1});
 is($cfg->param('check_existing'), 1, 'option sets, multiple in same out 2');
 
 # give config file

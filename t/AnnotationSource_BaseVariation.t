@@ -76,10 +76,10 @@ my $existing = {
 ok(!$c->is_var_novel($existing, $input), 'is_var_novel exact match');
 
 $existing->{allele_string} = 'A/T';
-ok(!$c->is_var_novel($existing, $input), 'is_var_novel alleles dont match but no check');
+ok($c->is_var_novel($existing, $input), 'is_var_novel alleles dont match but no check');
 
-$c->{check_alleles} = 1;
-ok($c->is_var_novel($existing, $input), 'is_var_novel alleles dont match with check');
+$c->{no_check_alleles} = 1;
+ok(!$c->is_var_novel($existing, $input), 'is_var_novel alleles dont match with check');
 
 $existing = {
   start  => 10,
@@ -89,12 +89,12 @@ $existing = {
 };
 ok(!$c->is_var_novel($existing, $input), 'is_var_novel rev strand exact match');
 
-$c->{check_alleles} = 0;
+$c->{no_check_alleles} = 0;
 $existing->{allele_string} = 'T/G';
-ok(!$c->is_var_novel($existing, $input), 'is_var_novel rev strand alleles dont match but no check');
+ok($c->is_var_novel($existing, $input), 'is_var_novel rev strand alleles dont match but no check');
 
-$c->{check_alleles} = 1;
-ok($c->is_var_novel($existing, $input), 'is_var_novel rev strand alleles dont match with check');
+$c->{no_check_alleles} = 1;
+ok(!$c->is_var_novel($existing, $input), 'is_var_novel rev strand alleles dont match with check');
 
 
 

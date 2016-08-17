@@ -74,7 +74,7 @@ sub new {
   my $self = $class->SUPER::new(@_);
 
   # add shortcuts to these params
-  $self->add_shortcuts([qw(check_alleles failed)]);# check_frequency freq_pop freq_freq freq_gt_lt freq_filter)]);
+  $self->add_shortcuts([qw(no_check_alleles failed)]);# check_frequency freq_pop freq_freq freq_gt_lt freq_filter)]);
 
   # add this flag to tell VEP runner to use this first
   # $self->{can_filter_vfs} = 1;
