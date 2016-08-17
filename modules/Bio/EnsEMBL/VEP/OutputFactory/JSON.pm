@@ -131,8 +131,6 @@ sub get_all_output_hashes_by_InputBuffer {
 
     $self->add_VariationFeatureOverlapAllele_info($vf, $hash);
 
-    $self->add_colocated_variant_info($vf, $hash);
-
     $hash->{custom_annotations} = $vf->{_custom_annotations} if $vf->{_custom_annotations};
 
     numberify($hash, \%NUMBERIFY_EXEMPT);
@@ -237,6 +235,8 @@ sub add_colocated_variant_info {
   my $self = shift;
   my $vf = shift;
   my $hash = shift;
+
+  $DB::single = 1;
 
   foreach my $ex_orig(@{$vf->{existing} || []}) {
 
