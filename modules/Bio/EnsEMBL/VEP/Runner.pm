@@ -137,8 +137,28 @@ sub run {
   return 1;
 }
 
+sub run_rest {
+  my $self = shift;
+  my $input = shift;
+
+  $self->param('input_data', $input);
+  $self->param('output_format', 'json');
+  $self->param('no_stats', 1);
+
+  $self->init();
+
+  my @return = ();
+
+  while(my $hash = $self->next_output_line(1)) {
+    push @return, $hash;
+  }
+
+  return \@return;
+}
+
 sub next_output_line {
   my $self = shift;
+  my $output_as_hash = shift;
 
   my $output_buffer = $self->{_output_buffer} ||= [];
 
@@ -147,10 +167,10 @@ sub next_output_line {
   $self->init();
 
   if($self->param('fork')) {
-    push @$output_buffer, @{$self->_forked_buffer_to_output($self->get_InputBuffer)};
+    push @$output_buffer, @{$self->_forked_buffer_to_output($self->get_InputBuffer, $output_as_hash)};
   }
   else {
-    push @$output_buffer, @{$self->_buffer_to_output($self->get_InputBuffer)};
+    push @$output_buffer, @{$self->_buffer_to_output($self->get_InputBuffer, $output_as_hash)};
   }
 
   return @$output_buffer ? shift @$output_buffer : undef;
@@ -159,6 +179,7 @@ sub next_output_line {
 sub _buffer_to_output {
   my $self = shift;
   my $input_buffer = shift;
+  my $output_as_hash = shift;
 
   my @output;
   my $vfs = $input_buffer->next();
@@ -172,7 +193,12 @@ sub _buffer_to_output {
       
     $input_buffer->finish_annotation;
 
-    push @output, @{$output_factory->get_all_lines_by_InputBuffer($input_buffer)};
+    if($output_as_hash) {
+      push @output, @{$output_factory->get_all_output_hashes_by_InputBuffer($input_buffer)};
+    }
+    else {
+      push @output, @{$output_factory->get_all_lines_by_InputBuffer($input_buffer)};
+    }
   }
 
   return \@output;
@@ -181,6 +207,7 @@ sub _buffer_to_output {
 sub _forked_buffer_to_output {
   my $self = shift;
   my $buffer = shift;
+  my $output_as_hash = shift;
 
   # get a buffer-sized chunk of VFs to split and fork on
   my $vfs = $buffer->next();
@@ -229,7 +256,7 @@ sub _forked_buffer_to_output {
           $active_forks++;
         }
         elsif($pid == 0) {
-          $self->_forked_process($buffer, \@tmp, $parent);
+          $self->_forked_process($buffer, \@tmp, $parent, $output_as_hash);
         }
       }
     }
@@ -291,6 +318,7 @@ sub _forked_process {
   my $buffer = shift;
   my $vfs = shift;
   my $parent = shift;
+  my $output_as_hash = shift;
 
   # redirect and capture STDERR
   $self->config->{warning_fh} = *STDERR;
@@ -326,7 +354,7 @@ sub _forked_process {
     throw('TEST DIE') if $self->{_test_die};
 
     # the real thing
-    $output = $self->_buffer_to_output($buffer);
+    $output = $self->_buffer_to_output($buffer, $output_as_hash);
   };
   my $die = $@;
 
