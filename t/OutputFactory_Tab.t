@@ -230,8 +230,8 @@ is(
   "rs142513484\t21:25585733\tT\tENSG00000154719\tENST00000307301\tTranscript\t3_prime_UTR_variant\t1122\t".
   "-\t-\t-\t-\trs142513484\tMODIFIER\t-\t-1\t-\tSNV\tMRPL39\tHGNC\tHGNC:14027\tprotein_coding\tYES\t5\tA2\t".
   "CCDS33522.1\tENSP00000305682\tQ9NYK5\t-\tUPI00001AEAC0\t-\t-\t-\t11/11\t-\t-\tENST00000307301.11:c.*18G>A\t".
-  "-\t-\tT:0.0010\tT:0.0030\tT:0.0014\tT:0.0000\tT:0.0000\tT:0.0000\tT:0.005\tT:0\tT:4.119e-04\tT:0.0004133\t".
-  "T:0.004681\tT:0.000173\tT:0\tT:0\tT:0\tT:0\tT:0\t-\t-\t-\t-\t-\t-\t-\t-",
+  "-\t-\t0.0010\t0.0030\t0.0014\t0.0000\t0.0000\t0.0000\t0.005\t0\t4.119e-04\t0.0004133\t".
+  "0.004681\t0.000173\t0\t0\t0\t0\t0\t-\t-\t-\t-\t-\t-\t-\t-",
   'get_all_lines_by_InputBuffer - everything'
 );
 

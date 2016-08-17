@@ -125,10 +125,10 @@ our @OPTION_SETS = (
       canonical      => 1,
       protein        => 1,
       biotype        => 1,
-      gmaf           => 1,
-      maf_1kg        => 1,
-      maf_esp        => 1,
-      maf_exac       => 1,
+      af             => 1,
+      af_1kg         => 1,
+      af_esp         => 1,
+      af_exac        => 1,
       pubmed         => 1,
       uniprot        => 1,
       tsl            => 1,
@@ -175,7 +175,7 @@ our @OPTION_SETS = (
   },
   
   {
-    flags => [qw(check_frequency check_alleles gmaf maf_1kg maf_esp maf_exac pubmed)],
+    flags => [qw(check_frequency check_alleles af af_1kg af_esp af_exac pubmed)],
     set   => {
       check_existing => 1,
     },
@@ -279,7 +279,7 @@ our %VALID = (
 our %INCOMPATIBLE = (
   most_severe => [qw(no_intergenic protein symbol sift polyphen coding_only ccds canonical xref_refseq numbers domains tsl appris uniprot summary pick flag_pick pick_allele flag_pick_allele)],
   summary     => [qw(no_intergenic protein symbol sift polyphen coding_only ccds canonical xref_refseq numbers domains tsl appris uniprot most_severe pick flag_pick pick_allele flag_pick_allele)],
-  database    => [qw(maf_1kg maf_esp maf_exac pubmed offline cache)],
+  database    => [qw(af_1kg af_esp af_exac pubmed offline cache)],
   quiet       => [qw(verbose)],
   refseq      => [qw(gencode_basic merged)],
   merged      => [qw(database)],
@@ -289,6 +289,16 @@ our %INCOMPATIBLE = (
   tab         => [qw(vcf gvf json)],
 );
 
+# deprecated/replaced flags
+our %DEPRECATED = (
+  'gmaf'     => 'af',
+  'maf_1kg'  => 'af_1kg',
+  'maf_esp'  => 'af_1kg',
+  'maf_exac' => 'af_exac',
+  'html'     => undef,
+  'gvf'      => undef,
+  'convert'  => undef,
+);
 
 
 ####################################
@@ -388,7 +398,7 @@ sub check_config {
   
   # turn off some options if using --everything and --database
   if($config->{everything} && $config->{database}) {
-    delete $config->{$_} for qw(maf_1kg maf_esp maf_exac pubmed);
+    delete $config->{$_} for qw(af_1kg af_esp af_exac pubmed);
   }
   
   # check valid values for flags
@@ -396,7 +406,7 @@ sub check_config {
     my @values = ref($config->{$flag}) eq 'ARRAY' ? @{$config->{$flag}} : split(',', $config->{$flag});
     
     foreach my $value(@values) {
-      die
+      throw
         sprintf(
           "ERROR: \"%s\" is not a valid value for --%s\nValid values: %s\n",
           $value,
@@ -409,8 +419,19 @@ sub check_config {
   # check incompatible flags
   foreach my $flag(grep {$config->{$_}} keys %INCOMPATIBLE) {
     foreach my $invalid(grep {$config->{$_}} @{$INCOMPATIBLE{$flag}}) {
-      die sprintf("ERROR: Can't use --%s and --%s together\n", $flag, $invalid);
+      throw sprintf("ERROR: Can't use --%s and --%s together\n", $flag, $invalid);
     }
+  }
+
+  # check deprecated flags
+  foreach my $flag(grep {$config->{$_}} keys %DEPRECATED) {
+    my $msg = "ERROR: --$flag has been deprecated";
+    
+    if(my $new = $DEPRECATED{$flag}) {
+      $msg .= " - please use --$new instead";
+    }
+
+    throw("$msg\n");
   }
   
   # check one of database/cache/offline/custom

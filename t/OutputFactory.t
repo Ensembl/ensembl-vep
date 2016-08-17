@@ -73,110 +73,6 @@ is_deeply(
   'add_colocated_variant_info',
 );
 
-
-
-## frequency tests
-##################
-
-$of->{gmaf} = 1;
-$exp->{GMAF} = ['T:0.0010'];
-is_deeply(
-  $of->add_colocated_variant_info($vf, {}),
-  $exp,
-  'add_colocated_variant_info - gmaf',
-);
-
-$of->{maf_1kg} = 1;
-$exp->{AFR_MAF} = ['T:0.0030'];
-$exp->{AMR_MAF} = ['T:0.0014'];
-$exp->{EAS_MAF} = ['T:0.0000'];
-$exp->{EUR_MAF} = ['T:0.0000'];
-$exp->{SAS_MAF} = ['T:0.0000'];
-is_deeply(
-  $of->add_colocated_variant_info($vf, {}),
-  $exp,
-  'add_colocated_variant_info - maf_1kg',
-);
-
-$of->{gmaf} = 0;
-$of->{maf_1kg} = 0;
-
-$ib = get_annotated_buffer({
-  check_existing => 1,
-  input_file => $test_cfg->create_input_file([qw(21 25891796 . C T . . .)])
-});
-$of->{maf_exac} = 1;
-
-is_deeply(
-  $of->add_colocated_variant_info($ib->buffer->[0], {}),
-  {
-    'ExAC_OTH_MAF' => [
-      'T:0.001101'
-    ],
-    'ExAC_Adj_MAF' => [
-      'T:5.768e-05'
-    ],
-    'ExAC_AFR_MAF' => [
-      'T:0'
-    ],
-    'ExAC_AMR_MAF' => [
-      'T:0.0003457'
-    ],
-    'PHENO' => [
-      1,
-      1
-    ],
-    'Existing_variation' => [
-      'rs63750066',
-      'CM930033'
-    ],
-    'CLIN_SIG' => [
-      'not_provided,pathogenic'
-    ],
-    'ExAC_NFE_MAF' => [
-      'T:2.998e-05'
-    ],
-    'ExAC_SAS_MAF' => [
-      'T:0'
-    ],
-    'ExAC_FIN_MAF' => [
-      'T:0'
-    ],
-    'ExAC_EAS_MAF' => [
-      'T:0'
-    ],
-    'ExAC_MAF' => [
-      'T:5.765e-05'
-    ]
-  },
-  'add_colocated_variant_info - maf_exac, pheno, clin_sig',
-);
-$of->{maf_exac} = 0;
-
-$ib = get_annotated_buffer({
-  check_existing => 1,
-  input_file => $test_cfg->create_input_file([qw(21 25975223 . G A . . .)])
-});
-
-$of->{maf_esp} = 1;
-is_deeply(
-  $of->add_colocated_variant_info($ib->buffer->[0], {}),
-  {
-    'Existing_variation' => [
-      'rs148180403',
-    ],
-    'AA_MAF' => [
-      'A:0',
-    ],
-    'EA_MAF' => [
-      'A:0.0008',
-    ],
-  },
-  'add_colocated_variant_info - maf_esp',
-);
-$of->{maf_esp} = 0;
-
-
 # frequency data from --check_frequency
 $ib->buffer->[0]->{_freq_check_freqs} = {
   '1KG_ALL' => {
@@ -187,7 +83,7 @@ is_deeply(
   $of->add_colocated_variant_info($ib->buffer->[0], {}),
   {
     'Existing_variation' => [
-      'rs148180403',
+      'rs142513484',
     ],
     'FREQS' => [
       '1KG_ALL:A:0.1',
@@ -196,6 +92,31 @@ is_deeply(
   'add_colocated_variant_info - _freq_check_freqs',
 );
 delete($ib->buffer->[0]->{_freq_check_freqs});
+
+
+# phenotype and clinsig come back without user param input
+$ib = get_annotated_buffer({
+  check_existing => 1,
+  input_file => $test_cfg->create_input_file([qw(21 25891796 . C T . . .)])
+});
+
+is_deeply(
+  $of->add_colocated_variant_info($ib->buffer->[0], {}),
+  {
+    'PHENO' => [
+      1,
+      1
+    ],
+    'CLIN_SIG' => [
+      'not_provided,pathogenic'
+    ],
+    'Existing_variation' => [
+      'rs63750066',
+      'CM930033'
+    ]
+  },
+  'add_colocated_variant_info - pheno, clin_sig, multiple',
+);
 
 
 
@@ -660,6 +581,123 @@ is_deeply(
   'VariationFeatureOverlapAllele_to_output_hash - pick'
 );
 $of->{flag_pick} = 0;
+
+
+
+
+
+## frequency tests
+##################
+
+$ib = get_annotated_buffer({
+  input_file => $test_cfg->{test_vcf},
+  check_existing => 1,
+});
+
+$vfoa = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[0];
+
+$of->{af} = 1;
+
+is_deeply(
+  $of->add_colocated_frequency_data($vf, {Allele => 'T'}, $vf->{existing}->[0]),
+  {Allele => 'T', AF => ['0.0010']},
+  'add_colocated_frequency_data - af',
+);
+
+is_deeply(
+  $of->add_colocated_frequency_data($vf, {Allele => 'C'}, $vf->{existing}->[0]),
+  {Allele => 'C', AF => ['0.999']},
+  'add_colocated_frequency_data - af other allele',
+);
+
+is_deeply(
+  $of->add_colocated_frequency_data($vf, {Allele => 'G'}, $vf->{existing}->[0]),
+  {Allele => 'G'},
+  'add_colocated_frequency_data - af absent allele',
+);
+
+$of->{af} = 0;
+
+# 1kg
+$of->{af_1kg} = 1;
+
+is_deeply(
+  $of->add_colocated_frequency_data($vf, {Allele => 'T'}, $vf->{existing}->[0]),
+  {
+    Allele => 'T',
+    AFR_AF => ['0.0030'],
+    AMR_AF => ['0.0014'],
+    EAS_AF => ['0.0000'],
+    EUR_AF => ['0.0000'],
+    SAS_AF => ['0.0000'],
+  },
+  'add_colocated_frequency_data - af_1kg',
+);
+
+$of->{af_1kg} = 0;
+
+$ib = get_annotated_buffer({
+  check_existing => 1,
+  input_file => $test_cfg->create_input_file([qw(21 25891796 . C T . . .)])
+});
+$of->{af_exac} = 1;
+
+is_deeply(
+  $of->add_colocated_frequency_data($ib->buffer->[0], {Allele => 'T'}, $ib->buffer->[0]->{existing}->[0]),
+  {
+    Allele => 'T',
+    'ExAC_OTH_AF' => [
+      '0.001101'
+    ],
+    'ExAC_Adj_AF' => [
+      '5.768e-05'
+    ],
+    'ExAC_AFR_AF' => [
+      '0'
+    ],
+    'ExAC_AMR_AF' => [
+      '0.0003457'
+    ],
+    'ExAC_NFE_AF' => [
+      '2.998e-05'
+    ],
+    'ExAC_SAS_AF' => [
+      '0'
+    ],
+    'ExAC_FIN_AF' => [
+      '0'
+    ],
+    'ExAC_EAS_AF' => [
+      '0'
+    ],
+    'ExAC_AF' => [
+      '5.765e-05'
+    ]
+  },
+  'add_colocated_frequency_data - af_exac',
+);
+$of->{af_exac} = 0;
+
+$ib = get_annotated_buffer({
+  check_existing => 1,
+  input_file => $test_cfg->create_input_file([qw(21 25975223 . G A . . .)])
+});
+
+$of->{af_esp} = 1;
+is_deeply(
+  $of->add_colocated_frequency_data($ib->buffer->[0], {Allele => 'A'}, $ib->buffer->[0]->{existing}->[0]),
+  {
+    'Allele' => 'A',
+    'AA_AF' => [
+      '0',
+    ],
+    'EA_AF' => [
+      '0.0008',
+    ],
+  },
+  'add_colocated_frequency_data - af_esp',
+);
+$of->{af_esp} = 0;
 
 
 

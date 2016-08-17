@@ -70,6 +70,13 @@ my %FORMAT_MAP = (
 
 my %DISTANCE_CONS = (upstream_gene_variant => 1, downstream_gene_variant => 1);
 
+my %FREQUENCY_KEYS = (
+  af      => ['AF'],
+  af_1kg  => [qw(AFR AMR ASN EAS EUR SAS)],
+  af_esp  => [qw(AA EA)],
+  af_exac => [('ExAC', map {'ExAC_'.$_} qw(Adj AFR AMR EAS FIN NFE OTH SAS))],
+);
+
 sub new {
   my $caller = shift;
   my $class = ref($caller) || $caller;
@@ -98,10 +105,10 @@ sub new {
     flag_pick_allele_gene
     
     variant_class
-    gmaf
-    maf_1kg
-    maf_esp
-    maf_exac
+    af
+    af_1kg
+    af_esp
+    af_exac
     pubmed
 
     numbers
@@ -657,21 +664,21 @@ sub add_colocated_variant_info {
   foreach my $ex(@{$vf->{existing}}) {
 
     # ID
-    push @{$tmp->{Existing_variation}}, $ex->{variation_name} if $ex->{variation_name};
+    push @{$hash->{Existing_variation}}, $ex->{variation_name} if $ex->{variation_name};
 
-    # GMAF?
-    if($self->{gmaf}) {
-      push @{$tmp->{GMAF}}, $ex->{minor_allele}.':'.$ex->{minor_allele_freq}
-        if $ex->{minor_allele} && looks_like_number($ex->{minor_allele_freq});
-    }
+    # # GMAF?
+    # if($self->{gmaf}) {
+    #   push @{$tmp->{GMAF}}, $ex->{minor_allele}.':'.$ex->{minor_allele_freq}
+    #     if $ex->{minor_allele} && looks_like_number($ex->{minor_allele_freq});
+    # }
 
-    # other freqs we can treat all the same
-    my @pops = ();
-    push @pops, qw(AFR AMR ASN EAS EUR SAS)                                    if $self->{maf_1kg};
-    push @pops, qw(AA EA)                                                      if $self->{maf_esp};
-    push @pops, ('ExAC', map {'ExAC_'.$_} qw(Adj AFR AMR EAS FIN NFE OTH SAS)) if $self->{maf_exac};
+    # # other freqs we can treat all the same
+    # my @pops = ();
+    # push @pops, qw(AFR AMR ASN EAS EUR SAS)                                    if $self->{maf_1kg};
+    # push @pops, qw(AA EA)                                                      if $self->{maf_esp};
+    # push @pops, ('ExAC', map {'ExAC_'.$_} qw(Adj AFR AMR EAS FIN NFE OTH SAS)) if $self->{maf_exac};
 
-    push @{$tmp->{$_.'_MAF'}}, $ex->{$_} for grep {defined($ex->{$_})} @pops;
+    # push @{$tmp->{$_.'_MAF'}}, $ex->{$_} for grep {defined($ex->{$_})} @pops;
 
     # clin sig and pubmed?
     push @{$tmp->{CLIN_SIG}}, $ex->{clin_sig} if $ex->{clin_sig};
@@ -713,6 +720,51 @@ sub add_colocated_variant_info {
   return $hash;
 }
 
+sub add_colocated_frequency_data {
+  my $self = shift;
+  my ($vf, $hash, $ex) = @_;
+
+  return unless grep {$self->{$_}} keys %FREQUENCY_KEYS;
+
+  my $this_allele = $hash->{Allele};
+
+  my @ex_alleles = split('/', $ex->{allele_string});
+
+  foreach my $group(grep {$self->{$_}} keys %FREQUENCY_KEYS) {
+
+    # gmaf stored a bit differently, but we can get it in the same format
+    $ex->{AF} = $ex->{minor_allele}.':'.$ex->{minor_allele_freq} if $group eq 'af' && $ex->{minor_allele};
+
+    foreach my $key(grep {$ex->{$_}} @{$FREQUENCY_KEYS{$group}}) {
+
+      my %freq_data;
+      my %remaining = map {$_ => 1} @ex_alleles;
+      my $total = 0;
+
+      foreach my $pair(split(',', $ex->{$key})) {
+        my ($a, $f) = split(':', $pair);
+        $freq_data{$a} = $f;
+        $total += $f;
+        delete $remaining{$a} if $remaining{$a};
+      }
+
+      my $out_key = $key eq 'AF' ? 'AF' : $key.'_AF';
+
+      if(exists($freq_data{$this_allele})) {
+        push @{$hash->{$out_key}}, $freq_data{$this_allele};
+      }
+      elsif(scalar keys %remaining == 1) {
+        $freq_data{(keys %remaining)[0]} = 1 - $total;
+        push @{$hash->{$out_key}}, $freq_data{$this_allele} if exists($freq_data{$this_allele});
+      }
+    }
+  }
+
+  delete $ex->{AF};
+
+  return $hash;
+}
+
 sub _add_custom_annotations_to_hash {
   my ($self, $hash, $custom_name, $annots) = @_;
 
@@ -723,6 +775,8 @@ sub _add_custom_annotations_to_hash {
       $hash->{$custom_name.'_'.$field} = $annot->{fields}->{$field};
     }
   }
+
+  return $hash;
 }
 
 sub VariationFeatureOverlapAllele_to_output_hash {
@@ -757,6 +811,11 @@ sub VariationFeatureOverlapAllele_to_output_hash {
         @{$vf->{_custom_annotations}->{$custom_name}}
       ]
     );
+  }
+
+  # frequency data
+  foreach my $ex(@{$vf->{existing} || []}) {
+    $self->add_colocated_frequency_data($vf, $hash, $ex);
   }
 
   return $hash;

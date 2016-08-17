@@ -80,7 +80,7 @@ is($cfg->param('regulatory'), undef, 'empty array ref (cell_type) does not trigg
 $cfg = Bio::EnsEMBL::VEP::Config->new({genomes => 1});
 ok(($cfg->param('host') eq 'mysql-eg-publicsql.ebi.ac.uk' and $cfg->param('port') == 4157), 'option sets, one in multiple out');
 
-$cfg = Bio::EnsEMBL::VEP::Config->new({gmaf => 1});
+$cfg = Bio::EnsEMBL::VEP::Config->new({af => 1});
 is($cfg->param('check_existing'), 1, 'option sets, multiple in same out 1');
 
 $cfg = Bio::EnsEMBL::VEP::Config->new({check_alleles => 1});
@@ -97,6 +97,10 @@ is($cfg->param('test1'), 'hello', 'ini file');
 # list conversion
 $cfg = Bio::EnsEMBL::VEP::Config->new({individual => 'dave,barry,keith'});
 is_deeply($cfg->param('individual'), [qw(dave barry keith)], 'list conversion');
+
+# deprecated
+throws_ok { Bio::EnsEMBL::VEP::Config->new({html => 1}) } qr/deprecated/, 'deprecated no replacement';
+throws_ok { Bio::EnsEMBL::VEP::Config->new({gmaf => 1}) } qr/deprecated.+\-\-af/, 'deprecated with replacement';
 
 # invalid value
 throws_ok { Bio::EnsEMBL::VEP::Config->new({format => 'gobbledegook'}) } qr/not a valid value/, 'invalid value for key';

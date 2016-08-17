@@ -283,4 +283,8 @@ sub add_colocated_variant_info {
   return $hash;
 }
 
+sub add_colocated_frequency_data {
+  return $_[1];
+}
+
 1;

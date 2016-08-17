@@ -68,10 +68,14 @@ GetOptions(
   'check_svs',               # find overlapping structural variations
   'check_alleles',           # only attribute co-located if alleles are the same
   'check_frequency',         # enable frequency checking
-  'gmaf',                    # add global MAF of existing var
-  'maf_1kg',                 # add 1KG MAFs of existing vars
-  'maf_esp',                 # add ESP MAFs of existing vars
-  'maf_exac',                # add ExAC MAFs of existing vars
+  'gmaf',                    # DEPRECATED: USE af
+  'maf_1kg',                 # DEPRECATED: USE af_1kg
+  'maf_esp',                 # DEPRECATED: USE af_esp
+  'maf_exac',                # DEPRECATED: USE af_exac
+  'af',                      # add global AF of existing var
+  'af_1kg',                  # add 1KG AFs of existing vars
+  'af_esp',                  # add ESP AFs of existing vars
+  'af_exac',                 # add ExAC AFs of existing vars
   'old_maf',                 # report 1KG/ESP MAFs in the old way (no allele, always < 0.5)
   'pubmed',                  # add Pubmed IDs for publications that cite existing vars
   'freq_filter=s',           # exclude or include
@@ -94,7 +98,7 @@ GetOptions(
   # output options
   'everything|e',            # switch on EVERYTHING :-)
   'output_file|o=s',         # output file name
-  # 'html',                    # generate an HTML version of output
+  'html',                    # DEPRECATED: generate an HTML version of output
   'stats_file|sf=s',         # stats file name
   'stats_text',              # write stats as text
   'stats_html',              # write stats as html
@@ -123,9 +127,9 @@ GetOptions(
   'variant_class',           # get SO variant type
   'regulatory',              # enable regulatory stuff
   'cell_type=s' => ($config->{cell_type} ||= []),             # filter cell types for regfeats
-  # 'convert=s',               # convert input to another format (doesn't run VEP)
+  'convert=s',               # DEPRECATED: convert input to another format (doesn't run VEP)
   'no_intergenic',           # don't print out INTERGENIC consequences
-  # 'gvf',                     # produce gvf output
+  'gvf',                     # DEPRECATED: produce gvf output
   'vcf',                     # produce vcf output
   'solr',                    # produce XML output for Solr
   'json',                    # produce JSON document output
