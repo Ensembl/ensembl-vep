@@ -49,6 +49,7 @@ use Scalar::Util qw(looks_like_number);
 
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
+use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
 use Bio::EnsEMBL::Variation::Utils::Constants;
 use Bio::EnsEMBL::VEP::Utils qw(format_coords);
 use Bio::EnsEMBL::VEP::Constants;
@@ -727,6 +728,7 @@ sub add_colocated_frequency_data {
   return unless grep {$self->{$_}} keys %FREQUENCY_KEYS;
 
   my $this_allele = $hash->{Allele};
+  reverse_comp(\$this_allele) if $vf->strand ne $ex->{strand};
 
   my @ex_alleles = split('/', $ex->{allele_string});
 

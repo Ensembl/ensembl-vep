@@ -636,6 +636,19 @@ is_deeply(
 
 $of->{af_1kg} = 0;
 
+
+$of->{af} = 1;
+$ib = get_annotated_buffer({
+  check_existing => 1,
+  input_file => $test_cfg->create_input_file([qw(21 25585733 25585733 G/A -)])
+});
+is_deeply(
+  $of->add_colocated_frequency_data($ib->buffer->[0], {Allele => 'A'}, $ib->buffer->[0]->{existing}->[0]),
+  {Allele => 'A', AF => ['0.0010']},
+  'add_colocated_frequency_data - rev strand',
+);
+$of->{af} = 0;
+
 $ib = get_annotated_buffer({
   check_existing => 1,
   input_file => $test_cfg->create_input_file([qw(21 25891796 . C T . . .)])
