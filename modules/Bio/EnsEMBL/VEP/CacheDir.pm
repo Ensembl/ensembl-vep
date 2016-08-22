@@ -161,7 +161,7 @@ sub dir {
   
   $self->{dir} = shift if @_;
 
-  if(!exists($self->{dir})) {
+  if(!defined($self->{dir})) {
 
     # initialise dir at root_dir
     my $dir = $self->root_dir;
