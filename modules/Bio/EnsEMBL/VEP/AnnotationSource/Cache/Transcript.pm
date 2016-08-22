@@ -86,7 +86,7 @@ sub check_sift_polyphen {
       unless($v) {
 
         # dont die if user set "everything" param on a species with no SIFT/PolyPhen
-        if($self->{everything}) {
+        if($self->{everything} || $self->param('safe')) {
           $self->status_msg("INFO: disabling $tool");
           $self->param($lc_tool, 0);
           $self->{$lc_tool} = 0;
