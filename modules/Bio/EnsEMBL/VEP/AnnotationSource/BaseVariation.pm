@@ -116,7 +116,7 @@ sub is_var_novel {
     $existing_alleles{$_} = 1 for split '\/', $existing_var->{allele_string};
 
     my $seen_new = 0;
-    foreach my $a(split '\/', ($new_var->allele_string || "")) {
+    foreach my $a(grep {$_ ne 'N'} split '\/', ($new_var->allele_string || "")) {
       reverse_comp(\$a) if $new_var->strand ne $existing_var->{strand};
       $seen_new = 1 unless defined $existing_alleles{$a};
     }
