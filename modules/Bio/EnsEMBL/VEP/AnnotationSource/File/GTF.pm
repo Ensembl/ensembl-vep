@@ -86,7 +86,11 @@ sub _record_get_id {
 }
 
 sub _record_get_biotype {
-  return $_[1]->{attributes}->{transcript_biotype} || $_[1]->{attributes}->{biotype} || $_[1]->{source};
+  return
+    $_[1]->{attributes}->{transcript_biotype} ||
+    $_[1]->{attributes}->{transcript_type} ||
+    $_[1]->{attributes}->{biotype} ||
+    $_[1]->{source};
 }
 
 1;

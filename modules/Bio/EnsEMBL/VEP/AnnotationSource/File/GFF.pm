@@ -129,7 +129,7 @@ sub _record_get_biotype {
   if(!exists($record->{_biotype})) {
 
     # Ensembl-y GFFs have biotype as an attribute
-    my $biotype = $record->{attributes}->{biotype};
+    my $biotype = $record->{attributes}->{biotype} || $record->{attributes}->{transcript_type};
 
     # others we need to (guess) work it out
     if(!$biotype) {
