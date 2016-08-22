@@ -251,6 +251,7 @@ sub detect_format {
     }
 
     $self->delimiter($delimiter);
+    $self->param('delimiter', $delimiter);
 
     my @data = split $delimiter, $_;
     next unless @data;
