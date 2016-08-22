@@ -128,6 +128,8 @@ sub registry {
 
   my $config = $self->config;
 
+  return $config->{_registry} = shift if @_;
+
   if(!exists($config->{_registry})) {
 
     my $reg = 'Bio::EnsEMBL::Registry';
