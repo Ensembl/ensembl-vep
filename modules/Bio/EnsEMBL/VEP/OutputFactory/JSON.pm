@@ -88,7 +88,10 @@ sub new {
   $self->add_shortcuts([qw(
     assembly
     cache_assembly
+    delimiter
   )]);
+
+  $self->{delimiter} = " " if $self->{delimiter} =~ /\+/;
 
   return $self;
 }
@@ -123,7 +126,7 @@ sub get_all_output_hashes_by_InputBuffer {
     };
 
     # add original input for use by POST endpoints
-    $hash->{input} = join("\t", @{$vf->{_line}}) if defined($vf->{_line});
+    $hash->{input} = join($self->{delimiter}, @{$vf->{_line}}) if defined($vf->{_line});
 
     # get other data from super method
     my $extra_hash = $self->VariationFeature_to_output_hash($vf);
