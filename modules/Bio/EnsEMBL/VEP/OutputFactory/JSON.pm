@@ -239,8 +239,6 @@ sub add_colocated_variant_info {
   my $vf = shift;
   my $hash = shift;
 
-  $DB::single = 1;
-
   foreach my $ex_orig(@{$vf->{existing} || []}) {
 
     # work on a copy as we're going to modify/delete things
