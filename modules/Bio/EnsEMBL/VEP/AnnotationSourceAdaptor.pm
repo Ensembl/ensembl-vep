@@ -75,7 +75,8 @@ sub get_all_from_cache {
 
   my $cache_dir_obj = Bio::EnsEMBL::VEP::CacheDir->new({
     config   => $self->config,
-    root_dir => $self->param('dir_cache') || $self->param('dir')
+    root_dir => $self->param('dir_cache') || $self->param('dir'),
+    dir      => $self->param('full_cache_dir')
   });
 
   return $cache_dir_obj->get_all_AnnotationSources();
