@@ -123,6 +123,8 @@ sub create_VariationFeatures {
     });
   }
 
+  $vf->{_line} = $parser->{record};
+
   return $self->post_process_vfs([$vf]);
 }
 

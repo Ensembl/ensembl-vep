@@ -103,6 +103,8 @@ sub create_VariationFeatures {
   # add chr attrib
   $vf->{chr} = $vf->slice->seq_region_name;
 
+  $vf->{_line} = [$hgvs];
+
   return $self->post_process_vfs([$vf]);
 }
 

@@ -97,6 +97,7 @@ sub create_VariationFeatures {
     delete $_->{overlap_consequences};
     $_->{chr} = $_->seq_region_name;
     $_->{variation_name} = $id;
+    $_->{_line} = [$id];
   }
 
   # restore state
