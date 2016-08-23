@@ -266,7 +266,9 @@ is_deeply(
 ## get_all_lines_by_InputBuffer
 ###############################
 
-my $ib = get_runner({input_file => $test_cfg->{test_vcf}})->get_InputBuffer;
+my $runner = get_runner({input_file => $test_cfg->{test_vcf}});
+my $ib = $runner->get_InputBuffer;
+$of = $runner->get_OutputFactory;
 
 my @lines = @{$of->get_all_lines_by_InputBuffer($ib)};
 
@@ -330,7 +332,6 @@ is(
 );
 
 # custom
-my $runner;
 use_ok('Bio::EnsEMBL::VEP::AnnotationSource::File');
 
 SKIP: {
@@ -455,6 +456,7 @@ sub get_runner {
     %$cfg_hash,
     dir => $test_cfg->{cache_root_dir},
     %$tmp_cfg,
+    output_format => 'vcf'
   });
 
   $runner->init;

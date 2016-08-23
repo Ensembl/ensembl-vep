@@ -56,7 +56,7 @@ is($p->line_number(1), 1, 'line_number set');
 
 is_deeply($p->headers, [], 'headers');
 
-$p->file($test_cfg->{test_vcf});
+$p = Bio::EnsEMBL::VEP::Parser->new({file => $test_cfg->{test_vcf}, config => $cfg});
 is($p->detect_format, 'vcf', 'detect_format - VCF');
 
 ok($p->file($test_cfg->{test_gzvcf}) =~ /GLOB/, 'gzipped VCF');

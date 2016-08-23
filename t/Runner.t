@@ -721,7 +721,7 @@ is_deeply(
   $runner->run_rest('21 25585733 rs142513484 C T . . .'),
   [
     {
-      'input' => '21	25585733	rs142513484	C	T	.	.	.',
+      'input' => '21 25585733 rs142513484 C T . . .',
       'assembly_name' => 'GRCh38',
       'end' => 25585733,
       'seq_region_name' => '21',

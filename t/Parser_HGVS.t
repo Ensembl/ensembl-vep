@@ -101,7 +101,7 @@ SKIP: {
   }, 'Bio::EnsEMBL::Variation::VariationFeature' );
 
   $vf = $p->next();
-  delete($vf->{$_}) for qw(adaptor variation slice variation_name);
+  delete($vf->{$_}) for qw(adaptor variation slice variation_name _line);
   is_deeply($vf, $expected, 'genomic');
 
 
@@ -114,7 +114,7 @@ SKIP: {
     file => $test_cfg->create_input_file('ENST00000352957.8:c.991G>A'),
     valid_chromosomes => [21],
   })->next();
-  delete($vf->{$_}) for qw(adaptor variation slice variation_name);
+  delete($vf->{$_}) for qw(adaptor variation slice variation_name _line);
   is_deeply($vf, $expected, 'coding');
 
   $vf = Bio::EnsEMBL::VEP::Parser::HGVS->new({
@@ -122,7 +122,7 @@ SKIP: {
     file => $test_cfg->create_input_file('ENST00000307301.11:c.*18G>A'),
     valid_chromosomes => [21],
   })->next();
-  delete($vf->{$_}) for qw(adaptor variation slice variation_name);
+  delete($vf->{$_}) for qw(adaptor variation slice variation_name _line);
   is_deeply($vf, $expected, 'coding - UTR');
 
   $vf = Bio::EnsEMBL::VEP::Parser::HGVS->new({
@@ -130,7 +130,7 @@ SKIP: {
     file => $test_cfg->create_input_file('ENSP00000284967.6:p.Ala331Thr'),
     valid_chromosomes => [21],
   })->next();
-  delete($vf->{$_}) for qw(adaptor variation slice variation_name);
+  delete($vf->{$_}) for qw(adaptor variation slice variation_name _line);
   is_deeply($vf, $expected, 'protein');
 
   # capture warning
@@ -168,7 +168,7 @@ SKIP: {
     valid_chromosomes => [21],
   })->next();
 
-  delete($vf->{$_}) for qw(adaptor variation slice variation_name);
+  delete($vf->{$_}) for qw(adaptor variation slice variation_name _line);
   is_deeply($vf, $expected, 'refseq coding');
 
   $vf = Bio::EnsEMBL::VEP::Parser::HGVS->new({
@@ -177,7 +177,7 @@ SKIP: {
     valid_chromosomes => [21],
   })->next();
 
-  delete($vf->{$_}) for qw(adaptor variation slice variation_name);
+  delete($vf->{$_}) for qw(adaptor variation slice variation_name _line);
   is_deeply($vf, $expected, 'refseq protein');
 
 
@@ -222,7 +222,7 @@ SKIP: {
     file => $test_cfg->create_input_file('LRG_485:g.6674G>A'),
     valid_chromosomes => [21, 'LRG_485'],
   })->next();
-  delete($vf->{$_}) for qw(adaptor variation slice variation_name);
+  delete($vf->{$_}) for qw(adaptor variation slice variation_name _line);
   is_deeply($vf, $expected, 'LRG genomic');
 
   $vf = Bio::EnsEMBL::VEP::Parser::HGVS->new({
@@ -230,7 +230,7 @@ SKIP: {
     file => $test_cfg->create_input_file('LRG_485t1:c.121G>A'),
     valid_chromosomes => [21, 'LRG_485'],
   })->next();
-  delete($vf->{$_}) for qw(adaptor variation slice variation_name);
+  delete($vf->{$_}) for qw(adaptor variation slice variation_name _line);
   is_deeply($vf, $expected, 'LRG coding');
 
   $vf = Bio::EnsEMBL::VEP::Parser::HGVS->new({
@@ -238,7 +238,7 @@ SKIP: {
     file => $test_cfg->create_input_file('LRG_485p1:p.Val41Met'),
     valid_chromosomes => [21, 'LRG_485'],
   })->next();
-  delete($vf->{$_}) for qw(adaptor variation slice variation_name);
+  delete($vf->{$_}) for qw(adaptor variation slice variation_name _line);
   is_deeply($vf, $expected, 'LRG protein');
 
 
@@ -283,11 +283,11 @@ SKIP: {
   }, 'Bio::EnsEMBL::Variation::VariationFeature' );
 
   $vf = $p->next;
-  delete($vf->{$_}) for qw(adaptor variation slice variation_name);
+  delete($vf->{$_}) for qw(adaptor variation slice variation_name _line);
   is_deeply($vf, $expected, 'LRG mapping 1');
 
   $vf = $p->next;
-  delete($vf->{$_}) for qw(adaptor variation slice variation_name);
+  delete($vf->{$_}) for qw(adaptor variation slice variation_name _line);
   is_deeply($vf, $expected_chr, 'LRG mapping 2');
   
   1;

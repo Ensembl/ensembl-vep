@@ -84,6 +84,8 @@ sub new {
     keep_csq
   )]);
 
+  $self->{input_format} = $self->param('format');
+
   return $self;
 }
 
@@ -156,7 +158,9 @@ sub get_all_lines_by_InputBuffer {
     my $fieldname = $self->{vcf_info_field} || 'CSQ';
 
     # if input was VCF then we get _line with the original contents
-    if($line = $vf->{_line}) {
+    if($self->{input_format} eq 'vcf' && $vf->{_line}) {
+
+      $line = $vf->{_line};
 
       # array copy to keep original intact
       my @tmp = @$line;

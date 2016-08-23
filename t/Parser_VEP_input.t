@@ -62,7 +62,8 @@ is_deeply($vf, bless( {
   'map_weight' => 1,
   'allele_string' => 'C/A',
   'end' => '25587759',
-  'start' => '25587759'
+  'start' => '25587759',
+  '_line' => [qw(21 25587759 25587759 C/A + test)]
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'basic next test');
 
 $vf = Bio::EnsEMBL::VEP::Parser::VEP_input->new({
@@ -77,7 +78,8 @@ is_deeply($vf, bless( {
   'map_weight' => 1,
   'allele_string' => 'C/A',
   'end' => '25587759',
-  'start' => '25587759'
+  'start' => '25587759',
+  '_line' => [qw(21 25587759 25587759 C/A - test)]
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'negative strand');
 
 $vf = Bio::EnsEMBL::VEP::Parser::VEP_input->new({
@@ -92,7 +94,8 @@ is_deeply($vf, bless( {
   'map_weight' => 1,
   'allele_string' => 'C/A',
   'end' => '25587759',
-  'start' => '25587759'
+  'start' => '25587759',
+  '_line' => [qw(21 25587759 25587759 C/A)]
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'stubby');
 
 $vf = Bio::EnsEMBL::VEP::Parser::VEP_input->new({
@@ -106,7 +109,8 @@ is_deeply($vf, bless( {
   'variation_name' => 'test',
   'class_SO_term' => 'duplication',
   'end' => '25587769',
-  'start' => '25587759'
+  'start' => '25587759',
+  '_line' => [qw(21 25587759 25587769 DUP + test)]
 }, 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ), 'SV dup');
 
 

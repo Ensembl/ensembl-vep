@@ -98,7 +98,8 @@ SKIP: {
     'flank_match' => '1',
     'minor_allele_frequency' => '0.000998403',
     'minor_allele' => 'T',
-    'start' => 25585733
+    'start' => 25585733,
+    '_line' => ['rs142513484']
   }, 'Bio::EnsEMBL::Variation::VariationFeature' );
 
   $vf = $p->next();

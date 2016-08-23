@@ -126,6 +126,8 @@ sub new {
     $format = lc($format);
     throw("ERROR: Unknown or unsupported format $format\n") unless $FORMAT_MAP{$format};
 
+    $self->param('format', $format);
+
     my $class = 'Bio::EnsEMBL::VEP::Parser::'.$FORMAT_MAP{$format};
     return $class->new({%$hashref, config => $self->config, delimiter => $self->delimiter});
   }
