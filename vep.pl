@@ -158,6 +158,8 @@ GetOptions(
   'offline',                 # offline mode uses minimal set of modules installed in same dir, no DB connection
   'custom=s' => ($config->{custom} ||= []), # specify custom tabixed bgzipped file with annotation
   'tmpdir=s',                # tmp dir used for BigWig retrieval
+  'gff=s',                   # shortcut to --custom [file],,gff
+  'gtf=s',                   # shortcut to --custom [file],,gtf
   'plugin=s' => ($config->{plugin} ||= []), # specify a method in a module in the plugins directory
   'safe',                    # die if plugins don't compile or spit warnings
   'fasta=s',                 # file or dir containing FASTA files with reference sequence

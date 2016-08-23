@@ -86,6 +86,9 @@ is($cfg->param('check_existing'), 1, 'option sets, multiple in same out 1');
 $cfg = Bio::EnsEMBL::VEP::Config->new({check_frequency => 1});
 is($cfg->param('check_existing'), 1, 'option sets, multiple in same out 2');
 
+$cfg = Bio::EnsEMBL::VEP::Config->new({gff => 'test'});
+is($cfg->param('custom'), 'test,,gff', 'option sets, substitution');
+
 # give config file
 $cfg = Bio::EnsEMBL::VEP::Config->new({config => $test_cfg->{test_ini_file}});
 is($cfg->param('test1'), 'hello', 'config file');

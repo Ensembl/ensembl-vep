@@ -270,6 +270,20 @@ our @OPTION_SETS = (
       allele_number => 1,
     }
   },
+  
+  {
+    flags => ['gff'],
+    set   => {
+      custom => '%gff%,,gff'
+    }
+  },
+  
+  {
+    flags => ['gtf'],
+    set   => {
+      custom => '%gtf%,,gtf'
+    }
+  },
 );
 
 # valid values for certain flags
@@ -380,7 +394,17 @@ sub new {
           $config->{$flag}
         )
       ) {
-        $config->{$_} = $set->{set}->{$_} for keys %{$set->{set}};
+        foreach my $key(keys %{$set->{set}}) {
+          my $val = $set->{set}->{$key};
+          $val =~ s/\%(\S+)\%/$config->{$1}/g;
+          
+          if(ref($config->{$key}) eq 'ARRAY') {
+            push @{$config->{$key}}, $val;
+          }
+          else {
+            $config->{$key} = $val;
+          }
+        }
       }
     }
   }
