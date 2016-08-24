@@ -32,7 +32,7 @@ SKIP: {
   no warnings 'once';
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'Bio::DB::HTS::Tabix module not available', 43 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+  skip 'Bio::DB::HTS::Tabix module not available', 44 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
 
   ## BASIC TESTS
   ##############
@@ -53,6 +53,10 @@ SKIP: {
 
 
   ok($as->fasta_db, 'setup fasta_db');
+
+  throws_ok {
+    $as = Bio::EnsEMBL::VEP::AnnotationSource::File::GFF->new({file => $test_cfg->{custom_gff}, config => $runner->config, type => 'exact'})
+  } qr/GXF annotation sources cannot be used as \"exact\" custom annotation type/, 'cant use exact type';
 
 
 

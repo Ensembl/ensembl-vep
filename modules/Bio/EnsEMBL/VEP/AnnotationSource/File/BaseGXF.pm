@@ -68,7 +68,10 @@ sub new {
 
   # requires sequence
   throw("ERROR: GXF annotation requires either database access (--database or --cache) or a FASTA file (--fasta)")
-    unless $self->param('fasta') or $self->param('cache') or $self->param('database');
+    unless $self->param('fasta') or ($self->param('cache') && !$self->param('offline')) or $self->param('database');
+
+  # no point doing exact
+  throw("ERROR: GXF annotation sources cannot be used as \"exact\" custom annotation type\n") if $self->type eq 'exact';
 
   $self->{cache_region_size} = 5e5;
 
