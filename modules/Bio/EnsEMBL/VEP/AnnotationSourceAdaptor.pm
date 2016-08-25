@@ -48,7 +48,6 @@ use base qw(Bio::EnsEMBL::VEP::BaseVEP);
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::CacheDir;
-use Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript;
 use Bio::EnsEMBL::VEP::AnnotationSource::Database::RegFeat;
 use Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation;
 use Bio::EnsEMBL::VEP::AnnotationSource::Database::StructuralVariation;
@@ -91,7 +90,9 @@ sub get_all_from_database {
 
   # we don't want to get e.g. transcript DB sources if we have cache
   unless($self->param('cache')) {
-    push @as, Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript->new({
+    my $module = $self->module_prefix.'::AnnotationSource::Database::Transcript';
+    eval "require $module";
+    push @as, $module->new({
       config => $self->config,
     }) if $self->param('database');
 

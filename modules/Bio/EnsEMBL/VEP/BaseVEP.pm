@@ -384,4 +384,11 @@ sub warning_fh {
   return $self->config->{warning_fh};
 }
 
+sub module_prefix {
+  my $self = shift;
+  my $prefix = 'Bio::EnsEMBL::VEP';
+  $prefix .= '::Haplo' if $self->param('haplo');
+  return $prefix;
+}
+
 1;

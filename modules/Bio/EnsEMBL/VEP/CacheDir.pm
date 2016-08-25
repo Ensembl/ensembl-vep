@@ -47,7 +47,6 @@ use base qw(Bio::EnsEMBL::VEP::BaseVEP);
 
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
-use Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript;
 use Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat;
 use Bio::EnsEMBL::VEP::AnnotationSource::Cache::Variation;
 use Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix;
@@ -83,7 +82,9 @@ sub get_all_AnnotationSources {
     my @as;
 
     # initialise with transcript source
-    push @as, Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript->new({
+    my $module = $self->module_prefix.'::AnnotationSource::Cache::Transcript';
+    eval "require $module";
+    push @as, $module->new({
       config => $self->config,
       dir => $dir,
       serializer_type => $info->{serialiser_type} || undef,
