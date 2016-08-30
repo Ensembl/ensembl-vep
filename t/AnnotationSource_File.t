@@ -85,7 +85,7 @@ throws_ok {
   $as = Bio::EnsEMBL::VEP::AnnotationSource::File->new({
     file => 'test',
     format => 'foo',
-    config => my $cfg = Bio::EnsEMBL::VEP::Config->new($test_cfg->base_testing_cfg)
+    config => Bio::EnsEMBL::VEP::Config->new($test_cfg->base_testing_cfg)
   });
 } qr/Unknown or unsupported format/, 'new - invalid format';
 
@@ -98,7 +98,7 @@ SKIP: {
     $as = Bio::EnsEMBL::VEP::AnnotationSource::File->new({
       file => 'test',
       format => lc($format),
-      config => my $cfg = Bio::EnsEMBL::VEP::Config->new($test_cfg->base_testing_cfg)
+      config => Bio::EnsEMBL::VEP::Config->new({%{$test_cfg->base_testing_cfg}, fasta => $test_cfg->{fasta}}),
     });
     is(ref($as), 'Bio::EnsEMBL::VEP::AnnotationSource::File::'.$format, 'new with format - '.$format);
   }
