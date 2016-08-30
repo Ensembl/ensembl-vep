@@ -46,31 +46,62 @@ package Bio::EnsEMBL::VEP::Haplo::Parser::VCF;
 use base qw(Bio::EnsEMBL::VEP::Parser::VCF);
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
+use Bio::EnsEMBL::Variation::Sample;
+use Bio::EnsEMBL::Variation::Individual;
 
+sub parser {
+  my $self = shift;
+
+  if(!exists($self->{parser})) {
+    $self->{parser} = $self->SUPER::parser();
+    $self->headers();
+    $self->samples();
+  }
+
+  return $self->{parser};
+}
+
+sub samples {
+  my $self = shift;
+
+  if(!exists($self->{_samples})) {
+    my @sample_ids = @{$self->parser->get_samples};
+
+    throw("ERROR: VCF file contains no sample/individual entries\n") unless @sample_ids;
+
+    $self->{_samples}->{$_} ||= Bio::EnsEMBL::Variation::Sample->new_fast({
+      name            => $_,
+      display         => 'UNDISPLAYABLE',
+      dbID            => --($self->{_sample_id}),
+      individual      => Bio::EnsEMBL::Variation::Individual->new_fast({
+        name     => $_,
+        type_individual => 'outbred',
+        dbID     => --($self->{_ind_id}),
+      }),
+    }) for @sample_ids;
+  }
+
+  return $self->{_samples};
+}
 
 sub next {
   my $self = shift;
 
-  my $cache = $self->{_vf_cache} ||= [];
+  my $vf;
+  my $parser = $self->parser;
 
-  if(!scalar @$cache) {
-
-    # getting the header requires we trigger next once
-    # so we don't want to trigger it again (once)
+  while(!$vf) {
     if($self->{_have_read_next}) {
       delete $self->{_have_read_next};
     }
     else {
-      $self->parser->next;
+      $parser->next;
     }
-
-    while(!@$cache) {
-      push @$cache, @{$self->create_VariationFeatures()};
-      $self->parser->next;
-    }
+    last unless $parser->{record};
+    ($vf) = @{$self->create_VariationFeatures()};
   }
 
-  return @$cache ? shift @$cache : undef;
+  return $vf;
 }
 
 sub create_VariationFeatures {
