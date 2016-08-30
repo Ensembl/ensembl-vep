@@ -102,6 +102,18 @@ sub new {
       close TR;
     }
   }
+  elsif(ref($as) =~ /File/) {
+    my $parser = $as->parser;
+
+    foreach my $chr(@{$parser->{tabix_file}->seqnames}) {
+      $parser->seek($chr, 1, 1e10);
+      while($parser->next) {
+        $self->insert($chr, $parser->get_start, $parser->get_end);
+      }
+    }
+
+    delete $as->{parser};
+  }  
   else {
     throw("ERROR: Don't know how to process ".ref($as));
   }
