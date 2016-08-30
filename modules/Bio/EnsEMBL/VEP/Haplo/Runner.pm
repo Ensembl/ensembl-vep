@@ -98,8 +98,10 @@ sub run {
   my $input_buffer = $self->get_InputBuffer;
 
   my $count;
+
+  my $vfs = $input_buffer->next();
   
-  while(my $vfs = $input_buffer->next()) {
+  while(@$vfs) {
     foreach my $as(@{$self->get_all_AnnotationSources}) {
       foreach my $thc(@{$as->annotate_InputBuffer($input_buffer)}) {
         my $tr = $thc->transcript;
@@ -107,21 +109,29 @@ sub run {
 
         return 1 if $count++ > 20;
 
-        foreach my $ch(@{$thc->get_all_CDSHaplotypes}) {
+        foreach my $ch(grep {!$_->is_reference} @{$thc->get_all_CDSHaplotypes}) {
 
-          next if $ch->name eq $tr_stable_id.':REF';
+          my $sample_counts = $ch->get_all_sample_counts;
 
-          my $ph = $ch->get_ProteinHaplotype;
-          my @out = (
-            $tr_stable_id,
-            $ch->name,
-            $ph->name,
-          );
+          foreach my $sample(keys %$sample_counts) {
 
-          print join("\t", @out)."\n";
+            my $ph = $ch->get_ProteinHaplotype;
+            my @out = (
+              $tr_stable_id,
+              $ch->name,
+              $ph->name,
+              $sample,
+              $sample_counts->{$sample},
+              join(",", @{$ph->get_all_flags}),
+            );
+
+            print join("\t", @out)."\n";
+          }
         }
       }
     }
+
+    $vfs = $input_buffer->next();
   }
 
   # $self->dump_stats;
