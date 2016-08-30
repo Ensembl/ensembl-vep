@@ -27,13 +27,13 @@ limitations under the License.
 
 =cut
 
-# EnsEMBL module for Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript
+# EnsEMBL module for Bio::EnsEMBL::VEP::AnnotationSource::File::GTF
 #
 #
 
 =head1 NAME
 
-Bio::EnsEMBL::VEP::Haplo::AnnotationSource::Cache::Transcript - local disk transcript annotation source
+Bio::EnsEMBL::VEP::Haplo::AnnotationSource::File::GTF - GTF transcript annotation source
 
 =cut
 
@@ -41,8 +41,8 @@ Bio::EnsEMBL::VEP::Haplo::AnnotationSource::Cache::Transcript - local disk trans
 use strict;
 use warnings;
 
-package Bio::EnsEMBL::VEP::Haplo::AnnotationSource::Cache::Transcript;
+package Bio::EnsEMBL::VEP::Haplo::AnnotationSource::File::GTF;
 
-use base qw(Bio::EnsEMBL::VEP::Haplo::AnnotationSource::BaseTranscript Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript);
+use base qw(Bio::EnsEMBL::VEP::Haplo::AnnotationSource::BaseTranscript Bio::EnsEMBL::VEP::AnnotationSource::File::GTF);
 
 1;

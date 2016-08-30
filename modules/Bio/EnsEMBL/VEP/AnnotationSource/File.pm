@@ -121,7 +121,8 @@ sub new {
       throw("ERROR: Cannot use format $format without Bio::DB::HTS::Tabix module installed\n") unless $CAN_USE_TABIX_PM;
     }
 
-    my $class = 'Bio::EnsEMBL::VEP::AnnotationSource::File::'.$FORMAT_MAP{$format};
+    my $class = $self->module_prefix.'::AnnotationSource::File::'.$FORMAT_MAP{$format};
+    eval "require $class";
     return $class->new({%$hashref, config => $self->config});
   }
 
