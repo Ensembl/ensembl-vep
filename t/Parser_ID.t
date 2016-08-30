@@ -99,7 +99,8 @@ SKIP: {
     'minor_allele_frequency' => '0.000998403',
     'minor_allele' => 'T',
     'start' => 25585733,
-    '_line' => ['rs142513484']
+    '_line' => ['rs142513484'],
+    '_source_name' => 'dbSNP',
   }, 'Bio::EnsEMBL::Variation::VariationFeature' );
 
   $vf = $p->next();
