@@ -57,7 +57,7 @@ sub new {
   my $hashref = $_[0];
 
   my $tree = $hashref->{transcript_tree};
-  assert_ref($tree, 'Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript');
+  assert_ref($tree, 'Bio::EnsEMBL::VEP::Haplo::TranscriptTree');
   $self->transcript_tree($tree);
 
   return $self;
@@ -79,6 +79,8 @@ sub next {
     while(!$max && ($vf = $parser->next)) {
       $max = $self->get_max_from_tree($vf->{chr}, $vf->{start}, $vf->{end});
     }
+
+    return $buffer unless $max;
 
     while($vf && $vf->{start} <= $max) {
       push @$buffer, $vf;
