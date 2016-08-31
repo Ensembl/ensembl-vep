@@ -45,4 +45,10 @@ package Bio::EnsEMBL::VEP::Haplo::AnnotationSource::Database::Transcript;
 
 use base qw(Bio::EnsEMBL::VEP::Haplo::AnnotationSource::BaseTranscript Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript);
 
+sub populate_tree {
+  my ($self, $tree) = @_;
+  my $ta = $self->get_adaptor('core', 'transcript');
+  $tree->insert($_->seq_region_name, $_->seq_region_start, $_->seq_region_end) for @{$ta->fetch_all_by_biotype('protein_coding')};
+}
+
 1;

@@ -45,4 +45,19 @@ package Bio::EnsEMBL::VEP::Haplo::AnnotationSource::File::GFF;
 
 use base qw(Bio::EnsEMBL::VEP::Haplo::AnnotationSource::BaseTranscript Bio::EnsEMBL::VEP::AnnotationSource::File::GFF);
 
+sub populate_tree {
+  my ($self, $tree) = @_;
+
+  my $parser = $self->parser;
+
+  foreach my $chr(@{$parser->{tabix_file}->seqnames}) {
+    $parser->seek($chr, 1, 1e10);
+    while($parser->next) {
+      $tree->insert($chr, $parser->get_start, $parser->get_end);
+    }
+  }
+
+  delete $self->{parser};
+}
+
 1;

@@ -60,63 +60,10 @@ sub new {
   my $as = $hashref->{annotation_source};
   assert_ref($as, 'Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript');
 
-  if(ref($as) =~ /Database/) {
-    my $ta = $self->get_adaptor('core', 'transcript');
-    $self->insert($_->seq_region_name, $_->seq_region_start, $_->seq_region_end) for @{$ta->fetch_all_by_biotype('protein_coding')};
-  }
-  elsif(ref($as) =~ /Cache/) {
-    my $as_dir = $as->dir;
+  throw("ERROR: Unable to populate tree from annotation source type ".ref($as)) unless $as->can('populate_tree');
+  $as->populate_tree($self);
 
-    if(-e $as_dir.'/transcript_coords.txt') {
-      open TR, $as_dir.'/transcript_coords.txt';
-      while(<TR>) {
-        chomp;
-        $self->insert(split);
-      }
-      close TR;
-    }
-    else {
-      my $cache_region_size = $as->{cache_region_size};
-
-      open TR, ">".$as_dir.'/transcript_coords.txt';
-
-      opendir DIR, $as_dir;
-      foreach my $c(grep {!/^\./ && -d $as_dir.'/'.$_} readdir DIR) {
-        
-        opendir CHR, $as_dir.'/'.$c;
-        foreach my $file(grep {/\d+\-\d+\.gz/} readdir CHR) {
-          my ($s) = split(/\D/, $file);
-
-          foreach my $t(
-            grep {$_->biotype eq 'protein_coding'}
-            @{$as->get_features_by_regions_uncached([[$c, ($s - 1) / $cache_region_size]])}
-          ) {
-            my ($s, $e) = ($t->seq_region_start, $t->seq_region_end);
-            $self->insert($c, $s, $e);
-            print TR "$c\t$s\t$e\n";
-          }
-        }
-        closedir CHR;
-      }
-      closedir DIR;
-      close TR;
-    }
-  }
-  elsif(ref($as) =~ /File/) {
-    my $parser = $as->parser;
-
-    foreach my $chr(@{$parser->{tabix_file}->seqnames}) {
-      $parser->seek($chr, 1, 1e10);
-      while($parser->next) {
-        $self->insert($chr, $parser->get_start, $parser->get_end);
-      }
-    }
-
-    delete $as->{parser};
-  }  
-  else {
-    throw("ERROR: Don't know how to process ".ref($as));
-  }
+  $self->valid_chromosomes({map {$_ => 1} $as->get_valid_chromosomes});
 
   return $self;
 }
@@ -151,7 +98,58 @@ sub insert {
 
 sub fetch {
   my ($self, $c, $s, $e) = @_;
-  return $self->get_chr_tree($c)->fetch($s - 1, $e);
+  return $self->get_chr_tree($self->get_source_chr_name($c))->fetch($s - 1, $e);
+}
+
+sub valid_chromosomes {
+  my $self = shift;
+  $self->{valid_chromosomes} = shift if @_;
+  return $self->{valid_chromosomes};
+}
+
+sub get_source_chr_name {
+  my $self = shift;
+  my $chr = shift;
+
+  my $chr_name_map = $self->{_chr_name_map} ||= {};
+
+  if(!exists($chr_name_map->{$chr})) {
+    my $mapped_name = $chr;
+
+    my $valid = $self->valid_chromosomes;
+
+    unless($valid->{$chr}) {
+
+      # try synonyms first
+      my $synonyms = $self->chromosome_synonyms;
+
+      foreach my $syn(keys %{$synonyms->{$chr} || {}}) {
+        if($valid->{$syn}) {
+          $mapped_name = $syn;
+          last;
+        }
+      }
+
+      # still haven't got it
+      if($mapped_name eq $chr) {
+
+        # try adding/removing "chr"
+        if($chr =~ /^chr/i) {
+          my $tmp = $chr;
+          $tmp =~ s/^chr//i;
+
+          $mapped_name = $tmp if $valid->{$tmp};
+        }
+        elsif($valid->{'chr'.$chr}) {
+          $mapped_name = 'chr'.$chr;
+        }
+      }
+    }
+
+    $chr_name_map->{$chr} = $mapped_name;
+  }
+
+  return $chr_name_map->{$chr};
 }
 
 1;

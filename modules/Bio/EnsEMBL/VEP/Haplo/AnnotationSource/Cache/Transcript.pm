@@ -43,6 +43,49 @@ use warnings;
 
 package Bio::EnsEMBL::VEP::Haplo::AnnotationSource::Cache::Transcript;
 
+use Bio::EnsEMBL::Utils::Exception qw(throw warning);
+
 use base qw(Bio::EnsEMBL::VEP::Haplo::AnnotationSource::BaseTranscript Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript);
+
+sub populate_tree {
+  my ($self, $tree) = @_;
+
+  my $as_dir = $self->dir;
+
+  if(-e $as_dir.'/transcript_coords.txt') {
+    open TR, $as_dir.'/transcript_coords.txt';
+    while(<TR>) {
+      chomp;
+      $tree->insert(split);
+    }
+    close TR;
+  }
+  else {
+    my $cache_region_size = $self->{cache_region_size};
+
+    open TR, ">".$as_dir.'/transcript_coords.txt' or throw("ERROR: Could not write to transcript coords file: $!");
+
+    opendir DIR, $as_dir;
+    foreach my $c(grep {!/^\./ && -d $as_dir.'/'.$_} readdir DIR) {
+      
+      opendir CHR, $as_dir.'/'.$c;
+      foreach my $file(grep {/\d+\-\d+\.gz/} readdir CHR) {
+        my ($s) = split(/\D/, $file);
+
+        foreach my $t(
+          grep {$_->biotype eq 'protein_coding'}
+          @{$self->get_features_by_regions_uncached([[$c, ($s - 1) / $cache_region_size]])}
+        ) {
+          my ($s, $e) = ($t->seq_region_start, $t->seq_region_end);
+          $tree->insert($c, $s, $e);
+          print TR "$c\t$s\t$e\n";
+        }
+      }
+      closedir CHR;
+    }
+    closedir DIR;
+    close TR;
+  }
+}
 
 1;
