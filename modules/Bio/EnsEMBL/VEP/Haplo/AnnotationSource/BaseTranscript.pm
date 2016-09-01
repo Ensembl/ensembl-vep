@@ -93,21 +93,6 @@ sub create_vf {
   });
 }
 
-sub get_sample {
-  my ($self, $sample_id) = @_;
-
-  return $self->{_samples}->{$sample_id} ||= Bio::EnsEMBL::Variation::Sample->new_fast({
-    name            => $sample_id,
-    display         => 'UNDISPLAYABLE',
-    dbID            => --($self->{_sample_id}),
-    individual      => Bio::EnsEMBL::Variation::Individual->new_fast({
-      name     => $sample_id,
-      type_individual => 'outbred',
-      dbID     => --($self->{_ind_id}),
-    }),
-  });
-}
-
 sub get_genotypes {
   my ($self, $hash, $samples) = @_;
 

@@ -47,6 +47,17 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
 use base qw(Bio::EnsEMBL::VEP::Haplo::AnnotationSource::BaseTranscript Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript);
 
+sub new {  
+  my $caller = shift;
+  my $class = ref($caller) || $caller;
+  
+  my $self = $class->SUPER::new(@_);
+
+  $self->param('haplotype_frequencies', $self->dir.'/haplotype_frequencies.txt.gz') if -e $self->dir.'/haplotype_frequencies.txt.gz';
+
+  return $self;
+}
+
 sub populate_tree {
   my ($self, $tree) = @_;
 

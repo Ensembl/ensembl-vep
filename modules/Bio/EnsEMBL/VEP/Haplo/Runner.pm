@@ -45,7 +45,10 @@ package Bio::EnsEMBL::VEP::Haplo::Runner;
 
 use base qw(Bio::EnsEMBL::VEP::BaseRunner);
 
+use Scalar::Util qw(looks_like_number);
+
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
+use Bio::EnsEMBL::VEP::Utils qw(get_compressed_filehandle);
 use Bio::EnsEMBL::VEP::Haplo::TranscriptTree;
 use Bio::EnsEMBL::VEP::Haplo::InputBuffer;
 use Bio::EnsEMBL::VEP::Haplo::Parser::VCF;
@@ -81,6 +84,9 @@ sub init {
 
   # setup FASTA file DB
   $self->fasta_db();
+
+  # get haplotype frequency data
+  $self->haplotype_frequencies($self->param('haplotype_frequencies'));
 
   my $buffer = $self->get_InputBuffer();
 
@@ -120,6 +126,7 @@ sub run {
               $tr_stable_id,
               $ch->name,
               $ph->name,
+              join(",", map {$_.'='.$self->haplotype_frequencies->{$ph->_hex}->{$_}} keys %{$self->haplotype_frequencies->{$ph->_hex} || {}}),
               $sample,
               $sample_counts->{$sample},
               join(",", @{$ph->get_all_flags}),
@@ -185,6 +192,72 @@ sub get_TranscriptTree {
   }
 
   return $self->{transcript_tree};
+}
+
+sub haplotype_frequencies {
+  my ($self, $file) = @_;
+
+  $self->{_haplotype_frequencies} ||= {};
+
+  if($file) {
+    my $fh;
+
+    if(-B $file) {
+      $fh = get_compressed_filehandle($file);
+    }
+    else {
+      open $fh, $file or throw("ERROR: $!");
+    }
+
+    my @headers;
+
+    while(<$fh>) {
+      chomp;
+
+      if(/^\#/) {
+        s/^\#+\s*//;
+        @headers = split;
+
+        throw("ERROR: No hex header found in haplotype frequency file $file\n") unless grep {$_ eq 'hex'} @headers;
+      }
+      else {
+        my @data = split;
+
+        # no headers? we can have a look at the file to see if we can guess the format
+        unless(@headers) {
+          
+          # first col should be hex, if not then we can't do much else
+          if($data[0] =~ /^[a-fA-F0-9]{32}$/) {
+            $headers[0] = 'hex';
+          }
+          else {
+            throw("ERROR: Cannot parse haplotype frequency file $file, first column should be an md5sum\n");
+          }
+
+          # examine remaining columns to see if they look like numbers
+          my $f = 1;
+          my $u = 1;
+
+          for my $i(1..$#data) {
+            $headers[$i] = (looks_like_number($data[$i]) && $data[$i] >= 0 && $data[$i] <= 1) ? 'freq'.$f++ : 'unknown'.$u++;
+          }
+
+          throw("ERROR: Could not find any data that looks like frequencies in haplotype frequency file $file\n") unless $f > 1;
+        }
+
+        throw("ERROR: Number of columns (".(scalar @data).") does not match headers (".(scalar @headers).")\n") unless scalar @data == scalar @headers;
+
+        my %row = map {$headers[$_] => $data[$_]} 0..$#data;
+        my $hex = delete $row{hex};
+
+        $self->{_haplotype_frequencies}->{$hex} = \%row;
+      }
+    }
+
+    close $fh;
+  }
+
+  return $self->{_haplotype_frequencies};
 }
 
 1;

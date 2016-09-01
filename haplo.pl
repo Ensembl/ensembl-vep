@@ -30,6 +30,9 @@ GetOptions(
   'format=s',                # input file format
   'output_format=s',         # output file format
   'delimiter=s',             # delimiter between fields in input
+
+  # haplo specific
+  'haplotype_frequencies=s',
   
   # DB options
   'species=s',               # species e.g. human, homo_sapiens
