@@ -63,7 +63,7 @@ sub new {
   throw("ERROR: Unable to populate tree from annotation source type ".ref($as)) unless $as->can('populate_tree');
   $as->populate_tree($self);
 
-  $self->valid_chromosomes({map {$_ => 1} $as->get_valid_chromosomes});
+  $self->valid_chromosomes({map {$_ => 1} @{$as->get_valid_chromosomes}});
 
   return $self;
 }
