@@ -47,7 +47,7 @@ use base qw(Bio::EnsEMBL::VEP::BaseVEP);
 
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
-use Bio::EnsEMBL::VEP::Utils qw(trim_sequences);
+use Bio::EnsEMBL::VEP::Utils qw(trim_sequences get_compressed_filehandle);
 
 use Bio::EnsEMBL::VEP::Parser::VCF;
 use Bio::EnsEMBL::VEP::Parser::VEP_input;
@@ -56,35 +56,6 @@ use Bio::EnsEMBL::VEP::Parser::HGVS;
 
 use Scalar::Util qw(openhandle looks_like_number);
 use FileHandle;
-
-our ($CAN_USE_PERLIO_GZIP, $CAN_USE_GZIP, $CAN_USE_IO_UNCOMPRESS);
-
-BEGIN {
-
-  # check PerlIO::gzip
-  # if (eval { require PerlIO::gzip; 1 }) {
-  #   $CAN_USE_PERLIO_GZIP = 1;
-  # }
-  # else {
-  #   $CAN_USE_PERLIO_GZIP = 0;
-  # }
-
-  # check gzip
-  if (`which gzip` =~ /\/gzip/) {
-    $CAN_USE_GZIP = 1;
-  }
-  else {
-    $CAN_USE_GZIP = 0;
-  }
-
-  # check IO::Uncompress::Gunzip 
-  if(eval { use IO::Uncompress::Gunzip qw($GunzipError); 1}) {
-    $CAN_USE_IO_UNCOMPRESS = 1;
-  }
-  else {
-    $CAN_USE_IO_UNCOMPRESS = 0;
-  }
-}
 
 my %FORMAT_MAP = (
   'vcf'     => 'VCF',
@@ -174,20 +145,8 @@ sub file {
     elsif(!openhandle($file)) {
       throw("ERROR: File \"$file\" does not exist\n") unless -e $file;
 
-      # check if file is compressed
-      if(-B $file) {
-        if($CAN_USE_IO_UNCOMPRESS) {
-          my $fh = IO::Uncompress::Gunzip->new($file, MultiStream => 1) or throw("ERROR: $GunzipError");
-          $file = $fh;
-        }
-        elsif($CAN_USE_GZIP) {
-          open my $fh, "gzip -dc $file |" or throw("ERROR: $!");
-          $file = $fh;
-        }
-        else {
-          throw("Cannot read from compressed or binary file");
-        }
-      }
+      # file is compressed?
+      $file = get_compressed_filehandle($file, 1) if -B $file;
     }
 
     $self->{file} = $file;

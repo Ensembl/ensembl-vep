@@ -44,6 +44,7 @@ use warnings;
 package Bio::EnsEMBL::VEP::Utils;
 use Exporter;
 use Scalar::Util qw(looks_like_number);
+use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
 use vars qw(@ISA @EXPORT_OK);
 
@@ -56,7 +57,37 @@ use vars qw(@ISA @EXPORT_OK);
   &convert_arrayref
   &numberify
   &merge_hashes
+  &get_compressed_filehandle
 );
+
+our ($CAN_USE_PERLIO_GZIP, $CAN_USE_GZIP, $CAN_USE_IO_UNCOMPRESS);
+
+BEGIN {
+
+  # check PerlIO::gzip
+  if (eval { require PerlIO::gzip; 1 }) {
+    $CAN_USE_PERLIO_GZIP = 1;
+  }
+  else {
+    $CAN_USE_PERLIO_GZIP = 0;
+  }
+
+  # check gzip
+  if (`which gzip` =~ /\/gzip/) {
+    $CAN_USE_GZIP = 1;
+  }
+  else {
+    $CAN_USE_GZIP = 0;
+  }
+
+  # check IO::Uncompress::Gunzip 
+  if(eval { use IO::Uncompress::Gunzip qw($GunzipError); 1}) {
+    $CAN_USE_IO_UNCOMPRESS = 1;
+  }
+  else {
+    $CAN_USE_IO_UNCOMPRESS = 0;
+  }
+}
 
 sub format_coords {
   my ($start, $end) = @_;
@@ -177,6 +208,29 @@ sub merge_arrays {
   push @$x, grep {!$tmp{$_}} @$y;
 
   return $x;
+}
+
+sub get_compressed_filehandle {
+  my ($file, $multi) = @_;
+
+  throw("ERROR: No file given\n") unless $file;
+  throw("ERROR: File $file does not exist\n") unless -e $file;
+  throw("ERROR: File $file does not look like a binary file\n") unless -B $file;
+
+  if($CAN_USE_PERLIO_GZIP && !$multi) {
+    open my $fh, "<:gzip", $file or throw("ERROR: $!");
+    return $fh;
+  }
+  if($CAN_USE_IO_UNCOMPRESS) {
+    return IO::Uncompress::Gunzip->new($file, MultiStream => $multi) or throw("ERROR: $GunzipError");
+  }
+  elsif($CAN_USE_GZIP) {
+    open my $fh, "gzip -dc $file |" or throw("ERROR: $!");
+    return $fh;
+  }
+  else {
+    throw("Cannot read from compressed or binary file");
+  }
 }
 
 # gets time

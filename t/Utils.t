@@ -18,7 +18,12 @@ use warnings;
 use Test::More;
 use Test::Exception;
 
-use Bio::EnsEMBL::VEP::Utils qw(format_coords convert_arrayref numberify merge_hashes get_time trim_sequences);
+use Bio::EnsEMBL::VEP::Utils qw(format_coords convert_arrayref numberify merge_hashes get_time trim_sequences get_compressed_filehandle);
+
+use FindBin qw($Bin);
+use lib $Bin;
+use VEPTestingConfig;
+my $test_cfg = VEPTestingConfig->new();
 
 ## format_coords
 ################
@@ -159,6 +164,69 @@ is_deeply(
   {a => [1, 2, 3, 4]},
   'merge_hashes - array'
 );
+
+
+
+## get_compressed_filehandle
+############################
+
+ok(get_compressed_filehandle($test_cfg->{test_gzvcf}), 'get_compressed_filehandle');
+throws_ok {get_compressed_filehandle()} qr/No file/, 'get_compressed_filehandle - no file';
+throws_ok {get_compressed_filehandle('foobargoobar')} qr/File .+ does not exist/, 'get_compressed_filehandle - file does not exist';
+throws_ok {get_compressed_filehandle($test_cfg->{test_vcf})} qr/File .+ binary/, 'get_compressed_filehandle - file not compressed';
+
+my @bak = (
+  $Bio::EnsEMBL::VEP::Utils::CAN_USE_PERLIO_GZIP,
+  $Bio::EnsEMBL::VEP::Utils::CAN_USE_IO_UNCOMPRESS,
+  $Bio::EnsEMBL::VEP::Utils::CAN_USE_GZIP
+);
+
+SKIP: {
+  skip 'PerlIO::Gzip not installed', 3 unless $Bio::EnsEMBL::VEP::Utils::CAN_USE_PERLIO_GZIP && $Bio::EnsEMBL::VEP::Utils::CAN_USE_IO_UNCOMPRESS;
+
+  is(
+    ref(get_compressed_filehandle($test_cfg->{test_gzvcf})),
+    'GLOB',
+    'get_compressed_filehandle - PerlIO::Gzip'
+  );
+  is(
+    ref(get_compressed_filehandle($test_cfg->{test_gzvcf}, 1)),
+    'IO::Uncompress::Gunzip',
+    'get_compressed_filehandle - PerlIO::Gzip with multistream uses IO::Uncompress::Gzip'
+  );
+
+  $Bio::EnsEMBL::VEP::Utils::CAN_USE_PERLIO_GZIP = 0;
+  is(
+    ref(get_compressed_filehandle($test_cfg->{test_gzvcf})),
+    'IO::Uncompress::Gunzip',
+    'get_compressed_filehandle - IO::Uncompress::Gzip'
+  );
+}
+
+SKIP: {
+  skip 'IO::Uncompress::Gunzip not installed', 1 unless $Bio::EnsEMBL::VEP::Utils::CAN_USE_IO_UNCOMPRESS;
+
+  $Bio::EnsEMBL::VEP::Utils::CAN_USE_IO_UNCOMPRESS = 0;
+  is(
+    ref(get_compressed_filehandle($test_cfg->{test_gzvcf})),
+    'GLOB',
+    'get_compressed_filehandle - gzip'
+  );
+}
+
+$Bio::EnsEMBL::VEP::Utils::CAN_USE_PERLIO_GZIP = 0;
+$Bio::EnsEMBL::VEP::Utils::CAN_USE_IO_UNCOMPRESS = 0;
+$Bio::EnsEMBL::VEP::Utils::CAN_USE_GZIP = 0;
+
+throws_ok {get_compressed_filehandle($test_cfg->{test_gzvcf})} qr/Cannot read from compressed or binary file/, 'get_compressed_filehandle - no available library';
+
+(
+  $Bio::EnsEMBL::VEP::Utils::CAN_USE_PERLIO_GZIP,
+  $Bio::EnsEMBL::VEP::Utils::CAN_USE_IO_UNCOMPRESS,
+  $Bio::EnsEMBL::VEP::Utils::CAN_USE_GZIP
+) = @bak;
+
+
 
 
 ## get_time
