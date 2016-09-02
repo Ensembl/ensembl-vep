@@ -50,10 +50,13 @@ sub populate_tree {
 
   my $parser = $self->parser;
 
+  my %include = %{$self->include_feature_types};
+  delete $include{$_} for qw(exon CDS);
+
   foreach my $chr(@{$parser->{tabix_file}->seqnames}) {
     $parser->seek($chr, 1, 1e10);
     while($parser->next) {
-      $tree->insert($chr, $parser->get_start, $parser->get_end);
+      $tree->insert($chr, $parser->get_start, $parser->get_end) if $include{$parser->get_type};
     }
   }
 
