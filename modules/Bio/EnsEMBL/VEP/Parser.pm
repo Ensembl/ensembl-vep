@@ -64,8 +64,6 @@ my %FORMAT_MAP = (
   'hgvs'    => 'HGVS',
 );
 
-my $DEFAULT_DELIMITER = "\t";
-
 sub new {
   my $caller = shift;
   my $class = ref($caller) || $caller;
@@ -79,7 +77,7 @@ sub new {
   throw("ERROR: No file given\n") unless $hashref->{file};
   $self->file($hashref->{file});
 
-  $self->delimiter($hashref->{delimiter} || $DEFAULT_DELIMITER) unless $self->delimiter;
+  $self->delimiter($hashref->{delimiter}) if $hashref->{delimiter};
 
   $self->line_number(0);
 
@@ -194,7 +192,7 @@ sub detect_format {
   }
 
   my $format;
-  my $delimiter = $self->delimiter;
+  my $delimiter = "\t";
 
   while(<$fh>) {
     next if /^\#/;

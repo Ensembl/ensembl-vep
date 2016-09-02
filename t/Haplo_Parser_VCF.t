@@ -61,7 +61,7 @@ throws_ok {
   })->samples
 } qr/no sample/, 'no samples';
 
-$p = Bio::EnsEMBL::VEP::Haplo::Parser::VCF->new({file => $test_cfg->{test_vcf}});
+$p = Bio::EnsEMBL::VEP::Haplo::Parser::VCF->new({file => $test_cfg->{test_vcf}, delimiter => "\t"});
 is(ref($p->parser), 'Bio::EnsEMBL::IO::Parser::VCF4', 'parser ref');
 
 is_deeply(
