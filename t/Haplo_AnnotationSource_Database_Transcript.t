@@ -114,7 +114,7 @@ SKIP: {
   );
 
   is_deeply(
-    $result->[0]->get_all_ProteinHaplotypes->[1]->get_all_diffs,
+    [map {@{$_->get_all_diffs}} @{$result->[0]->get_all_ProteinHaplotypes}],
     [
       {
         'diff' => '31S>P',
