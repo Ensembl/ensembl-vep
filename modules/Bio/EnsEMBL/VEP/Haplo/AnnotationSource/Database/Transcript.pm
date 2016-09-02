@@ -51,4 +51,15 @@ sub populate_tree {
   $tree->insert($_->seq_region_name, $_->seq_region_start, $_->seq_region_end) for @{$ta->fetch_all_by_biotype('protein_coding')};
 }
 
+sub create_container {
+  my ($self, $tr, $gts, $samples) = @_;
+
+  return Bio::EnsEMBL::Variation::TranscriptHaplotypeContainer->new(
+    -transcript => $tr,
+    -genotypes  => $gts,
+    -samples    => $samples,
+    -db         => $self->get_adaptor('variation', 'variation')->db,
+  );
+}
+
 1;

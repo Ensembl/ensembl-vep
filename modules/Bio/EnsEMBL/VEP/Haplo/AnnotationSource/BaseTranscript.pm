@@ -59,16 +59,12 @@ sub annotate_InputBuffer {
   foreach my $tr(grep {$_->biotype eq 'protein_coding'} @{$self->get_all_features_by_InputBuffer($buffer)}) {
     my @gts;
 
-    foreach my $hash(@{$buffer->get_overlapping_vfs($tr->seq_region_start, $tr->seq_region_end)}) {
-      push @gts, @{$self->get_genotypes($hash, $samples)};
+    foreach my $vf_hash(@{$buffer->get_overlapping_vfs($tr->seq_region_start, $tr->seq_region_end)}) {
+      push @gts, @{$self->get_genotypes($vf_hash, $samples)};
     }
 
     if(@gts) {
-      push @return, Bio::EnsEMBL::Variation::TranscriptHaplotypeContainer->new(
-        -transcript => $tr,
-        -genotypes  => \@gts,
-        -samples    => [values %$samples],
-      );
+      push @return, $self->create_container($tr, \@gts, [values %$samples]);
     }
   }
 
@@ -118,6 +114,16 @@ sub get_genotypes {
   }
 
   return $hash->{gt_objects};
+}
+
+sub create_container {
+  my ($self, $tr, $gts, $samples) = @_;
+
+  return Bio::EnsEMBL::Variation::TranscriptHaplotypeContainer->new(
+    -transcript => $tr,
+    -genotypes  => $gts,
+    -samples    => $samples,
+  );
 }
 
 1;
