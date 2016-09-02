@@ -70,6 +70,11 @@ ok($t->chromosome_synonyms($test_cfg->{chr_synonyms}), 'load synonyms');
 
 is_deeply($t->fetch('NC_000021.9', 25585733, 25585733), [[25585656, 25607517]], 'fetch - use synonyms');
 
+is_deeply($t->fetch('chr21', 25585733, 25585733), [[25585656, 25607517]], 'fetch - remove chr');
 
+$t = Bio::EnsEMBL::VEP::Haplo::TranscriptTree->new({annotation_source => $runner->get_all_AnnotationSources->[0], config => $runner->config});
+$t->valid_chromosomes({'chr21' => 1});
+$t->insert('chr21', 5, 10);
+is_deeply($t->fetch(21, 4, 6), [[5, 10]], 'fetch - add chr');
 
 done_testing();
