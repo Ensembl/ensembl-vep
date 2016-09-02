@@ -79,7 +79,7 @@ sub new {
   throw("ERROR: No file given\n") unless $hashref->{file};
   $self->file($hashref->{file});
 
-  $self->delimiter($hashref->{delimiter} || $DEFAULT_DELIMITER);
+  $self->delimiter($hashref->{delimiter} || $DEFAULT_DELIMITER) unless $self->delimiter;
 
   $self->line_number(0);
 
@@ -194,7 +194,7 @@ sub detect_format {
   }
 
   my $format;
-  my $delimiter = $DEFAULT_DELIMITER;
+  my $delimiter = $self->delimiter;
 
   while(<$fh>) {
     next if /^\#/;
