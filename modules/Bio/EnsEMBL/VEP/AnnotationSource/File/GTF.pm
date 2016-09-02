@@ -51,12 +51,14 @@ use base qw(Bio::EnsEMBL::VEP::AnnotationSource::File::BaseGXF);
 my %PARENTS = (
   'exon' => 'transcript',
   'cds' => 'transcript',
+  'stop_codon' => 'transcript',
   'transcript' => 'gene',
 );
 
 my %INCLUDE_FEATURE_TYPES = map {$_ => 1} qw(
   cds
   CDS
+  stop_codon
   exon
   gene
   transcript

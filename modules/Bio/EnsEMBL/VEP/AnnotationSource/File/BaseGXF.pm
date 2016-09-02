@@ -292,13 +292,14 @@ sub _create_transcript {
 
   # separate exons and cds entries
   my (@cdss, @exons);
+
   foreach my $child(@{$tr_record->{_children}}) {
     my $type = lc($child->{type});
 
     if($type eq 'exon') {
       push @exons, $child;
     }
-    elsif($type eq 'cds') {
+    elsif($type eq 'cds' || $type eq 'stop_codon') {
       push @cdss, $child;
     }
     else {
