@@ -368,7 +368,10 @@ sub validate_vf {
   my $have_chr = 0;
   my $valid = $self->valid_chromosomes;
 
-  if($valid->{$vf->{chr}}) {
+  my $tmp_chr = $vf->{chr};
+  $tmp_chr =~ s/^chr//i;
+
+  if($valid->{$vf->{chr}} || $valid->{'chr'.$vf->{chr}} || $valid->{$tmp_chr}) {
     $have_chr = 1;
   }
   else {
