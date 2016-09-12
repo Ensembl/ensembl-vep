@@ -23,7 +23,9 @@ Additional requirements for non-core functionality
 ```bash
 perl vep.pl -i input.vcf -o out.txt -cache
 ```
-See [documentation](http://www.ensembl.org/info/docs/tools/vep/script/index.html) for full details.
+See [documentation](http://www.ensembl.org/info/docs/tools/vep/script/index.html) for full command line instructions.
+
+> Note that this documentation currently corresponds to the ensembl-tools version of VEP; this will be updated to reflect the new version soon. Almost all commands and flags should work on both versions.
 
 ---
 ## Haplosaurus
