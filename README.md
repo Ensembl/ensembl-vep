@@ -22,6 +22,9 @@ Additional requirements for non-core functionality
 * [PerlIO::gzip](http://search.cpan.org/~nwclark/PerlIO-gzip-0.19/gzip.pm) - faster compressed file parsing
 * [Bio::DB::BigFile](http://search.cpan.org/~lds/Bio-BigFile-1.07/lib/Bio/DB/BigFile.pm) - required for reading custom annotation data from BigWig files
  
+---
+## VEP
+
 ### Usage
 ```bash
 perl vep.pl -i input.vcf -o out.txt -cache
