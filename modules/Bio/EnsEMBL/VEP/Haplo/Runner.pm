@@ -127,7 +127,11 @@ sub dump_TranscriptHaplotypeContainer {
   my $tr = $thc->transcript;
   my $tr_stable_id = $tr->stable_id;
 
-  foreach my $ch(grep {!$_->is_reference} @{$thc->get_all_CDSHaplotypes}) {
+  foreach my $ch(
+    sort {$b->count <=> $a->count || $a->name cmp $b->name}
+    grep {!$_->is_reference}
+    @{$thc->get_all_CDSHaplotypes}
+  ) {
 
     my $sample_counts = $ch->get_all_sample_counts;
 
