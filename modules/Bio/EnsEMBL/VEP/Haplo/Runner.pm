@@ -79,8 +79,8 @@ sub init {
   # get chromosome synoyms
   $self->chromosome_synonyms($self->param('synonyms'));
 
-  # get all annotation sources
-  my $annotation_sources = $self->get_all_AnnotationSources();
+  # get annotation source
+  $self->get_AnnotationSource();
 
   # setup FASTA file DB
   $self->fasta_db();
@@ -102,48 +102,70 @@ sub run {
   $self->init();
 
   my $input_buffer = $self->get_InputBuffer;
+  my $as = $self->get_AnnotationSource;
 
   my $count;
 
   my $vfs = $input_buffer->next();
   
   while(@$vfs) {
-    foreach my $as(@{$self->get_all_AnnotationSources}) {
-      foreach my $thc(@{$as->annotate_InputBuffer($input_buffer)}) {
-        my $tr = $thc->transcript;
-        my $tr_stable_id = $tr->stable_id;
-
-        return 1 if $count++ > 20;
-
-        foreach my $ch(grep {!$_->is_reference} @{$thc->get_all_CDSHaplotypes}) {
-
-          my $sample_counts = $ch->get_all_sample_counts;
-
-          foreach my $sample(keys %$sample_counts) {
-
-            my $ph = $ch->get_ProteinHaplotype;
-            my @out = (
-              $tr_stable_id,
-              $ch->name,
-              $ph->name,
-              join(",", map {$_.'='.$self->haplotype_frequencies->{$ph->_hex}->{$_}} keys %{$self->haplotype_frequencies->{$ph->_hex} || {}}),
-              $sample,
-              $sample_counts->{$sample},
-              join(",", @{$ph->get_all_flags}),
-            );
-
-            print join("\t", @out)."\n";
-          }
-        }
-      }
-    }
-
+    $self->dump_TranscriptHaplotypeContainer($_) for @{$as->annotate_InputBuffer($input_buffer)};
     $vfs = $input_buffer->next();
   }
 
   # $self->dump_stats;
 
   return 1;
+}
+
+sub dump_TranscriptHaplotypeContainer {
+  my ($self, $thc) = @_;
+
+  my $fh = $self->get_output_file_handle;
+
+  my $tr = $thc->transcript;
+  my $tr_stable_id = $tr->stable_id;
+
+  foreach my $ch(grep {!$_->is_reference} @{$thc->get_all_CDSHaplotypes}) {
+
+    my $sample_counts = $ch->get_all_sample_counts;
+
+    foreach my $sample(keys %$sample_counts) {
+
+      my $freqs = "";
+      my $ph = $ch->get_ProteinHaplotype;
+
+      if(my $freq_data = $self->haplotype_frequencies->{$ph->_hex}) {
+        if($freq_data->[0]->{transcript}) {
+          if(my ($tr_freq_data) = grep {$_->{transcript} eq $tr_stable_id} @$freq_data) {
+            $freqs = join(",", map {$_.'='.$tr_freq_data->{$_}} grep {$_ ne 'transcript'} keys %$tr_freq_data);
+          }
+        }
+        else {
+          foreach my $tr_freq_data(@$freq_data) {
+            $freqs = join(",", map {$_.'='.$tr_freq_data->{$_}} keys %$tr_freq_data);
+          }
+        }
+      }
+
+      my @out = (
+        $tr_stable_id,
+        $ch->name,
+        join(",", @{$ch->get_all_flags}),
+        $ph->name,
+        join(",", @{$ph->get_all_flags}),
+        $freqs,
+        $sample,
+        $sample_counts->{$sample},
+      );
+
+      print $fh join("\t", @out)."\n";
+    }
+  }
+}
+
+sub get_AnnotationSource {
+  return $_[0]->get_all_AnnotationSources->[0];
 }
 
 sub get_Parser {
@@ -250,7 +272,7 @@ sub haplotype_frequencies {
         my %row = map {$headers[$_] => $data[$_]} 0..$#data;
         my $hex = delete $row{hex};
 
-        $self->{_haplotype_frequencies}->{$hex} = \%row;
+        push @{$self->{_haplotype_frequencies}->{$hex}}, \%row;
       }
     }
 
