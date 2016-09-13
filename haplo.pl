@@ -53,64 +53,16 @@ GetOptions(
   # runtime options
   'chr=s',                   # analyse only these chromosomes, e.g. 1-5,10,MT
   'phased',                  # force VCF genotypes to be interpreted as phased
-  'fork=i',                  # fork into N processes
   'dont_skip',               # don't skip vars that fail validation
   
   # verbosity options
   'verbose|v',               # print out a bit more info while running
   'quiet',                   # print nothing to STDOUT (unless using -o stdout)
-  'no_progress',             # don't display progress bars
   
   # output options
-  'everything|e',            # switch on EVERYTHING :-)
   'output_file|o=s',         # output file name
-  'html',                    # DEPRECATED: generate an HTML version of output
-  'stats_file|sf=s',         # stats file name
-  'stats_text',              # write stats as text
-  'stats_html',              # write stats as html
-  'no_stats',                # don't write stats file
   'warning_file=s',          # file to write warnings to
   'force_overwrite',         # force overwrite of output file if already exists
-  'terms|t=s',               # consequence terms to use e.g. NCBI, SO
-  'coding_only',             # only return results for consequences in coding regions
-  'canonical',               # indicates if transcript is canonical
-  'tsl',                     # output transcript support level
-  'appris',                  # output APPRIS transcript annotation
-  'ccds',                    # output CCDS identifer
-  'xref_refseq',             # output refseq mrna xref
-  'uniprot',                 # output Uniprot identifiers (includes UniParc)
-  'protein',                 # add e! protein ID to extra column
-  'biotype',                 # add biotype of transcript to output
-  'hgnc',                    # add HGNC gene ID to extra column
-  'symbol',                  # add gene symbol (e.g. HGNC)
-  'gene_phenotype',          # indicate if genes are phenotype-associated
-  'hgvs',                    # add HGVS names to extra column
-  'shift_hgvs=i',            # disable/enable 3-prime shifting of HGVS indels to comply with standard
-  'sift=s',                  # SIFT predictions
-  'polyphen=s',              # PolyPhen predictions
-  'humdiv',                  # use humDiv instead of humVar for PolyPhen
-  'condel=s',                # Condel predictions
-  'variant_class',           # get SO variant type
-  'regulatory',              # enable regulatory stuff
-  'cell_type=s' => ($config->{cell_type} ||= []),             # filter cell types for regfeats
-  'convert=s',               # DEPRECATED: convert input to another format (doesn't run VEP)
-  'no_intergenic',           # don't print out INTERGENIC consequences
-  'gvf',                     # DEPRECATED: produce gvf output
-  'vcf',                     # produce vcf output
-  'solr',                    # produce XML output for Solr
-  'json',                    # produce JSON document output
-  'tab',                     # produce tabulated output
-  'vcf_info_field=s',        # allow user to change VCF info field name
-  'keep_csq',                # don't nuke existing CSQ fields in VCF
-  'keep_ann',                # synonym for keep_csq
-  'no_consequences',         # don't calculate consequences
-  'lrg',                     # enable LRG-based features
-  'fields=s',                # define your own output fields
-  'domains',                 # output overlapping protein features
-  'numbers',                 # include exon and intron numbers
-  'total_length',            # give total length alongside positions e.g. 14/203
-  'allele_number',           # indicate allele by number to avoid confusion with VCF conversions
-  'no_escape',               # don't percent-escape HGVS strings
   
   # cache stuff
   'database',                # must specify this to use DB now
@@ -119,14 +71,10 @@ GetOptions(
   'show_cache_info',         # print cache info and quit
   'dir=s',                   # dir where cache is found (defaults to $HOME/.vep/)
   'dir_cache=s',             # specific directory for cache
-  'dir_plugins=s',           # specific directory for plugins
   'offline',                 # offline mode uses minimal set of modules installed in same dir, no DB connection
-  'custom=s' => ($config->{custom} ||= []), # specify custom tabixed bgzipped file with annotation
-  'tmpdir=s',                # tmp dir used for BigWig retrieval
+  'custom=s' => ($config->{custom} ||= []), # specify custom tabixed bgzipped file with annotationl
   'gff=s',                   # shortcut to --custom [file],,gff
   'gtf=s',                   # shortcut to --custom [file],,gtf
-  'plugin=s' => ($config->{plugin} ||= []), # specify a method in a module in the plugins directory
-  'safe',                    # die if plugins don't compile or spit warnings
   'fasta=s',                 # file or dir containing FASTA files with reference sequence
   'sereal',                  # user Sereal instead of Storable for the cache
   'synonyms=s',              # file of chromosome synonyms
@@ -148,9 +96,9 @@ $runner->run();
 # outputs usage message
 sub usage {
     my $usage =<<END;
-#----------------------------------#
-# ENSEMBL VARIANT EFFECT PREDICTOR #
-#----------------------------------#
+#-------------#
+# HAPLOSAURUS #
+#-------------#
 
 version $VERSION
 by Will McLaren (wm2\@ebi.ac.uk)
@@ -158,10 +106,8 @@ by Will McLaren (wm2\@ebi.ac.uk)
 Help: dev\@ensembl.org , helpdesk\@ensembl.org
 Twitter: \@ensembl , \@EnsemblWill
 
-http://www.ensembl.org/info/docs/tools/vep/script/index.html
-
 Usage:
-perl vep.pl [--cache|--offline|--database] [arguments]
+perl haplo.pl [--cache|--offline|--database] [arguments]
 
 Basic options
 =============
@@ -172,13 +118,6 @@ Basic options
 -o | --output_file     Output file
 --force_overwrite      Force overwriting of output file
 --species [species]    Species to use [default: "human"]
-                       
---everything           Shortcut switch to turn on commonly used options. See web
-                       documentation for details [default: off]                       
---fork [num_forks]     Use forking to improve script runtime
-
-For full option documentation see:
-http://www.ensembl.org/info/docs/tools/vep/script/vep_options.html
 
 END
 
