@@ -66,6 +66,7 @@ perl haplo.pl -i input.vcf -o out.txt -cache
 ```
 
 Output data is currently a simple tab-delimited file reporting all observed non-reference haplotypes. It has the following fields:
+
 1. Transcript stable ID
 2. CDS haplotype name
 3. Comma-separated list of flags for CDS haplotype
