@@ -15,7 +15,7 @@ The VEP package requires Perl (>=5.10 recommended), the Ensembl API and a few ot
   * ensembl-io
 * CPAN modules - we recommend using [cpanminus](http://search.cpan.org/~miyagawa/Menlo-1.9003/script/cpanm-menlo) to install
   * [Set::IntervalTree](http://search.cpan.org/~benbooth/Set-IntervalTree/lib/Set/IntervalTree.pm)
-  * [Bio::DB::HTS](http://search.cpan.org/dist/Bio-DB-HTS/)
+  * [Bio::DB::HTS](http://search.cpan.org/dist/Bio-DB-HTS/) - requires compiled [htslib](https://github.com/samtools/htslib), set `$HTSLIB_DIR` to htslib path before installing Bio::DB::HTS
   * [JSON](http://search.cpan.org/dist/JSON/)
 
 Additional requirements for non-core functionality
@@ -36,8 +36,8 @@ vep.pl is compatible with the same downloadable caches as the ensembl-tools VEP.
 ### Differences to ensembl-tools VEP
 This ensembl-vep repo is a complete rewrite of the VEP code intended to make the software faster, more robust and more easily extensible. Almost all functionality of the ensembl-tools version has been replicated, with the command line flags remaining largely unchanged. A summary of changes follows:
 
-* **Known/existing variants:** The alleles of your input variant are now compared to any known variants when using ```--check_existing```. Previously this would require you to enable this functionality manually with ```--check_alleles```. The old functionality can be restored using ```--no_check_alleles```.
-* **Allele frequencies:** Allele frequencies are now reported for the input allele only e.g. as ```0.023``` instead of ```A:0.023,G:0.0005```. To reflect this change, the allele frequency fields are now named e.g. ```AFR_AF``` instead of ```AFR_MAF```. The command line flags reflect this also, so ```--maf``` is now ```--af``` and ```--maf_1kg``` is now ```--af_1kg```. Using the old flags will produce a deprecation message.
+* **Known/existing variants:** The alleles of your input variant are now compared to any known variants when using `--check_existing`. Previously this would require you to enable this functionality manually with `--check_alleles`. The old functionality can be restored using `--no_check_alleles`.
+* **Allele frequencies:** Allele frequencies are now reported for the input allele only e.g. as `0.023` instead of `A:0.023,G:0.0005`. To reflect this change, the allele frequency fields are now named e.g. `AFR_AF` instead of `AFR_MAF`. The command line flags reflect this also, so `--maf` is now `--af` and `--maf_1kg` is now `--af_1kg`. Using the old flags will produce a deprecation message.
 * **GFF and GTF files:** GFF and GTF files may now be used directly as a source of transcript annotation in place of, or even alongside, a cache or database source. Previously this involved [building a cache using gtf2vep.pl](http://www.ensembl.org/info/docs/tools/vep/script/vep_cache.html#gtf), which is now redundant. The files must first be bgzipped and tabix-indexed, and a FASTA file containing genomic sequence is required:
 ```bash
 $ grep -v "#" data.gff | sort -k1,1 -k4,4n -k5,5n | bgzip -c > data.gff.gz
@@ -45,14 +45,14 @@ $ tabix -p gff data.gff.gz
 $ perl vep.pl -i input.vcf -gff data.gff.gz -fasta genome.fa.gz
 ```
 * **VCF custom annotations:** [VCF files used as a source of custom annotation](http://www.ensembl.org/info/docs/tools/vep/script/vep_custom.html) will now have allele-specific data added from INFO fields; previously the whole content of each requested KEY=VALUE pair was reported.
-* **New pick flags:** New flags added to aid [selecting amongst consequence output](http://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick): ```--pick_allele_gene```, ```--flag_pick_allele_gene```
+* **New pick flags:** New flags added to aid [selecting amongst consequence output](http://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick): `--pick_allele_gene`, `--flag_pick_allele_gene`
 * **Runtime status:** vep.pl produces no runtime progress messages.
 * **Deprecated:**
-  * GVF output: ```--gvf```
-  * HTML output: ```--html```
-  * format conversion: ```--convert```
-  * pileup input: ```--format pileup```
-  * MAF flags (replaced by AF flags): ```--gmaf``` (```--af```), ```--maf_1kg``` (```--af```), ```--maf_esp``` (```--af_esp```), ```--maf_exac``` (```--af_exac```)
+  * GVF output: `--gvf`
+  * HTML output: `--html`
+  * format conversion: `--convert`
+  * pileup input: `--format pileup`
+  * MAF flags (replaced by AF flags): `--gmaf` (`--af`), `--maf_1kg` (`--af`), `--maf_esp` (`--af_esp`), `--maf_exac` (`--af_exac`)
 
 ---
 <a name="haplo"></a>
@@ -82,7 +82,7 @@ Output data is currently a simple tab-delimited file reporting all observed non-
 
 <a name="haplofreq"></a>
 ### Frequency data
-Haplotype frequencies may be loaded and assigned to observed haplotypes using ```--haplotype_frequencies [file]```. The following files may be used:
+Haplotype frequencies may be loaded and assigned to observed haplotypes using `--haplotype_frequencies [file]`. The following files may be used:
 
 * 1000 genomes frequencies (GRCh37): [protein_haplotype_freqs_1KG_e85_GRCh37.txt.gz](https://dl.dropboxusercontent.com/u/12936195/protein_haplotype_freqs_1KG_e85_GRCh37.txt.gz)
 * 1000 genomes frequencies (GRCh38): [protein_haplotype_freqs_1KG_e85_GRCh38.txt.gz](https://dl.dropboxusercontent.com/u/12936195/protein_haplotype_freqs_1KG_e85_GRCh38.txt.gz)
