@@ -60,6 +60,7 @@ sub new {
   my $self = $class->SUPER::new(@_);
 
   $self->param('haplo', 1);
+  $self->param('output_file', 'haplo_output.txt') unless $self->config->_raw_config->{output_file};
 
   return $self;
 }
