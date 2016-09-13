@@ -63,6 +63,7 @@ sub populate_tree {
 
   my $as_dir = $self->dir;
 
+  # cached coordinates file found
   if(-e $as_dir.'/transcript_coords.txt') {
     open TR, $as_dir.'/transcript_coords.txt';
     while(<TR>) {
@@ -71,6 +72,8 @@ sub populate_tree {
     }
     close TR;
   }
+
+  # otherwise we have to generate it by scanning the cache
   else {
     my $cache_region_size = $self->{cache_region_size};
 
@@ -80,9 +83,12 @@ sub populate_tree {
     foreach my $c(grep {!/^\./ && -d $as_dir.'/'.$_} readdir DIR) {
       
       opendir CHR, $as_dir.'/'.$c;
+
+      # scan each chr directory for transcript cache files e.g. 1-1000000.gz
       foreach my $file(grep {/\d+\-\d+\.gz/} readdir CHR) {
         my ($s) = split(/\D/, $file);
 
+        # we can use parent classes methods to fetch transcripts into memory
         foreach my $t(
           grep {$_->biotype eq 'protein_coding'}
           @{$self->get_features_by_regions_uncached([[$c, ($s - 1) / $cache_region_size]])}
@@ -91,6 +97,10 @@ sub populate_tree {
           $tree->insert($c, $s, $e);
           print TR "$c\t$s\t$e\n";
         }
+
+        # calling get_features_by_regions_uncached adds data to an in-memory cache
+        # we need to clear it manually here
+        $self->clean_cache;
       }
       closedir CHR;
     }
