@@ -141,16 +141,27 @@ sub dump_TranscriptHaplotypeContainer {
       my $ph = $ch->get_ProteinHaplotype;
 
       if(my $freq_data = $self->haplotype_frequencies->{$ph->_hex}) {
-        if($freq_data->[0]->{transcript}) {
-          if(my ($tr_freq_data) = grep {$_->{transcript} eq $tr_stable_id} @$freq_data) {
-            $freqs = join(",", map {$_.'='.$tr_freq_data->{$_}} grep {$_ ne 'transcript'} keys %$tr_freq_data);
+        my $tr_freq_data;
+
+        if(scalar @$freq_data > 1) {
+          if($freq_data->[0]->{transcript}) {
+            ($tr_freq_data) = grep {$_->{transcript} eq $tr_stable_id} @$freq_data;
+          }
+          else {
+            foreach my $tr_freq_data(@$freq_data) {
+              $freqs = join(",", map {$_.'='.$tr_freq_data->{$_}} keys %$tr_freq_data);
+            }
           }
         }
         else {
-          foreach my $tr_freq_data(@$freq_data) {
-            $freqs = join(",", map {$_.'='.$tr_freq_data->{$_}} keys %$tr_freq_data);
-          }
+          $tr_freq_data = $freq_data->[0];
         }
+
+        $freqs = join(",",
+          map {$_.'='.$tr_freq_data->{$_}}
+          grep {$_ ne 'transcript'}
+          keys %$tr_freq_data
+        );
       }
 
       my @out = (

@@ -125,7 +125,7 @@ is_deeply($runner->get_InputBuffer, bless({
 }, 'Bio::EnsEMBL::Haplo::VEP::InputBuffer' ), 'get_InputBuffer');
 
 
-throws_ok {$runner->haplotype_frequencies($test_cfg->{test_vcf})} qr/No hex header found/, 'haplotype_frequencies - no hex header found';
+throws_ok {$runner->haplotype_frequencies($test_cfg->{test_gzvcf})} qr/No hex header found/, 'haplotype_frequencies - no hex header found';
 throws_ok {$runner->haplotype_frequencies($test_cfg->{chr_synonyms})} qr/first column should be an md5sum/, 'haplotype_frequencies - no hex column found';
 
 ok($runner->haplotype_frequencies($test_cfg->{haplo_freqs}), 'haplotype_frequencies');
@@ -174,6 +174,33 @@ ENST00000419219  ENST00000419219:91T>C,582A>G    ENSP00000404426:31S>P      HG00
 },
   'run - check output'
 );
+
+
+$runner = Bio::EnsEMBL::VEP::Haplo::Runner->new({%$cfg_hash, output_file => 'STDOUT'});
+$tmp = undef;
+
+$runner->haplotype_frequencies($test_cfg->{haplo_freqs});
+$runner->run;
+
+is_deeply(
+  {
+    map {(split("=", $_))[0] => (split("=", $_))[1]}
+    map {split(",", $_)}
+    map {(split("\t", $_))[5]}
+    grep {/ENST00000307301\:612/} 
+    split("\n", $tmp)
+  },
+  {
+    'ALL' => '0.0905',
+    'AMR' => '0.0432',
+    'AFR' => '0.234',
+    'EUR' => '0.0467',
+    'SAS' => '0.0194',
+    'EAS' => '0.0476'
+  },
+  'run with haplotype_frequencies'
+);
+
 
 # restore STDOUT
 open(STDOUT, ">&SAVE") or die "Can't restore STDOUT\n";
