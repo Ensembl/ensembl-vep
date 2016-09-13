@@ -39,6 +39,7 @@ our %DEFAULTS = (
   )],
 
   chr_synonyms   => $Bin.'/testdata/chr_synonyms.txt',
+  haplo_freqs    => $Bin.'/testdata/haplotype_frequencies.txt',
 
   sereal_dir     => $Bin.'/testdata/cache/sereal/homo_sapiens/84_GRCh38',
 
