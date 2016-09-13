@@ -5,6 +5,7 @@
 
 > **!!! IMPORTANT !!!** This is pre-release code. Use at your own risk. Please continue to use the version of [VEP](http://www.ensembl.org/vep) in [ensembl-tools](https://github.com/Ensembl/ensembl-tools) if you are unsure.
 
+
 ### Installation and requirements
 The VEP package requires Perl (>=5.10 recommended), the Ensembl API and a few other Perl modules. The Ensembl API in turn requires the [BioPerl](https://github.com/bioperl/bioperl-live), [DBI](http://search.cpan.org/~timb/DBI/DBI.pm) and [DBD::mysql](http://search.cpan.org/~michielb/DBD-mysql-4.036/lib/DBD/mysql.pm) packages to be installed.
 * Ensembl API modules ([installation guide](http://www.ensembl.org/info/docs/api/api_installation.html), [git install](http://www.ensembl.org/info/docs/api/api_git.html))
@@ -27,7 +28,7 @@ perl vep.pl -i input.vcf -o out.txt -cache
 ```
 vep.pl is compatible with the same downloadable caches as the ensembl-tools VEP. See [documentation](http://www.ensembl.org/info/docs/tools/vep/script/index.html) for full command line instructions.
 
-> Note that this documentation currently corresponds to the ensembl-tools version of VEP; this will be updated to reflect the new version soon. Almost all commands, flags and plugins should work on both versions.
+> Note that the documentation hosted on ensembl.org and linked to from here currently corresponds to the ensembl-tools version of VEP; this will be updated to reflect the new version soon. Almost all commands, flags and plugins should work on both versions.
 
 ### Differences to ensembl-tools VEP
 This ensembl-vep repo is a complete rewrite of the VEP code intended to make the software faster, more robust and more easily extensible. Almost all functionality of the ensembl-tools version has been replicated, with the command line flags remaining largely unchanged. A summary of changes follows:
