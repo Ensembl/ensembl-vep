@@ -34,7 +34,7 @@ This ensembl-vep repo is a complete rewrite of the VEP code intended to make the
 
 * **Known/existing variants:** The alleles of your input variant are now compared to any known variants when using ```--check_existing```. Previously this would require you to enable this functionality manually with ```--check_alleles```. The old functionality can be restored using ```--no_check_alleles```.
 * **Allele frequencies:** Allele frequencies are now reported for the input allele only e.g. as ```0.023``` instead of ```A:0.023,G:0.0005```. To reflect this change, the allele frequency fields are now named e.g. ```AFR_AF``` instead of ```AFR_MAF```. The command line flags reflect this also, so ```--maf``` is now ```--af``` and ```--maf_1kg``` is now ```--af_1kg```. Using the old flags will produce a deprecation message.
-* **GFF and GTF files:** GFF and GTF files may now be used directly as a source of transcript annotation in place of, or even alongside, a cache or database source. Previously this invovled [building a cache using gtf2vep.pl](http://www.ensembl.org/info/docs/tools/vep/script/vep_cache.html#gtf), which is now redundant. The files must first be bgzipped and tabix-indexed, and a FASTA file containing genomic sequence is required:
+* **GFF and GTF files:** GFF and GTF files may now be used directly as a source of transcript annotation in place of, or even alongside, a cache or database source. Previously this involved [building a cache using gtf2vep.pl](http://www.ensembl.org/info/docs/tools/vep/script/vep_cache.html#gtf), which is now redundant. The files must first be bgzipped and tabix-indexed, and a FASTA file containing genomic sequence is required:
 ```bash
 $ grep -v "#" data.gff | sort -k1,1 -k4,4n -k5,5n | bgzip -c > data.gff.gz
 $ tabix -p gff data.gff.gz
@@ -55,10 +55,33 @@ $ perl vep.pl -i input.vcf -gff data.gff.gz -fasta genome.fa.gz
 ## Haplosaurus
 haplo.pl is a local tool implementation of the same functionality that powers the [Ensembl transcript haplotypes view](http://www.ensembl.org/Homo_sapiens/Transcript/Haplotypes?t=ENST00000304748).
 
-It shares much of the same command line functionality with vep.pl, and can use VEP caches, Ensembl databases, GFF and GTF files as sources of transcript data.
+It shares much of the same command line functionality with vep.pl, and can use VEP caches, Ensembl databases, GFF and GTF files as sources of transcript data; all vep.pl command line flags relating to this functionality work the same with haplo.pl.
 
 Input data must be a [VCF](http://samtools.github.io/hts-specs/VCFv4.3.pdf) containing phased genotype data for at least one individual; no other formats are currently supported.
+
+When using a VEP cache as the source of transcript annotation, the first time you run haplo.pl with a particular cache it will spend some time scanning transcript locations in the cache.
 
 ```bash
 perl haplo.pl -i input.vcf -o out.txt -cache
 ```
+
+Output data is currently a simple tab-delimited file reporting all observed non-reference haplotypes. It has the following fields:
+1. Transcript stable ID
+2. CDS haplotype name
+3. Comma-separated list of flags for CDS haplotype
+4. Protein haplotype name
+5. Comma-separated list of flags for protein haplotype
+6. Comma-separated list of [frequency data](#haplofreq) for protein haplotype
+7. Sample identifier
+8. Number of copies of this haplotype observed in sample
+
+<a name="haplofreq"></a>
+### Frequency data
+Haplotype frequencies may be loaded and assigned to observed haplotypes using ```--haplotype_frequencies [file]```. The following files may be used:
+
+* 1000 genomes frequencies (GRCh37): [protein_haplotype_freqs_1KG_e85_GRCh37.txt.gz](https://dl.dropboxusercontent.com/u/12936195/protein_haplotype_freqs_1KG_e85_GRCh37.txt.gz)
+* 1000 genomes frequencies (GRCh38): [protein_haplotype_freqs_1KG_e85_GRCh38.txt.gz](https://dl.dropboxusercontent.com/u/12936195/protein_haplotype_freqs_1KG_e85_GRCh38.txt.gz)
+
+> Note these files are temporarily hosted on 3rd party servers and may be subject to change or removal while the software remains in the development phase.
+
+
