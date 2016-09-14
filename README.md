@@ -17,10 +17,10 @@ The VEP package requires Perl (>=5.10 recommended), the Ensembl API and a few ot
 > **IMPORTANT:** ensembl-variation and ensembl-io currently must be on the master or (when available) release/86 branch:
 
 ```bash
-cd ensembl-variation
-git checkout master
-cd ../ensembl-io
-git checkout master
+$ cd ensembl-variation
+$ git checkout master
+$ cd ../ensembl-io
+$ git checkout master
 cd ../
 ```
 
@@ -38,7 +38,7 @@ Additional requirements for non-core functionality
 
 ### Usage
 ```bash
-perl vep.pl -i input.vcf -o out.txt -cache
+$ perl vep.pl -i input.vcf -o out.txt -cache
 ```
 vep.pl is compatible with the same downloadable caches as the ensembl-tools VEP. See [documentation](http://www.ensembl.org/info/docs/tools/vep/script/index.html) for full command line instructions.
 
@@ -78,7 +78,7 @@ Input data must be a [VCF](http://samtools.github.io/hts-specs/VCFv4.3.pdf) cont
 When using a VEP cache as the source of transcript annotation, the first time you run haplo.pl with a particular cache it will spend some time scanning transcript locations in the cache.
 
 ```bash
-perl haplo.pl -i input.vcf -o out.txt -cache
+$ perl haplo.pl -i input.vcf -o out.txt -cache
 ```
 
 Output data is currently a simple tab-delimited file reporting all observed non-reference haplotypes. It has the following fields:
