@@ -99,7 +99,7 @@ SKIP: {
     'info'
   );
 
-  is($as->have_pubmed, 1, 'have_pubmed');
+  is($as->have_pubmed, 0, 'have_pubmed');
   is($as->phenotype_attrib_id, '418', 'phenotype_attrib_id');
 
   ## TESTS WITH AN INPUT BUFFER
