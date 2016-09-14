@@ -13,7 +13,9 @@ The VEP package requires Perl (>=5.10 recommended), the Ensembl API and a few ot
   * ensembl
   * ensembl-funcgen
   * ensembl-io
+
 > **IMPORTANT:** ensembl-variation and ensembl-io currently must be on the master or (when available) release/86 branch:
+
 ```bash
 cd ensembl-variation
 git checkout master
@@ -21,6 +23,7 @@ cd ../ensembl-io
 git checkout master
 cd ../
 ```
+
 * CPAN modules - we recommend using [cpanminus](http://search.cpan.org/~miyagawa/Menlo-1.9003/script/cpanm-menlo) to install
   * [Set::IntervalTree](http://search.cpan.org/~benbooth/Set-IntervalTree/lib/Set/IntervalTree.pm)
   * [Bio::DB::HTS](http://search.cpan.org/dist/Bio-DB-HTS/) - requires compiled [htslib](https://github.com/samtools/htslib), set `$HTSLIB_DIR` to htslib path before installing Bio::DB::HTS
