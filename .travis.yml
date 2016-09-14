@@ -26,7 +26,7 @@ addons:
       - mysql-client-core-5.5
 
 before_install:
-  - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-test.git
+  - git clone --branch master --depth 1 https://github.com/willmclaren/ensembl-test.git
   - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl.git
   - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-io.git
   - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-funcgen.git
