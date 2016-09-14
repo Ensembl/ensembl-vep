@@ -8,11 +8,19 @@
 
 ### Installation and requirements
 The VEP package requires Perl (>=5.10 recommended), the Ensembl API and a few other Perl modules. The Ensembl API in turn requires the [BioPerl](https://github.com/bioperl/bioperl-live), [DBI](http://search.cpan.org/~timb/DBI/DBI.pm) and [DBD::mysql](http://search.cpan.org/~michielb/DBD-mysql-4.036/lib/DBD/mysql.pm) packages to be installed.
-* Ensembl API modules ([installation guide](http://www.ensembl.org/info/docs/api/api_installation.html), [git install](http://www.ensembl.org/info/docs/api/api_git.html))
+* Ensembl API modules - use git to install ([Ensembl git install instructions](http://www.ensembl.org/info/docs/api/api_git.html))
   * ensembl-variation
   * ensembl
   * ensembl-funcgen
   * ensembl-io
+> **IMPORTANT:** ensembl-variation and ensembl-io currently must be on the master or (when available) release/86 branch:
+```bash
+cd ensembl-variation
+git checkout master
+cd ../ensembl-io
+git checkout master
+cd ../
+```
 * CPAN modules - we recommend using [cpanminus](http://search.cpan.org/~miyagawa/Menlo-1.9003/script/cpanm-menlo) to install
   * [Set::IntervalTree](http://search.cpan.org/~benbooth/Set-IntervalTree/lib/Set/IntervalTree.pm)
   * [Bio::DB::HTS](http://search.cpan.org/dist/Bio-DB-HTS/) - requires compiled [htslib](https://github.com/samtools/htslib), set `$HTSLIB_DIR` to htslib path before installing Bio::DB::HTS
