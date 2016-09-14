@@ -21,7 +21,7 @@ $ cd ensembl-variation
 $ git checkout master
 $ cd ../ensembl-io
 $ git checkout master
-cd ../
+$ cd ../
 ```
 
 * CPAN modules - we recommend using [cpanminus](http://search.cpan.org/~miyagawa/Menlo-1.9003/script/cpanm-menlo) to install
