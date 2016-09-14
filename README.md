@@ -49,7 +49,7 @@ This ensembl-vep repo is a complete rewrite of the VEP code intended to make the
 
 * **Script name:** For brevity and to distinguish the two versions, the new script is named vep.pl, with the version in ensembl-tools named variant_effect_predictor.pl.
 * **Known/existing variants:** The alleles of your input variant are now compared to any known variants when using `--check_existing`. Previously this would require you to enable this functionality manually with `--check_alleles`. The old functionality can be restored using `--no_check_alleles`.
-* **Allele frequencies:** Allele frequencies are now reported for the input allele only e.g. as `0.023` instead of `A:0.023,G:0.0005`. To reflect this change, the allele frequency fields are now named e.g. `AFR_AF` instead of `AFR_MAF`. The command line flags reflect this also, so `--maf` is now `--af` and `--maf_1kg` is now `--af_1kg`. Using the old flags will produce a deprecation message.
+* **Allele frequencies:** Allele frequencies are now reported for the input allele only e.g. as `0.023` instead of `A:0.023,G:0.0005`. To reflect this change, the allele frequency fields are now named e.g. `AFR_AF` instead of `AFR_MAF`. The command line flags reflect this also, so `--gmaf` is now `--af` and `--maf_1kg` is now `--af_1kg`. Using the old flags will produce a deprecation message.
 * **GFF and GTF files:** GFF and GTF files may now be used directly as a source of transcript annotation in place of, or even alongside, a cache or database source. Previously this involved [building a cache using gtf2vep.pl](http://www.ensembl.org/info/docs/tools/vep/script/vep_cache.html#gtf), which is now redundant. The files must first be bgzipped and tabix-indexed, and a FASTA file containing genomic sequence is required:
 ```bash
 $ grep -v "#" data.gff | sort -k1,1 -k4,4n -k5,5n | bgzip -c > data.gff.gz
@@ -64,7 +64,7 @@ $ perl vep.pl -i input.vcf -gff data.gff.gz -fasta genome.fa.gz
   * HTML output: `--html`
   * format conversion: `--convert`
   * pileup input: `--format pileup`
-  * MAF flags (replaced by AF flags): `--gmaf` (`--af`), `--maf_1kg` (`--af`), `--maf_esp` (`--af_esp`), `--maf_exac` (`--af_exac`)
+  * MAF flags (replaced by AF flags): `--gmaf` (`--af`), `--maf_1kg` (`--af_1kg`), `--maf_esp` (`--af_esp`), `--maf_exac` (`--af_exac`)
 
 ---
 <a name="haplo"></a>
