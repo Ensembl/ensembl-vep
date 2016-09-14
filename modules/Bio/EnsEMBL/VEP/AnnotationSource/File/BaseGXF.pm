@@ -277,16 +277,16 @@ sub _create_transcript {
     return;  
   }  
 
-  my $tr = Bio::EnsEMBL::Transcript->new(
-    -STABLE_ID => $id,
-    -BIOTYPE   => $biotype,
-    -SLICE     => $slice,
-    -STRAND    => $tr_record->{strand},
-    -VERSION   => 1,
-    -dbID      => $self->{_tr_dbID}++,
-    -START     => $tr_record->{start},
-    -END       => $tr_record->{end},
-  );
+  my $tr = Bio::EnsEMBL::Transcript->new_fast({
+    stable_id => $id,
+    biotype   => $biotype,
+    slice     => $slice,
+    strand    => $tr_record->{strand},
+    version   => 1,
+    dbID      => $self->{_tr_dbID}++,
+    start     => $tr_record->{start},
+    end       => $tr_record->{end},
+  });
 
   $self->_add_identifiers($tr, $tr_record, $gene_record);
 
