@@ -6,11 +6,14 @@
 > **!!! IMPORTANT !!!** This is pre-release code. Use at your own risk. Please continue to use the version of [VEP](http://www.ensembl.org/vep) in [ensembl-tools](https://github.com/Ensembl/ensembl-tools/tree/release/85/scripts/variant_effect_predictor) if you are unsure.
 
 ##### Table of contents
-[Installation and requirements](#install)  
-[VEP: usage](#vepusage)  
-[VEP: differences to ensembl-tools version](#vepdiffs)  
-[Haplosaurus](#haplo)  
-[Haplotype frequency data](#haplofreq)  
+* [Installation and requirements](#install)
+* [VEP](#vep)
+  * [Usage](#vepusage)
+  * [Differences to ensembl-tools version](#vepdiffs)
+* [Haplosaurus](#haplo)
+  * [Usage](#haplousage)
+  * [Flags](#haploflags)
+  * [Frequency data](#haplofreq)
 
 ---
 <a name="install"></a>
@@ -45,6 +48,8 @@ Additional non-essential CPAN modules required for non-core functionality:
 * [Bio::DB::BigFile](http://search.cpan.org/~lds/Bio-BigFile-1.07/lib/Bio/DB/BigFile.pm) - required for reading custom annotation data from BigWig files
  
 ---
+
+<a name="vep"></a>
 ## VEP
 
 <a name="vepusage"></a>
@@ -88,6 +93,7 @@ haplo.pl is a local tool implementation of the same functionality that powers th
 
 It shares much of the same command line functionality with vep.pl, and can use VEP caches, Ensembl databases, GFF and GTF files as sources of transcript data; all vep.pl command line flags relating to this functionality work the same with haplo.pl.
 
+<a name="haplousage"></a>
 Input data must be a [VCF](http://samtools.github.io/hts-specs/VCFv4.3.pdf) containing phased genotype data for at least one individual; no other formats are currently supported.
 
 When using a VEP cache as the source of transcript annotation, the first time you run haplo.pl with a particular cache it will spend some time scanning transcript locations in the cache.
@@ -96,16 +102,26 @@ When using a VEP cache as the source of transcript annotation, the first time yo
 $ perl haplo.pl -i input.vcf -o out.txt -cache
 ```
 
+<a name="haplooutput"></a>
 Output data is currently a simple tab-delimited file reporting all observed non-reference haplotypes. It has the following fields:
 
 1. Transcript stable ID
 2. CDS haplotype name
-3. Comma-separated list of flags for CDS haplotype
+3. Comma-separated list of [flags](#haploflags) for CDS haplotype
 4. Protein haplotype name
-5. Comma-separated list of flags for protein haplotype
+5. Comma-separated list of [flags](#haploflags) for protein haplotype
 6. Comma-separated list of [frequency data](#haplofreq) for protein haplotype
 7. Sample identifier
 8. Number of copies of this haplotype observed in sample
+
+<a name="haploflags"></a>
+### Flags
+Haplotypes may be flagged with one or more of the following:
+* **indel**: haplotype contains an insertion or deletion (indel) relative to the reference.
+* **frameshift:** haplotype contains at least one indel that disrupts the reading frame of the transcript.
+* **resolved_frameshift:** haplotype contains two or more indels whose combined effect restores the reading frame of the transcript.
+* **stop_changed:** indicates either a STOP codon is gained (protein truncating variant, PTV) or the existing reference STOP codon is lost.
+* **deleterious_sift_or_polyphen:** haplotype contains at least one single amino acid substitution event flagged as deleterious (SIFT) or probably damaging (PolyPhen2).
 
 <a name="haplofreq"></a>
 ### Frequency data
