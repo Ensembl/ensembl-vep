@@ -5,6 +5,7 @@
 
 > **!!! IMPORTANT !!!** This is pre-release code. Use at your own risk. Please continue to use the version of [VEP](http://www.ensembl.org/vep) in [ensembl-tools](https://github.com/Ensembl/ensembl-tools/tree/release/85/scripts/variant_effect_predictor) if you are unsure.
 
+##### Table of contents
 [Installation and requirements](#install)  
 [VEP: usage](#vepusage)  
 [VEP: differences to ensembl-tools version](#vepdiffs)  
