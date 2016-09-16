@@ -15,14 +15,13 @@
 
 ### Installation and requirements
 The VEP package requires Perl (>=5.10 recommended), the Ensembl API and a few other Perl modules. The Ensembl API in turn requires the [BioPerl](https://github.com/bioperl/bioperl-live), [DBI](http://search.cpan.org/~timb/DBI/DBI.pm) and [DBD::mysql](http://search.cpan.org/~michielb/DBD-mysql-4.036/lib/DBD/mysql.pm) packages to be installed.
-* Ensembl API modules - use git to install ([Ensembl git install instructions](http://www.ensembl.org/info/docs/api/api_git.html))
+#### Ensembl API modules
+Use git to install ([Ensembl git install instructions](http://www.ensembl.org/info/docs/api/api_git.html)). Don't forget to add each component's modules path (e.g. `ensembl-variation/modules`) to the `$PERL5LIB` environment variable.
   * ensembl-variation
   * ensembl
   * ensembl-funcgen
   * ensembl-io
   
- > Don't forget to add each component's modules path (e.g. `ensembl-variation/modules`) to the `$PERL5LIB` environment variable
-
 > **IMPORTANT:** ensembl-variation and ensembl-io currently must be on the master or (when available) release/86 branch:
 
 ```bash
@@ -33,12 +32,13 @@ $ git checkout master
 $ cd ../
 ```
 
-* CPAN modules - we recommend using [cpanminus](http://search.cpan.org/~miyagawa/Menlo-1.9003/script/cpanm-menlo) to install
+#### CPAN modules
+We recommend using [cpanminus](http://search.cpan.org/~miyagawa/Menlo-1.9003/script/cpanm-menlo) to install.
   * [Set::IntervalTree](http://search.cpan.org/~benbooth/Set-IntervalTree/lib/Set/IntervalTree.pm)
   * [Bio::DB::HTS](http://search.cpan.org/dist/Bio-DB-HTS/) - requires compiled [htslib](https://github.com/samtools/htslib), set `$HTSLIB_DIR` to htslib path before installing Bio::DB::HTS
   * [JSON](http://search.cpan.org/dist/JSON/)
 
-Additional requirements for non-core functionality
+Additional non-essential CPAN modules required for non-core functionality:
 * [PerlIO::gzip](http://search.cpan.org/~nwclark/PerlIO-gzip-0.19/gzip.pm) - faster compressed file parsing
 * [Bio::DB::BigFile](http://search.cpan.org/~lds/Bio-BigFile-1.07/lib/Bio/DB/BigFile.pm) - required for reading custom annotation data from BigWig files
  
