@@ -12,6 +12,7 @@
 [Haplosaurus](#haplo)  
 [Haplotype frequency data](#haplofreq)  
 
+---
 <a name="install"></a>
 
 ### Installation and requirements
