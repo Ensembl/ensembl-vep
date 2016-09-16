@@ -1,7 +1,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/willmclaren/ensembl-vep/badge.svg?branch=master)](https://coveralls.io/github/willmclaren/ensembl-vep?branch=master)
 # ensembl-vep
-* The Variant Effect Predictor (VEP) predicts the functional effects of genomic variants.
-* [Haplosaurus](#haplo) uses phased genotype data to predict whole-transcript haplotype sequences.
+* **VEP** (Variant Effect Predictor) predicts the functional effects of genomic variants.
+* **Haplosaurus** uses phased genotype data to predict whole-transcript haplotype sequences.
 
 > **!!! IMPORTANT !!!** This is pre-release code. Use at your own risk. Please continue to use the version of [VEP](http://www.ensembl.org/vep) in [ensembl-tools](https://github.com/Ensembl/ensembl-tools/tree/release/85/scripts/variant_effect_predictor) if you are unsure.
 
