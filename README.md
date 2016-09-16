@@ -12,6 +12,7 @@
   * [Differences to ensembl-tools version](#vepdiffs)
 * [Haplosaurus](#haplo)
   * [Usage](#haplousage)
+  * [Output](#haplooutput)
   * [Flags](#haploflags)
   * [Frequency data](#haplofreq)
 
@@ -94,6 +95,7 @@ haplo.pl is a local tool implementation of the same functionality that powers th
 It shares much of the same command line functionality with vep.pl, and can use VEP caches, Ensembl databases, GFF and GTF files as sources of transcript data; all vep.pl command line flags relating to this functionality work the same with haplo.pl.
 
 <a name="haplousage"></a>
+### Usage
 Input data must be a [VCF](http://samtools.github.io/hts-specs/VCFv4.3.pdf) containing phased genotype data for at least one individual; no other formats are currently supported.
 
 When using a VEP cache as the source of transcript annotation, the first time you run haplo.pl with a particular cache it will spend some time scanning transcript locations in the cache.
@@ -103,6 +105,7 @@ $ perl haplo.pl -i input.vcf -o out.txt -cache
 ```
 
 <a name="haplooutput"></a>
+### Output
 Output data is currently a simple tab-delimited file reporting all observed non-reference haplotypes. It has the following fields:
 
 1. Transcript stable ID
