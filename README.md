@@ -20,7 +20,8 @@ The VEP package requires Perl (>=5.10 recommended), the Ensembl API and a few ot
   * ensembl
   * ensembl-funcgen
   * ensembl-io
- 
+
+
  > Don't forget to add each component's modules path (e.g. `ensembl-variation/modules`) to the `$PERL5LIB` environment variable
 
 > **IMPORTANT:** ensembl-variation and ensembl-io currently must be on the master or (when available) release/86 branch:
