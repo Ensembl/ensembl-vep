@@ -86,13 +86,17 @@ $ perl vep.pl -i input.vcf -gff data.gff.gz -fasta genome.fa.gz
   * format conversion: `--convert`
   * pileup input: `--format pileup`
   * MAF flags (replaced by AF flags): `--gmaf` (`--af`), `--maf_1kg` (`--af_1kg`), `--maf_esp` (`--af_esp`), `--maf_exac` (`--af_exac`)
+  * known variant allele checking (on by default, use `--no_check_alleles` to restore old behaviour):  `--check_alleles` 
+  * cache building flags (to be replaced by internal Ensembl pipeline): `--build`, `--write_cache`
 
 ---
 <a name="haplo"></a>
 ## Haplosaurus
-haplo.pl is a local tool implementation of the same functionality that powers the [Ensembl transcript haplotypes view](http://www.ensembl.org/Homo_sapiens/Transcript/Haplotypes?t=ENST00000304748).
+haplo.pl is a local tool implementation of the same functionality that powers the [Ensembl transcript haplotypes view](http://www.ensembl.org/Homo_sapiens/Transcript/Haplotypes?t=ENST00000304748). It takes phased genotypes from a VCF and constructs a pair of haplotype sequences for each overlapped transcript; these sequences are also translated into predicted protein haplotype sequences. Each variant haplotype sequence is aligned and compared to the reference, and an HGVS-like name is constructed representing its differences to the reference.
 
-It shares much of the same command line functionality with vep.pl, and can use VEP caches, Ensembl databases, GFF and GTF files as sources of transcript data; all vep.pl command line flags relating to this functionality work the same with haplo.pl.
+This approach offers an advantage over VEP's analysis, which treats each input variant independently. By considering the combined change contributed by all the variant alleles across a transcript, the compound effects the variants may have are correctly accounted for.
+
+haplo.pl shares much of the same command line functionality with vep.pl, and can use VEP caches, Ensembl databases, GFF and GTF files as sources of transcript data; all vep.pl command line flags relating to this functionality work the same with haplo.pl.
 
 <a name="haplousage"></a>
 ### Usage
