@@ -89,7 +89,7 @@ sub get_all_from_database {
   my @as;
 
   # we don't want to get e.g. transcript DB sources if we have cache
-  unless($self->param('cache')) {
+  unless($self->param('cache') || ($self->param('custom') && !$self->param('database'))) {
     my $module = $self->module_prefix.'::AnnotationSource::Database::Transcript';
     eval "require $module";
     push @as, $module->new({
