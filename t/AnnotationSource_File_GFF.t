@@ -99,7 +99,7 @@ SKIP: {
   );
 
 
-  my $trs = $as->_create_transcripts($records);
+  my $trs = $as->merge_features($as->_create_transcripts($records));
 
   is(scalar @$trs, 3, "_create_transcripts - count");
   is($trs->[0]->stable_id, "ENST00000307301", "stable_id");
@@ -112,7 +112,7 @@ SKIP: {
   is($trs->[0]->translation->seq, $prot_seq, "translate");
 
 
-  $trs = $as->_create_transcripts($as->_get_records_by_coords(21, 255e5, 26e6));
+  $trs = $as->merge_features($as->_create_transcripts($as->_get_records_by_coords(21, 255e5, 26e6)));
   is_deeply(
     {map {$_->stable_id => $_->biotype} @$trs},
     {
@@ -181,7 +181,7 @@ SKIP: {
   $records = $as->_get_records_by_coords(21, 25585733, 25585733);
   delete $records->[3]->{attributes}->{gene_id};
   delete $records->[2]->{attributes}->{gene_id};
-  is($as->_create_transcripts($records)->[0]->{_gene_stable_id}, 'ENSG00000154719', 'gene_stable_id from gene object ID not gene_id');
+  is($as->merge_features($as->_create_transcripts($records))->[0]->{_gene_stable_id}, 'ENSG00000154719', 'gene_stable_id from gene object ID not gene_id');
 
   ## TEST SOME FAILSAFES
   ######################
@@ -199,7 +199,7 @@ SKIP: {
   # invalid child type
   $records = $as->_get_records_by_coords(21, 25585733, 25585733);
   $records->[0]->{type} = 'foo';
-  throws_ok { $as->_create_transcripts($records) } qr/unexpected type of child record/, '_create_transcripts - unexpected type of child';
+  throws_ok { $as->merge_features($as->_create_transcripts($records)) } qr/unexpected type of child record/, '_create_transcripts - unexpected type of child';
 
   no warnings 'once';
   open(SAVE, ">&STDERR") or die "Can't save STDERR\n"; 
@@ -210,14 +210,14 @@ SKIP: {
 
   $records = $as->_get_records_by_coords(21, 25585733, 25585733);
   delete $records->[3]->{attributes}->{biotype};
-  is(scalar @{$as->_create_transcripts($records)}, 2, 'no biotype skips transcript');
+  is(scalar @{$as->merge_features($as->_create_transcripts($records))}, 2, 'no biotype skips transcript');
   ok($tmp =~ /Unable to determine biotype/, 'no biotype warning message');
 
   # overlapping exons
   $records = $as->_get_records_by_coords(21, 25585733, 25585733);
   $records->[0]->{end} += 1e5;
   delete($records->[0]->{attributes}->{rank});
-  is(scalar @{$as->_create_transcripts($records)}, 2, 'overlapping exons skips transcript');
+  is(scalar @{$as->merge_features($as->_create_transcripts($records))}, 2, 'overlapping exons skips transcript');
   ok($tmp =~ /Failed to add exon to transcript/, 'overlapping exons warning message');
 
   # restore STDERR
@@ -298,7 +298,7 @@ SKIP: {
     '_get_records_by_coords - check first'
   );
 
-  $trs = $as->_create_transcripts($records);
+  $trs = $as->merge_features($as->_create_transcripts($records));
 
   is(scalar @$trs, 4, "_create_transcripts - count");
   is($trs->[3]->stable_id, "NM_080794.3", "stable_id");
@@ -307,7 +307,7 @@ SKIP: {
   is(scalar @{$trs->[3]->get_all_Exons}, 11, "count exons");
   is($trs->[3]->translation->seq, $prot_seq, "translate");
 
-  $trs = $as->_create_transcripts($as->_get_records_by_coords('NC_000021.9', 255e5, 26e6));
+  $trs = $as->merge_features($as->_create_transcripts($as->_get_records_by_coords('NC_000021.9', 255e5, 26e6)));
 
   is_deeply(
     {map {$_->stable_id => $_->biotype} @$trs},

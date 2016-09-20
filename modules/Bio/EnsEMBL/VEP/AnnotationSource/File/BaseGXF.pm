@@ -198,9 +198,12 @@ sub _create_transcripts {
     }
 
     foreach my $tr_record(@gene_transcripts) {
-      my $tr = $self->_create_transcript($tr_record, $gene);
-      push @transcripts, $tr if $tr;
+      $tr_record->{_gene_record} = $gene;
+      push @transcripts, $tr_record;
     }
+
+    # avoid a circular ref
+    delete($gene->{_children}) if $gene;
   }
 
   return \@transcripts;
@@ -497,6 +500,25 @@ sub _convert_phase {
   }
 
   return $phase;
+}
+
+# we're going to use merge_features to lazily create our objects
+# this means all the transcript creation logic will only happen
+# when we actually need to use the object
+#
+# merge_features is called at the end of get_all_features_by_InputBuffer
+# in the parent class AnnotationSource
+sub merge_features {
+  my $self = shift;
+  my $features = shift;
+  my @return;
+
+  foreach my $feature(@$features) {
+    $feature->{object} = $self->_create_transcript($feature, $feature->{_gene_record}) if not exists($feature->{object});
+    push @return, $feature->{object} if $feature->{object};
+  }
+
+  return \@return;
 }
 
 1;
