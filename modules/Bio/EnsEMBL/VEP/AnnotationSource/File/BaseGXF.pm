@@ -73,7 +73,7 @@ sub new {
   # no point doing exact
   throw("ERROR: GXF annotation sources cannot be used as \"exact\" custom annotation type\n") if $self->type eq 'exact';
 
-  $self->{cache_region_size} = 5e5;
+  $self->{cache_region_size} = 1e6;
 
   return $self;
 }
@@ -512,9 +512,19 @@ sub lazy_load_transcript {
   return $feature->{object};
 }
 
-# we don't need to merge so just return input arrayref
+# merge using md5 for uniqueness
 sub merge_features {
-  return $_[1];
+  my ($self, $features) = @_;
+  my (@return, %seen);
+
+  foreach my $f(@$features) {
+    unless($seen{$f->{md5}}) {
+      push @return, $f;
+      $seen{$f->{md5}} = 1;  
+    }
+  }
+
+  return \@return;
 }
 
 1;
