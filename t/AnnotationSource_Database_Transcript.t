@@ -128,6 +128,13 @@ SKIP: {
   is($tr->{_protein}, 'ENSP00000305682', 'prefetch_translation_ids - Ensembl protein');
 
   ok($as->prefetch_translation_data($tr, $tr->translation), 'prefetch_translation_data');
+
+  my $sth = $as->get_adaptor('variation','variation')->db->dbc->prepare("SHOW CREATE TABLE protein_function_predictions");
+  $sth->execute();
+  my ($t, $c);
+  $sth->bind_columns(\$t, \$c);
+  $sth->fetch;
+  print STDERR $c."\n";
   
   my $vep_cache = $tr->{_variation_effect_feature_cache};
 
