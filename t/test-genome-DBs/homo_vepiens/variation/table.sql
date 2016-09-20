@@ -290,7 +290,7 @@ CREATE TABLE `protein_function_predictions` (
   `analysis_attrib_id` int unsigned NOT NULL,
   `prediction_matrix` mediumblob,
   PRIMARY KEY (`translation_md5_id`,`analysis_attrib_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 CREATE TABLE `protein_function_predictions_attrib` (
   `translation_md5_id` int(11) unsigned NOT NULL,
