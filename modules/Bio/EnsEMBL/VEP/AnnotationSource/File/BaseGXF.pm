@@ -296,7 +296,7 @@ sub _create_transcript {
   $self->_add_identifiers($tr, $tr_record, $gene_record);
 
   # separate exons and cds entries
-  my (@cdss, @exons);
+  my (%cdss, @exons);
 
   foreach my $child(@{$tr_record->{_children}}) {
     my $type = lc($child->{type});
@@ -305,7 +305,7 @@ sub _create_transcript {
       push @exons, $child;
     }
     elsif($type eq 'cds' || $type eq 'stop_codon') {
-      push @cdss, $child;
+      $cdss{$child->{start}} = $child;
     }
     else {
       throw("ERROR: Transcript has unexpected type of child record: ".Dumper($child)."\n");
@@ -327,10 +327,21 @@ sub _create_transcript {
     my ($s, $e) = ($exon_record->{start}, $exon_record->{end});
 
     my $phase = -1;
-    my $cds_record;
-    if(($cds_record) = grep {overlap($s, $e, $_->{start}, $_->{end})} @cdss) {
-      push @ordered_cdss, $cds_record;
-      $phase = $self->_convert_phase($cds_record->{phase});
+    my @cds_records;
+
+    if(my @cds_starts = grep {overlap($s, $e, $_, $_)} keys %cdss) {
+      if(@cds_starts > 1) {
+        if($tr_record->{strand} > 0) {
+          @cds_starts = sort {$a <=> $b} @cds_starts;
+        }
+        else {
+          @cds_starts = sort {$b <=> $a} @cds_starts;
+        }
+      }
+
+      @cds_records = map {delete $cdss{$_}} @cds_starts;
+      push @ordered_cdss, @cds_records;
+      $phase = $self->_convert_phase($cds_records[0]->{phase});
     }
 
     my $exon = Bio::EnsEMBL::Exon->new(
@@ -344,7 +355,7 @@ sub _create_transcript {
     $exon->{_seq_cache} = $exon->feature_Slice->seq;
 
     # log a pointer to the exon on the cds record
-    $cds_record->{_exon} = $exon if $cds_record;
+    $_->{_exon} = $exon for @cds_records;
 
     # add it to the transcript
     # sometimes this can fail if the coordinates overlap
