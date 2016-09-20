@@ -288,6 +288,11 @@ sub _create_transcript {
     end       => $tr_record->{end},
   });
 
+  # making a call to seq here means the sequence is cached in memory
+  # this means we don't need to repeatedly fetch for each exon
+  # the caching is done elsewhere so we don't need to worry any further here
+  $tr->feature_Slice->seq;
+
   $self->_add_identifiers($tr, $tr_record, $gene_record);
 
   # separate exons and cds entries
