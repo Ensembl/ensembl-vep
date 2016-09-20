@@ -502,23 +502,19 @@ sub _convert_phase {
   return $phase;
 }
 
-# we're going to use merge_features to lazily create our objects
-# this means all the transcript creation logic will only happen
-# when we actually need to use the object
-#
-# merge_features is called at the end of get_all_features_by_InputBuffer
-# in the parent class AnnotationSource
-sub merge_features {
+# only do the actual transcript creation when required
+sub lazy_load_transcript {
   my $self = shift;
-  my $features = shift;
-  my @return;
+  my $feature = shift;
 
-  foreach my $feature(@$features) {
-    $feature->{object} = $self->_create_transcript($feature, $feature->{_gene_record}) if not exists($feature->{object});
-    push @return, $feature->{object} if $feature->{object};
-  }
+  $feature->{object} = $self->_create_transcript($feature, $feature->{_gene_record}) if not exists($feature->{object});
 
-  return \@return;
+  return $feature->{object};
+}
+
+# we don't need to merge so just return input arrayref
+sub merge_features {
+  return $_[1];
 }
 
 1;

@@ -181,8 +181,6 @@ sub get_features_by_regions_uncached {
         # indicate phenotype
         $tr->{_gene_phenotype} = $gene_has_phenotype;
 
-        $self->prefetch_transcript_data($tr);
-
         push @features, $tr;
       }
     }
@@ -193,6 +191,17 @@ sub get_features_by_regions_uncached {
   }
 
   return \@return;
+}
+
+sub lazy_load_transcript {
+  my ($self, $tr) = @_;
+  
+  unless($tr->{_vep_lazy_loaded}) {
+    $self->prefetch_transcript_data($tr);
+    $tr->{_vep_lazy_loaded} = 1;
+  }
+
+  return $tr;
 }
 
 sub prefetch_transcript_data {

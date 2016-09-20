@@ -56,10 +56,24 @@ sub annotate_InputBuffer {
 
   my $samples = $buffer->parser->samples;
 
-  foreach my $tr(grep {$_->biotype eq 'protein_coding'} @{$self->get_all_features_by_InputBuffer($buffer)}) {
+  foreach my $tr(@{$self->get_all_features_by_InputBuffer($buffer)}) {
+    my ($s, $e);
+    if(ref($tr) eq 'HASH') {
+      ($s, $e) = ($tr->{start}, $tr->{end});
+    }
+    else {
+      ($s, $e) = ($tr->seq_region_start, $tr->seq_region_end);
+    }
+
+    my $vfs = $buffer->get_overlapping_vfs($s, $e);
+    next unless @$vfs;
+
+    $tr = $self->lazy_load_transcript($tr);
+    next unless $tr && $tr->{biotype} eq 'protein_coding';
+
     my @gts;
 
-    foreach my $vf_hash(@{$buffer->get_overlapping_vfs($tr->seq_region_start, $tr->seq_region_end)}) {
+    foreach my $vf_hash(@$vfs) {
       push @gts, @{$self->get_genotypes($vf_hash, $samples)};
     }
 

@@ -106,7 +106,7 @@ SKIP: {
     '_get_records_by_coords - non-overlapping sub-features count'
   );
 
-  my $trs = $as->merge_features($as->_create_transcripts($records));
+  my $trs = [map {$as->lazy_load_transcript($_)} @{$as->_create_transcripts($records)}];
 
   is(scalar @$trs, 3, "_create_transcripts - count");
   is($trs->[0]->stable_id, "ENST00000307301", "stable_id");
@@ -118,7 +118,7 @@ SKIP: {
   my $prot_seq = 'MEALAMGSRALRLWLVAPGGGIKWRFIATSSASQLSPTELTEMRNDLFNKEKARQLSLTPRTEKIEVKHVGKTDPGTVFVMNKNISTPYSCAMHLSEWYCRKSILALVDGQPWDMYKPLTKSCEIKFLTFKDCDPGEVNKAYWRSCAMMMGCVIERAFKDEYMVNLVRAPEVPVISGAFCYDVVLDSKLDEWMPTKENLRSFTKDAHALIYKDLPFETLEVEAKVALEIFQHSKYKVDFIEEKASQNPERIVKLHRIGDFIDVSEGPLIPRTSICFQYEVSAVHNLQPTQPSLIRRFQGVSLPVHLRAHFTIWDKLLERSRKMTPFPILLLFTTQSFFTTSPESYLLHGTVSE';
   is($trs->[0]->translation->seq, $prot_seq, "translate");
 
-  $trs = $as->merge_features($as->_create_transcripts($as->_get_records_by_coords(21, 255e5, 26e6)));
+  $trs = [map {$as->lazy_load_transcript($_)} @{$as->_create_transcripts($as->_get_records_by_coords(21, 255e5, 26e6))}];
   is_deeply(
     {map {$_->stable_id => $_->biotype} @$trs},
     {

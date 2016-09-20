@@ -60,14 +60,18 @@ sub annotate_InputBuffer {
   my $tva = $self->get_adaptor('variation', 'TranscriptVariation');
 
   foreach my $tr(@{$self->get_all_features_by_InputBuffer($buffer)}) {
-    my $tr_strand = $tr->strand;
+    my $tr_strand = $tr->{strand} || $tr->strand;
     my $fs = $tr->{start} - ($tr_strand == 1 ? $up_size : $down_size);
     my $fe = $tr->{end} + ($tr_strand == 1 ? $down_size : $up_size);
+    my $slice;
 
-    my $slice = $tr->{slice};
+    my $vfs = $buffer->get_overlapping_vfs($fs, $fe);
+    next unless @$vfs;
+    $tr = $self->lazy_load_transcript($tr);
+    next unless $tr;
 
-    foreach my $vf(@{$buffer->get_overlapping_vfs($fs, $fe)}) {
-      $vf->{slice} ||= $slice;
+    foreach my $vf(@$vfs) {
+      $vf->{slice} ||= $slice ||=  $tr->{slice};
 
       if(ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature') {
         my $svo = Bio::EnsEMBL::Variation::TranscriptStructuralVariation->new(
@@ -185,6 +189,17 @@ sub merge_features {
   }
 
   return \@return;
+}
+
+sub lazy_load_transcript {
+  my ($self, $tr) = @_;
+  if($tr->{_vep_lazy_loaded}) {
+    return $tr;
+  }
+  else {
+    $tr->{_vep_lazy_loaded} = 1;
+    return $tr;
+  }
 }
 
 1;
