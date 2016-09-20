@@ -275,23 +275,29 @@ sub _create_transcript {
   unless($biotype) {
     warn("WARNING: Unable to determine biotype of $id");
     return;  
-  }  
+  }
+
+  my ($tr_start, $tr_end, $tr_strand) = (
+    $tr_record->{start},
+    $tr_record->{end},
+    $tr_record->{strand}
+  );
 
   my $tr = Bio::EnsEMBL::Transcript->new_fast({
     stable_id => $id,
     biotype   => $biotype,
     slice     => $slice,
-    strand    => $tr_record->{strand},
+    strand    => $tr_strand,
     version   => 1,
     dbID      => $self->{_tr_dbID}++,
-    start     => $tr_record->{start},
-    end       => $tr_record->{end},
+    start     => $tr_start,
+    end       => $tr_end,
   });
 
   # making a call to seq here means the sequence is cached in memory
   # this means we don't need to repeatedly fetch for each exon
   # the caching is done elsewhere so we don't need to worry any further here
-  $tr->feature_Slice->seq;
+  $self->_quick_sub_Slice($slice, $tr_start, $tr_end, $tr_strand)->seq;
 
   $self->_add_identifiers($tr, $tr_record, $gene_record);
 
@@ -324,7 +330,7 @@ sub _create_transcript {
   my @ordered_cdss;
 
   foreach my $exon_record(@exons) {
-    my ($s, $e) = ($exon_record->{start}, $exon_record->{end});
+    my ($s, $e, $str) = ($exon_record->{start}, $exon_record->{end}, $exon_record->{strand});
 
     my $phase = -1;
     my @cds_records;
@@ -347,12 +353,12 @@ sub _create_transcript {
     my $exon = Bio::EnsEMBL::Exon->new(
       -START  => $s,
       -END    => $e,
-      -STRAND => $exon_record->{strand},
+      -STRAND => $str,
       -SLICE  => $slice,
       -PHASE  => $phase,
     );
 
-    $exon->{_seq_cache} = $exon->feature_Slice->seq;
+    $exon->{_seq_cache} = $self->_quick_sub_Slice($slice, $s, $e, $str)->seq;
 
     # log a pointer to the exon on the cds record
     $_->{_exon} = $exon for @cds_records;
@@ -369,6 +375,19 @@ sub _create_transcript {
   $self->_add_translation($tr, \@ordered_cdss) if @ordered_cdss;
 
   return $tr;
+}
+
+sub _quick_sub_Slice {
+  my ($self, $slice, $start, $end, $strand) = @_;
+
+  my %new = %{$slice};
+  $new{start}  = $start;
+  $new{end}    = $end;
+  $new{strand} = $strand;
+
+  bless(\%new, ref($slice));
+
+  return \%new;
 }
 
 sub _add_identifiers {
