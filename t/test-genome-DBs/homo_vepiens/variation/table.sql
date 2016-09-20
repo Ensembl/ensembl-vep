@@ -286,8 +286,8 @@ CREATE TABLE `population_synonym` (
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `protein_function_predictions` (
-  `translation_md5_id` int(11) unsigned NOT NULL,
-  `analysis_attrib_id` int(11) unsigned NOT NULL,
+  `translation_md5_id` int unsigned NOT NULL,
+  `analysis_attrib_id` int unsigned NOT NULL,
   `prediction_matrix` mediumblob,
   PRIMARY KEY (`translation_md5_id`,`analysis_attrib_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
