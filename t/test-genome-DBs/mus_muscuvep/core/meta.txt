@@ -1,5 +1,5 @@
 1	\N	schema_type	core
-2	\N	schema_version	85
+2	\N	schema_version	86
 3	\N	patch	patch_65_66_a.sql|schema_version
 4	\N	patch	patch_65_66_b.sql|fix_external_db_id
 5	\N	patch	patch_65_66_c.sql|reorder_unmapped_obj_index
@@ -154,3 +154,6 @@
 1829	1	species.classification	Eukaryota
 1833	\N	patch	patch_84_85_a.sql|schema_version
 1834	\N	patch	patch_84_85_b.sql|remove_duplicated_key
+1835	\N	patch	patch_85_86_a.sql|schema_version
+1836	\N	patch	patch_85_86_b.sql|add dna_align_feature_attrib table
+1837	\N	patch	patch_85_86_c.sql|meta_case_insensitive

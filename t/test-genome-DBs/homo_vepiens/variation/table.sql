@@ -168,7 +168,7 @@ CREATE TABLE `meta` (
   PRIMARY KEY (`meta_id`),
   UNIQUE KEY `species_key_value_idx` (`species_id`,`meta_key`,`meta_value`),
   KEY `species_value_idx` (`species_id`,`meta_value`)
-) ENGINE=MyISAM AUTO_INCREMENT=113 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=116 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `meta_coord` (
   `table_name` varchar(40) NOT NULL,
@@ -238,8 +238,10 @@ CREATE TABLE `phenotype_feature_attrib` (
 CREATE TABLE `phenotype_ontology_accession` (
   `phenotype_id` int(11) unsigned NOT NULL,
   `accession` varchar(255) NOT NULL,
-  `linked_by_attrib` set('437','438','439','440','441','442','443','444') DEFAULT NULL,
-  PRIMARY KEY (`phenotype_id`,`accession`)
+  `mapped_by_attrib` set('437','438','439','440','441','442','443','444') DEFAULT NULL,
+  `mapping_type` enum('is','involves') DEFAULT NULL,
+  PRIMARY KEY (`phenotype_id`,`accession`),
+  KEY `accession_idx` (`accession`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `population` (
@@ -286,8 +288,8 @@ CREATE TABLE `population_synonym` (
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `protein_function_predictions` (
-  `translation_md5_id` int unsigned NOT NULL,
-  `analysis_attrib_id` int unsigned NOT NULL,
+  `translation_md5_id` int(10) unsigned NOT NULL,
+  `analysis_attrib_id` int(10) unsigned NOT NULL,
   `prediction_matrix` mediumblob,
   PRIMARY KEY (`translation_md5_id`,`analysis_attrib_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -481,7 +483,8 @@ CREATE TABLE `study` (
   `external_reference` varchar(255) DEFAULT NULL,
   `study_type` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`study_id`),
-  KEY `source_idx` (`source_id`)
+  KEY `source_idx` (`source_id`),
+  KEY `external_reference_idx` (`external_reference`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `submitter_handle` (

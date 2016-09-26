@@ -1,5 +1,5 @@
 1	\N	schema_type	core
-2	\N	schema_version	85
+2	\N	schema_version	86
 3	\N	patch	patch_73_74_a.sql|schema_version
 4	\N	patch	patch_73_74_b.sql|remove_dnac
 5	\N	patch	patch_73_74_c.sql|remove_unconventional_transcript_association
@@ -142,3 +142,6 @@
 890	\N	patch	patch_83_84_e.sql|nullable_versions
 891	\N	patch	patch_84_85_a.sql|schema_version
 892	\N	patch	patch_84_85_b.sql|remove_duplicated_key
+893	\N	patch	patch_85_86_a.sql|schema_version
+894	\N	patch	patch_85_86_b.sql|add dna_align_feature_attrib table
+895	\N	patch	patch_85_86_c.sql|meta_case_insensitive

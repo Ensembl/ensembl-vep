@@ -225,6 +225,16 @@ CREATE TABLE `dna_align_feature` (
   KEY `external_db_idx` (`external_db_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=26678206 DEFAULT CHARSET=latin1 MAX_ROWS=100000000 AVG_ROW_LENGTH=80;
 
+CREATE TABLE `dna_align_feature_attrib` (
+  `dna_align_feature_id` int(10) unsigned NOT NULL,
+  `attrib_type_id` smallint(5) unsigned NOT NULL,
+  `value` text NOT NULL,
+  UNIQUE KEY `dna_align_feature_attribx` (`dna_align_feature_id`,`attrib_type_id`,`value`(500)),
+  KEY `dna_align_feature_idx` (`dna_align_feature_id`),
+  KEY `type_val_idx` (`attrib_type_id`,`value`(40)),
+  KEY `val_only_idx` (`value`(40))
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
 CREATE TABLE `exon` (
   `exon_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `seq_region_id` int(10) unsigned NOT NULL,
@@ -463,11 +473,11 @@ CREATE TABLE `meta` (
   `meta_id` int(11) NOT NULL AUTO_INCREMENT,
   `species_id` int(10) unsigned DEFAULT '1',
   `meta_key` varchar(40) NOT NULL,
-  `meta_value` varchar(255) CHARACTER SET latin1 COLLATE latin1_bin DEFAULT NULL,
+  `meta_value` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`meta_id`),
   UNIQUE KEY `species_key_value_idx` (`species_id`,`meta_key`,`meta_value`),
   KEY `species_value_idx` (`species_id`,`meta_value`)
-) ENGINE=MyISAM AUTO_INCREMENT=893 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=896 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `meta_coord` (
   `table_name` varchar(40) NOT NULL,

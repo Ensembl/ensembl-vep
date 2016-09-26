@@ -49,7 +49,7 @@
 57	\N	patch	patch_77_78_c.sql|Drop the table study_variation
 58	\N	patch	patch_77_78_d.sql|Extend the index type_val_idx in the table attrib
 59	\N	patch	patch_77_78_e.sql|add indexes on father_ and mother_individual_id and population name
-2	\N	schema_version	85
+2	\N	schema_version	86
 60	\N	patch	patch_78_79_a.sql|schema version
 61	\N	patch	patch_78_79_b.sql|change the column attrib_type_id by attrib_id in the variation_attrib table
 62	\N	patch	patch_78_79_c.sql|Store more detailed Sift information
@@ -79,3 +79,6 @@
 110	\N	patch	patch_84_85_e.sql|drop the table tagged_variation_feature
 111	\N	patch	patch_84_85_f.sql|add phenotype_ontology_accession
 112	\N	patch	patch_84_85_g.sql|allow the column description to store more text in the source table
+113	\N	patch	patch_85_86_a.sql|schema version
+114	\N	patch	patch_85_86_b.sql|add qualifier & index to phenotype_onology_accession
+115	\N	patch	patch_85_86_c.sql|add index on study.external_reference
