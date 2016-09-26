@@ -68,7 +68,7 @@ is(ref($result->[0]), 'Bio::EnsEMBL::Variation::TranscriptHaplotypeContainer', '
 
 is_deeply(
   [sort map {$_->transcript->stable_id} @$result],
-  [qw(ENST00000307301 ENST00000352957  ENST00000419219)],
+  [qw(ENST00000307301 ENST00000352957 ENST00000419219)],
   'annotate_InputBuffer - stable_ids'
 );
 
@@ -108,6 +108,31 @@ is_deeply(
     }
   ],
   'annotate_InputBuffer - PH diffs have sift/poly'
+);
+
+## with filter
+$runner = Bio::EnsEMBL::VEP::Haplo::Runner->new({
+  %{$test_cfg->base_testing_cfg},
+  input_file => $test_cfg->{test_vcf}
+});
+
+$as = Bio::EnsEMBL::VEP::Haplo::AnnotationSource::Cache::Transcript->new({
+  config => $runner->config,
+  dir => $test_cfg->{cache_dir},
+  cache_region_size => $runner->param('cache_region_size'),
+  source_type => 'core',
+  filter => 'stable_id ne ENST00000307301',
+});
+
+$as->populate_tree($runner->get_TranscriptTree);
+$ib = $runner->get_InputBuffer;
+$ib->next();
+$result = $as->annotate_InputBuffer($ib);
+
+is_deeply(
+  [sort map {$_->transcript->stable_id} @$result],
+  [qw(ENST00000352957 ENST00000419219)],
+  'with filter - stable_ids'
 );
 
 done_testing();

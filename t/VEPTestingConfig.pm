@@ -59,6 +59,8 @@ our %DEFAULTS = (
   custom_gtf     => $Bin.'/testdata/custom/test.gtf.gz',
   custom_bigwig  => $Bin.'/testdata/custom/test.bw',
 
+  filter_list    => $Bin.'/testdata/filter/gene_list.txt',
+
   header_info    => {
     time => 'test',
     vep_version => 1,

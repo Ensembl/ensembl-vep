@@ -58,6 +58,7 @@ is_deeply(
       'polyphen' => undef,
       'sift' => undef,
       'everything' => undef,
+      'filter' => undef,
       'info' => {
         'polyphen' => '2.2.2',
         'sift' => 'sift5.2.2',

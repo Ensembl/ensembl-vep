@@ -70,6 +70,8 @@ sub annotate_InputBuffer {
     $tr = $self->lazy_load_transcript($tr);
     next unless $tr;
 
+    next if $self->filter_set && !$self->filter_set->evaluate($tr);
+
     foreach my $vf(@$vfs) {
       $vf->{slice} ||= $slice ||=  $tr->{slice};
 

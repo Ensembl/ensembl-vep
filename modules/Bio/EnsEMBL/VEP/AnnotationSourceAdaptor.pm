@@ -94,6 +94,7 @@ sub get_all_from_database {
     eval "require $module";
     push @as, $module->new({
       config => $self->config,
+      filter => $self->param('transcript_filter'),
     }) if $self->param('database');
 
     push @as, Bio::EnsEMBL::VEP::AnnotationSource::Database::RegFeat->new({
@@ -132,6 +133,8 @@ sub get_all_custom {
       type => $type,
       report_coords => $report_coords,
     };
+
+    $opts->{filter} = $self->param('transcript_filter') if $format =~ /^G[TF]F$/i;
 
     $opts->{fields} = \@fields if @fields;
     

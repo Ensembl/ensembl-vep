@@ -71,6 +71,8 @@ sub annotate_InputBuffer {
     $tr = $self->lazy_load_transcript($tr);
     next unless $tr && $tr->{biotype} eq 'protein_coding';
 
+    next if $self->filter_set && !$self->filter_set->evaluate($tr);
+
     my @gts;
 
     foreach my $vf_hash(@$vfs) {

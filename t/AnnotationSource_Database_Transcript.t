@@ -392,6 +392,24 @@ SKIP: {
   is($vf->display_consequence, 'missense_variant', 'annotate_InputBuffer - display_consequence');
 
 
+  ## transcript filter
+  $as = Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript->new({
+    config => $cfg,
+    filter => 'stable_id ne ENST00000352957',
+  });
+
+  $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}, valid_chromosomes => [21]});
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+  $ib->next();
+
+  $as->annotate_InputBuffer($ib);
+  $vf = $ib->buffer->[0];
+  $vf->_finish_annotation;
+  is(scalar (grep {$_->transcript->stable_id eq 'ENST00000352957'} @{$vf->get_all_TranscriptVariations}), 0, 'with filter - filtered transcript absent');
+  is($vf->display_consequence, '3_prime_UTR_variant', 'with filter - display_consequence');
+
+
+
   ## TEST REFSEQ
   ##############
 

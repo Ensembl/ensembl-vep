@@ -45,6 +45,7 @@ package Bio::EnsEMBL::VEP::AnnotationSource;
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
+use Bio::EnsEMBL::VEP::FilterSet;
 
 use base qw(Bio::EnsEMBL::VEP::BaseVEP);
 
@@ -57,6 +58,8 @@ sub new {
   my $hashref = $_[0];
 
   $self->{$_} = $hashref->{$_} for keys %$hashref;
+
+  $self->filter_set(Bio::EnsEMBL::VEP::FilterSet->new($hashref->{filter})) if $hashref->{filter};
 
   return $self;
 }
@@ -215,6 +218,12 @@ sub filter_features_by_min_max {
     grep {overlap($_->{start}, $_->{end}, $min, $max)}
     @$features
   ];
+}
+
+sub filter_set {
+  my $self = shift;
+  $self->{filter_set} = shift if @_;
+  return $self->{filter_set};
 }
 
 sub cache {

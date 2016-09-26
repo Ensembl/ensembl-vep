@@ -92,6 +92,7 @@ sub get_all_AnnotationSources {
       cache_region_size => $info->{cache_region_size} || $self->param('cache_region_size'),
       info => $self->version_data,
       valid_chromosomes => $info->{valid_chromosomes},
+      filter => $self->param('transcript_filter'),
     });
 
     # add RegFeats if available
