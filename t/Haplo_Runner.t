@@ -223,6 +223,8 @@ ENST00000419219  ENST00000419219:91T>C,582A>G    ENSP00000404426:31S>P      HG00
 
 $runner = Bio::EnsEMBL::VEP::Haplo::Runner->new({%$cfg_hash, output_file => 'STDOUT'});
 $tmp = undef;
+close STDOUT;
+open STDOUT, '>', \$tmp;
 
 $runner->haplotype_frequencies($test_cfg->{haplo_freqs});
 $runner->run;
@@ -250,6 +252,8 @@ is_deeply(
 # haplotypes no header tests
 $runner = Bio::EnsEMBL::VEP::Haplo::Runner->new({%$cfg_hash, output_file => 'STDOUT'});
 $tmp = undef;
+close STDOUT;
+open STDOUT, '>', \$tmp;
 $runner->haplotype_frequencies($test_cfg->{haplo_freqs_nh});
 $runner->run;
 
@@ -258,7 +262,6 @@ is_deeply(
     map {(split("=", $_))[0] => (split("=", $_))[1]}
     map {split(",", $_)}
     map {(split("\t", $_))[5]}
-    grep {/freq/}
     grep {/ENST00000307301\:612/}
     split("\n", $tmp)
   },
@@ -273,6 +276,34 @@ is_deeply(
   },
   'run with haplotype_frequencies - no header'
 );
+
+
+# use input_data
+open IN, $test_cfg->{test_vcf};
+my @lines = <IN>;
+$runner = Bio::EnsEMBL::VEP::Haplo::Runner->new({
+  %{$test_cfg->base_testing_cfg},
+  input_data => join("", @lines),
+  output_file => 'STDOUT'
+});
+$tmp = undef;
+close STDOUT;
+open STDOUT, '>', \$tmp;
+$runner->run;
+
+$tmp =~ s/\t/  /g;
+is(
+  $tmp,
+qq{ENST00000352957  ENST00000352957:612A>G    ENSP00000284967:REF      HG00096  1
+ENST00000352957  ENST00000352957:91T>C,612A>G    ENSP00000284967:31S>P      HG00096  1
+ENST00000307301  ENST00000307301:612A>G    ENSP00000305682:REF      HG00096  1
+ENST00000307301  ENST00000307301:91T>C,612A>G    ENSP00000305682:31S>P      HG00096  1
+ENST00000419219  ENST00000419219:582A>G    ENSP00000404426:REF      HG00096  1
+ENST00000419219  ENST00000419219:91T>C,582A>G    ENSP00000404426:31S>P      HG00096  1
+},
+  'run - use input_data'
+);
+
 
 
 # restore STDOUT
