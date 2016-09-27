@@ -16,14 +16,14 @@ addons:
   apt:
     packages:
       - unzip
-      - mysql-server-5.5
+      - mysql-server-5.6
       - apache2
       - libmysqlclient-dev
       - libpng12-dev
       - libssl-dev
       - openssl
-      - mysql-client-5.5
-      - mysql-client-core-5.5
+      - mysql-client-5.6
+      - mysql-client-core-5.6
 
 before_install:
   - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-test.git
