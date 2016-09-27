@@ -464,5 +464,10 @@ is($fs->evaluate({bar => 1}),     1, 'evaluate - not - pass');
 is($fs->evaluate({foo => undef}), 1, 'evaluate - not - pass undef');
 is($fs->evaluate({foo => 1}),     0, 'evaluate - not - fail');
 
+# evaluate - synonyms
+is(Bio::EnsEMBL::VEP::FilterSet->new('foo')->evaluate({FOO => 1}),  1, 'evaluate - synonym - uc');
+is(Bio::EnsEMBL::VEP::FilterSet->new('FOO')->evaluate({foo => 1}),  1, 'evaluate - synonym - lc');
+is(Bio::EnsEMBL::VEP::FilterSet->new('foo')->evaluate({_foo => 1}), 1, 'evaluate - synonym - underscore');
+
 
 done_testing();

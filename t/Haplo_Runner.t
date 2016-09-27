@@ -144,7 +144,51 @@ is_deeply(
       SAS => 0.971
     }
   ],
-  'haplotype_frequencies - check data'
+  'haplotype_frequencies - check data 1'
+);
+
+is_deeply(
+  $runner->haplotype_frequencies->{'91212e92e2a1940184a2eb77fd115d5c'},
+  [
+    {
+      transcript => 'ENST00000307301',
+      ALL => '0.0905',
+      AMR => '0.0432',
+      AFR => '0.234',
+      EUR => '0.0467',
+      SAS => '0.0194',
+      EAS => '0.0476'
+    },
+    {
+      transcript => 'ENSTtest',
+      ALL => '0.0905',
+      AMR => '0.0432',
+      AFR => '0.234',
+      EUR => '0.0467',
+      SAS => '0.0194',
+      EAS => '0.0476'
+    }
+  ],
+  'haplotype_frequencies - check data 2'
+);
+
+$runner = Bio::EnsEMBL::VEP::Haplo::Runner->new($cfg_hash);
+ok($runner->haplotype_frequencies($test_cfg->{haplo_freqs_nh}), 'haplotype_frequencies - no header');
+
+is_deeply(
+  $runner->haplotype_frequencies->{'79d615f301917d96d4cefaea29702508'},
+  [
+    {
+      unknown1 => 'ENST00000307301',
+      freq1 => 0.889,
+      freq2 => 0.708,
+      freq3 => 0.952,
+      freq4 => 0.944,
+      freq5 => 0.946,
+      freq6 => 0.971
+    }
+  ],
+  'haplotype_frequencies - no header - check data'
 );
 
 
@@ -193,13 +237,41 @@ is_deeply(
   },
   {
     'ALL' => '0.0905',
-    'AMR' => '0.0432',
     'AFR' => '0.234',
+    'AMR' => '0.0432',
+    'EAS' => '0.0476',
     'EUR' => '0.0467',
     'SAS' => '0.0194',
-    'EAS' => '0.0476'
   },
   'run with haplotype_frequencies'
+);
+
+
+# haplotypes no header tests
+$runner = Bio::EnsEMBL::VEP::Haplo::Runner->new({%$cfg_hash, output_file => 'STDOUT'});
+$tmp = undef;
+$runner->haplotype_frequencies($test_cfg->{haplo_freqs_nh});
+$runner->run;
+
+is_deeply(
+  {
+    map {(split("=", $_))[0] => (split("=", $_))[1]}
+    map {split(",", $_)}
+    map {(split("\t", $_))[5]}
+    grep {/freq/}
+    grep {/ENST00000307301\:612/}
+    split("\n", $tmp)
+  },
+  {
+    'unknown1' => 'ENST00000307301',
+    'freq1' => '0.0905',
+    'freq2' => '0.234',
+    'freq3' => '0.0432',
+    'freq4' => '0.0476',
+    'freq5' => '0.0467',
+    'freq6' => '0.0194',
+  },
+  'run with haplotype_frequencies - no header'
 );
 
 
