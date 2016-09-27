@@ -10,9 +10,8 @@ perl:
 env:
   - COVERALLS=true  DB=mysql
 
+sudo: required
 dist: trusty
-
-sudo: false
 
 addons:
   apt:
