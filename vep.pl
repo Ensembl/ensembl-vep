@@ -13,6 +13,9 @@
 # limitations under the License.
 
 use Getopt::Long;
+use FindBin qw($RealBin);
+use lib $RealBin;
+use lib $RealBin.'/modules';
 use Bio::EnsEMBL::VEP::Runner;
 
 my $config = {};
