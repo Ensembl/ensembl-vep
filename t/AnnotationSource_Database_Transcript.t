@@ -129,13 +129,6 @@ SKIP: {
 
   ok($as->prefetch_translation_data($tr, $tr->translation), 'prefetch_translation_data');
 
-  my $sth = $as->get_adaptor('variation','variation')->db->dbc->prepare("SHOW CREATE TABLE protein_function_predictions");
-  $sth->execute();
-  my ($t, $c);
-  $sth->bind_columns(\$t, \$c);
-  $sth->fetch;
-  print STDERR $c."\n";
-  
   my $vep_cache = $tr->{_variation_effect_feature_cache};
 
   is(
@@ -207,6 +200,10 @@ SKIP: {
     'prefetch_translation_data - protein features'
   );
 
+  my $tr2 = $ta->fetch_by_stable_id('ENST00000352957');
+  $as->prefetch_translation_data($tr2, $tr2->translation);
+  $vep_cache = $tr2->{_variation_effect_feature_cache};
+
   is(
     ref($vep_cache->{protein_function_predictions}->{sift}),
     'Bio::EnsEMBL::Variation::ProteinFunctionPredictionMatrix',
@@ -218,6 +215,8 @@ SKIP: {
     'Bio::EnsEMBL::Variation::ProteinFunctionPredictionMatrix',
     'prefetch_translation_data - polyphen_humvar matrix'
   );
+
+  $vep_cache = $tr->{_variation_effect_feature_cache};
 
   ok($as->prefetch_transcript_data($tr), 'prefetch_transcript_data');
   is(ref($vep_cache->{introns}->[0]), 'Bio::EnsEMBL::Intron', 'prefetch_transcript_data - introns');
