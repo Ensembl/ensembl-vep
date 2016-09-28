@@ -497,7 +497,7 @@ sub dump_text {
   print $fh join("\t", map {s/\<.+?\>//g; $_} @{$_})."\n" for @{$finished_stats->{run_stats}};
   
   print $fh "\n[General statistics]\n";
-  print $fh join("\t", map {s/\<.+?\>//g; $_} @{$_})."\n" for @{$finished_stats->{general_stats}};
+  print $fh join("\t", map {s/\<.+?\>//g; $_} grep {defined($_)} @{$_})."\n" for @{$finished_stats->{general_stats}};
   
   foreach my $chart(@{$finished_stats->{charts}}) {
     print $fh "\n[".$chart->{title}."]\n";

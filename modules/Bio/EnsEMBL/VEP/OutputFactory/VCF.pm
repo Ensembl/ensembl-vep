@@ -126,7 +126,11 @@ sub headers {
   );
 
   # add misc version data
-  $headers[-1] .= ' '.join(' ', map {$_.'="'.$info->{version_data}->{$_}.'"'} sort keys %{$info->{version_data}}) if $info->{version_data};
+  $headers[-1] .= ' '.join(' ',
+    map {$_.'="'.$info->{version_data}->{$_}.'"'}
+    grep {defined($info->{version_data}->{$_})}
+    sort keys %{$info->{version_data}}
+  ) if $info->{version_data};
 
   # add VEP column def
   push @headers, sprintf(
