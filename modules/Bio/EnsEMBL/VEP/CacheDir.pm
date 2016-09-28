@@ -176,7 +176,7 @@ sub dir {
     $dir .= '/'.$species_dir_name;
 
     # check whats in here to match to assembly if given
-    die("ERROR: Cache directory $dir not found\n") if !-e $dir;
+    throw("ERROR: Cache directory $dir not found\n") if !-e $dir;
 
     # get version
     # user may specify this with --cache_version or --db_version

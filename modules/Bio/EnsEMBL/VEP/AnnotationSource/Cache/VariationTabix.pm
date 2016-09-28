@@ -106,7 +106,7 @@ sub _annotate_cl {
       } @tmp_list;
 
       open VARS, "tabix -f $file $region_string 2>&1 |"
-        or die "\nERROR: Could not open tabix pipe for $file\n";
+        or throw "\nERROR: Could not open tabix pipe for $file\n";
 
       # convert list to hash so we can look up quickly by position
       my %hash;

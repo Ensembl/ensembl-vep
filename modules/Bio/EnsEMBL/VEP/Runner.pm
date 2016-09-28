@@ -378,12 +378,12 @@ sub post_setup_checks {
   # offline needs cache, can't use HGVS
   if($self->param('offline')) {
     unless($self->fasta_db) {
-      die("ERROR: Cannot generate HGVS coordinates in offline mode without a FASTA file (see --fasta)\n") if $self->param('hgvs');
-      die("ERROR: Cannot check reference sequences without a FASTA file (see --fasta)\n") if $self->param('check_ref')
+      throw("ERROR: Cannot generate HGVS coordinates in offline mode without a FASTA file (see --fasta)\n") if $self->param('hgvs');
+      throw("ERROR: Cannot check reference sequences without a FASTA file (see --fasta)\n") if $self->param('check_ref')
     }
     
-    # die("ERROR: Cannot do frequency filtering in offline mode\n") if defined($config->{check_frequency}) && $config->{freq_pop} !~ /1kg.*(all|afr|amr|asn|eur)/i;
-    die("ERROR: Cannot map to LRGs in offline mode\n") if $self->param('lrg');
+    # throw("ERROR: Cannot do frequency filtering in offline mode\n") if defined($config->{check_frequency}) && $config->{freq_pop} !~ /1kg.*(all|afr|amr|asn|eur)/i;
+    throw("ERROR: Cannot map to LRGs in offline mode\n") if $self->param('lrg');
   }
     
   # warn user DB will be used for SIFT/PolyPhen/HGVS/frequency/LRG
