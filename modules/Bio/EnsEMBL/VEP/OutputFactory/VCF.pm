@@ -82,6 +82,7 @@ sub new {
     fields
     vcf_info_field
     keep_csq
+    web_output
   )]);
 
   $self->{input_format} = $self->param('format');
@@ -194,11 +195,12 @@ sub get_all_lines_by_InputBuffer {
     );
 
     push @return, join("\t", @$line);
+
+    $self->write_web_output($vf) if $self->{web_output};
   }
 
   return \@return;
 }
-
 
 sub output_hash_to_vcf_info_chunk {
   my $self = shift;
@@ -347,6 +349,51 @@ sub get_prev_base {
   }
 
   return $prev_base;
+}
+
+sub write_web_output {
+  my $self = shift;
+  my $vf = shift;
+
+  my $fh = $self->web_output_fh;
+
+  my $as = $vf->{allele_string};
+  my $id = $vf->{variation_name};
+  if(defined($as) && length($as) > 50) {
+    my @new_alleles;
+    
+    foreach my $allele(split(/\//, $as)) {
+      if(length($allele) > 50) {
+        my $new = length($allele).'BP_SEQ';
+        push @new_alleles, $new;
+        
+        $id =~ s/$allele/$new/e;
+      }
+      else {
+        push @new_alleles, $allele;
+      }
+    }
+    
+    $as = join("/", @new_alleles);
+  }
+
+  printf $fh "%s\t%i\t%i\t%s\t%s\t%s\t%s\n",
+    $vf->{chr}, $vf->{start}, $vf->{end},
+    $as || $vf->class_SO_term, 1,
+    $id,
+    $vf->display_consequence;
+}
+
+sub web_output_fh {
+  my $self = shift;
+
+  if(!exists($self->{_web_output_fh})) {
+    my $fh = FileHandle->new();
+    $fh->open(">".$self->{web_output}) or throw $!;
+    $self->{_web_output_fh} = $fh;
+  }
+
+  return $self->{_web_output_fh};
 }
 
 1;

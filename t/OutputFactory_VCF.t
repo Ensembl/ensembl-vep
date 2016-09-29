@@ -437,6 +437,47 @@ is(
   'headers - from input 3'
 );
 
+
+
+## web_output
+#############
+
+my $tmp_file = $test_cfg->create_input_file();
+
+$ib = get_runner({
+  input_file => $test_cfg->{test_vcf},
+  dir => $test_cfg->{cache_root_dir},
+  web_output => $tmp_file
+})->get_InputBuffer;
+
+Bio::EnsEMBL::VEP::OutputFactory::VCF->new({config => $ib->config})->get_all_lines_by_InputBuffer($ib);
+
+open IN, $tmp_file;
+@lines = <IN>;
+close IN;
+
+is(scalar @lines, 132, 'web_output - count lines');
+is($lines[-1], "21\t25982445\t25982445\tC/T\t1\trs141331202\tmissense_variant\n", 'web_output - check last');
+
+# test long allele string truncation
+$ib = get_runner({
+  input_file => $test_cfg->{test_vcf},
+  dir => $test_cfg->{cache_root_dir},
+  web_output => $tmp_file
+})->get_InputBuffer;
+
+$ib->buffer->[0]->{allele_string} = 'C/'.('T' x 100);
+
+Bio::EnsEMBL::VEP::OutputFactory::VCF->new({config => $ib->config})->get_all_lines_by_InputBuffer($ib);
+
+open IN, $tmp_file;
+@lines = <IN>;
+close IN;
+
+is($lines[0], "21\t25585733\t25585733\tC/100BP_SEQ\t1\trs142513484\tmissense_variant\n", 'web_output - allele truncation');
+
+
+
 # done
 done_testing();
 
