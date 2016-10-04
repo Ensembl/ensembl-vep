@@ -68,7 +68,7 @@ sub get_slice {
       'Slice'
     );
 
-    my $slice = $sa->fetch_by_region(undef, $chr);
+    my $slice = $sa->fetch_by_region(undef, $chr) || $sa->fetch_by_seq_region_id($chr);
     $slice->is_circular if $slice;
 
     $self->{_slice_cache}->{$chr} = $slice;
