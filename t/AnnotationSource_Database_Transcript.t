@@ -115,10 +115,12 @@ SKIP: {
   my $tr = $ta->fetch_by_stable_id('ENST00000307301');
   is(ref($tr), 'Bio::EnsEMBL::Transcript', 'get transcript');
 
-  ok($as->prefetch_transcript_ids($tr), 'prefetch_transcript_ids');
+  ok($as->prefetch_gene_ids($tr), 'prefetch_transcript_ids');
   is($tr->{_gene_symbol}, 'MRPL39', 'prefetch_transcript_ids - gene symbol');
   is($tr->{_gene_symbol_source}, 'HGNC', 'prefetch_transcript_ids - gene symbol source');
   is($tr->{_gene_hgnc_id}, 'HGNC:14027', 'prefetch_transcript_ids - gene HGNC ID');
+
+  ok($as->prefetch_transcript_ids($tr), 'prefetch_transcript_ids');
   is($tr->{_ccds}, 'CCDS33522.1', 'prefetch_transcript_ids - CCDS');
   is($tr->{_refseq}, 'NM_080794.3', 'prefetch_transcript_ids - RefSeq');
 
@@ -201,6 +203,7 @@ SKIP: {
   );
 
   my $tr2 = $ta->fetch_by_stable_id('ENST00000352957');
+  $as->{$_} = 1 for qw(sift polyphen);
   $as->prefetch_translation_data($tr2, $tr2->translation);
   $vep_cache = $tr2->{_variation_effect_feature_cache};
 
@@ -276,6 +279,7 @@ SKIP: {
   $tr = $ta->fetch_by_stable_id('NM_201413.2');
   is(ref($tr), 'Bio::EnsEMBL::Transcript', 'refseq - get transcript');
 
+  $as->prefetch_gene_ids($tr);
   $as->prefetch_transcript_ids($tr);
 
   is($tr->{_gene_symbol}, 'APP', 'refseq - prefetch_transcript_ids - gene symbol');

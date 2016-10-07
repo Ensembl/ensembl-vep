@@ -175,6 +175,7 @@ sub get_features_by_regions_uncached {
 
         $tr->{_gene_stable_id} = $gene_stable_id;
         $tr->{_gene} = $gene;
+        $self->prefetch_gene_ids($tr);
 
         # indicate if canonical
         $tr->{is_canonical} = 1 if defined $canonical_tr_id and $tr->dbID eq $canonical_tr_id;
@@ -286,22 +287,42 @@ sub prefetch_translation_data {
   $vep_cache->{seq_edits} = $tl->get_all_SeqEdits();
 
   # sift/polyphen
-  my $pfpma = $self->get_adaptor('variation', 'ProteinFunctionPredictionMatrix');
-
-  if($pfpma && defined($vep_cache->{peptide})) {
-    foreach my $a('sift', 'polyphen_'.$self->{polyphen_analysis}) {
-      next unless defined($self->{(split "_", $a)[0]});
-      $vep_cache->{protein_function_predictions}->{$a} ||= $pfpma->fetch_by_analysis_translation_md5($a, md5_hex($vep_cache->{peptide}));
-      delete $vep_cache->{protein_function_predictions}->{$a}->{adaptor};
-    }
-  }
+  $vep_cache->{protein_function_predictions} = $self->get_sift_polyphen($vep_cache) if($self->{sift} || $self->{polyphen});
 
   $self->prefetch_translation_ids($tr, $tl);
 
   return $tr;
 }
 
-sub prefetch_transcript_ids {
+# fetch SIFT/PolyPhen protein function prediction matrices
+# since many alt transcripts will have the same protein sequence
+# they can point to the same matrix, so we'll use a cache
+# this should speed up retrieval and reduce storage space used in the cache
+sub get_sift_polyphen {
+  my $self = shift;
+  my $vep_cache = shift;
+
+  my $md5 = md5_hex($vep_cache->{peptide});
+  my $cache = $self->{_sift_polyphen_cache} ||= [];
+  my $data;
+
+  unless(($data) = map {$_->{data}} grep {$_->{md5} eq $md5} @$cache) {
+    if(my $pfpma = $self->get_adaptor('variation', 'ProteinFunctionPredictionMatrix')) {
+      foreach my $a('sift', 'polyphen_'.$self->{polyphen_analysis}) {
+        next unless defined($self->{(split "_", $a)[0]});
+        $data->{$a} ||= $pfpma->fetch_by_analysis_translation_md5($a, $md5);
+        delete $data->{$a}->{adaptor};
+      }
+    }
+
+    push @$cache, {md5 => $md5, data => $data};
+    shift @$cache if scalar @$cache > 50;
+  }
+
+  return $data;
+}
+
+sub prefetch_gene_ids {
   my $self = shift;
   my $tr = shift;
 
@@ -333,6 +354,13 @@ sub prefetch_transcript_ids {
     $tr->{_gene}->{_symbol_source} = $tr->{_gene_symbol_source};
     $tr->{_gene}->{_hgnc_id} = $tr->{_gene_hgnc_id} if defined($tr->{_gene_hgnc_id});
   }
+
+  return $tr;
+}
+
+sub prefetch_transcript_ids {
+  my $self = shift;
+  my $tr = shift;
 
   # CCDS
   my @entries = grep {$_->database eq 'CCDS'} @{$tr->get_all_DBEntries};
