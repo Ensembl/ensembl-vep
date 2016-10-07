@@ -43,6 +43,7 @@ use warnings;
 
 package Bio::EnsEMBL::VEP::AnnotationSource::Database::RegFeat;
 
+use Scalar::Util qw(weaken isweak);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
 use base qw(
@@ -120,14 +121,23 @@ sub get_features_by_regions_uncached {
     my @region_features;
 
     my $rfa = $self->get_adaptor('funcgen', 'RegulatoryFeature');
+    
+    $sub_slice->{coord_system}->{adaptor} ||= $self->get_adaptor('core', 'coordsystem');
+    $sub_slice->{adaptor} ||= $self->get_adaptor('core', 'slice');
 
     foreach my $type(qw(RegulatoryFeature MotifFeature)) {
       my $features = $self->get_adaptor('funcgen', $type)->fetch_all_by_Slice($sub_slice);
       next unless defined($features);
 
-      # cell types
-      if($self->{cell_type} && scalar(@{$self->{cell_type}})) {
-        foreach my $rf(@$features) {
+      foreach my $rf(@$features) {        
+
+        # weaken a circular ref
+        foreach my $a(@{$rf->{_regulatory_activity} || []}) {
+          weaken($a->{_regulatory_feature}) unless isweak($a->{_regulatory_feature});
+        }
+
+        # cell types
+        if($self->{cell_type} && scalar(@{$self->{cell_type}})) {
 
           my %cl;
 
