@@ -86,6 +86,7 @@ sub get_available_cell_types {
 sub get_features_by_regions_uncached {
   my $self = shift;
   my $regions = shift;
+  my $chr_is_seq_region = shift;
 
   my $cache = $self->cache;
   my @return;
@@ -95,7 +96,7 @@ sub get_features_by_regions_uncached {
   foreach my $region(@{$regions}) {
     my ($c, $region_start) = @$region;
 
-    my $slice = $self->get_slice($c);
+    my $slice = $self->get_slice($c, $chr_is_seq_region);
 
     next unless $slice;
 

@@ -88,6 +88,7 @@ sub new {
 sub get_features_by_regions_uncached {
   my $self = shift;
   my $regions = shift;
+  my $chr_is_seq_region = shift;
 
   my $cache = $self->cache;
   my @return;
@@ -106,7 +107,7 @@ sub get_features_by_regions_uncached {
     );
 
     # no seq_region_id?
-    next unless $sr_cache->{$chr};
+    next unless $sr_cache->{$chr} || $chr_is_seq_region;
 
     my $phenotype_attrib_id = $self->phenotype_attrib_id || 0;
 
@@ -122,9 +123,9 @@ sub get_features_by_regions_uncached {
       WHERE vf.seq_region_id = ?
       AND vf.seq_region_start >= ?
       AND vf.seq_region_start <= ?
-    });
+    }, {mysql_use_result => 1});
 
-    $sth->execute($phenotype_attrib_id, $sr_cache->{$chr}, $s, $e);
+    $sth->execute($phenotype_attrib_id, $chr_is_seq_region ? $chr : $sr_cache->{$chr}, $s, $e);
 
     my %v;
     $v{$_} = undef for @VAR_CACHE_COLS;

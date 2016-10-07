@@ -61,6 +61,7 @@ sub new {
 sub get_slice {
   my $self = shift;
   my $chr = shift;
+  my $chr_is_seq_region = shift;
 
   if(!exists($self->{_slice_cache}->{$chr})) {
     my $sa = $self->get_adaptor(
@@ -68,7 +69,7 @@ sub get_slice {
       'Slice'
     );
 
-    my $slice = $sa->fetch_by_region(undef, $chr) || $sa->fetch_by_seq_region_id($chr);
+    my $slice = $chr_is_seq_region ? $sa->fetch_by_seq_region_id($chr) : $sa->fetch_by_region(undef, $chr);
     $slice->is_circular if $slice;
 
     $self->{_slice_cache}->{$chr} = $slice;
