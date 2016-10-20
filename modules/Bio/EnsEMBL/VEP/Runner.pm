@@ -494,7 +494,7 @@ sub get_all_Plugins {
       my $instance;
       
       eval {
-        $instance = $module->new($self->config, @params);
+        $instance = $module->new($self->config->{_params}, @params);
       };
       if($@) {
         my $msg = "Failed to instantiate plugin $module: $@\n";
@@ -543,7 +543,7 @@ sub get_all_Plugins {
       # all's good, so save the instance in our list of plugins      
       push @plugins, $instance;
       
-      $self->status_msg("Loaded plugin: $module");
+      # $self->status_msg("Loaded plugin: $module");
 
       # for convenience, check if the plugin wants regulatory stuff and turn on the config option if so
       if (grep { $_ =~ /motif|regulatory/i } @{ $instance->feature_types }) {
