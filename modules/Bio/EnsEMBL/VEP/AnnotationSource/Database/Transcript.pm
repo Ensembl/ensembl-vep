@@ -455,7 +455,9 @@ sub info {
     if($self->{source_type} eq 'refseq') {
       if(my $refseq_mca = $self->get_adaptor('otherfeatures', 'metacontainer')) {
         my $sth = $refseq_mca->db->dbc->prepare(qq{
-          SELECT CONCAT(db_version, ' - ', db_file) FROM analysis WHERE logic_name = 'refseq_import' 
+          SELECT CONCAT(db_version, IF(db_file IS NOT NULL, concat(' - ', db_file), ''))
+          FROM analysis
+          WHERE logic_name = 'refseq_import'          
         });
         $sth->execute;
 
