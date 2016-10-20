@@ -107,12 +107,16 @@ sub run {
 
   my $count;
 
+  $self->_set_package_variables();
+
   my $vfs = $input_buffer->next();
   
   while(@$vfs) {
     $self->dump_TranscriptHaplotypeContainer($_) for @{$as->annotate_InputBuffer($input_buffer)};
     $vfs = $input_buffer->next();
   }
+
+  $self->_reset_package_variables();
 
   # $self->dump_stats;
 

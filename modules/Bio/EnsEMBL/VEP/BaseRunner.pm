@@ -55,15 +55,6 @@ use Bio::EnsEMBL::VEP::Config;
 use Bio::EnsEMBL::VEP::InputBuffer;
 use Bio::EnsEMBL::VEP::AnnotationSourceAdaptor;
 
-# don't assert refs
-$Bio::EnsEMBL::Utils::Scalar::ASSERTIONS = 0;
-
-# don't use rearrange
-$Bio::EnsEMBL::Utils::Argument::NO_REARRANGE = 1;
-
-# avoid using transfer
-$Bio::EnsEMBL::Variation::TranscriptVariationAllele::NO_TRANSFER = 1;
-
 # has our own new method, does not use BaseVEP's
 # since this is the class users will be instantiating
 sub new {
@@ -257,6 +248,31 @@ sub get_valid_chromosomes {
   }
 
   return $self->{valid_chromosomes};
+}
+
+# set some package variables to optimal values for speed
+sub _set_package_variables {
+  my $self = shift;
+
+  # don't assert refs
+  $self->{_assertions_bak} = $Bio::EnsEMBL::Utils::Scalar::ASSERTIONS;
+  $Bio::EnsEMBL::Utils::Scalar::ASSERTIONS = 0;
+
+  # don't use rearrange
+  $self->{_no_rearrange_bak} = $Bio::EnsEMBL::Utils::Argument::NO_REARRANGE;
+  $Bio::EnsEMBL::Utils::Argument::NO_REARRANGE = 1;
+
+  # avoid using transfer
+  $self->{_no_transfer_bak} = $Bio::EnsEMBL::Variation::TranscriptVariationAllele::NO_TRANSFER;
+  $Bio::EnsEMBL::Variation::TranscriptVariationAllele::NO_TRANSFER = 1;
+}
+
+sub _reset_package_variables {
+  my $self = shift;
+
+  $Bio::EnsEMBL::Utils::Scalar::ASSERTIONS = $self->{_assertions_bak};
+  $Bio::EnsEMBL::Utils::Argument::NO_REARRANGE = $self->{_no_rearrange_bak};
+  $Bio::EnsEMBL::Variation::TranscriptVariationAllele::NO_TRANSFER = $self->{_no_transfer_bak};
 }
 
 1;

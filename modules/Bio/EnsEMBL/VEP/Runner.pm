@@ -142,12 +142,16 @@ sub next_output_line {
 
   $self->init();
 
+  $self->_set_package_variables();
+
   if($self->param('fork')) {
     push @$output_buffer, @{$self->_forked_buffer_to_output($self->get_InputBuffer, $output_as_hash)};
   }
   else {
     push @$output_buffer, @{$self->_buffer_to_output($self->get_InputBuffer, $output_as_hash)};
   }
+
+  $self->_reset_package_variables();
 
   return @$output_buffer ? shift @$output_buffer : undef;
 }
