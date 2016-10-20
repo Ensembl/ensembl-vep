@@ -351,7 +351,7 @@ is_deeply(
         'Transcript'
       ],
       'version' => '2.3',
-      'config' => $runner->config,
+      'config' => $runner->config->{_params},
     }, 'TestPlugin' )
   ],
   'get_all_Plugins'
