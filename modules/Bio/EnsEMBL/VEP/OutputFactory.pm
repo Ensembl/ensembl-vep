@@ -658,11 +658,29 @@ sub add_colocated_variant_info {
 
   return unless $vf->{existing} && scalar @{$vf->{existing}};
 
-  my @existing = @{$vf->{existing}};
-
   my $tmp = {};
 
-  foreach my $ex(@{$vf->{existing}}) {
+  # use these to sort variants
+  my %prefix_ranks = (
+    'rs' => 1, # dbSNP
+
+    'cm' => 2, # HGMD
+    'ci' => 2,
+    'cd' => 2,
+
+    'co' => 3, # COSMIC
+  );
+
+  foreach my $ex(
+    sort {
+      ($a->{somatic} || 0) <=> ($b->{somatic} || 0) ||
+
+      ($prefix_ranks{lc(substr($a->{variation_name}, 0, 2))} || 100)
+      <=>
+      ($prefix_ranks{lc(substr($b->{variation_name}, 0, 2))} || 100)
+    }
+    @{$vf->{existing}}
+  ) {
 
     # ID
     push @{$hash->{Existing_variation}}, $ex->{variation_name} if $ex->{variation_name};
