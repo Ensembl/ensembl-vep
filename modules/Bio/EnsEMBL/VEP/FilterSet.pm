@@ -129,17 +129,6 @@ sub parse_filters {
 
         # process field
         elsif(!$current->{field}) {
-          # if(!defined($config->{allowed_fields}->{$word})) {
-          #   my @matched_fields = grep {$_ =~ /^$word/i} keys %{$config->{allowed_fields}};
-            
-          #   if(scalar @matched_fields == 1) {
-          #     $word = $matched_fields[0];
-          #   }
-          #   #else {
-          #   #  die("ERROR: No field matching $word found\n");
-          #   #}
-          # }
-
           $current->{field} = $word;
         }
 
@@ -289,7 +278,7 @@ sub evaluate {
       $return = 0;
     }
     else {
-      $return = &$predicate($input, $value);
+      $return = &$predicate($input, $value, $self);
     }
   }
 
@@ -333,6 +322,23 @@ sub get_input {
         $synonyms->{$field} = '_'.$field;
         $input = $data->{$synonyms->{$field}};
       }
+      # substring
+      else {
+        my @matches = grep {$_ =~ /^$field/i} keys %$data;
+
+        if(scalar @matches == 1) {
+          $synonyms->{$field} = $matches[0];
+        }
+        elsif(scalar @matches > 1) {
+          throw(
+            sprintf(
+              'ERROR: Multiple data fields found matching query field "%s": %s',
+              $field,
+              join(", ", @matches)
+            )
+          );
+        }
+      }
     }
   }
 
@@ -357,6 +363,18 @@ sub synonyms {
   return $self->{synonyms} ||= {};
 }
 
+sub ontology_adaptor {
+  my $self = shift;
+  $self->{_ontology_adaptor} = shift if @_;
+  return $self->{_ontology_adaptor};
+}
+
+sub ontology_name {
+  my $self = shift;
+  $self->{_ontology_name} = shift if @_;
+  return $self->{_ontology_name};
+}
+
 
 
 ## PREDICATE METHODS
@@ -379,5 +397,34 @@ sub filter_nre { return $_[0] !~ /$_[1]/i }
 # in list
 sub filter_in  { return exists($_[1]->{$_[0]}) }
 
+# use ontology to check if input is a child of value
+# requires you to have set ontology_adaptor and ontology_name
+sub filter_is_child {
+  my ($child, $parent, $obj) = @_;
+  
+  # exact match, don't need to use ontology
+  return 1 if filter_re($child, $parent);
+
+  my $cache = $obj->{_cache}->{descendants} ||= {};
+  
+  # get parent term and descendants and cache it on $config
+  unless($cache->{$parent}) {
+
+    my $oa = $obj->ontology_adaptor;
+    my $ontology_name = $obj->ontology_name;
+
+    throw("ERROR: No ontology adaptor set") unless $oa;
+    throw("ERROR: No ontology_name set") unless $ontology_name;
+    
+    # connect to DBs here
+    my $terms = $oa->fetch_all_by_name($parent, $ontology_name);
+    throw("ERROR: No matching SO terms found for $parent\n") unless $terms && scalar @$terms;
+    throw("ERROR: Found more than one SO term matching $parent: ".join(", ", map {$_->name} @$terms)."\n") if scalar @$terms > 1;
+    my $parent_term = $terms->[0];
+    $cache->{$parent} = $parent_term->descendants;
+  }  
+  
+  return grep {$_->name =~ /^$child$/i} @{$cache->{$parent}};
+}
 
 1;
