@@ -44,6 +44,8 @@ use FileHandle;
 use FindBin qw($RealBin);
 use lib $RealBin;
 use lib $RealBin.'/modules';
+
+use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::FilterSet;
 use Bio::EnsEMBL::VEP::Utils qw(merge_hashes merge_arrays get_compressed_filehandle);
 
@@ -58,7 +60,7 @@ sub configure {
   
   # set defaults
   my $config = {
-    start => 0,
+    start => 1,
     limit => 1e12,
     output_file => 'stdout',
 
@@ -94,15 +96,15 @@ sub configure {
     'limit|l=i',               # return max N results
     
     'filter|f=s@',             # filter
-  ) or die "ERROR: Failed to parse command-line flags\n";
+  ) or throw("ERROR: Failed to parse command-line flags\n");
   
   # print usage message if requested or no args supplied
-  if(defined($config->{help}) || !$args) {
+  if($config->{help} || !$args) {
     &usage;
     exit(0);
   }
   
-  die("ERROR: No valid filters given\n") if !defined($config->{filter}) && !defined($config->{list});
+  throw("ERROR: No valid filters given\n") unless $config->{filter} || $config->{list};
 
   if($config->{ontology}) {
     my $changed = 0;
@@ -113,12 +115,12 @@ sub configure {
       }
     }
 
-    die("ERROR: At least one filter must contain \"Consequence is [value]\" when using --ontology\n") unless $changed;
+    throw("ERROR: At least one filter must contain \"Consequence is [value]\" when using --ontology\n") unless $changed;
 
     connect_to_db($config);
 
     my $oa = $config->{reg}->get_adaptor('Multi','Ontology','OntologyTerm');
-    die("ERROR: Could not fetch OntologyTerm adaptor\n") unless defined($oa);
+    throw("ERROR: Could not fetch OntologyTerm adaptor\n") unless $oa;
 
     $config->{filter_set} = Bio::EnsEMBL::VEP::FilterSet->new(@{$config->{filter}});
 
@@ -142,14 +144,14 @@ sub main {
     
   if(my $input_file = $config->{input_file}) {
     # check defined input file exists
-    die("ERROR: Could not find input file $input_file\n") unless -e $input_file;
+    throw("ERROR: Could not find input file $input_file\n") unless -e $input_file;
     
     if($input_file =~ /\.gz$/ || -B $input_file || $config->{gz}) {
       $in_fh = get_compressed_filehandle($input_file, 1);
     }
     else {
       $in_fh = FileHandle->new();
-      $in_fh->open( $config->{input_file} ) or die("ERROR: Could not read from input file ", $config->{input_file}, "\n");
+      $in_fh->open( $config->{input_file} ) or throw("ERROR: Could not read from input file ", $config->{input_file}, "\n");
     }
   }
   else {
@@ -159,14 +161,14 @@ sub main {
   # output
   my $out_fh = FileHandle->new();
   
-  if(-e $config->{output_file} && !defined($config->{force_overwrite})) {
-    die("ERROR: Output file ", $config->{output_file}, " already exists. Specify a different output file with --output_file or overwrite existing file with --force_overwrite\n");
+  if(-e $config->{output_file} && !$config->{force_overwrite}) {
+    throw("ERROR: Output file ", $config->{output_file}, " already exists. Specify a different output file with --output_file or overwrite existing file with --force_overwrite\n");
   }
   elsif($config->{output_file} =~ /stdout/i) {
     $out_fh = *STDOUT;
   }
   else {
-    $out_fh->open(">".$config->{output_file}) or die("ERROR: Could not write to output file ".$config->{output_file}."\n");
+    $out_fh->open(">".$config->{output_file}) or throw("ERROR: Could not write to output file ".$config->{output_file}."\n");
   }
   
   my (@raw_headers, @headers, $count, $line_number);
@@ -182,11 +184,11 @@ sub main {
     }
     else {
       $line_number++;
-      last if defined($config->{test}) && $line_number > $config->{test};
+      last if $config->{test} && $line_number > $config->{test};
       
       # parse headers before processing input
       if(!(scalar @headers)) {
-        die("ERROR: No headers found in input file\n") unless scalar @raw_headers;
+        throw("ERROR: No headers found in input file\n") unless scalar @raw_headers;
         
         # write headers to output
         unless(defined($config->{count}) || defined($config->{list})) {
@@ -210,12 +212,10 @@ sub main {
       
       # get format
       $config->{format} ||= detect_format($line);
-      die("ERROR: Could not detect input file format - perhaps you need to specify it with --format?\n") unless defined($config->{format});
-      die("ERROR: --only_matched is compatible only with VCF files\n") if $config->{format} ne 'vcf' && defined($config->{only_matched});
+      throw("ERROR: Could not detect input file format - perhaps you need to specify it with --format?\n") unless $config->{format};
+      throw("ERROR: --only_matched is compatible only with VCF files\n") if $config->{format} ne 'vcf' && $config->{only_matched};
       
       my (@data, @chunks, $vcf_info_field);
-
-      $DB::single = 1;
       
       if($config->{format} eq 'tab') {
         push @data, parse_line($line, \@headers, "\t");
@@ -243,7 +243,7 @@ sub main {
         }
       }
       else {
-        die("ERROR: Unable to parse data in format ".$config->{format}."\n");
+        throw("ERROR: Unable to parse data in format ".$config->{format}."\n");
       }
       
       my ($line_pass, @new_chunks);
@@ -363,7 +363,7 @@ sub connect_to_db {
   };
   
   if($@) {
-    die("ERROR: Could not load Ensembl API modules\n");
+    throw("ERROR: Could not load Ensembl API modules\n");
   }
   
   $config->{reg} = 'Bio::EnsEMBL::Registry';
