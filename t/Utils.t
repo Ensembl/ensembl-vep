@@ -18,7 +18,7 @@ use warnings;
 use Test::More;
 use Test::Exception;
 
-use Bio::EnsEMBL::VEP::Utils qw(format_coords convert_arrayref numberify merge_hashes get_time trim_sequences get_compressed_filehandle);
+use Bio::EnsEMBL::VEP::Utils qw(format_coords convert_arrayref numberify merge_hashes merge_arrays get_time trim_sequences get_compressed_filehandle);
 
 use FindBin qw($Bin);
 use lib $Bin;
@@ -164,6 +164,31 @@ is_deeply(
   {a => [1, 2, 3, 4]},
   'merge_hashes - array'
 );
+
+
+
+## merge_arrays
+###############
+
+is_deeply(
+  merge_arrays([1], [2]),
+  [1, 2],
+  'merge_arrays - simple'
+);
+
+is_deeply(
+  merge_arrays([1], [1, 2]),
+  [1, 2],
+  'merge_arrays - duplicates'
+);
+
+is_deeply(
+  merge_arrays([1, 3], [2, 1, 3, 4]),
+  [1, 3, 2, 4],
+  'merge_arrays - order'
+);
+
+
 
 
 

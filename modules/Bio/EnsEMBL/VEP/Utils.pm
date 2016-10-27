@@ -57,6 +57,7 @@ use vars qw(@ISA @EXPORT_OK);
   &convert_arrayref
   &numberify
   &merge_hashes
+  &merge_arrays
   &get_compressed_filehandle
 );
 
