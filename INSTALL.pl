@@ -56,13 +56,13 @@ use Bio::EnsEMBL::VEP::Utils qw(get_version_data get_version_string);
 our ($CAN_USE_CURL, $CAN_USE_LWP, $CAN_USE_HTTP_TINY);
 
 BEGIN {
-  # check gzip
-  # if (`which curl` =~ /\/curl/) {
-  #   $CAN_USE_CURL = 1;
-  # }
-  # else {
+  # check curl
+  if (`which curl` =~ /\/curl/) {
+    $CAN_USE_CURL = 1;
+  }
+  else {
     $CAN_USE_CURL = 0;
-  # }
+  }
 
   if(eval { use LWP::Simple qw(getstore get $ua); 1 }) {
     $CAN_USE_LWP = 1;
