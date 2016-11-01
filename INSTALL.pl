@@ -1255,7 +1255,33 @@ sub fasta() {
       copy("$FASTA_URL/$species/dna/$file", "$CACHE_DIR/$orig_species/$API_VERSION\_$assembly/$file") unless $TEST;
     }
 
-    if($NO_HTSLIB) {
+    my $bgzip = `which bgzip` || "$HTSLIB_DIR/bgzip";
+    eval q{ use Bio::DB::HTS::Faidx; };
+    my $can_use_faidx = $@ ? 0 : 1;
+
+    if($can_use_faidx && -e $bgzip) {
+      print " - converting sequence data to bgzip format\n" unless $QUIET;
+      my $curdir = getcwd;
+      my $bgzip = `which bgzip` || "$HTSLIB_DIR/bgzip";
+      chomp($bgzip);
+      my $bgzip_convert = "$bgzip -dc $ex.gz | $bgzip -c > $ex.gz.bgz; mv $ex.gz.bgz $ex.gz";
+      print " Going to run:\n$bgzip_convert\nThis may take some time...\n";
+      my $bgzip_result = `$bgzip_convert` unless $TEST;
+
+      if( $? != 0 ) {
+        die "FASTA gzip to bgzip conversion failed: $bgzip_result\n" unless $TEST;
+      }
+      else {
+        print "Converted FASTA gzip file to bgzip successfully\n";
+      }
+
+      Bio::DB::HTS::Faidx->new("$ex.gz") unless $TEST;
+      print " - indexing OK\n" unless $QUIET;
+
+      print "The FASTA file should be automatically detected by the VEP when using --cache or --offline. If it is not, use \"--fasta $ex.gz\"\n\n" unless $QUIET;
+    }
+
+    elsif($NO_HTSLIB) {
       print " - extracting data\n" unless $QUIET;
       unpack_arch("$CACHE_DIR/$orig_species/$API_VERSION\_$assembly/$file", "$CACHE_DIR/$orig_species/$API_VERSION\_$assembly/") unless $TEST;
 
@@ -1272,38 +1298,6 @@ sub fasta() {
       }
 
       print "The FASTA file should be automatically detected by the VEP when using --cache or --offline. If it is not, use \"--fasta $ex\"\n\n" unless $QUIET;
-    }
-
-    else {
-      print " - converting sequence data to bgzip format\n" unless $QUIET;
-      my $curdir = getcwd;
-      my $bgzip = `which bgzip` || "$HTSLIB_DIR/bgzip";
-      chomp($bgzip);
-      my $bgzip_convert = "$bgzip -dc $ex.gz | $bgzip -c > $ex.gz.bgz; mv $ex.gz.bgz $ex.gz";
-      print " Going to run:\n$bgzip_convert\nThis may take some time...\n";
-      my $bgzip_result = `$bgzip_convert` unless $TEST;
-
-      if( $? != 0 ) {
-        die "FASTA gzip to bgzip conversion failed: $bgzip_result\n" unless $TEST;
-      }
-      else {
-        print "Converted FASTA gzip file to bgzip successfully\n";
-      }
-
-      #Indexing needs Faidx, but this will not be present when the script is started up.
-      eval q{
-        use Bio::DB::HTS::Faidx;
-      };
-
-      if($@) {
-        print "Indexing failed - VEP will attempt to index the file the first time you use it\n" unless $QUIET;
-      }
-      else {
-        Bio::DB::HTS::Faidx->new("$ex.gz") unless $TEST;
-        print " - indexing OK\n" unless $QUIET;
-      }
-
-      print "The FASTA file should be automatically detected by the VEP when using --cache or --offline. If it is not, use \"--fasta $ex.gz\"\n\n" unless $QUIET;
     }
 
     if($ftp) {
