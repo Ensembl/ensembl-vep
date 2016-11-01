@@ -17,6 +17,7 @@ use FindBin qw($RealBin);
 use lib $RealBin;
 use lib $RealBin.'/modules';
 use Bio::EnsEMBL::VEP::Runner;
+use Bio::EnsEMBL::VEP::Utils qw(get_version_string);
 
 my $config = {};
 
@@ -193,13 +194,18 @@ $runner->run();
 
 # outputs usage message
 sub usage {
-    my $usage =<<END;
+
+  my $versions = get_version_string($RealBin.'/.version');
+
+  my $usage =<<END;
 #----------------------------------#
 # ENSEMBL VARIANT EFFECT PREDICTOR #
 #----------------------------------#
 
-version $VERSION
 by Will McLaren (wm2\@ebi.ac.uk)
+
+Versions:
+  $versions
 
 Help: dev\@ensembl.org , helpdesk\@ensembl.org
 Twitter: \@ensembl , \@EnsemblWill
@@ -228,7 +234,7 @@ http://www.ensembl.org/info/docs/tools/vep/script/vep_options.html
 
 END
 
-    print $usage;
+  print $usage;
 }
 
 

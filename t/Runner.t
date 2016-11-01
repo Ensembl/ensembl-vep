@@ -117,7 +117,7 @@ is_deeply($runner->get_InputBuffer, bless({
 my $info = $runner->get_output_header_info;
 ok($info->{time}, 'get_output_header_info - time');
 ok($info->{api_version} =~ /^\d+$/, 'get_output_header_info - api_version');
-ok($info->{vep_version} =~ /^\d+$/, 'get_output_header_info - vep_version');
+ok($info->{vep_version} =~ /^\d+(\.\d+)?$/, 'get_output_header_info - vep_version');
 is(ref($info->{input_headers}), 'ARRAY', 'get_output_header_info - input_headers');
 
 is_deeply(

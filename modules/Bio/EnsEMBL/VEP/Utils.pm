@@ -44,7 +44,8 @@ use warnings;
 package Bio::EnsEMBL::VEP::Utils;
 use Exporter;
 use Scalar::Util qw(looks_like_number);
-use Bio::EnsEMBL::Utils::Exception qw(throw warning);
+use FindBin qw($RealBin);
+use Bio::EnsEMBL::VEP::Constants;
 
 use vars qw(@ISA @EXPORT_OK);
 
@@ -59,6 +60,8 @@ use vars qw(@ISA @EXPORT_OK);
   &merge_hashes
   &merge_arrays
   &get_compressed_filehandle
+  &get_version_data
+  &get_version_string
 );
 
 our ($CAN_USE_PERLIO_GZIP, $CAN_USE_GZIP, $CAN_USE_IO_UNCOMPRESS);
@@ -214,23 +217,23 @@ sub merge_arrays {
 sub get_compressed_filehandle {
   my ($file, $multi) = @_;
 
-  throw("ERROR: No file given\n") unless $file;
-  throw("ERROR: File $file does not exist\n") unless -e $file;
-  throw("ERROR: File $file does not look like a binary file\n") unless -B $file;
+  die("ERROR: No file given\n") unless $file;
+  die("ERROR: File $file does not exist\n") unless -e $file;
+  die("ERROR: File $file does not look like a binary file\n") unless -B $file;
 
   if($CAN_USE_PERLIO_GZIP && !$multi) {
-    open my $fh, "<:gzip", $file or throw("ERROR: $!");
+    open my $fh, "<:gzip", $file or die("ERROR: $!");
     return $fh;
   }
   if($CAN_USE_IO_UNCOMPRESS) {
-    return IO::Uncompress::Gunzip->new($file, MultiStream => $multi) or throw("ERROR: $GunzipError");
+    return IO::Uncompress::Gunzip->new($file, MultiStream => $multi) or die("ERROR: $GunzipError");
   }
   elsif($CAN_USE_GZIP) {
-    open my $fh, "gzip -dc $file |" or throw("ERROR: $!");
+    open my $fh, "gzip -dc $file |" or die("ERROR: $!");
     return $fh;
   }
   else {
-    throw("Cannot read from compressed or binary file");
+    die("Cannot read from compressed or binary file");
   }
 }
 
@@ -256,4 +259,45 @@ sub get_time {
     $time[0];
 
   return $time;
+}
+
+# gets version data
+sub get_version_data {
+  my $version_dir = shift || $RealBin.'/.version';
+  my %version_data = ();
+
+  $version_data{'ensembl-vep'} = {
+    'release' => $Bio::EnsEMBL::VEP::Constants::VEP_VERSION,
+    'sub'     => $Bio::EnsEMBL::VEP::Constants::VEP_SUB_VERSION,
+  };
+
+  opendir DIR, $version_dir or return \%version_data;
+  foreach my $module(grep {!/^\./} readdir(DIR)) {
+    my %hash = ();
+
+    open IN, $version_dir.'/'.$module;
+    while(<IN>) {
+      chomp;
+      my @data = split;
+      $hash{$data[0]} = $data[1];
+    }
+    close IN;
+
+    $version_data{$module} = \%hash;
+  }
+  closedir DIR;
+
+  return \%version_data;
+}
+
+sub get_version_string {
+  my $version_data = get_version_data(@_);
+  return join(
+    "\n  ",
+    map {
+      sprintf("%-20s : %s", $_, $version_data->{$_}->{release}).
+      (defined($version_data->{$_}->{sub}) ? '.'.substr($version_data->{$_}->{sub}, 0, 7) : '')
+    }
+    keys %$version_data
+  );
 }

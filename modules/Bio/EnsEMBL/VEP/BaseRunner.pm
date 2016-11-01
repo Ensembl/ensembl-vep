@@ -49,7 +49,7 @@ use FileHandle;
 
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
-use Bio::EnsEMBL::VEP::Utils qw(get_time merge_hashes);
+use Bio::EnsEMBL::VEP::Utils qw(get_time merge_hashes get_version_data);
 use Bio::EnsEMBL::VEP::Constants;
 use Bio::EnsEMBL::VEP::Config;
 use Bio::EnsEMBL::VEP::InputBuffer;
@@ -206,9 +206,11 @@ sub get_output_header_info {
 
   if(!exists($self->{output_header_info})) {
 
+    my $vep_version_data = get_version_data()->{'ensembl-vep'};
+
     my $info = {
       time          => get_time,
-      vep_version   => $Bio::EnsEMBL::VEP::Constants::VERSION,
+      vep_version   => $vep_version_data->{release}.(defined($vep_version_data->{sub}) ? '.'.$vep_version_data->{sub} : ''),
       api_version   => $self->registry->software_version,
       input_headers => $self->get_Parser->headers,
     };

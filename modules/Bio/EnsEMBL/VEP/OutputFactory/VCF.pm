@@ -47,7 +47,7 @@ use base qw(Bio::EnsEMBL::VEP::OutputFactory);
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
-use Bio::EnsEMBL::VEP::Utils qw(convert_arrayref);
+use Bio::EnsEMBL::VEP::Utils qw(convert_arrayref get_version_data);
 use Bio::EnsEMBL::VEP::Constants;
 
 my @VCF_COLS = qw(
@@ -125,6 +125,21 @@ sub headers {
     $info->{cache_dir} ? ' cache="'.$info->{cache_dir}.'"' : '',
     $info->{db_name} ? ' db="'.$info->{db_name}.'@'.$info->{db_host}.'"' : ''
   );
+
+  # add API module info
+  my $software_version_data = get_version_data();
+  my $software_version_string = join(' ',
+    map {
+      sprintf(
+        '%s=%s%s',
+        $_,
+        $software_version_data->{$_}->{release},
+        (defined($software_version_data->{$_}->{sub}) ? '.'.substr($software_version_data->{$_}->{sub}, 0, 7) : '')
+      )
+    }
+    grep {$_ ne 'ensembl-vep'} keys %{$software_version_data}
+  );
+  $headers[-1] .= ' '.$software_version_string if $software_version_string;
 
   # add misc version data
   $headers[-1] .= ' '.join(' ',

@@ -43,6 +43,8 @@ use warnings;
 
 package Bio::EnsEMBL::VEP::OutputFactory::BaseTab;
 
+use Bio::EnsEMBL::VEP::Utils qw(get_version_data);
+
 use base qw(Bio::EnsEMBL::VEP::OutputFactory);
 
 sub headers {
@@ -59,6 +61,18 @@ sub headers {
   push @headers, "## Using cache in ".$info->{cache_dir} if $info->{cache_dir};
 
   push @headers, sprintf("## Using API version %i, DB version %s", $info->{api_version}, $info->{db_version} || '?');
+
+  my $software_version_data = get_version_data();
+  push @headers, 
+    map {
+      sprintf(
+        "## %s version %s%s",
+        $_,
+        $software_version_data->{$_}->{release},
+        (defined($software_version_data->{$_}->{sub}) ? '.'.substr($software_version_data->{$_}->{sub}, 0, 7) : '')
+      )
+    }
+    grep {$_ ne 'ensembl-vep'} keys %{$software_version_data};
 
   push @headers, "## $_ version ".$info->{version_data}->{$_} for keys %{$info->{version_data} || {}};
 
