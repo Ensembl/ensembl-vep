@@ -565,6 +565,7 @@ sub install_api() {
     print " - getting version information\n" unless $QUIET;
     my $git_sub = get_module_sub_version($module);
 
+    mkdir("$RealBin/.version/") unless -d "$RealBin/.version/";
     open OUT, ">$RealBin/.version/$module" or die $!;
     print OUT "release $API_VERSION\nsub $git_sub\n";
     close OUT;
