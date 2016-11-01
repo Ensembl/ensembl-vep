@@ -255,6 +255,9 @@ sub _forked_buffer_to_output {
         my $data = thaw($line);
         next unless $data && $data->{pid};
 
+        # forked process died
+        die(sprintf("%sDied in forked process %i\n", $data->{die}, $data->{pid})) if $data->{die};
+
         # data
         $by_pid{$data->{pid}} = $data->{output} if $data->{output};
 
@@ -276,8 +279,6 @@ sub _forked_buffer_to_output {
         $sel->remove($fh);
         $fh->close;
         $active_forks--;
-
-        throw("ERROR: Forked process(es) died\n".$data->{pid}." : ".$data->{die}) if $data->{die};
       }
 
       # read-through detected, DIE
