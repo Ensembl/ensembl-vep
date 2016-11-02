@@ -893,7 +893,7 @@ sub test() {
 
   print "\nTesting VEP installation\n" unless $QUIET;
 
-  eval q{use Test::Harness};
+  eval q{use Test::Harness; use Test::Exception; };
   if(!$@) {
     $ENV{PERL5LIB} = $ENV{PERL5LIB} ? $ENV{PERL5LIB}.':'.$DEST_DIR : $DEST_DIR;
 
