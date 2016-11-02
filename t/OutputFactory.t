@@ -42,7 +42,7 @@ my $runner = Bio::EnsEMBL::VEP::Runner->new({
   %$cfg_hash,
   input_file => $test_cfg->{test_vcf},
   check_existing => 1,
-  dir => $test_cfg->{cache_root_dir}.'/sereal',
+  dir => $test_cfg->{cache_root_dir},
 });
 ok($runner, 'new is defined');
 
