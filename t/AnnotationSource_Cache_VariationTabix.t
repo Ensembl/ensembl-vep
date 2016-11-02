@@ -55,7 +55,6 @@ throws_ok { $c->get_dump_file_name() } qr/No chromosome/, 'get_dump_file_name no
 is($c->delimiter, "\t", 'delimiter');
 
 
-
 ## TESTS WITH AN INPUT BUFFER
 #############################
 
@@ -429,8 +428,8 @@ SKIP: {
   $vf_hash = {
     $vf->{chr} => [$vf],
   };
-  delete($c->{_chr_name_map});
   $c->chromosome_synonyms($test_cfg->{chr_synonyms});
+  $c->{valid_chromosomes} = [21];
   $c->_annotate_pm($vf_hash);
 
   is_deeply($vf->{existing}, $exp, '_annotate_pm - chr synonym');
