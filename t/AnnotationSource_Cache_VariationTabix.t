@@ -63,20 +63,6 @@ use_ok('Bio::EnsEMBL::VEP::Parser::VCF');
 my $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}, valid_chromosomes => [21]});
 ok($p, 'get parser object');
 
-use_ok('Bio::EnsEMBL::VEP::InputBuffer');
-my $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
-is(ref($ib), 'Bio::EnsEMBL::VEP::InputBuffer', 'check class');
-
-is(ref($ib->next()), 'ARRAY', 'check buffer next');
-
-# the two methods in this class use a hashref of lists of VFs keyed on chr
-my $vf = $ib->buffer->[0];
-my $vf_hash = {
-  $vf->{chr} => [$vf],
-};
-
-$c->_annotate_cl($vf_hash);
-
 my $exp = [{
   'chr' => 21,
   'phenotype_or_disease' => 0,
@@ -109,283 +95,307 @@ my $exp = [{
   'pubmed' => undef,
 }];
 
-is_deeply($vf->{existing}, $exp, '_annotate_cl');
+use_ok('Bio::EnsEMBL::VEP::InputBuffer');
+my $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+is(ref($ib), 'Bio::EnsEMBL::VEP::InputBuffer', 'check class');
 
-# check synonyms
-$c->chromosome_synonyms($test_cfg->{chr_synonyms});
-$c->{valid_chromosomes} = [21];
-$vf->{chr} = 'NC_000021.9';
-
-delete $vf->{existing};
-$vf_hash = {
-  $vf->{chr} => [$vf],
-};
-
-$c->_annotate_cl($vf_hash);
-
-is_deeply($vf->{existing}, $exp, 'chr synonym');
-
-$vf->{chr} = 21;
+is(ref($ib->next()), 'ARRAY', 'check buffer next');
 
 
+SKIP: {
+  no warnings 'once';
 
-# no match
-$vf->{start}++;
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  skip 'Bio::DB::HTS::Tabix module not available', 21
+    unless $Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix::CAN_USE_TABIX_PM
+    or $Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix::CAN_USE_TABIX_CL;
 
-delete $vf->{existing};
-$vf_hash = {
-  $vf->{chr} => [$vf],
-};
+  # the two methods in this class use a hashref of lists of VFs keyed on chr
+  my $vf = $ib->buffer->[0];
+  my $vf_hash = {
+    $vf->{chr} => [$vf],
+  };
 
-is_deeply($vf->{existing}, undef, 'miss by coord - _annotate_cl');
+  $c->_annotate_cl($vf_hash);
 
-$p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}, valid_chromosomes => [21]});
-$ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
-$ib->next();
+  is_deeply($vf->{existing}, $exp, '_annotate_cl');
 
-$c->annotate_InputBuffer($ib);
-$vf = $ib->buffer->[0];
+  # check synonyms
+  $c->chromosome_synonyms($test_cfg->{chr_synonyms});
+  $c->{valid_chromosomes} = [21];
+  $vf->{chr} = 'NC_000021.9';
 
-is_deeply($vf->{existing}, $exp, 'annotate_InputBuffer');
+  delete $vf->{existing};
+  $vf_hash = {
+    $vf->{chr} => [$vf],
+  };
 
-is(scalar (grep {$_->{existing}} @{$ib->buffer}), 132, 'annotate_InputBuffer count annotated');
+  $c->_annotate_cl($vf_hash);
 
-# construct one to test phenotype_or_disease and clin_sig
-$p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, valid_chromosomes => [21], file => $test_cfg->create_input_file([qw(21 25891796 . C T . . .)])});
-$ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
-$ib->next;
+  is_deeply($vf->{existing}, $exp, 'chr synonym');
 
-$c->annotate_InputBuffer($ib);
+  $vf->{chr} = 21;
 
-is_deeply(
-  $ib->buffer->[0]->{existing},
-  [
+
+
+  # no match
+  $vf->{start}++;
+
+  delete $vf->{existing};
+  $vf_hash = {
+    $vf->{chr} => [$vf],
+  };
+
+  is_deeply($vf->{existing}, undef, 'miss by coord - _annotate_cl');
+
+  $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}, valid_chromosomes => [21]});
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+  $ib->next();
+
+  $c->annotate_InputBuffer($ib);
+  $vf = $ib->buffer->[0];
+
+  is_deeply($vf->{existing}, $exp, 'annotate_InputBuffer');
+
+  is(scalar (grep {$_->{existing}} @{$ib->buffer}), 132, 'annotate_InputBuffer count annotated');
+
+  # construct one to test phenotype_or_disease and clin_sig
+  $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, valid_chromosomes => [21], file => $test_cfg->create_input_file([qw(21 25891796 . C T . . .)])});
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+  $ib->next;
+
+  $c->annotate_InputBuffer($ib);
+
+  is_deeply(
+    $ib->buffer->[0]->{existing},
+    [
+      {
+        'phenotype_or_disease' => '1',
+        'ExAC_AMR' => 'T:0.0003457',
+        'SAS' => 'T:0.0000',
+        'failed' => 0,
+        'ExAC_NFE' => 'T:2.998e-05',
+        'AA' => undef,
+        'somatic' => 0,
+        'ExAC_SAS' => 'T:0',
+        'AFR' => 'T:0.0000',
+        'strand' => 1,
+        'allele_string' => 'C/T',
+        'ExAC_Adj' => 'T:5.768e-05',
+        'minor_allele_freq' => '0.0002',
+        'ExAC_FIN' => 'T:0',
+        'AMR' => 'T:0.0014',
+        'chr' => '21',
+        'EUR' => 'T:0.0000',
+        'clin_sig' => 'not_provided,pathogenic',
+        'EAS' => 'T:0.0000',
+        'end' => 25891796,
+        'ExAC' => 'T:5.765e-05',
+        'ExAC_OTH' => 'T:0.001101',
+        'ExAC_AFR' => 'T:0',
+        'variation_name' => 'rs63750066',
+        'ExAC_EAS' => 'T:0',
+        'minor_allele' => 'T',
+        'EA' => undef,
+        'start' => 25891796,
+        'pubmed' => undef
+      },
+      {
+        'phenotype_or_disease' => '1',
+        'ExAC_AMR' => undef,
+        'SAS' => undef,
+        'failed' => 0,
+        'ExAC_NFE' => undef,
+        'AA' => undef,
+        'somatic' => 0,
+        'ExAC_SAS' => undef,
+        'AFR' => undef,
+        'strand' => 1,
+        'allele_string' => 'HGMD_MUTATION',
+        'ExAC_Adj' => undef,
+        'minor_allele_freq' => undef,
+        'ExAC_FIN' => undef,
+        'AMR' => undef,
+        'chr' => '21',
+        'EUR' => undef,
+        'clin_sig' => undef,
+        'EAS' => undef,
+        'end' => 25891796,
+        'ExAC' => undef,
+        'ExAC_OTH' => undef,
+        'ExAC_AFR' => undef,
+        'variation_name' => 'CM930033',
+        'ExAC_EAS' => undef,
+        'minor_allele' => undef,
+        'EA' => undef,
+        'start' => 25891796,
+        'pubmed' => undef
+      }
+    ],
+    'annotate_InputBuffer - phenotype_or_disease'
+  );
+
+
+  ## FREQUENCY STUFF
+  ##################
+
+  # for now this requires we switch off allele checking
+  $c->{no_check_alleles} = 1;
+
+  # new checks
+  ok(
+    $c->check_frequency_filter,
+    'check_frequency_filter'
+  );
+
+  my $bak = $c->{freq_pop};
+  $c->{freq_pop} = 'foo';
+  throws_ok { $c->check_frequency_filter } qr/Invalid population/, 'check_frequency_filter - fails on missing pop';
+  $c->{freq_pop} = $bak;
+
+  # get_frequency_data
+  $vf = $ib->buffer->[0];
+  $c->get_frequency_data($vf);
+
+  is_deeply(
+    $vf->{_freq_check_freqs},
     {
-      'phenotype_or_disease' => '1',
-      'ExAC_AMR' => 'T:0.0003457',
-      'SAS' => 'T:0.0000',
-      'failed' => 0,
-      'ExAC_NFE' => 'T:2.998e-05',
-      'AA' => undef,
-      'somatic' => 0,
-      'ExAC_SAS' => 'T:0',
-      'AFR' => 'T:0.0000',
-      'strand' => 1,
-      'allele_string' => 'C/T',
-      'ExAC_Adj' => 'T:5.768e-05',
-      'minor_allele_freq' => '0.0002',
-      'ExAC_FIN' => 'T:0',
-      'AMR' => 'T:0.0014',
-      'chr' => '21',
-      'EUR' => 'T:0.0000',
-      'clin_sig' => 'not_provided,pathogenic',
-      'EAS' => 'T:0.0000',
-      'end' => 25891796,
-      'ExAC' => 'T:5.765e-05',
-      'ExAC_OTH' => 'T:0.001101',
-      'ExAC_AFR' => 'T:0',
-      'variation_name' => 'rs63750066',
-      'ExAC_EAS' => 'T:0',
-      'minor_allele' => 'T',
-      'EA' => undef,
-      'start' => 25891796,
-      'pubmed' => undef
+      '1KG_ALL' => {
+        'T' => '0.0002'
+      },
     },
+    'get_frequency_data - _freq_check_freqs'
+  );
+
+  is_deeply(
+    $vf->{_freq_check_pass},
     {
-      'phenotype_or_disease' => '1',
-      'ExAC_AMR' => undef,
-      'SAS' => undef,
-      'failed' => 0,
-      'ExAC_NFE' => undef,
-      'AA' => undef,
-      'somatic' => 0,
-      'ExAC_SAS' => undef,
-      'AFR' => undef,
-      'strand' => 1,
-      'allele_string' => 'HGMD_MUTATION',
-      'ExAC_Adj' => undef,
-      'minor_allele_freq' => undef,
-      'ExAC_FIN' => undef,
-      'AMR' => undef,
-      'chr' => '21',
-      'EUR' => undef,
-      'clin_sig' => undef,
-      'EAS' => undef,
-      'end' => 25891796,
-      'ExAC' => undef,
-      'ExAC_OTH' => undef,
-      'ExAC_AFR' => undef,
-      'variation_name' => 'CM930033',
-      'ExAC_EAS' => undef,
-      'minor_allele' => undef,
-      'EA' => undef,
-      'start' => 25891796,
-      'pubmed' => undef
-    }
-  ],
-  'annotate_InputBuffer - phenotype_or_disease'
-);
-
-
-## FREQUENCY STUFF
-##################
-
-# for now this requires we switch off allele checking
-$c->{no_check_alleles} = 1;
-
-# new checks
-ok(
-  $c->check_frequency_filter,
-  'check_frequency_filter'
-);
-
-my $bak = $c->{freq_pop};
-$c->{freq_pop} = 'foo';
-throws_ok { $c->check_frequency_filter } qr/Invalid population/, 'check_frequency_filter - fails on missing pop';
-$c->{freq_pop} = $bak;
-
-# get_frequency_data
-$vf = $ib->buffer->[0];
-$c->get_frequency_data($vf);
-
-is_deeply(
-  $vf->{_freq_check_freqs},
-  {
-    '1KG_ALL' => {
-      'T' => '0.0002'
+      'T' => 0
     },
-  },
-  'get_frequency_data - _freq_check_freqs'
-);
+    'get_frequency_data - _freq_check_pass'
+  );
 
-is_deeply(
-  $vf->{_freq_check_pass},
-  {
-    'T' => 0
-  },
-  'get_frequency_data - _freq_check_pass'
-);
+  is($vf->{_freq_check_all_failed}, 1, 'get_frequency_data - _freq_check_all_failed');
 
-is($vf->{_freq_check_all_failed}, 1, 'get_frequency_data - _freq_check_all_failed');
+  my %orig = %$c;
 
-my %orig = %$c;
+  # test switching gt_lt
+  $c->{freq_gt_lt} = 'lt';
+  $c->get_frequency_data($vf);
 
-# test switching gt_lt
-$c->{freq_gt_lt} = 'lt';
-$c->get_frequency_data($vf);
-
-is_deeply(
-  $vf->{_freq_check_pass},
-  {
-    'T' => 1
-  },
-  'get_frequency_data - gt_lt'
-);
-is($vf->{_freq_check_all_passed}, 1, 'get_frequency_data - gt_lt - _freq_check_all_passed');
-
-$c->{freq_gt_lt} = $orig{freq_gt_lt};
-
-# test adjusting freq
-$c->{freq_freq} = 0.0001;
-$c->get_frequency_data($vf);
-
-is_deeply(
-  $vf->{_freq_check_pass},
-  {
-    'T' => 1
-  },
-  'get_frequency_data - freq'
-);
-is($vf->{_freq_check_all_passed}, 1, 'get_frequency_data - freq - _freq_check_all_passed');
-$c->{freq_freq} = $orig{freq_freq};
-
-# test another pop
-$c->{freq_pop} = '1KG_AMR';
-delete($vf->{_freq_check_freqs});
-$c->get_frequency_data($vf);
-
-is_deeply(
-  $vf->{_freq_check_freqs},
-  {
-    '1KG_AMR' => {
-      'T' => '0.0014'
+  is_deeply(
+    $vf->{_freq_check_pass},
+    {
+      'T' => 1
     },
-  },
-  'get_frequency_data - pop _freq_check_freqs'
-);
-$c->{freq_pop} = $orig{freq_pop};
+    'get_frequency_data - gt_lt'
+  );
+  is($vf->{_freq_check_all_passed}, 1, 'get_frequency_data - gt_lt - _freq_check_all_passed');
 
-# test strand switching
-$vf->{strand} = -1;
-$vf->{allele_string} = 'G/A';
-delete($vf->{_freq_check_freqs});
-delete($vf->{_alt_alleles});
-$c->get_frequency_data($vf);
+  $c->{freq_gt_lt} = $orig{freq_gt_lt};
 
-is_deeply(
-  $vf->{_freq_check_freqs},
-  {
-    '1KG_ALL' => {
-      'A' => '0.0002'
+  # test adjusting freq
+  $c->{freq_freq} = 0.0001;
+  $c->get_frequency_data($vf);
+
+  is_deeply(
+    $vf->{_freq_check_pass},
+    {
+      'T' => 1
     },
-  },
-  'get_frequency_data - rev strand'
-);
+    'get_frequency_data - freq'
+  );
+  is($vf->{_freq_check_all_passed}, 1, 'get_frequency_data - freq - _freq_check_all_passed');
+  $c->{freq_freq} = $orig{freq_freq};
+
+  # test another pop
+  $c->{freq_pop} = '1KG_AMR';
+  delete($vf->{_freq_check_freqs});
+  $c->get_frequency_data($vf);
+
+  is_deeply(
+    $vf->{_freq_check_freqs},
+    {
+      '1KG_AMR' => {
+        'T' => '0.0014'
+      },
+    },
+    'get_frequency_data - pop _freq_check_freqs'
+  );
+  $c->{freq_pop} = $orig{freq_pop};
+
+  # test strand switching
+  $vf->{strand} = -1;
+  $vf->{allele_string} = 'G/A';
+  delete($vf->{_freq_check_freqs});
+  delete($vf->{_alt_alleles});
+  $c->get_frequency_data($vf);
+
+  is_deeply(
+    $vf->{_freq_check_freqs},
+    {
+      '1KG_ALL' => {
+        'A' => '0.0002'
+      },
+    },
+    'get_frequency_data - rev strand'
+  );
 
 
-## frequency_check_buffer
+  ## frequency_check_buffer
 
-# exclude (default)
-$p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, valid_chromosomes => [21], file => $test_cfg->{test_vcf}});
-$ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
-$ib->next;
-$c->annotate_InputBuffer($ib);
-$c->frequency_check_buffer($ib);
-is(scalar @{$ib->buffer}, 114, 'frequency_check_buffer - exclude count');
+  # exclude (default)
+  $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, valid_chromosomes => [21], file => $test_cfg->{test_vcf}});
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+  $ib->next;
+  $c->annotate_InputBuffer($ib);
+  $c->frequency_check_buffer($ib);
+  is(scalar @{$ib->buffer}, 114, 'frequency_check_buffer - exclude count');
 
-# include
-$p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, valid_chromosomes => [21], file => $test_cfg->{test_vcf}});
-$ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
-$ib->next;
-$c->annotate_InputBuffer($ib);
-$c->{freq_filter} = 'include';
-$c->frequency_check_buffer($ib);
-is(scalar @{$ib->buffer}, 18, 'frequency_check_buffer - include count');
-$c->{freq_filter} = $orig{freq_filter};
+  # include
+  $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, valid_chromosomes => [21], file => $test_cfg->{test_vcf}});
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+  $ib->next;
+  $c->annotate_InputBuffer($ib);
+  $c->{freq_filter} = 'include';
+  $c->frequency_check_buffer($ib);
+  is(scalar @{$ib->buffer}, 18, 'frequency_check_buffer - include count');
+  $c->{freq_filter} = $orig{freq_filter};
 
-# test removing single allele
-$c->{freq_freq} = 0.0001;
+  # test removing single allele
+  $c->{freq_freq} = 0.0001;
 
-$p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, valid_chromosomes => [21], file => $test_cfg->{test_vcf}});
-$ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
-$ib->next;
+  $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, valid_chromosomes => [21], file => $test_cfg->{test_vcf}});
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+  $ib->next;
 
-$vf = $ib->buffer->[0];
-$vf->{allele_string} = 'C/T/G';
-$ib->reset_buffer();
-$ib->buffer([$vf]);
+  $vf = $ib->buffer->[0];
+  $vf->{allele_string} = 'C/T/G';
+  $ib->reset_buffer();
+  $ib->buffer([$vf]);
 
-$c->annotate_InputBuffer($ib);
-$c->frequency_check_buffer($ib);
-is($vf->{allele_string}, 'C/G', 'frequency_check_buffer - remove allele 1');
+  $c->annotate_InputBuffer($ib);
+  $c->frequency_check_buffer($ib);
+  is($vf->{allele_string}, 'C/G', 'frequency_check_buffer - remove allele 1');
 
-# include
-$p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, valid_chromosomes => [21], file => $test_cfg->{test_vcf}});
-$ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
-$ib->next;
+  # include
+  $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, valid_chromosomes => [21], file => $test_cfg->{test_vcf}});
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+  $ib->next;
 
-$vf = $ib->buffer->[0];
-$vf->{allele_string} = 'C/T/G';
-$ib->buffer([$vf]);
+  $vf = $ib->buffer->[0];
+  $vf->{allele_string} = 'C/T/G';
+  $ib->buffer([$vf]);
 
-$c->{freq_filter} = 'include';
-$c->annotate_InputBuffer($ib);
-$c->frequency_check_buffer($ib);
-is($vf->{allele_string}, 'C/T', 'frequency_check_buffer - remove allele 2');
-$c->{freq_filter} = $orig{freq_filter};
+  $c->{freq_filter} = 'include';
+  $c->annotate_InputBuffer($ib);
+  $c->frequency_check_buffer($ib);
+  is($vf->{allele_string}, 'C/T', 'frequency_check_buffer - remove allele 2');
+  $c->{freq_filter} = $orig{freq_filter};
 
-# reset
-$c->{freq_freq} = $orig{freq_freq};
+  # reset
+  $c->{freq_freq} = $orig{freq_freq};
+}
 
 
 
@@ -394,12 +404,12 @@ SKIP: {
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
   skip 'Bio::DB::HTS::Tabix module not available', 5 unless $Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix::CAN_USE_TABIX_PM;
 
-  $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}, valid_chromosomes => [21]});
-  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+  my $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}, valid_chromosomes => [21]});
+  my $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
   $ib->next();
-  $vf = $ib->buffer->[0];
+  my $vf = $ib->buffer->[0];
 
-  $vf_hash = {
+  my $vf_hash = {
     21 => [$vf],
   };
   $c->_annotate_pm($vf_hash);
