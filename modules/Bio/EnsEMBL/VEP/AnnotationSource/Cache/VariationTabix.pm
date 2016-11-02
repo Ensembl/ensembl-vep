@@ -52,7 +52,7 @@ use base qw(
   Bio::EnsEMBL::VEP::AnnotationSource::BaseVariation
 );
 
-our $CAN_USE_TABIX_PM;
+our ($CAN_USE_TABIX_PM, $CAN_USE_TABIX_CL);
 
 BEGIN {
   if (eval q{ require Bio::DB::HTS::Tabix; 1 }) {
@@ -60,6 +60,13 @@ BEGIN {
   }
   else {
     $CAN_USE_TABIX_PM = 0;
+  }
+
+  if (`which tabix` =~ /\/tabix/) {
+    $CAN_USE_TABIX_CL = 1;
+  }
+  else {
+    $CAN_USE_TABIX_CL = 0;
   }
 }
 
