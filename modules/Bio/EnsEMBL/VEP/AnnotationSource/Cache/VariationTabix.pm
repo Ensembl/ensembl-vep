@@ -55,7 +55,7 @@ use base qw(
 our $CAN_USE_TABIX_PM;
 
 BEGIN {
-  if (eval { require Bio::DB::HTS::Tabix; 1 }) {
+  if (eval q{ require Bio::DB::HTS::Tabix; 1 }) {
     $CAN_USE_TABIX_PM = 1;
   }
   else {

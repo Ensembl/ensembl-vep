@@ -58,7 +58,7 @@ our ($CAN_USE_PERLIO_GZIP, $CAN_USE_GZIP, $CAN_USE_SEREAL);
 BEGIN {
 
   # check Sereal
-  if (eval { require Sereal; 1 }) {
+  if (eval q{ require Sereal; 1 }) {
     $CAN_USE_SEREAL = 1;
   }
   else {
@@ -66,7 +66,7 @@ BEGIN {
   }
 
   # check PerlIO::gzip
-  if (eval { require PerlIO::gzip; 1 }) {
+  if (eval q{ require PerlIO::gzip; 1 }) {
     $CAN_USE_PERLIO_GZIP = 1;
   }
   else {

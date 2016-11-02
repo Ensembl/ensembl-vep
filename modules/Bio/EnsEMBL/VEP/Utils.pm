@@ -69,7 +69,7 @@ our ($CAN_USE_PERLIO_GZIP, $CAN_USE_GZIP, $CAN_USE_IO_UNCOMPRESS);
 BEGIN {
 
   # check PerlIO::gzip
-  if (eval { require PerlIO::gzip; 1 }) {
+  if (eval q{ require PerlIO::gzip; 1 }) {
     $CAN_USE_PERLIO_GZIP = 1;
   }
   else {
@@ -85,7 +85,7 @@ BEGIN {
   }
 
   # check IO::Uncompress::Gunzip 
-  if(eval { use IO::Uncompress::Gunzip qw($GunzipError); 1}) {
+  if(eval q{ use IO::Uncompress::Gunzip qw($GunzipError); 1}) {
     $CAN_USE_IO_UNCOMPRESS = 1;
   }
   else {

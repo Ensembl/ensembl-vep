@@ -53,7 +53,7 @@ use Bio::EnsEMBL::VEP::Utils qw(trim_sequences);
 our $CAN_USE_INTERVAL_TREE;
 
 BEGIN {
-  if (eval { require Set::IntervalTree; 1 }) {
+  if (eval q{ require Set::IntervalTree; 1 }) {
     $CAN_USE_INTERVAL_TREE = 1;
   }
   else {

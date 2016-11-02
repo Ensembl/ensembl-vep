@@ -51,7 +51,7 @@ use base qw(Bio::EnsEMBL::VEP::AnnotationSource);
 our ($CAN_USE_TABIX_PM, $CAN_USE_BIGWIG);
 
 BEGIN {
-  if (eval { require Bio::DB::HTS::Tabix; 1 }) {
+  if (eval q{ require Bio::DB::HTS::Tabix; 1 }) {
     $CAN_USE_TABIX_PM = 1;
 
     eval q{
@@ -65,7 +65,7 @@ BEGIN {
     $CAN_USE_TABIX_PM = 0;
   }
 
-  if (eval { require Bio::DB::BigFile; 1 }) {
+  if (eval q{ require Bio::DB::BigFile; 1 }) {
     $CAN_USE_BIGWIG = 1;
 
     eval q{
