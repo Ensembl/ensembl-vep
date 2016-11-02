@@ -56,8 +56,18 @@ use Bio::EnsEMBL::VEP::Constants;
 
 use Bio::EnsEMBL::VEP::OutputFactory::VEP_output;
 use Bio::EnsEMBL::VEP::OutputFactory::VCF;
-use Bio::EnsEMBL::VEP::OutputFactory::JSON;
 use Bio::EnsEMBL::VEP::OutputFactory::Tab;
+
+our $CAN_USE_JSON;
+
+BEGIN {
+  if(eval q{ use Bio::EnsEMBL::VEP::OutputFactory::JSON; 1 }) {
+    $CAN_USE_JSON = 1;
+  }
+  else {
+    $CAN_USE_JSON = 0;
+  }
+}
 
 my %SO_RANKS = map {$_->SO_term => $_->rank} values %Bio::EnsEMBL::Variation::Utils::Constants::OVERLAP_CONSEQUENCES;
 
@@ -142,6 +152,11 @@ sub new {
 
     $format = lc($format);
     throw("ERROR: Unknown or unsupported output format $format\n") unless $FORMAT_MAP{$format};
+
+
+    if($FORMAT_MAP{$format} eq 'JSON') {
+      throw("ERROR: Cannot use format $format without JSON module installed\n") unless $CAN_USE_JSON;
+    }
 
     my $class = 'Bio::EnsEMBL::VEP::OutputFactory::'.$FORMAT_MAP{$format};
     return $class->new({%$hashref, config => $self->config});
