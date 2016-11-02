@@ -231,22 +231,19 @@ is($bv->get_database_assembly, undef, 'get_database_assembly - no DB');
 
 SKIP: {
   my $db_cfg = $test_cfg->db_cfg;
-  my $can_use_db = $db_cfg && scalar keys %$db_cfg;
+
+  eval q{
+    use Bio::EnsEMBL::Test::TestUtils;
+    use Bio::EnsEMBL::Test::MultiTestDB;
+    1;
+  };
+
+  my $can_use_db = $db_cfg && scalar keys %$db_cfg && !$@;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
   skip 'No local database configured', 6 unless $can_use_db;
 
-  my $multi;
-
-  if($can_use_db) {
-    eval q{
-      use Bio::EnsEMBL::Test::TestUtils;
-      use Bio::EnsEMBL::Test::MultiTestDB;
-      1;
-    };
-
-    $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens');
-  }
+  my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens') if $can_use_db;
   
   $bv = Bio::EnsEMBL::VEP::BaseVEP->new({
     config => Bio::EnsEMBL::VEP::Config->new({

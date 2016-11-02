@@ -36,22 +36,19 @@ use_ok('Bio::EnsEMBL::VEP::AnnotationSource::Database::RegFeat');
 
 SKIP: {
   my $db_cfg = $test_cfg->db_cfg;
-  my $can_use_db = $db_cfg && scalar keys %$db_cfg;
+
+  eval q{
+    use Bio::EnsEMBL::Test::TestUtils;
+    use Bio::EnsEMBL::Test::MultiTestDB;
+    1;
+  };
+
+  my $can_use_db = $db_cfg && scalar keys %$db_cfg && !$@;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
   skip 'No local database configured', 32 unless $can_use_db;
 
-  my $multi;
-
-  if($can_use_db) {
-    eval q{
-      use Bio::EnsEMBL::Test::TestUtils;
-      use Bio::EnsEMBL::Test::MultiTestDB;
-      1;
-    };
-
-    $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens');
-  }
+  my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens') if $can_use_db;
 
   # need to get a config object for further tests
   use_ok('Bio::EnsEMBL::VEP::Config');
