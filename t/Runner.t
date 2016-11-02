@@ -717,67 +717,74 @@ open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 ## run_rest
 ###########
 
-$runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, format => 'vcf', delimiter => ' '});
-is_deeply(
-  $runner->run_rest('21 25585733 rs142513484 C T . . .'),
-  [
-    {
-      'input' => '21 25585733 rs142513484 C T . . .',
-      'assembly_name' => 'GRCh38',
-      'end' => 25585733,
-      'seq_region_name' => '21',
-      'strand' => 1,
-      'transcript_consequences' => [
-        {
-          'gene_id' => 'ENSG00000154719',
-          'variant_allele' => 'T',
-          'cdna_end' => 1122,
-          'consequence_terms' => [
-            '3_prime_UTR_variant'
-          ],
-          'strand' => -1,
-          'transcript_id' => 'ENST00000307301',
-          'cdna_start' => 1122,
-          'impact' => 'MODIFIER'
-        },
-        {
-          'gene_id' => 'ENSG00000154719',
-          'cds_start' => 991,
-          'variant_allele' => 'T',
-          'cdna_end' => 1033,
-          'protein_start' => 331,
-          'codons' => 'Gca/Aca',
-          'cds_end' => 991,
-          'consequence_terms' => [
-            'missense_variant'
-          ],
-          'protein_end' => 331,
-          'amino_acids' => 'A/T',
-          'strand' => -1,
-          'transcript_id' => 'ENST00000352957',
-          'cdna_start' => 1033,
-          'impact' => 'MODERATE'
-        },
-        {
-          'gene_id' => 'ENSG00000260583',
-          'variant_allele' => 'T',
-          'distance' => 2407,
-          'consequence_terms' => [
-            'upstream_gene_variant'
-          ],
-          'strand' => -1,
-          'transcript_id' => 'ENST00000567517',
-          'impact' => 'MODIFIER'
-        }
-      ],
-      'id' => 'rs142513484',
-      'most_severe_consequence' => 'missense_variant',
-      'allele_string' => 'C/T',
-      'start' => 25585733
-    }
-  ],
-  'run_rest'
-);
+SKIP: {
+  no warnings 'once';
+
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  skip 'JSON module not available', 1 unless $Bio::EnsEMBL::VEP::OutputFactory::CAN_USE_JSON;
+
+  $runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, format => 'vcf', delimiter => ' '});
+  is_deeply(
+    $runner->run_rest('21 25585733 rs142513484 C T . . .'),
+    [
+      {
+        'input' => '21 25585733 rs142513484 C T . . .',
+        'assembly_name' => 'GRCh38',
+        'end' => 25585733,
+        'seq_region_name' => '21',
+        'strand' => 1,
+        'transcript_consequences' => [
+          {
+            'gene_id' => 'ENSG00000154719',
+            'variant_allele' => 'T',
+            'cdna_end' => 1122,
+            'consequence_terms' => [
+              '3_prime_UTR_variant'
+            ],
+            'strand' => -1,
+            'transcript_id' => 'ENST00000307301',
+            'cdna_start' => 1122,
+            'impact' => 'MODIFIER'
+          },
+          {
+            'gene_id' => 'ENSG00000154719',
+            'cds_start' => 991,
+            'variant_allele' => 'T',
+            'cdna_end' => 1033,
+            'protein_start' => 331,
+            'codons' => 'Gca/Aca',
+            'cds_end' => 991,
+            'consequence_terms' => [
+              'missense_variant'
+            ],
+            'protein_end' => 331,
+            'amino_acids' => 'A/T',
+            'strand' => -1,
+            'transcript_id' => 'ENST00000352957',
+            'cdna_start' => 1033,
+            'impact' => 'MODERATE'
+          },
+          {
+            'gene_id' => 'ENSG00000260583',
+            'variant_allele' => 'T',
+            'distance' => 2407,
+            'consequence_terms' => [
+              'upstream_gene_variant'
+            ],
+            'strand' => -1,
+            'transcript_id' => 'ENST00000567517',
+            'impact' => 'MODIFIER'
+          }
+        ],
+        'id' => 'rs142513484',
+        'most_severe_consequence' => 'missense_variant',
+        'allele_string' => 'C/T',
+        'start' => 25585733
+      }
+    ],
+    'run_rest'
+  );
+}
 
 
 
