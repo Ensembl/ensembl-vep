@@ -429,6 +429,7 @@ SKIP: {
   $vf_hash = {
     $vf->{chr} => [$vf],
   };
+  delete($c->{_chr_name_map});
   $c->chromosome_synonyms($test_cfg->{chr_synonyms});
   $c->_annotate_pm($vf_hash);
 
