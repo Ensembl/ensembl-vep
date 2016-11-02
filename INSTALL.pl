@@ -43,48 +43,10 @@ use Getopt::Long;
 use File::Path qw(mkpath rmtree);
 use File::Copy;
 use File::Basename;
-use Archive::Extract;
 use Net::FTP;
 use Cwd;
 use Scalar::Util qw(looks_like_number);
 use Bio::EnsEMBL::VEP::Utils qw(get_version_data get_version_string);
-
-## BEGIN BLOCK, CHECK WHAT MODULES ETC WE CAN USE
-#################################################
-
-our ($CAN_USE_CURL, $CAN_USE_LWP, $CAN_USE_HTTP_TINY, $ua);
-
-BEGIN {
-  # check curl
-  if (`which curl` =~ /\/curl/) {
-    $CAN_USE_CURL = 1;
-  }
-  else {
-    $CAN_USE_CURL = 0;
-  }
-
-  if(eval q{ use LWP::Simple qw(getstore get $ua); 1 }) {
-    $CAN_USE_LWP = 1;
-
-    # set up a user agent's proxy (excluding github)
-    $ua->env_proxy;
-  }
-  else {
-    $CAN_USE_LWP = 0;
-  }
-
-  if(eval q{ use HTTP::Tiny; 1 }) {
-    $CAN_USE_HTTP_TINY = 1;
-  }
-  else {
-    $CAN_USE_HTTP_TINY = 0;
-  }
-}
-
-$| = 1;
-
-# CONFIGURE
-###########
 
 our (
   $DEST_DIR,
@@ -112,8 +74,39 @@ our (
   $HTSLIB_DIR,
   $BIODBHTS_DIR,
   $REALPATH_DEST_DIR,
-  $NO_TEST
+  $NO_TEST,
+  $ua,
+
+  $CAN_USE_CURL,
+  $CAN_USE_LWP,
+  $CAN_USE_HTTP_TINY,
+  $CAN_USE_ARCHIVE,
+  $CAN_USE_UNZIP,
+  $CAN_USE_GZIP,
 );
+
+## BEGIN BLOCK, CHECK WHAT MODULES ETC WE CAN USE
+#################################################
+
+BEGIN {
+  if(eval q{ use LWP::Simple qw(getstore get $ua); 1 }) {
+    $CAN_USE_LWP = 1;
+
+    # set up a user agent's proxy (excluding github)
+    $ua->env_proxy;
+  }
+
+  $CAN_USE_CURL      = 1 if `which curl` =~ /\/curl/;
+  $CAN_USE_HTTP_TINY = 1 if eval q{ use HTTP::Tiny; 1 };
+  $CAN_USE_ARCHIVE   = 1 if eval q{ use Archive::Extract; 1 };
+  $CAN_USE_UNZIP     = 1 if `which unzip` =~ /\/unzip/;
+  $CAN_USE_GZIP      = 1 if `which gzip` =~ /\/gzip/;
+}
+
+$| = 1;
+
+# CONFIGURE
+###########
 
 # other global data
 my @API_MODULES = (
@@ -1327,7 +1320,7 @@ sub fasta() {
     eval q{ use Bio::DB::HTS::Faidx; };
     my $can_use_faidx = $@ ? 0 : 1;
 
-    if($can_use_faidx && -e $bgzip && `which gzip`) {
+    if($can_use_faidx && -e $bgzip && $CAN_USE_GZIP) {
       print " - converting sequence data to bgzip format, this may take some time...\n" unless $QUIET;
       my $curdir = getcwd;
       my $bgzip_convert = "gzip -dc $ex | $bgzip -c > $ex\.bgz; mv $ex\.bgz $ex";
@@ -1638,8 +1631,25 @@ sub download_to_file {
 sub unpack_arch {
   my ($arch_file, $dir) = @_;
 
-  my $ar = Archive::Extract->new(archive => $arch_file);
-  my $ok = $ar->extract(to => $dir) or die $ar->error;
+  if($CAN_USE_ARCHIVE) {
+    my $ar = Archive::Extract->new(archive => $arch_file);
+    my $ok = $ar->extract(to => $dir) or die $ar->error;
+  }
+  else {
+    if($arch_file =~ /.zip$/ && $CAN_USE_UNZIP) {
+      `unzip $arch_file -d $dir`;
+    }
+    elsif($arch_file =~ /\.gz$/ && $CAN_USE_GZIP) {
+      my $unpacked = $arch_file;
+      $unpacked =~ s/.*\///g;
+      $unpacked =~ s/\.gz$//;
+      `gzip -dc $arch_file > $dir/$unpacked`;
+    }
+    else {
+      die("ERROR: Unable to unpack file $arch_file without Archive::Extract or unzip/gzip\n");
+    }
+  }
+
   unlink($arch_file);
 }
 
