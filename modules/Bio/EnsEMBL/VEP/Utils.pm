@@ -64,7 +64,7 @@ use vars qw(@ISA @EXPORT_OK);
   &get_version_string
 );
 
-our ($CAN_USE_PERLIO_GZIP, $CAN_USE_GZIP, $CAN_USE_IO_UNCOMPRESS, $GunzipError);
+our ($CAN_USE_PERLIO_GZIP, $CAN_USE_GZIP, $CAN_USE_IO_UNCOMPRESS);
 
 BEGIN {
 
@@ -226,7 +226,8 @@ sub get_compressed_filehandle {
     return $fh;
   }
   if($CAN_USE_IO_UNCOMPRESS) {
-    return IO::Uncompress::Gunzip->new($file, MultiStream => $multi) or die("ERROR: $GunzipError");
+    my $fh = IO::Uncompress::Gunzip->new($file, MultiStream => $multi) or die("ERROR: $GunzipError");
+    return $fh;
   }
   elsif($CAN_USE_GZIP) {
     open my $fh, "gzip -dc $file |" or die("ERROR: $!");
