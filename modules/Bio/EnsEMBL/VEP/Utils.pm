@@ -226,7 +226,7 @@ sub get_compressed_filehandle {
     return $fh;
   }
   if($CAN_USE_IO_UNCOMPRESS) {
-    return IO::Uncompress::Gunzip->new($file, MultiStream => $multi) or die("ERROR: $GunzipError");
+    return IO::Uncompress::Gunzip->new($file, {MultiStream => $multi}) or die("ERROR: $GunzipError");
   }
   elsif($CAN_USE_GZIP) {
     open my $fh, "gzip -dc $file |" or die("ERROR: $!");
