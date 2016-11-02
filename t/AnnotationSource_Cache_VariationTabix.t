@@ -54,6 +54,8 @@ throws_ok { $c->get_dump_file_name() } qr/No chromosome/, 'get_dump_file_name no
 
 is($c->delimiter, "\t", 'delimiter');
 
+$c->chromosome_synonyms($test_cfg->{chr_synonyms});
+
 
 
 ## TESTS WITH AN INPUT BUFFER
@@ -121,7 +123,6 @@ SKIP: {
   is_deeply($vf->{existing}, $exp, '_annotate_cl');
 
   # check synonyms
-  $c->chromosome_synonyms($test_cfg->{chr_synonyms});
   $c->{valid_chromosomes} = [21];
   $vf->{chr} = 'NC_000021.9';
 
