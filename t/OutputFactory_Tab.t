@@ -258,7 +258,7 @@ sub get_annotated_buffer {
 
   my $runner = Bio::EnsEMBL::VEP::Runner->new({
     %$cfg_hash,
-    dir => $test_cfg->{cache_root_dir}.'/sereal',
+    dir => $test_cfg->{cache_root_dir},
     %$tmp_cfg,
   });
 
