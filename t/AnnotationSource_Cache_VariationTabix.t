@@ -101,18 +101,18 @@ is(ref($ib), 'Bio::EnsEMBL::VEP::InputBuffer', 'check class');
 
 is(ref($ib->next()), 'ARRAY', 'check buffer next');
 
+my ($vf, $vf_hash);
 
 SKIP: {
   no warnings 'once';
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'Bio::DB::HTS::Tabix module not available', 21
-    unless $Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix::CAN_USE_TABIX_PM
-    or $Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix::CAN_USE_TABIX_CL;
+  skip 'tabix binary not available', 3
+    unless $Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix::CAN_USE_TABIX_CL;
 
   # the two methods in this class use a hashref of lists of VFs keyed on chr
-  my $vf = $ib->buffer->[0];
-  my $vf_hash = {
+  $vf = $ib->buffer->[0];
+  $vf_hash = {
     $vf->{chr} => [$vf],
   };
 
@@ -134,11 +134,8 @@ SKIP: {
 
   is_deeply($vf->{existing}, $exp, 'chr synonym');
 
-  $vf->{chr} = 21;
-
-
-
   # no match
+  $vf->{chr} = 21;
   $vf->{start}++;
 
   delete $vf->{existing};
@@ -147,6 +144,15 @@ SKIP: {
   };
 
   is_deeply($vf->{existing}, undef, 'miss by coord - _annotate_cl');
+}
+
+SKIP: {
+  no warnings 'once';
+
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  skip 'Bio::DB::HTS::Tabix module or tabix binary not available', 19
+    unless $Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix::CAN_USE_TABIX_CL
+    or $Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix::CAN_USE_TABIX_PM;
 
   $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}, valid_chromosomes => [21]});
   $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
@@ -402,14 +408,14 @@ SKIP: {
 SKIP: {
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'Bio::DB::HTS::Tabix module not available', 5 unless $Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix::CAN_USE_TABIX_PM;
+  skip 'Bio::DB::HTS::Tabix module not available', 3 unless $Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix::CAN_USE_TABIX_PM;
 
-  my $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}, valid_chromosomes => [21]});
-  my $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+  $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}, valid_chromosomes => [21]});
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
   $ib->next();
-  my $vf = $ib->buffer->[0];
+  $vf = $ib->buffer->[0];
 
-  my $vf_hash = {
+  $vf_hash = {
     21 => [$vf],
   };
   $c->_annotate_pm($vf_hash);
@@ -423,7 +429,7 @@ SKIP: {
   $vf_hash = {
     $vf->{chr} => [$vf],
   };
-  $c->_annotate_cl($vf_hash);
+  $c->_annotate_pm($vf_hash);
 
   is_deeply($vf->{existing}, $exp, '_annotate_pm - chr synonym');
   $vf->{chr} = 21;
@@ -437,6 +443,15 @@ SKIP: {
   $c->_annotate_pm($vf_hash);
 
   is_deeply($vf->{existing}, undef, 'miss by coord - _annotate_pm');
+}
+
+
+SKIP: {
+  no warnings 'once';
+
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  skip 'tabix binary not available', 2
+    unless $Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix::CAN_USE_TABIX_CL;
 
 
   # do the same test with the "opposite" use of perl module vs command line
