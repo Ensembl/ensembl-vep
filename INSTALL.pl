@@ -42,7 +42,6 @@ use lib $RealBin.'/modules';
 use Getopt::Long;
 use File::Path qw(mkpath rmtree);
 use File::Copy;
-use File::Copy::Recursive qw(dircopy);
 use File::Basename;
 use Archive::Extract;
 use Net::FTP;
@@ -828,6 +827,26 @@ sub install_biodbhts() {
   }
 
   chdir $pdir;
+}
+
+sub dircopy {
+  my ($from, $to) = @_;
+
+  opendir FROM, $from;
+
+  foreach my $file(grep {!/^\.\.?/} readdir FROM) {
+
+    # dir?
+    if(-d "$from/$file") {
+      mkdir("$to/$file") unless -d "$to/$file";
+      dircopy("$from/$file", "$to/$file");
+    }
+    else {
+      copy("$from/$file", "$to/$file");
+    }
+  }
+
+  closedir FROM;
 }
 
 
