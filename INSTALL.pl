@@ -87,7 +87,34 @@ $| = 1;
 # CONFIGURE
 ###########
 
-our ($DEST_DIR, $ENS_CVS_ROOT, $API_VERSION, $ASSEMBLY, $ENS_GIT_ROOT, $BIOPERL_URL, $CACHE_URL, $CACHE_DIR, $PLUGINS, $PLUGIN_URL, $FASTA_URL, $FTP_USER, $help, $NO_UPDATE, $SPECIES, $AUTO, $QUIET, $PREFER_BIN, $CONVERT, $TEST, $NO_HTSLIB, $LIB_DIR, $HTSLIB_DIR, $BIODBHTS_DIR, $REALPATH_DEST_DIR );
+our (
+  $DEST_DIR,
+  $ENS_CVS_ROOT,
+  $API_VERSION,
+  $ASSEMBLY,
+  $ENS_GIT_ROOT,
+  $BIOPERL_URL,
+  $CACHE_URL,
+  $CACHE_DIR,
+  $PLUGINS,
+  $PLUGIN_URL,
+  $FASTA_URL,
+  $FTP_USER,
+  $HELP,
+  $NO_UPDATE,
+  $SPECIES,
+  $AUTO,
+  $QUIET,
+  $PREFER_BIN,
+  $CONVERT,
+  $TEST,
+  $NO_HTSLIB,
+  $LIB_DIR,
+  $HTSLIB_DIR,
+  $BIODBHTS_DIR,
+  $REALPATH_DEST_DIR,
+  $NO_TEST
+);
 
 # other global data
 my @API_MODULES = (
@@ -111,7 +138,7 @@ GetOptions(
   'CACHEURL|u=s' => \$CACHE_URL,
   'CACHEDIR|c=s' => \$CACHE_DIR,
   'FASTAURL|f=s' => \$FASTA_URL,
-  'HELP|h'       => \$help,
+  'HELP|h'       => \$HELP,
   'NO_UPDATE|n'  => \$NO_UPDATE,
   'SPECIES|s=s'  => \$SPECIES,
   'PLUGINS|g=s'  => \$PLUGINS,
@@ -122,6 +149,7 @@ GetOptions(
   'CONVERT|t'    => \$CONVERT,
   'TEST'         => \$TEST,
   'NO_HTSLIB|l'  => \$NO_HTSLIB,
+  'NO_TEST'      => \$NO_TEST,
 ) or die("ERROR: Failed to parse arguments");
 
 # load version data
@@ -129,7 +157,7 @@ our $CURRENT_VERSION_DATA = get_version_data($RealBin.'/.version');
 our $VERSION = $CURRENT_VERSION_DATA->{$VEP_MODULE_NAME}->{release};
 $VERSION =~ s/release\///;
 
-if(defined($help)) {
+if($HELP) {
   usage();
   exit(0);
 }
@@ -379,7 +407,7 @@ sub api() {
 
   chdir $curdir;
   install_api();
-  test();
+  test() unless $NO_TEST;
 }
 
 
@@ -844,11 +872,27 @@ sub bioperl() {
 ######
 sub test() {
 
-  print "\nTesting VEP script\n" unless $QUIET;
+  print "\nTesting VEP installation\n" unless $QUIET;
 
-  my $test_vep = `perl -I $DEST_DIR $dirname/vep.pl --help 2>&1`;
+  eval q{use Test::Harness};
+  if(!$@) {
+    $ENV{PERL5LIB} = $ENV{PERL5LIB} ? $ENV{PERL5LIB}.':'.$DEST_DIR : $DEST_DIR;
 
-  $test_vep =~ /ENSEMBL VARIANT EFFECT PREDICTOR/ or die "ERROR: Testing VEP script failed with the following error\n$test_vep\n";
+    opendir TEST, "$dirname\/t";
+    my @test_files = map {"$dirname\/t\/".$_} grep {!/^\./ && /\.t$/} readdir TEST;
+    closedir TEST;
+
+    # haplo.pl tests require Set::IntervalTree which is not installed here
+    eval q{use Set::IntervalTree};
+    @test_files = grep {!/Haplo/} @test_files if $@;
+
+    print "Warning: Tests failed, VEP may not run correctly\n" unless runtests(@test_files);
+  }
+  else {
+    my $test_vep = `perl -I $DEST_DIR $dirname/vep.pl --help 2>&1`;
+
+    $test_vep =~ /ENSEMBL VARIANT EFFECT PREDICTOR/ or die "ERROR: Testing VEP script failed with the following error\n$test_vep\n";
+  }
 
   print " - OK!\n" unless $QUIET;
 }
