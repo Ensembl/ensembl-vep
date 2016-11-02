@@ -52,7 +52,7 @@ use Bio::EnsEMBL::VEP::Utils qw(get_version_data get_version_string);
 ## BEGIN BLOCK, CHECK WHAT MODULES ETC WE CAN USE
 #################################################
 
-our ($CAN_USE_CURL, $CAN_USE_LWP, $CAN_USE_HTTP_TINY);
+our ($CAN_USE_CURL, $CAN_USE_LWP, $CAN_USE_HTTP_TINY, $ua);
 
 BEGIN {
   # check curl
@@ -127,7 +127,7 @@ my $archive_type = '.zip';
 my $git_api_root = 'https://api.github.com/repos/Ensembl/';
 my $VEP_MODULE_NAME = 'ensembl-vep';
 
-our (@store_species, @indexes, @files, $ftp, $ua, $dirname);
+our (@store_species, @indexes, @files, $ftp, $dirname);
 
 GetOptions(
   'DESTDIR|d=s'  => \$DEST_DIR,
