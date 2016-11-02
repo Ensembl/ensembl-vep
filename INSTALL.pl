@@ -399,6 +399,9 @@ sub api() {
   my $curdir = getcwd;
   bioperl();
 
+  # htslib needs to find bioperl to pass tests
+  $ENV{PERL5LIB} = $ENV{PERL5LIB} ? $ENV{PERL5LIB}.':'.$DEST_DIR : $DEST_DIR;
+
   unless($NO_HTSLIB) {
     chdir $curdir;
     install_biodbhts();
@@ -895,8 +898,6 @@ sub test() {
 
   eval q{use Test::Harness; use Test::Exception; };
   if(!$@) {
-    $ENV{PERL5LIB} = $ENV{PERL5LIB} ? $ENV{PERL5LIB}.':'.$DEST_DIR : $DEST_DIR;
-
     opendir TEST, "$dirname\/t";
     my @test_files = map {"$dirname\/t\/".$_} grep {!/^\./ && /\.t$/} readdir TEST;
     closedir TEST;
