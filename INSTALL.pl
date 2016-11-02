@@ -63,7 +63,7 @@ BEGIN {
     $CAN_USE_CURL = 0;
   }
 
-  if(eval { use LWP::Simple qw(getstore get $ua); 1 }) {
+  if(eval q{ use LWP::Simple qw(getstore get $ua); 1 }) {
     $CAN_USE_LWP = 1;
 
     # set up a user agent's proxy (excluding github)
@@ -73,7 +73,7 @@ BEGIN {
     $CAN_USE_LWP = 0;
   }
 
-  if(eval { use HTTP::Tiny; 1 }) {
+  if(eval q{ use HTTP::Tiny; 1 }) {
     $CAN_USE_HTTP_TINY = 1;
   }
   else {
