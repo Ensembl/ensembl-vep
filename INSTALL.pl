@@ -159,8 +159,8 @@ my $default_dir_used = check_default_dir();
 $LIB_DIR            = $DEST_DIR;
 $HTSLIB_DIR         = $LIB_DIR.'/htslib';
 $BIODBHTS_DIR       = $LIB_DIR.'/biodbhts';
+$REALPATH_DEST_DIR .= Cwd::realpath($DEST_DIR).'/Bio';
 $DEST_DIR          .= '/Bio';
-$REALPATH_DEST_DIR .= Cwd::realpath($DEST_DIR);
 $dirname            = dirname(__FILE__) || '.';
 
 $ENS_GIT_ROOT ||= 'https://github.com/Ensembl/';
