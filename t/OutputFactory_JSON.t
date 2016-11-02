@@ -23,7 +23,6 @@ use Bio::EnsEMBL::Variation::VariationFeature;
 use Bio::EnsEMBL::Variation::StructuralVariationFeature;
 
 use lib $Bin;
-use JSON;
 use VEPTestingConfig;
 my $test_cfg = VEPTestingConfig->new();
 
@@ -35,12 +34,13 @@ SKIP: {
   no warnings 'once';
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'JSON module not available', 17 unless $Bio::EnsEMBL::VEP::OutputFactory::CAN_USE_JSON;
+  skip 'JSON module not available', 18 unless $Bio::EnsEMBL::VEP::OutputFactory::CAN_USE_JSON;
 
   ## BASIC TESTS
   ##############
 
   # use test
+  use_ok('JSON');
   use_ok('Bio::EnsEMBL::VEP::OutputFactory::JSON');
 
   use_ok('Bio::EnsEMBL::VEP::Config');
