@@ -36,7 +36,7 @@ GetOptions(
   'delimiter=s',             # delimiter between fields in input
   
   # DB options
-  'species=s',               # species e.g. human, homo_sapiens
+  'species|s=s',             # species e.g. human, homo_sapiens
   'registry=s',              # registry file
   'host=s',                  # database host
   'port=s',                  # database port
