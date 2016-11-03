@@ -23,9 +23,9 @@
 The VEP package requires Perl (>=5.10 recommended, tested on 5.8, 5.10, 5.14, 5.18, 5.22) and the [DBI](http://search.cpan.org/~timb/DBI/DBI.pm) package installed.
 The remaining dependencies can be installed using the included [INSTALL.pl](http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html#installer) script. Basic instructions:
 ```bash
-$ git clone https://github.com/willmclaren/ensembl-vep.git
-$ cd ensembl-vep
-$ perl INSTALL.pl
+git clone https://github.com/willmclaren/ensembl-vep.git
+cd ensembl-vep
+perl INSTALL.pl
 ```
 The installer may also be used to check for updates to this and co-dependent packages, simply re-run INSTALL.pl.
 
@@ -46,7 +46,7 @@ The following modules are optional but most users will benefit from installing t
 
 ### Usage
 ```bash
-$ perl vep.pl -i input.vcf -o out.txt -offline
+perl vep.pl -i input.vcf -o out.txt -offline
 ```
 vep.pl is compatible with the same downloadable caches as the ensembl-tools VEP. See [documentation](http://www.ensembl.org/info/docs/tools/vep/script/index.html) for full command line instructions. The [INSTALL.pl](http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html#installer) script may be used to download and set up caches for use with vep.pl.
 
@@ -62,9 +62,9 @@ This ensembl-vep repo is a complete rewrite of the VEP code intended to make the
 * **Allele frequencies:** Allele frequencies are now reported for the input allele only e.g. as `0.023` instead of `A:0.023,G:0.0005`. To reflect this change, the allele frequency fields are now named e.g. `AFR_AF` instead of `AFR_MAF`. The command line flags reflect this also, so `--gmaf` is now `--af` and `--maf_1kg` is now `--af_1kg`. Using the old flags will produce a deprecation message.
 * **GFF and GTF files:** GFF and GTF files may now be used directly as a source of transcript annotation in place of, or even alongside, a cache or database source. Previously this involved [building a cache using gtf2vep.pl](http://www.ensembl.org/info/docs/tools/vep/script/vep_cache.html#gtf), which is now redundant. The files must first be bgzipped and tabix-indexed, and a FASTA file containing genomic sequence is required:
 ```bash
-$ grep -v "#" data.gff | sort -k1,1 -k4,4n -k5,5n | bgzip -c > data.gff.gz
-$ tabix -p gff data.gff.gz
-$ perl vep.pl -i input.vcf -gff data.gff.gz -fasta genome.fa.gz
+grep -v "#" data.gff | sort -k1,1 -k4,4n -k5,5n | bgzip -c > data.gff.gz
+tabix -p gff data.gff.gz
+perl vep.pl -i input.vcf -gff data.gff.gz -fasta genome.fa.gz
 ```
 * **VCF custom annotations:** [VCF files used as a source of custom annotation](http://www.ensembl.org/info/docs/tools/vep/script/vep_custom.html) will now have allele-specific data added from INFO fields; previously the whole content of each requested KEY=VALUE pair was reported.
 * **New pick flags:** New flags added to aid [selecting amongst consequence output](http://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick): `--pick_allele_gene`, `--flag_pick_allele_gene`
@@ -94,7 +94,7 @@ Input data must be a [VCF](http://samtools.github.io/hts-specs/VCFv4.3.pdf) cont
 When using a VEP cache as the source of transcript annotation, the first time you run haplo.pl with a particular cache it will spend some time scanning transcript locations in the cache.
 
 ```bash
-$ perl haplo.pl -i input.vcf -o out.txt -cache
+perl haplo.pl -i input.vcf -o out.txt -cache
 ```
 
 <a name="haplooutput"></a>
