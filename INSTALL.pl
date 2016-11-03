@@ -273,6 +273,11 @@ sub update() {
 
   unlink($repo_file);
 
+  unless($default_branch) {
+    print "WARNING: Unable to carry out version check for $module\n" unless $QUIET;
+    return;
+  }
+
   my $default_branch_number = $default_branch;
   $default_branch_number =~ s/release\/// if $default_branch_number;
 
