@@ -3,7 +3,7 @@
 * **VEP** (Variant Effect Predictor) predicts the functional effects of genomic variants.
 * **Haplosaurus** uses phased genotype data to predict whole-transcript haplotype sequences.
 
-> **!!! IMPORTANT !!!** This is pre-release code. Use at your own risk. Please continue to use the version of [VEP](http://www.ensembl.org/vep) in [ensembl-tools](https://github.com/Ensembl/ensembl-tools/tree/release/85/scripts/variant_effect_predictor) if you are unsure.
+> **!!! IMPORTANT !!!** This is pre-release code. Use at your own risk. Please continue to use the version of [VEP](http://www.ensembl.org/vep) in [ensembl-tools](https://github.com/Ensembl/ensembl-tools/tree/release/86/scripts/variant_effect_predictor) if you are unsure.
 
 ##### Table of contents
 * [Installation and requirements](#install)
@@ -20,33 +20,22 @@
 <a name="install"></a>
 
 ### Installation and requirements
-The VEP package requires Perl (>=5.10 recommended), the Ensembl API and a few other Perl modules. The Ensembl API in turn requires the [BioPerl](https://github.com/bioperl/bioperl-live), [DBI](http://search.cpan.org/~timb/DBI/DBI.pm) and [DBD::mysql](http://search.cpan.org/~michielb/DBD-mysql-4.036/lib/DBD/mysql.pm) packages to be installed.
-#### Ensembl API modules
-Use git to install ([Ensembl git install instructions](http://www.ensembl.org/info/docs/api/api_git.html)). Don't forget to add each component's modules path (e.g. `ensembl-variation/modules`) to the `$PERL5LIB` environment variable.
-  * ensembl-variation
-  * ensembl
-  * ensembl-funcgen
-  * ensembl-io
-  
-> **IMPORTANT:** ensembl-variation and ensembl-io currently must be on the master or (when available) release/86 branch:
-
+The VEP package requires Perl (>=5.10 recommended, tested on 5.8, 5.10, 5.14, 5.18, 5.22) and the [DBI](http://search.cpan.org/~timb/DBI/DBI.pm) package installed.
+The remaining dependencies can be installed using the included [INSTALL.pl](http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html#installer) script. Basic instructions:
 ```bash
-$ cd ensembl-variation
-$ git checkout master
-$ cd ../ensembl-io
-$ git checkout master
-$ cd ../
+$ git clone https://github.com/willmclaren/ensembl-vep.git
+$ cd ensembl-vep
+$ perl INSTALL.pl
 ```
+The installer may also be used to check for updates to this and co-dependent packages, simply re-run INSTALL.pl.
 
-#### CPAN modules
-We recommend using [cpanminus](http://search.cpan.org/~miyagawa/Menlo-1.9003/script/cpanm-menlo) to install.
-  * [Set::IntervalTree](http://search.cpan.org/~benbooth/Set-IntervalTree/lib/Set/IntervalTree.pm)
-  * [Bio::DB::HTS](http://search.cpan.org/dist/Bio-DB-HTS/) - requires compiled [htslib](https://github.com/samtools/htslib), set `$HTSLIB_DIR` to htslib path before installing Bio::DB::HTS
-  * [JSON](http://search.cpan.org/dist/JSON/)
-
-Additional non-essential CPAN modules required for non-core functionality:
-* [PerlIO::gzip](http://search.cpan.org/~nwclark/PerlIO-gzip-0.19/gzip.pm) - faster compressed file parsing
-* [Bio::DB::BigFile](http://search.cpan.org/~lds/Bio-BigFile-1.07/lib/Bio/DB/BigFile.pm) - required for reading custom annotation data from BigWig files
+#### Additional CPAN modules
+The following modules are optional but most users will benefit from installing them. We recommend using [cpanminus](http://search.cpan.org/~miyagawa/Menlo-1.9003/script/cpanm-menlo) to install.
+  * [DBD::mysql](http://search.cpan.org/~michielb/DBD-mysql/lib/DBD/mysql.pm) - required for database access (`--database` or `--cache` without `--offline`)
+  * [Set::IntervalTree](http://search.cpan.org/~benbooth/Set-IntervalTree/lib/Set/IntervalTree.pm) - required for Haplosaurus, also confers speed updates to VEP
+  * [JSON](http://search.cpan.org/dist/JSON/) - required for writing JSON output
+  * [PerlIO::gzip](http://search.cpan.org/~nwclark/PerlIO-gzip-0.19/gzip.pm) - faster compressed file parsing
+  * [Bio::DB::BigFile](http://search.cpan.org/~lds/Bio-BigFile-1.07/lib/Bio/DB/BigFile.pm) - required for reading custom annotation data from BigWig files
  
 ---
 
@@ -57,9 +46,9 @@ Additional non-essential CPAN modules required for non-core functionality:
 
 ### Usage
 ```bash
-$ perl vep.pl -i input.vcf -o out.txt -cache
+$ perl vep.pl -i input.vcf -o out.txt -offline
 ```
-vep.pl is compatible with the same downloadable caches as the ensembl-tools VEP. See [documentation](http://www.ensembl.org/info/docs/tools/vep/script/index.html) for full command line instructions. The [INSTALL.pl](https://github.com/Ensembl/ensembl-tools/blob/release/85/scripts/variant_effect_predictor/INSTALL.pl) script from ensembl-tools VEP may be used to download and set up caches for use with vep.pl (skip the API install part).
+vep.pl is compatible with the same downloadable caches as the ensembl-tools VEP. See [documentation](http://www.ensembl.org/info/docs/tools/vep/script/index.html) for full command line instructions. The [INSTALL.pl](http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html#installer) script may be used to download and set up caches for use with vep.pl.
 
 > Note that the documentation hosted on ensembl.org and linked to from here currently corresponds to the ensembl-tools version of VEP; this will be updated to reflect the new version soon. Almost all commands, flags and plugins should work on both versions.
 
@@ -87,7 +76,7 @@ $ perl vep.pl -i input.vcf -gff data.gff.gz -fasta genome.fa.gz
   * pileup input: `--format pileup`
   * MAF flags (replaced by AF flags): `--gmaf` (`--af`), `--maf_1kg` (`--af_1kg`), `--maf_esp` (`--af_esp`), `--maf_exac` (`--af_exac`)
   * known variant allele checking (on by default, use `--no_check_alleles` to restore old behaviour):  `--check_alleles` 
-  * cache building flags (to be replaced by internal Ensembl pipeline): `--build`, `--write_cache`
+  * cache building flags (replaced by internal Ensembl pipeline): `--build`, `--write_cache`
 
 ---
 <a name="haplo"></a>
