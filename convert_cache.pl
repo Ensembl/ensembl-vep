@@ -38,12 +38,18 @@ by Will McLaren (wm2@ebi.ac.uk)
 use strict;
 use Getopt::Long;
 use FileHandle;
+use File::Copy;
+use IO::Socket;
+use IO::Select;
 use Storable qw(nstore_fd fd_retrieve freeze thaw);
 use MIME::Base64;
 
 use FindBin qw($RealBin);
 use lib $RealBin;
 use lib $RealBin.'/modules';
+
+use Bio::EnsEMBL::VEP::Config;
+use Bio::EnsEMBL::VEP::CacheDir;
 
 # set output autoflush for progress bars
 $| = 1;
@@ -57,7 +63,10 @@ main($config);
 sub configure {
   my $args = shift;
   
-  my $config = {};
+  my $config = {
+    compress => 'gzip -dc',
+    fork     => 1,
+  };
   
   GetOptions(
     $config,
@@ -65,6 +74,7 @@ sub configure {
     'quiet|q',           # no output on STDOUT
     'force_overwrite|f', # force overwrite existing files
     'remove|r',          # remove cache files after we finish
+    'fork=i',            # fork
     
     'species|s=s',       # species
     'dir|d=s',           # cache dir
@@ -115,17 +125,27 @@ sub configure {
   
   # check versions
   my %versions;
+  my $version_count = 0;
   foreach my $sp(@{$config->{species}}) {
     opendir DIR, $config->{dir}.'/'.$sp;
     %{$versions{$sp}} = map {$_ => 1} grep {-d $config->{dir}.'/'.$sp.'/'.$_ && !/^\./} readdir DIR;
     closedir DIR;
+    $version_count += keys %{$versions{$sp}};
   }
+
+  die "ERROR: No valid direcotories found\n" unless $version_count;
   
-  if(!defined($config->{version})) {
-    my $msg = keys %versions ? " or select one of the following:\n".join("\n", keys %versions)."\n" : "";
+  if(!defined($config->{version}) && $version_count > 1) {
+    my $msg = keys %versions ? " or select one of the following:\n".join("\n",
+      keys %{{
+        map {$_ => 1}
+        map {keys $versions{$_}}
+        keys %versions
+      }}
+    )."\n" : "";
     die("ERROR: No version specified (--version). Use \"--version all\"$msg\n");
   }
-  elsif($config->{version} eq 'all') {
+  elsif($config->{version} eq 'all' || $version_count == 1) {
     $config->{version} = \%versions;
   }
   else {
@@ -142,8 +162,6 @@ sub configure {
     }
     $config->{version} = \%tmp;
   }
-  
-  $config->{compress} ||= 'gzip -dc';
 
   foreach my $tool(qw(bgzip tabix)) {
     unless($config->{$tool}) {
@@ -164,13 +182,9 @@ sub configure {
 
 sub main {
   my $config = shift;
-  
-  my $bgzip    = $config->{bgzip};
-  my $tabix    = $config->{tabix};
-  my $zcat     = $config->{compress};
-  my $base_dir = $config->{dir};
-  
-  my @files_to_remove;
+
+  my $base_dir    = $config->{dir};
+  my $fork_number = $config->{fork};
   
   foreach my $sp(@{$config->{species}}) {
     debug($config, "Processing $sp");
@@ -178,143 +192,247 @@ sub main {
     foreach my $v(keys %{$config->{version}->{$sp}}) {
       my $dir = join('/', ($base_dir, $sp, $v));
       $config->{dir} = $dir;
-      
       next unless -d $dir;
+
       debug($config, "Processing version $v");
-      
+
+      # read cache info
+      my $config_obj = Bio::EnsEMBL::VEP::Config->new({dir => $dir, offline => 1, species => $sp});
+      my $cache_dir_obj = Bio::EnsEMBL::VEP::CacheDir->new({dir => $dir, config => $config_obj});
+
+      # work out which types we're processing based on cache info and user options
+      my @types;
+      push @types, '_var' unless ($cache_dir_obj->info->{var_type} || '') eq 'tabix';
+      if($config->{sereal}) {
+        push @types, qw(_tr _reg) unless ($cache_dir_obj->info->{serialiser_type} || '') eq 'sereal';
+      }
+
+      unless(@types) {
+        debug($config, "No unprocessed types remaining, skipping");
+        next;
+      }
+
       opendir DIR, $dir;
       my @chrs = grep {-d $dir.'/'.$_ && !/^\./} readdir DIR;
       closedir DIR;
       
-      # read cache info
-      read_cache_info($config);
-      
       # get pos col
-      my @cols = @{$config->{cache_variation_cols}};
+      my @cols = @{$cache_dir_obj->info->{variation_cols}};
       my %var_cols = map {$cols[$_] => $_} (0..$#cols);
       $config->{pos_col} = $var_cols{start};
       
-      foreach my $t($config->{sereal} ? qw(_tr _reg _var) : qw(_var)) {
-      #foreach my $t(qw(_tr _reg _var)) {
-        
+      foreach my $t(@types) {
         my %chr_files;
         my $total = 0;
         my $i = 0;
         
         debug($config, "Processing $t cache type");
+
+        my $chr_files = get_chr_files($dir, \@chrs, $t);
+        my $total = 0;
+        my $i = 0;
+        $total += scalar @{$chr_files->{$_}} for keys %$chr_files;
         
-        my $type = $t;
-        my $orig_type = $type;
-        $type = '' if $type eq '_tr';
-        
-        my $method = 'process'.$orig_type;
-        my $method_ref = \&$method;
-        
-        foreach my $chr(@chrs) {    
-          opendir DIR, $dir.'/'.$chr;
-          my @files = grep {-f $dir.'/'.$chr.'/'.$_ && /\d+$type\.gz$/} readdir DIR;
-          closedir DIR;
-          
-          # make sure we process in chromosomal order
-          my @tmp;
-          
-          foreach my $file(@files) {
-            if($file =~ m/(\d+)\-\d+$type\.gz/) {
-              push @tmp, {
-                s => $1,
-                f => $file,
-              };
-            }
-            else {
-              die("ERROR: Filename $file doesn't look right\n");
-            }
+        if($fork_number <= 1) {
+
+          foreach my $chr(@chrs) {
+            progress($config, $i, $total);
+            process_chr_type($config, $dir, $chr, $t, $chr_files->{$chr});
+            $i += scalar @{$chr_files->{$chr}};
           }
-          
-          @files = map {$_->{f}} sort {$a->{s} <=> $b->{s}} @tmp;
-          
-          $chr_files{$chr} = \@files;
-          $total += scalar @files;
         }
-        
-        foreach my $chr(@chrs) {
-          
-          my $outfilepath = join('/', ($dir, $chr, "all".$orig_type."s"));
-          
-          # check if files exist
-          foreach my $file($outfilepath.'.gz', $outfilepath.'.gz.tbi') {
-            if(-e $file) {
-              if(defined($config->{force_overwrite})) {
-                unlink($file) or die("ERROR: Failed to delete file $file\n");
+        else {
+          my $active_forks = 0;
+          my @pids;
+          my $sel = IO::Select->new;
+
+          while(keys %$chr_files or $active_forks) {
+
+            # only spawn new forks if we have space
+            if($active_forks <= $fork_number) {
+
+              my $chr = (keys %$chr_files)[0];
+              my $files = delete($chr_files->{$chr});
+
+              # create sockets for IPC
+              my ($child, $parent);
+              socketpair($child, $parent, AF_UNIX, SOCK_STREAM, PF_UNSPEC) or throw("ERROR: Failed to open socketpair: $!");
+              $child->autoflush(1);
+              $parent->autoflush(1);
+              $sel->add($child);
+
+              # fork
+              my $pid = fork;
+              if(!defined($pid)) {
+                throw("ERROR: Failed to fork\n");
               }
-              else {
-                die("ERROR: File $file already exists - use --force_overwrite to overwrite\n");
+              elsif($pid) {
+                push @pids, $pid;
+                $active_forks++;
+              }
+              elsif($pid == 0) {
+                process_chr_type($config, $dir, $chr, $t, $files);
+                print $parent scalar @$files;
+                exit(0);
               }
             }
-          }
-          
-          my $out_fh = new FileHandle;
 
-          if($type eq '_var') {
-            $out_fh->open(">$outfilepath") or die("ERROR: Could not write to file $outfilepath\n");
-          }
-          
-          foreach my $file(@{$chr_files{$chr}}) {
-            progress($config, $i++, $total);
-            
-            my $infilepath = join('/', ($dir, $chr, $file));
-            
-            &$method_ref($config, $chr, $infilepath, $out_fh);
-            
-            push @files_to_remove, $infilepath if defined($config->{remove});
-          }
-          
-          $out_fh->close();
-          
-          # sort
-          if($type eq '_var') {
+            # read child input
+            while(my @ready = $sel->can_read()) {
+              my $no_read = 1;
 
-            # bgzip
-            my $bgzipout = `$bgzip $outfilepath 2>&1`;
-            die("ERROR: bgzip failed\n$bgzipout") if $bgzipout;
-            
-            # tabix
-            my ($b, $e) = ($config->{pos_col} + 2, $config->{pos_col} + 2);
-            my $tabixout = `$tabix -s 1 -b $b -e $e $outfilepath\.gz 2>&1`;
-            die("ERROR: tabix failed\n$tabixout") if $tabixout;
+              foreach my $fh(@ready) {
+                $no_read++;
+
+                my $line = join('', $fh->getlines());
+                next unless $line;
+                $no_read = 0;
+
+                # finish up
+                $sel->remove($fh);
+                $fh->close;
+                $active_forks--;
+                progress($config, $i, $total);
+                $i += $line;
+              }
+
+              # read-through detected, DIE
+              die("ERROR: Forked process(es) died\n") if $no_read;
+
+              last if $active_forks < $fork_number;
+            }
           }
+
+          waitpid($_, 0) for @pids;
         }
         
         end_progress($config);
       }
-      
-      $config->{cache_var_type} = 'tabix';
-      $config->{cache_serialiser_type} = 'sereal' if $config->{sereal};
-      $config->{cache_variation_cols} = 'chr,'.join(",", @{$config->{cache_variation_cols}}) unless $config->{cache_variation_cols}->[0] eq 'chr';
-      
-      open OUT, ">".$config->{dir}.'/info.txt' or die("ERROR: Could not write to info.txt\n");
+
+      open OUT, ">".$config->{dir}.'/info.txt.new' or die("ERROR: Could not write to info.txt.new\n");
       print OUT "# CACHE UPDATED ".get_time()."\n";
-      foreach my $param(grep {/^cache\_/} keys %$config) {
-        my $val = $config->{$param};
-        if(ref($val) eq 'ARRAY') {
-          $val = join ",", @$val;
+
+      open IN, $config->{dir}.'/info.txt' or die $!;
+      while(<IN>) {
+        if(/^variation_cols/) {
+          print OUT "variation_cols\t".join(',', 'chr', @{$cache_dir_obj->info->{variation_cols}})."\n";
         }
-        $param =~ s/^cache\_//;
-        print OUT "$param\t$val\n";
+        elsif(/\# CACHE UPDATED/) {
+          next;
+        }
+        else {
+          print OUT $_;
+        }
       }
-      
-      my $version_data = get_version_data($config);
-      print OUT "source\_$_\t".$version_data->{$_}."\n" for keys %$version_data;
-      
+
+      print OUT "var_type\ttabix\n";
+      print OUT "serialiser_type\tsereal\n" if $config->{sereal};
+
       close OUT;
+      close IN;
+
+      move($config->{dir}.'/info.txt', $config->{dir}.'/info.txt.bak');
+      move($config->{dir}.'/info.txt.new', $config->{dir}.'/info.txt');
     }
   }
   
-  if(scalar @files_to_remove) {
-    debug($config, "Removing old cache files");
-    unlink($_) for @files_to_remove;
+  debug($config, "All done!");
+}
+
+sub get_chr_files {
+  my ($dir, $chrs, $type) = @_;
+
+  my %chr_files;
+
+  foreach my $chr(@$chrs) {    
+    opendir DIR, $dir.'/'.$chr;
+    my @files = grep {-f $dir.'/'.$chr.'/'.$_ && /\d+$type\.gz$/} readdir DIR;
+    closedir DIR;
+    
+    # make sure we process in chromosomal order
+    my @tmp;
+    
+    foreach my $file(@files) {
+      if($file =~ m/(\d+)\-\d+$type\.gz/) {
+        push @tmp, {
+          s => $1,
+          f => $file,
+        };
+      }
+      else {
+        die("ERROR: Filename $file doesn't look right\n");
+      }
+    }
+    
+    @files = map {$_->{f}} sort {$a->{s} <=> $b->{s}} @tmp;
+    
+    $chr_files{$chr} = \@files;
+  }
+
+  return \%chr_files;
+}
+
+sub process_chr_type {
+  my ($config, $dir, $chr, $type, $files) = @_;
+  
+  my $bgzip = $config->{bgzip};
+  my $tabix = $config->{tabix};
+  my $zcat  = $config->{compress};
+
+  my $orig_type = $type;
+  $type = '' if $type eq '_tr';
+  
+  my $method = 'process'.$orig_type;
+  my $method_ref = \&$method;
+          
+  my $outfilepath = join('/', ($dir, $chr, "all".$orig_type."s"));
+
+  my @files_to_remove;
+  
+  # check if files exist
+  foreach my $file($outfilepath.'.gz', $outfilepath.'.gz.tbi') {
+    if(-e $file) {
+      if(defined($config->{force_overwrite})) {
+        unlink($file) or die("ERROR: Failed to delete file $file\n");
+      }
+      else {
+        die("ERROR: File $file already exists - use --force_overwrite to overwrite\n");
+      }
+    }
   }
   
-  debug($config, "All done!");
+  my $out_fh = new FileHandle;
+
+  if($type eq '_var') {
+    $out_fh->open(">$outfilepath") or die("ERROR: Could not write to file $outfilepath\n");
+  }
+  
+  foreach my $file(@$files) {    
+    my $infilepath = join('/', ($dir, $chr, $file));
+    
+    &$method_ref($config, $chr, $infilepath, $out_fh);
+    
+    push @files_to_remove, $infilepath if defined($config->{remove});
+  }
+  
+  $out_fh->close();
+  
+  # sort
+  if($type eq '_var') {
+
+    # bgzip
+    my $bgzipout = `$bgzip $outfilepath 2>&1`;
+    die("ERROR: bgzip failed\n$bgzipout") if $bgzipout;
+    
+    # tabix
+    my ($b, $e) = ($config->{pos_col} + 2, $config->{pos_col} + 2);
+    my $tabixout = `$tabix -s 1 -b $b -e $e $outfilepath\.gz 2>&1`;
+    die("ERROR: tabix failed\n$tabixout") if $tabixout;
+  }
+  
+  if(scalar @files_to_remove) {
+    unlink($_) for @files_to_remove;
+  }
 }
 
 sub process_tr {
@@ -476,7 +594,7 @@ perl convert_cache.pl [arguments]
 --version [version]  -v   Cache version to convert ("all" to do all found)
 
 --compress [cmd]     -c   Path to binary/command to decompress gzipped files.
-                          Defaults to "zcat", some systems may prefer "gzip -dc"
+                          Defaults to "gzip -dc", some systems may prefer "zcat"
 --bgzip [cmd]        -b   Path to bgzip binary (default: bgzip)
 --tabix [cmd]        -t   Path to tabix binary (default: tabix)
 };
