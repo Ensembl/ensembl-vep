@@ -1,4 +1,4 @@
-[![Coverage Status](https://coveralls.io/repos/github/willmclaren/ensembl-vep/badge.svg?branch=master)](https://coveralls.io/github/willmclaren/ensembl-vep?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/Ensembl/ensembl-vep/badge.svg?branch=master)](https://coveralls.io/github/Ensembl/ensembl-vep?branch=master)
 # ensembl-vep
 * **VEP** (Variant Effect Predictor) predicts the functional effects of genomic variants.
 * **Haplosaurus** uses phased genotype data to predict whole-transcript haplotype sequences.
@@ -23,7 +23,7 @@
 The VEP package requires Perl (>=5.10 recommended, tested on 5.8, 5.10, 5.14, 5.18, 5.22) and the [DBI](http://search.cpan.org/~timb/DBI/DBI.pm) package installed.
 The remaining dependencies can be installed using the included [INSTALL.pl](http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html#installer) script. Basic instructions:
 ```bash
-git clone https://github.com/willmclaren/ensembl-vep.git
+git clone https://github.com/Ensembl/ensembl-vep.git
 cd ensembl-vep
 perl INSTALL.pl
 ```
