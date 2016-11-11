@@ -80,7 +80,23 @@ is_deeply($vf, bless( {
   'end' => '25587759',
   'start' => '25587759',
   '_line' => [qw(21 25587759 25587759 C/A - test)]
-}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'negative strand');
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'negative strand (-)');
+
+$vf = Bio::EnsEMBL::VEP::Parser::VEP_input->new({
+  config => $cfg, file => $test_cfg->create_input_file([qw(21 25587759 25587759 C/A -1 test)]),
+  valid_chromosomes => [21]
+})->next();
+delete($vf->{adaptor});
+is_deeply($vf, bless( {
+  'chr' => '21',
+  'strand' => '-1',
+  'variation_name' => 'test',
+  'map_weight' => 1,
+  'allele_string' => 'C/A',
+  'end' => '25587759',
+  'start' => '25587759',
+  '_line' => [qw(21 25587759 25587759 C/A -1 test)]
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'negative strand (-1)');
 
 $vf = Bio::EnsEMBL::VEP::Parser::VEP_input->new({
   config => $cfg, file => $test_cfg->create_input_file([qw(21 25587759 25587759 C/A)]),
