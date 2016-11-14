@@ -135,8 +135,6 @@ sub registry {
     my $reg = 'Bio::EnsEMBL::Registry';
     
     if($self->param('database') || ($self->param('cache') && !$self->param('offline'))) {
-      # suppress warnings that the FeatureAdpators spit if using no_slice_cache
-      Bio::EnsEMBL::Utils::Exception::verbose(1999) if $self->param('no_slice_cache');
 
       # load DB options from registry file if given
       if(my $registry_file = $self->param('registry')) {

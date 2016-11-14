@@ -267,6 +267,10 @@ sub _set_package_variables {
   # avoid using transfer
   $self->{_no_transfer_bak} = $Bio::EnsEMBL::Variation::TranscriptVariationAllele::NO_TRANSFER;
   $Bio::EnsEMBL::Variation::TranscriptVariationAllele::NO_TRANSFER = 1;
+
+  # suppress warnings that the FeatureAdpators spit if using no_slice_cache
+  $self->{_verbose_bak} = Bio::EnsEMBL::Utils::Exception::verbose();
+  Bio::EnsEMBL::Utils::Exception::verbose(1999);
 }
 
 sub _reset_package_variables {
@@ -275,6 +279,8 @@ sub _reset_package_variables {
   $Bio::EnsEMBL::Utils::Scalar::ASSERTIONS = $self->{_assertions_bak};
   $Bio::EnsEMBL::Utils::Argument::NO_REARRANGE = $self->{_no_rearrange_bak};
   $Bio::EnsEMBL::Variation::TranscriptVariationAllele::NO_TRANSFER = $self->{_no_transfer_bak};
+
+  Bio::EnsEMBL::Utils::Exception::verbose($self->{_verbose_bak});
 }
 
 1;
