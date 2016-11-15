@@ -72,24 +72,15 @@ BEGIN {
   if (eval q{ require PerlIO::gzip; 1 }) {
     $CAN_USE_PERLIO_GZIP = 1;
   }
-  else {
-    $CAN_USE_PERLIO_GZIP = 0;
-  }
 
   # check gzip
   if (`which gzip` =~ /\/gzip/) {
     $CAN_USE_GZIP = 1;
   }
-  else {
-    $CAN_USE_GZIP = 0;
-  }
 
   # check IO::Uncompress::Gunzip 
   if(eval q{ use IO::Uncompress::Gunzip qw($GunzipError); 1}) {
     $CAN_USE_IO_UNCOMPRESS = 1;
-  }
-  else {
-    $CAN_USE_IO_UNCOMPRESS = 0;
   }
 }
 

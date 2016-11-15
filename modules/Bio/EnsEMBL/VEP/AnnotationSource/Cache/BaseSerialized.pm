@@ -61,24 +61,15 @@ BEGIN {
   if (eval q{ require Sereal; 1 }) {
     $CAN_USE_SEREAL = 1;
   }
-  else {
-    $CAN_USE_SEREAL = 0;
-  }
 
   # check PerlIO::gzip
   if (eval q{ require PerlIO::gzip; 1 }) {
     $CAN_USE_PERLIO_GZIP = 1;
   }
-  else {
-    $CAN_USE_PERLIO_GZIP = 0;
-  }
 
   # check gzip
   if (`which gzip` =~ /\/gzip/) {
     $CAN_USE_GZIP = 1;
-  }
-  else {
-    $CAN_USE_GZIP = 0;
   }
 }
 

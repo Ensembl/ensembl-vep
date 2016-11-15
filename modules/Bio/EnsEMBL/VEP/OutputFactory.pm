@@ -64,9 +64,6 @@ BEGIN {
   if(eval q{ use Bio::EnsEMBL::VEP::OutputFactory::JSON; 1 }) {
     $CAN_USE_JSON = 1;
   }
-  else {
-    $CAN_USE_JSON = 0;
-  }
 }
 
 my %SO_RANKS = map {$_->SO_term => $_->rank} values %Bio::EnsEMBL::Variation::Utils::Constants::OVERLAP_CONSEQUENCES;

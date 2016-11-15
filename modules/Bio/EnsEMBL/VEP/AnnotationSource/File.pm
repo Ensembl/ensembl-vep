@@ -61,9 +61,6 @@ BEGIN {
       use Bio::EnsEMBL::VEP::AnnotationSource::File::GTF;
     };
   }
-  else {
-    $CAN_USE_TABIX_PM = 0;
-  }
 
   if (eval q{ require Bio::DB::BigFile; 1 }) {
     $CAN_USE_BIGWIG = 1;
@@ -71,9 +68,6 @@ BEGIN {
     eval q{
       use Bio::EnsEMBL::VEP::AnnotationSource::File::BigWig;
     };
-  }
-  else {
-    $CAN_USE_BIGWIG = 0;
   }
 }
 

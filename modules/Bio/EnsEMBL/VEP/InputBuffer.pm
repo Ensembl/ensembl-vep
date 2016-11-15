@@ -56,9 +56,6 @@ BEGIN {
   if (eval q{ require Set::IntervalTree; 1 }) {
     $CAN_USE_INTERVAL_TREE = 1;
   }
-  else {
-    $CAN_USE_INTERVAL_TREE = 0;
-  }
 }
 
 sub new {
