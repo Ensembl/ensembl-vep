@@ -18,9 +18,21 @@ use warnings;
 use Test::More;
 use Test::Exception;
 
-use Bio::EnsEMBL::VEP::Utils qw(format_coords convert_arrayref numberify merge_hashes merge_arrays get_time trim_sequences get_compressed_filehandle);
+use Bio::EnsEMBL::VEP::Utils qw(
+  format_coords
+  convert_arrayref
+  numberify
+  merge_hashes
+  merge_arrays
+  get_time
+  trim_sequences
+  get_compressed_filehandle
+  get_version_data
+  get_version_string
+);
 
 use FindBin qw($Bin);
+use Scalar::Util qw(looks_like_number);
 use lib $Bin;
 use VEPTestingConfig;
 my $test_cfg = VEPTestingConfig->new();
@@ -258,6 +270,39 @@ throws_ok {get_compressed_filehandle($test_cfg->{test_gzvcf})} qr/Cannot read fr
 ###########
 
 ok(get_time =~ /\d{4}(\-\d\d){2} \d\d(\:\d\d){2}/, 'get_time');
+
+
+
+## version data
+###############
+
+my $vd = get_version_data($Bin.'/testdata/version');
+my $vep_vd = delete($vd->{'ensembl-vep'});
+
+is(ref($vep_vd), 'HASH', 'get_version_data - ensembl-vep hashref');
+ok(looks_like_number($vep_vd->{release}), 'get_version_data - ensembl-vep release');
+ok(looks_like_number($vep_vd->{sub}), 'get_version_data - ensembl-vep sub');
+
+is_deeply(
+  $vd,
+  {
+    'ensembl-variation' => {
+      'sub' => '0000000',
+      'release' => '86'
+    },
+    'ensembl' => {
+      'sub' => '0000001',
+      'release' => '86'
+    }
+  },
+  'get_version_data - the rest'
+);
+
+ok(
+  get_version_string($Bin.'/testdata/version') =~
+    /ensembl\s+\: 86\.0000001\s+ensembl\-variation\s+\: 86\.0000000\s+ensembl\-vep\s+\: \d+\.\d+/,
+  'get_version_string'
+);
 
 # done
 done_testing();

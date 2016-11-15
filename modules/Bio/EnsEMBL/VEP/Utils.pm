@@ -299,6 +299,6 @@ sub get_version_string {
       sprintf("%-20s : %s", $_, $version_data->{$_}->{release}).
       (defined($version_data->{$_}->{sub}) ? '.'.substr($version_data->{$_}->{sub}, 0, 7) : '')
     }
-    keys %$version_data
+    sort keys %$version_data
   );
 }
