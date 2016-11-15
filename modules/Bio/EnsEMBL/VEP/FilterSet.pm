@@ -421,10 +421,10 @@ sub filter_is_child {
     throw("ERROR: No matching SO terms found for $parent\n") unless $terms && scalar @$terms;
     throw("ERROR: Found more than one SO term matching $parent: ".join(", ", map {$_->name} @$terms)."\n") if scalar @$terms > 1;
     my $parent_term = $terms->[0];
-    $cache->{$parent} = $parent_term->descendants;
+    $cache->{$parent} = [map {$_->name} @{$parent_term->descendants}];
   }  
   
-  return grep {$_->name =~ /^$child$/i} @{$cache->{$parent}};
+  return grep {lc($_) eq lc($child)} @{$cache->{$parent}};
 }
 
 1;

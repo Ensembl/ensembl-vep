@@ -470,4 +470,41 @@ is(Bio::EnsEMBL::VEP::FilterSet->new('FOO')->evaluate({foo => 1}),  1, 'evaluate
 is(Bio::EnsEMBL::VEP::FilterSet->new('foo')->evaluate({_foo => 1}), 1, 'evaluate - synonym - underscore');
 
 
+## ontology
+###########
+
+
+SKIP: {
+  my $db_cfg = $test_cfg->db_cfg;
+
+  eval q{
+    use Bio::EnsEMBL::Test::TestUtils;
+    use Bio::EnsEMBL::Test::MultiTestDB;
+    1;
+  };
+
+  my $can_use_db = $db_cfg && scalar keys %$db_cfg && !$@;
+
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  skip 'No local database configured', 8 unless $can_use_db;
+
+  my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('multi') if $can_use_db;
+
+  my $fs = Bio::EnsEMBL::VEP::FilterSet->new('foo is_child gene_variant');
+
+  throws_ok { $fs->evaluate({foo => 1}) } qr/No ontology adaptor set/, 'is_child - no adaptor';
+
+  ok($fs->ontology_adaptor($multi->get_DBAdaptor('ontology')->get_OntologyTermAdaptor), 'is_child - set adaptor');
+
+  throws_ok { $fs->evaluate({foo => 1}) } qr/No ontology_name set/, 'is_child - no ontology_name';
+
+  ok($fs->ontology_name('SO'), 'is_child - set ontology_name');
+
+  is($fs->evaluate({foo => 1}),                  0, 'is_child - fail');
+  is($fs->evaluate({foo => 'gene_variant'}),     1, 'is_child - pass exact');
+  is($fs->evaluate({foo => 'missense_variant'}), 1, 'is_child - pass child 1');
+  is($fs->evaluate({foo => 'intron_variant'}),   1, 'is_child - pass child 2');
+}
+
+
 done_testing();
