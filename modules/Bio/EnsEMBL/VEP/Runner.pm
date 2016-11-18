@@ -90,6 +90,17 @@ sub init {
   return $self->{_initialized} = 1;
 }
 
+# run at the end of runner's life
+sub finish {
+  my $self = shift;
+
+  $self->dump_stats unless $self->param('no_stats');
+
+  foreach my $plugin(@{$self->get_all_Plugins}) {
+    $plugin->finish() if $plugin->can('finish');
+  }
+}
+
 # run
 sub run {
   my $self = shift;
@@ -106,7 +117,7 @@ sub run {
 
   close $fh;
 
-  $self->dump_stats;
+  $self->finish();
 
   return 1;
 }
@@ -128,6 +139,8 @@ sub run_rest {
   while(my $hash = $self->next_output_line(1)) {
     push @return, $hash;
   }
+
+  $self->finish();
 
   return \@return;
 }
