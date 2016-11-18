@@ -174,6 +174,40 @@ SKIP: {
     },
     'annotate_InputBuffer - deletion'
   );
+
+  # insertion
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
+    config => $cfg,
+    parser => Bio::EnsEMBL::VEP::Parser::VEP_input->new({
+      config => $cfg,
+      file => $test_cfg->create_input_file([
+        [qw(21 25585741 25585740 -/C +)],
+        [qw(21 25585740 25585740 A/C +)]
+      ]),
+      valid_chromosomes => [21]
+    })
+  });
+  $ib->next;
+
+  $as->annotate_InputBuffer($ib);
+  is_deeply(
+    $ib->buffer->[0]->{_custom_annotations},
+    {
+      'foo' => [
+        { name => 'ins1', allele => 'C', fields => {'GOO' => 'YAR'} },
+      ]
+    },
+    'annotate_InputBuffer - mixed - insertion'
+  );
+  is_deeply(
+    $ib->buffer->[1]->{_custom_annotations},
+    {
+      'foo' => [
+        { name => 'ins1', allele => 'C', fields => {'GOO' => 'ZAR'} },
+      ]
+    },
+    'annotate_InputBuffer - mixed - snp'
+  );
 }
 
 done_testing();
