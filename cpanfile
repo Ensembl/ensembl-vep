@@ -1,8 +1,10 @@
-requires 'JSON';
-requires 'Sereal';
+requires 'DBI';
 requires 'Set::IntervalTree';
-requires 'PerlIO::gzip';
-requires 'IO::Uncompress::Gunzip';
+requires 'JSON';
 requires 'CGI';
-requires 'HTML::Lint';
-requires 'Bio::DB::BigFile';
+recommends 'DBD::mysql';
+recommends 'PerlIO::gzip';
+recommends 'IO::Uncompress::Gunzip';
+recommends 'Bio::DB::BigFile';
+recommends 'Sereal';
+recommends 'HTML::Lint';

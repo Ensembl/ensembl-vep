@@ -54,7 +54,7 @@ install:
   - $CWD/travisci/build_c.sh
   - cd $CWD
   - cpanm --quiet --installdeps --with-recommends --notest --cpanfile ensembl/cpanfile .
-  - cpanm --quiet --installdeps --notest .
+  - cpanm --quiet --installdeps --with-recommends --notest .
   - cpanm --quiet -n Devel::Cover::Report::Coveralls
   - cp travisci/MultiTestDB.conf.travisci  t/MultiTestDB.conf
 
