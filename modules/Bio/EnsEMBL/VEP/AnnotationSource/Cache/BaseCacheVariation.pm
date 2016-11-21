@@ -78,10 +78,8 @@ sub parse_variation {
   my $delim = $self->delimiter;
   my @data = split $delim, $line;
 
-  # assumption fix for old cache files
-  push @cols, ('AFR', 'AMR', 'ASN', 'EUR') if scalar @data > scalar @cols;
-
-  my %v = map {$cols[$_] => $data[$_] eq '.' ? undef : $data[$_]} (0..$#data);
+  # this switcher is a bit of a hack, should fix cache generation really
+  my %v = map {$cols[$_] => $data[$_] eq '.' ? undef : $data[$_]} (0..(@data > @cols ? $#cols : $#data));
 
   $v{$_} ||= 0 for qw(failed somatic phenotype_or_disease);
   $v{end}     ||= $v{start};
