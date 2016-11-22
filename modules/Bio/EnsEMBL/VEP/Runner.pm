@@ -288,6 +288,12 @@ sub _forked_buffer_to_output {
         # stderr
         $self->warning_msg($data->{pid}." : ".$data->{stderr}) if $data->{stderr};
 
+        # oc_cache - used for speeding up consequence calcs
+        if(my $fork_oc_cache = $data->{oc_cache}) {
+          my $cache = $Bio::EnsEMBL::Variation::Utils::VariationEffect::_oc_cache ||= {};
+          $cache->{$_} = $fork_oc_cache->{$_} for keys %$fork_oc_cache;
+        }
+
         # finish up
         $sel->remove($fh);
         $fh->close;
@@ -374,6 +380,7 @@ sub _forked_process {
     stderr => $stderr,
     die => $die,
     stats => $self->stats->{stats}->{counters},
+    oc_cache => $Bio::EnsEMBL::Variation::Utils::VariationEffect::_oc_cache,
   });
 
   exit(0);
