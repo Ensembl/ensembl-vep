@@ -106,7 +106,7 @@ is_deeply(
 ####################
 
 $p = Bio::EnsEMBL::VEP::Parser->new({file => $test_cfg->{test_vcf}, config => $cfg});
-$p->{valid_chromosomes} = {1 => 1, 21 => 1, CHR_1 => 1, M => 1, MT => 1, chromosome => 1};
+$p->{valid_chromosomes} = {1 => 1, 21 => 1, CHR_1 => 1, MT => 1, chromosome => 1, chr12 => 1};
 
 is($p->validate_svf(), 1, 'validate_svf - not implemented yet');
 
@@ -121,31 +121,26 @@ is($p->validate_vf(get_vf({allele_string => 'G/C'})), 1, 'validate_vf - chr list
 is($p->validate_vf(get_vf({allele_string => 'G/C', chr => 2})), 0, 'validate_vf - chr list exclude');
 delete($p->{chr});
 
-$vf = get_vf({allele_string => 'G/C', chr => 'chr1'});
-$p->validate_vf($vf);
-is($vf->{chr}, '1', 'validate_vf - strip "chr"');
-
-$vf = get_vf({allele_string => 'G/C', chr => 'chromosome'});
-$p->validate_vf($vf);
-is($vf->{chr}, 'chromosome', 'validate_vf - dont strip "chr" if chromosome');
-
-$vf = get_vf({allele_string => 'G/C', chr => 'CHR_1'});
-$p->validate_vf($vf);
-is($vf->{chr}, 'CHR_1', 'validate_vf - dont strip "chr" if CHR_');
-
-$vf = get_vf({allele_string => 'G/C', chr => 'M'});
-$p->validate_vf($vf);
-is($vf->{chr}, 'MT', 'validate_vf - convert M to MT');
-
 $vf = get_vf({allele_string => 'g/c'});
 $p->validate_vf($vf);
 is($vf->{allele_string}, 'G/C', 'validate_vf - uppercase allele_string');
 
-ok($p->chromosome_synonyms($test_cfg->{chr_synonyms}), "load chr_synonyms");
+## have_chr checks
+is($p->_have_chr(get_vf({chr => 1})), 1, 'have_chr - pass');
+is($p->_have_chr(get_vf({chr => 'chr1'})), 1, 'have_chr - remove chr');
+is($p->_have_chr(get_vf({chr => 12})), 1, 'have_chr - add chr');
+is($p->_have_chr(get_vf({chr => 2})), 0, 'have_chr - fail');
 
-$vf = get_vf({allele_string => 'G/C', chr => 'NC_000021.9'});
-ok($p->validate_vf($vf), 'use chr synonym');
+$vf = get_vf({allele_string => 'G/C', chr => 'M'});
+is($p->_have_chr($vf), 1, 'have_chr - M');
+is($vf->{chr}, 'MT', 'have_chr - convert M to MT');
+
+ok($p->chromosome_synonyms($test_cfg->{chr_synonyms}), "load chr_synonyms");
+$vf = get_vf({chr => 'NC_000021.9'});
+is($p->_have_chr($vf), 1, 'have_chr - synonym');
 is($vf->{chr}, 'NC_000021.9', 'chr unchanged after synonym check');
+
+
 
 # warning_msg prints to STDERR
 no warnings 'once';

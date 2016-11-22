@@ -303,10 +303,6 @@ sub validate_vf {
     return 0 unless grep {$vf->{chr} eq $_} @{$self->{chr}};
   }
 
-  # fix inputs
-  $vf->{chr} =~ s/^chr//ig unless $vf->{chr} =~ /^chromosome$/i || $vf->{chr} =~ /^CHR\_/;
-  $vf->{chr} = 'MT' if $vf->{chr} eq 'M';
-
   # sanity checks
   unless(looks_like_number($vf->{start}) && looks_like_number($vf->{end})) {
     $self->warning_msg("WARNING: Start ".$vf->{start}." or end ".$vf->{end}." coordinate invalid on line ".$self->line_number);
@@ -324,26 +320,8 @@ sub validate_vf {
   }
 
   # check we have this chr in any of the annotation sources
-  my $have_chr = 0;
-  my $valid = $self->valid_chromosomes;
-
-  my $tmp_chr = $vf->{chr};
-  $tmp_chr =~ s/^chr//i;
-
-  if($valid->{$vf->{chr}} || $valid->{'chr'.$vf->{chr}} || $valid->{$tmp_chr}) {
-    $have_chr = 1;
-  }
-  else {
-    foreach my $alt(keys %{$self->chromosome_synonyms->{$vf->{chr}} || {}}) {
-      if($valid->{$alt}) {
-        $have_chr = 1;
-        last;
-      }
-    }
-  }
-
-  # map to top level?  
-  unless($have_chr) {
+  # otherwise try to map to toplevel if available
+  unless($self->_have_chr($vf)) {
 
     # slice adaptor required
     if(my $sa = $self->get_adaptor('core', 'Slice')) {
@@ -464,6 +442,40 @@ sub validate_vf {
   }
 
   return 1;
+}
+
+sub _have_chr {
+  my ($self, $vf) = @_;
+
+  my $have_chr = 0;
+  my $valid = $self->valid_chromosomes;
+  my $vf_chr = $vf->{chr};
+
+  if($valid->{$vf_chr}) {
+    $have_chr = 1;
+  }
+  else {
+    my $synonyms = $self->chromosome_synonyms;
+    $valid->{$_} = 1 for map {keys %{$synonyms->{$_} || {}}} keys %$valid;
+
+    if($valid->{$vf->{chr}}) {
+      $have_chr = 1;
+    }
+    else {
+      my $tmp_chr = $vf_chr;
+      $tmp_chr =~ s/^chr//i;
+
+      if($valid->{'chr'.$vf->{chr}} || $valid->{$tmp_chr}) {
+        $have_chr = 1;
+      }
+      elsif($vf->{chr} eq 'M' && $valid->{MT}) {
+        $vf->{chr} = 'MT';
+        $have_chr = 1;
+      }
+    }
+  }
+
+  return $have_chr;
 }
 
 # validate a structural variation
