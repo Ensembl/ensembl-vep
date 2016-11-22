@@ -70,13 +70,13 @@ sub init {
   # setup DB connection
   $self->setup_db_connection();
 
-  # get chromosome synoyms
-  $self->chromosome_synonyms($self->param('synonyms'));
-
   my $plugins = $self->get_all_Plugins();
 
   # get all annotation sources
   my $annotation_sources = $self->get_all_AnnotationSources();
+
+  # get chromosome synoyms
+  $self->chromosome_synonyms($self->param('synonyms'));
 
   # setup FASTA file DB
   $self->fasta_db();
