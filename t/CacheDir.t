@@ -18,6 +18,7 @@ use warnings;
 use Test::More;
 use Test::Exception;
 use FindBin qw($Bin);
+use File::Copy;
 
 use lib $Bin;
 use VEPTestingConfig;
@@ -42,9 +43,15 @@ ok($cd, 'new is defined');
 
 is(ref($cd), 'Bio::EnsEMBL::VEP::CacheDir', 'check class');
 
-# detects FASTA file
+# copy chr_synonyms.txt file temporarily
+copy($test_cfg->{chr_synonyms}, $cd->dir);
+
+# detects FASTA file and synonyms
 $cd = Bio::EnsEMBL::VEP::CacheDir->new({config => $cfg, root_dir => $cfg_hash->{dir}});
+is($cd->param('synonyms'), $cd->dir.'/chr_synonyms.txt', 'detect synonyms');
 ok($cd->param('fasta') =~ /test\.fa/, 'detect FASTA');
+
+unlink($cd->dir.'/chr_synonyms.txt');
 
 $cd = Bio::EnsEMBL::VEP::CacheDir->new({
   root_dir => $cfg_hash->{dir},

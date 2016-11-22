@@ -135,10 +135,10 @@ sub get_all_AnnotationSources {
 sub init {
   my $self = shift;
 
+  my $dir = $self->dir;
+
   # check if there's a FASTA file in there
   unless($self->param('fasta') || $self->param('no_fasta')) {
-    my $dir = $self->dir;
-
     opendir CACHE, $dir;
     my ($fa) = grep {/\.fa(\.gz)?$/} readdir CACHE;
     closedir CACHE;
@@ -148,6 +148,8 @@ sub init {
       $self->status_msg("Auto-detected FASTA file in cache directory") if $self->param('verbose');
     }
   }
+
+  $self->param('synonyms', $dir.'/chr_synonyms.txt') if -e $dir.'/chr_synonyms.txt';
 
   return 1;
 }
