@@ -168,6 +168,7 @@ GetOptions(
   'plugin=s' => ($config->{plugin} ||= []), # specify a method in a module in the plugins directory
   'safe',                    # die if plugins don't compile or spit warnings
   'fasta|fa=s',              # file or dir containing FASTA files with reference sequence
+  'no_fasta',                # don't autodetect FASTA file in cache dir
   'sereal',                  # user Sereal instead of Storable for the cache
   'synonyms=s',              # file of chromosome synonyms
   
