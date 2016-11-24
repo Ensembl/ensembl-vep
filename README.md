@@ -3,7 +3,7 @@
 * **VEP** (Variant Effect Predictor) predicts the functional effects of genomic variants.
 * **Haplosaurus** uses phased genotype data to predict whole-transcript haplotype sequences.
 
-> **!!! IMPORTANT !!!** This is pre-release code. Use at your own risk. Please continue to use the version of [VEP](http://www.ensembl.org/vep) in [ensembl-tools](https://github.com/Ensembl/ensembl-tools/tree/release/86/scripts/variant_effect_predictor) if you are unsure.
+> **!!! IMPORTANT !!!** This is pre-release code. Use at your own risk. Please continue to use the version of [VEP](http://www.ensembl.org/vep) in [ensembl-tools](https://github.com/Ensembl/ensembl-tools/) if you are unsure.
 
 ##### Table of contents
 * [Installation and requirements](#install)
@@ -58,6 +58,7 @@ vep.pl is compatible with the same downloadable caches as the ensembl-tools VEP.
 This ensembl-vep repo is a complete rewrite of the VEP code intended to make the software faster, more robust and more easily extensible. Almost all functionality of the ensembl-tools version has been replicated, with the command line flags remaining largely unchanged. A summary of changes follows:
 
 * **Script name:** For brevity and to distinguish the two versions, the new script is named vep.pl, with the version in ensembl-tools named variant_effect_predictor.pl.
+* **Speed:** A typical individual human genome of 4 million variants can now be processed in around 30 minutes on a quad-core machine using under 1GB of RAM.
 * **Known/existing variants:** The alleles of your input variant are now compared to any known variants when using `--check_existing`. Previously this would require you to enable this functionality manually with `--check_alleles`. The old functionality can be restored using `--no_check_alleles`.
 * **Allele frequencies:** Allele frequencies are now reported for the input allele only e.g. as `0.023` instead of `A:0.023,G:0.0005`. To reflect this change, the allele frequency fields are now named e.g. `AFR_AF` instead of `AFR_MAF`. The command line flags reflect this also, so `--gmaf` is now `--af` and `--maf_1kg` is now `--af_1kg`. Using the old flags will produce a deprecation message.
 * **GFF and GTF files:** GFF and GTF files may now be used directly as a source of transcript annotation in place of, or even alongside, a cache or database source. Previously this involved [building a cache using gtf2vep.pl](http://www.ensembl.org/info/docs/tools/vep/script/vep_cache.html#gtf), which is now redundant. The files must first be bgzipped and tabix-indexed, and a FASTA file containing genomic sequence is required:
