@@ -50,6 +50,7 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
 use Bio::EnsEMBL::VEP::Utils qw(trim_sequences);
 
+our $HASH_TREE_SIZE = 1e4;
 our $CAN_USE_INTERVAL_TREE;
 
 BEGIN {
@@ -159,7 +160,13 @@ sub get_overlapping_vfs {
     return $tree->fetch($start - 1, $end);
   }
   else {
-    return [grep {overlap($_->{start}, $_->{end}, $start, $end)} @{$self->buffer}];
+    my $hash_tree = $self->hash_tree;
+
+    return [
+      grep {overlap($_->{start}, $_->{end}, $start, $end)}
+      map {@{$hash_tree->{$_} || []}}
+      (sprintf("%.0f", $start / $HASH_TREE_SIZE)..(sprintf("%.0f", $end / $HASH_TREE_SIZE) + 1))
+    ];
   }
 }
 
@@ -182,6 +189,24 @@ sub interval_tree {
   }
 
   return $self->{temp}->{interval_tree};
+}
+
+sub hash_tree {
+  my $self = shift;
+
+  if(!exists($self->{temp}->{hash_tree})) {
+
+    my $hash_tree = {};
+
+    foreach my $vf(@{$self->buffer}) {
+      my $s = sprintf("%.0f", $vf->{start} / $HASH_TREE_SIZE);
+      push @{$hash_tree->{$s}}, $vf;
+    }
+
+    $self->{temp}->{hash_tree} = $hash_tree;
+  }
+
+  return $self->{temp}->{hash_tree};
 }
 
 sub min_max {
