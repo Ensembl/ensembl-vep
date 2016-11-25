@@ -5,6 +5,8 @@
 
 > **!!! IMPORTANT !!!** This is pre-release code. Use at your own risk. Please continue to use the version of [VEP](http://www.ensembl.org/vep) in [ensembl-tools](https://github.com/Ensembl/ensembl-tools/) if you are unsure.
 
+> Please report any bugs or issues by creating a [GitHub issue](issues) or [contacting Ensembl](http://www.ensembl.org/info/about/contact/index.html)
+
 ##### Table of contents
 * [Installation and requirements](#install)
 * [VEP](#vep)
