@@ -713,6 +713,49 @@ throws_ok {$runner->next_output_line} qr/TEST DIE/, 'fork - test die';
 open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
 
+# warnings
+is_deeply($runner->warnings, [], 'warnings - empty');
+
+my $test_warning = qq{WARNING: Test 1
+
+-------------------- EXCEPTION --------------------
+MSG: Msg 1
+STACK S1
+STACK S2
+
+
+ERROR : Test 2
+
+-------------------- EXCEPTION --------------------
+MSG: Msg 2
+STACK S1
+STACK S2
+STACK S3
+};
+
+$runner->{_warning_string} = $test_warning;
+
+is_deeply(
+  $runner->warnings,
+  [
+    {
+      'msg' => 'Test 1: Msg 1',
+      'stack' => 'STACK S1
+STACK S2
+',
+      'type' => 'WARNING'
+    },
+    {
+      'msg' => 'Test 2: Msg 2',
+      'stack' => 'STACK S1
+STACK S2
+STACK S3
+',
+      'type' => 'ERROR'
+    }
+  ],
+  'warnings - with multiple'
+);
 
 ## run_rest
 ###########

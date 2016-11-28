@@ -122,9 +122,14 @@ sub run {
   return 1;
 }
 
+# like run but takes input as a string and returns an arrayref of results
 sub run_rest {
   my $self = shift;
   my $input = shift;
+
+  $self->{_warning_string} = '';
+  open WARNINGS, '>', \$self->{_warning_string};
+  $self->config->{warning_fh} = *WARNINGS;
 
   $self->param('input_data', $input);
   $self->param('output_format', 'json');
@@ -142,7 +147,55 @@ sub run_rest {
 
   $self->finish();
 
+  close WARNINGS;
+
   return \@return;
+}
+
+# use after run_rest() to check for warnings/errors
+# returns an arrayref of hashrefs with the following structure:
+# {
+#   type => 'ERROR',
+#   msg => 'Something exploded',
+#   stack => 'STACK Foo::Bar::foobar()\nSTACK Boo::Far::moocar()'
+# }
+sub warnings {
+  my $self = shift;
+
+  my @warnings;
+
+  my %current_warning = ();
+
+  if(my $warnings = $self->{_warning_string}) {
+    foreach my $line(split /\n+/, $warnings) {
+
+      if($line =~ /^(WARNING|ERROR)\s*\:\s*(.+)$/) {
+
+        if(keys %current_warning) {
+          my %copy = %current_warning;
+          push @warnings, \%copy;
+        }
+
+        %current_warning = (
+          type => $1,
+          msg => $2,
+        );
+      }
+      elsif($line =~ /^MSG\s*\:\s*(.+)$/) {
+        $current_warning{msg} .= ': '.$1;
+      }
+      elsif($line =~ /^STACK/) {
+        $current_warning{stack} .= $line."\n";
+      }
+    }
+  }
+
+  if(keys %current_warning) {
+    my %copy = %current_warning;
+    push @warnings, \%copy;
+  }
+
+  return \@warnings;
 }
 
 sub next_output_line {
