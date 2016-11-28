@@ -89,7 +89,10 @@ sub create_VariationFeatures {
 
   my $v_obj = $ad->fetch_by_name($id);
 
-  return [] unless defined $v_obj;
+  if(!$v_obj) {
+    $self->warning_msg("WARNING: No variant found with ID \'$id\'");
+    return [];
+  }
 
   my @vfs = @{$v_obj->get_all_VariationFeatures};
   for(@vfs) {

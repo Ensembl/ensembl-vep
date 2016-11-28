@@ -53,7 +53,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg && !$@;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 3 unless $can_use_db;
+  skip 'No local database configured', 4 unless $can_use_db;
 
   my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens') if $can_use_db;
   
@@ -105,11 +105,24 @@ SKIP: {
 
   is_deeply($vf, $expected, 'basic input test');
 
+
+  my $tmp;
+  no warnings 'once';
+  open(SAVE, ">&STDERR") or die "Can't save STDERR\n"; 
+
+  close STDERR;
+  open STDERR, '>', \$tmp;
+
   $vf = Bio::EnsEMBL::VEP::Parser::ID->new({
     config => $cfg,
     file => $test_cfg->create_input_file('rs699'),
   })->next;
   is($vf, undef, 'missing ID');
+
+  ok($tmp =~ /No variant found with ID/, 'missing ID warning msg');
+
+  # restore STDERR
+  open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
   1;
 };
