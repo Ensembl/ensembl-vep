@@ -49,7 +49,13 @@ use Bio::EnsEMBL::Variation::Utils::Constants;
 use Bio::EnsEMBL::VEP::Constants;
 use Bio::EnsEMBL::VEP::Utils qw(get_time);
 
-use CGI;
+our $CAN_USE_CGI;
+
+BEGIN {
+  if (eval q{ require CGI; 1 }) {
+    $CAN_USE_CGI = 1;
+  }
+}
 
 sub new {
   my $caller = shift;

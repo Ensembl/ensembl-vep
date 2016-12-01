@@ -187,7 +187,7 @@ sub dump_stats {
 
   unless($self->param('no_stats')) {
 
-    if($self->param('stats_text')) {
+    if($self->param('stats_text') || !$Bio::EnsEMBL::VEP::Stats::CAN_USE_CGI) {
       my $fh = $self->get_stats_file_handle('txt');
       $self->stats->dump_text($fh);
       close $fh;
