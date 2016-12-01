@@ -1,0 +1,5 @@
+##fileformat=VCFv4.0
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	281897	.	G	T	.	.	.
+2	39510	.	G	T	.	.	.
+6	179893	.	GA	G	.	.	.
