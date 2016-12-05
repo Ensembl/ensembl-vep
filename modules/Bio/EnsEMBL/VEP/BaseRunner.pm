@@ -193,7 +193,7 @@ sub dump_stats {
       close $fh;
     }
 
-    if($self->param('stats_html')) {
+    if($self->param('stats_html') && $Bio::EnsEMBL::VEP::Stats::CAN_USE_CGI) {
       my $fh = $self->get_stats_file_handle('html');
       $self->stats->dump_html($fh);
       close $fh;
