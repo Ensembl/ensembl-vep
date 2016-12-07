@@ -543,7 +543,7 @@ sub get_OutputFactory {
 sub get_all_Plugins {
   my $self = shift;
 
-  if(!exists($self->{plugins})) {
+  if(!defined($self->{plugins})) {
     my @plugins = ();
 
     unshift @INC, $self->param('dir_plugins') || $self->param('dir').'/Plugins';
