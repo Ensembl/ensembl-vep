@@ -182,12 +182,29 @@ sub merge_features {
   }
 
   ## hack to copy HGNC IDs and RefSeq stuff
+  my %counts;
   foreach my $tr(@return) {
     $tr->{_gene_hgnc_id} = $hgnc_ids{$tr->{_gene_symbol}} if defined($tr->{_gene_symbol}) && defined($hgnc_ids{$tr->{_gene_symbol}});
 
     if($source_type_is_refseq) {
       $tr->{$_} ||= $refseq_stuff{$tr->{_gene}->stable_id}->{$_} for qw(_gene_symbol _gene_symbol_source _gene_hgnc_id);
+      $counts{$tr->{stable_id}}++;
     }
+  }
+
+  ## now remove duplicates...
+  if($source_type_is_refseq) {
+    my @new;
+    foreach my $tr(@return) {
+      if($counts{$tr->{stable_id}} > 1) {
+        push @new, $tr unless $tr->{source} eq 'ensembl';
+      }
+      else {
+        push @new, $tr;
+      }
+    }
+
+    @return = @new;
   }
 
   return \@return;

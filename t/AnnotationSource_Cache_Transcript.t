@@ -166,12 +166,25 @@ delete $tmp[0]->{_gene_hgnc_id};
 is($tmp[0]->{_gene_hgnc_id}, 'HGNC:14027', 'merge_features restores missing _gene_hgnc_id');
 
 $c->{source_type} = 'refseq';
+
+# check copying/restoration of data
 @tmp = grep {$_->{_gene_symbol} eq 'MRPL39'} @$features;
 delete $tmp[0]->{$_} for qw(_gene_symbol _gene_symbol_source _gene_hgnc_id);
 @tmp = @{$c->merge_features(\@tmp)};
 is($tmp[0]->{_gene_symbol}, 'MRPL39', 'merge_features refseq restores missing _gene_symbol');
 is($tmp[0]->{_gene_symbol_source}, 'HGNC', 'merge_features refseq restores missing _gene_symbol_source');
 is($tmp[0]->{_gene_hgnc_id}, 'HGNC:14027', 'merge_features refseq restores missing _gene_hgnc_id');
+
+# check removal of duplicates
+@tmp = grep {$_->{_gene_symbol} eq 'MRPL39'} @$features;
+my %copy = %{$tmp[-1]};
+push @tmp, bless(\%copy, ref($tmp[-1]));
+$tmp[-1]->{source} = 'ensembl';
+$tmp[-1]->{dbID}++;
+is(scalar @tmp, 4, 'merge_features refseq count before merge');
+@tmp = @{$c->merge_features(\@tmp)};
+is(scalar @tmp, 3, 'merge_features refseq removes duplicates');
+
 $c->{source_type} = 'ensembl';
 
 $features = $c->get_features_by_regions_uncached([[$test_cfg->{cache_chr}, $test_cfg->{cache_s}]]);
