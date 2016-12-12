@@ -337,6 +337,10 @@ unlink($test_cfg->{user_file}.'.out');
 
 
 # plugins
+$runner = Bio::EnsEMBL::VEP::Runner->new($cfg_hash);
+$runner->{plugins} = undef;
+ok($runner->get_all_Plugins, 'get_all_Plugins - plugins may be undefined');
+
 $runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, plugin => ['TestPlugin'], quiet => 1});
 
 is_deeply(
