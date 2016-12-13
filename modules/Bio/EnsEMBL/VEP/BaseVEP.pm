@@ -192,24 +192,32 @@ sub get_adaptor {
   if(!exists($cache->{$group}) || !exists($cache->{$group}->{$type})) {
     my $ad;
 
-    unless($self->param('database') || ($self->param('cache') && !$self->param('offline'))) {
-      my $module_name = sprintf(
-        "Bio::EnsEMBL::%sDBSQL::%sAdaptor",
-        (lc($group) eq 'core' ? '' : ucfirst($group).'::'),
-        $type
-      );
-
-      eval { $ad = $module_name->new_fake($self->species()) };
+    if($self->param('database') || ($self->param('cache') && !$self->param('offline'))) {
+      $ad = $self->registry->get_adaptor($self->species, $group, $type)
     }
 
-    else {
-      $ad = $self->registry->get_adaptor($self->species, $group, $type);
-    }
+    $ad ||= $self->_get_fake_adaptor($group, $type);
 
     $cache->{$group}->{$type} = $ad;
   }
 
   return $cache->{$group}->{$type};
+}
+
+sub _get_fake_adaptor {
+  my ($self, $group, $type) = @_;
+
+  my $ad;
+
+  my $module_name = sprintf(
+    "Bio::EnsEMBL::%sDBSQL::%sAdaptor",
+    (lc($group) eq 'core' ? '' : ucfirst($group).'::'),
+    $type
+  );
+
+  eval { $ad = $module_name->new_fake($self->species()) };
+
+  return $ad;
 }
 
 sub get_slice {

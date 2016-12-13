@@ -53,9 +53,9 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg && !$@;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 14 unless $can_use_db;
+  skip 'No local database configured', 16 unless $can_use_db;
 
-  my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens') if $can_use_db;
+  my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens');
   
   my $cfg = Bio::EnsEMBL::VEP::Config->new({
     %$db_cfg,
@@ -286,6 +286,63 @@ SKIP: {
   $vf = $p->next;
   delete($vf->{$_}) for qw(adaptor variation slice variation_name _line);
   is_deeply($vf, $expected_chr, 'LRG mapping 2');
+
+
+  ## check species with no var db, should use fake adaptor(s)
+  $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens_coreonly');
+  
+  $cfg = Bio::EnsEMBL::VEP::Config->new({
+    %$db_cfg,
+    database => 1,
+    offline => 0,
+    species => 'homo_vepiens_coreonly',
+    warning_file => 'STDERR',
+  });
+
+  $p = Bio::EnsEMBL::VEP::Parser::HGVS->new({
+    config => $cfg,
+    file => $test_cfg->create_input_file('21:g.25585733C>T'),
+    valid_chromosomes => [21],
+  });
+
+  $vf = $p->next();
+
+  is_deeply(
+    $p->get_adaptor('variation', 'VariationFeature'),
+    bless( {
+      'species' => 'homo_vepiens_coreonly'
+    }, 'Bio::EnsEMBL::Variation::DBSQL::VariationFeatureAdaptor' ),
+    'core db only - check adaptor'
+  );
+
+  delete($vf->{$_}) for qw(adaptor variation slice variation_name _line);
+  is_deeply(
+    $vf,
+    bless( {
+      'source' => undef,
+      'is_somatic' => undef,
+      'clinical_significance' => undef,
+      'display' => undef,
+      'dbID' => undef,
+      'minor_allele_count' => undef,
+      'seqname' => undef,
+      'strand' => 1,
+      'evidence' => undef,
+      '_variation_id' => undef,
+      'class_SO_term' => undef,
+      'allele_string' => 'C/T',
+      'map_weight' => 1,
+      'chr' => '21',
+      '_source_id' => undef,
+      'analysis' => undef,
+      'end' => 25585733,
+      'minor_allele_frequency' => undef,
+      'overlap_consequences' => undef,
+      'minor_allele' => undef,
+      'start' => 25585733
+    }, 'Bio::EnsEMBL::Variation::VariationFeature' ),
+    'core db only - genomic hgvs'
+  );
   
   1;
 };

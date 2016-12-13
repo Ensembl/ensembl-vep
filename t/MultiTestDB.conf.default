@@ -11,6 +11,9 @@
       'otherfeatures' => 'Bio::EnsEMBL::DBSQL::DBAdaptor', 
       'funcgen'   => 'Bio::EnsEMBL::Funcgen::DBSQL::DBAdaptor',
     },
+    'homo_vepiens_coreonly' => { 
+      'core'      => 'Bio::EnsEMBL::DBSQL::DBAdaptor',
+    },
     'mus_muscuvep' => {
       'core'      => 'Bio::EnsEMBL::DBSQL::DBAdaptor',
     },

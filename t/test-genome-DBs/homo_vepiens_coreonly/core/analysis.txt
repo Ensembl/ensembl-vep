@@ -1,0 +1,31 @@
+8556	2014-05-23 13:41:28	havana	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+8557	2009-06-01 09:01:22	xrefexoneratedna	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+8558	2014-05-23 10:14:31	uniprot_sw_havana	\N	2014_02	\N	\N	\N	\N	\N	DepthFilter	\N	\N	\N
+8559	2014-06-18 08:25:03	xrefchecksum	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+8560	2014-05-23 10:14:31	est2genome_human_havana	\N	118	\N	\N	\N	\N	\N	ClusterDepthFilter	\N	\N	\N
+8561	2014-04-16 13:56:36	ncrna	Rfam	11.0	/lustre/scratch110/ensembl/th3/GRCh38/ncRNA_wc	cmsearch	\N	/software/ensembl/bin/cmsearch_1.0	\N	Bio::EnsEMBL::Analysis::RunnableDB::Infernal	\N	ensembl	gene
+8562	2014-04-16 13:56:36	rfamblast	Rfam	11.0	/lustre/scratch110/ensembl/th3/GRCh38/ncRNA_wc/filtered.fasta	wublastn	\N	wublastn	W=12 B=10000 V=10000 -hspmax 0 -gspmax 0 -kap -cpus=1	Bio::EnsEMBL::Analysis::RunnableDB::BlastRfam	\N	ensembl	gene
+8563	2014-04-16 13:56:36	blastmirna	all_mirnas.fa	20.0	/lustre/scratch110/ensembl/th3/GRCh38/ncRNA_wc/all_mirnas.fa	wublastn	\N	wublastn	\N	Bio::EnsEMBL::Analysis::RunnableDB::BlastmiRNA	\N	ensembl	gene
+8564	2014-05-23 10:14:31	uniprot_tr_havana	\N	2014_02	\N	\N	\N	\N	\N	DepthFilter	\N	\N	\N
+8565	2014-05-23 10:14:31	vertrna_havana	\N	10-Feb-14 (118)	\N	\N	\N	\N	\N	BlastGenscanDNA	\N	\N	\N
+8566	2014-05-23 13:41:28	ensembl_havana_gene	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+8567	2014-05-23 13:41:30	ensembl_havana_transcript	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+8568	2014-02-13 13:12:49	human_cdna2genome	\N	refseq_59	\N	\N	\N	/nfs/users/nfs_j/jhv/bin/exonerate.hacked.cdna2genome	\N	Exonerate2Genes	\N	\N	\N
+8569	2014-06-18 07:44:58	xrefexonerateprotein	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+8570	2015-10-20 16:07:50	gene3d	Gene3D	3.5.0	\N	gene3d	\N	\N	\N	\N	\N	\N	\N
+8571	2015-10-20 16:07:50	superfamily	Superfamily	1.75	\N	superfamily	\N	\N	\N	\N	\N	\N	\N
+8572	2015-10-20 16:07:50	hmmpanther	PANTHER	9.0	\N	hmmpanther	\N	\N	\N	\N	\N	\N	\N
+8573	2014-08-11 10:23:56	ccds	\N	16092015	\N	\N	\N	\N	\N	\N	\N	\N	\N
+8574	2015-10-20 16:07:50	seg	Seg	\N	\N	seg	\N	\N	\N	\N	\N	\N	\N
+8575	2015-10-20 16:07:50	signalp	SignalP	\N	\N	signalp	\N	\N	\N	\N	\N	\N	\N
+8576	2015-10-20 16:07:50	pfam	Pfam	27.0	\N	pfam	\N	\N	\N	\N	\N	\N	\N
+8577	2015-10-20 16:07:50	tmhmm	Tmhmm	\N	\N	tmhmm	\N	\N	\N	\N	\N	\N	\N
+8578	2015-10-20 16:07:50	smart	Smart	6.2	\N	smart	\N	\N	\N	\N	\N	\N	\N
+8579	2015-10-20 16:07:50	pfscan	Prosite_profiles	20.105	\N	pfscan	\N	\N	\N	\N	\N	\N	\N
+8580	2015-10-01 13:44:01	ensembl	\N	\N	\N	\N	\N	\N	\N	GeneBuilder	\N	\N	\N
+8581	2014-02-07 12:47:35	human_cdna	\N	refseq_59	\N	exonerate	0.9.0	/software/ensembl/genebuild/usrlocalensemblbin/exonerate-0.9.0	\N	Exonerate2Genes	\N	\N	\N
+8582	2014-02-13 13:12:49	human_protein	\N	refseq_59,uniprot_2014_01	\N	\N	\N	\N	\N	BestTargetted	\N	\N	\N
+8583	2015-10-20 16:07:50	pirsf	PIRSF	2.84	\N	pirsf	\N	\N	\N	\N	\N	\N	\N
+8584	2015-10-20 16:07:50	scanprosite	Prosite_patterns	20.105	\N	scanprosite	\N	\N	\N	\N	\N	\N	\N
+8585	2015-10-20 16:07:50	prints	PRINTS	42.0	\N	prints	\N	\N	\N	\N	\N	\N	\N
+8586	2015-10-20 16:07:50	ncoils	ncoils	\N	\N	ncoils	\N	\N	\N	\N	\N	\N	\N

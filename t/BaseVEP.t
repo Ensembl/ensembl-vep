@@ -241,9 +241,9 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg && !$@;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 6 unless $can_use_db;
+  skip 'No local database configured', 8 unless $can_use_db;
 
-  my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens') if $can_use_db;
+  my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens');
   
   $bv = Bio::EnsEMBL::VEP::BaseVEP->new({
     config => Bio::EnsEMBL::VEP::Config->new({
@@ -276,6 +276,28 @@ SKIP: {
   is(ref($bv->get_slice('21')), 'Bio::EnsEMBL::Slice', 'get_slice - database');
 
   is($bv->get_database_assembly, 'GRCh38', 'get_database_assembly');
+
+  $multi = Bio::EnsEMBL::Test::MultiTestDB->new('mus_muscuvep');
+  
+  $bv = Bio::EnsEMBL::VEP::BaseVEP->new({
+    config => Bio::EnsEMBL::VEP::Config->new({
+      %$cfg_hash,
+      %$db_cfg,
+      database => 1,
+      offline => 0,
+      species => 'mus_muscuvep',
+    })
+  });
+
+  is_deeply(
+    $bv->get_adaptor('variation', 'VariationFeature'),
+    bless( {
+      'species' => 'mus_muscuvep'
+    }, 'Bio::EnsEMBL::Variation::DBSQL::VariationFeatureAdaptor' ),
+    'get_adaptor - species with no var db gets fake'
+  );
+
+  is($bv->get_adaptor('variation', 'Variation'), undef, 'get_adaptor - species with no var db no fake available');
 
   1;
 };
