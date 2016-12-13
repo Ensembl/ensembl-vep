@@ -433,21 +433,28 @@ $runner = get_runner({
 
 $of = $runner->get_OutputFactory;
 
-is(
-  $of->headers->[0],
-  '##fileformat=VCFv4.1',
+is_deeply(
+  [map {$of->headers->[$_]} 0..5],
+  [
+    '##fileformat=VCFv4.1',
+    '##contig=<ID=21,assembly=GCF_000001405.26,length=46709983>',
+    '##contig=<ID=22,assembly=GCF_000001405.26,length=50818468>',
+    '##ALT=<ID=CNV,Description="Copy Number Polymorphism">',
+    '##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">',
+    '##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">'
+  ],
   'headers - from input 1'
 );
 
 
 is(
-  $of->headers->[2],
+  $of->headers->[-2],
   '##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|SYMBOL_SOURCE|HGNC_ID">',
   'headers - from input 2'
 );
 
 is(
-  $of->headers->[3],
+  $of->headers->[-1],
   "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tHG00096",
   'headers - from input 3'
 );
