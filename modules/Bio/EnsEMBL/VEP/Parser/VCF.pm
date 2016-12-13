@@ -83,12 +83,7 @@ sub headers {
       $self->{_have_read_next} = 1;
     }
 
-    my $metadata = $parser->get_all_metadata;
-
-    $self->{headers} = [
-      map {[$_, $metadata->{$_}]}
-      $parser->{_metadata_order} ? (@{$parser->{_metadata_order}}, 'header') : sort keys %$metadata
-    ];
+    $self->{headers} = $parser->{_raw_metadata} || [];
   }
 
   return $self->{headers};

@@ -102,13 +102,8 @@ sub headers {
   
   # input was VCF
   if($info->{input_headers} && scalar @{$info->{input_headers}}) {
-    my @input_headers = @{$info->{input_headers}};
-
-    my $col_heading_pair = pop @input_headers;
-    $col_heading = '#'.join("\t", @{$col_heading_pair->[1]});
-
-    # add the remaining headers
-    @headers = map {sprintf('##%s=%s', $_->[0], $_->[1])} @input_headers;
+    push @headers, @{$info->{input_headers}};
+    $col_heading = pop @headers;
   }
 
   # input wasn't VCF
