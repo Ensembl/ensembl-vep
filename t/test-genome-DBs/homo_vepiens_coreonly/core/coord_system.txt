@@ -1,0 +1,9 @@
+1	1	contig	\N	4	default_version,sequence_level
+3	1	scaffold	GRCh38	2	default_version
+4	1	chromosome	GRCh38	1	default_version
+2	1	clone	\N	3	default_version
+12	1	chromosome	GRCh37	5	
+117	1	chromosome	NCBI36	6	
+1001	1	chromosome	NCBI35	7	
+10001	1	chromosome	NCBI34	8	
+10007	1	lrg	\N	9	default_version
