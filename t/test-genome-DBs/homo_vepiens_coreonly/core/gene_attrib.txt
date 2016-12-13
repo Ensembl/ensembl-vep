@@ -1,0 +1,125 @@
+10423951	4	AP001342.1
+10423951	52	Havana
+10423951	53	vega@sanger.ac.uk
+10423951	407	Overlapping RefSeq annotation not matched
+10423951	142	39.43
+10423952	4	AP000235.3
+10423952	52	Havana
+10423952	53	vega@sanger.ac.uk
+10423952	380	overlapping locus
+10423952	407	Overlapping RefSeq annotation not matched
+10423952	142	36.36
+10423953	4	AP000233.2
+10423953	52	Havana
+10423953	53	vega@sanger.ac.uk
+10423953	142	35.82
+10423953	407	No overlapping RefSeq annotation found
+10423954	142	51.76
+10423954	407	No overlapping RefSeq annotation found
+10423955	4	AP000233.3
+10423955	52	Havana
+10423955	53	vega@sanger.ac.uk
+10423955	142	34.13
+10423955	407	No overlapping RefSeq annotation found
+10423956	4	AP000233.4
+10423956	52	Havana
+10423956	53	vega@sanger.ac.uk
+10423956	123	LEC
+10423956	142	35.64
+10423956	407	No overlapping RefSeq annotation found
+10423957	142	44.04
+10423957	407	No overlapping RefSeq annotation found
+10423958	142	45.26
+10423958	407	No overlapping RefSeq annotation found
+10423959	4	AP001340.2
+10423959	52	Havana
+10423959	53	vega@sanger.ac.uk
+10423959	142	56.96
+10423959	407	No overlapping RefSeq annotation found
+10423960	4	AP001340.3
+10423960	52	Havana
+10423960	53	vega@sanger.ac.uk
+10423960	142	34.56
+10423960	407	No overlapping RefSeq annotation found
+10423961	53	vega@sanger.ac.uk
+10423961	52	Havana
+10423961	4	LINC00158
+10423961	3	C21orf42
+10423961	407	Overlapping RefSeq Gene ID 54072 matches but different biotype of misc_RNA
+10423961	142	37.89
+10423962	142	29.91
+10423962	407	No overlapping RefSeq annotation found
+10423963	4	AP000221.1
+10423963	52	Havana
+10423963	53	vega@sanger.ac.uk
+10423963	142	31.33
+10423963	407	No overlapping RefSeq annotation found
+10423964	4	MIR155HG
+10423964	52	Havana
+10423964	53	vega@sanger.ac.uk
+10423964	380	ncRNA host
+10423964	407	Overlapping RefSeq Gene ID 114614 matches but different biotype of misc_RNA
+10423964	142	37.70
+10423965	142	40.00
+10423965	407	Overlapping RefSeq Gene ID 406947 matches but different biotype of misc_RNA
+10423966	4	AP000223.42
+10423966	52	Havana
+10423966	53	vega@sanger.ac.uk
+10423966	407	Overlapping RefSeq annotation not matched
+10423966	142	44.17
+10423967	4	MRPL39
+10423967	52	Havana
+10423967	53	vega@sanger.ac.uk
+10423967	407	Overlapping RefSeq Gene ID 54148 matches and has similar biotype of protein_coding
+10423967	142	37.94
+10423968	52	Havana
+10423968	4	JAM2
+10423968	380	overlapping locus
+10423968	53	vega@sanger.ac.uk
+10423968	407	Overlapping RefSeq Gene ID 58494 matches and has similar biotype of protein_coding
+10423968	142	39.65
+10423969	4	AP000223.41
+10423969	52	Havana
+10423969	53	vega@sanger.ac.uk
+10423969	142	41.35
+10423969	380	overlapping locus
+10423969	407	Overlapping RefSeq annotation not matched
+10423970	4	FDXP2
+10423970	52	Havana
+10423970	53	vega@sanger.ac.uk
+10423970	142	41.60
+10423970	380	overlapping locus
+10423970	407	Overlapping RefSeq annotation not matched
+10423971	4	ATP5J
+10423971	52	Havana
+10423971	53	vega@sanger.ac.uk
+10423971	142	41.96
+10423971	407	Overlapping RefSeq Gene ID 522 matches and has similar biotype of protein_coding
+10423972	4	GABPA
+10423972	52	Havana
+10423972	53	vega@sanger.ac.uk
+10423972	142	36.67
+10423972	407	Overlapping RefSeq Gene ID 2551 matches and has similar biotype of protein_coding
+10423973	4	AP000226.9
+10423973	52	Havana
+10423973	53	vega@sanger.ac.uk
+10423973	142	39.90
+10423973	407	Overlapping RefSeq annotation not matched
+10423974	4	APP
+10423974	52	Havana
+10423974	53	vega@sanger.ac.uk
+10423974	407	Overlapping RefSeq Gene ID 351 matches and has similar biotype of protein_coding
+10423974	142	39.73
+10423975	3	AP001443.1
+10423975	4	AP001442.2
+10423975	52	Havana
+10423975	53	vega@sanger.ac.uk
+10423975	142	40.47
+10423975	407	Overlapping RefSeq annotation not matched
+10423976	142	33.33
+10423976	407	Overlapping RefSeq annotation not matched
+10423977	4	CSTB
+10423977	52	Havana
+10423977	53	vega@sanger.ac.uk
+10423977	142	54.22
+10423977	407	Overlapping RefSeq Gene ID 1476 matches and has similar biotype of protein_coding

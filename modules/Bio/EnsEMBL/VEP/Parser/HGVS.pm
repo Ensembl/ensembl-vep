@@ -79,6 +79,8 @@ sub create_VariationFeatures {
   my $hgvs = $parser->get_value;
 
   my $core_group = $self->param('core_type');
+
+  $DB::single = 1;
   
   my $vfa = $self->get_adaptor('variation', 'VariationFeature');
   my $sa  = $self->get_adaptor($core_group, 'Slice');
