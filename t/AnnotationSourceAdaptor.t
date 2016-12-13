@@ -214,7 +214,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg && !$@;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 5 unless $can_use_db;
+  skip 'No local database configured', 9 unless $can_use_db;
 
   my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens') if $can_use_db;
 
@@ -299,6 +299,30 @@ SKIP: {
     'get_all_from_database - SV'
   );
   $asa->param('check_svs', 0);
+
+
+  ## check species with no var or reg db
+  $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens_coreonly');
+
+  $asa = Bio::EnsEMBL::VEP::AnnotationSourceAdaptor->new({
+    config => Bio::EnsEMBL::VEP::Config->new({
+      %$db_cfg,
+      database => 1,
+      offline => 0,
+      species => 'homo_vepiens_coreonly',
+    })
+  });
+
+  is(scalar @{$asa->get_all_from_database}, 1, 'get_all_from_database - no var/reg 1');
+
+  $asa->param('check_existing', 1);
+  is(scalar @{$asa->get_all_from_database}, 1, 'get_all_from_database - no var/reg 2');
+
+  $asa->param('regulatory', 1);
+  is(scalar @{$asa->get_all_from_database}, 1, 'get_all_from_database - no var/reg 3');
+
+  $asa->param('check_svs', 1);
+  is(scalar @{$asa->get_all_from_database}, 1, 'get_all_from_database - no var/reg 4');
 };
 
 

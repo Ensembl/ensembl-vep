@@ -99,18 +99,18 @@ sub get_all_from_database {
 
     push @as, Bio::EnsEMBL::VEP::AnnotationSource::Database::RegFeat->new({
       config => $self->config,
-    }) if $self->param('regulatory');
+    }) if $self->param('regulatory') && $self->get_adaptor('funcgen', 'RegulatoryFeature');
 
     push @as, Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation->new({
       config => $self->config,
-    }) if $self->param('check_existing');
+    }) if $self->param('check_existing') && $self->get_adaptor('variation', 'Variation');
   }
 
   # overlapping SVs
   # this has no cache equivalent
   push @as, Bio::EnsEMBL::VEP::AnnotationSource::Database::StructuralVariation->new({
     config => $self->config,
-  }) if $self->param('check_svs');
+  }) if $self->param('check_svs') && $self->get_adaptor('variation', 'Variation');
 
   return \@as;
 }
