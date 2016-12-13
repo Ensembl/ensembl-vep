@@ -53,21 +53,13 @@ is(ref($p->parser), 'Bio::EnsEMBL::IO::Parser::VCF4', 'parser');
 is_deeply(
   $p->headers,
   [
-    ['fileformat', 'VCFv4.1'],
-    [
-      'header', [
-        'CHROM',
-        'POS',
-        'ID',
-        'REF',
-        'ALT',
-        'QUAL',
-        'FILTER',
-        'INFO',
-        'FORMAT',
-        'HG00096'
-      ],
-    ],
+    '##fileformat=VCFv4.1',
+    '##contig=<ID=21,assembly=GCF_000001405.26,length=46709983>',
+    '##contig=<ID=22,assembly=GCF_000001405.26,length=50818468>',
+    '##ALT=<ID=CNV,Description="Copy Number Polymorphism">',
+    '##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">',
+    '##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">',
+    '#'.join("\t", qw(CHROM POS ID REF ALT QUAL FILTER INFO FORMAT HG00096)),
   ],
   'headers'
 );
