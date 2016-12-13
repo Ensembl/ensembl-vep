@@ -282,12 +282,12 @@ is(ref($runner->get_stats_file_handle('html')), 'FileHandle', 'get_stats_file_ha
 ok(-e $test_cfg->{user_file}.'.out_summary.html', 'get_stats_file_handle - html file exists');
 unlink($test_cfg->{user_file}.'.out_summary.html');
 
-$runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, stats_file => $test_cfg->{user_file}.'.stats'});
+$runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, stats_file => $test_cfg->{user_file}.'.stats', force_overwrite => 1});
 $runner->get_stats_file_handle('txt');
 ok(-e $test_cfg->{user_file}.'.stats.txt', 'get_stats_file_handle - extension handling 1');
 unlink($test_cfg->{user_file}.'.stats.txt');
 
-$runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, stats_file => $test_cfg->{user_file}.'.txt'});
+$runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, stats_file => $test_cfg->{user_file}.'.txt', force_overwrite => 1});
 $runner->get_stats_file_handle('txt');
 ok(-e $test_cfg->{user_file}.'.txt', 'get_stats_file_handle - extension handling 2');
 
@@ -296,7 +296,7 @@ ok(-e $test_cfg->{user_file}.'.html', 'get_stats_file_handle - extension handlin
 unlink($test_cfg->{user_file}.'.txt');
 unlink($test_cfg->{user_file}.'.html');
 
-$runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, stats_file => $test_cfg->{user_file}.'_stats'});
+$runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, stats_file => $test_cfg->{user_file}.'_stats', force_overwrite => 1});
 $runner->get_stats_file_handle('txt');
 ok(-e $test_cfg->{user_file}.'_stats.txt', 'get_stats_file_handle - extension handling 4');
 unlink($test_cfg->{user_file}.'_stats.txt');
