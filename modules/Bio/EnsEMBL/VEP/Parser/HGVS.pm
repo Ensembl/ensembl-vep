@@ -80,6 +80,9 @@ sub create_VariationFeatures {
 
   my $hgvs = $parser->get_value;
 
+  # remove whitespace
+  $hgvs =~ s/\s+//g;
+
   my $core_group = $self->param('core_type');
 
   $DB::single = 1;
