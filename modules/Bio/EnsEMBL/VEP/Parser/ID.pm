@@ -82,6 +82,9 @@ sub create_VariationFeatures {
 
   my $id = $parser->get_value;
 
+  # remove whitespace
+  $id =~ s/\s+//g;
+
   my $ad = $self->{adaptor};
 
   # tell adaptor to fetch failed variants
