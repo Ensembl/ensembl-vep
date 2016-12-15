@@ -121,6 +121,24 @@ SKIP: {
 
   ok($tmp =~ /No variant found with ID/, 'missing ID warning msg');
 
+  my $file = $test_cfg->create_input_file();
+  open OUT, ">$file";
+  print OUT "\n \nrs142513484\n";
+  close OUT;
+
+  $p = Bio::EnsEMBL::VEP::Parser::ID->new({
+    config => $cfg,
+    file => $file,,
+    valid_chromosomes => [21],
+  });
+
+  $vf = $p->next();
+  delete($vf->{$_}) for qw(adaptor variation slice variation_name);
+
+  is_deeply($vf, $expected, 'parse input file with empty lines');
+
+  ok($tmp =~ /Skipped 2 empty lines/, 'empty line warning');
+
   # restore STDERR
   open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
