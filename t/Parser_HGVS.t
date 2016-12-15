@@ -301,7 +301,7 @@ SKIP: {
 
   $p = Bio::EnsEMBL::VEP::Parser::HGVS->new({
     config => $cfg,
-    file => $test_cfg->create_input_file('21:g.25585733C>T'),
+    file => $test_cfg->create_input_file('21:g.25585733C>T '),
     valid_chromosomes => [21],
   });
 

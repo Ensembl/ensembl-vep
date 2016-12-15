@@ -123,7 +123,7 @@ SKIP: {
 
   my $file = $test_cfg->create_input_file();
   open OUT, ">$file";
-  print OUT "\n \nrs142513484\n";
+  print OUT "\n \nrs142513484 \n";
   close OUT;
 
   $p = Bio::EnsEMBL::VEP::Parser::ID->new({
