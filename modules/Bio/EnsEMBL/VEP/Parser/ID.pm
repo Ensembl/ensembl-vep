@@ -74,6 +74,8 @@ sub create_VariationFeatures {
   my $parser = $self->parser;
   $parser->next();
 
+  $self->skip_empty_lines();
+
   return [] unless $parser->{record};
 
   $self->line_number($self->line_number + 1);
