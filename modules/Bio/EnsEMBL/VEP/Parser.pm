@@ -155,6 +155,35 @@ sub file {
   return $self->{file};
 }
 
+sub skip_empty_lines {
+  my $self = shift;
+  my $parser = $self->parser;
+
+  my $skipped = 0;
+
+  # allow for empty lines
+  while(defined($parser->{record}) && $parser->{record} !~ /\w+/) {
+    $parser->next();
+    $self->line_number($self->line_number + 1);
+    $skipped++;
+  }
+
+  if($skipped) {
+    my $ln = $self->line_number();
+
+    $self->warning_msg(
+      sprintf(
+        "Skipped %i empty line%s from line %i",
+        $skipped,
+        $skipped > 1 ? 's' : '',
+        $ln - $skipped + 1,
+      )
+    );
+  }
+
+  return $skipped;
+}
+
 sub line_number {
   my $self = shift;
   $self->{line_number} = shift if @_;
