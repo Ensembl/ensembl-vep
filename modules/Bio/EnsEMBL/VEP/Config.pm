@@ -449,9 +449,11 @@ sub check_config {
   }
   
   # check incompatible flags
-  foreach my $flag(grep {$config->{$_}} keys %INCOMPATIBLE) {
-    foreach my $invalid(grep {$config->{$_}} @{$INCOMPATIBLE{$flag}}) {
-      throw sprintf("ERROR: Can't use --%s and --%s together\n", $flag, $invalid);
+  unless($config->{safe}) {
+    foreach my $flag(grep {$config->{$_}} keys %INCOMPATIBLE) {
+      foreach my $invalid(grep {$config->{$_}} @{$INCOMPATIBLE{$flag}}) {
+        throw sprintf("ERROR: Can't use --%s and --%s together\n", $flag, $invalid);
+      }
     }
   }
 
