@@ -111,6 +111,9 @@ throws_ok { Bio::EnsEMBL::VEP::Config->new({format => 'gobbledegook'}) } qr/not 
 # incompatible flags
 throws_ok { Bio::EnsEMBL::VEP::Config->new({database => 1, cache => 1}) } qr/Can\'t use.+together/, 'incompatible params';
 
+# incompatible ok with safe on
+ok(Bio::EnsEMBL::VEP::Config->new({safe => 1, most_severe => 1, symbol => 1}), 'incompatible pass with safe');
+
 # missing database/cache/offline
 throws_ok { Bio::EnsEMBL::VEP::Config->new({database => 0}) } qr/The VEP can read gene data from/, 'no database/cache/offline';
 
