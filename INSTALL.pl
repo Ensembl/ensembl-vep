@@ -142,6 +142,7 @@ GetOptions(
   'TEST'         => \$TEST,
   'NO_HTSLIB|l'  => \$NO_HTSLIB,
   'NO_TEST'      => \$NO_TEST,
+  'NO_BIOPERL'   => \$NO_BIOPERL
 ) or die("ERROR: Failed to parse arguments");
 
 # load version data
@@ -395,7 +396,9 @@ sub check_default_dir {
 sub api() {
   setup_dirs();
   my $curdir = getcwd;
-  bioperl();
+  unless($NO_BIOPERL) {
+    bioperl();
+  }  
 
   # htslib needs to find bioperl to pass tests
   $ENV{PERL5LIB} = $ENV{PERL5LIB} ? $ENV{PERL5LIB}.':'.$DEST_DIR : $DEST_DIR;
