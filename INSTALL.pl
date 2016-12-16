@@ -1698,6 +1698,7 @@ Options
 -q | --QUIET       Don't write any status output when using --AUTO
 -p | --PREFER_BIN  Use this if the installer fails with out of memory errors
 -l | --NO_HTSLIB   Don't attempt to install Faidx/htslib
+--NO_BIOPERL       Don't install BioPerl
 
 -t | --CONVERT     Convert downloaded caches to use tabix for retrieving
                    co-located variants (requires tabix)
