@@ -75,6 +75,7 @@ our (
   $BIODBHTS_DIR,
   $REALPATH_DEST_DIR,
   $NO_TEST,
+  $NO_BIOPERL,
   $ua,
 
   $CAN_USE_CURL,
