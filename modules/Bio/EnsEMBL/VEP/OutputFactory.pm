@@ -717,8 +717,8 @@ sub add_colocated_variant_info {
     # push @{$tmp->{$_.'_MAF'}}, $ex->{$_} for grep {defined($ex->{$_})} @pops;
 
     # clin sig and pubmed?
-    push @{$tmp->{CLIN_SIG}}, $ex->{clin_sig} if $ex->{clin_sig};
-    push @{$tmp->{PUBMED}}, $ex->{pubmed} if $self->{pubmed} && $ex->{pubmed};
+    push @{$tmp->{CLIN_SIG}}, split(',', $ex->{clin_sig}) if $ex->{clin_sig};
+    push @{$tmp->{PUBMED}}, split(',', $ex->{pubmed}) if $self->{pubmed} && $ex->{pubmed};
 
     # somatic?
     push @{$tmp->{SOMATIC}}, $ex->{somatic} ? 1 : 0;
