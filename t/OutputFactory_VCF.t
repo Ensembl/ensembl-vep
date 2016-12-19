@@ -420,6 +420,19 @@ $of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({config => $ib->config});
 ok($lines[0] =~ /EFF/ && $lines[0] !~ /CSQ/, 'vcf_info_field');
 
 
+# no cons
+$ib = get_runner({
+  input_file => $test_cfg->create_input_file([qw(21 25585733 25585733 C/T 1)]),
+  dir => $test_cfg->{cache_root_dir},
+})->get_InputBuffer;
+$of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({config => $ib->config});
+$ib->buffer->[0]->{transcript_variations} = {};
+
+is_deeply(
+  $of->get_all_lines_by_InputBuffer($ib)->[0],
+  "21\t25585733\t21_25585733_C/T\tC\tT\t.\t.\t.",
+  "no consequences added"
+);
 
 
 ## test getting stuff from input

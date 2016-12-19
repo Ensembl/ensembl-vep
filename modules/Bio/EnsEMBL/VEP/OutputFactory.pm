@@ -355,21 +355,24 @@ sub get_all_VariationFeatureOverlapAlleles {
 
   # get all VFOAs
   # need to be sensitive to whether --coding_only is switched on
-  my $vfos;
+  my $vfos = $vf->get_all_VariationFeatureOverlaps;
 
-  # if coding only just get transcript & intergenic ones
+  # if coding only filter TranscriptVariations down to coding ones
+  # leave others intact, otherwise doesn't make sense to do --regulatory and --coding_only
   if($self->{coding_only}) {
-    @$vfos = grep {defined($_)} (
-      @{$vf->get_all_TranscriptVariations},
-      $vf->get_IntergenicVariation
-    );
-  }
-  else {
-    $vfos = $vf->get_all_VariationFeatureOverlaps;
-  }
+    my @new;
 
-  # grep out non-coding?
-  @$vfos = grep {$_->can('affects_cds') && $_->affects_cds} @$vfos if $self->{coding_only};
+    foreach my $vfo(@$vfos) {
+      if($vfo->isa('Bio::EnsEMBL::Variation::BaseVariationFeatureOverlap')) {
+        push @new, $vfo if $vfo->can('affects_cds') && $vfo->affects_cds;
+      }
+      else {
+        push @new, $vfo;
+      }
+    }
+
+    $vfos = \@new;
+  }
 
   # method name stub for getting *VariationAlleles
   my $allele_method = $self->{process_ref_homs} ? 'get_all_' : 'get_all_alternate_';  
@@ -412,6 +415,8 @@ sub get_all_StructuralVariationOverlapAlleles {
 sub filter_VariationFeatureOverlapAlleles {
   my $self = shift;
   my $vfoas = shift;
+
+  return [] unless $vfoas && scalar @$vfoas;
 
   # pick worst?
   if($self->{pick}) {
@@ -712,8 +717,8 @@ sub add_colocated_variant_info {
     # push @{$tmp->{$_.'_MAF'}}, $ex->{$_} for grep {defined($ex->{$_})} @pops;
 
     # clin sig and pubmed?
-    push @{$tmp->{CLIN_SIG}}, $ex->{clin_sig} if $ex->{clin_sig};
-    push @{$tmp->{PUBMED}}, $ex->{pubmed} if $self->{pubmed} && $ex->{pubmed};
+    push @{$tmp->{CLIN_SIG}}, split(',', $ex->{clin_sig}) if $ex->{clin_sig};
+    push @{$tmp->{PUBMED}}, split(',', $ex->{pubmed}) if $self->{pubmed} && $ex->{pubmed};
 
     # somatic?
     push @{$tmp->{SOMATIC}}, $ex->{somatic} ? 1 : 0;

@@ -108,7 +108,8 @@ is_deeply(
       1
     ],
     'CLIN_SIG' => [
-      'not_provided,pathogenic'
+      'not_provided',
+      'pathogenic'
     ],
     'Existing_variation' => [
       'rs63750066',
@@ -140,6 +141,7 @@ is_deeply(
     ],
     'PUBMED' => [
       '20708005',
+      'test'
     ],
   },
   'add_colocated_variant_info - pubmed',
@@ -314,6 +316,8 @@ $of->{pick_order} = $orig_order;
 
 ## filter_VariationFeatureOverlapAlleles
 ########################################
+
+is_deeply($of->filter_VariationFeatureOverlapAlleles([]), [], 'filter_VariationFeatureOverlapAlleles - empty arrayref');
 
 is(scalar @{$of->filter_VariationFeatureOverlapAlleles(\@vfoas)}, scalar @vfoas, 'filter_VariationFeatureOverlapAlleles - no filter');
 
