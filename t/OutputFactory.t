@@ -315,6 +315,8 @@ $of->{pick_order} = $orig_order;
 ## filter_VariationFeatureOverlapAlleles
 ########################################
 
+is_deeply($of->filter_VariationFeatureOverlapAlleles([]), [], 'filter_VariationFeatureOverlapAlleles - empty arrayref');
+
 is(scalar @{$of->filter_VariationFeatureOverlapAlleles(\@vfoas)}, scalar @vfoas, 'filter_VariationFeatureOverlapAlleles - no filter');
 
 $of->{pick} = 1;
