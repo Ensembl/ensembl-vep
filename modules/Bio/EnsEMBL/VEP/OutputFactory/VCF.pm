@@ -197,12 +197,17 @@ sub get_all_lines_by_InputBuffer {
       $line->[7] = '';
     }
 
-    $line->[7] .= ';' if $line->[7];
-
-    $line->[7] .= $fieldname.'='.join(",",
+    my @chunks =
       map {$self->output_hash_to_vcf_info_chunk($_, $vf->strand)} 
-      @{$self->get_all_output_hashes_by_VariationFeature($vf)}
-    );
+      @{$self->get_all_output_hashes_by_VariationFeature($vf)};
+
+    if(@chunks) {
+      $line->[7] .= ';' if $line->[7];
+      $line->[7] .= $fieldname.'='.join(",", @chunks);
+    }
+    else {
+      $line->[7] ||= '.';
+    }
 
     push @return, join("\t", @$line);
 
