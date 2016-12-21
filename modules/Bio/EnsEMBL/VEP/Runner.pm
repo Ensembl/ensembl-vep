@@ -57,6 +57,7 @@ use Bio::EnsEMBL::VEP::Constants;
 use Bio::EnsEMBL::VEP::Parser;
 use Bio::EnsEMBL::VEP::InputBuffer;
 use Bio::EnsEMBL::VEP::OutputFactory;
+use Bio::EnsEMBL::Variation::Utils::FastaSequence qw(revert_fasta);
 
 # dispatcher/runner for all initial setup from config
 sub init {
@@ -94,11 +95,13 @@ sub init {
 sub finish {
   my $self = shift;
 
-  $self->dump_stats unless $self->param('no_stats');
-
   foreach my $plugin(@{$self->get_all_Plugins}) {
     $plugin->finish() if $plugin->can('finish');
   }
+
+  $self->dump_stats unless $self->param('no_stats');
+
+  revert_fasta() if $self->fasta_db;
 }
 
 # run
