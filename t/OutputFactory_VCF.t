@@ -299,6 +299,24 @@ is(
   'get_all_lines_by_InputBuffer - check last'
 );
 
+
+# check incomplete VCF entry gets filled out properly
+$ib = get_runner({
+  input_data => qq{21\t25585733\trs142513484\tC\tT},
+  dir => $test_cfg->{cache_root_dir},
+})->get_InputBuffer;
+
+$of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({config => $ib->config});
+@lines = @{$of->get_all_lines_by_InputBuffer($ib)};
+
+is(
+  $lines[0],
+  "21\t25585733\trs142513484\tC\tT\t.\t.\t".
+  'CSQ=T|3_prime_UTR_variant|MODIFIER||ENSG00000154719|Transcript|ENST00000307301||||||1122|||||||-1|,T|missense_variant|MODERATE||ENSG00000154719|Transcript|ENST00000352957||||||1033|991|331|A/T|Gca/Aca|||-1|,T|upstream_gene_variant|MODIFIER||ENSG00000260583|Transcript|ENST00000567517||||||||||||2407|-1|',
+  'get_all_lines_by_InputBuffer - incomplete VCF entry filled out'
+);
+
+
 $ib = get_runner({
   input_file => $test_cfg->{test_vcf},
   everything => 1,
