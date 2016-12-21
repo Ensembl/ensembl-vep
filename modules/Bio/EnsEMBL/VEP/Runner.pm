@@ -229,22 +229,26 @@ sub _buffer_to_output {
 
   my @output;
   my $vfs = $input_buffer->next();
+  return [] unless $vfs && scalar @$vfs;
 
-  if($vfs && scalar @$vfs) {
-    my $output_factory = $self->get_OutputFactory;
+  my $output_factory = $self->get_OutputFactory;
 
-    foreach my $as(@{$self->get_all_AnnotationSources}) {
-      $as->annotate_InputBuffer($input_buffer);
-    }
-      
-    $input_buffer->finish_annotation;
+  foreach my $as(@{$self->get_all_AnnotationSources}) {
+    $as->annotate_InputBuffer($input_buffer);
+  }
+    
+  $input_buffer->finish_annotation;
 
-    if($output_as_hash) {
-      push @output, @{$output_factory->get_all_output_hashes_by_InputBuffer($input_buffer)};
-    }
-    else {
-      push @output, @{$output_factory->get_all_lines_by_InputBuffer($input_buffer)};
-    }
+  # if the input buffer got reduced to nothing we have to re-run this method here
+  # this can happen if an annotation source filters out variants
+  # NB we dont want to do this if we've been called from within a fork otherwise duplication will happen
+  return $self->_buffer_to_output($input_buffer, $output_as_hash) unless scalar @{$input_buffer->buffer} || $self->param('fork');
+
+  if($output_as_hash) {
+    push @output, @{$output_factory->get_all_output_hashes_by_InputBuffer($input_buffer)};
+  }
+  else {
+    push @output, @{$output_factory->get_all_lines_by_InputBuffer($input_buffer)};
   }
 
   return \@output;
@@ -263,7 +267,7 @@ sub _forked_buffer_to_output {
   my $buffer_size = $self->param('buffer_size');
   my $delta = 0.5;
   my $minForkSize = 50;
-  my $maxForkSize = int($buffer_size / (2 * $fork_number));
+  my $maxForkSize = int($buffer_size / (2 * $fork_number)) || 1;
   my $active_forks = 0;
   my (@pids, %by_pid);
   my $sel = IO::Select->new;
@@ -362,8 +366,14 @@ sub _forked_buffer_to_output {
 
   waitpid($_, 0) for @pids;
 
-  # sort data by dispatched PID order and return
-  return [map {@{$by_pid{$_} || []}} @pids];
+  # sort data by dispatched PID order
+  my @return = map {@{$by_pid{$_} || []}} @pids;
+
+  # if the input buffer got reduced to nothing we have to re-run this method here
+  # this can happen if an annotation source filters out variants
+  return $self->_forked_buffer_to_output($buffer, $output_as_hash) unless scalar @return;
+
+  return \@return;
 }
 
 sub _forked_process {

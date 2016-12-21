@@ -336,6 +336,43 @@ unlink($test_cfg->{user_file}.'.html');
 unlink($test_cfg->{user_file}.'.out');
 
 
+## check the situation where an annotation source filters out all variants in the current input buffer
+## but there are still variants remaining to be processed from the parser
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  no_stats => 1,
+  buffer_size => 1,
+  filter_common => 1,
+  freq_freq => 0.0012,
+});
+
+# the second line should get filtered out here
+# since we're using buffer_size of 1 this will leave an empty buffer
+# runner should be aware of this and still continue on with next buffer fill
+my $output = $runner->run_rest(qq{21\t25585733\trs142513484\tC\tT\t.\t.\t.\tGT\t0|0
+21\t25587758\trs116645811\tG\tA\t.\t.\t.\tGT\t0|0
+21\t25587701\trs187353664\tT\tC\t.\t.\t.\tGT\t0|0
+});
+
+is_deeply([map {$_->{id}} @$output], [qw(rs142513484 rs187353664)], 'run with filter check pass over empty buffer');
+
+# now check the same again but using the equivalent forked path through the code
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  no_stats => 1,
+  buffer_size => 1,
+  filter_common => 1,
+  freq_freq => 0.0012,
+  fork => 2,
+});
+
+$output = $runner->run_rest(qq{21\t25585733\trs142513484\tC\tT\t.\t.\t.\tGT\t0|0
+21\t25587758\trs116645811\tG\tA\t.\t.\t.\tGT\t0|0
+21\t25587701\trs187353664\tT\tC\t.\t.\t.\tGT\t0|0
+});
+is_deeply([map {$_->{id}} @$output], [qw(rs142513484 rs187353664)], 'run with filter check pass over empty buffer - forked');
+
+
 # plugins
 $runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, plugin => ['TestPlugin'], quiet => 1});
 
