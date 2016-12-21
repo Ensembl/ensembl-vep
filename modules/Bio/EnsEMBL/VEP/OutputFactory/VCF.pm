@@ -209,7 +209,7 @@ sub get_all_lines_by_InputBuffer {
       $line->[7] ||= '.';
     }
 
-    push @return, join("\t", @$line);
+    push @return, join("\t", map {defined($_) ? $_ : '.'} @$line);
 
     $self->write_web_output($vf) if $self->{web_output};
   }
