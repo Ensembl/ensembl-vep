@@ -18,6 +18,7 @@ use warnings;
 use Test::More;
 use Test::Exception;
 use FindBin qw($Bin);
+use B;
 
 use lib $Bin;
 use VEPTestingConfig;
@@ -316,6 +317,7 @@ ok($runner->run, 'run - ok');
 
 open IN, $test_cfg->{user_file}.'.out';
 my @tmp_lines = <IN>;
+close IN;
 is(scalar @tmp_lines, 38, 'run - count lines');
 
 is_deeply(
@@ -336,41 +338,73 @@ unlink($test_cfg->{user_file}.'.html');
 unlink($test_cfg->{user_file}.'.out');
 
 
+## test restoration of Slice->seq after run
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  fasta => $test_cfg->{fasta},
+  no_stats => 1,
+});
+$runner->init();
+
+# use of B gleaned from http://www.perlmonks.org/?node_id=413556
+my $b = B::svref_2object(\&Bio::EnsEMBL::Slice::seq);
+is($b->GV->STASH->NAME, 'Bio::EnsEMBL::Variation::Utils::FastaSequence', 'Slice::seq after init');
+
+$runner->finish();
+$b = B::svref_2object(\&Bio::EnsEMBL::Slice::seq);
+is($b->GV->STASH->NAME, 'Bio::EnsEMBL::Slice', 'Slice::seq after finish');
+
+
 ## check the situation where an annotation source filters out all variants in the current input buffer
 ## but there are still variants remaining to be processed from the parser
-# $runner = Bio::EnsEMBL::VEP::Runner->new({
-#   %$cfg_hash,
-#   no_stats => 1,
-#   buffer_size => 1,
-#   filter_common => 1,
-#   freq_freq => 0.0012,
-# });
 
-# # the second line should get filtered out here
-# # since we're using buffer_size of 1 this will leave an empty buffer
-# # runner should be aware of this and still continue on with next buffer fill
-# my $output = $runner->run_rest(qq{21\t25585733\trs142513484\tC\tT\t.\t.\t.\tGT\t0|0
-# 21\t25587758\trs116645811\tG\tA\t.\t.\t.\tGT\t0|0
-# 21\t25587701\trs187353664\tT\tC\t.\t.\t.\tGT\t0|0
-# });
+# the second line should get filtered out here
+my $in = qq{21\t25585733\trs142513484\tC\tT\t.\t.\t.\tGT\t0|0
+21\t25587758\trs116645811\tG\tA\t.\t.\t.\tGT\t0|0
+21\t25587701\trs187353664\tT\tC\t.\t.\t.\tGT\t0|0};
 
-# is_deeply([map {$_->{id}} @$output], [qw(rs142513484 rs187353664)], 'run with filter check pass over empty buffer');
+# since we're using buffer_size of 1 this will leave an empty buffer
+# runner should be aware of this and still continue on with next buffer fill
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  no_stats => 1,
+  buffer_size => 1,
+  filter_common => 1,
+  freq_freq => 0.0012,
+  input_data => $in,
+  output_file => $test_cfg->{user_file}.'.out',
+  pick => 1,
+});
+$runner->run();
 
-# # now check the same again but using the equivalent forked path through the code
-# $runner = Bio::EnsEMBL::VEP::Runner->new({
-#   %$cfg_hash,
-#   no_stats => 1,
-#   buffer_size => 1,
-#   filter_common => 1,
-#   freq_freq => 0.0012,
-#   fork => 2,
-# });
+open IN, $test_cfg->{user_file}.'.out';
+@tmp_lines = grep {!/^\#/} <IN>;
+close IN;
+unlink($test_cfg->{user_file}.'.out');
 
-# $output = $runner->run_rest(qq{21\t25585733\trs142513484\tC\tT\t.\t.\t.\tGT\t0|0
-# 21\t25587758\trs116645811\tG\tA\t.\t.\t.\tGT\t0|0
-# 21\t25587701\trs187353664\tT\tC\t.\t.\t.\tGT\t0|0
-# });
-# is_deeply([map {$_->{id}} @$output], [qw(rs142513484 rs187353664)], 'run with filter check pass over empty buffer - forked');
+is_deeply([map {(split("\t", $_))[0]} @tmp_lines], [qw(rs142513484 rs187353664)], 'run with filter check pass over empty buffer');
+
+# now check the same again but using the equivalent forked path through the code
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  no_stats => 1,
+  buffer_size => 1,
+  filter_common => 1,
+  freq_freq => 0.0012,
+  fork => 2,
+  input_data => $in,
+  output_file => $test_cfg->{user_file}.'.out',
+  pick => 1,
+});
+
+$runner->run();
+
+open IN, $test_cfg->{user_file}.'.out';
+@tmp_lines = grep {!/^\#/} <IN>;
+close IN;
+unlink($test_cfg->{user_file}.'.out');
+
+is_deeply([map {(split("\t", $_))[0]} @tmp_lines], [qw(rs142513484 rs187353664)], 'run with filter check pass over empty buffer - forked');
 
 
 # plugins
