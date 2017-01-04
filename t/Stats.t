@@ -440,6 +440,7 @@ if($can_use_lint) {
   $s->dump_html(*STATS);
 
   $lint->parse($tmp);
+  $lint->eof();
   ok(!$lint->errors, 'dump_html - HTML::Lint check no errors') or diag(map {$_->as_string."\n"} $lint->errors);
 
   close STATS;
