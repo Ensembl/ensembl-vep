@@ -226,7 +226,14 @@ sub detect_format {
   while(<$fh>) {
     next if /^\#/;
     chomp;
-    s/\r|(?>\v|\x0D\x0A).+//;
+
+    # perl 5.8.8 doesn't recognise \v meaning any vertical whitespace...
+    if($] < 5.01) {
+      s/\r|(\x0D\x0A).+//;
+    }
+    else {
+      s/\r|(?>\v|\x0D\x0A).+//;
+    }    
 
     # try to detect delimiter
     if(!/$delimiter/) {
