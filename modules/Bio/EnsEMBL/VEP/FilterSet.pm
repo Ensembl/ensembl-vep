@@ -224,7 +224,15 @@ sub finish_filter_node {
       open IN, $list or throw("ERROR: Could not read from file $list\n");
       while(<IN>) {
         chomp;
-        s/\r|(?>\v|\x0D\x0A)//g;
+
+        # perl 5.8.8 doesn't recognise \v meaning any vertical whitespace...
+        if($] < 5.01) {
+          s/\r|(\x0D\x0A).+//;
+        }
+        else {
+          s/\r|(?>\v|\x0D\x0A)//g;
+        }
+
         $compare{$_} = 1;
       }
       close IN;
