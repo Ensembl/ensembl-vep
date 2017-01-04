@@ -50,6 +50,7 @@ our %DEFAULTS = (
   registry_file  => $Bin.'/testdata/vep.registry',
 
   test_vcf       => $Bin.'/testdata/input/test.vcf',
+  windows_vcf    => $Bin.'/testdata/input/windows.vcf',
   test_gzvcf     => $Bin.'/testdata/input/test.vcf.gz',
   user_file      => $Bin.'/testdata/user_file'.$$,
 

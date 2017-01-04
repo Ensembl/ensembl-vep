@@ -210,6 +210,9 @@ is($p->detect_format, 'vcf', 'detect_format - VCF SV 1');
 $p->file($test_cfg->create_input_file([qw(21 25587758 sv_dup T <DUP> . . .')]));
 is($p->detect_format, 'vcf', 'detect_format - VCF SV 2');
 
+$p->file($test_cfg->{windows_vcf});
+is($p->detect_format, 'vcf', 'detect_format - VCF with Windows newline');
+
 $p->file($test_cfg->create_input_file('rs699'));
 is($p->detect_format, 'id', 'detect_format - ID');
 
