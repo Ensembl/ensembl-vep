@@ -226,6 +226,7 @@ sub detect_format {
   while(<$fh>) {
     next if /^\#/;
     chomp;
+    s/\r|(?>\v|\x0D\x0A).+//;
 
     # try to detect delimiter
     if(!/$delimiter/) {
