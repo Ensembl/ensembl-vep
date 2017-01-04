@@ -136,9 +136,7 @@ sub run_rest {
 
   $self->param('input_data', $input);
   $self->param('output_format', 'json');
-  $self->param('safe', 1);
-  $self->param('quiet', 1);
-  $self->param('no_stats', 1);
+  $self->param($_, 1) for qw(no_escape safe quiet no_stats);
 
   $self->init();
 
