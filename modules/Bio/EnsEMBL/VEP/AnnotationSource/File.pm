@@ -216,7 +216,12 @@ sub _record_overlaps_VF {
   my $type = $self->type();
 
   if($type eq 'overlap') {
-    return overlap($parser->get_start, $parser->get_end, $vf->{start}, $vf->{end});
+
+    # account for insertions in Ensembl world where s = e+1
+    my ($vs, $ve) = ($vf->{start}, $vf->{end});
+    ($vs, $ve) = ($ve, $vs) if $vs > $ve;
+    
+    return overlap($parser->get_start, $parser->get_end, $vs, $ve);
   }
   elsif($type eq 'exact') {
     return $parser->get_start == $vf->{start} && $parser->get_end == $vf->{end};
