@@ -49,6 +49,60 @@ ok($c, 'new is defined');
 ## METHODS
 ##########
 
+ok($c->filter_variation({failed => 0}),  'filter_variation pass');
+ok(!$c->filter_variation({failed => 1}), 'filter_variation fail');
+
+$c->{failed} = 1;
+ok($c->filter_variation({failed => 1}), 'filter_variation pass with failed on');
+$c->{failed} = 0;
+
+
+## NOVEL TESTS
+##############
+
+use_ok('Bio::EnsEMBL::Variation::VariationFeature');
+
+my $input = Bio::EnsEMBL::Variation::VariationFeature->new_fast({
+  start  => 10,
+  end    => 10,
+  strand => 1,
+  allele_string => 'A/G',
+});
+
+my $existing = {
+  start  => 10,
+  end    => 10,
+  strand => 1,
+  allele_string => 'A/G',
+};
+
+ok(!$c->is_var_novel($existing, $input), 'is_var_novel exact match');
+
+$existing->{allele_string} = 'A/T';
+ok($c->is_var_novel($existing, $input), 'is_var_novel alleles dont match but no check');
+
+$c->{no_check_alleles} = 1;
+ok(!$c->is_var_novel($existing, $input), 'is_var_novel alleles dont match with check');
+
+$existing = {
+  start  => 10,
+  end    => 10,
+  strand => -1,
+  allele_string => 'T/C',
+};
+ok(!$c->is_var_novel($existing, $input), 'is_var_novel rev strand exact match');
+
+$c->{no_check_alleles} = 0;
+$existing->{allele_string} = 'T/G';
+ok($c->is_var_novel($existing, $input), 'is_var_novel rev strand alleles dont match but no check');
+
+$c->{no_check_alleles} = 1;
+ok(!$c->is_var_novel($existing, $input), 'is_var_novel rev strand alleles dont match with check');
+
+
+## OTHER METHODS
+################
+
 is($c->get_dump_file_name(1, '1-100'), $dir.'/1/1-100_var.gz', 'get_dump_file_name');
 is($c->get_dump_file_name(1, 1, 100), $dir.'/1/1-100_var.gz', 'get_dump_file_name with end');
 

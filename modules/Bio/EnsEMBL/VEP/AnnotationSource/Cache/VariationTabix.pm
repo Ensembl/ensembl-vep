@@ -49,7 +49,6 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
 use base qw(
   Bio::EnsEMBL::VEP::AnnotationSource::Cache::BaseCacheVariation
-  Bio::EnsEMBL::VEP::AnnotationSource::BaseVariation
 );
 
 our ($CAN_USE_TABIX_PM, $CAN_USE_TABIX_CL);
