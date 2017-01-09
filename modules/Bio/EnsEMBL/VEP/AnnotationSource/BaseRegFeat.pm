@@ -45,8 +45,6 @@ package Bio::EnsEMBL::VEP::AnnotationSource::BaseRegFeat;
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
-use base qw(Bio::EnsEMBL::VEP::AnnotationSource);
-
 our @REG_FEAT_TYPES = qw(
   RegulatoryFeature
   MotifFeature

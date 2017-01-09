@@ -49,8 +49,6 @@ use Scalar::Util qw(weaken);
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
-use base qw(Bio::EnsEMBL::VEP::AnnotationSource);
-
 sub annotate_InputBuffer {
   my $self = shift;
   my $buffer = shift;
