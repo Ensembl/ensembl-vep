@@ -176,7 +176,7 @@ SKIP: {
   my $can_use_sereal = $@ ? 0 : 1;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 8 unless $can_use_sereal;
+  skip 'Sereal not installed', 8 unless $can_use_sereal;
 
   $c = Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat->new({
     config => $cfg,
