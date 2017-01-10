@@ -69,6 +69,7 @@ our @FLAG_FIELDS = (
   { flag => 'af_1kg',          fields => ['AFR_AF','AMR_AF','EAS_AF','EUR_AF','SAS_AF'] },
   { flag => 'af_esp',          fields => ['AA_AF','EA_AF'] },
   { flag => 'af_exac',         fields => ['ExAC_AF','ExAC_Adj_AF','ExAC_AFR_AF','ExAC_AMR_AF','ExAC_EAS_AF','ExAC_FIN_AF','ExAC_NFE_AF','ExAC_OTH_AF','ExAC_SAS_AF'] },
+  { flag => 'max_af',          fields => ['MAX_AF', 'MAX_AF_POPS'] },
   { flag => 'check_frequency', fields => ['FREQS'] },
 
   # misc variation stuff
@@ -146,6 +147,8 @@ our %FIELD_DESCRIPTIONS = (
   'ExAC_NFE_AF',       => 'Frequency of existing variant in ExAC Non-Finnish European population',
   'ExAC_OTH_AF',       => 'Frequency of existing variant in ExAC combined other combined populations',
   'ExAC_SAS_AF',       => 'Frequency of existing variant in ExAC South Asian population',
+  'MAX_AF',            => 'Maximum observed allele frequency in 1000 Genomes, ESP and ExAC',
+  'MAX_AF_POPS'        => 'Populations in which maximum allele frequency was observed',
   'DISTANCE'           => 'Shortest distance from variant to transcript',
   'CLIN_SIG'           => 'ClinVar clinical significance of the dbSNP variant',
   'BIOTYPE'            => 'Biotype of transcript or regulatory feature',

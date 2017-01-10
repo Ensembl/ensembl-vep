@@ -84,6 +84,7 @@ GetOptions(
   'af_esp',                  # add ESP AFs of existing vars
   'af_exac',                 # add ExAC AFs of existing vars
   'old_maf',                 # report 1KG/ESP MAFs in the old way (no allele, always < 0.5)
+  'max_af',                  # report maximum observed allele frequency in any 1KG, ESP, ExAC pop
   'pubmed',                  # add Pubmed IDs for publications that cite existing vars
   'freq_filter=s',           # exclude or include
   'freq_freq=f',             # frequency to filter on

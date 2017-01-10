@@ -117,6 +117,7 @@ sub new {
     af_1kg
     af_esp
     af_exac
+    max_af
     pubmed
 
     numbers
@@ -760,24 +761,32 @@ sub add_colocated_frequency_data {
   my $self = shift;
   my ($vf, $hash, $ex) = @_;
 
-  return unless grep {$self->{$_}} keys %FREQUENCY_KEYS;
+  return unless grep {$self->{$_}} keys %FREQUENCY_KEYS or $self->{max_af};
 
   my $this_allele = $hash->{Allele};
   reverse_comp(\$this_allele) if $vf->strand ne $ex->{strand};
 
   my @ex_alleles = split('/', $ex->{allele_string});
 
-  foreach my $group(grep {$self->{$_}} keys %FREQUENCY_KEYS) {
+  # gmaf stored a bit differently, but we can get it in the same format
+  $ex->{AF} = $ex->{minor_allele}.':'.$ex->{minor_allele_freq} if $ex->{minor_allele};
 
-    # gmaf stored a bit differently, but we can get it in the same format
-    $ex->{AF} = $ex->{minor_allele}.':'.$ex->{minor_allele_freq} if $group eq 'af' && $ex->{minor_allele};
+  my @keys = keys %FREQUENCY_KEYS;
+  @keys = grep {$self->{$_}} @keys unless $self->{max_af};
 
+  my $max_af = 0;
+  my @max_af_pops;
+
+  foreach my $group(@keys) {
     foreach my $key(grep {$ex->{$_}} @{$FREQUENCY_KEYS{$group}}) {
 
       my %freq_data;
-      my %remaining = map {$_ => 1} @ex_alleles;
       my $total = 0;
 
+      # use this to log which alleles we've explicitly seen freqs for
+      my %remaining = map {$_ => 1} @ex_alleles;
+
+      # get the frequencies for each allele into a hashref
       foreach my $pair(split(',', $ex->{$key})) {
         my ($a, $f) = split(':', $pair);
         $freq_data{$a} = $f;
@@ -785,16 +794,37 @@ sub add_colocated_frequency_data {
         delete $remaining{$a} if $remaining{$a};
       }
 
-      my $out_key = $key eq 'AF' ? 'AF' : $key.'_AF';
+      # interpolate the frequency for the remaining allele if there's only 1
+      $freq_data{(keys %remaining)[0]} = 1 - $total if scalar keys %remaining == 1;
 
       if(exists($freq_data{$this_allele})) {
-        push @{$hash->{$out_key}}, $freq_data{$this_allele};
-      }
-      elsif(scalar keys %remaining == 1) {
-        $freq_data{(keys %remaining)[0]} = 1 - $total;
-        push @{$hash->{$out_key}}, $freq_data{$this_allele} if exists($freq_data{$this_allele});
+
+        my $f = $freq_data{$this_allele};
+
+        # record the frequency if requested
+        if($self->{$group}) {
+          my $out_key = $key eq 'AF' ? 'AF' : $key.'_AF';
+          push @{$hash->{$out_key}}, $f;
+        }
+
+        # update max_af data if required
+        # make sure we don't include any combined-level pops
+        if($self->{max_af} && $key ne 'AF' && $key ne 'ExAC' && $key ne 'ExAC_Adj') {
+          if($f > $max_af) {
+            $max_af = $f;
+            @max_af_pops = ($key);
+          }
+          elsif($f == $max_af) {
+            push @max_af_pops, $key;
+          }
+        }
       }
     }
+  }
+
+  if($self->{max_af}) {
+    $hash->{MAX_AF} = $max_af;
+    $hash->{MAX_AF_POPS} = \@max_af_pops;
   }
 
   delete $ex->{AF};

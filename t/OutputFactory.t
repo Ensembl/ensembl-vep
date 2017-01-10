@@ -717,6 +717,27 @@ is_deeply(
 $of->{af_esp} = 0;
 
 
+# max_af
+$ib = get_annotated_buffer({
+  check_existing => 1,
+  input_file => $test_cfg->create_input_file([qw(21 25594005 . A G . . .)])
+});
+
+$of->{max_af} = 1;
+is_deeply(
+  $of->add_colocated_frequency_data($ib->buffer->[0], {Allele => 'G'}, $ib->buffer->[0]->{existing}->[0]),
+  {
+    'Allele' => 'G',
+    'MAX_AF' => '0.755',
+    'MAX_AF_POPS' => [
+      'ExAC_NFE',
+    ],
+  },
+  'add_colocated_frequency_data - max_af',
+);
+$of->{max_af} = 0;
+
+
 
 ## BaseTranscriptVariationAllele_to_output_hash
 ###############################################

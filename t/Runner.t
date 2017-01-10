@@ -185,6 +185,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'plugins' => [],
   'no_stats' => undef,
   'allele_number' => undef,
+  'max_af' => undef,
 }, 'Bio::EnsEMBL::VEP::OutputFactory::VEP_output' ), 'get_OutputFactory');
 
 ok($runner->init, 'init');

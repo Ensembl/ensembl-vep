@@ -204,7 +204,8 @@ is(
   'AA_AF=0.005;EA_AF=0;'.
   'ExAC_AF=4.119e-04;ExAC_Adj_AF=0.0004133;ExAC_AFR_AF=0.004681;'.
   'ExAC_AMR_AF=0.000173;ExAC_EAS_AF=0;ExAC_FIN_AF=0;'.
-  'ExAC_NFE_AF=0;ExAC_OTH_AF=0;ExAC_SAS_AF=0',
+  'ExAC_NFE_AF=0;ExAC_OTH_AF=0;ExAC_SAS_AF=0;'.
+  'MAX_AF=0.005;MAX_AF_POPS=AA',
   'get_all_lines_by_InputBuffer - everything'
 );
 
