@@ -822,9 +822,16 @@ sub add_colocated_frequency_data {
     }
   }
 
-  if($self->{max_af}) {
-    $hash->{MAX_AF} = $max_af;
-    $hash->{MAX_AF_POPS} = \@max_af_pops;
+  # add/update max_af info
+  if($self->{max_af} && @max_af_pops) {
+    my $current_max = $hash->{MAX_AF} ||= 0;
+
+    if($max_af > $current_max) {
+      $hash->{MAX_AF} = $max_af;
+      $hash->{MAX_AF_POPS} = [];
+    }
+    
+    push @{$hash->{MAX_AF_POPS}}, @max_af_pops if $max_af >= $current_max;
   }
 
   delete $ex->{AF};
