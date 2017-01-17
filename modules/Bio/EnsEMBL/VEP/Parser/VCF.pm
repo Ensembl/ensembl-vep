@@ -241,10 +241,19 @@ sub create_VariationFeatures {
 
   # individual data?
   if($self->{individual}) {
-    return [
+    my @return = 
       map {@{$self->create_individual_VariationFeatures($_)}}
-      @{$self->post_process_vfs([$vf])}
-    ];
+      @{$self->post_process_vfs([$vf])};
+
+    # if all selected individuals had REF or missing genotypes @return will be empty
+    # re-run this method in this case to avoid the parser shorting out and finishing
+    if(@return) {
+      return \@return;
+    }
+    else {
+      $parser->next();
+      return $self->create_VariationFeatures;
+    }
   }
 
   # normal return

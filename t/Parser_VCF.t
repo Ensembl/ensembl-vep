@@ -524,6 +524,22 @@ is_deeply($vf, bless( {
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'individual - process_ref_homs');
 
 
+# test situation where a line gets passed over for having no valid ALT genotypes
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, individual => 'jeff'}),
+  file => $test_cfg->create_input_file([
+    ['##fileformat=VCFv4.1'],
+    [qw(#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT jeff)],
+    [qw(21 25587759 indtest1 A G . . . GT ./.)],
+    [qw(21 25587760 indtest2 C T . . . GT 1/1)],
+  ]),
+  valid_chromosomes => [21]
+});
+
+$vf = $p->next;
+is($vf->{variation_name}, 'indtest2', 'individual - pass over entries with no valid GTs');
+
+
 
 
 # warning_msg prints to STDERR
