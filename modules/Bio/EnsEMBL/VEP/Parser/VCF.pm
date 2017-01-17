@@ -356,6 +356,7 @@ sub create_individual_VariationFeatures {
 
     # get alleles present in this individual
     my $gt = $ind_gts->{$ind};
+    next if (!$gt);
     my @bits = split /\||\/|\\/, $gt;
     my $phased = ($gt =~ /\|/ ? 1 : 0);
 
