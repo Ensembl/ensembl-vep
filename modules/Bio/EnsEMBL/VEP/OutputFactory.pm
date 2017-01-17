@@ -167,18 +167,17 @@ sub new {
   return $self;
 }
 
-# sub print_InputBuffer {
-#   my $self = shift;
-#   my $buffer = shift;
 
-#   $self->print_line($_) for @{$self->get_all_lines_by_InputBuffer($buffer)};
-# }
+### Top level methods
+#####################
 
 # this is the method that will be called by Runner
 # may be re-implemented by child classes to account for differing structure
 sub get_all_lines_by_InputBuffer {
   my $self = shift;
   my $buffer = shift;
+
+  # output_hash_to_line will be implemented in the child class as its behaviour varies by output type
   return [map {$self->output_hash_to_line($_)} @{$self->get_all_output_hashes_by_InputBuffer($buffer)}];
 }
 
@@ -187,71 +186,13 @@ sub get_all_output_hashes_by_InputBuffer {
   my $self = shift;
   my $buffer = shift;
 
+  # rejoin variants that have been split
+  # this can happen when using --minimal
   $self->rejoin_variants_in_InputBuffer($buffer) if $buffer->rejoin_required;
 
   return [
     map {@{$self->get_all_output_hashes_by_VariationFeature($_)}}
     @{$buffer->buffer}
-  ];
-}
-
-# method to retrieve header info passed in on object creation
-sub header_info {
-  my $self = shift;
-  return $self->{header_info} || {};
-}
-
-# sub-classes will typically re-implement this
-sub headers {
-  return [];
-}
-
-sub get_plugin_headers {
-  my $self = shift;
-
-  my @headers = ();
-
-  for my $plugin (@{$self->plugins}) {
-    if (my $hdr = $plugin->get_header_info) {
-      for my $key (sort keys %$hdr) {
-        push @headers, [$key, $hdr->{$key}];
-      }
-    }
-  }
-
-  return \@headers;
-}
-
-sub get_custom_headers {
-  my $self = shift;
-
-  my @headers;
-
-  foreach my $custom(@{$self->header_info->{custom_info} || []}) {
-    push @headers, [$custom->{short_name}, sprintf("%s (%s)", $custom->{file}, $custom->{type})];
-    
-    foreach my $field(@{$custom->{fields} || []}) {
-      push @headers, [
-        sprintf("%s_%s", $custom->{short_name}, $field),
-        sprintf("%s field from %s", $field, $custom->{file})
-      ];
-    }
-  }
-
-  return \@headers;
-}
-
-# this method returns all the fields that will be populated given user parameters
-sub flag_fields {
-  my $self = shift;
-  return [
-    map {@{$_->{fields}}}
-    map {$_->[0]}
-    grep {
-      ref($_->[1]) eq 'ARRAY' ? scalar @{$_->[1]} : $_->[1]
-    }
-    map {[$_, $self->param($_->{flag})]}
-    @Bio::EnsEMBL::VEP::Constants::FLAG_FIELDS
   ];
 }
 
@@ -412,7 +353,7 @@ sub get_all_StructuralVariationOverlapAlleles {
 }
 
 # this method chooses the appropriate filtering method
-# the "flag" options are not strictly filters, but they operate on the same logic
+# the "flag_" options are not strictly filters, but they operate on the same logic
 sub filter_VariationFeatureOverlapAlleles {
   my $self = shift;
   my $vfoas = shift;
@@ -467,8 +408,8 @@ sub filter_VariationFeatureOverlapAlleles {
   return $vfoas;
 }
 
-# picks the worst self a list self VariationFeatureOverlapAlleles
-# VFOAs are ordered by a heirarchy:
+# picks the worst from a list of VariationFeatureOverlapAlleles
+# VFOAs are ordered by a heirarchy set in the pick_order param:
 # 1: canonical
 # 2: transcript support level
 # 3: biotype (protein coding favoured)
@@ -617,6 +558,13 @@ sub pick_VariationFeatureOverlapAllele_per_gene {
   return \@return;
 }
 
+
+### Transforming methods
+### Typically these methods will transform an API object into hash-able data
+### Most will take the object to be transformed and the hash into which the
+### data are inserted as the arguments, and return the hashref
+############################################################################
+
 # initialize an output hash for a VariationFeature
 sub VariationFeature_to_output_hash {
   my $self = shift;
@@ -702,20 +650,6 @@ sub add_colocated_variant_info {
 
     # ID
     push @{$hash->{Existing_variation}}, $ex->{variation_name} if $ex->{variation_name};
-
-    # # GMAF?
-    # if($self->{gmaf}) {
-    #   push @{$tmp->{GMAF}}, $ex->{minor_allele}.':'.$ex->{minor_allele_freq}
-    #     if $ex->{minor_allele} && looks_like_number($ex->{minor_allele_freq});
-    # }
-
-    # # other freqs we can treat all the same
-    # my @pops = ();
-    # push @pops, qw(AFR AMR ASN EAS EUR SAS)                                    if $self->{maf_1kg};
-    # push @pops, qw(AA EA)                                                      if $self->{maf_esp};
-    # push @pops, ('ExAC', map {'ExAC_'.$_} qw(Adj AFR AMR EAS FIN NFE OTH SAS)) if $self->{maf_exac};
-
-    # push @{$tmp->{$_.'_MAF'}}, $ex->{$_} for grep {defined($ex->{$_})} @pops;
 
     # clin sig and pubmed?
     push @{$tmp->{CLIN_SIG}}, split(',', $ex->{clin_sig}) if $ex->{clin_sig};
@@ -1217,6 +1151,10 @@ sub IntergenicVariationAllele_to_output_hash {
   return $self->VariationFeatureOverlapAllele_to_output_hash(@_);
 }
 
+
+### SV-type methods
+###################
+
 sub BaseStructuralVariationOverlapAllele_to_output_hash {
   my $self = shift;
   my ($vfoa, $hash) = @_;
@@ -1324,6 +1262,10 @@ sub IntergenicStructuralVariationAllele_to_output_hash {
   my $self = shift;
   return $self->BaseStructuralVariationOverlapAllele_to_output_hash(@_);
 }
+
+
+### Other methods
+#################
 
 sub plugins {
   return $_[0]->{plugins} || [];
@@ -1454,6 +1396,71 @@ sub rejoin_variants_in_InputBuffer {
   $self->{no_stats} = $no_stats;
 
   $buffer->buffer(\@joined_list);
+}
+
+
+### Header etc methods
+### These will be called when generating the actual output
+##########################################################
+
+# method to retrieve header info passed in on object creation
+sub header_info {
+  my $self = shift;
+  return $self->{header_info} || {};
+}
+
+# sub-classes will typically re-implement this
+sub headers {
+  return [];
+}
+
+sub get_plugin_headers {
+  my $self = shift;
+
+  my @headers = ();
+
+  for my $plugin (@{$self->plugins}) {
+    if (my $hdr = $plugin->get_header_info) {
+      for my $key (sort keys %$hdr) {
+        push @headers, [$key, $hdr->{$key}];
+      }
+    }
+  }
+
+  return \@headers;
+}
+
+sub get_custom_headers {
+  my $self = shift;
+
+  my @headers;
+
+  foreach my $custom(@{$self->header_info->{custom_info} || []}) {
+    push @headers, [$custom->{short_name}, sprintf("%s (%s)", $custom->{file}, $custom->{type})];
+    
+    foreach my $field(@{$custom->{fields} || []}) {
+      push @headers, [
+        sprintf("%s_%s", $custom->{short_name}, $field),
+        sprintf("%s field from %s", $field, $custom->{file})
+      ];
+    }
+  }
+
+  return \@headers;
+}
+
+# this method returns all the fields that will be populated given user parameters
+sub flag_fields {
+  my $self = shift;
+  return [
+    map {@{$_->{fields}}}
+    map {$_->[0]}
+    grep {
+      ref($_->[1]) eq 'ARRAY' ? scalar @{$_->[1]} : $_->[1]
+    }
+    map {[$_, $self->param($_->{flag})]}
+    @Bio::EnsEMBL::VEP::Constants::FLAG_FIELDS
+  ];
 }
 
 1;
