@@ -309,6 +309,7 @@ our %INCOMPATIBLE = (
   vcf         => [qw(json gvf tab)],
   gvf         => [qw(vcf json tab)],
   tab         => [qw(vcf gvf json)],
+  individual  => [qw(minimal)],
 );
 
 # deprecated/replaced flags
