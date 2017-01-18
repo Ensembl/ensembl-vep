@@ -14,7 +14,11 @@
 # limitations under the License.
 
 use Getopt::Long;
+use FindBin qw($RealBin);
+use lib $RealBin;
+use lib $RealBin.'/modules';
 use Bio::EnsEMBL::VEP::Haplo::Runner;
+use Bio::EnsEMBL::VEP::Utils qw(get_version_string);
 
 my $config = {};
 
@@ -96,13 +100,17 @@ $runner->run();
 
 # outputs usage message
 sub usage {
-    my $usage =<<END;
+  my $versions = get_version_string($RealBin.'/.version');
+
+  my $usage =<<END;
 #-------------#
 # HAPLOSAURUS #
 #-------------#
 
-version $VERSION
 by Will McLaren (wm2\@ebi.ac.uk)
+
+Versions:
+  $versions
 
 Help: dev\@ensembl.org , helpdesk\@ensembl.org
 Twitter: \@ensembl , \@EnsemblWill
