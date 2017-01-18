@@ -540,6 +540,26 @@ $vf = $p->next;
 is($vf->{variation_name}, 'indtest2', 'individual - pass over entries with no valid GTs');
 
 
+# test alleles being mapped properly to ensembl types
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, individual => 'jeff'}),
+  file => $test_cfg->create_input_file([
+    ['##fileformat=VCFv4.1'],
+    [qw(#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT jeff)],
+    [qw(21 25587759 indtest1 A AT . . . GT 1/1)],
+    [qw(21 25587760 indtest2 GC G . . . GT 1/1)],
+  ]),
+  valid_chromosomes => [21]
+});
+
+$vf = $p->next;
+is($vf->{allele_string}, '-/T', 'individual - insertion alleles mapped');
+
+$vf = $p->next;
+is($vf->{allele_string}, 'C/-', 'individual - deletion alleles mapped');
+
+
+
 
 
 # warning_msg prints to STDERR

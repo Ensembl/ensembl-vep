@@ -176,6 +176,10 @@ sub create_VariationFeatures {
     }
   }
 
+  # record original alleles
+  # if they get changed, we need to map from old to new in create_individual_VariationFeatures
+  my @original_alleles = ($ref, @$alts);
+
   # adjust end coord
   # $end += (length($ref) - 1);
 
@@ -241,8 +245,11 @@ sub create_VariationFeatures {
 
   # individual data?
   if($self->{individual}) {
+    my @changed_alleles = ($ref, @$alts);
+    my %allele_map = map {$original_alleles[$_] => $changed_alleles[$_]} 0..$#original_alleles;
+
     my @return = 
-      map {@{$self->create_individual_VariationFeatures($_)}}
+      map {@{$self->create_individual_VariationFeatures($_, \%allele_map)}}
       @{$self->post_process_vfs([$vf])};
 
     # if all selected individuals had REF or missing genotypes @return will be empty
@@ -348,6 +355,7 @@ sub create_StructuralVariationFeatures {
 sub create_individual_VariationFeatures {
   my $self = shift;
   my $vf = shift;
+  my $allele_map = shift;
 
   my $parser = $self->parser();
   my $record = $parser->{record};
@@ -366,7 +374,7 @@ sub create_individual_VariationFeatures {
     # get alleles present in this individual
     my $gt = $ind_gts->{$ind};
     next if (!$gt);
-    my @bits = split /\||\/|\\/, $gt;
+    my @bits = map { $allele_map->{$_} } split /\||\/|\\/, $gt;
     my $phased = ($gt =~ /\|/ ? 1 : 0);
 
     # shallow copy VF
