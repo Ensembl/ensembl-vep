@@ -836,14 +836,11 @@ $of->{gene_phenotype} = 0;
 # we can test these ones en-masse
 my @flags = (
   [qw(ccds        CCDS      CCDS33522.1)],
-  [qw(xref_refseq RefSeq    NM_080794.3)],
   [qw(protein     ENSP      ENSP00000305682)],
   [qw(canonical   CANONICAL YES)],
   [qw(biotype     BIOTYPE   protein_coding)],
   [qw(tsl         TSL       5)],
   [qw(appris      APPRIS    A2)],
-  [qw(uniprot     SWISSPROT Q9NYK5)],
-  [qw(uniprot     UNIPARC   UPI00001AEAC0)],
 );
 my $method = 'BaseTranscriptVariationAllele_to_output_hash';
 $vfoa = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[0];
@@ -851,6 +848,21 @@ $vfoa = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[0];
 foreach my $flag(@flags) {
   $of->{$flag->[0]} = 1;
   is($of->$method($vfoa)->{$flag->[1]}, $flag->[2], $method.' - '.$flag->[0]);
+  $of->{$flag->[0]} = 0;
+}
+
+# and these, but we expect arrayrefs
+@flags = (
+  [qw(xref_refseq RefSeq    NM_080794.3)],
+  [qw(uniprot     SWISSPROT Q9NYK5)],
+  [qw(uniprot     UNIPARC   UPI00001AEAC0)],
+);
+$method = 'BaseTranscriptVariationAllele_to_output_hash';
+$vfoa = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[0];
+
+foreach my $flag(@flags) {
+  $of->{$flag->[0]} = 1;
+  is_deeply($of->$method($vfoa)->{$flag->[1]}, [$flag->[2]], $method.' - '.$flag->[0]);
   $of->{$flag->[0]} = 0;
 }
 

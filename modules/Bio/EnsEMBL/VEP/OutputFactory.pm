@@ -910,7 +910,7 @@ sub BaseTranscriptVariationAllele_to_output_hash {
     $tr->{_ccds} ne '-';
 
   # refseq xref
-  $hash->{RefSeq} = $tr->{_refseq} if
+  $hash->{RefSeq} = [split(',', $tr->{_refseq})] if
     $self->{xref_refseq} &&
     defined($tr->{_refseq}) &&
     $tr->{_refseq} ne '-';
@@ -932,7 +932,7 @@ sub BaseTranscriptVariationAllele_to_output_hash {
     for my $db(qw(swissprot trembl uniparc)) {
       my $id = $tr->{'_'.$db};
       $id = undef if defined($id) && $id eq '-';
-      $hash->{uc($db)} = $id if defined($id);
+      $hash->{uc($db)} = [split(',', $id)] if defined($id);
     }
   }
 

@@ -296,7 +296,9 @@ SKIP: {
         {
           'variant_allele' => 'T',
           'cdna_end' => 1122,
-          'swissprot' => 'Q9NYK5',
+          'swissprot' => [
+            'Q9NYK5'
+          ],
           'hgvsc' => 'ENST00000307301.11:c.*18G>A',
           'hgnc_id' => 'HGNC:14027',
           'strand' => -1,
@@ -308,7 +310,9 @@ SKIP: {
           'canonical' => 1,
           'appris' => 'A2',
           'protein_id' => 'ENSP00000305682',
-          'uniparc' => 'UPI00001AEAC0',
+          'uniparc' => [
+            'UPI00001AEAC0'
+          ],
           'biotype' => 'protein_coding',
           'gene_symbol_source' => 'HGNC',
           'consequence_terms' => [
@@ -324,7 +328,9 @@ SKIP: {
           'cdna_end' => 1033,
           'polyphen_score' => '0.021',
           'codons' => 'Gca/Aca',
-          'swissprot' => 'Q9NYK5',
+          'swissprot' => [
+            'Q9NYK5'
+          ],
           'hgvsc' => 'ENST00000352957.8:c.991G>A',
           'protein_end' => 331,
           'strand' => -1,
@@ -341,7 +347,9 @@ SKIP: {
           'protein_id' => 'ENSP00000284967',
           'polyphen_prediction' => 'benign',
           'protein_start' => 331,
-          'uniparc' => 'UPI00001AEE66',
+          'uniparc' => [
+            'UPI00001AEE66'
+          ],
           'biotype' => 'protein_coding',
           'gene_symbol_source' => 'HGNC',
           'sift_score' => '0.17',
