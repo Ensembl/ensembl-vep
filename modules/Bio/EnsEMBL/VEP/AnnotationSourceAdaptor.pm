@@ -125,6 +125,8 @@ sub get_all_custom {
 
     throw("ERROR: No format specified for custom annotation source $file\n") unless $format;
 
+    throw("ERROR: Access to remote data files disabled\n") if $self->param('no_remote') && $file =~ /^(ht|f)tp:\/\/.+/;
+
     my $opts = {
       config => $self->config,
       file => $file,

@@ -93,6 +93,11 @@ throws_ok {$asa->get_all_custom} qr/No format/, 'get_all_custom - no format';
 $asa->param('custom', [$test_cfg->{custom_vcf}.',test,foo,exact']);
 throws_ok {$asa->get_all_custom} qr/Unknown or unsupported format foo/, 'get_all_custom - invalid format';
 
+$asa->param('no_remote', 1);
+$asa->param('custom', ['http://foo.bar.com/file,test,foo,exact']);
+throws_ok {$asa->get_all_custom} qr/Access to remote data files disabled/, 'get_all_custom - no_remote';
+$asa->param('no_remote', 0);
+
 # use test
 use_ok('Bio::EnsEMBL::VEP::AnnotationSource::File');
 
