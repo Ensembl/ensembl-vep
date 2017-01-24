@@ -48,6 +48,9 @@ SKIP: {
 
   my $as = Bio::EnsEMBL::VEP::AnnotationSource::File::BigWig->new({file => $file, config => $cfg});
   ok($as, 'new is defined');
+  
+
+  throws_ok {Bio::EnsEMBL::VEP::AnnotationSource::File::BigWig->new({file => 'foo', config => $cfg})->parser} qr/Failed to open/, 'new with invalid file throws';
 
 
   ## TESTS WITH INPUT BUFFER

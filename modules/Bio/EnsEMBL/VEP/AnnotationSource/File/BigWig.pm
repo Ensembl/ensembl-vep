@@ -51,7 +51,32 @@ use base qw(Bio::EnsEMBL::VEP::AnnotationSource::File);
 
 sub parser {
   my $self = shift;
-  return $self->{parser} ||= Bio::EnsEMBL::IO::Parser::BigWig->open($self->file);
+
+  unless(exists($self->{parser})) {
+
+    # This is something of a hack.
+    # The BigWig parser uses the Kent source tree which calls exit() if the file doesn't exist.
+    # We can't use -e $self->file as the file might be a remote one.
+    # So, we fork, attempt to open the file, and check the return code of the forked process.
+    my $pid = fork();
+
+    # parent process, capture the return code and die nicely if it failed
+    if($pid) {
+      if(waitpid($pid, 0) > 0) {
+        my $rc = $? >> 8;
+        throw("ERROR: Failed to open ".$self->file."\n") if $rc > 0;
+      }
+    }
+
+    # child process, attempt to open the file
+    else {
+      my $test = Bio::EnsEMBL::IO::Parser::BigWig->open($self->file);
+      exit(0);
+    }
+
+    $self->{parser} = Bio::EnsEMBL::IO::Parser::BigWig->open($self->file);
+  }
+  return $self->{parser};
 }
 
 sub get_valid_chromosomes {
