@@ -128,7 +128,10 @@ sub get_all_output_hashes_by_InputBuffer {
     # add original input for use by POST endpoints
     $hash->{input} = join($self->{delimiter}, @{$vf->{_line}}) if defined($vf->{_line});
 
-    # get other data from super method
+    # add custom annotations here and delete so they don't get added again
+    $hash->{custom_annotations} = delete($vf->{_custom_annotations}) if $vf->{_custom_annotations};
+
+    # get other data from super methods
     my $extra_hash = $self->VariationFeature_to_output_hash($vf);
     $hash->{lc($_)} = $extra_hash->{$_} for grep {!$SKIP_KEYS{$_}} keys %$extra_hash;
 
