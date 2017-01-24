@@ -239,7 +239,11 @@ sub min_max {
 sub finish_annotation {
   my $self = shift;
   $self->stats->log_lines_read($self->parser->line_number) if $self->parser;
-  $_->_finish_annotation for @{$self->buffer};
+  
+  foreach my $vf(@{$self->buffer}) {
+    $vf->{slice} ||= $self->get_slice($vf->{chr});
+    $vf->_finish_annotation;
+  }
 }
 
 sub reset_buffer {

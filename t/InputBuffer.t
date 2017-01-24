@@ -252,6 +252,9 @@ SKIP: {
 $cfg->param('buffer_size', 5);
 $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, variation_features => $vfs});
 
+# need FASTA to add valid slice
+$ib->param('fasta', $test_cfg->{fasta});
+
 is(ref($ib), 'Bio::EnsEMBL::VEP::InputBuffer', 'new with vfs - check class');
 
 $vfs = $ib->next();
@@ -273,15 +276,17 @@ $vfs = $ib->next();
 is(scalar @$vfs, $ib->param('buffer_size'), 'next again');
 is(scalar @$vfs, $ib->param('buffer_size'), 'next again size');
 
+ok(!$vfs->[0]->{slice}, 'no slice before finish_annotation');
 $ib->finish_annotation();
 is($vfs->[0]->display_consequence, 'intergenic_variant', 'finish_annotation gives intergenic_variant');
+is(ref($vfs->[0]->{slice}), 'Bio::EnsEMBL::Slice', 'finish_annotation adds slice');
 
 
 $vfs = $ib->next();
 is(scalar @$vfs, 0, 'next again - finished');
 
 $ib->reset_buffer();
-delete($ib->{_config});
+delete($ib->{$_}) for qw(_config _adaptors _slice_cache _species _coord_system);
 is_deeply($ib, bless( {
   'buffer_size' => 5,
   'pre_buffer' => [],
