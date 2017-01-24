@@ -82,6 +82,7 @@ our %DEFAULTS = (
   pick_order        => [qw(canonical appris tsl biotype ccds rank length ensembl refseq)],
   terminal_width    => 48,
   vcf_info_field    => 'CSQ',
+  ucsc_data_root    => 'http://hgdownload.cse.ucsc.edu/goldenpath/',
   
   # frequency filtering
   freq_freq         => 0.01,
@@ -105,6 +106,8 @@ our @LIST_FLAGS = qw(
 our @ALLOW_MULTIPLE = qw(
   plugin
   custom
+  phyloP
+  phastCons
 );
 
 # sets of options that turn on / off others
@@ -285,6 +288,27 @@ our @OPTION_SETS = (
       custom => '%gtf%,,gtf'
     }
   },
+  
+  {
+    flags => ['bigwig'],
+    set   => {
+      custom => '%bigwig%,,bigwig,exact'
+    }
+  },
+  
+  {
+    flags => ['phyloP'],
+    set   => {
+      custom => '%ucsc_data_root%%ucsc_assembly%/phyloP%phyloP%way/%ucsc_assembly%.phyloP%phyloP%way.bw,phlyoP%phyloP%way,bigwig,exact'
+    }
+  },
+  
+  {
+    flags => ['phastCons'],
+    set   => {
+      custom => '%ucsc_data_root%%ucsc_assembly%/phastCons%phastCons%way/%ucsc_assembly%.phastCons%phastCons%way.bw,phastCons%phastCons%way,bigwig,exact'
+    }
+  },
 );
 
 # valid values for certain flags
@@ -295,6 +319,13 @@ our %VALID = (
   sift       => [qw(s p b)],
   polyphen   => [qw(s p b)],
   pick_order => [qw(canonical appris tsl biotype ccds rank length ensembl refseq)],
+);
+
+# these flags require others to be set, no sensible defaults can be set by us
+our %REQUIRES = (
+  original  => [qw(filters)],
+  phyloP    => [qw(ucsc_assembly)],
+  phastCons => [qw(ucsc_assembly)],
 );
 
 # incompatible options
@@ -361,6 +392,9 @@ sub new {
   foreach my $key(keys %DEFAULTS) {
     $config->{$key} = $DEFAULTS{$key} unless exists($config->{$key});
   }
+
+  # set those that will be arrayrefs empty if not defined
+  $config->{$_} ||= [] for @ALLOW_MULTIPLE;
     
   # config file?
   if(defined $config->{config}) {
@@ -384,32 +418,8 @@ sub new {
   foreach my $flag(grep {defined($config->{$_}) && ref($config->{$_}) ne 'ARRAY'} @LIST_FLAGS) {
     $config->{$flag} = [split(',', $config->{$flag})];
   }
-  
-  # apply option sets
-  foreach my $set(@OPTION_SETS) {
-    foreach my $flag(@{$set->{flags}}) {
-      if(
-        defined($config->{$flag}) &&
-        (
-          ref($config->{$flag}) eq 'ARRAY' ?
-          scalar @{$config->{$flag}} :
-          $config->{$flag}
-        )
-      ) {
-        foreach my $key(keys %{$set->{set}}) {
-          my $val = $set->{set}->{$key};
-          $val =~ s/\%(\S+)\%/$config->{$1}/g;
-          
-          if(ref($config->{$key}) eq 'ARRAY') {
-            push @{$config->{$key}}, $val;
-          }
-          else {
-            $config->{$key} = $val;
-          }
-        }
-      }
-    }
-  }
+
+  $self->apply_option_sets($config);
   
   # check config before we return
   $self->check_config($config);
@@ -418,6 +428,84 @@ sub new {
   $self->{_params} = $config;
     
   return $self;
+}
+
+sub apply_option_sets {
+  my $self = shift;
+  my $config = shift;
+
+  # apply option sets
+  foreach my $set(@OPTION_SETS) {
+    foreach my $flag(@{$set->{flags}}) {
+
+      # check whether the flag has been set
+      if($self->_is_flag_active($config, $flag)) {
+
+        # some flags are allowed to be set more than once
+        # so we're going to iterate over each instance specified
+        my @instances = (
+          ref($config->{$flag}) eq 'ARRAY' ?
+          @{$config->{$flag}} :
+          ($config->{$flag})
+        );
+
+        foreach my $i(0..$#instances) {
+
+          # now we work on the set of flags that are going to be altered
+          foreach my $key(keys %{$set->{set}}) {
+            my $val = $set->{set}->{$key};
+
+            # the syntax allows us to replace values with other config params
+            # for example, 'blah_%foo%_blah' will have '%foo%' replaced by $config->{foo}
+            my %replace;
+
+            # again though, we have to take care of the cases where the same flag can be set multiple times
+            while($val =~ m/\%(\S+?)\%/g) {
+              my $sub;
+              next unless defined($config->{$1});
+
+              # for those set multiple times
+              if(ref($config->{$1}) eq 'ARRAY') {
+
+                # replace from the appropriate instance of our "foo"
+                # defaulting to the first if further ones are not defined
+                $sub = defined($config->{$1}->[$i]) ? $config->{$1}->[$i] : $config->{$1}->[0];
+              }
+
+              # for those set once
+              else {
+                $sub = $config->{$1};
+              }
+
+              $replace{$1} = $sub;
+            }
+
+            # now do the actual replacement
+            $val =~ s/\%(\S+?)\%/$replace{$1}||"%$1%"/ge;
+            
+            # and set the value, either by appending to the arrayref
+            if(ref($config->{$key}) eq 'ARRAY') {
+              push @{$config->{$key}}, $val;
+            }
+            # or setting the value in $config
+            else {
+              $config->{$key} = $val;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return $config
+}
+
+# resolve whether a flag has been set
+# depends on array or scalar type
+sub _is_flag_active {
+  my ($self, $config, $flag) = @_;
+  return 0 unless defined($config->{$flag});
+  return ref($config->{$flag}) eq 'ARRAY' ? scalar @{$config->{$flag}} : $config->{$flag};
 }
 
 sub check_config {
@@ -436,7 +524,7 @@ sub check_config {
   }
   
   # check valid values for flags
-  foreach my $flag(grep {defined($config->{$_})} keys %VALID) {
+  foreach my $flag(grep {$self->_is_flag_active($config, $_)} keys %VALID) {
     my @values = ref($config->{$flag}) eq 'ARRAY' ? @{$config->{$flag}} : split(',', $config->{$flag});
     
     foreach my $value(@values) {
@@ -452,15 +540,22 @@ sub check_config {
   
   # check incompatible flags
   unless($config->{safe}) {
-    foreach my $flag(grep {$config->{$_}} keys %INCOMPATIBLE) {
-      foreach my $invalid(grep {$config->{$_}} @{$INCOMPATIBLE{$flag}}) {
+    foreach my $flag(grep {$self->_is_flag_active($config, $_)} keys %INCOMPATIBLE) {
+      foreach my $invalid(grep {$self->_is_flag_active($config, $_)} @{$INCOMPATIBLE{$flag}}) {
         throw sprintf("ERROR: Can't use --%s and --%s together\n", $flag, $invalid);
       }
     }
   }
+  
+  # check required flags
+  foreach my $flag(grep {$self->_is_flag_active($config, $_)} keys %REQUIRES) {
+    foreach my $required(@{$REQUIRES{$flag}}) {
+      throw sprintf("ERROR: You must set --%s to use --%s\n", $required, $flag) unless $self->_is_flag_active($config, $required);
+    }
+  }
 
   # check deprecated flags
-  foreach my $flag(grep {$config->{$_}} keys %DEPRECATED) {
+  foreach my $flag(grep {$self->_is_flag_active($config, $_)} keys %DEPRECATED) {
     my $msg = "ERROR: --$flag has been deprecated";
     
     if(my $new = $DEPRECATED{$flag}) {
@@ -471,7 +566,7 @@ sub check_config {
   }
   
   # check one of database/cache/offline/custom
-  if(!grep {$config->{$_}} qw(database cache offline custom)) {
+  if(!grep {$self->_is_flag_active($config, $_)} qw(database cache offline custom)) {
     die qq{
 IMPORTANT INFORMATION:
 
@@ -496,9 +591,6 @@ Cache: http://www.ensembl.org/info/docs/tools/vep/script/index.html#cache
 
     }
   };
-  
-  # check if using filter and original
-  throw("ERROR: You must also provide output filters using --filter to use --original\n") if defined($config->{original}) && !defined($config->{filter});
 }
 
 # reads config from a file

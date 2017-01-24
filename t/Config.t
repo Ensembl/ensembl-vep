@@ -87,7 +87,17 @@ $cfg = Bio::EnsEMBL::VEP::Config->new({check_frequency => 1});
 is($cfg->param('check_existing'), 1, 'option sets, multiple in same out 2');
 
 $cfg = Bio::EnsEMBL::VEP::Config->new({gff => 'test'});
-is($cfg->param('custom'), 'test,,gff', 'option sets, substitution');
+is_deeply($cfg->param('custom'), ['test,,gff'], 'option sets, substitution');
+
+$cfg = Bio::EnsEMBL::VEP::Config->new({ucsc_assembly => 'hg38', phyloP => [7, 100], custom => []});
+is_deeply(
+  $cfg->param('custom'),
+  [
+    'http://hgdownload.cse.ucsc.edu/goldenpath/hg38/phyloP7way/hg38.phyloP7way.bw,phlyoP7way,bigwig,exact',
+    'http://hgdownload.cse.ucsc.edu/goldenpath/hg38/phyloP100way/hg38.phyloP100way.bw,phlyoP100way,bigwig,exact'
+  ],
+  'option sets, multiple substitution'
+);
 
 # give config file
 $cfg = Bio::EnsEMBL::VEP::Config->new({config => $test_cfg->{test_ini_file}});
@@ -114,6 +124,9 @@ throws_ok { Bio::EnsEMBL::VEP::Config->new({database => 1, cache => 1}) } qr/Can
 # incompatible ok with safe on
 ok(Bio::EnsEMBL::VEP::Config->new({safe => 1, most_severe => 1, symbol => 1}), 'incompatible pass with safe');
 
+# required
+throws_ok { Bio::EnsEMBL::VEP::Config->new({phyloP => 1}) } qr/You must set --\w+ to use --\w+/, 'required params';
+
 # missing database/cache/offline
 throws_ok { Bio::EnsEMBL::VEP::Config->new({database => 0}) } qr/The VEP can read gene data from/, 'no database/cache/offline';
 
@@ -125,8 +138,6 @@ is($cfg->param('verbose'), undef, 'STDOUT output turns off verbose');
 
 $cfg = Bio::EnsEMBL::VEP::Config->new({everything => 1, database => 1});
 is($cfg->param($_), undef, 'everything with database turns off '.$_) for qw(maf_1kg maf_esp maf_exac pubmed);
-
-throws_ok { Bio::EnsEMBL::VEP::Config->new({original => 1}) } qr/provide output filters/, 'must provide --filters with --original';
 
 
 
