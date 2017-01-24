@@ -134,8 +134,6 @@ sub get_all_output_hashes_by_InputBuffer {
 
     $self->add_VariationFeatureOverlapAllele_info($vf, $hash);
 
-    $hash->{custom_annotations} = $vf->{_custom_annotations} if $vf->{_custom_annotations};
-
     numberify($hash, \%NUMBERIFY_EXEMPT);
 
     # rename
