@@ -41,7 +41,7 @@ GetOptions(
   'registry=s',              # registry file
   'host=s',                  # database host
   'port=s',                  # database port
-  'user|u=s',                  # database user name
+  'user|u=s',                # database user name
   'password=s',              # database password
   'db_version=i',            # Ensembl database version to use e.g. 62
   'assembly|a=s',            # assembly version to use
@@ -163,16 +163,25 @@ GetOptions(
   'dir_cache=s',             # specific directory for cache
   'dir_plugins=s',           # specific directory for plugins
   'offline',                 # offline mode uses minimal set of modules installed in same dir, no DB connection
-  'custom=s' => ($config->{custom} ||= []), # specify custom tabixed bgzipped file with annotation
-  'tmpdir=s',                # tmp dir used for BigWig retrieval
-  'gff=s',                   # shortcut to --custom [file],,gff
-  'gtf=s',                   # shortcut to --custom [file],,gtf
-  'plugin=s' => ($config->{plugin} ||= []), # specify a method in a module in the plugins directory
-  'safe',                    # die if plugins don't compile or spit warnings
   'fasta|fa=s',              # file or dir containing FASTA files with reference sequence
   'no_fasta',                # don't autodetect FASTA file in cache dir
   'sereal',                  # user Sereal instead of Storable for the cache
   'synonyms=s',              # file of chromosome synonyms
+
+  # custom file stuff
+  'custom=s' => ($config->{custom} ||= []),        # specify custom tabixed bgzipped or bigWig file with annotation
+  'tmpdir=s',                                      # tmp dir used for BigWig retrieval
+  'gff=s',                                         # shortcut to --custom [file],,gff
+  'gtf=s',                                         # shortcut to --custom [file],,gtf
+  'bigwig=s',                                      # shortcut to --custom [file],,bigwig,exact
+  'phyloP=s' => ($config->{phyloP} ||= []),        # shortcut to using remote phyloP, may use multiple
+  'phastCons=s', => ($config->{phastCons} ||= []), # shortcut to using remote phastCons, may use multiple
+  'ucsc_assembly=s',                               # required for phyloP, phastCons, e.g. use hg19 for GRCh37, hg38 for GRCh38
+  'ucsc_data_root=s',                              # replace if you have the data locally, defaults to http://hgdownload.cse.ucsc.edu/goldenpath/
+
+  # plugins
+  'plugin=s' => ($config->{plugin} ||= []), # specify a method in a module in the plugins directory
+  'safe',                                   # die if plugins don't compile or spit warnings
   
   # debug
   'debug',                   # print out debug info
