@@ -73,20 +73,6 @@ sub new {
   return $self;
 }
 
-# gets variation cache columns
-sub get_cache_columns {
-  my $self = shift;
-
-  if(!exists($self->{cols})) {
-    my @copy = @Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation::VAR_CACHE_COLS;
-    $self->{cols} = \@copy;
-    # push @{$self->{cols}}, 'pubmed' if $self->have_pubmed() && $self->param('pubmed');
-    # push @{$self->{cols}}, @{$self->{freq_file_pops}} if defined($self->{freq_file_pops});
-  }
-
-  return $self->{cols};
-}
-
 sub parse_variation {
   my $self = shift;
   my $line = shift;
