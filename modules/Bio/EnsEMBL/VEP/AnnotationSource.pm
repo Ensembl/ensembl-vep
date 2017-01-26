@@ -59,7 +59,10 @@ sub new {
 
   $self->{$_} = $hashref->{$_} for keys %$hashref;
 
-  $self->filter_set(Bio::EnsEMBL::VEP::FilterSet->new($hashref->{filter})) if $hashref->{filter};
+  if(my $filter = $hashref->{filter}) {
+    my @set = ref($filter) eq 'ARRAY' ? @$filter : ($filter);
+    $self->filter_set(Bio::EnsEMBL::VEP::FilterSet->new(@set)) if scalar @set;
+  }
 
   return $self;
 }

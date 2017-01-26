@@ -108,6 +108,7 @@ our @ALLOW_MULTIPLE = qw(
   custom
   phyloP
   phastCons
+  transcript_filter
 );
 
 # sets of options that turn on / off others
@@ -307,6 +308,13 @@ our @OPTION_SETS = (
     flags => ['phastCons'],
     set   => {
       custom => '%ucsc_data_root%%ucsc_assembly%/phastCons%phastCons%way/%ucsc_assembly%.phastCons%phastCons%way.bw,phastCons%phastCons%way,bigwig,exact'
+    }
+  },
+
+  {
+    flags => ['exclude_predicted'],
+    set   => {
+      transcript_filter => 'not stable_id match ^X._'
     }
   },
 );

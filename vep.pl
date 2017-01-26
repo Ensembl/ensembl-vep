@@ -53,7 +53,8 @@ GetOptions(
   'is_multispecies=i',       # '1' for a multispecies database (e.g protists_euglenozoa1_collection_core_29_82_1)
 
   # runtime options
-  'transcript_filter=s',     # filter transcripts
+  'transcript_filter=s' => ($config->{transcript_filter} ||= []), # filter transcripts
+  'exclude_predicted',
   'minimal',                 # convert input alleles to minimal representation
   'most_severe',             # only return most severe consequence
   'summary',                 # only return one line per variation with all consquence types

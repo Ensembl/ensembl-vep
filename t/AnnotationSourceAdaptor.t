@@ -61,7 +61,7 @@ my $exp = [
     'sift' => undef,
     'polyphen' => undef,
     'everything' => undef,
-    'filter' => undef,
+    'filter' => [],
     'info' => {
       'polyphen' => '2.2.2',
       'sift' => 'sift5.2.2',
@@ -250,7 +250,7 @@ SKIP: {
       'all_refseq' => undef,
       'assembly' => undef,
       '_species' => 'homo_vepiens',
-      'filter' => undef,
+      'filter' => [],
       'info' => {
         'genebuild' => '2014-07',
         'gencode' => 'GENCODE 24',
