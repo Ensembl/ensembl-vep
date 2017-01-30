@@ -154,15 +154,18 @@ sub get_all_regions_by_InputBuffer {
 }
 
 sub get_source_chr_name {
-  my $self = shift;
-  my $chr = shift;
+  my ($self, $chr, $set, $valids) = @_;
 
-  my $chr_name_map = $self->{_chr_name_map} ||= {};
+  $set    ||= 'default';
+  $valids ||= [];
+
+  my $chr_name_map = $self->{_chr_name_map}->{$set} ||= {};
 
   if(!exists($chr_name_map->{$chr})) {
     my $mapped_name = $chr;
 
-    my %valid = map {$_ => 1} @{$self->can('get_valid_chromosomes') ? $self->get_valid_chromosomes : []};
+    @$valids = @{$self->can('get_valid_chromosomes') ? $self->get_valid_chromosomes : []} unless @$valids;
+    my %valid = map {$_ => 1} @$valids;
 
     unless($valid{$chr}) {
 

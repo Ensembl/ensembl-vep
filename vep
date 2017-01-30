@@ -168,6 +168,7 @@ GetOptions(
   'no_fasta',                # don't autodetect FASTA file in cache dir
   'sereal',                  # user Sereal instead of Storable for the cache
   'synonyms=s',              # file of chromosome synonyms
+  'bam=s',                   # bam file used to modify transcripts
 
   # custom file stuff
   'custom=s' => ($config->{custom} ||= []),        # specify custom tabixed bgzipped or bigWig file with annotation

@@ -48,6 +48,18 @@ package Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript;
 use Scalar::Util qw(weaken);
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
+use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
+
+our ($CAN_USE_HTS, $CAN_USE_CIGAR);
+
+BEGIN {
+  if (eval q{ require Bio::DB::HTS; 1 }) {
+    $CAN_USE_HTS = 1;
+  }
+  if (eval q{ require Bio::Cigar; 1 }) {
+    $CAN_USE_CIGAR = 1;
+  }
+}
 
 sub annotate_InputBuffer {
   my $self = shift;
@@ -63,12 +75,19 @@ sub annotate_InputBuffer {
     my $fe = $tr->{end} + ($tr_strand == 1 ? $down_size : $up_size);
     my $slice;
 
+    # get overlapping VFs
     my $vfs = $buffer->get_overlapping_vfs($fs, $fe);
     next unless @$vfs;
+
+    # lazy load transcript
     $tr = $self->lazy_load_transcript($tr);
     next unless $tr;
 
+    # apply filters
     next if $self->filter_set && !$self->filter_set->evaluate($tr);
+
+    # apply edits
+    $self->apply_edits($tr);
 
     foreach my $vf(@$vfs) {
       $vf->{slice} ||= $slice ||=  $tr->{slice};
@@ -217,6 +236,137 @@ sub lazy_load_transcript {
     $tr->{_vep_lazy_loaded} = 1;
     return $tr;
   }
+}
+
+sub bam {
+  my $self = shift;
+
+  if(@_ || $self->{bam}) {
+    throw("ERROR: Cannot add BAM file without Bio::DB::HTS installed\n") unless $CAN_USE_HTS;
+    $self->{_bam} = Bio::DB::HTS->new(-bam => @_ ? shift : $self->{bam});
+  }
+
+  $self->{_bam} = undef unless exists $self->{_bam};
+
+  return $self->{_bam};
+}
+
+sub apply_edits {
+  my ($self, $tr) = @_;
+
+  my $bam = $self->bam;
+  return unless $bam;
+
+  my $stable_id = $tr->stable_id;
+
+  # get the alignment representing this transcript aligned to the genome
+  my ($al) =
+    grep {$_->query->name eq $stable_id}
+    ($bam->get_features_by_location(
+      -seq_id => $self->get_source_chr_name($tr->seq_region_name, 'bam', [$bam->seq_ids]),
+      -start  => $tr->start,
+      -end    => $tr->end
+    ));
+
+  return unless $al;
+
+  # get cigar string and check for indels and mismatches
+  my $cigar_array = $al->cigar_array;
+
+  # we need to look at these op types
+  my %edit_ops = map {$_ => 1} qw(X D I);
+
+  return unless grep {$edit_ops{$_->[0]}} @$cigar_array;
+
+  # my $bc = Bio::Cigar->new($al->cigar_str);
+
+  # contains a hashref saying whether each CIGAR op type "consumes" query [0] and/or ref [1] seq
+  # e.g. M => [1, 1], I => [1, 0], D => [0, 1]
+  # modified from Bio::Cigar
+  my %op_consumes = (
+    # op => [query, reference]
+    'M' => [1, 1],
+    'I' => [1, 0],
+    'D' => [0, 1],
+    'N' => [0, 0], # special case intron - normally this should be [0, 1] but the position we want is cDNA-relative
+    'S' => [1, 0],
+    'H' => [0, 0],
+    'P' => [0, 0],
+    '=' => [1, 1],
+    'X' => [1, 1],
+  );
+
+  my $current_q_pos = 1;
+  my $current_t_pos = ($al->start - $tr->seq_region_start) + 1;
+  my @edits;
+  my $q_seq = $al->query->seq->seq;
+  my $mapping_strand = $al->strand;
+  my $bam_file = $self->{bam};
+
+  foreach my $c(@$cigar_array) {
+    my ($op, $l) = @$c;
+
+    throw("ERROR: Unrecognised operation $op\n") unless $op_consumes{$op};
+
+    if($edit_ops{$op}) {
+      my $q_s = $current_q_pos;
+
+      ## option A) use Bio::Cigar to map
+      # my $q_e = ($current_q_pos + $l) - 1;
+
+      # my ($map_q_s, $map_q_e) = ($q_s, $q_e);
+      # if($op eq 'I') {
+      #   $map_q_s = $q_e + 1;
+      #   $map_q_e = $current_q_pos - 1;
+      # }
+
+      # my ($t_s, $t_s_op) = $bc->qpos_to_rpos($map_q_s);
+      # my ($t_e, $t_e_op) = $bc->qpos_to_rpos($map_q_e);
+
+      # throw("ERROR: unable to map qpos $map_q_s for $stable_id\n") unless $t_s;
+      # throw("ERROR: unable to map qpos $map_q_e for $stable_id\n") unless $t_e;
+
+      ## option B) track target position through cigar array
+      my ($t_s, $t_e);
+
+      if($op eq 'I') {
+        $t_s = $current_t_pos;
+        $t_e = $current_t_pos - 1;
+      }
+      else {
+        $t_s = $current_t_pos;
+        $t_e = ($current_t_pos + $l) - 1;
+      }
+
+      # get query seq and reverse complement if necessary
+      my $alt_seq = substr($q_seq, $current_q_pos - 1, $l);
+      reverse_comp(\$alt_seq) if $mapping_strand < 0;
+
+      push @edits, Bio::EnsEMBL::Attribute->new(
+        -VALUE       => "$t_s $t_e $alt_seq",
+        -CODE        => '_rna_edit',
+        -NAME        => 'RNA Edit',
+        -DESCRIPTION => "Edit from $bam_file, op=$op len=$l mapped to $t_s-$t_e on $stable_id"
+      );
+    }
+
+    # increment positions
+    $current_q_pos += $l if $op_consumes{$op}->[0];
+    $current_t_pos += $l if $op_consumes{$op}->[1];
+  }
+
+  # add the edits to the transcript as attributes
+  $tr->add_Attributes(@edits);
+
+  # tell the transcript to apply them when we call relevant methods
+  $tr->edits_enabled(1);
+
+  # now delete sequences pre-cached for VEP as they may need to be regenerated with edited seq
+  if(my $vep_cache = $tr->{_variation_effect_feature_cache}) {
+    delete $vep_cache->{$_} for qw(translateable_seq peptide three_prime_utr);
+  }
+
+  return $tr;
 }
 
 1;

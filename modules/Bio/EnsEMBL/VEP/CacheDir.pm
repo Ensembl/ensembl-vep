@@ -93,6 +93,7 @@ sub get_all_AnnotationSources {
       info => $self->version_data,
       valid_chromosomes => $info->{valid_chromosomes},
       filter => $self->param('transcript_filter'),
+      bam => $self->param('bam'),
     });
 
     # add RegFeats if available
