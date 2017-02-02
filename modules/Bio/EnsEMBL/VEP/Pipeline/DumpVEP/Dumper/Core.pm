@@ -97,7 +97,7 @@ sub get_dumpable_object {
 
   my $obj = {
     $chr => [
-      map {$as->lazy_load_transcript($_); $self->clean_transcript($_); $_}
+      map {$as->apply_edits($_); $as->lazy_load_transcript($_); $self->clean_transcript($_); $_}
       @{$as->get_features_by_regions_uncached([[$sr, $s]], 1)}
     ]
   };
@@ -178,6 +178,7 @@ sub clean_transcript {
       rseq_ens_match_cds
       rseq_ens_no_match
       enst_refseq_compare
+      _rna_edit
     );
 
     foreach my $att(@{$tr->{attributes}}) {

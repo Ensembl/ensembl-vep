@@ -49,6 +49,8 @@ sub run {
 
   $vep_params->{'core_type'} = 'otherfeatures';
 
+  $vep_params->{'bam'} = $self->param('bam');
+
   my $config = Bio::EnsEMBL::VEP::Config->new($vep_params);
 
   my $region_size = $self->param('region_size');
