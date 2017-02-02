@@ -129,21 +129,27 @@ sub create_VariationFeatures {
   $self->line_number($self->line_number + 1);
 
   # get the data we need to decide if this is an SV
-  my ($alts, $info) = (
+  my ($ref, $alts, $info) = (
+    $parser->get_reference,
     $parser->get_alternatives,
     $parser->get_info,
   );
 
-  if($info->{SVTYPE} || join(",", @$alts) =~ /[<\[][^\*]+[>\]]/) {
+  if(
+    join("", $ref, @$alts) !~ /^[ACGT]+$/ &&
+    (
+      $info->{SVTYPE} ||
+      join(",", @$alts) =~ /[<\[][^\*]+[>\]]/
+    )
+  ) {
     return $self->create_StructuralVariationFeatures();
   }
 
   # get the rest of the relevant data
-  my ($chr, $start, $end, $ref, $ids) = (
+  my ($chr, $start, $end, $ids) = (
     $parser->get_seqname,
     $parser->get_raw_start,
     $parser->get_raw_end,
-    $parser->get_reference,
     $parser->get_IDs,
   );
 
