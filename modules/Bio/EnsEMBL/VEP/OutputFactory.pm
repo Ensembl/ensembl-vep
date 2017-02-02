@@ -101,6 +101,7 @@ sub new {
     no_escape
     pick_order
     allele_number
+    use_transcript_ref
 
     most_severe
     summary
@@ -1032,6 +1033,12 @@ sub TranscriptVariationAllele_to_output_hash {
 
       $hash->{HGVS_OFFSET} = $offset if $offset;
     }
+  }
+
+  if($self->{use_transcript_ref}) {
+    my $ref_tva = $tv->get_reference_TranscriptVariationAllele;
+    $hash->{USED_REF} = $ref_tva->variation_feature_seq;
+    $hash->{GIVEN_REF} = $ref_tva->{given_ref};
   }
 
   return $hash;

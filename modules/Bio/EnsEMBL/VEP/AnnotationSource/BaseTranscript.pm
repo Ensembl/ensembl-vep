@@ -108,7 +108,8 @@ sub annotate_InputBuffer {
           -variation_feature => $vf,
           -adaptor           => $tva,
           -no_ref_check      => 1,
-          -no_transfer       => 1
+          -no_transfer       => 1,
+          -use_feature_ref   => $self->param('use_transcript_ref'),
         );
 
         $vf->add_TranscriptVariation($tv);
@@ -254,6 +255,8 @@ sub bam {
 sub apply_edits {
   my ($self, $tr) = @_;
 
+  return $tr if exists($tr->{_bam_edit_status});
+
   my $bam = $self->bam;
   return unless $bam;
 
@@ -278,10 +281,8 @@ sub apply_edits {
 
   return unless grep {$edit_ops{$_->[0]}} @$cigar_array;
 
-  # my $bc = Bio::Cigar->new($al->cigar_str);
-
-  # contains a hashref saying whether each CIGAR op type "consumes" query [0] and/or ref [1] seq
-  # e.g. M => [1, 1], I => [1, 0], D => [0, 1]
+  # op_consumes is a hash saying whether each CIGAR op type "consumes" query [0] and/or ref [1] seq
+  # e.g. M (match) => [1, 1], I (insertion) => [1, 0], D (deletion) => [0, 1]
   # modified from Bio::Cigar
   my %op_consumes = (
     # op => [query, reference]
@@ -301,7 +302,7 @@ sub apply_edits {
   my @edits;
   my $q_seq = $al->query->seq->seq;
   my $mapping_strand = $al->strand;
-  my $bam_file = $self->{bam};
+  my $bam_file = (split('/', $self->{bam}))[-1];
 
   foreach my $c(@$cigar_array) {
     my ($op, $l) = @$c;
@@ -311,22 +312,6 @@ sub apply_edits {
     if($edit_ops{$op}) {
       my $q_s = $current_q_pos;
 
-      ## option A) use Bio::Cigar to map
-      # my $q_e = ($current_q_pos + $l) - 1;
-
-      # my ($map_q_s, $map_q_e) = ($q_s, $q_e);
-      # if($op eq 'I') {
-      #   $map_q_s = $q_e + 1;
-      #   $map_q_e = $current_q_pos - 1;
-      # }
-
-      # my ($t_s, $t_s_op) = $bc->qpos_to_rpos($map_q_s);
-      # my ($t_e, $t_e_op) = $bc->qpos_to_rpos($map_q_e);
-
-      # throw("ERROR: unable to map qpos $map_q_s for $stable_id\n") unless $t_s;
-      # throw("ERROR: unable to map qpos $map_q_e for $stable_id\n") unless $t_e;
-
-      ## option B) track target position through cigar array
       my ($t_s, $t_e);
 
       if($op eq 'I') {
@@ -346,7 +331,7 @@ sub apply_edits {
         -VALUE       => "$t_s $t_e $alt_seq",
         -CODE        => '_rna_edit',
         -NAME        => 'RNA Edit',
-        -DESCRIPTION => "Edit from $bam_file, op=$op len=$l mapped to $t_s-$t_e on $stable_id"
+        -DESCRIPTION => "Edit from $bam_file, op=$op len=$l mapped to $t_s-$t_e"
       );
     }
 
@@ -359,11 +344,38 @@ sub apply_edits {
   $tr->add_Attributes(@edits);
 
   # tell the transcript to apply them when we call relevant methods
+  my $edits_enabled_bak = $tr->edits_enabled(); 
   $tr->edits_enabled(1);
 
-  # now delete sequences pre-cached for VEP as they may need to be regenerated with edited seq
-  if(my $vep_cache = $tr->{_variation_effect_feature_cache}) {
-    delete $vep_cache->{$_} for qw(translateable_seq peptide three_prime_utr);
+  # now test whether the sequence the transcript object will create with the SeqEdits matches the input (RefSeq) seq
+  my $bam_seq = $q_seq;
+  reverse_comp(\$bam_seq) if $mapping_strand < 0;
+  
+  if($bam_seq ne $tr->spliced_seq) {
+
+    # flag as failed
+    $tr->{_bam_edit_status} = 'failed';
+
+    # revert the changes we've made and flag this transcript
+    $tr->{attributes} = [grep {$_->description !~ /$bam_file/} @{$tr->get_all_Attributes}];
+    $tr->edits_enabled($edits_enabled_bak);
+  }
+  else {
+
+    # flag successful
+    $tr->{_bam_edit_status} = 'ok';
+
+    # delete stuff pre-cached for VEP as they need to be regenerated with edited seq
+    if(my $vep_cache = $tr->{_variation_effect_feature_cache}) {
+      delete $vep_cache->{$_} for qw(
+        mapper
+        three_prime_utr
+        translateable_seq
+        peptide
+        protein_function_predictions
+        protein_features
+      );
+    }
   }
 
   return $tr;

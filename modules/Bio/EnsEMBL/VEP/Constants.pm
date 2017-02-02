@@ -52,6 +52,7 @@ our @FLAG_FIELDS = (
   { flag => 'xref_refseq',     fields => ['RefSeq'] },
   { flag => 'refseq',          fields => ['REFSEQ_MATCH'] },
   { flag => 'merged',          fields => ['REFSEQ_MATCH', 'SOURCE'] },
+  { flag => 'use_transcript_ref', fields => ['GIVEN_REF', 'USED_REF']},
   { flag => 'custom',          fields => ['SOURCE'] },
   { flag => 'gene_phenotype',  fields => ['GENE_PHENO'] },
 
@@ -160,6 +161,8 @@ our %FIELD_DESCRIPTIONS = (
   'PICK'               => 'Indicates if this consequence has been picked as the most severe',
   'SOMATIC'            => 'Somatic status of existing variant',
   'REFSEQ_MATCH'       => 'RefSeq transcript match status',
+  'GIVEN_REF'          => 'Reference allele from input',
+  'USED_REF'           => 'Reference allele as used to get consequences',
   'VARIANT_CLASS'      => 'SO variant class',
   'PHENO'              => 'Indicates if existing variant(s) is associated with a phenotype, disease or trait; multiple values correspond to multiple variants',
   'GENE_PHENO'         => 'Indicates if gene is associated with a phenotype, disease or trait',

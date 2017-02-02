@@ -317,6 +317,13 @@ our @OPTION_SETS = (
       transcript_filter => 'not stable_id match ^X._'
     }
   },
+
+  {
+    flags => ['bam'],
+    set   => {
+      use_transcript_ref => 1,
+    }
+  },
 );
 
 # valid values for certain flags
