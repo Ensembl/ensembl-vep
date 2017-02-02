@@ -248,7 +248,7 @@ sub finished_stats {
     
     # convert allele changes to Ts/Tv
     my $ts_tv = \%Bio::EnsEMBL::VEP::Constants::TS_TV;
-    map {$stats->{ts_tv}->{$ts_tv->{$_}} += $stats->{allele_changes}->{$_}} keys %{$stats->{allele_changes}} if $stats->{allele_changes};
+    map {$stats->{ts_tv}->{$ts_tv->{$_}} += $stats->{allele_changes}->{$_}} grep {$ts_tv->{$_}} keys %{$stats->{allele_changes}} if $stats->{allele_changes};
     
     # flesh out protein_pos
     if(defined($stats->{protein_pos})) {
