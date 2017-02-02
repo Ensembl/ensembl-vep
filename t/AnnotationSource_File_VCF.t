@@ -243,6 +243,28 @@ SKIP: {
     },
     'annotate_InputBuffer - mixed - snp'
   );
+
+  # SV deletion should only have overlap type applied
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
+    config => $cfg,
+    parser => Bio::EnsEMBL::VEP::Parser::VCF->new({
+      config => $cfg,
+      file => $test_cfg->create_input_file([qw(21 25585735 . G . . . SVTYPE=DEL;SVLEN=2)]),
+      valid_chromosomes => [21]
+    })
+  });
+  $ib->next;
+  $as->annotate_InputBuffer($ib);
+
+  is_deeply(
+    $ib->buffer->[0]->{_custom_annotations},
+    {
+      'foo' => [
+        { name => 'del2' },
+      ]
+    },
+    'annotate_InputBuffer - SV reverts to overlap'
+  );
 }
 
 done_testing();

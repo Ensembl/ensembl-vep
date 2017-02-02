@@ -161,7 +161,8 @@ sub _record_overlaps_VF {
   my ($vf) = @_;
 
   # we can use the superclass method if overlap type
-  return $self->SUPER::_record_overlaps_VF(@_) if $self->type eq 'overlap';
+  return $self->SUPER::_record_overlaps_VF(@_)
+    if $self->type eq 'overlap' || ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature';
 
   # exact more difficult, we need to check each allele
   my $parser = $self->parser;
