@@ -126,7 +126,8 @@ is($cfg->param('verbose'), undef, 'STDOUT output turns off verbose');
 $cfg = Bio::EnsEMBL::VEP::Config->new({everything => 1, database => 1});
 is($cfg->param($_), undef, 'everything with database turns off '.$_) for qw(maf_1kg maf_esp maf_exac pubmed);
 
-throws_ok { Bio::EnsEMBL::VEP::Config->new({original => 1}) } qr/provide output filters/, 'must provide --filters with --original';
+$cfg = Bio::EnsEMBL::VEP::Config->new({species => 'mus_musculus1'});
+is($cfg->param('species'), 'mus_musculus', '1 getting trimmed from species name');
 
 
 
