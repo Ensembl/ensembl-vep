@@ -26,7 +26,7 @@ my $version_file = $version_dir.$vep_module;
 
 
 # find out what branch we are on
-my $git_branch = `git rev-parse --abbrev-ref HEAD`;
+my $git_branch = `cd $Bin; git rev-parse --abbrev-ref HEAD`;
 chomp($git_branch);
 ok($git_branch, 'get current git branch');
 
