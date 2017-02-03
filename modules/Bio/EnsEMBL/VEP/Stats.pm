@@ -354,7 +354,7 @@ sub generate_chart_data {
     sort => 'chr',
     type => 'bar',
     options => '{legend: {position: "none"}}',
-  };
+  } if $stats->{chr_totals};
   
   foreach my $chr(sort {($a !~ /^\d+$/ || $b !~ /^\d+/) ? $a cmp $b : $a <=> $b} keys %{$stats->{chr}}) {
     my $chr_id = $chr;
@@ -382,7 +382,7 @@ sub generate_chart_data {
     type => 'bar',
     no_table => 1,
     options => '{hAxis: {title: "Position in protein (percentile)", textStyle: {fontSize: 10}}, legend: {position: "none"}}',
-  };
+  } if $stats->{protein_pos};
 
   return \@charts;
 }
