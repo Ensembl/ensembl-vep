@@ -84,8 +84,6 @@ sub create_VariationFeatures {
   $hgvs =~ s/\s+//g;
 
   my $core_group = $self->param('core_type');
-
-  $DB::single = 1;
   
   my $vfa = $self->get_adaptor('variation', 'VariationFeature');
   my $sa  = $self->get_adaptor($core_group, 'Slice');
@@ -98,7 +96,7 @@ sub create_VariationFeatures {
 
   if(!defined($vf) || (defined $@ && length($@) > 1)) {
     $self->warning_msg("WARNING: Unable to parse HGVS notation \'$hgvs\'\n$@");
-    return [];
+    return $self->create_VariationFeatures;
   }
 
   # transfer to whole chromosome slice
