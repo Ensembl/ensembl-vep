@@ -145,6 +145,15 @@ SKIP: {
   is($vf, undef, 'invalid HGVS type');
   ok($tmp =~ /Unable to parse HGVS notation/, 'invalid HGVS type warning msg');
 
+  $tmp = '';
+  $vf = Bio::EnsEMBL::VEP::Parser::HGVS->new({
+    config => $cfg,
+    file => $test_cfg->create_input_file("21:k.25585733C>T\nENSP00000284967.6:p.Ala331Thr"),
+    valid_chromosomes => [21],
+  })->next();
+  is(ref($vf), 'Bio::EnsEMBL::Variation::VariationFeature', 'skip past invalid HGVS type');
+  ok($tmp =~ /Unable to parse HGVS notation/, 'invalid HGVS type warning msg');
+
   open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
 

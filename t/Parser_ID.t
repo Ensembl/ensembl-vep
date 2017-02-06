@@ -113,11 +113,22 @@ SKIP: {
   close STDERR;
   open STDERR, '>', \$tmp;
 
+  # missing ID
   $vf = Bio::EnsEMBL::VEP::Parser::ID->new({
     config => $cfg,
     file => $test_cfg->create_input_file('rs699'),
   })->next;
   is($vf, undef, 'missing ID');
+
+  ok($tmp =~ /No variant found with ID/, 'missing ID warning msg');
+
+  # skip past missing ID
+  $tmp = '';
+  $vf = Bio::EnsEMBL::VEP::Parser::ID->new({
+    config => $cfg,
+    file => $test_cfg->create_input_file("rs699\nrs142513484"),
+  })->next;
+  is($vf->{variation_name}, 'rs142513484', 'skip past missing ID');
 
   ok($tmp =~ /No variant found with ID/, 'missing ID warning msg');
 

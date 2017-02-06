@@ -94,12 +94,18 @@ sub create_VariationFeatures {
 
   my $v_obj = $ad->fetch_by_name($id);
 
-  if(!$v_obj) {
+  unless($v_obj) {
     $self->warning_msg("WARNING: No variant found with ID \'$id\'");
-    return [];
+    return $self->create_VariationFeatures();
   }
 
   my @vfs = @{$v_obj->get_all_VariationFeatures};
+
+  unless(@vfs) {
+    $self->warning_msg("WARNING: No mappings found for variant \'$id\'");
+    return $self->create_VariationFeatures();
+  }
+
   for(@vfs) {
     delete $_->{dbID};
     delete $_->{overlap_consequences};
