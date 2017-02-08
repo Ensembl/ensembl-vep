@@ -104,7 +104,9 @@ sub setup_db_connection {
   }
 
   # update species, e.g. if user has input "human" we get "homo_sapiens"
-  $self->species($reg->get_alias($self->param('species')));
+  my $latin_species = $reg->get_alias($self->param('species'));
+  $latin_species =~ s/\d+$//;
+  $self->species($latin_species);
 
   return 1;
 }
