@@ -237,8 +237,11 @@ sub output_hash_to_vcf_info_chunk {
       else {
         $data = '' if $data eq '-';  
       }
-      
-      $data =~ s/\;/\%3B/g if defined $data;
+
+      if(defined($data)) {
+        $data =~ s/\,/\&/g;
+        $data =~ s/\;/\%3B/g;
+      }
 
       push @chunk, $data;
     }
