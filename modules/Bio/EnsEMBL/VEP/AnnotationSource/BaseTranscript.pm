@@ -61,6 +61,8 @@ BEGIN {
   }
 }
 
+our $DEBUG = 0;
+
 sub annotate_InputBuffer {
   my $self = shift;
   my $buffer = shift;
@@ -253,11 +255,11 @@ sub bam {
 }
 
 sub apply_edits {
-  my ($self, $tr) = @_;
+  my ($self, $tr, $bam) = @_;
 
   return $tr if exists($tr->{_bam_edit_status});
 
-  my $bam = $self->bam;
+  $bam ||= $self->bam;
   return unless $bam;
 
   my $stable_id = $tr->stable_id;
@@ -297,12 +299,23 @@ sub apply_edits {
     'X' => [1, 1],
   );
 
-  my $current_q_pos = 1;
-  my $current_t_pos = ($al->start - $tr->seq_region_start) + 1;
   my @edits;
   my $q_seq = $al->query->seq->seq;
   my $mapping_strand = $al->strand;
   my $bam_file = (split('/', $self->{bam}))[-1];
+  my %seen_ops = ();
+
+  # work out positions to start from
+  my $current_q_pos = 1;
+  my $current_t_pos;
+
+  # forward strand
+  if($mapping_strand > 0) {
+    $current_t_pos = ($al->start - $tr->seq_region_start) + 1;
+  }
+  else {
+    $current_t_pos = ($al->start - $tr->seq_region_start) + length($tr->spliced_seq);
+  }
 
   foreach my $c(@$cigar_array) {
     my ($op, $l) = @$c;
@@ -310,17 +323,31 @@ sub apply_edits {
     throw("ERROR: Unrecognised operation $op\n") unless $op_consumes{$op};
 
     if($edit_ops{$op}) {
+      $seen_ops{$op}++;
+
       my $q_s = $current_q_pos;
 
       my ($t_s, $t_e);
 
       if($op eq 'I') {
-        $t_s = $current_t_pos;
-        $t_e = $current_t_pos - 1;
+        if($mapping_strand > 0) {
+          $t_s = $current_t_pos;
+          $t_e = $current_t_pos - 1;
+        }
+        else {
+          $t_s = $current_t_pos + 1;
+          $t_e = $current_t_pos;
+        }
       }
       else {
-        $t_s = $current_t_pos;
-        $t_e = ($current_t_pos + $l) - 1;
+        if($mapping_strand > 0) {
+          $t_s = $current_t_pos;
+          $t_e = ($current_t_pos + $l) - 1;
+        }
+        else {
+          $t_s = ($current_t_pos - $l) + 1;
+          $t_e = $current_t_pos;
+        }
       }
 
       # get query seq and reverse complement if necessary
@@ -337,7 +364,7 @@ sub apply_edits {
 
     # increment positions
     $current_q_pos += $l if $op_consumes{$op}->[0];
-    $current_t_pos += $l if $op_consumes{$op}->[1];
+    $current_t_pos += ($l * $mapping_strand) if $op_consumes{$op}->[1];
   }
 
   # add the edits to the transcript as attributes
@@ -356,14 +383,46 @@ sub apply_edits {
     # flag as failed
     $tr->{_bam_edit_status} = 'failed';
 
+    if($DEBUG) {
+      print STDERR "FAILED $stable_id ".join(", ", map {$_->value} grep {$_->code eq '_rna_edit'} @{$tr->get_all_Attributes})."\n";
+
+      # open OUT, ">$stable_id.aln.txt";
+
+      # use Bio::EnsEMBL::Variation::Utils::Sequence qw(align_seqs);
+      # my ($s1, $s2) = @{align_seqs($bam_seq, $tr->spliced_seq)};
+
+      # my $s = 0;
+      # my $l = 100;
+      # while($s < length($s1)) {
+      #   print OUT substr($s1, $s, $l)."  ".($s + $l)."\n";
+      #   print OUT substr($s2, $s, $l)."\n";
+      #   print OUT "\n";
+      #   $s += $l;
+      # }
+
+      # close OUT;
+
+      open OUT, ">$stable_id.fa";
+      print OUT "\>BAM\n$bam_seq\n\>TR\n".$tr->spliced_seq;
+      close OUT;
+    }
+
     # revert the changes we've made and flag this transcript
-    $tr->{attributes} = [grep {$_->description !~ /$bam_file/} @{$tr->get_all_Attributes}];
+    $tr->{attributes} = [grep {($_->description || '') !~ /$bam_file/} @{$tr->get_all_Attributes}];
     $tr->edits_enabled($edits_enabled_bak);
   }
   else {
 
     # flag successful
     $tr->{_bam_edit_status} = 'ok';
+
+    if($DEBUG) {
+      print STDERR
+        "OK $stable_id STRAND $mapping_strand OPS ".
+        join(", ", map {$_.":".$seen_ops{$_}} sort keys %seen_ops).
+        " EDITS ".
+        join(", ", map {$_->value} grep {$_->code eq '_rna_edit'} @{$tr->get_all_Attributes})."\n";
+    }
 
     # delete stuff pre-cached for VEP as they need to be regenerated with edited seq
     if(my $vep_cache = $tr->{_variation_effect_feature_cache}) {
