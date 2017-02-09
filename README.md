@@ -48,9 +48,9 @@ The following modules are optional but most users will benefit from installing t
 
 ### Usage
 ```bash
-perl vep.pl -i input.vcf -o out.txt -offline
+./vep -i input.vcf -o out.txt -offline
 ```
-vep.pl is compatible with the same downloadable caches as the ensembl-tools VEP. See [documentation](http://www.ensembl.org/info/docs/tools/vep/script/index.html) for full command line instructions. The [INSTALL.pl](http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html#installer) script may be used to download and set up caches for use with vep.pl.
+`vep` is compatible with the same downloadable caches as the ensembl-tools VEP. See [documentation](http://www.ensembl.org/info/docs/tools/vep/script/index.html) for full command line instructions. The [INSTALL.pl](http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html#installer) script may be used to download and set up caches for use with `vep`.
 
 > Note that the documentation hosted on ensembl.org and linked to from here currently corresponds to the ensembl-tools version of VEP; this will be updated to reflect the new version soon. Almost all commands, flags and plugins should work on both versions.
 
@@ -59,19 +59,19 @@ vep.pl is compatible with the same downloadable caches as the ensembl-tools VEP.
 ### Differences to ensembl-tools VEP
 This ensembl-vep repo is a complete rewrite of the VEP code intended to make the software faster, more robust and more easily extensible. Almost all functionality of the ensembl-tools version has been replicated, with the command line flags remaining largely unchanged. A summary of changes follows:
 
-* **Script name:** For brevity and to distinguish the two versions, the new script is named vep.pl, with the version in ensembl-tools named variant_effect_predictor.pl.
+* **Tool name:** For brevity and to distinguish the two versions, the new command line tool is named `vep`, with the version in ensembl-tools named `variant_effect_predictor.pl`.
 * **Speed:** A typical individual human genome of 4 million variants can now be processed in around 30 minutes on a quad-core machine using under 1GB of RAM.
 * **Known/existing variants:** The alleles of your input variant are now compared to any known variants when using `--check_existing`. Previously this would require you to enable this functionality manually with `--check_alleles`. The old functionality can be restored using `--no_check_alleles`.
 * **Allele frequencies:** Allele frequencies are now reported for the input allele only e.g. as `0.023` instead of `A:0.023,G:0.0005`. To reflect this change, the allele frequency fields are now named e.g. `AFR_AF` instead of `AFR_MAF`. The command line flags reflect this also, so `--gmaf` is now `--af` and `--maf_1kg` is now `--af_1kg`. Using the old flags will produce a deprecation message.
-* **GFF and GTF files:** GFF and GTF files may now be used directly as a source of transcript annotation in place of, or even alongside, a cache or database source. Previously this involved [building a cache using gtf2vep.pl](http://www.ensembl.org/info/docs/tools/vep/script/vep_cache.html#gtf), which is now redundant. The files must first be bgzipped and tabix-indexed, and a FASTA file containing genomic sequence is required:
+* **GFF and GTF files:** GFF and GTF files may now be used directly as a source of transcript annotation in place of, or even alongside, a cache or database source. Previously this involved [building a cache using gtf2vep](http://www.ensembl.org/info/docs/tools/vep/script/vep_cache.html#gtf), which is now redundant. The files must first be bgzipped and tabix-indexed, and a FASTA file containing genomic sequence is required:
 ```bash
 grep -v "#" data.gff | sort -k1,1 -k4,4n -k5,5n | bgzip -c > data.gff.gz
 tabix -p gff data.gff.gz
-perl vep.pl -i input.vcf -gff data.gff.gz -fasta genome.fa.gz
+./vep -i input.vcf -gff data.gff.gz -fasta genome.fa.gz
 ```
 * **VCF custom annotations:** [VCF files used as a source of custom annotation](http://www.ensembl.org/info/docs/tools/vep/script/vep_custom.html) will now have allele-specific data added from INFO fields; previously the whole content of each requested KEY=VALUE pair was reported.
 * **New pick flags:** New flags added to aid [selecting amongst consequence output](http://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick): `--pick_allele_gene`, `--flag_pick_allele_gene`
-* **Runtime status:** vep.pl produces no runtime progress messages.
+* **Runtime status:** `vep` produces no runtime progress messages.
 * **Deprecated:**
   * GVF output: `--gvf`
   * HTML output: `--html`
@@ -84,20 +84,20 @@ perl vep.pl -i input.vcf -gff data.gff.gz -fasta genome.fa.gz
 ---
 <a name="haplo"></a>
 ## Haplosaurus
-haplo.pl is a local tool implementation of the same functionality that powers the [Ensembl transcript haplotypes view](http://www.ensembl.org/Homo_sapiens/Transcript/Haplotypes?t=ENST00000304748). It takes phased genotypes from a VCF and constructs a pair of haplotype sequences for each overlapped transcript; these sequences are also translated into predicted protein haplotype sequences. Each variant haplotype sequence is aligned and compared to the reference, and an HGVS-like name is constructed representing its differences to the reference.
+`haplo` is a local tool implementation of the same functionality that powers the [Ensembl transcript haplotypes view](http://www.ensembl.org/Homo_sapiens/Transcript/Haplotypes?t=ENST00000304748). It takes phased genotypes from a VCF and constructs a pair of haplotype sequences for each overlapped transcript; these sequences are also translated into predicted protein haplotype sequences. Each variant haplotype sequence is aligned and compared to the reference, and an HGVS-like name is constructed representing its differences to the reference.
 
 This approach offers an advantage over VEP's analysis, which treats each input variant independently. By considering the combined change contributed by all the variant alleles across a transcript, the compound effects the variants may have are correctly accounted for.
 
-haplo.pl shares much of the same command line functionality with vep.pl, and can use VEP caches, Ensembl databases, GFF and GTF files as sources of transcript data; all vep.pl command line flags relating to this functionality work the same with haplo.pl.
+`haplo` shares much of the same command line functionality with `vep`, and can use VEP caches, Ensembl databases, GFF and GTF files as sources of transcript data; all `vep` command line flags relating to this functionality work the same with `haplo`.
 
 <a name="haplousage"></a>
 ### Usage
 Input data must be a [VCF](http://samtools.github.io/hts-specs/VCFv4.3.pdf) containing phased genotype data for at least one individual; no other formats are currently supported.
 
-When using a VEP cache as the source of transcript annotation, the first time you run haplo.pl with a particular cache it will spend some time scanning transcript locations in the cache.
+When using a VEP cache as the source of transcript annotation, the first time you run `haplo` with a particular cache it will spend some time scanning transcript locations in the cache.
 
 ```bash
-perl haplo.pl -i input.vcf -o out.txt -cache
+./haplo -i input.vcf -o out.txt -cache
 ```
 
 <a name="haplooutput"></a>
