@@ -270,9 +270,11 @@ sub apply_edits {
     ($bam->get_features_by_location(
       -seq_id => $self->get_source_chr_name($tr->seq_region_name, 'bam', [$bam->seq_ids]),
       -start  => $tr->start,
-      -end    => $tr->end
+      -end    => $tr->end,
+      -types  => 'match',
     ));
 
+  print STDERR "FAILED $stable_id NO ALIGNMENT\n" if $DEBUG && !$al;
   return unless $al;
 
   # get cigar string and check for indels and mismatches
@@ -281,6 +283,7 @@ sub apply_edits {
   # we need to look at these op types
   my %edit_ops = map {$_ => 1} qw(X D I);
 
+  print STDERR "OK $stable_id NO EDITS REQUIRED\n" if $DEBUG && !(grep {$edit_ops{$_->[0]}} @$cigar_array);
   return unless grep {$edit_ops{$_->[0]}} @$cigar_array;
 
   # op_consumes is a hash saying whether each CIGAR op type "consumes" query [0] and/or ref [1] seq
@@ -350,8 +353,10 @@ sub apply_edits {
         }
       }
 
-      # get query seq and reverse complement if necessary
-      my $alt_seq = substr($q_seq, $current_q_pos - 1, $l);
+      # get query seq, account for dels by multiplying length by the op_consumes value for query seq
+      my $alt_seq = substr($q_seq, $current_q_pos - 1, $op_consumes{$op}->[0] * $l);
+
+      # reverse complement if necessary
       reverse_comp(\$alt_seq) if $mapping_strand < 0;
 
       push @edits, Bio::EnsEMBL::Attribute->new(
@@ -376,36 +381,28 @@ sub apply_edits {
 
   # now test whether the sequence the transcript object will create with the SeqEdits matches the input (RefSeq) seq
   my $bam_seq = $q_seq;
-  reverse_comp(\$bam_seq) if $mapping_strand < 0;
+  reverse_comp(\$bam_seq) if $mapping_strand < 0;  
+
+  if($DEBUG) {
+    my $status = $bam_seq eq $tr->spliced_seq ? 'OK' : 'FAILED';
+
+    print STDERR
+      "$status $stable_id STRAND $mapping_strand OPS ".
+      join(", ", map {$_.":".$seen_ops{$_}} sort keys %seen_ops).
+      " EDITS ".
+      join(", ", map {$_->value} grep {$_->code eq '_rna_edit'} @{$tr->get_all_Attributes})."\n";
+
+    if($status eq 'FAILED') {
+      open OUT, ">$stable_id.fa";
+      print OUT "\>BAM\n$bam_seq\n\>TR\n".$tr->spliced_seq;
+      close OUT;
+    }
+  }
   
   if($bam_seq ne $tr->spliced_seq) {
 
     # flag as failed
     $tr->{_bam_edit_status} = 'failed';
-
-    if($DEBUG) {
-      print STDERR "FAILED $stable_id ".join(", ", map {$_->value} grep {$_->code eq '_rna_edit'} @{$tr->get_all_Attributes})."\n";
-
-      # open OUT, ">$stable_id.aln.txt";
-
-      # use Bio::EnsEMBL::Variation::Utils::Sequence qw(align_seqs);
-      # my ($s1, $s2) = @{align_seqs($bam_seq, $tr->spliced_seq)};
-
-      # my $s = 0;
-      # my $l = 100;
-      # while($s < length($s1)) {
-      #   print OUT substr($s1, $s, $l)."  ".($s + $l)."\n";
-      #   print OUT substr($s2, $s, $l)."\n";
-      #   print OUT "\n";
-      #   $s += $l;
-      # }
-
-      # close OUT;
-
-      open OUT, ">$stable_id.fa";
-      print OUT "\>BAM\n$bam_seq\n\>TR\n".$tr->spliced_seq;
-      close OUT;
-    }
 
     # revert the changes we've made and flag this transcript
     $tr->{attributes} = [grep {($_->description || '') !~ /$bam_file/} @{$tr->get_all_Attributes}];
@@ -415,14 +412,6 @@ sub apply_edits {
 
     # flag successful
     $tr->{_bam_edit_status} = 'ok';
-
-    if($DEBUG) {
-      print STDERR
-        "OK $stable_id STRAND $mapping_strand OPS ".
-        join(", ", map {$_.":".$seen_ops{$_}} sort keys %seen_ops).
-        " EDITS ".
-        join(", ", map {$_->value} grep {$_->code eq '_rna_edit'} @{$tr->get_all_Attributes})."\n";
-    }
 
     # delete stuff pre-cached for VEP as they need to be regenerated with edited seq
     if(my $vep_cache = $tr->{_variation_effect_feature_cache}) {
