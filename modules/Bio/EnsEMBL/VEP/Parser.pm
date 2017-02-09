@@ -146,7 +146,7 @@ sub file {
       throw("ERROR: File \"$file\" does not exist\n") unless -e $file;
 
       # file is compressed?
-      $file = get_compressed_filehandle($file, 1) if -B $file;
+      $file = get_compressed_filehandle($file, 1) if -f $file && -B $file;
     }
 
     $self->{file} = $file;
