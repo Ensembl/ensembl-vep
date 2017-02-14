@@ -244,7 +244,7 @@ sub lazy_load_transcript {
 sub bam {
   my $self = shift;
 
-  if(@_ || $self->{bam}) {
+  if(@_ || (!$self->{_bam} && $self->{bam})) {
     throw("ERROR: Cannot add BAM file without Bio::DB::HTS installed\n") unless $CAN_USE_HTS;
     $self->{_bam} = Bio::DB::HTS->new(-bam => @_ ? shift : $self->{bam});
   }
