@@ -259,10 +259,17 @@ sub apply_edits {
 
   return $tr if exists($tr->{_bam_edit_status});
 
+  my $stable_id = $tr->stable_id;
+
+  # COMMENTED OUT FOR NOW IN CASE WE CAN'T TRUST THESE ATTRIBS
+  # don't need to edit if exact match already
+  if(grep {$_->code eq 'rseq_mrna_match'} @{$tr->get_all_Attributes}) {
+    print STDERR "OK $stable_id MATCH ATTRIBUTE PRESENT\n" if $DEBUG;
+    return;
+  }
+
   $bam ||= $self->bam;
   return unless $bam;
-
-  my $stable_id = $tr->stable_id;
 
   # get the alignment representing this transcript aligned to the genome
   my ($al) =
@@ -274,17 +281,34 @@ sub apply_edits {
       -types  => 'match',
     ));
 
-  print STDERR "FAILED $stable_id NO ALIGNMENT\n" if $DEBUG && !$al;
-  return unless $al;
+  unless($al) {
+    print STDERR "FAILED $stable_id NO ALIGNMENT\n" if $DEBUG;
+    return;
+  }
 
   # get cigar string and check for indels and mismatches
-  my $cigar_array = $al->cigar_array;
+  my $cigar_array    = $al->cigar_array;
+  my $q_seq_obj      = $al->query->seq;
+  my $mapping_strand = $al->strand;
 
   # we need to look at these op types
   my %edit_ops = map {$_ => 1} qw(X D I);
 
-  print STDERR "OK $stable_id NO EDITS REQUIRED\n" if $DEBUG && !(grep {$edit_ops{$_->[0]}} @$cigar_array);
-  return unless grep {$edit_ops{$_->[0]}} @$cigar_array;
+  ## COMMENTED OUT FOR NOW, TRUST SEQ COMPARISON INSTEAD
+  ## check for edit ops
+  # unless(grep {$edit_ops{$_->[0]}} @$cigar_array) {
+  #   print STDERR "OK $stable_id NO EDITS REQUIRED\n" if $DEBUG;
+  #   return;
+  # }
+
+  # do a manual check on the sequences
+  my $pre_edit_seq = $tr->spliced_seq;
+  my $bam_seq = ($mapping_strand > 0 ? $q_seq_obj->seq : $q_seq_obj->revcom->seq);
+
+  if($pre_edit_seq eq $bam_seq) {
+    print STDERR "OK $stable_id SEQUENCES MATCH ANYWAY\n" if $DEBUG;
+    return;
+  }
 
   # op_consumes is a hash saying whether each CIGAR op type "consumes" query [0] and/or ref [1] seq
   # e.g. M (match) => [1, 1], I (insertion) => [1, 0], D (deletion) => [0, 1]
@@ -303,8 +327,7 @@ sub apply_edits {
   );
 
   my @edits;
-  my $q_seq = $al->query->seq->seq;
-  my $mapping_strand = $al->strand;
+  my $q_seq    = $q_seq_obj->seq;
   my $bam_file = (split('/', $self->{bam}))[-1];
   my %seen_ops = ();
 
@@ -316,6 +339,7 @@ sub apply_edits {
   if($mapping_strand > 0) {
     $current_t_pos = ($al->start - $tr->seq_region_start) + 1;
   }
+  # reverse strand
   else {
     $current_t_pos = ($al->start - $tr->seq_region_start) + length($tr->spliced_seq);
   }
@@ -327,6 +351,8 @@ sub apply_edits {
 
     if($edit_ops{$op}) {
       $seen_ops{$op}++;
+
+      $DB::single = 1;
 
       my $q_s = $current_q_pos;
 
@@ -380,36 +406,25 @@ sub apply_edits {
   $tr->edits_enabled(1);
 
   # now test whether the sequence the transcript object will create with the SeqEdits matches the input (RefSeq) seq
-  my $bam_seq = $q_seq;
-  reverse_comp(\$bam_seq) if $mapping_strand < 0;  
-
+  my $new_tr_spliced_seq = $tr->spliced_seq;
+  my $cmp = $new_tr_spliced_seq eq $bam_seq;
   if($DEBUG) {
-    my $status = $bam_seq eq $tr->spliced_seq ? 'OK' : 'FAILED';
+    my $status = $cmp ? 'OK' : 'FAILED';
 
     print STDERR
       "$status $stable_id STRAND $mapping_strand OPS ".
       join(", ", map {$_.":".$seen_ops{$_}} sort keys %seen_ops).
       " EDITS ".
-      join(", ", map {$_->value} grep {$_->code eq '_rna_edit'} @{$tr->get_all_Attributes})."\n";
+      (join(", ", map {$_->value} grep {$_->code eq '_rna_edit'} @{$tr->get_all_Attributes}) || 'NONE')."\n";
 
     if($status eq 'FAILED') {
       open OUT, ">$stable_id.fa";
-      print OUT "\>BAM\n$bam_seq\n\>TR\n".$tr->spliced_seq;
+      print OUT "\>BAM\n$bam_seq\n\>PRE\n$pre_edit_seq\n\>TR\n".$tr->spliced_seq;
       close OUT;
     }
   }
   
-  if($bam_seq ne $tr->spliced_seq) {
-
-    # flag as failed
-    $tr->{_bam_edit_status} = 'failed';
-
-    # revert the changes we've made and flag this transcript
-    $tr->{attributes} = [grep {($_->description || '') !~ /$bam_file/} @{$tr->get_all_Attributes}];
-    $tr->edits_enabled($edits_enabled_bak);
-  }
-  else {
-
+  if($cmp) {
     # flag successful
     $tr->{_bam_edit_status} = 'ok';
 
@@ -424,6 +439,14 @@ sub apply_edits {
         protein_features
       );
     }
+  }
+  else {
+    # flag as failed
+    $tr->{_bam_edit_status} = 'failed';
+
+    # revert the changes we've made and flag this transcript
+    $tr->{attributes} = [grep {($_->description || '') !~ /$bam_file/} @{$tr->get_all_Attributes}];
+    $tr->edits_enabled($edits_enabled_bak);
   }
 
   return $tr;
