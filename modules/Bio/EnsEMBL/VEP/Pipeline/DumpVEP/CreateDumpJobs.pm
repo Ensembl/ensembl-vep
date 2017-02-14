@@ -183,6 +183,8 @@ sub get_chr_jobs {
   if($self->param('group') eq 'core') {
     make_path($self->param('pipeline_dir').'/synonyms');
 
+    my $srsa = $dba->get_SeqRegionSynonymAdaptor();
+
     open SYN, sprintf(
       ">%s/synonyms/%s_%s_chr_synonyms.txt",
       $self->param('pipeline_dir'),
@@ -190,10 +192,27 @@ sub get_chr_jobs {
       $species_hash->{assembly}
     ) or die "ERROR: Could not write to synonyms file\n";
 
-    foreach my $slice(@slices) {
-      print SYN $slice->seq_region_name."\t".$_->name."\n" for @{$slice->get_all_synonyms};
-      delete($slice->{synonym});
+    # synonyms can be indirect i.e. A <-> B <-> C
+    # and there may not be a direct link between A <-> C in the DB
+    # so let's allow for one level of indirection
+    my $tree = {};
+    foreach my $syn(@{$srsa->fetch_all}) {
+      my ($a, $b) = sort ($sa->fetch_by_seq_region_id($syn->seq_region_id)->seq_region_name, $syn->name);
+      $tree->{$a}->{$b} = 1;
+      $tree->{$_}->{$b} = 1 for keys %{$tree->{$a} || {}};
+      $tree->{$_}->{$a} = 1 for keys %{$tree->{$b} || {}};
     }
+
+    # now create uniq A <-> B / B <-> A pairs
+    my %uniq;
+    foreach my $a(keys %$tree) {
+      foreach my $b(keys %{$tree->{$a}}) {
+        $uniq{join("\t", sort ($a, $b))} = 1;
+      }
+    }
+
+    print SYN "$_\n" for keys %uniq;
+
     close SYN;
   }
 
