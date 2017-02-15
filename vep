@@ -128,6 +128,7 @@ GetOptions(
   'symbol',                  # add gene symbol (e.g. HGNC)
   'gene_phenotype',          # indicate if genes are phenotype-associated
   'hgvs',                    # add HGVS names to extra column
+  'hgvsg',                   # add HGVS g. also
   'shift_hgvs=i',            # disable/enable 3-prime shifting of HGVS indels to comply with standard
   'sift=s',                  # SIFT predictions
   'polyphen=s',              # PolyPhen predictions

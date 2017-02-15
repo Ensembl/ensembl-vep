@@ -586,7 +586,31 @@ is_deeply(
 );
 $of->{flag_pick} = 0;
 
+$of->{hgvsg} = 1;
+is_deeply(
+  $of->VariationFeatureOverlapAllele_to_output_hash($vfoa, {}, $ib->buffer->[0]),
+  {
+    'IMPACT' => 'MODIFIER',
+    'Consequence' => [
+      '3_prime_UTR_variant'
+    ],
+    'Allele' => 'T',
+    'PICK' => 1,
+    'HGVSg' => '21:g.25585733C>T',
+  },
+  'VariationFeatureOverlapAllele_to_output_hash - hgvsg'
+);
 
+# $of->chromosome_synonyms($test_cfg->{chr_synonyms});
+# delete $ib->buffer->[0]->{_hgvs_genomic};
+
+# is(
+#   $of->VariationFeatureOverlapAllele_to_output_hash($vfoa, {}, $ib->buffer->[0])->{HGVSg},
+#   'NC_000021.9:g.25585733C>T',
+#   'VariationFeatureOverlapAllele_to_output_hash - hgvsg with synonyms'
+# );
+
+$of->{hgvsg} = 0;
 
 
 

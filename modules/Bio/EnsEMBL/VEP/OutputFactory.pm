@@ -137,6 +137,7 @@ sub new {
 
     total_length
     hgvs
+    hgvsg
     sift
     polyphen
     polyphen_analysis
@@ -808,6 +809,15 @@ sub VariationFeatureOverlapAllele_to_output_hash {
 
   # picked?
   $hash->{PICK} = 1 if defined($vfoa->{PICK});
+
+  # hgvs g.
+  if($self->{hgvsg}) {
+    $vf->{_hgvs_genomic} ||= $vf->hgvs_genomic($vf->slice, $vf->{chr});
+
+    if(my $hgvsg = $vf->{_hgvs_genomic}->{$hash->{Allele}}) {
+      $hash->{HGVSg} = $hgvsg;
+    }
+  }
 
   # custom annotations
   foreach my $custom_name(keys %{$vf->{_custom_annotations} || {}}) {

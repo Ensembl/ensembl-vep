@@ -63,6 +63,7 @@ our @FLAG_FIELDS = (
   { flag => 'numbers',         fields => ['EXON','INTRON'] },
   { flag => 'domains',         fields => ['DOMAINS'] },
   { flag => 'hgvs',            fields => ['HGVSc','HGVSp','HGVS_OFFSET'] },
+  { flag => 'hgvsg',           fields => ['HGVSg'] },
 
   # frequency stuff
   { flag => 'af',              fields => ['AF'] },
@@ -115,6 +116,7 @@ our %FIELD_DESCRIPTIONS = (
   'UNIPARC'            => 'UniParc accession',
   'HGVSc'              => 'HGVS coding sequence name',
   'HGVSp'              => 'HGVS protein sequence name',
+  'HGVSg'              => 'HGVS genomic sequence name',
   'SIFT'               => 'SIFT prediction and/or score',
   'PolyPhen'           => 'PolyPhen prediction and/or score',
   'EXON'               => 'Exon number(s) / total',
