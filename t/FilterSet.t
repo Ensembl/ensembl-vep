@@ -469,6 +469,16 @@ is(Bio::EnsEMBL::VEP::FilterSet->new('foo')->evaluate({FOO => 1}),  1, 'evaluate
 is(Bio::EnsEMBL::VEP::FilterSet->new('FOO')->evaluate({foo => 1}),  1, 'evaluate - synonym - lc');
 is(Bio::EnsEMBL::VEP::FilterSet->new('foo')->evaluate({_foo => 1}), 1, 'evaluate - synonym - underscore');
 
+{
+  my $fs = Bio::EnsEMBL::VEP::FilterSet->new('foo');
+
+  $fs->evaluate({bar => 1});
+  is_deeply($fs->synonyms, {}, 'empty synonyms without limit_synonym_search');
+
+  $fs->limit_synonym_search(1);
+  $fs->evaluate({bar => 1});
+  is_deeply($fs->synonyms, {foo => undef}, 'undef synonym with limit_synonym_search');
+}
 
 ## ontology
 ###########

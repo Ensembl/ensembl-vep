@@ -47,7 +47,7 @@ use lib $RealBin.'/modules';
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::FilterSet;
-use Bio::EnsEMBL::VEP::Utils qw(merge_hashes merge_arrays get_compressed_filehandle);
+use Bio::EnsEMBL::VEP::Utils qw(get_compressed_filehandle);
 
 # configure from command line opts
 my $config = configure(scalar @ARGV);
@@ -172,6 +172,7 @@ sub main {
   }
   
   my (@raw_headers, @headers, $count, $line_number);
+  my $filter_set = $config->{filter_set};
   
   while(<$in_fh>) {
     chomp;
@@ -220,6 +221,7 @@ sub main {
       if($config->{format} eq 'tab') {
         push @data, parse_line($line, \@headers, "\t");
         push @chunks, $line;
+        $filter_set->limit_synonym_search(1) unless grep {$_ eq 'Extra'} @headers;
       }
       elsif($config->{format} eq 'vcf') {
         
@@ -237,10 +239,11 @@ sub main {
           $vcf_info_field = $1;
           @chunks = split('\,', $2);
           push @data,
-            map {merge_hashes($_, $main_data)}
-            map {parse_line($_, \@headers, '\|')}
+            map {parse_line($_, \@headers, '\|', $main_data)}
             @chunks;
         }
+
+        $filter_set->limit_synonym_search(1);
       }
       else {
         throw("ERROR: Unable to parse data in format ".$config->{format}."\n");
@@ -254,7 +257,7 @@ sub main {
         my $parsed_chunk = $data[$i];
         my $raw_chunk = $chunks[$i];
         
-        $chunk_pass = $config->{filter_set}->evaluate($parsed_chunk);
+        $chunk_pass = $filter_set->evaluate($parsed_chunk);
         $line_pass += $chunk_pass;
         
         push @new_chunks, $raw_chunk if $chunk_pass;
@@ -313,11 +316,14 @@ sub parse_line {
   my $line = shift;
   my $headers = shift;
   my $delimiter = shift;
+  my $main_data = shift;
+
+  my %data = %{$main_data || {}};
   
   chomp $line;
   my @split = split($delimiter, $line);
   
-  my %data = map {$headers->[$_] => $split[$_]} 0..$#split;
+  $data{$headers->[$_]} = $split[$_] for 0..$#split;
   
   if(defined($data{Extra})) {
     foreach my $chunk(split /\;/, $data{Extra}) {
@@ -325,11 +331,16 @@ sub parse_line {
       $data{$key} = $value;
     }
   }
-  
+
   # clean
   foreach my $key(keys %data) {
     $data{$key} = undef if
       $data{$key} eq '' || ($key ne 'Allele' && $data{$key} eq '-');
+  }
+
+  # set missing fields to undef
+  for(@$headers) {
+    $data{$_} = undef unless exists($data{$_});
   }
   
   return \%data;

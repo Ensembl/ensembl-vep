@@ -310,8 +310,8 @@ sub get_input {
     # try synonyms
     my $synonyms = $self->synonyms;
 
-    if(my $synonym = $synonyms->{$field}) {
-      $input = $data->{$synonym};
+    if(exists($synonyms->{$field})) {
+      $input = defined($synonyms->{$field}) ? $data->{$synonyms->{$field}} : undef;
     }
 
     else {
@@ -346,6 +346,9 @@ sub get_input {
             )
           );
         }
+        elsif($self->limit_synonym_search) {
+          $synonyms->{$field} = undef;
+        }
       }
     }
   }
@@ -369,6 +372,12 @@ sub synonyms {
   my $self = shift;
   $self->{synonyms} = shift if @_;
   return $self->{synonyms} ||= {};
+}
+
+sub limit_synonym_search {
+  my $self = shift;
+  $self->{limit_synonym_search} = shift if @_;
+  return $self->{limit_synonym_search} ||= 0;
 }
 
 sub ontology_adaptor {
