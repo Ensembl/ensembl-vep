@@ -206,7 +206,7 @@ sub get_chr_jobs {
     # now create uniq A <-> B / B <-> A pairs
     my %uniq;
     foreach my $a(keys %$tree) {
-      foreach my $b(keys %{$tree->{$a}}) {
+      foreach my $b(grep {$a ne $_} keys %{$tree->{$a}}) {
         $uniq{join("\t", sort ($a, $b))} = 1;
       }
     }
