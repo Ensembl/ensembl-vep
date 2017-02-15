@@ -177,6 +177,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'variant_class' => undef,
   'ccds' => undef,
   'hgvs' => undef,
+  'hgvsg' => undef,
   'merged' => undef,
   'af_1kg' => undef,
   'tsl' => undef,
