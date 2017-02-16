@@ -576,7 +576,7 @@ sub check_config {
   ## HACK FIX FOR UNEXPLAINED WEB BUG
   # sometimes web jobs e.g. RT 171600 see "Cache directory [blah]/homo_sapiens1_merged not found" errors
   # "1" is getting appended to the species name somehow
-  $config->{species} =~ s/\d+$//;
+  # $config->{species} =~ s/\d+$//;
   
   # check one of database/cache/offline/custom
   if(!grep {$self->_is_flag_active($config, $_)} qw(database cache offline custom)) {
