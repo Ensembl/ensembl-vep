@@ -128,9 +128,10 @@ sub registry {
 
   my $config = $self->config;
 
-  return $config->{_registry} = shift if @_;
-
-  if(!exists($config->{_registry})) {
+  if(@_) {
+    $config->{_registry} = shift;
+  }
+  elsif(!exists($config->{_registry})) {
 
     my $reg = 'Bio::EnsEMBL::Registry';
     
@@ -175,6 +176,9 @@ sub registry {
 
     $config->{_registry} = $reg;
   }
+
+  # copy to raw_config for plugin backward compatibility
+  $config->{_params}->{reg} ||= $config->{_registry};
 
   return $config->{_registry};
 }
