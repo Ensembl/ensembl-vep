@@ -136,7 +136,7 @@ sub default_options {
                 version => 'phase3'
               },
               {
-                file => $self->o('data_dir').'/ESP.GRCh37.vcf.gz',
+                file => $self->o('data_dir').'/ESP6500SI-V2-SSA137.vcf.gz',
                 pops => [qw(AA EA)],
                 name => 'ESP',
               },
@@ -158,7 +158,7 @@ sub default_options {
                 version => 'phase3'
               },
               {
-                file => $self->o('data_dir').'/ESP.GRCh38.vcf.gz',
+                file => $self->o('data_dir').'/ESP6500SI-V2-SSA137_GRCh38.vcf.gz',
                 pops => [qw(AA EA)],
                 name => 'ESP',
               },
