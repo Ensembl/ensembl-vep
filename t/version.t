@@ -24,27 +24,31 @@ my $vep_module   = 'ensembl-vep';
 my $version_dir  = $Bin.'/../.version/';
 my $version_file = $version_dir.$vep_module;
 
+SKIP: {
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  skip 'Not a git repository', 3 unless -d "$Bin/../.git";
 
-# find out what branch we are on
-my $git_branch = `cd $Bin; git rev-parse --abbrev-ref HEAD`;
-chomp($git_branch);
-ok($git_branch, 'get current git branch');
+  # find out what branch we are on
+  my $git_branch = `cd $Bin; git rev-parse --abbrev-ref HEAD`;
+  chomp($git_branch);
+  ok($git_branch, 'get current git branch');
 
-# no need to continue unless we're on a release/NN branch
-my $git_release_number;
+  # no need to continue unless we're on a release/NN branch
+  my $git_release_number;
 
-if($git_branch !~ m/^release\/(\d+)/) {
-  done_testing();
-  exit(0);
+  if($git_branch !~ m/^release\/(\d+)/) {
+    done_testing();
+    exit(0);
+  }
+  else {
+    $git_release_number = $1;
+  }
+
+  my $software_version_data = get_version_data($version_dir);
+
+  is(ref($software_version_data->{$vep_module}), 'HASH', $vep_module.' version data');
+  is($software_version_data->{$vep_module}->{release}, $git_release_number, $vep_module.' release matches git release');
 }
-else {
-  $git_release_number = $1;
-}
-
-my $software_version_data = get_version_data($version_dir);
-
-is(ref($software_version_data->{$vep_module}), 'HASH', $vep_module.' version data');
-is($software_version_data->{$vep_module}->{release}, $git_release_number, $vep_module.' release matches git release');
 
 
 done_testing();
