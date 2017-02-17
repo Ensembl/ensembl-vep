@@ -32,7 +32,6 @@ package Bio::EnsEMBL::VEP::Pipeline::DumpVEP::BaseVEP;
 use strict;
 use warnings;
 
-use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use File::Path qw(make_path rmtree);
 
 use base qw(Bio::EnsEMBL::Variation::Pipeline::BaseVariationProcess);
@@ -148,7 +147,7 @@ sub run_system_command {
   my $cmd = shift;
 
   my ($exit_code, $stderr, $flat_cmd) = $self->SUPER::run_system_command($cmd);
-  throw("Failed to run $flat_cmd: $stderr\n") unless $exit_code == 0;
+  die("Failed to run $flat_cmd: $stderr\n") unless $exit_code == 0;
 
   return $exit_code;
 }
