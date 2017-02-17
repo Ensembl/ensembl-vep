@@ -161,6 +161,7 @@ sub default_options {
                 file => $self->o('data_dir').'/ESP6500SI-V2-SSA137_GRCh38.vcf.gz',
                 pops => [qw(AA EA)],
                 name => 'ESP',
+                version => 'V2-SSA137',
               },
               {
                 file => $self->o('data_dir').'/ExAC.0.3.GRCh38.vcf.gz',
