@@ -462,7 +462,7 @@ SKIP: {
     no warnings 'once';
 
     ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-    skip 'Bio::DB::HTS::Tabix module not available', 1 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+    skip 'Bio::DB::HTS::Tabix module not available', 2 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
 
     $ib = get_annotated_buffer({
       input_file => $test_cfg->{test_vcf},
@@ -487,6 +487,34 @@ SKIP: {
         ]
       },
       'custom_annotations'
+    );
+
+    $ib = get_annotated_buffer({
+      input_data => "21\t25585733\t.\tCATG\tTACG",
+      everything => 1,
+      dir => $test_cfg->{cache_root_dir},
+      custom => [$test_cfg->{custom_vcf}.',test,vcf,overlap'],
+    });
+    $of = Bio::EnsEMBL::VEP::OutputFactory::JSON->new({config => $ib->config});
+    @lines = @{$of->get_all_lines_by_InputBuffer($ib)};
+
+    is_deeply(
+      $json->decode($lines[0])->{custom_annotations},
+      {
+        "test" => [
+          {
+            "name" => "test1",
+          },
+          {
+            "name" => "del1",
+          },
+          {
+            "name" => "del2",
+          }
+
+        ]
+      },
+      'custom_annotations overlap'
     );
   }
 }

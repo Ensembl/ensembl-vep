@@ -240,7 +240,25 @@ is_deeply(
 );
 delete($of->{individual});
 
-$of->get_all_output_hashes_by_VariationFeature($ib->buffer->[0]);
+
+$ib->buffer->[0]->{_custom_annotations} = {
+  custom1 => [ {name => 'foo'} ],
+  custom2 => [ {name => 'bar'}, {name => 'car'} ],
+  custom3 => [ {allele => 'A', name => 'shoe'} ], # this one will be ignored as it has allele key
+};
+is_deeply(
+  $of->VariationFeature_to_output_hash($ib->buffer->[0]),
+  {
+    'Uploaded_variation' => 'indtest',
+    'Location' => '21:25587759',
+    'IND' => 'dave',
+    'ZYG' => 'HET',
+    'custom1' => ['foo'],
+    'custom2' => ['bar', 'car'],
+  },
+  'VariationFeature_to_output_hash - custom annotations'
+);
+
 
 
 
@@ -587,6 +605,27 @@ is_deeply(
 $of->{flag_pick} = 0;
 
 
+
+
+$ib->buffer->[0]->{_custom_annotations} = {
+  custom1 => [ {allele => 'T', name => 'foo'} ],
+  custom2 => [ {name => 'bar'}, {name => 'car'} ], # this one will be ignored as it has no allele key
+  custom3 => [ {allele => 'T', name => 'shoe'}, {allele => 'T', name => 'moo'} ],
+};
+is_deeply(
+  $of->VariationFeatureOverlapAllele_to_output_hash($vfoa, {}, $ib->buffer->[0]),
+  {
+    'IMPACT' => 'MODIFIER',
+    'Consequence' => [
+      '3_prime_UTR_variant'
+    ],
+    'Allele' => 'T',
+    'PICK' => 1,
+    'custom1' => ['foo'],
+    'custom3' => ['shoe', 'moo'],
+  },
+  'VariationFeatureOverlapAllele_to_output_hash - custom annotations'
+);
 
 
 
