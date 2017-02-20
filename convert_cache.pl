@@ -139,7 +139,7 @@ sub configure {
     my $msg = keys %versions ? " or select one of the following:\n".join("\n",
       keys %{{
         map {$_ => 1}
-        map {keys $versions{$_}}
+        map {keys %{$versions{$_}}}
         keys %versions
       }}
     )."\n" : "";
