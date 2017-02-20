@@ -778,10 +778,10 @@ sub _add_custom_annotations_to_hash {
   my ($self, $hash, $custom_name, $annots) = @_;
 
   foreach my $annot(@$annots) {
-    $hash->{$custom_name} = $annot->{name};
+    push @{$hash->{$custom_name}}, $annot->{name};
 
     foreach my $field(keys %{$annot->{fields} || {}}) {
-      $hash->{$custom_name.'_'.$field} = $annot->{fields}->{$field};
+      push @{$hash->{$custom_name.'_'.$field}}, $annot->{fields}->{$field};
     }
   }
 
