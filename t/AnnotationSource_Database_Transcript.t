@@ -216,6 +216,12 @@ SKIP: {
     'prefetch_translation_data - polyphen_humvar matrix'
   );
 
+  is(
+    ref($vep_cache->{protein_function_predictions}->{polyphen_humdiv}),
+    'Bio::EnsEMBL::Variation::ProteinFunctionPredictionMatrix',
+    'prefetch_translation_data - polyphen_humdiv matrix'
+  );
+
   $vep_cache = $tr->{_variation_effect_feature_cache};
 
   ok($as->prefetch_transcript_data($tr), 'prefetch_transcript_data');

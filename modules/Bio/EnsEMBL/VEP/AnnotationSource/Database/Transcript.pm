@@ -68,7 +68,6 @@ sub new {
     sift
     polyphen
     everything
-    polyphen_analysis
     xref_refseq
     protein
     uniprot
@@ -308,7 +307,7 @@ sub get_sift_polyphen {
 
   unless(($data) = map {$_->{data}} grep {$_->{md5} eq $md5} @$cache) {
     if(my $pfpma = $self->get_adaptor('variation', 'ProteinFunctionPredictionMatrix')) {
-      foreach my $a('sift', 'polyphen_'.$self->{polyphen_analysis}) {
+      foreach my $a(qw(sift polyphen_humvar polyphen_humdiv)) {
         next unless defined($self->{(split "_", $a)[0]});
         $data->{$a} ||= $pfpma->fetch_by_analysis_translation_md5($a, $md5);
         delete $data->{$a}->{adaptor};

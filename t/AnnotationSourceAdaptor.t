@@ -240,7 +240,6 @@ SKIP: {
       'uniprot' => undef,
       '_config' => $asa->config,
       'xref_refseq' => undef,
-      'polyphen_analysis' => 'humvar',
       'cache_region_size' => 50000,
       'protein' => undef,
       'domains' => undef,
