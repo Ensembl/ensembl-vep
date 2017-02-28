@@ -1673,8 +1673,6 @@ sub usage {
 versions
   $versions
 
-By Will McLaren (wm2\@ebi.ac.uk)
-
 http://www.ensembl.org/info/docs/variation/vep/vep_script.html#installer
 
 Usage:

@@ -397,16 +397,14 @@ sub connect_to_db {
 }
 
 sub usage {
-  print qq{#---------------#
-# filter_vep.pl #
-#---------------#
-
-By Will McLaren (wm2\@ebi.ac.uk)
+  print qq{#------------#
+# filter_vep #
+#------------#
 
 http://www.ensembl.org/info/docs/variation/vep/vep_script.html#filter
 
 Usage:
-perl filter_vep.pl [arguments]
+./filter_vep [arguments]
   
 --help               -h   Print usage message and exit
 

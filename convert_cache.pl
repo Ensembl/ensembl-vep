@@ -577,8 +577,6 @@ sub usage {
 # convert_cache.pl #
 #---------------#
 
-By Will McLaren (wm2\@ebi.ac.uk)
-
 http://www.ensembl.org/info/docs/variation/vep/vep_script.html#convert_cache
 
 Usage:

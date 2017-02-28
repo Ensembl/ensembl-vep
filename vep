@@ -216,8 +216,6 @@ sub usage {
 # ENSEMBL VARIANT EFFECT PREDICTOR #
 #----------------------------------#
 
-by Will McLaren (wm2\@ebi.ac.uk)
-
 Versions:
   $versions
 
@@ -227,7 +225,7 @@ Twitter: \@ensembl , \@EnsemblWill
 http://www.ensembl.org/info/docs/tools/vep/script/index.html
 
 Usage:
-perl vep.pl [--cache|--offline|--database] [arguments]
+./vep [--cache|--offline|--database] [arguments]
 
 Basic options
 =============
