@@ -219,7 +219,7 @@ my @bak = (
 );
 
 SKIP: {
-  skip 'PerlIO::Gzip not installed', 3 unless $Bio::EnsEMBL::VEP::Utils::CAN_USE_PERLIO_GZIP && $Bio::EnsEMBL::VEP::Utils::CAN_USE_IO_UNCOMPRESS;
+  skip 'PerlIO::Gzip or gzip not installed', 3 unless $Bio::EnsEMBL::VEP::Utils::CAN_USE_PERLIO_GZIP && $Bio::EnsEMBL::VEP::Utils::CAN_USE_GZIP;
 
   is(
     ref(get_compressed_filehandle($test_cfg->{test_gzvcf})),
@@ -228,26 +228,27 @@ SKIP: {
   );
   is(
     ref(get_compressed_filehandle($test_cfg->{test_gzvcf}, 1)),
-    'IO::Uncompress::Gunzip',
-    'get_compressed_filehandle - PerlIO::Gzip with multistream uses IO::Uncompress::Gzip'
+    'GLOB',
+    'get_compressed_filehandle - PerlIO::Gzip with multistream uses gzip'
   );
 
   $Bio::EnsEMBL::VEP::Utils::CAN_USE_PERLIO_GZIP = 0;
   is(
     ref(get_compressed_filehandle($test_cfg->{test_gzvcf})),
-    'IO::Uncompress::Gunzip',
-    'get_compressed_filehandle - IO::Uncompress::Gzip'
+    'GLOB',
+    'get_compressed_filehandle - gzip'
   );
 }
 
 SKIP: {
-  skip 'IO::Uncompress::Gunzip not installed', 1 unless $Bio::EnsEMBL::VEP::Utils::CAN_USE_IO_UNCOMPRESS;
+  skip 'gzip or IO::Uncompress::Gunzip not installed', 1 unless $Bio::EnsEMBL::VEP::Utils::CAN_USE_GZIP && $Bio::EnsEMBL::VEP::Utils::CAN_USE_IO_UNCOMPRESS;
 
-  $Bio::EnsEMBL::VEP::Utils::CAN_USE_IO_UNCOMPRESS = 0;
+  $Bio::EnsEMBL::VEP::Utils::CAN_USE_PERLIO_GZIP = 0;
+  $Bio::EnsEMBL::VEP::Utils::CAN_USE_GZIP = 0;
   is(
     ref(get_compressed_filehandle($test_cfg->{test_gzvcf})),
-    'GLOB',
-    'get_compressed_filehandle - gzip'
+    'IO::Uncompress::Gunzip',
+    'get_compressed_filehandle - IO::Uncompress::Gunzip'
   );
 }
 
