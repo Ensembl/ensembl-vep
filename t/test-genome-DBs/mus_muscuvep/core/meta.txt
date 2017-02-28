@@ -1,5 +1,5 @@
 1	\N	schema_type	core
-2	\N	schema_version	86
+2	\N	schema_version	88
 3	\N	patch	patch_65_66_a.sql|schema_version
 4	\N	patch	patch_65_66_b.sql|fix_external_db_id
 5	\N	patch	patch_65_66_c.sql|reorder_unmapped_obj_index
@@ -157,3 +157,9 @@
 1835	\N	patch	patch_85_86_a.sql|schema_version
 1836	\N	patch	patch_85_86_b.sql|add dna_align_feature_attrib table
 1837	\N	patch	patch_85_86_c.sql|meta_case_insensitive
+1838	\N	patch	patch_86_87_a.sql|schema_version
+1839	\N	patch	patch_86_87_b.sql|meta_value_NOT_NULL
+1840	\N	patch	patch_86_87_c.sql|datetime_default_NULL
+1841	\N	patch	patch_87_88_a.sql|schema_version
+1842	\N	patch	patch_87_88_b.sql|seq_region_name_255
+1843	\N	patch	patch_87_88_c.sql|protein_featue_uniqueness

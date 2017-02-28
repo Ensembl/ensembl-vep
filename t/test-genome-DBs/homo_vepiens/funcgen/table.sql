@@ -132,7 +132,7 @@ CREATE TABLE `coord_system` (
 CREATE TABLE `data_set` (
   `data_set_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `feature_set_id` int(10) unsigned NOT NULL DEFAULT '0',
-  `name` varchar(100) DEFAULT NULL,
+  `name` varchar(200) DEFAULT NULL,
   PRIMARY KEY (`data_set_id`,`feature_set_id`),
   UNIQUE KEY `name_idx` (`name`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1210 DEFAULT CHARSET=latin1;
@@ -153,7 +153,7 @@ CREATE TABLE `epigenome` (
   `display_label` varchar(30) NOT NULL,
   `description` varchar(80) DEFAULT NULL,
   `production_name` varchar(120) DEFAULT NULL,
-  `gender` enum('male','female','hermaphrodite','mixed') DEFAULT NULL,
+  `gender` enum('male','female','hermaphrodite','mixed','unknown') DEFAULT NULL,
   `ontology_accession` varchar(20) DEFAULT NULL,
   `ontology` enum('EFO','CL') DEFAULT NULL,
   `tissue` varchar(50) DEFAULT NULL,
@@ -228,8 +228,6 @@ CREATE TABLE `external_feature_file` (
   `analysis_id` smallint(5) unsigned NOT NULL,
   `epigenome_id` int(10) unsigned DEFAULT NULL,
   `feature_type_id` int(10) unsigned DEFAULT NULL,
-  `experiment_id` int(10) unsigned DEFAULT NULL,
-  `result_set_id` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`external_feature_file_id`),
   UNIQUE KEY `name_idx` (`name`),
   KEY `epigenome_idx` (`epigenome_id`),
@@ -262,7 +260,7 @@ CREATE TABLE `feature_set` (
 
 CREATE TABLE `feature_set_qc_prop_reads_in_peaks` (
   `feature_set_qc_prop_reads_in_peaks_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `analysis_id` int(10) unsigned DEFAULT NULL,
+  `analysis_id` smallint(5) unsigned DEFAULT NULL,
   `feature_set_id` int(10) unsigned NOT NULL,
   `prop_reads_in_peaks` double DEFAULT NULL,
   `total_reads` int(10) DEFAULT NULL,
@@ -327,7 +325,7 @@ CREATE TABLE `meta` (
   PRIMARY KEY (`meta_id`),
   UNIQUE KEY `species_key_value_idx` (`species_id`,`meta_key`,`meta_value`),
   KEY `species_value_idx` (`species_id`,`meta_value`)
-) ENGINE=MyISAM AUTO_INCREMENT=640 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=648 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `meta_coord` (
   `table_name` varchar(40) NOT NULL,
@@ -450,8 +448,9 @@ CREATE TABLE `regulatory_build` (
   `initial_release_date` varchar(50) DEFAULT NULL,
   `last_annotation_update` varchar(50) DEFAULT NULL,
   `feature_type_id` int(4) unsigned NOT NULL,
-  `analysis_id` int(4) unsigned NOT NULL,
+  `analysis_id` smallint(5) unsigned NOT NULL,
   `is_current` tinyint(1) NOT NULL DEFAULT '0',
+  `sample_regulatory_feature_id` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`regulatory_build_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 
@@ -516,8 +515,8 @@ CREATE TABLE `result_set_input` (
 
 CREATE TABLE `result_set_qc_chance` (
   `result_set_qc_chance_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `signal_result_set_id` int(10) DEFAULT NULL,
-  `analysis_id` int(10) unsigned DEFAULT NULL,
+  `signal_result_set_id` int(10) unsigned DEFAULT NULL,
+  `analysis_id` smallint(5) unsigned DEFAULT NULL,
   `p` double DEFAULT NULL,
   `q` double DEFAULT NULL,
   `divergence` double DEFAULT NULL,
@@ -535,7 +534,7 @@ CREATE TABLE `result_set_qc_chance` (
 CREATE TABLE `result_set_qc_flagstats` (
   `result_set_qc_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `result_set_id` int(10) unsigned DEFAULT NULL,
-  `analysis_id` int(10) unsigned DEFAULT NULL,
+  `analysis_id` smallint(5) unsigned DEFAULT NULL,
   `category` varchar(100) NOT NULL,
   `qc_passed_reads` int(10) unsigned DEFAULT NULL,
   `qc_failed_reads` int(10) unsigned DEFAULT NULL,
@@ -547,7 +546,7 @@ CREATE TABLE `result_set_qc_flagstats` (
 
 CREATE TABLE `result_set_qc_phantom_peak` (
   `result_set_qc_phantom_peak_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `analysis_id` int(10) unsigned DEFAULT NULL,
+  `analysis_id` smallint(5) unsigned DEFAULT NULL,
   `result_set_id` int(10) unsigned NOT NULL,
   `filename` varchar(512) NOT NULL,
   `numReads` int(10) unsigned NOT NULL,
@@ -586,7 +585,7 @@ CREATE TABLE `segmentation_feature` (
 
 CREATE TABLE `segmentation_file` (
   `segmentation_file_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `regulatory_build_id` int(10) DEFAULT NULL,
+  `regulatory_build_id` int(4) unsigned DEFAULT NULL,
   `name` varchar(100) DEFAULT NULL,
   `analysis_id` smallint(5) unsigned NOT NULL,
   `epigenome_id` int(10) unsigned DEFAULT NULL,
@@ -598,7 +597,7 @@ CREATE TABLE `segmentation_file` (
 
 CREATE TABLE `seq_region` (
   `seq_region_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(40) NOT NULL,
+  `name` varchar(255) NOT NULL,
   `coord_system_id` int(10) unsigned NOT NULL,
   `core_seq_region_id` int(10) unsigned NOT NULL,
   `schema_build` varchar(10) NOT NULL DEFAULT '',

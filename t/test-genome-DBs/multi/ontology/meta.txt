@@ -9,7 +9,7 @@
 10	patch	patch_72_73_b.sql|meta	\N
 12	patch	patch_73_74_a.sql|schema_version	\N
 14	patch	patch_74_75_a.sql|schema_version	\N
-15	schema_version	86	\N
+15	schema_version	88	\N
 16	patch	patch_75_76_a.sql|schema_version	\N
 17	patch	patch_76_77_a.sql|schema_version	\N
 18	patch	patch_77_78_a.sql|schema_version	\N
@@ -25,3 +25,8 @@
 28	patch	patch_84_85_a.sql|schema_version	\N
 29	patch	patch_84_85_d.sql| add ontology data-version	\N
 30	patch	patch_85_86_a.sql|schema_version	\N
+31	patch	patch_86_87_a.sql|schema_version	\N
+32	patch	patch_86_87_b.sql|longer_dbxref	\N
+33	patch	patch_86_87_c.sql|make_table_utf8	\N
+34	patch	patch_86_87_d.sql|default_value_confident_relationship	\N
+35	patch	patch_87_88_a.sql|schema_version	\N

@@ -20,7 +20,7 @@ CREATE TABLE `alt_allele_group` (
 
 CREATE TABLE `analysis` (
   `analysis_id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
-  `created` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `created` datetime DEFAULT NULL,
   `logic_name` varchar(128) NOT NULL,
   `db` varchar(120) DEFAULT NULL,
   `db_version` varchar(40) DEFAULT NULL,
@@ -247,8 +247,8 @@ CREATE TABLE `exon` (
   `is_constitutive` tinyint(1) NOT NULL DEFAULT '0',
   `stable_id` varchar(128) DEFAULT NULL,
   `version` smallint(5) unsigned DEFAULT NULL,
-  `created_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `modified_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `created_date` datetime DEFAULT NULL,
+  `modified_date` datetime DEFAULT NULL,
   PRIMARY KEY (`exon_id`),
   KEY `seq_region_idx` (`seq_region_id`,`seq_region_start`),
   KEY `stable_id_idx` (`stable_id`,`version`)
@@ -301,8 +301,8 @@ CREATE TABLE `gene` (
   `canonical_transcript_id` int(10) unsigned NOT NULL,
   `stable_id` varchar(128) DEFAULT NULL,
   `version` smallint(5) unsigned DEFAULT NULL,
-  `created_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `modified_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `created_date` datetime DEFAULT NULL,
+  `modified_date` datetime DEFAULT NULL,
   PRIMARY KEY (`gene_id`),
   KEY `seq_region_idx` (`seq_region_id`,`seq_region_start`),
   KEY `xref_id_index` (`display_xref_id`),
@@ -342,7 +342,7 @@ CREATE TABLE `genome_statistics` (
   `value` bigint(11) unsigned NOT NULL DEFAULT '0',
   `species_id` int(10) unsigned DEFAULT '1',
   `attrib_type_id` int(10) unsigned DEFAULT NULL,
-  `timestamp` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `timestamp` datetime DEFAULT NULL,
   PRIMARY KEY (`genome_statistics_id`),
   UNIQUE KEY `stats_uniq` (`statistic`,`attrib_type_id`,`species_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
@@ -473,11 +473,11 @@ CREATE TABLE `meta` (
   `meta_id` int(11) NOT NULL AUTO_INCREMENT,
   `species_id` int(10) unsigned DEFAULT '1',
   `meta_key` varchar(40) NOT NULL,
-  `meta_value` varchar(255) DEFAULT NULL,
+  `meta_value` varchar(255) NOT NULL,
   PRIMARY KEY (`meta_id`),
   UNIQUE KEY `species_key_value_idx` (`species_id`,`meta_key`,`meta_value`),
   KEY `species_value_idx` (`species_id`,`meta_value`)
-) ENGINE=MyISAM AUTO_INCREMENT=841 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=847 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `meta_coord` (
   `table_name` varchar(40) NOT NULL,
@@ -555,8 +555,8 @@ CREATE TABLE `operon` (
   `analysis_id` smallint(5) unsigned NOT NULL,
   `stable_id` varchar(128) DEFAULT NULL,
   `version` smallint(5) unsigned DEFAULT NULL,
-  `created_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `modified_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `created_date` datetime DEFAULT NULL,
+  `modified_date` datetime DEFAULT NULL,
   PRIMARY KEY (`operon_id`),
   KEY `seq_region_idx` (`seq_region_id`,`seq_region_start`),
   KEY `name_idx` (`display_label`),
@@ -574,8 +574,8 @@ CREATE TABLE `operon_transcript` (
   `analysis_id` smallint(5) unsigned NOT NULL,
   `stable_id` varchar(128) DEFAULT NULL,
   `version` smallint(5) unsigned DEFAULT NULL,
-  `created_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `modified_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `created_date` datetime DEFAULT NULL,
+  `modified_date` datetime DEFAULT NULL,
   PRIMARY KEY (`operon_transcript_id`),
   KEY `operon_idx` (`operon_id`),
   KEY `seq_region_idx` (`seq_region_id`,`seq_region_start`),
@@ -664,7 +664,7 @@ CREATE TABLE `protein_feature` (
   `external_data` text,
   `hit_description` text,
   PRIMARY KEY (`protein_feature_id`),
-  UNIQUE KEY `aln_idx` (`translation_id`,`hit_name`,`seq_start`,`seq_end`,`hit_start`,`hit_end`),
+  UNIQUE KEY `aln_idx` (`translation_id`,`hit_name`,`seq_start`,`seq_end`,`hit_start`,`hit_end`,`analysis_id`),
   KEY `translation_idx` (`translation_id`),
   KEY `hitname_idx` (`hit_name`),
   KEY `analysis_idx` (`analysis_id`)
@@ -702,7 +702,7 @@ CREATE TABLE `repeat_feature` (
 
 CREATE TABLE `seq_region` (
   `seq_region_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(40) NOT NULL,
+  `name` varchar(255) NOT NULL,
   `coord_system_id` int(10) unsigned NOT NULL,
   `length` int(10) unsigned NOT NULL,
   PRIMARY KEY (`seq_region_id`),
@@ -790,8 +790,8 @@ CREATE TABLE `transcript` (
   `canonical_translation_id` int(10) unsigned DEFAULT NULL,
   `stable_id` varchar(128) DEFAULT NULL,
   `version` smallint(5) unsigned DEFAULT NULL,
-  `created_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `modified_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `created_date` datetime DEFAULT NULL,
+  `modified_date` datetime DEFAULT NULL,
   PRIMARY KEY (`transcript_id`),
   UNIQUE KEY `canonical_translation_idx` (`canonical_translation_id`),
   KEY `seq_region_idx` (`seq_region_id`,`seq_region_start`),
@@ -837,8 +837,8 @@ CREATE TABLE `translation` (
   `end_exon_id` int(10) unsigned NOT NULL,
   `stable_id` varchar(128) DEFAULT NULL,
   `version` smallint(5) unsigned DEFAULT NULL,
-  `created_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `modified_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `created_date` datetime DEFAULT NULL,
+  `modified_date` datetime DEFAULT NULL,
   PRIMARY KEY (`translation_id`),
   KEY `transcript_idx` (`transcript_id`),
   KEY `stable_id_idx` (`stable_id`,`version`)

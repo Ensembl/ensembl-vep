@@ -1,5 +1,5 @@
 1	\N	schema_type	core
-2	\N	schema_version	86
+2	\N	schema_version	88
 3	\N	patch	patch_73_74_a.sql|schema_version
 4	\N	patch	patch_73_74_b.sql|remove_dnac
 5	\N	patch	patch_73_74_c.sql|remove_unconventional_transcript_association
@@ -145,3 +145,9 @@
 893	\N	patch	patch_85_86_a.sql|schema_version
 894	\N	patch	patch_85_86_b.sql|add dna_align_feature_attrib table
 895	\N	patch	patch_85_86_c.sql|meta_case_insensitive
+896	\N	patch	patch_86_87_a.sql|schema_version
+897	\N	patch	patch_86_87_b.sql|meta_value_NOT_NULL
+898	\N	patch	patch_86_87_c.sql|datetime_default_NULL
+899	\N	patch	patch_87_88_a.sql|schema_version
+900	\N	patch	patch_87_88_b.sql|seq_region_name_255
+901	\N	patch	patch_87_88_c.sql|protein_featue_uniqueness
