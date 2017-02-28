@@ -202,7 +202,7 @@ sub main {
 
       # work out which types we're processing based on cache info and user options
       my @types;
-      push @types, '_var' unless ($cache_dir_obj->info->{var_type} || '') eq 'tabix';
+      push @types, '_var' unless ($cache_dir_obj->info->{var_type} || '') eq 'tabix' || !$cache_dir_obj->info->{variation_cols};
       if($config->{sereal}) {
         push @types, qw(_tr _reg) unless ($cache_dir_obj->info->{serialiser_type} || '') eq 'sereal';
       }
