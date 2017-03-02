@@ -3,9 +3,7 @@
 * **VEP** (Variant Effect Predictor) predicts the functional effects of genomic variants.
 * **Haplosaurus** uses phased genotype data to predict whole-transcript haplotype sequences.
 
-> **!!! IMPORTANT !!!** This is pre-release code. Use at your own risk. Please continue to use the version of [VEP](http://www.ensembl.org/vep) in [ensembl-tools](https://github.com/Ensembl/ensembl-tools/) if you are unsure.
-
-> Please report any bugs or issues by creating a [GitHub issue](https://github.com/Ensembl/ensembl-vep/issues) or [contacting Ensembl](http://www.ensembl.org/info/about/contact/index.html)
+> Please report any bugs or issues by [contacting Ensembl](http://www.ensembl.org/info/about/contact/index.html) or creating a [GitHub issue](https://github.com/Ensembl/ensembl-vep/issues)
 
 ##### Table of contents
 * [Installation and requirements](#install)
@@ -31,6 +29,8 @@ perl INSTALL.pl
 ```
 The installer may also be used to check for updates to this and co-dependent packages, simply re-run INSTALL.pl.
 
+See [documentation]((http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html) for full installation instructions.
+
 #### Additional CPAN modules
 The following modules are optional but most users will benefit from installing them. We recommend using [cpanminus](http://search.cpan.org/~miyagawa/Menlo-1.9003/script/cpanm-menlo) to install.
   * [DBD::mysql](http://search.cpan.org/~michielb/DBD-mysql/lib/DBD/mysql.pm) - required for database access (`--database` or `--cache` without `--offline`)
@@ -50,9 +50,7 @@ The following modules are optional but most users will benefit from installing t
 ```bash
 ./vep -i input.vcf -o out.txt -offline
 ```
-`vep` is compatible with the same downloadable caches as the ensembl-tools VEP. See [documentation](http://www.ensembl.org/info/docs/tools/vep/script/index.html) for full command line instructions. The [INSTALL.pl](http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html#installer) script may be used to download and set up caches for use with `vep`.
-
-> Note that the documentation hosted on ensembl.org and linked to from here currently corresponds to the ensembl-tools version of VEP; this will be updated to reflect the new version soon. Almost all commands, flags and plugins should work on both versions.
+See [documentation](http://www.ensembl.org/info/docs/tools/vep/script/index.html) for full command line instructions.
 
 <a name="vepdiffs"></a>
 
