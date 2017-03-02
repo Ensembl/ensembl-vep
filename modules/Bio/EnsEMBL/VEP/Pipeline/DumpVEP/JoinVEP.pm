@@ -238,8 +238,11 @@ sub tar {
   unlink($tar_file);
 
   $self->run_system_command(
+    # use some steps to prevent tar failing with warnings about files changing as they are read
+    # --warning=no-file-changed suppresses that warning
+    # "|| [[ $? -eq 1]]" allows us to ignore the return code of 1 which is returned if those warnings appear
     sprintf(
-      'tar -cz -C %s -f %s %s',
+      'tar --warning=no-file-changed -cz -C %s -f %s %s || [[ $? -eq 1 ]]',
       $dir,
       $tar_file,
       $suffix
