@@ -932,6 +932,10 @@ sub BaseTranscriptVariationAllele_to_output_hash {
     $hash->{REFSEQ_MATCH} = [map {$_->code} @rseq_attrs] if scalar @rseq_attrs;
   }
 
+  if(my $status = $tr->{_bam_edit_status}) {
+    $hash->{BAM_EDIT} = uc($status);
+  }
+
   # protein ID
   $hash->{ENSP} = $tr->{_protein} if
     $self->{protein} &&

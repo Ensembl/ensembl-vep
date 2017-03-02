@@ -53,6 +53,7 @@ our @FLAG_FIELDS = (
   { flag => 'refseq',          fields => ['REFSEQ_MATCH'] },
   { flag => 'merged',          fields => ['REFSEQ_MATCH', 'SOURCE'] },
   { flag => 'use_transcript_ref', fields => ['GIVEN_REF', 'USED_REF']},
+  { flag => 'bam',             fields => ['BAM_EDIT']},
   { flag => 'custom',          fields => ['SOURCE'] },
   { flag => 'gene_phenotype',  fields => ['GENE_PHENO'] },
 
@@ -161,6 +162,7 @@ our %FIELD_DESCRIPTIONS = (
   'PICK'               => 'Indicates if this consequence has been picked as the most severe',
   'SOMATIC'            => 'Somatic status of existing variant',
   'REFSEQ_MATCH'       => 'RefSeq transcript match status',
+  'BAM_EDIT'           => 'Indicates success or failure of edit using BAM file',
   'GIVEN_REF'          => 'Reference allele from input',
   'USED_REF'           => 'Reference allele as used to get consequences',
   'VARIANT_CLASS'      => 'SO variant class',
