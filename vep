@@ -147,7 +147,6 @@ GetOptions(
   'vcf_info_field=s',        # allow user to change VCF info field name
   'keep_csq',                # don't nuke existing CSQ fields in VCF
   'keep_ann',                # synonym for keep_csq
-  'no_consequences',         # don't calculate consequences
   'lrg',                     # enable LRG-based features
   'fields=s',                # define your own output fields
   'domains',                 # output overlapping protein features
