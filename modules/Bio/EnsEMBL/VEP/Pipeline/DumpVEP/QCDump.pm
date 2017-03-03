@@ -304,7 +304,7 @@ sub run_test_set {
     regulatory => $has_reg,
     check_existing => $has_var,
     buffer_size => 10,
-    check_ref => 1,
+    # check_ref => 1,
     warning_file => $qc_dir.'/warnings.txt',
     $self->param('type') => 1,
   });
@@ -313,13 +313,16 @@ sub run_test_set {
 
   # qc report file
   my $qc_report_file = sprintf(
-    '%s/qc/%s_%s_qc_report.txt',
+    '%s/qc/%s_%s_%s_qc_report.txt',
     $self->dump_dir(),
     $self->param('species'),
+    $self->param('type'),
     $self->param('assembly')
   );
 
   open QC, ">$qc_report_file" or die $!;
+
+  $| = 1;
 
   while(my $line = $runner->next_output_line) {
     my $data = $json->decode($line);
@@ -360,9 +363,9 @@ sub run_test_set {
 
   close QC;
 
-  my $count = `wc -l $qc_report_file | cut -f 1 -d " "`;
+  my $count = `wc -l $qc_report_file`;
 
-  die("ERROR: Problems found during QC, see $qc_report_file\n") if $count;
+  die("ERROR: Problems found during QC, see $qc_report_file\n") unless $count =~ /^0/;
 }
 
 sub generate_test_file {
