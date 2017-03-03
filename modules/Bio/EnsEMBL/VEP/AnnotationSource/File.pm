@@ -198,7 +198,9 @@ sub _get_record_name {
   my $self = shift;
   my $parser = $self->parser;
 
-  return $self->report_coords ?
+  my $name = $parser->get_name;
+
+  return ($self->report_coords || !$name) ?
     sprintf(
       '%s:%i-%i',
       $parser->get_seqname,

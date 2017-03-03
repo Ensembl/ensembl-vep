@@ -146,14 +146,16 @@ sub _get_record_name {
   my $self = shift;
   my $parser = $self->parser;
 
-  return $self->report_coords ?
+  my $id = $parser->get_IDs->[0];
+
+  return ($self->report_coords || !$id || $id eq '.') ?
     sprintf(
       '%s:%i-%i',
       $parser->get_seqname,
       $parser->get_start,
       $parser->get_end
     ) :
-    $parser->get_IDs->[0];
+    $id;
 }
 
 sub _record_overlaps_VF {

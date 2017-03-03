@@ -103,6 +103,34 @@ SKIP: {
     },
     'annotate_InputBuffer - overlap - insertion'
   );
+
+
+  # entry with no ID defaults to reporting coords
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
+    config => $cfg,
+    parser => Bio::EnsEMBL::VEP::Parser::VEP_input->new({
+      config => $cfg,
+      file => $test_cfg->create_input_file([qw(21 25585753 25585753 C/T)]),
+      valid_chromosomes => [21]
+    })
+  });
+  $ib->next;
+  $as->report_coords(0);
+  $as->annotate_InputBuffer($ib);
+
+  is_deeply(
+    $ib->buffer->[0]->{_custom_annotations},
+    {
+      'test.vcf.gz' => [
+        {
+          'name' => '21:25585753-25585753'
+        }
+      ]
+    },
+    'annotate_InputBuffer - overlap - no ID reports coords'
+  );
+
+  
   
 
   # report_coords
