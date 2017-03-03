@@ -72,6 +72,8 @@ is_deeply(
         'ClinVar' => '201601'
       },
       'valid_chromosomes' => [21, 'LRG_485'],
+      'bam' => undef,
+      'use_transcript_ref' => undef,
     }, 'Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript' )
   ],
   'get_all_AnnotationSources'
@@ -187,6 +189,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'no_stats' => undef,
   'allele_number' => undef,
   'max_af' => undef,
+  'use_transcript_ref' => undef,
 }, 'Bio::EnsEMBL::VEP::OutputFactory::VEP_output' ), 'get_OutputFactory');
 
 ok($runner->init, 'init');

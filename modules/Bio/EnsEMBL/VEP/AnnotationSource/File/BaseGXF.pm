@@ -73,6 +73,8 @@ sub new {
   # no point doing exact
   throw("ERROR: GXF annotation sources cannot be used as \"exact\" custom annotation type\n") if $self->type eq 'exact';
 
+  $self->add_shortcuts(['use_transcript_ref']);
+
   $self->{cache_region_size} = 1e6;
 
   return $self;

@@ -72,6 +72,7 @@ sub new {
     protein
     uniprot
     domains
+    use_transcript_ref
   )]);
 
   $self->{source_type} = ($self->{core_type} || '') eq 'otherfeatures' ? 'refseq' : 'ensembl';

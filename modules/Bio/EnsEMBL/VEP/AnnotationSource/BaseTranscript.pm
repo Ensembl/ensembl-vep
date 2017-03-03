@@ -70,6 +70,7 @@ sub annotate_InputBuffer {
   my $up_size   = $Bio::EnsEMBL::Variation::Utils::VariationEffect::UPSTREAM_DISTANCE;
   my $down_size = $Bio::EnsEMBL::Variation::Utils::VariationEffect::DOWNSTREAM_DISTANCE;
   my $tva = $self->get_adaptor('variation', 'TranscriptVariation');
+  my $use_feature_ref = $self->{use_transcript_ref};
 
   foreach my $tr(@{$self->get_all_features_by_InputBuffer($buffer)}) {
     my $tr_strand = $tr->{strand} || $tr->strand;
@@ -111,7 +112,7 @@ sub annotate_InputBuffer {
           -adaptor           => $tva,
           -no_ref_check      => 1,
           -no_transfer       => 1,
-          -use_feature_ref   => $self->param('use_transcript_ref'),
+          -use_feature_ref   => $use_feature_ref,
         );
 
         $vf->add_TranscriptVariation($tv);

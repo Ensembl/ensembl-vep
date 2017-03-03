@@ -65,7 +65,7 @@ sub new {
   my $self = $class->SUPER::new(@_);
 
   # add shortcuts to these params
-  $self->add_shortcuts([qw(gencode_basic all_refseq sift polyphen everything)]);
+  $self->add_shortcuts([qw(gencode_basic all_refseq sift polyphen everything use_transcript_ref)]);
 
   $self->check_sift_polyphen();
 

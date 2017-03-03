@@ -76,6 +76,8 @@ my $exp = [
       'ClinVar' => '201601'
     },
     'valid_chromosomes' => [21, 'LRG_485'],
+    'bam' => undef,
+    'use_transcript_ref' => undef,
   }, 'Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript' )
 ];
 
@@ -250,6 +252,8 @@ SKIP: {
       'assembly' => undef,
       '_species' => 'homo_vepiens',
       'filter' => [],
+      'bam' => undef,
+      'use_transcript_ref' => undef,
       'info' => {
         'genebuild' => '2014-07',
         'gencode' => 'GENCODE 24',
