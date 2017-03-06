@@ -280,6 +280,12 @@ sub evaluate {
     my $field = $filter->{field};
     my $value = $filter->{value};
     my $input = $self->get_input($field, $value, $data);
+
+    # value is field
+    if(defined($value) && substr($value, 0, 1) eq '#') {
+      $value = $self->get_input(substr($value, 1), undef, $data);
+      return 0 unless defined($value);
+    }
     
     # run filter
     if(defined($value) && !defined($input)) {

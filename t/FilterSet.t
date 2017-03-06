@@ -469,6 +469,13 @@ is(Bio::EnsEMBL::VEP::FilterSet->new('foo')->evaluate({FOO => 1}),  1, 'evaluate
 is(Bio::EnsEMBL::VEP::FilterSet->new('FOO')->evaluate({foo => 1}),  1, 'evaluate - synonym - lc');
 is(Bio::EnsEMBL::VEP::FilterSet->new('foo')->evaluate({_foo => 1}), 1, 'evaluate - synonym - underscore');
 
+# evaluate - value is field
+is(Bio::EnsEMBL::VEP::FilterSet->new('FOO > #BAR')->evaluate({FOO => 2, BAR => 1}),  1, 'evaluate - value is field - pass');
+is(Bio::EnsEMBL::VEP::FilterSet->new('FOO > #bar')->evaluate({FOO => 2, BAR => 1}),  1, 'evaluate - value is field - pass synonym');
+is(Bio::EnsEMBL::VEP::FilterSet->new('FOO < #BAR')->evaluate({FOO => 2, BAR => 1}),  0, 'evaluate - value is field - fail');
+is(Bio::EnsEMBL::VEP::FilterSet->new('FOO = #BAR')->evaluate({FOO => 2}),  0, 'evaluate - value is field - fail missing');
+
+
 {
   my $fs = Bio::EnsEMBL::VEP::FilterSet->new('foo');
 
