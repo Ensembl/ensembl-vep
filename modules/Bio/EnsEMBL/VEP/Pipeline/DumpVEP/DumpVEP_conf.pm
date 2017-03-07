@@ -86,8 +86,8 @@ sub default_options {
     # ],
     dump_servers => [
       {
-        host => 'mysql-ensembl-mirror.ebi.ac.uk',
-        port => 4240,
+        host => 'mysql-ens-sta-1.ebi.ac.uk',
+        port => 4519,
         user => 'ensro',
         pass => $self->o('dump_db_password'),
       },
