@@ -260,17 +260,17 @@ sub apply_edits {
 
   return $tr if exists($tr->{_bam_edit_status});
 
+  $bam ||= $self->bam;
+  return unless $bam;
+
   my $stable_id = $tr->stable_id;
 
   # COMMENTED OUT FOR NOW IN CASE WE CAN'T TRUST THESE ATTRIBS
   # don't need to edit if exact match already
   if(grep {$_->code eq 'rseq_mrna_match'} @{$tr->get_all_Attributes}) {
     print STDERR "OK $stable_id MATCH ATTRIBUTE PRESENT\n" if $DEBUG;
-    return;
+    return $tr;
   }
-
-  $bam ||= $self->bam;
-  return unless $bam;
 
   # get the alignment representing this transcript aligned to the genome
   my ($al) =
@@ -308,7 +308,7 @@ sub apply_edits {
 
   if($pre_edit_seq eq $bam_seq) {
     print STDERR "OK $stable_id SEQUENCES MATCH ANYWAY\n" if $DEBUG;
-    return;
+    return $tr;
   }
 
   # op_consumes is a hash saying whether each CIGAR op type "consumes" query [0] and/or ref [1] seq
@@ -453,6 +453,8 @@ sub apply_edits {
     # revert the changes we've made and flag this transcript
     $tr->{attributes} = [grep {($_->description || '') !~ /$bam_file/} @{$tr->get_all_Attributes}];
     $tr->edits_enabled($edits_enabled_bak);
+
+    return;
   }
 
   return $tr;
