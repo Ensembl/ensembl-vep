@@ -197,7 +197,9 @@ sub get_chr_jobs {
     # so let's allow for one level of indirection
     my $tree = {};
     foreach my $syn(@{$srsa->fetch_all}) {
-      my ($a, $b) = sort ($sa->fetch_by_seq_region_id($syn->seq_region_id)->seq_region_name, $syn->name);
+      my $syn_slice = $sa->fetch_by_seq_region_id($syn->seq_region_id);
+      next unless $syn_slice;
+      my ($a, $b) = sort ($syn_slice->seq_region_name, $syn->name);
       $tree->{$a}->{$b} = 1;
       $tree->{$_}->{$b} = 1 for keys %{$tree->{$a} || {}};
       $tree->{$_}->{$a} = 1 for keys %{$tree->{$b} || {}};
