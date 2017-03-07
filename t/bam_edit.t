@@ -31,10 +31,12 @@ SKIP: {
   no warnings 'once';
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'Bio::DB::HTS::Tabix module not available', 25 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+  skip 'Bio::DB::HTS::Tabix module not available', 28 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM && $Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript::CAN_USE_HTS;
 
   ## BASIC TESTS
   ##############
+
+  # $Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript::DEBUG = 1;
 
   # use test
   use_ok('Bio::EnsEMBL::VEP::AnnotationSource::File::GFF');
@@ -55,6 +57,8 @@ SKIP: {
 
   ok(!$as->bam, 'no bam provided');
 
+  ok(!$as->apply_edits({}), 'apply_edits - no bam fails');
+
   my $bak = $Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript::CAN_USE_HTS;
   $Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript::CAN_USE_HTS = 0;
   throws_ok {$as->bam($test_cfg->{bam_edit_bam})} qr/Cannot add BAM file/, 'bam - no HTS installed';
@@ -68,7 +72,7 @@ SKIP: {
     config => $runner->config
   });
 
-  is(ref($as->bam($test_cfg->{bam_edit_bam})), 'Bio::DB::HTS', 'bam - give filename at new()');  
+  is(ref($as->bam($test_cfg->{bam_edit_bam})), 'Bio::DB::HTS', 'bam - give filename at new()');
 
   # requires fasta db
   ok($as->fasta_db, 'setup fasta_db');
@@ -76,22 +80,18 @@ SKIP: {
   # requires synonyms
   ok($as->chromosome_synonyms($test_cfg->{chr_synonyms}), 'load synonyms');
 
-  my $l = int(
-    $as->fasta_db->length($as->get_source_chr_name(21, 'fasta', [$as->fasta_db->get_all_sequence_ids])) /
-    $runner->param('cache_region_size')
-  );
-  is($l, 46, 'get chrom length');
-
   my @trs;
   push @trs,
     grep {$_}
     map {$as->lazy_load_transcript($_)}
     @{$as->get_features_by_regions_uncached([['NC_000021.9', $_]])}
-    for 1..$l;
+    for 10..46;
 
   is(scalar @trs, 35, 'get transcripts');
 
   # test apply edit
+  ok($as->apply_edits({_bam_edit_status => 1}), 'apply_edits - _bam_edit_status already set');
+
   ok($as->apply_edits($trs[0]), 'apply_edits');
 
   is(
@@ -159,18 +159,51 @@ SKIP: {
   $as->apply_edits($_) for @trs;
   is((scalar grep {$_->{_bam_edit_status} eq 'ok'} @trs), 35, 'apply_edits - check all');
 
+
+  # test skip edit with rseq_mrna_match attrib
+  delete $trs[0]->{_bam_edit_status};
+  $trs[0]->add_Attributes(
+    Bio::EnsEMBL::Attribute->new(
+      -VALUE       => 1,
+      -CODE        => 'rseq_mrna_match',
+      -NAME        => 1,
+    )
+  );
+  ok($as->apply_edits($trs[0]), 'apply_edits - rseq_mrna_match returns ok');
+  ok(!exists($trs[0]->{_bam_edit_status}), 'apply_edits - rseq_mrna_match no _bam_edit_status');
+
+  delete $trs[0]->{attributes};
+  $as->apply_edits($trs[0]);
+  delete $trs[0]->{_bam_edit_status};
+  ok($as->apply_edits($trs[0]), 'apply_edits - sequences match anyway');
+
+
+  # test fails
   ($tr) =
     grep {$_ && $_->stable_id eq 'NM_001286476.1'}
     map {$as->lazy_load_transcript($_)}
     @{$as->get_features_by_regions_uncached([['NC_000021.9', $_]])}
-    for 1..$l;
-
-  ok($tr, 'NM_001286476.1 - reload to force fail');
+    for 10..46;
 
   substr($tr->get_all_Exons->[0]->{_seq_cache}, 1, 1, 'N');
-  ok($as->apply_edits($tr), 'NM_001286476.1 - failed apply_edits returns ok');
-  is($tr->{_bam_edit_status}, 'failed', 'NM_001286476.1 - _bam_edit_status failed');
-  is(scalar @{$tr->get_all_Attributes}, 0, 'NM_001286476.1 - no edit attribs');
+  ok(!$as->apply_edits($tr), 'fail - NM_001286476.1 - apply_edits returns undef');
+  is($tr->{_bam_edit_status}, 'failed', 'fail - NM_001286476.1 - _bam_edit_status failed');
+  is(scalar @{$tr->get_all_Attributes}, 0, 'fail - NM_001286476.1 - no edit attribs');
+
+  ($tr) =
+    grep {$_ && $_->stable_id eq 'NM_001286476.1'}
+    map {$as->lazy_load_transcript($_)}
+    @{$as->get_features_by_regions_uncached([['NC_000021.9', $_]])}
+    for 10..46;
+
+  $tr->stable_id('foo');
+  ok(!$as->apply_edits($tr), 'fail - no alignment');
+
+  ($tr) =
+    grep {$_ && $_->stable_id eq 'NM_001286476.1'}
+    map {$as->lazy_load_transcript($_)}
+    @{$as->get_features_by_regions_uncached([['NC_000021.9', $_]])}
+    for 10..46;
 }
 
 done_testing();
