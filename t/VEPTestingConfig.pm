@@ -61,6 +61,9 @@ our %DEFAULTS = (
   custom_gtf     => $Bin.'/testdata/custom/test.gtf.gz',
   custom_bigwig  => $Bin.'/testdata/custom/test.bw',
 
+  bam_edit_gff   => $Bin.'/testdata/custom/bam_edit.gff.gz',
+  bam_edit_bam   => $Bin.'/testdata/custom/bam_edit.bam',
+
   filter_list    => $Bin.'/testdata/filter/gene_list.txt',
 
   header_info    => {
