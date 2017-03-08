@@ -198,12 +198,6 @@ SKIP: {
 
   $tr->stable_id('foo');
   ok(!$as->apply_edits($tr), 'fail - no alignment');
-
-  ($tr) =
-    grep {$_ && $_->stable_id eq 'NM_001286476.1'}
-    map {$as->lazy_load_transcript($_)}
-    @{$as->get_features_by_regions_uncached([['NC_000021.9', $_]])}
-    for 10..46;
 }
 
 done_testing();
