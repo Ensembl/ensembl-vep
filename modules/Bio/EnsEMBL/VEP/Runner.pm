@@ -516,7 +516,7 @@ sub get_Parser {
       config            => $self->config,
       format            => $self->param('format'),
       file              => $self->param('input_file'),
-      valid_chromosomes => $self->get_valid_chromosomes,
+      valid_chromosomes => $self->valid_chromosomes,
     })
   }
 

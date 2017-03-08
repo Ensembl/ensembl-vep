@@ -27,13 +27,13 @@ limitations under the License.
 
 =cut
 
-# EnsEMBL module for Bio::EnsEMBL::VEP::Haplo::TranscriptTree
+# EnsEMBL module for Bio::EnsEMBL::VEP::TranscriptTree
 #
 #
 
 =head1 NAME
 
-Bio::EnsEMBL::VEP::Haplo::TranscriptTree - class containing IntervalTree of transcript locations
+Bio::EnsEMBL::VEP::TranscriptTree - class containing IntervalTree of transcript locations
 
 =cut
 
@@ -41,7 +41,7 @@ Bio::EnsEMBL::VEP::Haplo::TranscriptTree - class containing IntervalTree of tran
 use strict;
 use warnings;
 
-package Bio::EnsEMBL::VEP::Haplo::TranscriptTree;
+package Bio::EnsEMBL::VEP::TranscriptTree;
 
 use base qw(Bio::EnsEMBL::VEP::BaseVEP);
 
@@ -63,7 +63,7 @@ sub new {
   throw("ERROR: Unable to populate tree from annotation source type ".ref($as)) unless $as->can('populate_tree');
   $as->populate_tree($self);
 
-  $self->valid_chromosomes({map {$_ => 1} @{$as->get_valid_chromosomes}});
+  $self->valid_chromosomes($as->valid_chromosomes);
 
   return $self;
 }
@@ -105,51 +105,6 @@ sub valid_chromosomes {
   my $self = shift;
   $self->{valid_chromosomes} = shift if @_;
   return $self->{valid_chromosomes};
-}
-
-sub get_source_chr_name {
-  my $self = shift;
-  my $chr = shift;
-
-  my $chr_name_map = $self->{_chr_name_map} ||= {};
-
-  if(!exists($chr_name_map->{$chr})) {
-    my $mapped_name = $chr;
-
-    my $valid = $self->valid_chromosomes;
-
-    unless($valid->{$chr}) {
-
-      # try synonyms first
-      my $synonyms = $self->chromosome_synonyms;
-
-      foreach my $syn(keys %{$synonyms->{$chr} || {}}) {
-        if($valid->{$syn}) {
-          $mapped_name = $syn;
-          last;
-        }
-      }
-
-      # still haven't got it
-      if($mapped_name eq $chr) {
-
-        # try adding/removing "chr"
-        if($chr =~ /^chr/i) {
-          my $tmp = $chr;
-          $tmp =~ s/^chr//i;
-
-          $mapped_name = $tmp if $valid->{$tmp};
-        }
-        elsif($valid->{'chr'.$chr}) {
-          $mapped_name = 'chr'.$chr;
-        }
-      }
-    }
-
-    $chr_name_map->{$chr} = $mapped_name;
-  }
-
-  return $chr_name_map->{$chr};
 }
 
 1;

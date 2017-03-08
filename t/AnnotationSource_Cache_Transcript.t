@@ -53,7 +53,7 @@ ok($c, 'new is defined');
 is($c->serializer_type, 'storable', 'serializer_type');
 is($c->file_suffix, 'gz', 'file_suffix');
 
-is_deeply($c->get_valid_chromosomes, [21], 'get_valid_chromosomes');
+is_deeply($c->valid_chromosomes, [21], 'valid_chromosomes');
 
 is($c->get_dump_file_name(1, '1-100'), $dir.'/1/1-100.gz', 'get_dump_file_name');
 is($c->get_dump_file_name(1, 1, 100), $dir.'/1/1-100.gz', 'get_dump_file_name with end');

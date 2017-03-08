@@ -83,7 +83,7 @@ is_deeply(
 # setup_db_connection should return silently in offline mode
 ok(!$runner->setup_db_connection(), 'setup_db_connection');
 
-is_deeply($runner->get_valid_chromosomes, [21, 'LRG_485'], 'get_valid_chromosomes');
+is_deeply($runner->valid_chromosomes, [21, 'LRG_485'], 'valid_chromosomes');
 
 is_deeply($runner->get_Parser, bless({
   '_config' => $runner->config,
@@ -111,11 +111,8 @@ is_deeply(
   $runner->get_TranscriptTree,
   bless( {
     '_config' => $runner->config,
-    'valid_chromosomes' => {
-      '21' => 1,
-      'LRG_485' => 1
-    },
-  }, 'Bio::EnsEMBL::VEP::Haplo::TranscriptTree' ),
+    'valid_chromosomes' => [21, 'LRG_485'],
+  }, 'Bio::EnsEMBL::VEP::TranscriptTree' ),
   'get_TranscriptTree'
 );
 

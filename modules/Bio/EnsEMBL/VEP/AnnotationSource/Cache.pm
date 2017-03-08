@@ -53,7 +53,7 @@ sub dir {
   return $self->{dir};
 }
 
-sub get_valid_chromosomes {
+sub valid_chromosomes {
   return $_[0]->{valid_chromosomes} || [];
 }
 

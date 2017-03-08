@@ -27,28 +27,28 @@ my $test_cfg = VEPTestingConfig->new();
 ##############
 
 # use test
-use_ok('Bio::EnsEMBL::VEP::Haplo::TranscriptTree');
+use_ok('Bio::EnsEMBL::VEP::TranscriptTree');
 
-throws_ok {Bio::EnsEMBL::VEP::Haplo::TranscriptTree->new()} qr/reference.+undef/, 'new - no annotation source';
+throws_ok {Bio::EnsEMBL::VEP::TranscriptTree->new()} qr/reference.+undef/, 'new - no annotation source';
 
 throws_ok {
-  Bio::EnsEMBL::VEP::Haplo::TranscriptTree->new({annotation_source => bless({}, 'test')})
+  Bio::EnsEMBL::VEP::TranscriptTree->new({annotation_source => bless({}, 'test')})
 } qr/not an ISA of .+BaseTranscript/, 'new - wrong class';
 
 use_ok('Bio::EnsEMBL::VEP::Haplo::Runner');
 ok(my $runner = Bio::EnsEMBL::VEP::Haplo::Runner->new($test_cfg->base_testing_cfg), 'get runner');
 
 my $t;
-ok($t = Bio::EnsEMBL::VEP::Haplo::TranscriptTree->new({annotation_source => $runner->get_all_AnnotationSources->[0], config => $runner->config}), 'new');
+ok($t = Bio::EnsEMBL::VEP::TranscriptTree->new({annotation_source => $runner->get_all_AnnotationSources->[0], config => $runner->config}), 'new');
 
-is(ref($t), 'Bio::EnsEMBL::VEP::Haplo::TranscriptTree', 'check class');
+is(ref($t), 'Bio::EnsEMBL::VEP::TranscriptTree', 'check class');
 
 
 ## METHOD TESTS
 ###############
 
-is_deeply($t->valid_chromosomes, {21 => 1, 'LRG_485' => 1}, 'valid_chromosomes - get');
-is_deeply($t->valid_chromosomes({21 => 1}), {21 => 1}, 'valid_chromosomes - set');
+is_deeply($t->valid_chromosomes, [21, 'LRG_485'], 'valid_chromosomes - get');
+is_deeply($t->valid_chromosomes([21]), [21], 'valid_chromosomes - set');
 
 is(ref($t->get_chr_tree('foo')), 'Set::IntervalTree', 'get_chr_tree - ref');
 
@@ -72,8 +72,8 @@ is_deeply($t->fetch('NC_000021.9', 25585733, 25585733), [[25585656, 25607517]], 
 
 is_deeply($t->fetch('chr21', 25585733, 25585733), [[25585656, 25607517]], 'fetch - remove chr');
 
-$t = Bio::EnsEMBL::VEP::Haplo::TranscriptTree->new({annotation_source => $runner->get_all_AnnotationSources->[0], config => $runner->config});
-$t->valid_chromosomes({'chr21' => 1});
+$t = Bio::EnsEMBL::VEP::TranscriptTree->new({annotation_source => $runner->get_all_AnnotationSources->[0], config => $runner->config});
+$t->valid_chromosomes(['chr21']);
 $t->insert('chr21', 5, 10);
 is_deeply($t->fetch(21, 4, 6), [[5, 10]], 'fetch - add chr');
 

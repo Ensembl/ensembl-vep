@@ -79,7 +79,7 @@ sub parser {
   return $self->{parser};
 }
 
-sub get_valid_chromosomes {
+sub valid_chromosomes {
   my $self = shift;
   return $self->{valid_chromosomes} ||= [keys %{$self->parser->{cache}->{chromosomes}}];
 }

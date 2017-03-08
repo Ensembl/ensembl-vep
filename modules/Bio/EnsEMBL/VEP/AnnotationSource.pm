@@ -153,54 +153,6 @@ sub get_all_regions_by_InputBuffer {
   return \@regions;
 }
 
-sub get_source_chr_name {
-  my ($self, $chr, $set, $valids) = @_;
-
-  $set    ||= 'default';
-  $valids ||= [];
-
-  my $chr_name_map = $self->{_chr_name_map}->{$set} ||= {};
-
-  if(!exists($chr_name_map->{$chr})) {
-    my $mapped_name = $chr;
-
-    @$valids = @{$self->can('get_valid_chromosomes') ? $self->get_valid_chromosomes : []} unless @$valids;
-    my %valid = map {$_ => 1} @$valids;
-
-    unless($valid{$chr}) {
-
-      # try synonyms first
-      my $synonyms = $self->chromosome_synonyms;
-
-      foreach my $syn(keys %{$synonyms->{$chr} || {}}) {
-        if($valid{$syn}) {
-          $mapped_name = $syn;
-          last;
-        }
-      }
-
-      # still haven't got it
-      if($mapped_name eq $chr) {
-
-        # try adding/removing "chr"
-        if($chr =~ /^chr/i) {
-          my $tmp = $chr;
-          $tmp =~ s/^chr//i;
-
-          $mapped_name = $tmp if $valid{$tmp};
-        }
-        elsif($valid{'chr'.$chr}) {
-          $mapped_name = 'chr'.$chr;
-        }
-      }
-    }
-
-    $chr_name_map->{$chr} = $mapped_name;
-  }
-
-  return $chr_name_map->{$chr};
-}
-
 sub get_features_by_regions_cached {
   my $self = shift;
   my $regions = shift;

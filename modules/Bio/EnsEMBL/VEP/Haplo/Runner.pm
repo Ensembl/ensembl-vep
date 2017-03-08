@@ -49,7 +49,7 @@ use Scalar::Util qw(looks_like_number);
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::Utils qw(get_compressed_filehandle);
-use Bio::EnsEMBL::VEP::Haplo::TranscriptTree;
+use Bio::EnsEMBL::VEP::TranscriptTree;
 use Bio::EnsEMBL::VEP::Haplo::InputBuffer;
 use Bio::EnsEMBL::VEP::Haplo::Parser::VCF;
 
@@ -202,7 +202,7 @@ sub get_Parser {
     $self->{parser} = Bio::EnsEMBL::VEP::Haplo::Parser::VCF->new({
       config            => $self->config,
       file              => $self->param('input_file'),
-      valid_chromosomes => $self->get_valid_chromosomes,
+      valid_chromosomes => $self->valid_chromosomes,
     })
   }
 
@@ -227,7 +227,7 @@ sub get_TranscriptTree {
   my $self = shift;
 
   if(!exists($self->{transcript_tree})) {
-    $self->{transcript_tree} = Bio::EnsEMBL::VEP::Haplo::TranscriptTree->new({
+    $self->{transcript_tree} = Bio::EnsEMBL::VEP::TranscriptTree->new({
       config => $self->config,
       annotation_source => $self->get_all_AnnotationSources->[0]
     });

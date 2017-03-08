@@ -78,7 +78,7 @@ sub get_slice {
   return $self->{_slice_cache}->{$chr};
 }
 
-sub get_valid_chromosomes {
+sub valid_chromosomes {
   my $self = shift;
 
   if(!exists($self->{valid_chromosomes})) {

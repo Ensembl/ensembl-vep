@@ -328,6 +328,54 @@ sub chromosome_synonyms {
   return $self->config->{_chromosome_synonyms} ||= {};
 }
 
+sub get_source_chr_name {
+  my ($self, $chr, $set, $valids) = @_;
+
+  $set    ||= 'default';
+  $valids ||= [];
+
+  my $chr_name_map = $self->{_chr_name_map}->{$set} ||= {};
+
+  if(!exists($chr_name_map->{$chr})) {
+    my $mapped_name = $chr;
+
+    @$valids = @{$self->can('valid_chromosomes') ? $self->valid_chromosomes : []} unless @$valids;
+    my %valid = map {$_ => 1} @$valids;
+
+    unless($valid{$chr}) {
+
+      # try synonyms first
+      my $synonyms = $self->chromosome_synonyms;
+
+      foreach my $syn(keys %{$synonyms->{$chr} || {}}) {
+        if($valid{$syn}) {
+          $mapped_name = $syn;
+          last;
+        }
+      }
+
+      # still haven't got it
+      if($mapped_name eq $chr) {
+
+        # try adding/removing "chr"
+        if($chr =~ /^chr/i) {
+          my $tmp = $chr;
+          $tmp =~ s/^chr//i;
+
+          $mapped_name = $tmp if $valid{$tmp};
+        }
+        elsif($valid{'chr'.$chr}) {
+          $mapped_name = 'chr'.$chr;
+        }
+      }
+    }
+
+    $chr_name_map->{$chr} = $mapped_name;
+  }
+
+  return $chr_name_map->{$chr};
+}
+
 # adds shortcuts to named params to this object
 sub add_shortcuts {
   my $self = shift;

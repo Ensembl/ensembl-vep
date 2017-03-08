@@ -77,12 +77,12 @@ SKIP: {
   ## METHODS
   ##########
 
-  is_deeply($as->get_valid_chromosomes, [21], 'get_valid_chromosomes');
+  is_deeply($as->valid_chromosomes, [21], 'valid_chromosomes');
 
   is_deeply(
     $as->stats->{stats}->{chr_lengths},
     {21 => 46709983},
-    'get_valid_chromosomes - stored chr lengths'
+    'valid_chromosomes - stored chr lengths'
   );
 
   is_deeply(

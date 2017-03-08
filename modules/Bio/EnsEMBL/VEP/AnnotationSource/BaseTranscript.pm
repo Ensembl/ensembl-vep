@@ -50,7 +50,7 @@ use Scalar::Util qw(weaken);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
 
-our ($CAN_USE_HTS, $CAN_USE_CIGAR);
+our ($CAN_USE_HTS, $CAN_USE_CIGAR, $CAN_USE_INTERVAL_TREE);
 
 BEGIN {
   if (eval q{ require Bio::DB::HTS; 1 }) {
@@ -58,6 +58,9 @@ BEGIN {
   }
   if (eval q{ require Bio::Cigar; 1 }) {
     $CAN_USE_CIGAR = 1;
+  }
+  if (eval q{ require Set::IntervalTree; 1 }) {
+    $CAN_USE_INTERVAL_TREE = 1;
   }
 }
 
@@ -119,6 +122,8 @@ sub annotate_InputBuffer {
       }
     }
   }
+
+  # $self->get_nearest($_) for @{$buffer->buffer} if $self->{nearest};
 }
 
 sub up_down_size {
@@ -240,6 +245,10 @@ sub lazy_load_transcript {
     $tr->{_vep_lazy_loaded} = 1;
     return $tr;
   }
+}
+
+sub get_nearest {
+  my ($self, $vf) = shift;
 }
 
 sub bam {

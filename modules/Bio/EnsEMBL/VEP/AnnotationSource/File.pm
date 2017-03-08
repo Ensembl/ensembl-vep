@@ -176,7 +176,7 @@ sub annotate_InputBuffer {
   }
 }
 
-sub get_valid_chromosomes {
+sub valid_chromosomes {
   my $self = shift;
   return $self->{valid_chromosomes} ||= $self->parser->{tabix_file}->seqnames;
 }

@@ -57,7 +57,7 @@ sub new {
   my $hashref = $_[0];
 
   my $tree = $hashref->{transcript_tree};
-  assert_ref($tree, 'Bio::EnsEMBL::VEP::Haplo::TranscriptTree');
+  assert_ref($tree, 'Bio::EnsEMBL::VEP::TranscriptTree');
   $self->transcript_tree($tree);
 
   return $self;
