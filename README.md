@@ -3,8 +3,6 @@
 * **VEP** (Variant Effect Predictor) predicts the functional effects of genomic variants.
 * **Haplosaurus** uses phased genotype data to predict whole-transcript haplotype sequences.
 
-> Please report any bugs or issues by [contacting Ensembl](http://www.ensembl.org/info/about/contact/index.html) or creating a [GitHub issue](https://github.com/Ensembl/ensembl-vep/issues)
-
 ##### Table of contents
 * [Installation and requirements](#install)
 * [VEP](#vep)
@@ -29,7 +27,7 @@ perl INSTALL.pl
 ```
 The installer may also be used to check for updates to this and co-dependent packages, simply re-run INSTALL.pl.
 
-See [documentation]((http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html) for full installation instructions.
+See [documentation](http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html) for full installation instructions.
 
 #### Additional CPAN modules
 The following modules are optional but most users will benefit from installing them. We recommend using [cpanminus](http://search.cpan.org/~miyagawa/Menlo-1.9003/script/cpanm-menlo) to install.
@@ -61,7 +59,7 @@ This ensembl-vep repo is a complete rewrite of the VEP code intended to make the
 * **Speed:** A typical individual human genome of 4 million variants can now be processed in around 30 minutes on a quad-core machine using under 1GB of RAM.
 * **Known/existing variants:** The alleles of your input variant are now compared to any known variants when using `--check_existing`. Previously this would require you to enable this functionality manually with `--check_alleles`. The old functionality can be restored using `--no_check_alleles`.
 * **Allele frequencies:** Allele frequencies are now reported for the input allele only e.g. as `0.023` instead of `A:0.023,G:0.0005`. To reflect this change, the allele frequency fields are now named e.g. `AFR_AF` instead of `AFR_MAF`. The command line flags reflect this also, so `--gmaf` is now `--af` and `--maf_1kg` is now `--af_1kg`. Using the old flags will produce a deprecation message.
-* **GFF and GTF files:** GFF and GTF files may now be used directly as a source of transcript annotation in place of, or even alongside, a cache or database source. Previously this involved [building a cache using gtf2vep](http://www.ensembl.org/info/docs/tools/vep/script/vep_cache.html#gtf), which is now redundant. The files must first be bgzipped and tabix-indexed, and a FASTA file containing genomic sequence is required:
+* **GFF and GTF files:** GFF and GTF files may now be used directly as a source of transcript annotation in place of, or even alongside, a cache or database source. Previously this involved [building a cache using gtf2vep](http://e87.ensembl.org/info/docs/tools/vep/script/vep_cache.html#gtf), which is now redundant. The files must first be bgzipped and tabix-indexed, and a FASTA file containing genomic sequence is required:
 ```bash
 grep -v "#" data.gff | sort -k1,1 -k4,4n -k5,5n | bgzip -c > data.gff.gz
 tabix -p gff data.gff.gz
@@ -78,6 +76,8 @@ tabix -p gff data.gff.gz
   * MAF flags (replaced by AF flags): `--gmaf` (`--af`), `--maf_1kg` (`--af_1kg`), `--maf_esp` (`--af_esp`), `--maf_exac` (`--af_exac`)
   * known variant allele checking (on by default, use `--no_check_alleles` to restore old behaviour):  `--check_alleles` 
   * cache building flags (replaced by internal Ensembl pipeline): `--build`, `--write_cache`
+
+> Please report any bugs or issues by [contacting Ensembl](http://www.ensembl.org/info/about/contact/index.html) or creating a [GitHub issue](https://github.com/Ensembl/ensembl-vep/issues)
 
 ---
 <a name="haplo"></a>
