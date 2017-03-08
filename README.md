@@ -50,6 +50,8 @@ The following modules are optional but most users will benefit from installing t
 ```
 See [documentation](http://www.ensembl.org/info/docs/tools/vep/script/index.html) for full command line instructions.
 
+> Please report any bugs or issues by [contacting Ensembl](http://www.ensembl.org/info/about/contact/index.html) or creating a [GitHub issue](https://github.com/Ensembl/ensembl-vep/issues)
+
 <a name="vepdiffs"></a>
 
 ### Differences to ensembl-tools VEP
@@ -76,8 +78,6 @@ tabix -p gff data.gff.gz
   * MAF flags (replaced by AF flags): `--gmaf` (`--af`), `--maf_1kg` (`--af_1kg`), `--maf_esp` (`--af_esp`), `--maf_exac` (`--af_exac`)
   * known variant allele checking (on by default, use `--no_check_alleles` to restore old behaviour):  `--check_alleles` 
   * cache building flags (replaced by internal Ensembl pipeline): `--build`, `--write_cache`
-
-> Please report any bugs or issues by [contacting Ensembl](http://www.ensembl.org/info/about/contact/index.html) or creating a [GitHub issue](https://github.com/Ensembl/ensembl-vep/issues)
 
 ---
 <a name="haplo"></a>
