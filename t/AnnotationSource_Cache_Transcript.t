@@ -21,6 +21,7 @@ use FindBin qw($Bin);
 
 use lib $Bin;
 use VEPTestingConfig;
+use Digest::MD5 qw(md5_hex);
 my $test_cfg = VEPTestingConfig->new();
 
 ## BASIC TESTS
@@ -271,6 +272,116 @@ is(scalar (grep {$_->transcript->stable_id eq 'ENST00000352957'} @{$vf->get_all_
 is($vf->display_consequence, '3_prime_UTR_variant', 'with filter - display_consequence');
 
 
+
+## TREE
+#######
+
+SKIP: {
+
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  no warnings 'once';
+  skip 'Set::IntervalTree not installed', 18 unless $Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript::CAN_USE_INTERVAL_TREE;
+
+  $c = Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript->new({
+    config => $cfg,
+    dir => $dir,
+    source_type => 'ensembl',
+    cache_region_size => 1000000,
+    valid_chromosomes => [21],
+  });
+  $c->param('quiet', 1);
+
+  my $fn = $c->_tree_coords_filename;
+  is($fn, $dir.'/transcript_gene_tss.txt', '_tree_coords_filename');
+
+  # unlink to test generation goes OK
+  unlink($fn) if -e $fn;
+  $c->tree_file;
+  ok(-e $fn, 'tree_file - generates OK');
+
+  open TREE, $fn;
+  my $timestamp = (stat(TREE))[9];
+  ok($timestamp, 'tree_file - timestamp before');
+  close TREE;
+
+  $c->tree_file;
+  open TREE, $fn;
+  ok($timestamp eq (stat(TREE))[9], 'tree_file - timestamp same after rerun');
+
+  # read data to check
+  is(md5_hex(join("", <TREE>)), '4c0a59f7101414b8f14f27d7b4ac2e38', 'md5_hex of tree_file content');
+  close TREE;
+
+  # fetch the tree itself
+  my $tree = $c->transcript_tree();
+  is(ref($tree), 'Bio::EnsEMBL::VEP::TranscriptTree', 'transcript_tree - ref');
+  is_deeply($tree->valid_chromosomes, [21], 'transcript_tree - valid_chromosomes');
+
+  throws_ok {$c->get_nearest({chr => 21, start => 1, end => 1})} qr/No type/, 'get_nearest - no type';
+  throws_ok {$c->get_nearest({chr => 21, start => 1, end => 1}, 'foo')} qr/Invalid type/, 'get_nearest - invalid type';
+
+  is_deeply($c->get_nearest({chr => 21, start => 1, end => 1}, 'transcript'), ['ENST00000419219'], 'get_nearest - transcript');
+  is_deeply($c->get_nearest({chr => 21, start => 1, end => 1}, 'gene'), ['ENSG00000154719'], 'get_nearest - gene');
+  is_deeply($c->get_nearest({chr => 21, start => 1, end => 1}, 'symbol'), ['MRPL39'], 'get_nearest - symbol');
+
+  is_deeply($c->get_nearest({chr => 22, start => 1, end => 1}, 'transcript'), [], 'get_nearest - no hits');
+
+  is_deeply($c->get_nearest({chr => 21, start => 25607517, end => 25607517}, 'transcript'), ['ENST00000352957'], 'get_nearest - overlap 1');
+  is_deeply($c->get_nearest({chr => 21, start => 25607514, end => 25607519}, 'transcript'), ['ENST00000352957'], 'get_nearest - overlap 2');
+  is_deeply($c->get_nearest({chr => 21, start => 25607517, end => 25607516}, 'transcript'), ['ENST00000352957'], 'get_nearest - insertion 1');
+  is_deeply($c->get_nearest({chr => 21, start => 25607518, end => 25607517}, 'transcript'), ['ENST00000352957'], 'get_nearest - insertion 2');
+
+  # test for real
+  $c = Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript->new({
+    config => $cfg,
+    dir => $dir,
+    source_type => 'ensembl',
+    cache_region_size => 1000000,
+    valid_chromosomes => [21],
+  });
+
+  $c->param('buffer_size', 20);
+  $c->{nearest} = 'symbol';
+
+  $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}, valid_chromosomes => [21]});
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+  $ib->next();
+  $ib->next();
+
+  $c->annotate_InputBuffer($ib);
+  is_deeply(
+    {map {$_->{start} => $_->{nearest}->[0]} @{$ib->buffer}},
+    {
+      '25683895' => 'JAM2',
+      '25606478' => 'MRPL39',
+      '25607456' => 'MRPL39',
+      '25606638' => 'MRPL39',
+      '25606567' => 'MRPL39',
+      '25606515' => 'MRPL39',
+      '25607452' => 'MRPL39',
+      '25607440' => 'MRPL39',
+      '25606491' => 'MRPL39',
+      '25606573' => 'MRPL39',
+      '25607474' => 'MRPL39',
+      '25639880' => 'JAM2',
+      '25606457' => 'MRPL39',
+      '25683920' => 'JAM2',
+      '25603925' => 'MRPL39',
+      '25607463' => 'MRPL39',
+      '25639842' => 'JAM2',
+      '25693825' => 'GABPA',
+      '25606494' => 'MRPL39',
+      '25683938' => 'JAM2'
+    },
+    'nearest - test from annotate_InputBuffer'
+  );
+
+  # remove tree dump file ready for next test run
+  unlink($fn) if -e $fn;
+}
+
+
+
 ## SEREAL
 #########
 
@@ -290,7 +401,7 @@ SKIP: {
   });
 
   is($c->serializer_type, 'sereal', 'sereal - serializer_type');
-  is($c->file_suffix, 'sereal', 'file_suffix');
+  is($c->file_suffix, 'sereal', 'sereal - file_suffix');
 
   # deserialization
   my $obj = $c->deserialize_from_file(

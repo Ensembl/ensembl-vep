@@ -75,6 +75,7 @@ is_deeply(
       'valid_chromosomes' => [21, 'LRG_485'],
       'bam' => undef,
       'use_transcript_ref' => undef,
+      'nearest' => undef,
     }, 'Bio::EnsEMBL::VEP::Haplo::AnnotationSource::Cache::Transcript' )
   ],
   'get_all_AnnotationSources'

@@ -98,6 +98,7 @@ GetOptions(
   'phased',                  # force VCF genotypes to be interpreted as phased
   'fork=i',                  # fork into N processes
   'dont_skip',               # don't skip vars that fail validation
+  'nearest=s',               # get nearest transcript, gene or symbol (for gene)
   
   # verbosity options
   'verbose|v',               # print out a bit more info while running

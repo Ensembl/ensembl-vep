@@ -56,6 +56,7 @@ our @FLAG_FIELDS = (
   { flag => 'bam',             fields => ['BAM_EDIT']},
   { flag => 'custom',          fields => ['SOURCE'] },
   { flag => 'gene_phenotype',  fields => ['GENE_PHENO'] },
+  { flag => 'nearest',         fields => ['NEAREST'] },
 
   # non-synonymous predictions
   { flag => 'sift',            fields => ['SIFT'] },
@@ -116,6 +117,7 @@ our %FIELD_DESCRIPTIONS = (
   'SWISSPROT'          => 'UniProtKB/Swiss-Prot accession',
   'TREMBL'             => 'UniProtKB/TrEMBL accession',
   'UNIPARC'            => 'UniParc accession',
+  'NEAREST'            => 'Identifier(s) of nearest transcription start site',
   'HGVSc'              => 'HGVS coding sequence name',
   'HGVSp'              => 'HGVS protein sequence name',
   'HGVSg'              => 'HGVS genomic sequence name',

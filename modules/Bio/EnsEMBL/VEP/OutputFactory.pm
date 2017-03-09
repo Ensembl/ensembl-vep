@@ -614,6 +614,9 @@ sub VariationFeature_to_output_hash {
     );
   }
 
+  # nearest
+  $hash->{NEAREST} = $vf->{nearest} if $vf->{nearest};
+
   $self->stats->log_VariationFeature($vf, $hash) unless $self->{no_stats};
 
   return $hash;

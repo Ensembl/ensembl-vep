@@ -65,9 +65,20 @@ sub new {
   my $self = $class->SUPER::new(@_);
 
   # add shortcuts to these params
-  $self->add_shortcuts([qw(gencode_basic all_refseq sift polyphen everything use_transcript_ref)]);
+  $self->add_shortcuts([qw(
+    gencode_basic
+    all_refseq
+    sift
+    polyphen
+    everything
+    use_transcript_ref
+    nearest
+  )]);
 
   $self->check_sift_polyphen();
+
+  # generate tree here otherwise forked processes will regenerate
+  $self->transcript_tree() if $self->{nearest};
 
   return $self;
 }
@@ -153,6 +164,50 @@ sub deserialized_obj_to_features {
   }
 
   return \@features;
+}
+
+sub tree_file {
+  my ($self, $tree) = @_;
+
+  my $file = $self->_tree_coords_filename;
+
+  # generate it by scanning the cache
+  unless(-e $file) {
+    my $as_dir = $self->dir;
+    my $cache_region_size = $self->{cache_region_size};
+
+    $self->status_msg("INFO: Scanning cache for transcript coordinates. This may take a while but will only run once per cache.\n");
+
+    open TR, ">$file" or throw("ERROR: Could not write to transcript coords file: $!");
+
+    opendir DIR, $as_dir;
+    foreach my $c(grep {!/^\./ && -d $as_dir.'/'.$_} readdir DIR) {
+      
+      opendir CHR, $as_dir.'/'.$c;
+
+      # scan each chr directory for transcript cache files e.g. 1-1000000.gz
+      foreach my $file(grep {/\d+\-\d+\.gz/} readdir CHR) {
+        my ($s) = split(/\D/, $file);
+
+        # we can use parent classes methods to fetch transcripts into memory
+        foreach my $t(
+          grep {$_->biotype eq 'protein_coding'}
+          @{$self->get_features_by_regions_uncached([[$c, ($s - 1) / $cache_region_size]])}
+        ) {
+          print TR "$c\t".join("\t", @{$self->_tree_file_data($t)})."\n";
+        }
+
+        # calling get_features_by_regions_uncached adds data to an in-memory cache
+        # we need to clear it manually here
+        $self->clean_cache;
+      }
+      closedir CHR;
+    }
+    closedir DIR;
+    close TR;
+  }
+
+  return $file;
 }
 
 1;

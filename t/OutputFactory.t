@@ -258,6 +258,21 @@ is_deeply(
   },
   'VariationFeature_to_output_hash - custom annotations'
 );
+delete($ib->buffer->[0]->{_custom_annotations});
+
+$ib->buffer->[0]->{nearest} = ['foo', 'bar'];
+is_deeply(
+  $of->VariationFeature_to_output_hash($ib->buffer->[0]),
+  {
+    'Uploaded_variation' => 'indtest',
+    'Location' => '21:25587759',
+    'IND' => 'dave',
+    'ZYG' => 'HET',
+    'NEAREST' => ['foo', 'bar'],
+  },
+  'VariationFeature_to_output_hash - nearest'
+);
+delete($ib->buffer->[0]->{nearest});
 
 
 

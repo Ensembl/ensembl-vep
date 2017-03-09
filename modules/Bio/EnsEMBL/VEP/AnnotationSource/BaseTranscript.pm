@@ -50,6 +50,7 @@ use Scalar::Util qw(weaken);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
 
+
 our ($CAN_USE_HTS, $CAN_USE_CIGAR, $CAN_USE_INTERVAL_TREE);
 
 BEGIN {
@@ -59,7 +60,7 @@ BEGIN {
   if (eval q{ require Bio::Cigar; 1 }) {
     $CAN_USE_CIGAR = 1;
   }
-  if (eval q{ require Set::IntervalTree; 1 }) {
+  if (eval q{ require Bio::EnsEMBL::VEP::TranscriptTree; 1 }) {
     $CAN_USE_INTERVAL_TREE = 1;
   }
 }
@@ -123,7 +124,11 @@ sub annotate_InputBuffer {
     }
   }
 
-  # $self->get_nearest($_) for @{$buffer->buffer} if $self->{nearest};
+  if(my $nearest_type = $self->{nearest}) {
+    foreach my $vf(@{$buffer->buffer}) {
+      $vf->{nearest} = $self->get_nearest($vf, $nearest_type);
+    }
+  }
 }
 
 sub up_down_size {
@@ -247,9 +252,10 @@ sub lazy_load_transcript {
   }
 }
 
-sub get_nearest {
-  my ($self, $vf) = shift;
-}
+
+
+## BAM EDIT METHODS
+###################
 
 sub bam {
   my $self = shift;
@@ -467,6 +473,76 @@ sub apply_edits {
   }
 
   return $tr;
+}
+
+
+
+## TREE METHODS
+###############
+
+sub transcript_tree {
+  my $self = shift;
+
+  unless(exists($self->{transcript_tree})) {
+    $self->{transcript_tree} = Bio::EnsEMBL::VEP::TranscriptTree->new({
+      config => $self->config,
+      annotation_source => $self
+    });
+  }
+
+  return $self->{transcript_tree};
+}
+
+sub populate_tree {
+  my ($self, $tree) = @_;
+
+  # insert into tree from file
+  open TR, $self->tree_file or throw("ERROR: Could not read from tree file: $!");
+  $self->_tree_insert_file_line($tree, $_) while (<TR>);
+  close TR;
+}
+
+sub get_nearest {
+  my ($self, $vf, $type) = @_;
+
+  throw("ERROR: No type supplied for --nearest\n") unless $type;
+
+  my @return;
+  my %seen;
+  foreach my $nearest(@{$self->transcript_tree->nearest($vf->{chr}, $vf->{start}, $vf->{end})}) {
+    throw("ERROR: Invalid type \"$type\" for --nearest\n") unless exists($nearest->{$type});
+    next unless my $value = $nearest->{$type};
+    push @return, $value unless $seen{$value};
+    $seen{$value} = 1;
+  }
+
+  return \@return;
+}
+
+sub _tree_coords_filename {
+  return $_[0]->dir.'/transcript_gene_tss.txt';
+}
+
+sub _tree_file_data {
+  my ($self, $tr) = @_;
+  my $tss = $tr->seq_region_strand == 1 ? $tr->seq_region_start : $tr->seq_region_end;
+  return [$tss, $tr->stable_id, $tr->{_gene_stable_id}, $tr->{_gene_symbol}];
+}
+
+sub _tree_insert_file_line {
+  my ($self, $tree, $line) = @_;
+  chomp($line);
+  my ($c, $tss, $tr_stable_id, $gene_stable_id, $gene_symbol) = split("\t", $line);
+  $tree->insert(
+    $c, $tss, $tss,
+    {
+      s          => $tss,
+      e          => $tss,
+      transcript => $tr_stable_id,
+      gene       => $gene_stable_id,
+      symbol     => $gene_symbol
+    }
+  );
 }
 
 1;

@@ -53,7 +53,15 @@ delete($t->{trees});
 # new will have run populate_tree, so should be able to test fetch now
 is_deeply($t->fetch(21, 25585733, 25585733), [], 'fetch before populated empty');
 
+my $fn = $as->_tree_coords_filename;
+is($fn, $test_cfg->{cache_dir}.'/transcript_coords.txt', '_tree_coords_filename');
+
+# unlink to test generation goes OK
+unlink($fn) if -e $fn;
+
+$as->param('quiet', 1);
 $as->populate_tree($t);
+$as->param('quiet', 0);
 
 is_deeply($t->fetch(21, 25585733, 25585733), [[25585656, 25607517]], 'fetch after populated');
 
@@ -134,5 +142,7 @@ is_deeply(
   [qw(ENST00000352957 ENST00000419219)],
   'with filter - stable_ids'
 );
+
+unlink($fn) if -e $fn;
 
 done_testing();

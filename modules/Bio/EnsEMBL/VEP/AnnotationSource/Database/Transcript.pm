@@ -75,6 +75,10 @@ sub new {
     use_transcript_ref
   )]);
 
+  if($self->param('nearest')) {
+    $self->warning_msg("WARNING: --nearest is not currently compatible with database annotation type");
+  }
+
   $self->{source_type} = ($self->{core_type} || '') eq 'otherfeatures' ? 'refseq' : 'ensembl';
 
   $self->check_sift_polyphen();

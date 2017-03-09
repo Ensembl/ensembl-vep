@@ -58,55 +58,18 @@ sub new {
   return $self;
 }
 
-sub populate_tree {
-  my ($self, $tree) = @_;
+sub _tree_coords_filename {
+  return $_[0]->dir.'/transcript_coords.txt';
+}
 
-  my $as_dir = $self->dir;
+sub _tree_file_data {
+  return [$_[1]->seq_region_start, $_[1]->seq_region_end];
+}
 
-  # cached coordinates file found
-  if(-e $as_dir.'/transcript_coords.txt') {
-    open TR, $as_dir.'/transcript_coords.txt';
-    while(<TR>) {
-      chomp;
-      $tree->insert(split);
-    }
-    close TR;
-  }
-
-  # otherwise we have to generate it by scanning the cache
-  else {
-    my $cache_region_size = $self->{cache_region_size};
-
-    open TR, ">".$as_dir.'/transcript_coords.txt' or throw("ERROR: Could not write to transcript coords file: $!");
-
-    opendir DIR, $as_dir;
-    foreach my $c(grep {!/^\./ && -d $as_dir.'/'.$_} readdir DIR) {
-      
-      opendir CHR, $as_dir.'/'.$c;
-
-      # scan each chr directory for transcript cache files e.g. 1-1000000.gz
-      foreach my $file(grep {/\d+\-\d+\.gz/} readdir CHR) {
-        my ($s) = split(/\D/, $file);
-
-        # we can use parent classes methods to fetch transcripts into memory
-        foreach my $t(
-          grep {$_->biotype eq 'protein_coding'}
-          @{$self->get_features_by_regions_uncached([[$c, ($s - 1) / $cache_region_size]])}
-        ) {
-          my ($s, $e) = ($t->seq_region_start, $t->seq_region_end);
-          $tree->insert($c, $s, $e);
-          print TR "$c\t$s\t$e\n";
-        }
-
-        # calling get_features_by_regions_uncached adds data to an in-memory cache
-        # we need to clear it manually here
-        $self->clean_cache;
-      }
-      closedir CHR;
-    }
-    closedir DIR;
-    close TR;
-  }
+sub _tree_insert_file_line {
+  my ($self, $tree, $line) = @_;
+  chomp($line);
+  $tree->insert(split("\t", $line));
 }
 
 1;

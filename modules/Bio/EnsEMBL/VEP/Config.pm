@@ -334,6 +334,7 @@ our %VALID = (
   sift       => [qw(s p b)],
   polyphen   => [qw(s p b)],
   pick_order => [qw(canonical appris tsl biotype ccds rank length ensembl refseq)],
+  nearest    => [qw(transcript gene symbol)],
 );
 
 # these flags require others to be set, no sensible defaults can be set by us

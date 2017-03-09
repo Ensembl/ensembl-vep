@@ -75,6 +75,10 @@ sub new {
 
   $self->add_shortcuts(['use_transcript_ref']);
 
+  if($self->param('nearest')) {
+    $self->warning_msg("WARNING: --nearest is not currently compatible with GXF annotation sources");
+  }
+
   $self->{cache_region_size} = 1e6;
 
   return $self;
