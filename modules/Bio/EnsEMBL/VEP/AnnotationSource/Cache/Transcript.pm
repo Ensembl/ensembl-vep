@@ -78,7 +78,10 @@ sub new {
   $self->check_sift_polyphen();
 
   # generate tree here otherwise forked processes will regenerate
-  $self->transcript_tree() if $self->{nearest};
+  if($self->{nearest}) {
+    throw("ERROR: --nearest requires Set::IntervalTree perl module to be installed\n") unless $Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript::CAN_USE_INTERVAL_TREE;
+    $self->transcript_tree();
+  }
 
   return $self;
 }
