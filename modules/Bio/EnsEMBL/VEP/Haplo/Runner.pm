@@ -229,7 +229,7 @@ sub get_TranscriptTree {
   if(!exists($self->{transcript_tree})) {
     $self->{transcript_tree} = Bio::EnsEMBL::VEP::TranscriptTree->new({
       config => $self->config,
-      annotation_source => $self->get_all_AnnotationSources->[0]
+      annotation_source => $self->get_AnnotationSource
     });
   }
 
