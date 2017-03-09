@@ -526,7 +526,7 @@ sub _tree_coords_filename {
 sub _tree_file_data {
   my ($self, $tr) = @_;
   my $tss = $tr->seq_region_strand == 1 ? $tr->seq_region_start : $tr->seq_region_end;
-  return [$tss, $tr->stable_id, $tr->{_gene_stable_id}, $tr->{_gene_symbol}];
+  return [$tss, $tr->stable_id, $tr->{_gene_stable_id}, ($tr->{_gene_symbol} || $tr->{_gene_stable_id})];
 }
 
 sub _tree_insert_file_line {
