@@ -75,10 +75,20 @@ sub get_chr_tree {
 }
 
 sub insert {  
-  my ($self, $c, $s, $e) = @_;
+  my ($self, $c, $s, $e, $obj) = @_;
 
   my $tree = $self->get_chr_tree($c);
 
+  # obj given, just insert it and return
+  if($obj) {
+    $obj->{s} ||= $s;
+    $obj->{e} ||= $e;
+
+    $tree->insert($obj, $s - 1, $e);
+    return [$s, $e];
+  }
+
+  # otherwise do a merge if any overlap and insert an arrayref representing the range
   my ($min, $max) = ($s, $e);
 
   my $fetched = $tree->fetch($s - 1, $e);
@@ -99,6 +109,72 @@ sub insert {
 sub fetch {
   my ($self, $c, $s, $e) = @_;
   return $self->get_chr_tree($self->get_source_chr_name($c))->fetch($s - 1, $e);
+}
+
+sub nearest {
+  my ($self, $c, $s, $e) = @_;
+
+  my $tree = $self->get_chr_tree($self->get_source_chr_name($c));
+
+  # invert if $s > $e
+  ($e, $s) = ($s, $e) if $s > $e;
+
+  # search up and down - note "up" in Set::IntervalTree means a higher numerical value coordinate
+  # confusing if you're used to talking in terms of up/downstream on a genome
+  # so we search "up" from $s and "down" from $e as this will capture overlaps too
+  my @search = grep {$_} (
+    $tree->fetch_nearest_down($e),
+    $tree->fetch_nearest_up($s),
+  );
+
+  # bail out here if <=1 result (empty chr or 1 result)
+  return \@search unless scalar @search > 1;
+
+  # get dists as hash indexed on array pos in @search
+  my %dists =
+    map {$_ => $self->_get_dist(
+      @{$self->_get_obj_start_end($search[$_])},
+      $s, $e
+    )}
+    0..$#search;
+
+  # find minimum distance
+  my $min_dist = (sort {$a <=> $b} values %dists)[0];
+
+  # return all objects that have that dist
+  return [map {$search[$_]} grep {$dists{$_} == $min_dist} 0..$#search];
+}
+
+sub _get_obj_start_end {
+  my ($self, $obj) = @_;
+
+  my ($s, $e);
+  
+  if(ref($obj) eq 'ARRAY') {
+    ($s, $e) = @$obj;
+  }
+  else {
+    $s = $obj->{s} || $obj->{start} or throw("ERROR: No start field \"s\" defined on object\n");
+    $e = $obj->{e} || $obj->{end} || $s;
+  }
+
+  return [$s, $e];
+}
+
+sub _get_dist {
+  my ($self, $o_s, $o_e, $s, $e) = @_;
+
+  # calculate all possible distances
+  # sort to find lowest
+  return (
+    sort {$a <=> $b}
+    (
+      abs($s - $o_s),
+      abs($s - $o_e),
+      abs($e - $o_s),
+      abs($e - $o_e)
+    )
+  )[0];
 }
 
 sub valid_chromosomes {

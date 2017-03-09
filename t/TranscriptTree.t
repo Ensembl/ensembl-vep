@@ -77,4 +77,39 @@ $t->valid_chromosomes(['chr21']);
 $t->insert('chr21', 5, 10);
 is_deeply($t->fetch(21, 4, 6), [[5, 10]], 'fetch - add chr');
 
+# insert object
+$t->insert('chrobj', 5, 10, {foo => 'bar'});
+is_deeply($t->fetch('chrobj', 7, 8), [{foo => 'bar', s => 5, e => 10}], 'insert and fetch object');
+
+# insert another doesn't merge
+$t->insert('chrobj', 6, 12, {goo => 'car'});
+is_deeply($t->fetch('chrobj', 7, 8), [{foo => 'bar', s => 5, e => 10}, {goo => 'car', s => 6, e => 12}], 'insert another doesn\'t merge');
+
+
+## _get_obj_start_end util method
+is_deeply($t->_get_obj_start_end([1, 5]), [1, 5], '_get_obj_start_end - arrayref');
+is_deeply($t->_get_obj_start_end({s => 1, e => 5}), [1, 5], '_get_obj_start_end - hashref 1');
+is_deeply($t->_get_obj_start_end({start => 1, end => 5}), [1, 5], '_get_obj_start_end - hashref 2');
+is_deeply($t->_get_obj_start_end({s => 1}), [1, 1], '_get_obj_start_end - no end');
+throws_ok {$t->_get_obj_start_end({})} qr/No start field/, '_get_obj_start_end throws no start';
+
+## _get_dist util method
+is($t->_get_dist(1, 5, 6, 7), 1, '_get_dist arrayref 1');
+is($t->_get_dist(6, 8, 2, 4), 2, '_get_dist arrayref 2');
+is($t->_get_dist(1, 5, 4, 5), 0, '_get_dist arrayref overlap 0');
+is($t->_get_dist(1, 5, -3, -1), 2, '_get_dist arrayref negative');
+
+
+## nearest
+is_deeply($t->nearest('nearest', 1, 5), [], 'nearest - no result');
+
+$t->insert('nearest', 1, 5, {foo => 1});
+$t->insert('nearest', 11, 16, {bar => 1});
+is_deeply($t->nearest('nearest', 6, 6), [{foo => 1, s => 1, e => 5}], 'nearest - left');
+is_deeply($t->nearest('nearest', 9, 9), [{bar => 1, s => 11, e => 16}], 'nearest - right');
+is_deeply($t->nearest('nearest', 8, 8), [{foo => 1, s => 1, e => 5}, {bar => 1, s => 11, e => 16}], 'nearest - 2 hits');
+is_deeply($t->nearest('nearest', 7, 9), [{foo => 1, s => 1, e => 5}, {bar => 1, s => 11, e => 16}], 'nearest - 2 hits input not length 1');
+
+
+
 done_testing();
