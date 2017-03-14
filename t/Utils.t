@@ -88,6 +88,12 @@ is_deeply(
   'trim_sequences - coords'
 );
 
+is_deeply(
+  trim_sequences(qw(ATTT AT 10)),
+  ['TT', '', 11, 12, 1],
+  'trim_sequences - trim from right first'
+);
+
 
 ## convert_arrayref
 ###################
