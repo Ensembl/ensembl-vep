@@ -718,7 +718,7 @@ END
 
   # STEP 2: Check out HTSLIB / or make this a download?
   print(" - checking out HTSLib\n");
-  system "git clone -b master https://github.com/samtools/htslib.git";
+  system "git clone -b 1.3.2 https://github.com/samtools/htslib.git";
   -d './htslib' or die "git clone seems to have failed. Could not find $htslib_install_dir/htslib directory";
   chdir './htslib';
 

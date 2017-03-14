@@ -8,7 +8,7 @@ fi
 
 echo 'Getting HTSlib'
 if [ ! -d htslib ]; then
-  git clone --branch master --depth 1 https://github.com/samtools/htslib.git
+  git clone --branch 1.3.2 --depth 1 https://github.com/samtools/htslib.git
 fi
 
 echo 'Getting Bio::DB::HTS'
