@@ -132,6 +132,39 @@ is_deeply(
 );
 
 $of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({merged => 1, custom => 1, database => 0})
+});
+is_deeply(
+  $of->fields,
+  [
+    'Allele',
+    'Consequence',
+    'IMPACT',
+    'SYMBOL',
+    'Gene',
+    'Feature_type',
+    'Feature',
+    'BIOTYPE',
+    'EXON',
+    'INTRON',
+    'HGVSc',
+    'HGVSp',
+    'cDNA_position',
+    'CDS_position',
+    'Protein_position',
+    'Amino_acids',
+    'Codons',
+    'Existing_variation',
+    'DISTANCE',
+    'STRAND',
+    'FLAGS',
+    'REFSEQ_MATCH',
+    'SOURCE',
+  ],
+  'fields - --merged and --custom dont duplicate SOURCE'
+);
+
+$of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({fields => 'Allele,Consequence'})
 });
 is_deeply(

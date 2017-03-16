@@ -99,6 +99,16 @@ is_deeply(
   'headers'
 );
 
+$of = Bio::EnsEMBL::VEP::OutputFactory::Tab->new({
+  config => $cfg,
+  header_info => $test_cfg->{header_info}
+});
+$of->param('merged', 1);
+$of->param('custom', 1);
+is(scalar (grep {$_ eq 'SOURCE'} @{$of->fields}), 1, '--merged and --custom dont duplicate SOURCE header');
+$of->param('merged', 0);
+$of->param('custom', 0);
+
 my $runner = get_annotated_buffer_runner({
   input_file => $test_cfg->{test_vcf},
   plugin => ['TestPlugin'],
@@ -112,6 +122,10 @@ is(
   'headers - plugin'
 );
 
+$of = Bio::EnsEMBL::VEP::OutputFactory::Tab->new({
+  config => $cfg,
+  header_info => $test_cfg->{header_info}
+});
 is($of->output_hash_to_line({}), '-'.("\t\-" x 17), 'output_hash_to_line - empty');
 
 is(

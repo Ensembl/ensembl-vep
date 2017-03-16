@@ -67,6 +67,14 @@ $of->param('sift', 0);
 delete($of->{field_order});
 delete($of->{fields});
 
+$of->param('merged', 1);
+$of->param('custom', 1);
+is(scalar (grep {$_ eq 'SOURCE'} @{$of->fields}), 1, '--merged and --custom dont duplicate SOURCE header');
+$of->param('merged', 0);
+$of->param('custom', 0);
+delete($of->{field_order});
+delete($of->{fields});
+
 is_deeply(
   $of->headers(),
   [

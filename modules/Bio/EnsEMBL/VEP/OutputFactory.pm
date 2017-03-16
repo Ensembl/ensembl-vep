@@ -1476,7 +1476,9 @@ sub get_custom_headers {
 # this method returns all the fields that will be populated given user parameters
 sub flag_fields {
   my $self = shift;
-  return [
+  
+  # get all fields
+  my @tmp = (
     map {@{$_->{fields}}}
     map {$_->[0]}
     grep {
@@ -1484,7 +1486,16 @@ sub flag_fields {
     }
     map {[$_, $self->param($_->{flag})]}
     @Bio::EnsEMBL::VEP::Constants::FLAG_FIELDS
-  ];
+  );
+
+  # uniquify, retaining order
+  my (%seen, @return);
+  for(@tmp) {
+    push @return, $_ unless $seen{$_};
+    $seen{$_} = 1;
+  }
+
+  return \@return;
 }
 
 1;
