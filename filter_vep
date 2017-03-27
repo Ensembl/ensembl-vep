@@ -31,7 +31,7 @@ limitations under the License.
 
 =head1 NAME
 
-filter_vep.pl - a script to filter results from the Variant Effect Predictor
+filter_vep - a script to filter results from the Variant Effect Predictor
 
 http://www.ensembl.org/info/docs/tools/vep/script/vep_filter.html
 

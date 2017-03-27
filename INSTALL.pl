@@ -345,7 +345,7 @@ sub check_default_dir {
   # check if $DEST_DIR is default
   if(defined($DEST_DIR)) {
     print "Using non-default API installation directory $DEST_DIR.\n";
-    print "Please note this just specifies the location for downloaded API files. The vep.pl script will remain in its current location where ensembl-vep was unzipped.\n";
+    print "Please note this just specifies the location for downloaded API files. The vep script will remain in its current location where ensembl-vep was unzipped.\n";
     print "Have you \n";
     print "1. added $DEST_DIR to your PERL5LIB environment variable?\n";
     print "2. added $DEST_DIR/htslib to your PATH environment variable?\n";
@@ -911,7 +911,7 @@ sub test() {
     print "Warning: Tests failed, VEP may not run correctly\n" unless runtests(@test_files);
   }
   else {
-    my $test_vep = `perl -I $DEST_DIR $dirname/vep.pl --help 2>&1`;
+    my $test_vep = `perl -I $DEST_DIR $dirname/vep --help 2>&1`;
 
     $test_vep =~ /ENSEMBL VARIANT EFFECT PREDICTOR/ or die "ERROR: Testing VEP script failed with the following error\n$test_vep\n";
   }
