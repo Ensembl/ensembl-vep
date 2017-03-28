@@ -28,11 +28,11 @@ addons:
       - mysql-client-core-5.6
 
 before_install:
-  - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-test.git
-  - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl.git
-  - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-io.git
-  - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-funcgen.git
-  - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-variation.git
+  - git clone --branch release/87 --depth 1 https://github.com/Ensembl/ensembl-test.git
+  - git clone --branch release/87 --depth 1 https://github.com/Ensembl/ensembl.git
+  - git clone --branch release/87 --depth 1 https://github.com/Ensembl/ensembl-io.git
+  - git clone --branch release/87 --depth 1 https://github.com/Ensembl/ensembl-funcgen.git
+  - git clone --branch release/87 --depth 1 https://github.com/Ensembl/ensembl-variation.git
   # - git clone --branch master --depth 1 https://github.com/Ensembl/Bio-HTS
   # - wget https://github.com/bioperl/bioperl-live/archive/release-1-6-924.zip
   # - unzip release-1-6-924.zip
