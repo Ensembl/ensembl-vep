@@ -107,8 +107,6 @@ sub usage {
 # HAPLOSAURUS #
 #-------------#
 
-by Will McLaren (wm2\@ebi.ac.uk)
-
 Versions:
   $versions
 
