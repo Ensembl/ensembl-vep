@@ -1,8 +1,6 @@
 ### docker container for ensembl-vep
 FROM ubuntu
 
-MAINTAINER William McLaren <wm2@ebi.ac.uk>
-
 # update aptitude and install some required packages
 # a lot of them are required for Bio::DB::BigFile
 RUN apt-get update && apt-get -y install build-essential cpanminus curl git manpages perl perl-base vim wget mysql-client libmysqlclient-dev libssl-dev unzip apache2 libmysqlclient-dev libpng12-dev libssl-dev openssl

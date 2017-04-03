@@ -35,7 +35,6 @@ filter_vep.pl - a script to filter results from the Variant Effect Predictor
 
 http://www.ensembl.org/info/docs/tools/vep/script/vep_filter.html
 
-by Will McLaren (wm2@ebi.ac.uk)
 =cut
 
 use strict;

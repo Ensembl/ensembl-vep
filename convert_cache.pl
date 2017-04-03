@@ -32,7 +32,6 @@ convert_cache.pl - a script to convert VEP caches to use tabix
 
 http://www.ensembl.org/info/docs/tools/vep/script/vep_cache.html#convert
 
-by Will McLaren (wm2@ebi.ac.uk)
 =cut
 
 use strict;

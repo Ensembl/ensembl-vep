@@ -33,7 +33,6 @@ limitations under the License.
 
 INSTALL.pl - a script to install required code and data for VEP
 
-by Will McLaren (wm2@ebi.ac.uk)
 =cut
 
 use strict;
