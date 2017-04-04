@@ -26,9 +26,7 @@ my $test_cfg = VEPTestingConfig->new();
 ## BASIC TESTS
 ##############
 
-# use test
-use_ok('Bio::EnsEMBL::VEP::Haplo::AnnotationSource::Database::Transcript');
-
+use_ok('Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript');
 
 ## DATABASE TESTS
 #################
@@ -45,7 +43,11 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg && !$@;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 10 unless $can_use_db;
+  no warnings 'once';
+  skip 'No local database configured or Set::IntervalTree not installed', 11 unless $can_use_db && $Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript::CAN_USE_INTERVAL_TREE;
+
+  # use test
+  use_ok('Bio::EnsEMBL::VEP::Haplo::AnnotationSource::Database::Transcript');
 
   my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens') if $can_use_db;
 
