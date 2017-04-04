@@ -26,58 +26,67 @@ my $test_cfg = VEPTestingConfig->new();
 ## BASIC TESTS
 ##############
 
-# use test
-use_ok('Bio::EnsEMBL::VEP::Haplo::InputBuffer');
+use_ok('Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript');
 
-throws_ok {Bio::EnsEMBL::VEP::Haplo::InputBuffer->new()} qr/reference for attribute .+ undef/, 'new without transcript_tree';
+SKIP: {
 
-use_ok('Bio::EnsEMBL::VEP::Haplo::Runner');
-my $runner = Bio::EnsEMBL::VEP::Haplo::Runner->new({%{$test_cfg->base_testing_cfg}, input_file => $test_cfg->{test_vcf}});
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  no warnings 'once';
+  skip 'Set::IntervalTree not installed', 9 unless $Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript::CAN_USE_INTERVAL_TREE;
 
-ok(my $ib = Bio::EnsEMBL::VEP::Haplo::InputBuffer->new({transcript_tree => $runner->get_TranscriptTree}), 'new');
+  # use test
+  use_ok('Bio::EnsEMBL::VEP::Haplo::InputBuffer');
 
-is_deeply($ib->transcript_tree, $runner->get_TranscriptTree, 'transcript_tree');
+  throws_ok {Bio::EnsEMBL::VEP::Haplo::InputBuffer->new()} qr/reference for attribute .+ undef/, 'new without transcript_tree';
 
-is($ib->get_max_from_tree(21, 25585733, 25585733), 25607517, 'get_max_from_tree');
-is($ib->get_max_from_tree(21, 25607519, 25607519), 0, 'get_max_from_tree missed');
+  use_ok('Bio::EnsEMBL::VEP::Haplo::Runner');
+  my $runner = Bio::EnsEMBL::VEP::Haplo::Runner->new({%{$test_cfg->base_testing_cfg}, input_file => $test_cfg->{test_vcf}});
 
-$ib = $runner->get_InputBuffer;
+  ok(my $ib = Bio::EnsEMBL::VEP::Haplo::InputBuffer->new({transcript_tree => $runner->get_TranscriptTree}), 'new');
 
-is_deeply(
-  $ib->next,
-  [
-    {
-      'alleles' => 'T,C',
-      'ids' => [
-        'rs1135618'
-      ],
-      'chr' => '21',
-      'gts' => {
-        'HG00096' => 'C|C'
+  is_deeply($ib->transcript_tree, $runner->get_TranscriptTree, 'transcript_tree');
+
+  is($ib->get_max_from_tree(21, 25585733, 25585733), 25607517, 'get_max_from_tree');
+  is($ib->get_max_from_tree(21, 25607519, 25607519), 0, 'get_max_from_tree missed');
+
+  $ib = $runner->get_InputBuffer;
+
+  is_deeply(
+    $ib->next,
+    [
+      {
+        'alleles' => 'T,C',
+        'ids' => [
+          'rs1135618'
+        ],
+        'chr' => '21',
+        'gts' => {
+          'HG00096' => 'C|C'
+        },
+        'end' => 25597391,
+        'start' => 25597391
       },
-      'end' => 25597391,
-      'start' => 25597391
-    },
-    {
-      'alleles' => 'A,G',
-      'ids' => [
-        'rs3989369'
-      ],
-      'chr' => '21',
-      'gts' => {
-        'HG00096' => 'A|G'
-      },
-      'end' => 25606638,
-      'start' => 25606638
-    }
-  ],
-  'next'
-);
+      {
+        'alleles' => 'A,G',
+        'ids' => [
+          'rs3989369'
+        ],
+        'chr' => '21',
+        'gts' => {
+          'HG00096' => 'A|G'
+        },
+        'end' => 25606638,
+        'start' => 25606638
+      }
+    ],
+    'next'
+  );
 
-is_deeply(
-  $ib->next,
-  [],
-  'next again empty'
-);
+  is_deeply(
+    $ib->next,
+    [],
+    'next again empty'
+  );
+}
 
 done_testing();
