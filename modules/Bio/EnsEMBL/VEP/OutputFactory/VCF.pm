@@ -194,7 +194,7 @@ sub get_all_lines_by_InputBuffer {
     # we have to create one if input wasnt VCF
     else {
       $line = $self->VariationFeature_to_VCF_record($vf);
-      $line->[7] = '';
+      $line->[7] = '' if ($line->[7] || '') eq '.';
     }
 
     my @chunks =
