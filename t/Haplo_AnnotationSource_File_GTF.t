@@ -26,7 +26,7 @@ my $test_cfg = VEPTestingConfig->new();
 ## BASIC TESTS
 ##############
 
-# use test
+use_ok('Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript');
 use_ok('Bio::EnsEMBL::VEP::AnnotationSource::File');
 
 
@@ -34,7 +34,7 @@ SKIP: {
   no warnings 'once';
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'Bio::DB::HTS::Tabix module not available', 10 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+  skip 'Bio::DB::HTS::Tabix module not available or Set::IntervalTree not installed', 11 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM && $Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript::CAN_USE_INTERVAL_TREE;
 
   # use test
   use_ok('Bio::EnsEMBL::VEP::Haplo::AnnotationSource::File::GTF');
@@ -45,6 +45,8 @@ SKIP: {
     %{$test_cfg->base_testing_cfg},
     input_file => $test_cfg->{test_vcf},
     fasta => $test_cfg->{fasta},
+    gtf => $test_cfg->{custom_gtf},
+    offline => 0,
   });
 
   ok(
@@ -56,7 +58,8 @@ SKIP: {
   );
   is(ref($as), 'Bio::EnsEMBL::VEP::Haplo::AnnotationSource::File::GTF', 'new ref');
 
-  my $t = $runner->get_TranscriptTree;
+  my $t;
+  ok($t = Bio::EnsEMBL::VEP::TranscriptTree->new({annotation_source => $as, config => $runner->config}), 'get TranscriptTree');
   delete($t->{trees});
 
   # new will have run populate_tree, so should be able to test fetch now
