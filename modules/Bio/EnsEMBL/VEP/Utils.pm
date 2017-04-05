@@ -208,8 +208,6 @@ sub merge_arrays {
 sub get_compressed_filehandle {
   my ($file, $multi) = @_;
 
-  $DB::single = 1;
-
   die("ERROR: No file given\n") unless $file;
   die("ERROR: File $file does not exist\n") unless -e $file;
   die("ERROR: File $file does not look like a binary file\n") unless -B $file;
@@ -223,7 +221,9 @@ sub get_compressed_filehandle {
     return $fh;
   }
   elsif($CAN_USE_IO_UNCOMPRESS) {
-    my $fh = IO::Uncompress::Gunzip->new($file, MultiStream => $multi) or die("ERROR: $GunzipError");
+    my $fh;
+    eval q{ $fh = IO::Uncompress::Gunzip->new($file, MultiStream => $multi) or die("ERROR: $GunzipError"); };
+    die($@) if $@;
     return $fh;
   }
   else {
