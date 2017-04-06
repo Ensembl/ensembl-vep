@@ -83,6 +83,7 @@ our (
   $CAN_USE_ARCHIVE,
   $CAN_USE_UNZIP,
   $CAN_USE_GZIP,
+  $CAN_USE_TAR,
 );
 
 ## BEGIN BLOCK, CHECK WHAT MODULES ETC WE CAN USE
@@ -101,6 +102,7 @@ BEGIN {
   $CAN_USE_ARCHIVE   = 1 if eval q{ use Archive::Extract; 1 };
   $CAN_USE_UNZIP     = 1 if `which unzip` =~ /\/unzip/;
   $CAN_USE_GZIP      = 1 if `which gzip` =~ /\/gzip/;
+  $CAN_USE_TAR       = 1 if `which tar` =~ /\/tar/;
 }
 
 $| = 1;
@@ -1645,16 +1647,19 @@ sub unpack_arch {
   }
   else {
     if($arch_file =~ /.zip$/ && $CAN_USE_UNZIP) {
-      `unzip $arch_file -d $dir`;
+      `unzip $arch_file -d $dir -qq` and die("ERROR: Failed to unpack file $arch_file\n");
     }
-    elsif($arch_file =~ /\.gz$/ && $CAN_USE_GZIP) {
+    elsif($arch_file =~ /(\.tar\.|\.t)gz$/ && $CAN_USE_TAR) {
+      `tar -C $dir -zxf $arch_file` and die("ERROR: Failed to unpack file $arch_file\n");
+    }
+    elsif($arch_file =~ /\.gz$/ && $arch_file !~ /(\.tar\.|\.t)gz$/ && $CAN_USE_GZIP) {
       my $unpacked = $arch_file;
       $unpacked =~ s/.*\///g;
       $unpacked =~ s/\.gz$//;
-      `gzip -dc $arch_file > $dir/$unpacked`;
+      `gzip -dc $arch_file > $dir/$unpacked` and die("ERROR: Failed to unpack file $arch_file\n");
     }
     else {
-      die("ERROR: Unable to unpack file $arch_file without Archive::Extract or unzip/gzip\n");
+      die("ERROR: Unable to unpack file $arch_file without Archive::Extract or tar/unzip/gzip\n");
     }
   }
 

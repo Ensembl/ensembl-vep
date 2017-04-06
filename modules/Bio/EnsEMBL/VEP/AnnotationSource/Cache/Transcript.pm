@@ -44,6 +44,7 @@ use warnings;
 package Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript;
 
 use Scalar::Util qw(weaken);
+use File::Copy;
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Gene;
@@ -181,7 +182,9 @@ sub tree_file {
 
     $self->status_msg("INFO: Scanning cache for transcript coordinates. This may take a while but will only run once per cache.\n");
 
-    open TR, ">$file" or throw("ERROR: Could not write to transcript coords file: $!");
+    # use an intermediate tmp file so that if write is interrupted next run will start from scratch
+    my $tmpfile = $file.".tmp".$$;
+    open TR, ">$tmpfile" or throw("ERROR: Could not write to transcript coords file: $!");
 
     opendir DIR, $as_dir;
     foreach my $c(grep {!/^\./ && -d $as_dir.'/'.$_} readdir DIR) {
@@ -208,6 +211,8 @@ sub tree_file {
     }
     closedir DIR;
     close TR;
+
+    move($tmpfile, $file);
   }
 
   return $file;

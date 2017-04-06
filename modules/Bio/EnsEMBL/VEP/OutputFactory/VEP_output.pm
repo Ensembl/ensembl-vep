@@ -127,4 +127,4 @@ sub field_order {
   return $self->{field_order};
 }
 
-return 1;
+1;
