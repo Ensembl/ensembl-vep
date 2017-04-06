@@ -1647,7 +1647,7 @@ sub unpack_arch {
   }
   else {
     if($arch_file =~ /.zip$/ && $CAN_USE_UNZIP) {
-      `unzip $arch_file -d $dir -qq` and die("ERROR: Failed to unpack file $arch_file\n");
+      `unzip -qq $arch_file -d $dir` and die("ERROR: Failed to unpack file $arch_file\n");
     }
     elsif($arch_file =~ /(\.tar\.|\.t)gz$/ && $CAN_USE_TAR) {
       `tar -C $dir -zxf $arch_file` and die("ERROR: Failed to unpack file $arch_file\n");
