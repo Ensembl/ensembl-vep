@@ -130,4 +130,4 @@ sub create_VariationFeatures {
   return $self->post_process_vfs([$vf]);
 }
 
-return 1;
+1;

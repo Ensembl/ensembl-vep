@@ -103,4 +103,4 @@ sub fields {
   return $self->{fields};
 }
 
-return 1;
+1;
