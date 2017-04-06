@@ -295,3 +295,6 @@ sub get_version_string {
     sort keys %$version_data
   );
 }
+
+1;
+
