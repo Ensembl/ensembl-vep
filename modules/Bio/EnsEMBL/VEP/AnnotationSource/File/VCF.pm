@@ -86,6 +86,7 @@ sub _create_records {
   if(my $fields = $self->fields) {
     my $parser = $self->parser;
     my $info = $parser->get_info;
+    my $alt_count = scalar @{$parser->get_alternatives};
 
     foreach my $field(grep {exists($info->{$_})} @$fields) {
       my $value = $info->{$field};
@@ -93,7 +94,18 @@ sub _create_records {
 
       if($value =~ /\,/) {
         my @split = split(',', $value);
-        $fields_data->{$field}->{$_} = $split[$_] for 0..$#split;
+
+        # some VCFs have data for REF included
+        shift @split if scalar(@split) == $alt_count + 1;
+
+        # don't do allele-specific if @split now doesn't match alt_count
+        if(scalar(@split) == $alt_count) {
+          $fields_data->{$field}->{$_} = $split[$_] for 0..$#split;  
+        }
+        else {
+          $fields_data->{$field} = $value;  
+        }
+        
       }
       else {
         $fields_data->{$field} = $value;

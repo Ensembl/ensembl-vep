@@ -31,7 +31,7 @@ SKIP: {
   no warnings 'once';
   
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'Bio::DB::HTS::Tabix module not available', 15 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+  skip 'Bio::DB::HTS::Tabix module not available', 22 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
 
   ## BASIC TESTS
   ##############
@@ -292,6 +292,43 @@ SKIP: {
       ]
     },
     'annotate_InputBuffer - SV reverts to overlap'
+  );
+
+  # test mismatches in num of ALTs to num INFO chunks
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
+    config => $cfg,
+    parser => Bio::EnsEMBL::VEP::Parser::VEP_input->new({
+      config => $cfg,
+      file => $test_cfg->create_input_file([
+        [qw(21 25585760 25585760 C/T +)],
+        [qw(21 25585761 25585761 C/T +)]
+      ]),
+      valid_chromosomes => [21]
+    })
+  });
+  $ib->next;
+
+  $as->fields(['FOO']);
+  $as->annotate_InputBuffer($ib);
+
+  is_deeply(
+    $ib->buffer->[0]->{_custom_annotations},
+    {
+      'foo' => [
+        { name => 'refinc', allele => 'T', fields => {'FOO' => 0.1} },
+      ]
+    },
+    'annotate_InputBuffer - REF included in INFO chunks'
+  );
+  
+  is_deeply(
+    $ib->buffer->[1]->{_custom_annotations},
+    {
+      'foo' => [
+        { name => 'countwrong', allele => 'T', fields => {'FOO' => '0.7,0.2,0.1'} },
+      ]
+    },
+    'annotate_InputBuffer - INFO chunk count doesnt match ALT count'
   );
 }
 
