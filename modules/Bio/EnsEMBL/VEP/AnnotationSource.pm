@@ -124,26 +124,23 @@ sub get_all_regions_by_InputBuffer {
     my $source_chr = $self->get_source_chr_name($chr);
 
     my ($vf_s, $vf_e) = ($vf->{start}, $vf->{end});
-    my @region_starts;
 
-    if($vf_s > $vf_e) {
-      @region_starts = ($vf_e - $up_down_size, $vf_s + $up_down_size);
+    # allow for indels
+    ($vf_s, $vf_e) = ($vf_e, $vf_s) if $vf_s > $vf_e;
 
-      $min = $vf_e if $vf_e < $min;
-      $max = $vf_s if $vf_s > $max;
-    }
-    else {
-      @region_starts = ($vf_s - $up_down_size, $vf_e + $up_down_size);
+    # log min/max
+    $min = $vf_s if $vf_s < $min;
+    $max = $vf_e if $vf_e > $max;
 
-      $min = $vf_s if $vf_s < $min;
-      $max = $vf_e if $vf_e > $max;
-    }
+    # convert to region-size
+    my ($r_s, $r_e) = map {int(($_ - 1) / $cache_region_size)} ($vf_s, $vf_e);
 
-    foreach my $region_start(map {int(($_ - 1)/ $cache_region_size)} @region_starts) {
-      my $key = join(':', ($source_chr, $region_start));
+    # add all regions between r_s and r_e inclusive
+    for(my $s = $r_s; $s <= $r_e; $s++) {
+      my $key = join(':', ($source_chr, $s));
       next if $seen{$key};
 
-      push @regions, [$source_chr, $region_start];
+      push @regions, [$source_chr, $s];
       $seen{$key} = 1;
     }
   }
