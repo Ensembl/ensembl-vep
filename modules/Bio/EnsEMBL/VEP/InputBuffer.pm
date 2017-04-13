@@ -164,8 +164,15 @@ sub get_overlapping_vfs {
 
     return [
       grep {overlap($_->{start}, $_->{end}, $start, $end)}
-      map {@{$hash_tree->{$_} || []}}
-      (sprintf("%.0f", $start / $HASH_TREE_SIZE)..(sprintf("%.0f", $end / $HASH_TREE_SIZE) + 1))
+      values %{{
+        map {$_->{_hash_tree_id} => $_}                  # use _hash_tree_id to uniquify
+        map {@{$hash_tree->{$_} || []}}                  # tree might be empty
+        (
+          sprintf("%.0f", $start / $HASH_TREE_SIZE)      # start of range
+          ..
+          (sprintf("%.0f", $end / $HASH_TREE_SIZE) + 1)  # end of range
+        )
+      }}
     ];
   }
 }
@@ -191,16 +198,31 @@ sub interval_tree {
   return $self->{temp}->{interval_tree};
 }
 
+# this is a pure-perl interval tree of sorts
+# variants are added to "branches" (keys) of a hash
+# where the key is a bin obtained by bin = int(coord / $HASH_TREE_SIZE)
+# variants can span multiple bins and so can be added to more than one branch
 sub hash_tree {
   my $self = shift;
 
   if(!exists($self->{temp}->{hash_tree})) {
 
     my $hash_tree = {};
+    my $hash_tree_id = 1;
 
     foreach my $vf(@{$self->buffer}) {
-      my $s = sprintf("%.0f", $vf->{start} / $HASH_TREE_SIZE);
-      push @{$hash_tree->{$s}}, $vf;
+      my ($vf_s, $vf_e) = ($vf->{start}, $vf->{end});
+      ($vf_s, $vf_e) = ($vf_e, $vf_s) if $vf_s > $vf_e;
+      my ($h_s, $h_e) = map {int($_ / $HASH_TREE_SIZE)} ($vf_s, $vf_e);
+
+      # add this VF to the bin for each branch that it overlaps
+      for(my $s = $h_s; $s <= $h_e; $s++) {
+        push @{$hash_tree->{$s}}, $vf;
+      }
+
+      # log a unique ID for each VF in the tree
+      # allows us to unique sort when fetching across multiple branches
+      $vf->{_hash_tree_id} = $hash_tree_id++;
     }
 
     $self->{temp}->{hash_tree} = $hash_tree;
