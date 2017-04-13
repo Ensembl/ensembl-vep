@@ -101,6 +101,14 @@ $tmp_ib->next();
 is_deeply($tmp_ib->min_max, [25592911, 25592912], 'min_max with insertion');
 
 
+# modify a VF to create a fake huge SV
+my $fake_sv = $vfs->[-1];
+($fake_sv->{start}, $fake_sv->{end}) = (2e6+1, 6e6+1);
+delete($fake_sv->{$_}) for qw(_line adaptor);
+
+my $exp = [$vfs->[0]];
+
+
 SKIP: {
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
@@ -111,32 +119,10 @@ SKIP: {
 
   is_deeply(
     $ib->interval_tree->fetch(25592910, 25592911),
-    [
-      bless( {
-        'chr' => '21',
-        'strand' => 1,
-        'variation_name' => 'rs148490508',
-        'map_weight' => 1,
-        'allele_string' => 'A/G',
-        'end' => 25592911,
-        'start' => '25592911'
-      }, 'Bio::EnsEMBL::Variation::VariationFeature' )
-    ],
+    $exp,
     'interval_tree fetch'
   );
 }
-
-my $exp = [
-  bless( {
-    'chr' => '21',
-    'strand' => 1,
-    'variation_name' => 'rs148490508',
-    'map_weight' => 1,
-    'allele_string' => 'A/G',
-    'end' => 25592911,
-    'start' => '25592911'
-  }, 'Bio::EnsEMBL::Variation::VariationFeature' )
-];
 
 is_deeply(
   $ib->get_overlapping_vfs(25592911, 25592911),
@@ -184,6 +170,18 @@ is_deeply(
   $ib->get_overlapping_vfs(25592912, 25592912),
   [],
   'get_overlapping_vfs 8'
+);
+
+is_deeply(
+  $ib->get_overlapping_vfs(3e6, 3e6),
+  [$fake_sv],
+  'get_overlapping_vfs - big SV 1'
+);
+
+is_deeply(
+  $ib->get_overlapping_vfs(5e6, 5e6),
+  [$fake_sv],
+  'get_overlapping_vfs - big SV 2'
 );
 
 SKIP: {
@@ -245,6 +243,18 @@ SKIP: {
     'get_overlapping_vfs no tree 8'
   );
 
+  is_deeply(
+    $ib->get_overlapping_vfs(3e6, 3e6),
+    [$fake_sv],
+    'get_overlapping_vfs no tree - big SV 1'
+  );
+
+  is_deeply(
+    $ib->get_overlapping_vfs(5e6, 5e6),
+    [$fake_sv],
+    'get_overlapping_vfs no tree - big SV 2'
+  );
+
   $Bio::EnsEMBL::VEP::InputBuffer::CAN_USE_INTERVAL_TREE = $orig;
 }
 
@@ -261,15 +271,7 @@ $vfs = $ib->next();
 is(ref($vfs), 'ARRAY', 'new with vfs - next ref');
 is(scalar @$vfs, $ib->param('buffer_size'), 'new with vfs - next size');
 
-is_deeply($vfs->[0], bless( {
-  'chr' => '21',
-  'strand' => 1,
-  'variation_name' => 'rs148490508',
-  'map_weight' => 1,
-  'allele_string' => 'A/G',
-  'end' => 25592911,
-  'start' => '25592911'
-}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'new with vfs - next first variant');
+is_deeply($vfs->[0], $exp->[0], 'new with vfs - next first variant');
 
 
 $vfs = $ib->next();

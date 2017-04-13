@@ -83,6 +83,11 @@ my $inputs = [
   [ [qw(1 1000000 . C CT . . .)],  [[1, 0], [1, 1]], 'across boundary insertion'],
 
   [
+    [qw(1 1 . . <DEL> . . SVTYPE=DEL;END=3000001)],
+    [[1, 0], [1, 1], [1, 2], [1, 3]],
+    'spans mulitple'
+  ],
+  [
     [[qw(1 1000000 . A G . . .)], [qw(1 1000001 . A G . . .)]],
     [[1, 0], [1, 1]],
     'one before, one after'
