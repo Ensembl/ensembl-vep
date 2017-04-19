@@ -10,6 +10,9 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$DEPS/htslib
 
 export PATH=$PATH:$DEPS/htslib
 
+# required for perl 5.8
+export DEVEL_COVER_UNSUPPORTED=1
+
 echo "Running test suite"
 echo "Using $PERL5LIB"
 if [ "$COVERALLS" = 'true' ]; then
