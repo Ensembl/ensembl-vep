@@ -80,7 +80,8 @@ sub annotate_InputBuffer {
     }
 
     if(@gts) {
-      push @return, $self->create_container($tr, \@gts, [values %$samples]);
+      my $ct = $self->create_container($tr, \@gts, [values %$samples]);
+      push @return, $ct if $ct;
     }
   }
 
