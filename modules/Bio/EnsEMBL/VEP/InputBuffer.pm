@@ -48,7 +48,7 @@ use base qw(Bio::EnsEMBL::VEP::BaseVEP);
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
-use Bio::EnsEMBL::VEP::Utils qw(trim_sequences);
+use Bio::EnsEMBL::Variation::Utils::Sequence qw(trim_sequences);
 
 our $HASH_TREE_SIZE = 1e4;
 our $CAN_USE_INTERVAL_TREE;
@@ -319,9 +319,7 @@ sub split_variants {
         my $end   = $original_vf->{end};
         my $this_changed = 0;
 
-        ($ref, $alt, $start, $end, $this_changed) = @{trim_sequences($ref, $alt, $start, $end)};
-        $ref ||= '-';
-        $alt ||= '-';
+        ($ref, $alt, $start, $end, $this_changed) = @{trim_sequences($ref, $alt, $start, $end, 1)};
         $changed += $this_changed;
 
         # create a copy

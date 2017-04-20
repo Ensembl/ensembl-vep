@@ -37,7 +37,7 @@ use FileHandle;
 use Bio::EnsEMBL::VEP::Config;
 use Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation;
 use Bio::EnsEMBL::VEP::AnnotationSource::Cache::Variation;
-use Bio::EnsEMBL::VEP::Utils qw(trim_sequences);
+use Bio::EnsEMBL::Variation::Utils::Sequence qw(trim_sequences);
 
 our $CAN_USE_TABIX_PM;
 
@@ -291,9 +291,7 @@ sub freqs_from_vcf {
         my $orig_alt = $orig_alts[$alt_index];
 
         # use trim sequences to get the minimal representation of each allele
-        my ($ref, $alt, $start) = @{trim_sequences($orig_ref, $orig_alt, $orig_start)};
-        $ref ||= '-';
-        $alt ||= '-';
+        my ($ref, $alt, $start) = @{trim_sequences($orig_ref, $orig_alt, $orig_start, undef, 1)};
 
         push @{$alts_by_start->{$start}}, {
           r => $ref,

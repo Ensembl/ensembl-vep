@@ -45,7 +45,7 @@ package Bio::EnsEMBL::VEP::AnnotationSource::File::VCF;
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
-use Bio::EnsEMBL::VEP::Utils qw(trim_sequences);
+use Bio::EnsEMBL::Variation::Utils::Sequence qw(trim_sequences);
 use Bio::EnsEMBL::IO::Parser::VCF4Tabix;
 
 use base qw(Bio::EnsEMBL::VEP::AnnotationSource::File);
@@ -201,9 +201,7 @@ sub _record_overlaps_VF {
     my $start = $orig_start;
     my $ref   = $orig_ref;
 
-    ($ref, $alt, $start) = @{trim_sequences($ref, $alt, $start)};
-    $ref ||= '-';
-    $alt ||= '-';
+    ($ref, $alt, $start) = @{trim_sequences($ref, $alt, $start, undef, 1)};
 
     # check strand before doing expensive revcomp
     if($vf->{start} == $start) {

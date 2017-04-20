@@ -47,7 +47,8 @@ use base qw(Bio::EnsEMBL::VEP::BaseVEP);
 
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
-use Bio::EnsEMBL::VEP::Utils qw(trim_sequences get_compressed_filehandle);
+use Bio::EnsEMBL::VEP::Utils qw(get_compressed_filehandle);
+use Bio::EnsEMBL::Variation::Utils::Sequence qw(trim_sequences);
 
 use Bio::EnsEMBL::VEP::Parser::VCF;
 use Bio::EnsEMBL::VEP::Parser::VEP_input;
@@ -587,9 +588,7 @@ sub minimise_alleles {
         my $start = $vf->{start};
         my $end   = $vf->{end};
 
-        ($ref, $alt, $start, $end) = @{trim_sequences($ref, $alt, $start, $end)};
-        $ref ||= '-';
-        $alt ||= '-';
+        ($ref, $alt, $start, $end) = @{trim_sequences($ref, $alt, $start, $end, 1)};
 
         # create a copy
         my $new_vf;
