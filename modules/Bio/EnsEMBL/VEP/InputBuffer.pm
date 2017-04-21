@@ -168,9 +168,9 @@ sub get_overlapping_vfs {
         map {$_->{_hash_tree_id} => $_}                  # use _hash_tree_id to uniquify
         map {@{$hash_tree->{$_} || []}}                  # tree might be empty
         (
-          sprintf("%.0f", $start / $HASH_TREE_SIZE)      # start of range
+          int($start / $HASH_TREE_SIZE)      # start of range
           ..
-          (sprintf("%.0f", $end / $HASH_TREE_SIZE) + 1)  # end of range
+          (int($end / $HASH_TREE_SIZE) + 1)  # end of range
         )
       }}
     ];
