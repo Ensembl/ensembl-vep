@@ -495,7 +495,10 @@ sub check_api() {
     $message = "It looks like you already have the following API modules installed:\n\n".(join "\n", grep {$has_api->{$_}} keys %$has_api)."\n\nThe VEP requires the ensembl, ensembl-io, ensembl-variation and ensembl-funcgen modules";
   }
 
-  if(defined($message)) {
+  if($AUTO =~ /a/ || !defined($message)) {
+    return 1;
+  }
+  else {
     print $message unless $QUIET;
 
     print "\n\nSkip to the next step (n) to install cache files\n\nDo you want to continue installing the API (y/n)? ";
@@ -508,10 +511,6 @@ sub check_api() {
     else {
       return 1;
     }
-  }
-
-  else {
-    return 1;
   }
 }
 
