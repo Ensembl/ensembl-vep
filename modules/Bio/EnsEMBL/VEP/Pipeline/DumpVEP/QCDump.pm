@@ -86,7 +86,7 @@ sub qc {
 
   die("ERROR: Tar file $tar_file not found\n") unless -e $tar_file;
 
-  my $qc_dir = $dump_dir.'/qc/'.md5_hex($self->input_id);
+  my $qc_dir = $dump_dir.'/qc/'.md5_hex($self->input_id.($converted || 0));
 
   unless(-d $qc_dir) {
     make_path($qc_dir) or die "Could not make directory $qc_dir";
@@ -119,7 +119,7 @@ sub qc {
 
   $self->check_dirs($cache_dir_obj, $converted);
 
-  $self->run_test_set($qc_dir) if $has_var && $type ne 'refseq';
+  $self->run_test_set($qc_dir, $mod) if $has_var && $type eq 'core';
 
   # clean up
   rmtree($qc_dir);
@@ -273,6 +273,7 @@ sub check_dirs {
 sub run_test_set {
   my $self = shift;
   my $qc_dir = shift;
+  my $mod = shift;
 
   # get a test file
   my $test_file = $self->generate_test_file();
@@ -313,11 +314,12 @@ sub run_test_set {
 
   # qc report file
   my $qc_report_file = sprintf(
-    '%s/qc/%s_%s_%s_qc_report.txt',
+    '%s/qc/%s_%s_%s%s_qc_report.txt',
     $self->dump_dir(),
     $self->param('species'),
     $self->param('type'),
-    $self->param('assembly')
+    $self->param('assembly'),
+    $mod || "",
   );
 
   open QC, ">$qc_report_file" or die $!;
@@ -365,7 +367,14 @@ sub run_test_set {
 
   my $count = `wc -l $qc_report_file`;
 
-  die("ERROR: Problems found during QC, see $qc_report_file\n") unless $count =~ /^0/;
+  # report file empty, no failures
+  if($count =~ /^0/) {
+    unlink($qc_report_file);
+    return undef;
+  }
+  else {
+    return $qc_report_file;
+  }
 }
 
 sub generate_test_file {

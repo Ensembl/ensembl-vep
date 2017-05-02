@@ -369,35 +369,24 @@ sub pipeline_analyses {
       -failed_job_tolerance => 0,
       -max_retry_count => 0,
     },
+
+    {
+      -logic_name => 'finish_dump',
+      -module     => 'Bio::EnsEMBL::VEP::Pipeline::DumpVEP::FinishDump',
+      -parameters => { @common_params },
+      -wait_for   => ['join_vep'],
+      -max_retry_count => 0,
+    },
+
+    {
+      -logic_name => 'distribute_dumps',
+      -module     => 'Bio::EnsEMBL::VEP::Pipeline::DumpVEP::DistributeDumps',
+      -parameters => { @common_params },
+      -wait_for   => ['join_vep'],
+      -max_retry_count => 0,
+    },
   );
 
-  if (!$self->o('debug')) {  
-    push @analyses, (
-      {
-        -logic_name => 'finish_dump',
-        -module     => 'Bio::EnsEMBL::VEP::Pipeline::DumpVEP::FinishDump',
-        -parameters => { @common_params },
-        -wait_for   => ['qc_vep'],
-        -max_retry_count => 0,
-      },
-      {
-        -logic_name => 'distribute_dumps',
-        -module     => 'Bio::EnsEMBL::VEP::Pipeline::DumpVEP::DistributeDumps',
-        -parameters => { @common_params },
-        -wait_for   => ['qc_vep'],
-        -max_retry_count => 0,
-      },
-    );
-    # if ($self->o('qc')) {
-    #   push @analyses, 
-    #     {
-    #       -logic_name => 'qc_dumps',
-    #       -module     => 'Bio::EnsEMBL::VEP::Pipeline::DumpVEP::QC',
-    #       -parameters => {  @common_params },
-    #       -wait_for   => ['join_vep'],
-    #     };
-    # }
-  } # end if not debug
   return \@analyses;
 }
 
