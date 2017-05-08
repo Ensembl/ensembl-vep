@@ -1,4 +1,5 @@
 > Used VEP? Please help us guide the future development of VEP by participating in our [user survey](https://docs.google.com/forms/d/e/1FAIpQLSe3PKvSviifr-zFjAc6xxQegOio17xTx_UlkDe4TMUoV0gbDg/viewform).
+
 [![Coverage Status](https://coveralls.io/repos/github/Ensembl/ensembl-vep/badge.svg?branch=master)](https://coveralls.io/github/Ensembl/ensembl-vep?branch=master)
 # ensembl-vep
 * **VEP** (Variant Effect Predictor) predicts the functional effects of genomic variants.
