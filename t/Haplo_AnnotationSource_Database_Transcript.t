@@ -26,7 +26,7 @@ my $test_cfg = VEPTestingConfig->new();
 ## BASIC TESTS
 ##############
 
-use_ok('Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript');
+use_ok('Bio::EnsEMBL::VEP::AnnotationType::Transcript');
 
 ## DATABASE TESTS
 #################
@@ -44,7 +44,7 @@ SKIP: {
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
   no warnings 'once';
-  skip 'No local database configured or Set::IntervalTree not installed', 11 unless $can_use_db && $Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript::CAN_USE_INTERVAL_TREE;
+  skip 'No local database configured or Set::IntervalTree not installed', 11 unless $can_use_db && $Bio::EnsEMBL::VEP::AnnotationType::Transcript::CAN_USE_INTERVAL_TREE;
 
   # use test
   use_ok('Bio::EnsEMBL::VEP::Haplo::AnnotationSource::Database::Transcript');

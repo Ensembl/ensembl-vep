@@ -27,15 +27,24 @@ limitations under the License.
 
 =cut
 
-# EnsEMBL module for Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript
+# EnsEMBL module for Bio::EnsEMBL::VEP::AnnotationType::Transcript
 #
 #
 
 =head1 NAME
 
-Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript - base class for transcript annotation sources
+Bio::EnsEMBL::VEP::AnnotationType::Transcript - base class for transcript annotation sources
 
-DO NOT USE DIRECTLY
+=head1 SYNOPSIS
+
+Should not be invoked directly.
+
+=head1 DESCRIPTION
+
+Helper class for all transcript-based AnnotationSource classes. Contains the bulk of the
+code that carries out the annotation.
+
+=head1 METHODS
 
 =cut
 
@@ -43,7 +52,7 @@ DO NOT USE DIRECTLY
 use strict;
 use warnings;
 
-package Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript;
+package Bio::EnsEMBL::VEP::AnnotationType::Transcript;
 
 use Scalar::Util qw(weaken);
 
@@ -66,6 +75,22 @@ BEGIN {
 }
 
 our $DEBUG = 0;
+
+
+=head2 annotate_InputBuffer
+
+  Arg 1      : Bio::EnsEMBL::VEP::InputBuffer
+  Example    : $as->annotate_InputBuffer($ib);
+  Description: Gets overlapping transcripts for the variants in
+               the input buffer, and creates TranscriptVariation objects for
+               each overlapping pair of variant/transcript. These are then added
+               to the relevant VariationFeature.
+  Returntype : none
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
 
 sub annotate_InputBuffer {
   my $self = shift;
@@ -131,6 +156,19 @@ sub annotate_InputBuffer {
   }
 }
 
+
+=head2 up_down_size
+
+  Example    : $size = $as->up_down_size();
+  Description: Gets range in bp that should be added to boundaries
+               when fetching features.
+  Returntype : int
+  Exceptions : none
+  Caller     : get_all_regions_by_InputBuffer()
+  Status     : Stable
+
+=cut
+
 sub up_down_size {
   return $_[0]->{up_down_size} ||= (
     sort {$a <=> $b} (
@@ -139,6 +177,22 @@ sub up_down_size {
     )
   )[-1];
 }
+
+
+=head2 filter_transcript
+
+  Arg 1      : Bio::EnsEMBL::Transcript $t
+  Example    : $pass = $as->filter_transcript($t);
+  Description: Pass/fail a transcript based on user configuration.
+               Transcripts may be excluded if they are not in the GENCODE
+               basic set, or if they are not RefSeq transcripts from the
+               refseq cache.
+  Returntype : bool
+  Exceptions : none
+  Caller     : get_features_by_regions_uncached()
+  Status     : Stable
+
+=cut
 
 sub filter_transcript {
   my $self = shift;
@@ -175,6 +229,19 @@ sub filter_transcript {
 
   return 1;
 }
+
+
+=head2 merge_features
+
+  Arg 1      : arrayref of Bio::EnsEMBL::Transcript $transcripts
+  Example    : $merged = $as->merge_features($features);
+  Description: "Uniquifies" a list of transcripts using dbID
+  Returntype : arrayref of Bio::EnsEMBL::Transcript
+  Exceptions : none
+  Caller     : get_all_features_by_InputBuffer()
+  Status     : Stable
+
+=cut
   
 sub merge_features {
   my $self = shift;
@@ -241,6 +308,19 @@ sub merge_features {
   return \@return;
 }
 
+
+=head2 lazy_load_transcript
+
+  Arg 1      : Bio::EnsEMBL::Transcript $tr
+  Example    : $as->lazy_load_transcript($tr);
+  Description: Stub method to lazy-load transcript data
+  Returntype : Bio::EnsEMBL::Transcript
+  Exceptions : none
+  Caller     : annotate_InputBuffer()
+  Status     : Stable
+
+=cut
+
 sub lazy_load_transcript {
   my ($self, $tr) = @_;
   if($tr->{_vep_lazy_loaded}) {
@@ -257,6 +337,20 @@ sub lazy_load_transcript {
 ## BAM EDIT METHODS
 ###################
 
+
+=head2 bam
+
+  Arg 1      : (optional) string $bam_file
+  Example    : $bam_obj = $as->bam($file);
+  Description: Get Bio::DB::HTS object for a BAM file, used for
+               editing transcripts in apply_edits()
+  Returntype : Bio::DB::HTS
+  Exceptions : throws if Bio::DB::HTS not installed
+  Caller     : apply_edits()
+  Status     : Stable
+
+=cut
+
 sub bam {
   my $self = shift;
 
@@ -269,6 +363,23 @@ sub bam {
 
   return $self->{_bam};
 }
+
+
+=head2 apply_edits
+
+  Arg 1      : Bio::EnsEMBL::Transcript $tr
+  Arg 2      : (optional) Bio::DB::HTS $bam
+  Example    : $as->apply_edits($tr);
+  Description: Uses a BAM file containing aligned sequence for transcripts
+               to "correct" the sequence retrieved for a transcript from the
+               underlying genome. Edits are applied as SeqEdit attributes,
+               which then get picked up when calling e.g. $tr->spliced_seq
+  Returntype : Bio::EnsEMBL::Transcript unless fails
+  Exceptions : none
+  Caller     : annotate_InputBuffer()
+  Status     : Stable
+
+=cut
 
 sub apply_edits {
   my ($self, $tr, $bam) = @_;
@@ -480,6 +591,18 @@ sub apply_edits {
 ## TREE METHODS
 ###############
 
+
+=head2 transcript_tree
+
+  Example    : $tree = $as->transcript_tree();
+  Description: Gets transcript tree for this annotation source.
+  Returntype : Bio::EnsEMBL::VEP::TranscriptTree
+  Exceptions : none
+  Caller     : get_nearest()
+  Status     : Stable
+
+=cut
+
 sub transcript_tree {
   my $self = shift;
 
@@ -493,6 +616,19 @@ sub transcript_tree {
   return $self->{transcript_tree};
 }
 
+
+=head2 populate_tree
+
+  Arg 1      : Bio::EnsEMBL::VEP::TranscriptTree $tree
+  Example    : $as->populate_tree($tree);
+  Description: Populates transcript tree with data from this annotation source.
+  Returntype : none
+  Exceptions : none
+  Caller     : TranscriptTree::new()
+  Status     : Stable
+
+=cut
+
 sub populate_tree {
   my ($self, $tree) = @_;
 
@@ -501,6 +637,21 @@ sub populate_tree {
   $self->_tree_insert_file_line($tree, $_) while (<TR>);
   close TR;
 }
+
+
+=head2 get_nearest
+
+  Arg 1      : Bio::EnsEMBL::Variation::BaseVariationFeature $vf
+  Arg 2      : string $type (transcript, gene or symbol)
+  Example    : $nearest_gene = $as->get_nearest($vf, 'symbol');
+  Description: Gets ID (one of transcript, gene, symbol) of the nearest
+               transcript to the given variant.
+  Returntype : string
+  Exceptions : none
+  Caller     : annotate_InputBuffer()
+  Status     : Stable
+
+=cut
 
 sub get_nearest {
   my ($self, $vf, $type) = @_;
@@ -519,15 +670,54 @@ sub get_nearest {
   return \@return;
 }
 
+
+=head2 _tree_coords_filename
+
+  Example    : $file = $as->_tree_coords_filename();
+  Description: Get filename to read/write transcript coordinates used to
+               populate transcript tree.
+  Returntype : string
+  Exceptions : none
+  Caller     : populate_tree()
+  Status     : Stable
+
+=cut
+
 sub _tree_coords_filename {
   return $_[0]->dir.'/transcript_gene_tss.txt';
 }
+
+
+=head2 _tree_file_data
+
+  Arg 1      : Bio::EnsEMBL::Transcript $tr
+  Example    : $data = $as->_tree_file_data($tr);
+  Description: Gets arrayref of data for writing to tree file from a transcript.
+  Returntype : arrayref of strings
+  Exceptions : none
+  Caller     : tree_file()
+  Status     : Stable
+
+=cut
 
 sub _tree_file_data {
   my ($self, $tr) = @_;
   my $tss = $tr->seq_region_strand == 1 ? $tr->seq_region_start : $tr->seq_region_end;
   return [$tss, $tr->stable_id, $tr->{_gene_stable_id}, ($tr->{_gene_symbol} || $tr->{_gene_stable_id})];
 }
+
+
+=head2 _tree_insert_file_line
+
+  Arg 1      : Bio::EnsEMBL::VEP::TranscriptTree
+  Example    : $as->_tree_insert_file_line($tree, $line);
+  Description: Insert a line of data read from tree file to the transcript tree.
+  Returntype : none
+  Exceptions : none
+  Caller     : populate_tree()
+  Status     : Stable
+
+=cut
 
 sub _tree_insert_file_line {
   my ($self, $tree, $line) = @_;

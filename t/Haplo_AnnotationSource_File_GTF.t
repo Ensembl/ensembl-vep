@@ -26,7 +26,7 @@ my $test_cfg = VEPTestingConfig->new();
 ## BASIC TESTS
 ##############
 
-use_ok('Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript');
+use_ok('Bio::EnsEMBL::VEP::AnnotationType::Transcript');
 use_ok('Bio::EnsEMBL::VEP::AnnotationSource::File');
 
 
@@ -34,7 +34,7 @@ SKIP: {
   no warnings 'once';
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'Bio::DB::HTS::Tabix module not available or Set::IntervalTree not installed', 11 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM && $Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript::CAN_USE_INTERVAL_TREE;
+  skip 'Bio::DB::HTS::Tabix module not available or Set::IntervalTree not installed', 11 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM && $Bio::EnsEMBL::VEP::AnnotationType::Transcript::CAN_USE_INTERVAL_TREE;
 
   # use test
   use_ok('Bio::EnsEMBL::VEP::Haplo::AnnotationSource::File::GTF');

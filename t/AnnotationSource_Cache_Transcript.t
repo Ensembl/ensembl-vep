@@ -280,7 +280,7 @@ SKIP: {
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
   no warnings 'once';
-  skip 'Set::IntervalTree not installed', 18 unless $Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript::CAN_USE_INTERVAL_TREE;
+  skip 'Set::IntervalTree not installed', 18 unless $Bio::EnsEMBL::VEP::AnnotationType::Transcript::CAN_USE_INTERVAL_TREE;
 
   $c = Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript->new({
     config => $cfg,

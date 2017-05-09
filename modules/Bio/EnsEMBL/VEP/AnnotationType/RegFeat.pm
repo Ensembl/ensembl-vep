@@ -27,13 +27,24 @@ limitations under the License.
 
 =cut
 
-# EnsEMBL module for Bio::EnsEMBL::VEP::AnnotationSource::BaseRegFeat
+# EnsEMBL module for Bio::EnsEMBL::VEP::AnnotationType::RegFeat
 #
 #
 
 =head1 NAME
 
-Bio::EnsEMBL::VEP::AnnotationSource::BaseRegFeat - base class for regfeat annotation sources
+Bio::EnsEMBL::VEP::AnnotationType::RegFeat - base class for regfeat annotation sources
+
+=head1 SYNOPSIS
+
+Should not be invoked directly.
+
+=head1 DESCRIPTION
+
+Helper class for all RegFeat-based AnnotationSource classes. Contains the bulk of the
+code that carries out the annotation.
+
+=head1 METHODS
 
 =cut
 
@@ -41,7 +52,7 @@ Bio::EnsEMBL::VEP::AnnotationSource::BaseRegFeat - base class for regfeat annota
 use strict;
 use warnings;
 
-package Bio::EnsEMBL::VEP::AnnotationSource::BaseRegFeat;
+package Bio::EnsEMBL::VEP::AnnotationType::RegFeat;
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
@@ -49,6 +60,19 @@ our @REG_FEAT_TYPES = qw(
   RegulatoryFeature
   MotifFeature
 );
+
+
+=head2 check_cell_types
+
+  Example    : $ok = $as->check_cell_types();
+  Description: Check if this annotation source contains the cell types
+               as specified by the user with --cell_type.
+  Returntype : bool
+  Exceptions : throws if cell type unavailable
+  Caller     : new()
+  Status     : Stable
+
+=cut
 
 sub check_cell_types {
   my $self = shift;
@@ -71,6 +95,21 @@ sub check_cell_types {
 
   return 1;
 }
+
+
+=head2 annotate_InputBuffer
+
+  Arg 1      : Bio::EnsEMBL::VEP::InputBuffer
+  Example    : $as->annotate_InputBuffer($ib);
+  Description: Gets overlapping regulatory and motif features for the variants in
+               the input buffer, and creates VariationFeatureOverlap objects for
+               each overlapping pair of variant/feature.
+  Returntype : none
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
 
 sub annotate_InputBuffer {
   my $self = shift;
@@ -110,9 +149,35 @@ sub annotate_InputBuffer {
   }
 }
 
+
+=head2 up_down_size
+
+  Example    : $size = $as->up_down_size();
+  Description: Gets range in bp that should be added to boundaries
+               when fetching features. 0 for regulatory features.
+  Returntype : int
+  Exceptions : none
+  Caller     : get_all_regions_by_InputBuffer()
+  Status     : Stable
+
+=cut
+
 sub up_down_size {
   return 0;
 }
+
+
+=head2 merge_features
+
+  Arg 1      : arrayref of Bio::EnsEMBL::Feature $features
+  Example    : $merged = $as->merge_features($features);
+  Description: "Uniquifies" a list of features using dbID
+  Returntype : arrayref of Bio::EnsEMBL::Feature
+  Exceptions : none
+  Caller     : get_all_features_by_InputBuffer()
+  Status     : Stable
+
+=cut
 
 sub merge_features {
   my $self = shift;

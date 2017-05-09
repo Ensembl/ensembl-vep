@@ -31,12 +31,12 @@ SKIP: {
   no warnings 'once';
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'Bio::DB::HTS::Tabix module not available', 28 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM && $Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript::CAN_USE_HTS;
+  skip 'Bio::DB::HTS::Tabix module not available', 28 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM && $Bio::EnsEMBL::VEP::AnnotationType::Transcript::CAN_USE_HTS;
 
   ## BASIC TESTS
   ##############
 
-  # $Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript::DEBUG = 1;
+  # $Bio::EnsEMBL::VEP::AnnotationType::Transcript::DEBUG = 1;
 
   # use test
   use_ok('Bio::EnsEMBL::VEP::AnnotationSource::File::GFF');
@@ -59,10 +59,10 @@ SKIP: {
 
   ok(!$as->apply_edits({}), 'apply_edits - no bam fails');
 
-  my $bak = $Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript::CAN_USE_HTS;
-  $Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript::CAN_USE_HTS = 0;
+  my $bak = $Bio::EnsEMBL::VEP::AnnotationType::Transcript::CAN_USE_HTS;
+  $Bio::EnsEMBL::VEP::AnnotationType::Transcript::CAN_USE_HTS = 0;
   throws_ok {$as->bam($test_cfg->{bam_edit_bam})} qr/Cannot add BAM file/, 'bam - no HTS installed';
-  $Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript::CAN_USE_HTS = $bak;
+  $Bio::EnsEMBL::VEP::AnnotationType::Transcript::CAN_USE_HTS = $bak;
 
   is(ref($as->bam($test_cfg->{bam_edit_bam})), 'Bio::DB::HTS', 'bam - give filename');
 

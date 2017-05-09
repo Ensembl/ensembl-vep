@@ -27,13 +27,24 @@ limitations under the License.
 
 =cut
 
-# EnsEMBL module for Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript
+# EnsEMBL module for Bio::EnsEMBL::VEP::Haplo::AnnotationType::Transcript
 #
 #
 
 =head1 NAME
 
-Bio::EnsEMBL::VEP::Haplo::AnnotationSource::BaseTranscript - base haplotype annotation source
+Bio::EnsEMBL::VEP::Haplo::AnnotationType::Transcript - base haplotype annotation source
+
+=head1 SYNOPSIS
+
+Should not be invoked directly.
+
+=head1 DESCRIPTION
+
+Helper class for all Haplo::AnnotationSource classes. Contains the bulk of the
+code that carries out the annotation.
+
+=head1 METHODS
 
 =cut
 
@@ -41,12 +52,26 @@ Bio::EnsEMBL::VEP::Haplo::AnnotationSource::BaseTranscript - base haplotype anno
 use strict;
 use warnings;
 
-package Bio::EnsEMBL::VEP::Haplo::AnnotationSource::BaseTranscript;
+package Bio::EnsEMBL::VEP::Haplo::AnnotationType::Transcript;
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Variation::VariationFeature;
 use Bio::EnsEMBL::Variation::SampleGenotypeFeature;
 use Bio::EnsEMBL::Variation::TranscriptHaplotypeContainer;
+
+
+=head2 annotate_InputBuffer
+
+  Arg 1      : Bio::EnsEMBL::VEP::Haplo::InputBuffer
+  Example    : my $containers = $as->annotate_InputBuffer($ib);
+  Description: Creates TranscriptHaplotypeContainers for the variants in
+               the InputBuffer for each Transcript that they overlap.
+  Returntype : arrayref of Bio::EnsEMBL::Variation::TranscriptHaplotypeContainer
+  Exceptions : none
+  Caller     : Bio::EnsEMBL::VEP::Haplo::Runner
+  Status     : Stable
+
+=cut
 
 sub annotate_InputBuffer {
   my $self = shift;
@@ -88,6 +113,20 @@ sub annotate_InputBuffer {
   return \@return;
 }
 
+
+=head2 create_vf
+
+  Arg 1      : hashref $vf_hash
+  Example    : my $vf = $as->create_vf($vf_hash);
+  Description: Creates VariationFeature objects from the hashes that are
+               created by the InputBuffer's parser.
+  Returntype : Bio::EnsEMBL::Variation::VariationFeature
+  Exceptions : none
+  Caller     : get_genotypes()
+  Status     : Stable
+
+=cut
+
 sub create_vf {
   my ($self, $hash) = @_;
 
@@ -105,6 +144,21 @@ sub create_vf {
     slice          => $self->get_slice($hash->{chr}),
   });
 }
+
+
+=head2 get_genotypes
+
+  Arg 1      : hashref $vf_hash
+  Arg 2      : arrayref of Bio::EnsEMBL::Variation::Sample $samples
+  Example    : my $gts = $as->get_genotypes($vf_hash, $samples);
+  Description: Creates SampleGenotypeFeature objects from the variant hashes
+               and samples from the InputBuffer
+  Returntype : arrayref of Bio::EnsEMBL::Variation::SampleGenotypeFeature
+  Exceptions : none
+  Caller     : annotate_InputBuffer()
+  Status     : Stable
+
+=cut
 
 sub get_genotypes {
   my ($self, $hash, $samples) = @_;
@@ -132,6 +186,21 @@ sub get_genotypes {
 
   return $hash->{gt_objects};
 }
+
+
+=head2 create_container
+
+  Arg 1      : Bio::EnsEMBL::Transcript
+  Arg 2      : arrayref of Bio::EnsEMBL::Variation::SampleGenotypeFeature
+  Arg 3      : arrayref of Bio::EnsEMBL::Variation::Sample
+  Example    : $thc = $as->create_container($tr, $gts, $samples);
+  Description: Creates a TranscriptHaplotypeContainer for the given transcript
+  Returntype : Bio::EnsEMBL::Variation::TranscriptHaplotypeContainer
+  Exceptions : none
+  Caller     : annotate_InputBuffer()
+  Status     : Stable
+
+=cut
 
 sub create_container {
   my ($self, $tr, $gts, $samples) = @_;

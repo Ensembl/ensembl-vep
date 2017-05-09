@@ -26,13 +26,13 @@ my $test_cfg = VEPTestingConfig->new();
 ## BASIC TESTS
 ##############
 
-use_ok('Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript');
+use_ok('Bio::EnsEMBL::VEP::AnnotationType::Transcript');
 
 SKIP: {
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
   no warnings 'once';
-  skip 'Set::IntervalTree not installed', 37 unless $Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript::CAN_USE_INTERVAL_TREE;
+  skip 'Set::IntervalTree not installed', 37 unless $Bio::EnsEMBL::VEP::AnnotationType::Transcript::CAN_USE_INTERVAL_TREE;
 
   # use test
   use_ok('Bio::EnsEMBL::VEP::TranscriptTree');
@@ -41,7 +41,7 @@ SKIP: {
 
   throws_ok {
     Bio::EnsEMBL::VEP::TranscriptTree->new({annotation_source => bless({}, 'test')})
-  } qr/not an ISA of .+BaseTranscript/, 'new - wrong class';
+  } qr/not an ISA of .+Transcript/, 'new - wrong class';
 
   use_ok('Bio::EnsEMBL::VEP::Haplo::Runner');
   ok(my $runner = Bio::EnsEMBL::VEP::Haplo::Runner->new($test_cfg->base_testing_cfg), 'get runner');

@@ -27,15 +27,23 @@ limitations under the License.
 
 =cut
 
-# EnsEMBL module for Bio::EnsEMBL::VEP::AnnotationSource::BaseVariation
+# EnsEMBL module for Bio::EnsEMBL::VEP::AnnotationType::Variation
 #
 #
 
 =head1 NAME
 
-Bio::EnsEMBL::VEP::AnnotationSource::BaseVariation - base class for variation (overlap) sources
+Bio::EnsEMBL::VEP::AnnotationType::Variation - base class for variation (overlap) sources
 
-DO NOT USE DIRECTLY
+=head1 SYNOPSIS
+
+Should not be invoked directly.
+
+=head1 DESCRIPTION
+
+Helper class for all variant-based AnnotationSource classes. 
+
+=head1 METHODS
 
 =cut
 
@@ -43,12 +51,29 @@ DO NOT USE DIRECTLY
 use strict;
 use warnings;
 
-package Bio::EnsEMBL::VEP::AnnotationSource::BaseVariation;
+package Bio::EnsEMBL::VEP::AnnotationType::Variation;
 
 use Scalar::Util qw(weaken);
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
+
+
+=head2 annotate_InputBuffer
+
+  Arg 1      : Bio::EnsEMBL::VEP::InputBuffer
+  Example    : $as->annotate_InputBuffer($ib);
+  Description: Gets overlapping known variants for the variants in
+               the input buffer, checks if they are "novel" (see is_var_novel())
+               and adds them to the key "existing" on the VariationFeature
+               object. May also filter the input buffer by comparing frequencies
+               of known variants to user-specified thresholds.
+  Returntype : none
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
 
 sub annotate_InputBuffer {
   my $self = shift;
@@ -66,7 +91,21 @@ sub annotate_InputBuffer {
   $self->frequency_check_buffer($buffer) if $self->{check_frequency};
 }
 
-# gets variation cache columns
+
+=head2 get_cache_columns
+
+  Example    : my $cols = $as->get_cache_columns();
+  Description: Gets the default columns for the known variant cache file.
+               In newer caches the columns are specified in the cache's
+               info.txt file, so this is generally only used when creating
+               caches.
+  Returntype : none
+  Exceptions : none
+  Caller     : parse_variation(), DumpVEP pipeline
+  Status     : Stable
+
+=cut
+
 sub get_cache_columns {
   my $self = shift;
 
@@ -79,6 +118,25 @@ sub get_cache_columns {
 
   return $self->{cols};
 }
+
+
+=head2 is_var_novel
+
+  Arg 1      : hashref $known_var
+  Arg 2      : Bio::EnsEMBL::Variation::VariationFeature $input_vf
+  Example    : $is_novel = $as->is_var_novel($known_var, $input_vf);
+  Description: Compares a VariationFeature as created from user input to
+               a known variant from the cache/database and determines if
+               the input variant is novel. To do this the alleles of each
+               are compared - if any of the alleles in the input variant
+               are not found in the known variant (accounting for strand)
+               then the input variant is considered to be novel.
+  Returntype : bool
+  Exceptions : none
+  Caller     : annotate_InputBuffer()
+  Status     : Stable
+
+=cut
 
 sub is_var_novel {
   my $self = shift;
@@ -110,10 +168,39 @@ sub is_var_novel {
   return $is_novel;
 }
 
+
+=head2 filter_variation
+
+  Arg 1      : hashref $known_var
+  Example    : $include = $as->filter_variation($known_var);
+  Description: Filter known variant as loaded from the cache/database
+               according to its failed (QC) state by comparing to the
+               VEP default or user-set state.
+  Returntype : bool
+  Exceptions : none
+  Caller     : annotate_InputBuffer()
+  Status     : Stable
+
+=cut
+
 sub filter_variation {
   my ($self, $var) = @_;
   return 0 unless $var->{failed} <= (defined($self->{failed}) ? $self->{failed} : 0);
 }
+
+
+=head2 up_down_size
+
+  Example    : $size = $as->up_down_size();
+  Description: Gets range in bp that should be added to boundaries
+               when fetching features. 1 for variants to allow for
+               indel oddness.
+  Returntype : int
+  Exceptions : none
+  Caller     : get_all_regions_by_InputBuffer()
+  Status     : Stable
+
+=cut
 
 sub up_down_size {
   return 1;
