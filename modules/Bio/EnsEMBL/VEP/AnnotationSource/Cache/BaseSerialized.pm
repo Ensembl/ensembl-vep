@@ -35,7 +35,15 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::AnnotationSource::Cache::BaseCache - local disk annotation source base class.
 
-DO NOT USE DIRECTLY
+=head1 SYNOPSIS
+
+Should not be invoked directly
+
+=head1 DESCRIPTION
+
+Base class for annotation sources that read serialized data from a cache.
+
+=head1 METHODS
 
 =cut
 
@@ -73,11 +81,46 @@ BEGIN {
   }
 }
 
+
+=head2 deserialize_from_file
+
+  Arg 1      : string $filename
+  Example    : $obj = $as->deserialize_from_file($file);
+  Description: Deserialize data from disk to in-memory object.
+               Wrapper for deserialize_from_file_storable() or
+               deserialize_from_file_sereal() depending on
+               serializer used for cache.
+  Returntype : scalar (typically hashref)
+  Exceptions : none
+  Caller     : get_features_by_regions_uncached()
+  Status     : Stable
+
+=cut
+
 sub deserialize_from_file {
   my $self = shift;
   my $method = 'deserialize_from_file_'.$self->serializer_type;
   return $self->$method(@_);
 }
+
+
+=head2 deserialize_from_file_storable
+
+  Arg 1      : string $filename
+  Example    : $obj = $as->deserialize_from_file_storable($file);
+  Description: Deserialize Storable data from disk to in-memory object.
+               On-disk files are compressed with gzip, so this method
+               will use the following methods of decompression in order
+               of preference:
+                - PerlIO::gzip
+                - gzip binary
+                - Compress::Zlib
+  Returntype : scalar (typically hashref)
+  Exceptions : none
+  Caller     : deserialize_from_file()
+  Status     : Stable
+
+=cut
 
 sub deserialize_from_file_storable {
   my $self = shift;
@@ -116,6 +159,19 @@ sub deserialize_from_file_storable {
   return $obj;
 }
 
+
+=head2 deserialize_from_file_sereal
+
+  Arg 1      : string $filename
+  Example    : $obj = $as->deserialize_from_file_sereal($file);
+  Description: Deserialize Sereal data from disk to in-memory object.
+  Returntype : scalar (typically hashref)
+  Exceptions : none
+  Caller     : deserialize_from_file()
+  Status     : Stable
+
+=cut
+
 sub deserialize_from_file_sereal {
   my $self = shift;
   my $file = shift;
@@ -130,6 +186,19 @@ sub deserialize_from_file_sereal {
   return $obj;
 }
 
+
+=head2 serializer_type
+
+  Arg 1      : string $type
+  Example    : $type = $as->serializer_type();
+  Description: Getter/setter for serializer type - one of "storable" or "sereal"
+  Returntype : string
+  Exceptions : none
+  Caller     : deserialize_from_file(), file_suffix()
+  Status     : Stable
+
+=cut
+
 sub serializer_type {
   my $self = shift;
   
@@ -139,10 +208,37 @@ sub serializer_type {
   return $self->{serializer_type};
 }
 
+
+=head2 file_suffix
+
+  Example    : $suffix = $as->file_suffix();
+  Description: Get cache file suffix; depends on serializer_type
+  Returntype : string
+  Exceptions : none
+  Caller     : get_dump_file_name()
+  Status     : Stable
+
+=cut
+
 sub file_suffix {
   my $self = shift;
   return $self->{file_suffix} ||= $self->serializer_type eq 'sereal' ? 'sereal' : 'gz';
 }
+
+
+=head2 get_features_by_regions_uncached
+
+  Arg 1      : arrayref $regions
+  Example    : $features = $as->get_features_by_regions_uncached($regions)
+  Description: Gets all features overlapping the given set of regions. See
+               Bio::EnsEMBL::VEP::AnnotationSource::get_all_regions_by_InputBuffer()
+               for information about regions.
+  Returntype : arrayref
+  Exceptions : none
+  Caller     : get_all_features_by_InputBuffer()
+  Status     : Stable
+
+=cut
 
 sub get_features_by_regions_uncached {
   my $self = shift;

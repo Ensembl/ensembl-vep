@@ -35,6 +35,26 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::Parser::VEP_input - VEP format input parser
 
+=head1 SYNOPSIS
+
+my $parser = Bio::EnsEMBL::VEP::Parser::VEP_input->new({
+  config => $config,
+  file   => 'variants.txt',
+});
+
+my $vf = $parser->next();
+
+=head1 DESCRIPTION
+
+VEP format input parser.
+
+A simple tab-delimited format to describe sequence or simple structural
+variants.
+
+http://www.ensembl.org/info/docs/tools/vep/vep_formats.html#default
+
+=head1 METHODS
+
 =cut
 
 
@@ -49,6 +69,18 @@ use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::IO::Parser::VEP_input;
 
+
+=head2 parser
+
+  Example    : $io_parser = $parser->parser();
+  Description: Get ensembl-io parser object used to read data from input.
+  Returntype : Bio::EnsEMBL::IO::Parser::VEP_input
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
 sub parser {
   my $self = shift;
 
@@ -59,6 +91,19 @@ sub parser {
 
   return $self->{parser};
 }
+
+
+=head2 create_VariationFeatures
+
+  Example    : $vfs = $parser->create_VariationFeatures();
+  Description: Create a VariationFeature object from the current line
+               of input. 
+  Returntype : arrayref of Bio::EnsEMBL::BaseVariationFeature
+  Exceptions : none
+  Caller     : next()
+  Status     : Stable
+
+=cut
 
 sub create_VariationFeatures {
   my $self = shift;

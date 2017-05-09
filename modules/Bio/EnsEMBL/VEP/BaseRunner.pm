@@ -35,6 +35,16 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::BaseRunner - base runner class for VEP
 
+=head1 SYNOPSIS
+
+Should not be invoked directly.
+
+=head1 DESCRIPTION
+
+Base class shared by Bio::EnsEMBL::VEP::Runner and Bio::EnsEMBL::VEP::Haplo::Runner
+
+=head1 METHODS
+
 =cut
 
 
@@ -55,8 +65,22 @@ use Bio::EnsEMBL::VEP::Config;
 use Bio::EnsEMBL::VEP::InputBuffer;
 use Bio::EnsEMBL::VEP::AnnotationSourceAdaptor;
 
-# has our own new method, does not use BaseVEP's
-# since this is the class users will be instantiating
+
+=head2 new
+
+  Arg 1      : hashref $config
+  Example    : $runner = Bio::EnsEMBL::VEP::Runner->new($config);
+  Description: Creates a new runner object. The $config hash passed is
+               used to create a Bio::EnsEMBL::VEP::Config object; see docs
+               for this object and the vep script itself for allowed
+               parameters.
+  Returntype : Bio::EnsEMBL::VEP::BaseRunner
+  Exceptions : throws on invalid configuration, see Bio::EnsEMBL::VEP::Config
+  Caller     : vep
+  Status     : Stable
+
+=cut
+
 sub new {
   my $caller = shift;
   my $class = ref($caller) || $caller;
@@ -69,6 +93,22 @@ sub new {
 
   return $self;
 }
+
+
+=head2 setup_db_connection
+
+  Example    : $runner->setup_db_connection();
+  Description: Sets up database connection. Also carries out a check of the
+               assembly specified in the database versus one that the user
+               may have supplied.
+  Returntype : bool
+  Exceptions : throws if:
+                - assembly version from param does not match database
+                - no assembly version found in database
+  Caller     : vep
+  Status     : Stable
+
+=cut
 
 sub setup_db_connection {
   my $self = shift;
@@ -115,6 +155,18 @@ sub setup_db_connection {
   return 1;
 }
 
+
+=head2 get_all_AnnotationSources
+
+  Example    : $sources = $runner->get_all_AnnotationSources();
+  Description: Gets all AnnotationSources.
+  Returntype : arrayref of Bio::EnsEMBL::VEP::AnnotationSource
+  Exceptions : none
+  Caller     : init(), _buffer_to_output()
+  Status     : Stable
+
+=cut
+
 sub get_all_AnnotationSources {
   my $self = shift;
 
@@ -125,6 +177,18 @@ sub get_all_AnnotationSources {
 
   return $self->{_annotation_sources};
 }
+
+
+=head2 get_output_file_handle
+
+  Example    : $handle = $runner->get_output_file_handle();
+  Description: Gets all file handle for writing output to.
+  Returntype : glob
+  Exceptions : throws if file exists or cannot write
+  Caller     : run()
+  Status     : Stable
+
+=cut
 
 sub get_output_file_handle {
   my $self = shift;
@@ -152,6 +216,18 @@ sub get_output_file_handle {
 
   return $self->{output_file_handle};
 }
+
+
+=head2 get_stats_file_handle
+
+  Example    : $handle = $runner->get_stats_file_handle();
+  Description: Gets all file handle for writing stats data to.
+  Returntype : glob
+  Exceptions : throws if file exists or cannot write
+  Caller     : dump_stats()
+  Status     : Stable
+
+=cut
 
 sub get_stats_file_handle {
   my $self = shift;
@@ -188,6 +264,18 @@ sub get_stats_file_handle {
   return $fh;
 }
 
+
+=head2 dump_stats
+
+  Example    : $runner->dump_stats();
+  Description: Writes all run stats to stats file
+  Returntype : none
+  Exceptions : none
+  Caller     : finish()
+  Status     : Stable
+
+=cut
+
 sub dump_stats {
   my $self = shift;
 
@@ -206,6 +294,19 @@ sub dump_stats {
     }
   }
 }
+
+
+=head2 get_output_header_info
+
+  Example    : $info = $runner->get_output_header_info();
+  Description: Gets info hash including software version data, database info,
+               input file headers, annotation source info
+  Returntype : hashref
+  Exceptions : none
+  Caller     : init(), get_OutputFactory()
+  Status     : Stable
+
+=cut
 
 sub get_output_header_info {
   my $self = shift;
@@ -240,6 +341,18 @@ sub get_output_header_info {
   return $self->{output_header_info};
 }
 
+
+=head2 valid_chromosomes
+
+  Example    : $chrs = $runner->valid_chromosomes();
+  Description: Compiles valid chromosomes across all annotation sources
+  Returntype : arrayref of strings
+  Exceptions : none
+  Caller     : get_Parser()
+  Status     : Stable
+
+=cut
+
 sub valid_chromosomes {
   my $self = shift;
 
@@ -258,7 +371,18 @@ sub valid_chromosomes {
   return $self->{valid_chromosomes};
 }
 
-# set some package variables to optimal values for speed
+
+=head2 _set_package_variables
+
+  Example    : $runner->_set_package_variables();
+  Description: Temporarily sets some package variables for speed
+  Returntype : none
+  Exceptions : none
+  Caller     : next_output_line()
+  Status     : Stable
+
+=cut
+
 sub _set_package_variables {
   my $self = shift;
 
@@ -278,6 +402,18 @@ sub _set_package_variables {
   $self->{_verbose_bak} = Bio::EnsEMBL::Utils::Exception::verbose();
   Bio::EnsEMBL::Utils::Exception::verbose(1999);
 }
+
+
+=head2 _reset_package_variables
+
+  Example    : $runner->_set_package_variables();
+  Description: Re-sets package variables altered by _set_package_variables
+  Returntype : none
+  Exceptions : none
+  Caller     : next_output_line()
+  Status     : Stable
+
+=cut
 
 sub _reset_package_variables {
   my $self = shift;

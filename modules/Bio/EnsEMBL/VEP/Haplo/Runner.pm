@@ -27,13 +27,29 @@ limitations under the License.
 
 =cut
 
-# EnsEMBL module for Bio::EnsEMBL::VEP::Runner
+# EnsEMBL module for Bio::EnsEMBL::VEP::Haplo::Runner
 #
 #
 
 =head1 NAME
 
-Bio::EnsEMBL::VEP::Runner - runner class for VEP
+Bio::EnsEMBL::VEP::Haplo::Runner - runner class for haplo
+
+=head1 SYNOPSIS
+
+my $runner = Bio::EnsEMBL::VEP::Haplo::Runner->new($config_hashref);
+
+$runner->run;
+
+=head1 DESCRIPTION
+
+The haplo runner class is used to run a Haplosaurus analysis given
+the configuration provided to the new() method.
+
+It should be the only class you need to instantiate manually if you
+wish to incorporate Haplosaurus analysis into your code.
+
+=head1 METHODS
 
 =cut
 
@@ -53,6 +69,22 @@ use Bio::EnsEMBL::VEP::TranscriptTree;
 use Bio::EnsEMBL::VEP::Haplo::InputBuffer;
 use Bio::EnsEMBL::VEP::Haplo::Parser::VCF;
 
+
+=head2 new
+
+  Arg 1      : hashref $config
+  Example    : $runner = Bio::EnsEMBL::VEP::Haplo::Runner->new($config);
+  Description: Creates a new haplo runner object. The $config hash passed is
+               used to create a Bio::EnsEMBL::VEP::Config object; see docs
+               for this object and the haplo script itself for allowed
+               parameters.
+  Returntype : Bio::EnsEMBL::VEP::Haplo::Runner
+  Exceptions : throws on invalid configuration, see Bio::EnsEMBL::VEP::Config
+  Caller     : haplo
+  Status     : Stable
+
+=cut
+
 sub new {
   my $caller = shift;
   my $class = ref($caller) || $caller;
@@ -65,7 +97,26 @@ sub new {
   return $self;
 }
 
-# dispatcher/runner for all initial setup from config
+
+=head2 init
+
+  Example    : $runner->init()
+  Description: Runs initialisation and setup for the runner. This includes:
+                - setting up database connection
+                - loading chromosome synonyms
+                - getting AnnotationSource object
+                - setting up FASTA file for sequence access
+                - loading haplotype frequency data from disk
+                - getting InputBuffer object
+                - initialising stats
+               Runs only once - subsequent calls are not executed.
+  Returntype : bool
+  Exceptions : none
+  Caller     : run()
+  Status     : Stable
+
+=cut
+
 sub init {
   my $self = shift;
 
@@ -96,7 +147,19 @@ sub init {
   return $self->{_initialized} = 1;
 }
 
-# run
+
+=head2 run
+
+  Example    : $runner->run();
+  Description: Runs Haplosaurus using the config as set up with new(). Writes
+               output to file/handle.
+  Returntype : bool
+  Exceptions : none
+  Caller     : haplo
+  Status     : Stable
+
+=cut
+
 sub run {
   my $self = shift;
 
@@ -122,6 +185,21 @@ sub run {
 
   return 1;
 }
+
+
+=head2 dump_TranscriptHaplotypeContainer
+
+  Arg 1      : Bio::EnsEMBL::Variation::TranscriptHaplotypeContainer $thc
+  Example    : $runner->dump_TranscriptHaplotypeContainer($thc);
+  Description: Writes a TranscriptHaplotypeContainer object to a flat file
+               ($self->get_output_file_handle) as a series of lines, each line
+               representing a unique CDS haplotype.
+  Returntype : none
+  Exceptions : none
+  Caller     : run()
+  Status     : Stable
+
+=cut
 
 sub dump_TranscriptHaplotypeContainer {
   my ($self, $thc) = @_;
@@ -184,9 +262,34 @@ sub dump_TranscriptHaplotypeContainer {
   }
 }
 
+
+=head2 get_AnnotationSource
+
+  Example    : my $as = $runner->get_AnnotationSource();
+  Description: Gets the AnnotationSource configured for this runner.
+  Returntype : Bio::EnsEMBL::VEP::Haplo::AnnotationType::Transcript
+  Exceptions : none
+  Caller     : init(), run(), get_TranscriptTree()
+  Status     : Stable
+
+=cut
+
 sub get_AnnotationSource {
   return $_[0]->get_all_AnnotationSources->[0];
 }
+
+
+=head2 get_Parser
+
+  Example    : my $parser = $runner->get_Parser();
+  Description: Gets the Parser configured for this runner. Currently Haplosaurus
+               supports only VCF input.
+  Returntype : Bio::EnsEMBL::VEP::Haplo::Parser::VCF
+  Exceptions : none
+  Caller     : getInputBuffer()
+  Status     : Stable
+
+=cut
 
 sub get_Parser {
   my $self = shift;
@@ -209,6 +312,18 @@ sub get_Parser {
   return $self->{parser};
 }
 
+
+=head2 get_InputBuffer
+
+  Example    : my $ib = $runner->get_InputBuffer();
+  Description: Gets the InputBuffer configured for this runner.
+  Returntype : Bio::EnsEMBL::VEP::Haplo::InputBuffer
+  Exceptions : none
+  Caller     : init(), run()
+  Status     : Stable
+
+=cut
+
 sub get_InputBuffer {
   my $self = shift;
 
@@ -223,6 +338,18 @@ sub get_InputBuffer {
   return $self->{input_buffer};
 }
 
+
+=head2 get_TranscriptTree
+
+  Example    : my $parser = $runner->get_TranscriptTree();
+  Description: Gets the TranscriptTree configured for this runner.
+  Returntype : Bio::EnsEMBL::VEP::TranscriptTree
+  Exceptions : none
+  Caller     : get_InputBuffer()
+  Status     : Stable
+
+=cut
+
 sub get_TranscriptTree {
   my $self = shift;
 
@@ -235,6 +362,24 @@ sub get_TranscriptTree {
 
   return $self->{transcript_tree};
 }
+
+
+=head2 haplotype_frequencies
+  
+  Arg 1      : string $filename
+  Example    : my $freqs = $runner->haplotype_frequencies($freqs_file);
+  Description: Gets a hashref of haplotype frequencies keyed on the md5 hex
+               of the haplotype's sequence. If a filename is provided, the
+               frequencies are loaded from this file. The file should contain
+               a header line starting with "#" indicating the names of the
+               columns; all columns except those named "hex" or "transcript"
+               are treated as representing a population/grouping name.
+  Returntype : hashref
+  Exceptions : throws if no hex field in header or invalid data in file
+  Caller     : init(), dump_TranscriptHaplotypeContainer()
+  Status     : Stable
+
+=cut
 
 sub haplotype_frequencies {
   my ($self, $file) = @_;

@@ -35,6 +35,20 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation - database variation annotation source
 
+=head1 SYNOPSIS
+
+my $as = Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation->new({
+  config => $config,
+});
+
+$as->annotate_InputBuffer($ib);
+
+=head1 DESCRIPTION
+
+Database-based annotation source for known variant data.
+
+=head1 METHODS
+
 =cut
 
 
@@ -50,7 +64,7 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
 use base qw(
   Bio::EnsEMBL::VEP::AnnotationSource::Database
-  Bio::EnsEMBL::VEP::AnnotationSource::BaseVariation
+  Bio::EnsEMBL::VEP::AnnotationType::Variation
 );
 
 our @VAR_CACHE_COLS = qw(
@@ -66,6 +80,22 @@ our @VAR_CACHE_COLS = qw(
   clin_sig
   phenotype_or_disease
 );
+
+
+=head2 new
+
+  Arg 1      : hashref $args
+               {
+                 config => Bio::EnsEMBL::VEP::Config $config,
+               }
+  Example    : $as = Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation->new($args);
+  Description: Create a new Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation object.
+  Returntype : Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation
+  Exceptions : throws if --check_frequency set (only compatible with cache annotation sources)
+  Caller     : AnnotationSourceAdaptor
+  Status     : Stable
+
+=cut
 
 sub new {
   my $caller = shift;
@@ -84,6 +114,21 @@ sub new {
 
   return $self;
 }
+
+
+=head2 get_features_by_regions_uncached
+
+  Arg 1      : arrayref $regions
+  Example    : $trs = $as->get_features_by_regions_uncached($regions)
+  Description: Gets all known variants overlapping the given set of regions. See
+               Bio::EnsEMBL::VEP::AnnotationSource::get_all_regions_by_InputBuffer()
+               for information about regions.
+  Returntype : arrayref of variant hashrefs
+  Exceptions : none
+  Caller     : get_all_features_by_InputBuffer()
+  Status     : Stable
+
+=cut
 
 sub get_features_by_regions_uncached {
   my $self = shift;
@@ -152,6 +197,19 @@ sub get_features_by_regions_uncached {
   return \@return;
 }
 
+
+=head2 seq_region_cache
+
+  Example    : $cache = $as->seq_region_cache()
+  Description: Gets a hashref mapping chromosome name to the database's
+               internal seq_region_id.
+  Returntype : hashref
+  Exceptions : none
+  Caller     : get_features_by_regions_uncached()
+  Status     : Stable
+
+=cut
+
 sub seq_region_cache {
   my $self = shift;
 
@@ -173,6 +231,18 @@ sub seq_region_cache {
   return $self->{seq_region_cache};
 }
 
+
+=head2 have_pubmed
+
+  Example    : $have_pubmed = $as->have_pubmed()
+  Description: Finds if this database contains any database citation information.
+  Returntype : bool
+  Exceptions : none
+  Caller     : DumpVEP pipeline
+  Status     : Stable
+
+=cut
+
 sub have_pubmed {
   my $self = shift;
 
@@ -192,6 +262,19 @@ sub have_pubmed {
 
   return $self->{have_pubmed};
 }
+
+
+=head2 phenotype_attrib_id
+
+  Example    : $id = $as->phenotype_attrib_id()
+  Description: Gets the internal database attribute ID that indicates if
+               a variant has an associated phenotype or disease.
+  Returntype : int
+  Exceptions : none
+  Caller     : get_features_by_regions_uncached()
+  Status     : Stable
+
+=cut
 
 sub phenotype_attrib_id {
   my $self = shift;
@@ -213,6 +296,18 @@ sub phenotype_attrib_id {
   return $self->{phenotype_attrib_id};
 }
 
+
+=head2 phenotype_attrib_id
+
+  Example    : $dbc = $as->var_dbc()
+  Description: Gets the DBI database connection object for the variation database.
+  Returntype : DBI
+  Exceptions : none
+  Caller     : get_features_by_regions_uncached()
+  Status     : Stable
+
+=cut
+
 sub var_dbc {
   my $self = shift;
 
@@ -226,9 +321,40 @@ sub var_dbc {
   return $self->{var_dbc};
 }
 
+
+=head2 merge_features
+
+  Arg 1      : arrayref $variant_hashrefs
+  Example    : $variant_hashrefs = $as->merge_features($variant_hashrefs)
+  Description: Compatibility method, returns arg
+  Returntype : arrayref
+  Exceptions : none
+  Caller     : annotate_InputBuffer()
+  Status     : Stable
+
+=cut
+
 sub merge_features {
   return $_[1];
 }
+
+
+=head2 info
+
+  Example    : $info = $as->info()
+  Description: Gets the info hashref for this annotation source. Contains
+               version information for:
+                - dbSNP
+                - COSMIC
+                - ClinVar
+                - ESP
+                - HGMD-PUBLIC
+  Returntype : hashref
+  Exceptions : none
+  Caller     : Bio::EnsEMBL::VEP::BaseRunner
+  Status     : Stable
+
+=cut
 
 sub info {
   my $self = shift;

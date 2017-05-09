@@ -35,6 +35,31 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::Parser::HGVS - HGVS list input parser
 
+=head1 SYNOPSIS
+
+my $parser = Bio::EnsEMBL::VEP::Parser::HGVS->new({
+  config => $config,
+  file   => 'hgvs.txt',
+});
+
+my $vf = $parser->next();
+
+=head1 DESCRIPTION
+
+HGVS format parser.
+
+See http://www.hgvs.org/mutnomen/ for spec.
+
+Variants can be g. (genomic), c. (transcript) or p. (protein), though
+since variants are transformed to genomic coordinates some p.
+descriptions may fail to parse if they do not unambiguously resolve
+to a genomic postion and ref/alt.
+
+Requires a database connection to look up reference feature
+locations, so not available in --offline mode.
+
+=head1 METHODS
+
 =cut
 
 
@@ -49,6 +74,23 @@ use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::IO::ListBasedParser;
 
+
+=head2 new
+
+  Arg 1      : hashref $args
+               {
+                 config    => Bio::EnsEMBL::VEP::Config,
+                 file      => string or filehandle,
+               }
+  Example    : $parser = Bio::EnsEMBL::VEP::Parser::HGVS->new($args);
+  Description: Create a new Bio::EnsEMBL::VEP::Parser::HGVS object.
+  Returntype : Bio::EnsEMBL::VEP::Parser::HGVS
+  Exceptions : throws if offline mode (--offline) enabled
+  Caller     : Runner
+  Status     : Stable
+
+=cut
+
 sub new {
   my $caller = shift;
   my $class = ref($caller) || $caller;
@@ -61,10 +103,35 @@ sub new {
   return $self;
 }
 
+
+=head2 parser
+
+  Example    : $io_parser = $parser->parser();
+  Description: Get ensembl-io parser object used to read data from input.
+  Returntype : Bio::EnsEMBL::IO::ListBasedParser
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
 sub parser {
   my $self = shift;
   return $self->{parser} ||= Bio::EnsEMBL::IO::ListBasedParser->open($self->file);
 }
+
+
+=head2 create_VariationFeatures
+
+  Example    : $vfs = $parser->create_VariationFeatures();
+  Description: Create a VariationFeature object from the current line
+               of input. 
+  Returntype : arrayref of Bio::EnsEMBL::VariationFeature
+  Exceptions : warns if unable to parse HGVS string
+  Caller     : next()
+  Status     : Stable
+
+=cut
 
 sub create_VariationFeatures {
   my $self = shift;

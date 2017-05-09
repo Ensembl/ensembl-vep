@@ -35,6 +35,28 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::Stats - object for tracking VEP run stats
 
+=head1 SYNOPSIS
+
+my $stats = Bio::EnsEMBL::VEP::Haplo::Stats->new({
+  config => $config
+});
+
+my $start_time = $stats->start_time();
+
+$stats->log_VariationFeature($vf);
+
+my $end_time = $stats->end_time();
+
+=head1 DESCRIPTION
+
+The Stats class is used to track all runtime and data statistics
+for a VEP run.
+
+It also generates summary statistics output, by default in an HTML
+report file containing tables and charts.
+
+=head1 METHODS
+
 =cut
 
 
@@ -57,6 +79,22 @@ BEGIN {
   }
 }
 
+
+=head2 new
+
+  Arg 1      : hashref $args
+               {
+                 config => Bio::EnsEMBL::VEP::Config,
+               }
+  Example    : $stats = Bio::EnsEMBL::VEP::Stats->new({config => $config});
+  Description: Create a new Bio::EnsEMBL::VEP::Stats object.
+  Returntype : Bio::EnsEMBL::VEP::Stats
+  Exceptions : none
+  Caller     : BaseVEP
+  Status     : Stable
+
+=cut
+
 sub new {
   my $caller = shift;
   my $class = ref($caller) || $caller;
@@ -71,11 +109,38 @@ sub new {
   return $self;
 }
 
+
+=head2 info
+
+  Arg 1      : (optional) hashref $info
+  Example    : $info = $stats->info();
+  Description: Get/set the info hashref. Used to store version and annotation
+               source data, as retrieved by get_output_header_info() in Runner.
+  Returntype : hashref
+  Exceptions : none
+  Caller     : Runner::init()
+  Status     : Stable
+
+=cut
+
 sub info {
   my $self = shift;
   $self->{info} = shift if @_;
   return $self->{info} ||= {};
 }
+
+
+=head2 start_time
+
+  Example    : $time = $stats->start_time();
+  Description: Get start timestamp of this VEP run. Set to current time the first
+               time this method is called.
+  Returntype : string
+  Exceptions : none
+  Caller     : Runner::init()
+  Status     : Stable
+
+=cut
 
 sub start_time {
   my $self = shift;
@@ -83,17 +148,69 @@ sub start_time {
   return $self->{stats}->{start_time} ||= get_time();
 }
 
+
+=head2 end_time
+
+  Example    : $time = $stats->end_time();
+  Description: Get end timestamp of this VEP run. Set to current time the first
+               time this method is called.
+  Returntype : string
+  Exceptions : none
+  Caller     : Runner::dump_stats()
+  Status     : Stable
+
+=cut
+
 sub end_time {
   return $_[0]->{stats}->{end_time} ||= get_time();
 }
+
+
+=head2 run_time
+
+  Example    : $runtime = $stats->run_time();
+  Description: Get run time in seconds (current time - start time)
+  Returntype : int
+  Exceptions : none
+  Caller     : generate_run_stats()
+  Status     : Stable
+
+=cut
 
 sub run_time {
   return time() - $_[0]->{stats}->{run_time_start};
 }
 
+
+=head2 log_lines_read
+
+  Arg 1      : int $num_lines
+  Example    : $stats->log_lines_read($num_lines);
+  Description: Store the total number of lines read, used in stats output
+  Returntype : none
+  Exceptions : none
+  Caller     : InputBuffer
+  Status     : Stable
+
+=cut
+
 sub log_lines_read {
   $_[0]->{stats}->{lines_read} = $_[1];
 }
+
+
+=head2 log_fasta_chromosomes
+
+  Arg 1      : Bio::DB::Fasta or Bio::DB::HTS::Faidx $fasta_db
+  Example    : $stats->log_fasta_chromosomes($fasta_db);
+  Description: Logs the chromosome names and lengths as retrieved
+               from FASTA db.
+  Returntype : none
+  Exceptions : none
+  Caller     : BaseVEP
+  Status     : Stable
+
+=cut
 
 sub log_fasta_chromosomes {
   my ($self, $fasta_db) = @_;
@@ -108,9 +225,37 @@ sub log_fasta_chromosomes {
   };
 }
 
+
+=head2 log_db_chromosomes
+
+  Arg 1      : hashref $chr_names_and_lengths
+  Example    : $stats->log_db_chromosomes($lengths);
+  Description: Logs the chromosome names and lengths as retrieved
+               from core database.
+  Returntype : none
+  Exceptions : none
+  Caller     : BaseVEP
+  Status     : Stable
+
+=cut
+
 sub log_db_chromosomes {
   $_[0]->{stats}->{chr_lengths} ||= $_[1];
 }
+
+
+=head2 log_VariationFeature
+
+  Arg 1      : Bio::EnsEMBL::Variation::BaseVariationFeature $vf
+  Arg 2      : hashref $vf_hash
+  Example    : $stats->log_VariationFeature($vf);
+  Description: Log statistics for a VariationFeature object
+  Returntype : none
+  Exceptions : none
+  Caller     : OutputFactory
+  Status     : Stable
+
+=cut
 
 sub log_VariationFeature {
   my $self = shift;
@@ -146,6 +291,20 @@ sub log_VariationFeature {
   }
 }
 
+
+=head2 log_VariationFeatureOverlapAllele
+
+  Arg 1      : Bio::EnsEMBL::Variation::VariationFeatureOverlapAllele $vfoa
+  Arg 2      : hashref $vf_hash
+  Example    : $stats->log_VariationFeatureOverlapAllele($vfoa);
+  Description: Log statistics for a VariationFeatureOverlapAllele object
+  Returntype : none
+  Exceptions : none
+  Caller     : OutputFactory
+  Status     : Stable
+
+=cut
+
 sub log_VariationFeatureOverlapAllele {
   my $self = shift;
   my ($vfoa, $hash) = @_;
@@ -165,15 +324,58 @@ sub log_VariationFeatureOverlapAllele {
   $self->$method(@_) if $self->can($method);
 }
 
+
+=head2 log_TranscriptVariationAllele
+
+  Arg 1      : Bio::EnsEMBL::Variation::TranscriptVariationAllele $tva
+  Arg 2      : hashref $vf_hash
+  Example    : $stats->log_TranscriptVariationAllele($tva);
+  Description: Log statistics for a TranscriptVariationAllele object
+  Returntype : none
+  Exceptions : none
+  Caller     : OutputFactory
+  Status     : Stable
+
+=cut
+
 sub log_TranscriptVariationAllele {
   my $self = shift;
   $self->log_BaseTranscriptVariationAllele(@_);
 }
 
+
+=head2 log_TranscriptStructuralVariationAllele
+
+  Arg 1      : Bio::EnsEMBL::Variation::TranscriptStructuralVariationAllele $tsva
+  Arg 2      : hashref $vf_hash
+  Example    : $stats->log_TranscriptStructuralVariationAllele($tsva);
+  Description: Log statistics for a TranscriptStructuralVariationAllele object
+  Returntype : none
+  Exceptions : none
+  Caller     : OutputFactory
+  Status     : Stable
+
+=cut
+
 sub log_TranscriptStructuralVariationAllele {
   my $self = shift;
   $self->log_BaseTranscriptVariationAllele(@_);
 }
+
+
+=head2 log_BaseTranscriptVariationAllele
+
+  Arg 1      : Bio::EnsEMBL::Variation::BaseTranscriptVariationAllele $btva
+  Arg 2      : hashref $vf_hash
+  Example    : $stats->log_BaseTranscriptVariationAllele($btva);
+  Description: Log statistics for a BaseTranscriptVariationAllele object
+  Returntype : none
+  Exceptions : none
+  Caller     : log_TranscriptVariationAllele()
+               log_TranscriptStructuralVariationAllele()
+  Status     : Stable
+
+=cut
 
 sub log_BaseTranscriptVariationAllele {
   my $self = shift;
@@ -198,15 +400,54 @@ sub log_BaseTranscriptVariationAllele {
   $stats->{gene}->{$hash->{Gene}}++;
 }
 
+
+=head2 log_sift_polyphen
+
+  Arg 1      : string $tool_name
+  Arg 2      : string $prediction
+  Example    : $stats->log_sift_polyphen('SIFT', 'deleterious');
+  Description: Log statistics for a SIFT or PolyPhen prediction
+  Returntype : none
+  Exceptions : none
+  Caller     : OutputFactory
+  Status     : Stable
+
+=cut
+
 sub log_sift_polyphen {
   my ($self, $tool, $pred) = @_;
   $self->{stats}->{counters}->{$tool}->{$pred}++;
 }
 
+
+=head2 increment_filtered_variants
+
+  Arg 1      : int $count
+  Example    : $stats->increment_filtered_variants(3);
+  Description: Log a number of filtered variants
+  Returntype : none
+  Exceptions : none
+  Caller     : AnnotationSource::Cache::BaseCacheVariation
+  Status     : Stable
+
+=cut
+
 sub increment_filtered_variants {
   my ($self, $count) = @_;
   $self->{stats}->{counters}->{filtered_variants} += $count;
 }
+
+
+=head2 finished_stats
+
+  Example    : $finished = $stats->finished_stats();
+  Description: Finalise and return finished stats hashref
+  Returntype : hashref
+  Exceptions : none
+  Caller     : dump_text(), dump_html()
+  Status     : Stable
+
+=cut
 
 sub finished_stats {
   my $self = shift;
@@ -280,6 +521,20 @@ sub finished_stats {
 
   return $self->{finished_stats};
 }
+
+
+=head2 generate_chart_data
+
+  Arg 1      : hashref $stats
+  Example    : $chart_data = $stats->generate_chart_data($stats);
+  Description: Generates chart configurations and data based on available
+               stats.
+  Returntype : arrayref
+  Exceptions : none
+  Caller     : finished_stats()
+  Status     : Stable
+
+=cut
 
 sub generate_chart_data {
   my $self = shift;
@@ -387,6 +642,19 @@ sub generate_chart_data {
   return \@charts;
 }
 
+
+=head2 generate_run_stats
+
+  Arg 1      : hashref $stats
+  Example    : $run_stats = $stats->generate_run_stats($stats);
+  Description: Generates VEP run stats.
+  Returntype : arrayref
+  Exceptions : none
+  Caller     : finished_stats()
+  Status     : Stable
+
+=cut
+
 sub generate_run_stats {
   my $self = shift;
   my $stats = shift;
@@ -441,6 +709,20 @@ sub generate_run_stats {
   return \@return;
 }
 
+
+=head2 generate_general_stats
+
+  Arg 1      : hashref $stats
+  Example    : $run_stats = $stats->generate_run_stats($stats);
+  Description: Generates general VEP stats, not run-related but not
+               suitable for charting e.g. no. overlapped genes.
+  Returntype : arrayref
+  Exceptions : none
+  Caller     : finished_stats()
+  Status     : Stable
+
+=cut
+
 sub generate_general_stats {
   my $self = shift;
   my $stats = shift;
@@ -466,6 +748,24 @@ sub generate_general_stats {
     ['Overlapped regulatory features', $stats->{regulatoryfeature} || '-'],
   ];
 }
+
+
+=head2 sort_keys
+
+  Arg 1      : hashref $data
+  Arg 2      : scalar $sort_type
+  Example    : $run_stats = $stats->generate_run_stats($stats);
+  Description: Sorts the keys from a hashref of data according to various strategies
+               as set by $sort_type:
+                - string 'chr'   : sort alphanumerically
+                - string 'value' : sort numerically by values in $data
+                - hashref        : sort numerically by values of keys in $sort
+  Returntype : arrayref of strings
+  Exceptions : none
+  Caller     : dump_text(), stats_html_head()
+  Status     : Stable
+
+=cut
 
 sub sort_keys {
   my $self = shift;
@@ -493,6 +793,20 @@ sub sort_keys {
   return \@keys;
 }
 
+
+=head2 dump_text
+
+  Arg 1      : (optional) filehandle $fh
+  Example    : $stats->dump_text(*STDOUT);
+  Description: Dumps statistics as text to filehandle; STDERR is used if no
+               filehandle given.
+  Returntype : bool
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
+
 sub dump_text {
   my $self = shift;
   my $fh = shift || *STDERR;
@@ -512,6 +826,19 @@ sub dump_text {
 
   return 1;
 }
+
+
+=head2 dump_html
+
+  Arg 1      : filehandle $fh
+  Example    : $stats->dump_html($fh);
+  Description: Dumps statistics as HTML to filehandle
+  Returntype : bool
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
 
 sub dump_html {
   my $self = shift;
@@ -569,6 +896,21 @@ sub dump_html {
 
   return 1;
 }
+
+
+=head2 stats_html_head
+
+  Arg 1      : arrayref $chart_data
+  Example    : $html = $stats->stats_html_head($chart_data);
+  Description: Generates the HTML header for HTML stats dump, includes
+               JavaScript necessary for rendering and interacting with
+               charts.
+  Returntype : string
+  Exceptions : none
+  Caller     : dump_html()
+  Status     : Stable
+
+=cut
 
 sub stats_html_head {
   my $self = shift;

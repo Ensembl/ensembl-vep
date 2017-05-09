@@ -35,6 +35,28 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::AnnotationSource::File - file-based annotation source
 
+=head1 SYNOPSIS
+
+# actually returns a Bio::EnsEMBL::VEP::AnnotationSource::File::VCF
+my $as = Bio::EnsEMBL::VEP::AnnotationSource::File->new({
+  config => $config,
+  file   => "some_variants.vcf.gz",
+  format => 'vcf',
+  type   => 'exact'
+});
+
+$as->annotate_InputBuffer($ib);
+
+=head1 DESCRIPTION
+
+Base class for all custom file-based AnnotationSource classes.
+
+Most child classes use ensembl-io parsers to read data from a custom annotation
+file. This means they operate on a seek() and next() method of finding data in
+the file.
+
+=head1 METHODS
+
 =cut
 
 
@@ -84,6 +106,31 @@ my %VALID_TYPES = (
   'exact' => 1,
 );
 
+
+=head2 new
+
+  Arg 1      : hashref $args
+               {
+                 config        => Bio::EnsEMBL::VEP::Config $config,
+                 file          => string $filename,
+                 format        => string $format (bed,bigwig,gff,gtf,vcf),
+                 short_name    => (optional) string $short_name,
+                 type          => (optional) string $type (overlap (default), exact),
+                 report_coords => (optional) bool $report_coords,
+               }
+  Example    : $as = Bio::EnsEMBL::VEP::AnnotationSource::File->new($args);
+  Description: Create a new Bio::EnsEMBL::VEP::AnnotationSource::File object. Will
+               actually return a sub-class depending on the specified format.
+  Returntype : Bio::EnsEMBL::VEP::AnnotationSource::File
+  Exceptions : throws if:
+                - no file given
+                - invalid format specified
+                - required module not installed (Bio::DB::HTS::Tabix or Bio::DB::BigFile)
+  Caller     : AnnotationSourceAdaptor
+  Status     : Stable
+
+=cut
+
 sub new {
   my $caller = shift;
   my $class = ref($caller) || $caller;
@@ -123,17 +170,60 @@ sub new {
   return $self;
 }
 
+
+=head2 file
+
+  Arg 1      : (optional) string $file
+  Example    : $file = $as->file()
+  Description: Getter/setter for filename for this source.
+  Returntype : string
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
 sub file {
   my $self = shift;
   $self->{file} = shift if @_;
   return $self->{file};
 }
 
+
+=head2 short_name
+
+  Arg 1      : (optional) string $short_name
+  Example    : $short_name = $as->short_name()
+  Description: Getter/setter for short name for this source, used as the key
+               in VEP output.
+  Returntype : string
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
 sub short_name {
   my $self = shift;
   $self->{short_name} = shift if @_;
   return $self->{short_name};
 }
+
+
+=head2 type
+
+  Arg 1      : (optional) string $type
+  Example    : $type = $as->type()
+  Description: Getter/setter for type of this source, either "overlap"
+               or "exact".
+                - overlap returns any source features that overlap input variants
+                - exact requires that source features' coordinates match input variants exactly
+  Returntype : string
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
 
 sub type {
   my $self = shift;
@@ -147,11 +237,41 @@ sub type {
   return $self->{type};
 }
 
+
+=head2 report_coords
+
+  Arg 1      : (optional) bool $report_coords
+  Example    : $report_coords = $as->report_coords()
+  Description: Getter/setter for the report_coords parameter. If set to a true value,
+               the coordinates of the source feature are returned in place of any
+               identifier found in the source for the feature.
+  Returntype : bool
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
 sub report_coords {
   my $self = shift;
   $self->{report_coords} = shift if @_;
   return $self->{report_coords};
 }
+
+
+=head2 annotate_InputBuffer
+
+  Arg 1      : Bio::EnsEMBL::VEP::InputBuffer
+  Example    : $as->annotate_InputBuffer($ib);
+  Description: Gets overlapping features from the source for the variants in
+               the input buffer, and adds them as references to the  relevant
+               VariationFeature.
+  Returntype : none
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
 
 sub annotate_InputBuffer {
   my $self = shift;
@@ -176,10 +296,36 @@ sub annotate_InputBuffer {
   }
 }
 
+
+=head2 valid_chromosomes
+
+  Example    : $chrs = $as->valid_chromosomes();
+  Description: Gets valid chromosome names for this source
+  Returntype : arrayref of strings
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
+
 sub valid_chromosomes {
   my $self = shift;
   return $self->{valid_chromosomes} ||= $self->parser->{tabix_file}->seqnames;
 }
+
+
+=head2 annotate_VariationFeature
+ 
+  Arg 1      : Bio::EnsEMBL::Variation::VariationFeature
+  Example    : $as->annotate_VariationFeature($vf);
+  Description: Add custom annotations to the given variant using the
+               current record as read from the annotation source.
+  Returntype : none
+  Exceptions : none
+  Caller     : annotate_InputBuffer()
+  Status     : Stable
+
+=cut
 
 sub annotate_VariationFeature {
   my $self = shift;
@@ -190,9 +336,35 @@ sub annotate_VariationFeature {
   push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$self->_create_records($overlap_result)} if $overlap_result;
 }
 
+
+=head2 _create_records
+ 
+  Example    : $records = $as->_create_records();
+  Description: Create a custom annotation record from the current
+               record as read from the annotation source.
+  Returntype : arrayref of hashrefs
+  Exceptions : none
+  Caller     : annotate_VariationFeature()
+  Status     : Stable
+
+=cut
+
 sub _create_records {
   return [{name => $_[0]->_get_record_name}];
 }
+
+
+=head2 _get_record_name
+ 
+  Example    : $record_name = $as->_get_record_name();
+  Description: Get name for the current record using either ID as
+               found in the source or record coordinates.
+  Returntype : string
+  Exceptions : none
+  Caller     : _create_records()
+  Status     : Stable
+
+=cut
 
 sub _get_record_name {
   my $self = shift;
@@ -209,6 +381,20 @@ sub _get_record_name {
     ) :
     $parser->get_name;
 }
+
+
+=head2 _record_overlaps_VF
+ 
+  Arg 1      : Bio::EnsEMBL::Variation::VariationFeature
+  Example    : $overlap_ok = $as->_record_overlaps_VF($vf);
+  Description: Determine whether the given VariationFeature overlaps
+               the current record, depending on the set type()
+  Returntype : bool
+  Exceptions : none
+  Caller     : annotate_VariationFeature()
+  Status     : Stable
+
+=cut
 
 sub _record_overlaps_VF {
   my $self = shift;

@@ -35,6 +35,18 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::BaseVEP - Base class used by the Bio::EnsEMBL::VEP::* classes
 
+=head1 SYNOPSIS
+
+Should not be invoked directly.
+
+=head1 DESCRIPTION
+
+Base class used by all Bio::EnsEMBL::VEP::* classes
+
+Contains methods for accessing common functionality.
+
+=head1 METHODS
+
 =cut
 
 
@@ -56,7 +68,24 @@ use Bio::EnsEMBL::CoordSystem;
 use Bio::EnsEMBL::VEP::Stats;
 use FileHandle;
 
-# new method, may or may not be reused by child classes
+
+=head2 new
+
+  Arg 1      : hashref $args
+               {
+                 config => Bio::EnsEMBL::VEP::Config,
+                 arg1   => val1,
+                 ... 
+               }
+  Example    : $obj = Bio::EnsEMBL::VEP::*->new($args);
+  Description: Constructor method used by most VEP classes
+  Returntype : Bio::EnsEMBL::VEP::BaseVEP
+  Exceptions : throws if config arg is not Bio::EnsEMBL::VEP::Config
+  Caller     : general
+  Status     : Stable
+
+=cut
+
 sub new {
   my $caller = shift;
   my $class = ref($caller) || $caller;
@@ -84,18 +113,53 @@ sub new {
   return $self;
 }
 
-# returns Bio::EnsEMBL::Variation::VEP::Config object
+
+=head2 config
+
+  Example    : $config = $obj->config()
+  Description: Gets associated Bio::EnsEMBL::VEP::Config
+  Returntype : Bio::EnsEMBL::VEP::Config
+  Exceptions : none
+  Caller     : param()
+  Status     : Stable
+
+=cut
+
 sub config {
   return $_[0]->{_config};
 }
 
-# gets/sets the value of a config parameter given a key name
+
+=head2 param
+
+  Examples   : $value = $obj->param($key)
+               $obj->param($key, $value)
+  Description: Getter/setter for config parameters
+  Returntype : string (typically)
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
 sub param {
   my $self = shift;
   return $self->config->param(@_);
 }
 
-# get stats object
+
+=head2 stats
+
+  Example    : $stats = $obj->stats()
+  Description: Get Bio::EnsEMBL::VEP::Stats object for this VEP run. Cached
+               on shared config object so all derived objects will share.
+  Returntype : Bio::EnsEMBL::VEP::Stats
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
 sub stats {
   my $self = shift;
 
@@ -107,6 +171,18 @@ sub stats {
 
   return $config->{_stats};
 }
+
+
+=head2 species
+
+  Example    : $species = $obj->species()
+  Description: Getter/setter species name configured for this VEP run
+  Returntype : string
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
 
 sub species {
   my $self = shift;
@@ -122,7 +198,20 @@ sub species {
   return $self->{_species};
 }
 
-# gets Bio::EnsEMBL::Registry, connects to DB if available
+
+=head2 registry
+
+  Arg 1      : (optional) Bio::EnsEMBL::Registry $registry
+  Example    : $registry = $obj->registry()
+  Description: Invokes database connection via Bio::EnsEMBL::Registry.
+               Can also be set as first arg; this is used by REST.
+  Returntype : Bio::EnsEMBL::Registry
+  Exceptions : none
+  Caller     : setup_db_connection(), REST
+  Status     : Stable
+
+=cut
+
 sub registry {
   my $self = shift;
 
@@ -183,6 +272,22 @@ sub registry {
   return $config->{_registry};
 }
 
+
+=head2 get_adaptor
+
+  Arg 1      : string $group (core, variation, funcgen)
+  Arg 2      : string $adaptor_type
+  Example    : $slice_adaptor = $obj->get_adaptor('core', 'slice')
+  Description: Gets database adaptors for given group and type. Uses internal
+               cache for speedup, bypasses requirement for giving species.
+               Also fetches "fake" adaptors with no DB connection where necessary.
+  Returntype : Bio::EnsEMBL::BaseAdaptor
+  Exceptions : throws if no group and/or type given
+  Caller     : general
+  Status     : Stable
+
+=cut
+
 sub get_adaptor {
   my $self = shift;
   my $group = shift;
@@ -208,6 +313,20 @@ sub get_adaptor {
   return $cache->{$group}->{$type};
 }
 
+
+=head2 _get_fake_adaptor
+
+  Arg 1      : string $group (core, variation, funcgen)
+  Arg 2      : string $adaptor_type
+  Example    : $fake_vf_adaptor = $obj->get_adaptor('variation', 'VariationFeature')
+  Description: Fetches "fake" adaptors with no DB connection.
+  Returntype : Bio::EnsEMBL::BaseAdaptor
+  Exceptions : none
+  Caller     : get_adaptor()
+  Status     : Stable
+
+=cut
+
 sub _get_fake_adaptor {
   my ($self, $group, $type) = @_;
 
@@ -223,6 +342,20 @@ sub _get_fake_adaptor {
 
   return $ad;
 }
+
+
+=head2 get_slice
+
+  Arg 1      : string $chr
+  Example    : $slice = $obj->get_slice('MT')
+  Description: Gets whole-chromosome slices from slice adaptor. Creates fake slices
+               using FASTA database if no database connection available.
+  Returntype : Bio::EnsEMBL::Slice
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
 
 sub get_slice {
   my $self = shift;
@@ -258,6 +391,19 @@ sub get_slice {
   return $cache->{$chr};
 }
 
+
+=head2 get_database_assembly
+
+  Example    : $assembly = $obj->get_database_assembly()
+  Description: Gets whole-chromosome slices from slice adaptor. Creates fake slices
+               using FASTA database if no database connection available.
+  Returntype : string
+  Exceptions : none
+  Caller     : BaseRunner, AnnotationSource::Database::Transcript
+  Status     : Stable
+
+=cut
+
 sub get_database_assembly {
   my $self = shift;
 
@@ -276,6 +422,18 @@ sub get_database_assembly {
 
   return $config->{_database_assembly};
 }
+
+
+=head2 fasta_db
+
+  Example    : $fasta_db = $obj->fasta_db()
+  Description: Sets up FASTA file handler using Bio::EnsEMBL::Variation::Utils::FastaSequence
+  Returntype : Bio::DB::HTS::Faidx or Bio::DB::Fasta
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
 
 sub fasta_db {
   my $self = shift;
@@ -300,6 +458,20 @@ sub fasta_db {
 
   return $self->config->{_fasta_db};
 }
+
+
+=head2 chromosome_synonyms
+  
+  Arg 1      : (optional) string $synonyms_file
+  Example    : $syns = $obj->chromosome_synonyms()
+  Description: Gets hashref of chromosome synonyms; synonyms from $synonyms_file
+               are added if specfied. 
+  Returntype : hashref
+  Exceptions : throws if cannot read from $synonyms_file
+  Caller     : general
+  Status     : Stable
+
+=cut
 
 sub chromosome_synonyms {
   my $self = shift;
@@ -327,6 +499,28 @@ sub chromosome_synonyms {
 
   return $self->config->{_chromosome_synonyms} ||= {};
 }
+
+
+=head2 get_source_chr_name
+  
+  Arg 1      : string $chr
+  Arg 2      : (optional) string $set_name
+  Arg 3      : (optional) arrayref $valid_chromosomes
+  Example    : $syns = $obj->get_source_chr_name()
+  Description: Attempts to get the chromosome name as it appears in a source
+               (annotation source, FASTA file, etc) from given chromosome name.
+               A list of valid chromosome names for the source can be given,
+               along with a set name to keep mappings for different sources separate.
+
+               Will also attempt to do simple transforms like adding/removing "chr".
+
+               If no valid match is found, returns $chr as given.
+  Returntype : string
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
 
 sub get_source_chr_name {
   my ($self, $chr, $set, $valids) = @_;
@@ -376,7 +570,21 @@ sub get_source_chr_name {
   return $chr_name_map->{$chr};
 }
 
-# adds shortcuts to named params to this object
+
+=head2 add_shortcuts
+  
+  Arg 1      : string $param_1
+  ...
+  Arg N      : string $param_N
+  Example    : $obj->add_shortcuts($param1, $param2, $param3)
+  Description: Adds "shortcuts" to $self for the values of config params
+  Returntype : none
+  Exceptions : throws if key for $param_N on $self already exists
+  Caller     : new() constructors
+  Status     : Stable
+
+=cut
+
 sub add_shortcuts {
   my $self = shift;
 
@@ -388,7 +596,20 @@ sub add_shortcuts {
   }
 }
 
-# prints a status message to STDOUT
+
+=head2 status_msg
+  
+  Arg 1      : string $msg
+  Example    : $obj->status_msg("Hello world!")
+  Description: Prints a time-stamped status message to STDOUT, adding
+               a newline character at the end if none given.
+  Returntype : none
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
 sub status_msg {
   my $self = shift;
   return if $self->param('quiet');
@@ -397,7 +618,20 @@ sub status_msg {
   print get_time()." - ".$msg.($msg =~ /\n$/ ? "" : "\n");
 }
 
-# prints warning messages to STDERR or a log file
+
+=head2 warning_msg
+  
+  Arg 1      : string $msg
+  Example    : $obj->warning_msg("Look out!")
+  Description: Prints a given warning message to handle given
+               by $self->warning_fh (default STDERR).
+  Returntype : none
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
 sub warning_msg {
   my $self = shift;
   my $text = shift || '';
@@ -416,7 +650,19 @@ sub warning_msg {
   }
 }
 
-# gets filehandle for use by warning_msg
+
+=head2 warning_fh
+  
+  Example    : $fh = $obj->warning_fh()
+  Description: Gets filehandle for writing warning messages to.
+               Defaults to STDERR, but can be configured via "warning_file" param
+  Returntype : glob
+  Exceptions : none
+  Caller     : warning_msg()
+  Status     : Stable
+
+=cut
+
 sub warning_fh {
   my $self = shift;
 
@@ -441,6 +687,20 @@ sub warning_fh {
 
   return $self->config->{warning_fh};
 }
+
+
+=head2 module_prefix
+  
+  Example    : $prefix = $obj->module_prefix()
+  Description: Gets prefix to be applied when generating classes; this is used
+               when instantiating Bio::EnsEMBL::VEP::AnnotationSource::* classes
+               so that the correct VEP or Haplo class is created
+  Returntype : string
+  Exceptions : none
+  Caller     : Bio::EnsEMBL::VEP::AnnotationSourceAdaptor, Bio::EnsEMBL::VEP::CacheDir
+  Status     : Stable
+
+=cut
 
 sub module_prefix {
   my $self = shift;

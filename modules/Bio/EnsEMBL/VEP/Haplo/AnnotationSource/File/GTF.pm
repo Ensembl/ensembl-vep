@@ -35,6 +35,23 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::Haplo::AnnotationSource::File::GTF - GTF transcript annotation source
 
+=head1 SYNOPSIS
+
+my $as = Bio::EnsEMBL::VEP::AnnotationSource::File::GTF->new({
+  config     => $config,
+  file       => $gtf_file,
+  short_name => $short_name,
+  type       => 'overlap',
+});
+
+$as->annotate_InputBuffer($ib);
+
+=head1 DESCRIPTION
+
+AnnotationSource that reads transcript data from a tabix-indexed GTF file.
+
+=head1 METHODS
+
 =cut
 
 
@@ -43,7 +60,21 @@ use warnings;
 
 package Bio::EnsEMBL::VEP::Haplo::AnnotationSource::File::GTF;
 
-use base qw(Bio::EnsEMBL::VEP::Haplo::AnnotationSource::BaseTranscript Bio::EnsEMBL::VEP::AnnotationSource::File::GTF);
+use base qw(Bio::EnsEMBL::VEP::Haplo::AnnotationType::Transcript Bio::EnsEMBL::VEP::AnnotationSource::File::GTF);
+
+
+=head2 populate_tree
+
+  Arg 1      : Bio::EnsEMBL::VEP::TranscriptTree
+  Example    : $as->populate_tree($tree);
+  Description: Populates the given transcript tree with data from the transcripts
+               in the GTF file.
+  Returntype : none
+  Exceptions : none
+  Caller     : internal
+  Status     : Stable
+
+=cut
 
 sub populate_tree {
   my ($self, $tree) = @_;

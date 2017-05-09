@@ -35,6 +35,18 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::AnnotationSource - Base class used for VEP annotation sources
 
+=head1 SYNOPSIS
+
+Should not be invoked directly.
+
+=head1 DESCRIPTION
+
+Base class for all VEP annotation sources. Contains basic methods for retrieving
+data from the annotation source; some or most of these may be overridden in any
+given child class.
+
+=head1 METHODS
+
 =cut
 
 
@@ -48,6 +60,19 @@ use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
 use Bio::EnsEMBL::VEP::FilterSet;
 
 use base qw(Bio::EnsEMBL::VEP::BaseVEP);
+
+
+=head2 new
+
+  Arg 1      : hashref $args
+  Example    : Invoked by child classes only
+  Description: Creates a new AnnotationSource. Copies all values in $args to $self.
+  Returntype : Bio::EnsEMBL::VEP::AnnotationSource
+  Exceptions : none
+  Caller     : Child classes
+  Status     : Stable
+
+=cut
 
 sub new {  
   my $caller = shift;
@@ -66,6 +91,20 @@ sub new {
 
   return $self;
 }
+
+
+=head2 get_all_features_by_InputBuffer
+
+  Arg 1      : Bio::EnsEMBL::VEP::InputBuffer $ib
+  Example    : $features = $as->get_all_features_by_InputBuffer($ib)
+  Description: Fetches all features that overlap the variants currently
+               in the input buffer.
+  Returntype : arrayref of Bio::EnsEMBL::Feature (typically)
+  Exceptions : none
+  Caller     : annotate_InputBuffer()
+  Status     : Stable
+
+=cut
 
 sub get_all_features_by_InputBuffer {
   my $self = shift;
@@ -104,6 +143,21 @@ sub get_all_features_by_InputBuffer {
     $self->filter_features_by_min_max(\@features, @{$buffer->min_max})
   );
 }
+
+
+=head2 get_all_regions_by_InputBuffer
+
+  Arg 1      : Bio::EnsEMBL::VEP::InputBuffer $ib
+  Example    : $regions = $as->get_all_regions_by_InputBuffer($ib)
+  Description: Fetches all non-overlapping regions that overlap the variants currently
+               in the input buffer. Regions are a simple arrayref [$chr, $start],
+               corresponding to bins of genomic coordinates, size cache_region_size
+  Returntype : arrayref of region arrayrefs
+  Exceptions : none
+  Caller     : get_all_features_by_InputBuffer()
+  Status     : Stable
+
+=cut
 
 sub get_all_regions_by_InputBuffer {
   my $self = shift;
@@ -150,6 +204,19 @@ sub get_all_regions_by_InputBuffer {
   return \@regions;
 }
 
+
+=head2 get_features_by_regions_cached
+
+  Arg 1      : arrayref $regions
+  Example    : $features = $as->get_features_by_regions_cached($regions)
+  Description: Fetches features for given regions from in-memory cache
+  Returntype : arrayref of Bio::EnsEMBL::Feature (typically)
+  Exceptions : none
+  Caller     : get_all_features_by_InputBuffer()
+  Status     : Stable
+
+=cut
+
 sub get_features_by_regions_cached {
   my $self = shift;
   my $regions = shift;
@@ -158,6 +225,24 @@ sub get_features_by_regions_cached {
 
   return [map {@{$cache->{$_->[0]}->{$_->[1]} || []}} @$regions];
 }
+
+
+=head2 filter_features_by_min_max
+
+  Arg 1      : arrayref $features
+  Arg 2      : int $min_min
+  Arg 3      : int $max_coord
+  Example    : $features = $as->filter_features_by_min_max($features, $min, $max)
+  Description: Filters a list of features to those overlapping a given coordinate range.
+               Used after features are fetched from regions/bins to limit those to be
+               analysed to just those that overlap the min/max retrieved from the
+               input buffer.
+  Returntype : arrayref of Bio::EnsEMBL::Feature (typically)
+  Exceptions : none
+  Caller     : get_all_features_by_InputBuffer()
+  Status     : Stable
+
+=cut
 
 sub filter_features_by_min_max {
   my $self = shift;
@@ -175,18 +260,55 @@ sub filter_features_by_min_max {
   ];
 }
 
+
+=head2 filter_set
+
+  Arg 1      : (optional) Bio::EnsEMBL::VEP::FilterSet $fs
+  Example    : $fs = $as->filter_set()
+  Description: Getter/setter for the FilterSet used to filter features
+               retrieved by this annotation source.
+  Returntype : Bio::EnsEMBL::VEP::FilterSet
+  Exceptions : none
+  Caller     : annotate_InputBuffer()
+  Status     : Stable
+
+=cut
+
 sub filter_set {
   my $self = shift;
   $self->{filter_set} = shift if @_;
   return $self->{filter_set};
 }
 
+
+=head2 cache
+
+  Example    : $cache = $as->cache()
+  Description: Gets (and initialises if required) the cache hashref used
+               to cache features between input buffer fills
+  Returntype : hashref
+  Exceptions : none
+  Caller     : get_features_by_regions_cached()
+  Status     : Stable
+
+=cut
+
 sub cache {
   return $_[0]->{_cache} ||= {};
 }
 
-# used after each disk fetch
-# removes out-of-range features from cache
+
+=head2 clean_cache
+
+  Example    : $as->clean_cache()
+  Description: Removes out-of-range features from in-memory cache
+  Returntype : none
+  Exceptions : none
+  Caller     : get_all_features_by_InputBuffer()
+  Status     : Stable
+
+=cut
+
 sub clean_cache {
   my $self = shift;
   my $keep_regions = shift || [];
@@ -207,6 +329,19 @@ sub clean_cache {
     }
   }
 }
+
+
+=head2 info
+
+  Example    : $info = $as->info()
+  Description: Gets the info hashref for this annotation source, typically
+               contains version information etc.
+  Returntype : hashref
+  Exceptions : none
+  Caller     : Bio::EnsEMBL::VEP::BaseRunner
+  Status     : Stable
+
+=cut
 
 sub info {
   return $_[0]->{info} || {};

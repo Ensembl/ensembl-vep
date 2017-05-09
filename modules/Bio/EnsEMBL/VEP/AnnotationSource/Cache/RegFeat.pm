@@ -35,6 +35,36 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat - local disk regulatory feature annotation source
 
+=head1 SYNOPSIS
+
+my $as = Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat->new({
+  config => $config,
+  dir    => $dir
+});
+
+$as->annotate_InputBuffer($ib);
+
+=head1 DESCRIPTION
+
+Cache-based annotation source for regulatory data.
+
+Data are stored as serialized objects on disk. Structure:
+
+$cache = {
+  chr => {
+    RegulatoryFeature => [
+      rf1,
+      rf2
+    ],
+    MotifFeature => [
+      mf1,
+      mf2
+    ]
+  }
+}
+
+=head1 METHODS
+
 =cut
 
 
@@ -53,8 +83,25 @@ use Bio::EnsEMBL::Variation::RegulatoryFeatureVariation;
 
 use base qw(
   Bio::EnsEMBL::VEP::AnnotationSource::Cache::BaseSerialized
-  Bio::EnsEMBL::VEP::AnnotationSource::BaseRegFeat
+  Bio::EnsEMBL::VEP::AnnotationType::RegFeat
 );
+
+
+=head2 new
+
+  Arg 1      : hashref $args
+               {
+                 config => Bio::EnsEMBL::VEP::Config $config,
+                 dir    => string $dir,
+               }
+  Example    : $as = Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat->new($args);
+  Description: Create a new Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat object.
+  Returntype : Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat
+  Exceptions : none
+  Caller     : CacheDir
+  Status     : Stable
+
+=cut
 
 sub new {
   my $caller = shift;
@@ -72,9 +119,37 @@ sub new {
   return $self;
 }
 
+
+=head2 get_available_cell_types
+
+  Example    : $types = $as->get_available_cell_types();
+  Description: Gets cell types available in this cache. Pre-loaded
+               from cache info file.
+  Returntype : arrayref of strings
+  Exceptions : none
+  Caller     : check_cell_types()
+  Status     : Stable
+
+=cut
+
 sub get_available_cell_types {
   return $_[0]->{available_cell_types} || [];
 }
+
+
+=head2 get_dump_file_name
+
+  Arg 1      : string $chr
+  Arg 2      : string $region or int $start
+  Arg 3      : (optional) int $end
+  Example    : $file = $as->get_dump_file_name(1, "1-1000000");
+  Description: Gets file name from the cache given a region.
+  Returntype : string
+  Exceptions : none
+  Caller     : get_features_by_regions_uncached()
+  Status     : Stable
+
+=cut
 
 sub get_dump_file_name {
   my $self = shift;
@@ -95,6 +170,20 @@ sub get_dump_file_name {
     $self->file_suffix
   );
 }
+
+
+=head2 deserialized_obj_to_features
+
+  Arg 1      : hashref $obj
+  Example    : $features = $as->deserialized_obj_to_features($obj);
+  Description: Takes the deserialized object read from the cache file,
+               restores the objects by reattaching necessary adaptors.
+  Returntype : arrayref of Bio::EnsEMBL::Feature
+  Exceptions : none
+  Caller     : get_features_by_regions_uncached()
+  Status     : Stable
+
+=cut
 
 sub deserialized_obj_to_features {
   my $self = shift;

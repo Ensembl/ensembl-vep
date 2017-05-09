@@ -35,6 +35,23 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::AnnotationSource::File::BED - BED annotation source
 
+=head1 SYNOPSIS
+
+my $as = Bio::EnsEMBL::VEP::AnnotationSource::File::BED->new({
+  config => $config,
+  file   => "my_features.bed.gz",
+  type   => "overlap"
+});
+
+$as->annotate_InputBuffer($ib);
+
+=head1 DESCRIPTION
+
+BED format custom annotation source. BED files must be chromosome/pos
+sorted, compressed with bgzip and indexed with tabix.
+
+=head1 METHODS
+
 =cut
 
 
@@ -47,6 +64,18 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::IO::Parser::BedTabix;
 
 use base qw(Bio::EnsEMBL::VEP::AnnotationSource::File);
+
+
+=head2 parser
+
+  Example    : $parser = $as->parser();
+  Description: Get ensembl-io parser to read from file
+  Returntype : Bio::EnsEMBL::IO::Parser::BedTabix
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
 
 sub parser {
   my $self = shift;

@@ -35,6 +35,57 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::FilterSet - Base class used for filters
 
+=head1 SYNOPSIS
+
+my $fs = Bio::EnsEMBL::VEP::FilterSet->new("field1 = foo and field2 < 10");
+
+my $pass = $fs->evaluate({field1 => 'foo', field2 => 6});
+my $fail = $fs->evaluate({field1 => 'bar', field2 => 12});
+
+=head1 DESCRIPTION
+
+The FilterSet class allows logical filtering by determining whether a given
+hashref of data "passes" a set of filters described in a fairly simple
+string format.
+
+The filter string consists of one or more units linked together by logical
+conditions (AND or OR) and optionally compartmentalised by parentheses.
+
+A unit consists of three components: a field, an operator and a value
+
+ - field: key name as found in the hashref to be evaluated. If no exact match
+   is found, the code attempts "synonym" lookups by looking for
+   case-insensitive and/or partial string matches e.g. "foobar" => "FooBar",
+   "cons" => "consequence"
+
+ - operator: the operator used to compare the value given in the filter string
+   to the user-supplied value for field in the evaluated hashref
+
+ - value: the value used to compare. If prefixed with "#", corresponds to
+   the value of #field in the data e.g. field1 < #field2
+
+If operator and value are excluded, then only the existence of field is
+checked.
+
+A unit may be "inverted" by adding "not" before the unit.
+
+Available operators:
+
+ - eq:       strings equal (eq in perl)
+ - ne:       strings inequal (ne in perl)
+ - gt:       numerical greater than (> in perl)
+ - lt:       numerical less than (< in perl)
+ - gte:      numerical greater than or equal to (>= in perl)
+ - lte:      numerical less than or equal to (>= in perl)
+ - ex:       value is defined (defined in perl)
+ - nex:      value is not defined (!defined in perl)
+ - re:       regular expression match
+ - nre:      regular expression non-match
+ - in:       value exists in comma-separated list or file
+ - is_child: uses ontology_adaptor to lookup via ontology
+
+=head1 METHODS
+
 =cut
 
 
@@ -65,6 +116,19 @@ my %FILTER_SYNONYMS = (
   'regex' => 're',
 );
 
+
+=head2 new
+
+  Arg 1      : string $filter_string
+  Example    : $fs = Bio::EnsEMBL::VEP::FilterSet->new($filter_string);
+  Description: Constructor for Bio::EnsEMBL::VEP::FilterString.
+  Returntype : Bio::EnsEMBL::VEP::FilterString
+  Exceptions : none
+  Caller     : filter_vep, AnnotationSource
+  Status     : Stable
+
+=cut
+
 sub new {  
   my $caller = shift;
   my $class = ref($caller) || $caller;
@@ -76,6 +140,71 @@ sub new {
 
   return $self;
 }
+
+
+=head2 parse_filters
+
+  Arg 1      : string $filter_string
+  Example    : $filter_root = $fs->parse_filters($filter_string);
+  Description: Takes a filter string and returns a hashref representing
+               the filter structure. The structure consists of a series
+               of nodes, each having one or more children components,
+               where siblings are logically linked filter units within
+               the same level of parentheses.
+
+               Examples:
+
+               "foo is bar" =>
+               {
+                 is_root => 1,
+                 logic => 'and',
+                 components => [
+                   {
+                     logic => 'and',
+                     field => 'foo',
+                     operator => 'eq',
+                     value => 'bar'
+                   }
+                 ]
+               }
+
+               "foo is bar and (a < 10 or b > 100)" =>
+               {
+                 is_root => 1,
+                 logic => 'and',
+                 components => [
+                   {
+                     logic => 'and',
+                     field => 'foo',
+                     operator => 'eq',
+                     value => 'bar',
+                   },
+                   {
+                     logic => 'and',
+                     operator => 'ex',
+                     components => [
+                       {
+                         logic => 'and',
+                         field => 'a',
+                         operator => 'lt',
+                         value => 10
+                       },
+                       {
+                         logic => 'or',
+                         field => 'b',
+                         operator => 'gt',
+                         value => 100
+                       },
+                     ],
+                   }
+                 ]
+               }
+  Returntype : hashref
+  Exceptions : throws on failure to parse filter string
+  Caller     : filter_vep, AnnotationSource
+  Status     : Stable
+
+=cut
 
 sub parse_filters {
   my $self = shift;
@@ -180,9 +309,38 @@ sub parse_filters {
   return $root;
 }
 
+
+=head2 defined_and_non_empty
+
+  Arg 1      : scalar $value
+  Examples   : $ok = $fs->defined_and_non_empty(1)
+               $ok = $fs->defined_and_non_empty(0)
+               $not_ok = $fs->defined_and_non_empty('')
+               $not_ok = $fs->defined_and_non_empty()
+  Description: Checks if a given value is defined and not an empty string
+  Returntype : bool
+  Exceptions : none
+  Caller     : parse_filters()
+  Status     : Stable
+
+=cut
+
 sub defined_and_non_empty {
   return defined($_[1]) && $_[1] ne '' ? 1 : 0;
 }
+
+
+=head2 create_filter_node
+
+  Arg 1      : hashref $filter_node
+  Example    : $node = $fs->create_filter_node()
+  Description: Initialises a filter node
+  Returntype : hashref
+  Exceptions : none
+  Caller     : parse_filters()
+  Status     : Stable
+
+=cut
 
 sub create_filter_node {
   my $self = shift;
@@ -193,6 +351,21 @@ sub create_filter_node {
 
   return $filter;
 }
+
+
+=head2 finish_filter_node
+
+  Arg 1      : hashref $filter_node
+  Example    : $node = $fs->finish_filter_node()
+  Description: Finalises a filter node; assigns default operator (ex),
+               checks value or reads file if operator is "in", deletes
+               "parent" key to avoid circular references
+  Returntype : hashref
+  Exceptions : none
+  Caller     : parse_filters()
+  Status     : Stable
+
+=cut
 
 sub finish_filter_node {
   my $self = shift;
@@ -250,6 +423,21 @@ sub finish_filter_node {
   return $filter;
 }
 
+
+=head2 evaluate
+
+  Arg 1      : hashref $data
+  Arg 2      : (optional) hashref $filter_root
+  Example    : $pass = $fs->evaluate($data)
+  Description: Evaluates a given hashref of data using the filter structure
+               defined by this FilterSet. Called iteratively by child nodes.
+  Returntype : bool
+  Exceptions : none
+  Caller     : user
+  Status     : Stable
+
+=cut
+
 sub evaluate {
   my $self = shift;
   my $data = shift;
@@ -302,6 +490,25 @@ sub evaluate {
 
   return $return;
 }
+
+
+=head2 get_input
+  
+  Arg 1      : string $field
+  Arg 2      : scalar $value
+  Arg 3      : hashref $data
+  Example    : $input = $fs->get_input('foo', 0.1, {foo => 'bar(0.7)'});
+  Description: Gets the value for field from given data hashref. The value
+               to be compared against is also supplied such that code can
+               work out whether to extract numerical or text part of mixed-type
+               values (e.g. 0.7 is returned in example above)
+  Returntype : scalar
+  Exceptions : throws if field name has partial match to multiple fields in data
+               during synonym lookup
+  Caller     : evaluate()
+  Status     : Stable
+
+=cut
 
 sub get_input {
   my ($self, $field, $value, $data) = @_;
@@ -374,11 +581,42 @@ sub get_input {
   return $input;
 }
 
+
+=head2 synonyms
+  
+  Arg 1      : (optional) hashref $synonyms
+  Example    : $syns = $fs->synonyms();
+  Description: Getter/setter for hashref containing synonyms mapping field
+               names as supplied in filter string to those actually found
+               in data.
+  Returntype : hashref
+  Exceptions : none
+  Caller     : get_input()
+  Status     : Stable
+
+=cut
+
 sub synonyms {
   my $self = shift;
   $self->{synonyms} = shift if @_;
   return $self->{synonyms} ||= {};
 }
+
+
+=head2 limit_synonym_search
+  
+  Arg 1      : (optional) bool $limit_search
+  Example    : $fs->limit_synonym_search(1);
+  Description: Getter/setter for setting controlling how synonyms are looked up.
+               By enabling this, if a synonym lookup fails the first time, it
+               will not be run again. Otherwise, a failed lookup can be repeated
+               each time get_input() is called
+  Returntype : hashref
+  Exceptions : none
+  Caller     : get_input()
+  Status     : Stable
+
+=cut
 
 sub limit_synonym_search {
   my $self = shift;
@@ -386,11 +624,39 @@ sub limit_synonym_search {
   return $self->{limit_synonym_search} ||= 0;
 }
 
+
+=head2 ontology_adaptor
+  
+  Arg 1      : (optional) Bio::EnsEMBL::DBSQL::OntologyTermAdaptor $ad
+  Example    : $ad = $fs->ontology_adaptor(1);
+  Description: Getter/setter for the ontology adaptor to use when looking
+               up child terms for the is_child operator
+  Returntype : Bio::EnsEMBL::DBSQL::OntologyTermAdaptor
+  Exceptions : none
+  Caller     : filter_vep, is_child()
+  Status     : Stable
+
+=cut
+
 sub ontology_adaptor {
   my $self = shift;
   $self->{_ontology_adaptor} = shift if @_;
   return $self->{_ontology_adaptor};
 }
+
+
+=head2 ontology_name
+  
+  Arg 1      : (optional) string $name
+  Example    : $name = $fs->ontology_name();
+  Description: Getter/setter for the ontology name to use when looking
+               up child terms for the is_child operator
+  Returntype : string
+  Exceptions : none
+  Caller     : filter_vep, is_child()
+  Status     : Stable
+
+=cut
 
 sub ontology_name {
   my $self = shift;

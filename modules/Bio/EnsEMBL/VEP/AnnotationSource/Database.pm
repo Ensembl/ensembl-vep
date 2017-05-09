@@ -35,6 +35,16 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::AnnotationSource::Database - database annotation source
 
+=head1 SYNOPSIS
+
+Should not be invoked directly.
+
+=head1 DESCRIPTION
+
+Base class for all database-based AnnotationSource classes.
+
+=head1 METHODS
+
 =cut
 
 
@@ -47,6 +57,24 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
 use base qw(Bio::EnsEMBL::VEP::AnnotationSource);
 
+
+=head2 new
+
+  Arg 1      : hashref $args
+               {
+                 config => Bio::EnsEMBL::VEP::Config $config,
+                 filter => string $transcript_filter,
+                 bam    => string $bam_file,
+               }
+  Example    : Not invoked directly
+  Description: Creates a new database AnnotationSource object
+  Returntype : Bio::EnsEMBL::VEP::AnnotationSource::Database
+  Exceptions : none
+  Caller     : AnnotationSourceAdaptor
+  Status     : Stable
+
+=cut
+
 sub new {
   my $caller = shift;
   my $class = ref($caller) || $caller;
@@ -57,6 +85,19 @@ sub new {
 
   return $self;
 }
+
+
+=head2 get_slice
+
+  Arg 1      : string $chr
+  Example    : $slice = $obj->get_slice('MT')
+  Description: Gets whole-chromosome slices from slice adaptor.
+  Returntype : Bio::EnsEMBL::Slice
+  Exceptions : none
+  Caller     : get_features_by_regions_uncached()
+  Status     : Stable
+
+=cut
 
 sub get_slice {
   my $self = shift;
@@ -77,6 +118,18 @@ sub get_slice {
 
   return $self->{_slice_cache}->{$chr};
 }
+
+
+=head2 valid_chromosomes
+
+  Example    : $chrs = $as->valid_chromosomes();
+  Description: Gets valid chromosome names for this database
+  Returntype : arrayref of strings
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
 
 sub valid_chromosomes {
   my $self = shift;

@@ -35,6 +35,20 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::AnnotationSource::Database::StructuralVariation - database structural variation annotation source
 
+=head1 SYNOPSIS
+
+my $as = Bio::EnsEMBL::VEP::AnnotationSource::Database::StructuralVariation->new({
+  config => $config,
+});
+
+$as->annotate_InputBuffer($ib);
+
+=head1 DESCRIPTION
+
+Database annotation source for known structural variants.
+
+=head1 METHODS
+
 =cut
 
 
@@ -50,6 +64,21 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
 use base qw(Bio::EnsEMBL::VEP::AnnotationSource::Database);
 
+
+=head2 annotate_InputBuffer
+
+  Arg 1      : Bio::EnsEMBL::VEP::InputBuffer
+  Example    : $as->annotate_InputBuffer($ib);
+  Description: Gets overlapping known structural variants for the variants in
+               the input buffer and adds them to the key "overlapping_svs"
+               on the VariationFeature object.
+  Returntype : none
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
+
 sub annotate_InputBuffer {
   my $self = shift;
   my $buffer = shift;
@@ -60,6 +89,21 @@ sub annotate_InputBuffer {
     }
   }
 }
+
+
+=head2 get_features_by_regions_uncached
+
+  Arg 1      : arrayref $regions
+  Example    : $svs = $as->get_features_by_regions_uncached($regions)
+  Description: Gets all structural variants overlapping the given set of regions. See
+               Bio::EnsEMBL::VEP::AnnotationSource::get_all_regions_by_InputBuffer()
+               for information about regions.
+  Returntype : arrayref of Bio::EnsEMBL::Variation::StructuralVariationFeature
+  Exceptions : none
+  Caller     : get_all_features_by_InputBuffer()
+  Status     : Stable
+
+=cut
 
 sub get_features_by_regions_uncached {
   my $self = shift;
@@ -106,6 +150,20 @@ sub get_features_by_regions_uncached {
   return \@return;
 }
 
+
+=head2 merge_features
+
+  Arg 1      : arrayref of Bio::EnsEMBL::Variation::StructuralVariationFeature $svs
+  Example    : $unique_svs = $as->merge_features($tr_record_hashes)
+  Description: Return a unique list of Structural variants. Unique
+               sorting done on dbID proprety of variants.
+  Returntype : arrayref
+  Exceptions : none
+  Caller     : annotate_InputBuffer()
+  Status     : Stable
+
+=cut
+
 sub merge_features {
   my $self = shift;
   my $features = shift;
@@ -120,6 +178,20 @@ sub merge_features {
 
   return \@return;
 }
+
+
+=head2 up_down_size
+
+  Example    : $size = $as->up_down_size();
+  Description: Gets range in bp that should be added to boundaries
+               when fetching features. 1 for variants to allow for
+               indel oddness.
+  Returntype : int
+  Exceptions : none
+  Caller     : get_all_regions_by_InputBuffer()
+  Status     : Stable
+
+=cut
 
 sub up_down_size {
   return 1;

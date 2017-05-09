@@ -35,6 +35,31 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::Runner - runner class for VEP
 
+=head1 SYNOPSIS
+
+my $runner = Bio::EnsEMBL::VEP::Runner->new({
+  input_file    => 'variants.vcf',
+  output_file   => 'variants_annotated.vcf',
+  output_format => 'vcf',
+  cache         => 1,
+});
+
+$runner->param('fork', 4);
+
+$runner->run();
+
+=head1 DESCRIPTION
+
+The Runner class is the entry point for access to most
+of VEP's functionality.
+
+Creating and configuring Runner should be all most users
+need to access VEP functionality.
+
+Shares a base class, BaseRunner, with Haplo::Runner.
+
+=head1 METHODS
+
 =cut
 
 
@@ -59,7 +84,27 @@ use Bio::EnsEMBL::VEP::InputBuffer;
 use Bio::EnsEMBL::VEP::OutputFactory;
 use Bio::EnsEMBL::Variation::Utils::FastaSequence qw(revert_fasta);
 
-# dispatcher/runner for all initial setup from config
+
+=head2 init
+
+  Example    : $runner->init()
+  Description: Runs initialisation and setup for the runner. This includes:
+                - initialising stats
+                - setting up database connection
+                - initialising plugins
+                - getting all AnnotationSources
+                - loading chromosome synonyms
+                - setting up FASTA file for sequence access
+                - getting InputBuffer object
+                - running post-setup checks
+               Runs only once - subsequent calls are not executed.
+  Returntype : bool
+  Exceptions : none
+  Caller     : run(), run_rest(), next_output_line()
+  Status     : Stable
+
+=cut
+
 sub init {
   my $self = shift;
 
@@ -91,7 +136,21 @@ sub init {
   return $self->{_initialized} = 1;
 }
 
-# run at the end of runner's life
+
+=head2 finish
+
+  Example    : $runner->finish()
+  Description: Finalises run and restores some states. This includes:
+                - calling plugins' finish() method
+                - dumping VEP run statistics
+                - resetting FASTA file config
+  Returntype : none
+  Exceptions : none
+  Caller     : run(), run_rest()
+  Status     : Stable
+
+=cut
+
 sub finish {
   my $self = shift;
 
@@ -104,7 +163,18 @@ sub finish {
   revert_fasta() if $self->fasta_db;
 }
 
-# run
+
+=head2 run
+
+  Example    : $runner->run()
+  Description: Run VEP: initialise, get and write output, finish.
+  Returntype : bool
+  Exceptions : none
+  Caller     : vep
+  Status     : Stable
+
+=cut
+
 sub run {
   my $self = shift;
 
@@ -125,7 +195,20 @@ sub run {
   return 1;
 }
 
-# like run but takes input as a string and returns an arrayref of results
+
+=head2 run_rest
+
+  Arg 1      : (optional) string $input
+  Example    : $results = $runner->run_rest($input)
+  Description: Run VEP as used from REST API: initialise, get output, finish,
+               return output as listref of hashrefs.
+  Returntype : listref of hashrefs
+  Exceptions : none
+  Caller     : REST API VEP Controller
+  Status     : Stable
+
+=cut
+
 sub run_rest {
   my $self = shift;
   my $input = shift;
@@ -153,13 +236,25 @@ sub run_rest {
   return \@return;
 }
 
-# use after run_rest() to check for warnings/errors
-# returns an arrayref of hashrefs with the following structure:
-# {
-#   type => 'ERROR',
-#   msg => 'Something exploded',
-#   stack => 'STACK Foo::Bar::foobar()\nSTACK Boo::Far::moocar()'
-# }
+
+=head2 warnings
+
+  Example    : $results = $runner->run_rest($dodgy_input);
+               $warnings = $runner->warnings();
+  Description: Used after run_rest() to check for warnings/errors
+               returns an arrayref of hashrefs with the following structure:
+               {
+                 type => 'ERROR',
+                 msg => 'Something exploded',
+                 stack => 'STACK Foo::Bar::foobar()\nSTACK Boo::Far::moocar()'
+               }
+  Returntype : listref of hashrefs
+  Exceptions : none
+  Caller     : REST API VEP Controller
+  Status     : Stable
+
+=cut
+
 sub warnings {
   my $self = shift;
 
@@ -199,6 +294,21 @@ sub warnings {
   return \@warnings;
 }
 
+
+=head2 next_output_line
+
+  Arg 1      : (optional) bool $output_as_hash
+  Example    : $line = $runner->next_output_line();
+  Description: Get the next line of output. If $output_as_hash is set
+               to a true value, a hashref of data is returned; otherwise
+               return value is a string.
+  Returntype : string or hashref
+  Exceptions : none
+  Caller     : run()
+  Status     : Stable
+
+=cut
+
 sub next_output_line {
   my $self = shift;
   my $output_as_hash = shift;
@@ -222,6 +332,24 @@ sub next_output_line {
 
   return @$output_buffer ? shift @$output_buffer : undef;
 }
+
+
+=head2 _buffer_to_output
+
+  Arg 1      : Bio::EnsEMBL::VEP::InputBuffer $ib
+  Arg 2      : (optional) bool $output_as_hash
+  Example    : $output = $runner->_buffer_to_output($ib);
+  Description: Get the next buffer "fill" and run annotate. This may be
+               delegated to a number of forked processes or run in this
+               process depending on configuration. If $output_as_hash is set
+               to a true value, arrayrefs of hashref of data are returned; otherwise
+               return value is an arrayref of strings.
+  Returntype : arrayref of strings or hashrefs
+  Exceptions : none
+  Caller     : next_output_line(), _forked_process()
+  Status     : Stable
+
+=cut
 
 sub _buffer_to_output {
   my $self = shift;
@@ -254,6 +382,25 @@ sub _buffer_to_output {
 
   return \@output;
 }
+
+
+=head2 _forked_buffer_to_output
+
+  Arg 1      : Bio::EnsEMBL::VEP::InputBuffer $ib
+  Arg 2      : (optional) bool $output_as_hash
+  Example    : $output = $runner->_forked_buffer_to_output($ib);
+  Description: Fork-based wrapper for _buffer_to_output. Divides variants
+               from InputBuffer into chunks and forks off a process to
+               run each chunk. Output is collected from socketpairs that
+               allow communication between the forked children and this
+               process; data is written to sockets as hashes serialised
+               with Storable.
+  Returntype : arrayref of strings or hashrefs
+  Exceptions : none
+  Caller     : next_output_line()
+  Status     : Stable
+
+=cut
 
 sub _forked_buffer_to_output {
   my $self = shift;
@@ -377,6 +524,28 @@ sub _forked_buffer_to_output {
   return \@return;
 }
 
+
+=head2 _forked_process
+
+  Arg 1      : Bio::EnsEMBL::VEP::InputBuffer $ib
+  Arg 2      : arrayref of Bio::EnsEMBL::VariationFeature $vfs
+  Arg 3      : filehandle $parent_socket
+  Arg 4      : bool $output_as_hash
+  Example    : $runner->_forked_process($ib, $vfs, $socket);
+  Description: Forked process is run within processes forked off by
+               _forked_buffer_to_output(). It essentially executes
+               _buffer_to_output() on the chunk of input given, and
+               prints output as hashrefs serialised with Storable to
+               a socketpair that is read by the parent process. These
+               serialised hashrefs also contain stats, cached plugin
+               data and any warnings or die states.
+  Returntype : none (exits process)
+  Exceptions : none
+  Caller     : _forked_buffer_to_output()
+  Status     : Stable
+
+=cut
+
 sub _forked_process {
   my $self = shift;
   my $buffer = shift;
@@ -450,6 +619,24 @@ sub _forked_process {
   exit(0);
 }
 
+
+=head2 post_setup_checks
+
+  Example    : $ok = $runner->post_setup_checks();
+  Description: Run a set of checks after initialisation:
+                - disable HGVS if using --offline with no FASTA
+                - check for set options incompatible with --offline
+                - warn user certain flags will access DB with --cache
+  Returntype : bool
+  Exceptions : throws if:
+                - --hgvs and --offline enabled without a FASTA file
+                - --check_ref and --offline enabled without a FASTA file
+                - --lrg and --offline set
+  Caller     : init()
+  Status     : Stable
+
+=cut
+
 sub post_setup_checks {
   my $self = shift;
 
@@ -501,6 +688,18 @@ sub post_setup_checks {
   return 1;
 }
 
+
+=head2 get_Parser
+
+  Example    : my $parser = $runner->get_Parser();
+  Description: Gets the Parser configured for this runner.
+  Returntype : Bio::EnsEMBL::VEP::Parser
+  Exceptions : none
+  Caller     : getInputBuffer()
+  Status     : Stable
+
+=cut
+
 sub get_Parser {
   my $self = shift;
 
@@ -523,6 +722,18 @@ sub get_Parser {
   return $self->{parser};
 }
 
+
+=head2 get_InputBuffer
+
+  Example    : my $ib = $runner->get_InputBuffer();
+  Description: Gets the InputBuffer configured for this runner.
+  Returntype : Bio::EnsEMBL::VEP::InputBuffer
+  Exceptions : none
+  Caller     : init(), run()
+  Status     : Stable
+
+=cut
+
 sub get_InputBuffer {
   my $self = shift;
 
@@ -535,6 +746,18 @@ sub get_InputBuffer {
 
   return $self->{input_buffer};
 }
+
+
+=head2 get_OutputFactory
+
+  Example    : my $ib = $runner->get_OutputFactory();
+  Description: Gets the OutputFactory configured for this runner.
+  Returntype : Bio::EnsEMBL::VEP::OutputFactory
+  Exceptions : none
+  Caller     : init(), run()
+  Status     : Stable
+
+=cut
 
 sub get_OutputFactory {
   my $self = shift;
@@ -550,6 +773,21 @@ sub get_OutputFactory {
 
   return $self->{output_factory};
 }
+
+
+=head2 get_all_Plugins
+
+  Example    : my $plugins = $runner->get_all_Plugins();
+  Description: Takes user config for plugins and initialises plugin object
+               instances. Failure to instantiate a plugin instance will not
+               throw by default; this must be enabled with --safe (as used
+               by web VEP and REST API).
+  Returntype : arrayref of Bio::EnsEMBL::Variation::Utils::BaseVepPlugin
+  Exceptions : none
+  Caller     : init()
+  Status     : Stable
+
+=cut
 
 sub get_all_Plugins {
   my $self = shift;

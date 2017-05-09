@@ -35,6 +35,24 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::Parser - base class for input parsers
 
+=head1 SYNOPSIS
+
+# note this actually returns a Bio::EnsEMBL::VEP::Parser::VCF
+my $parser = Bio::EnsEMBL::VEP::Parser->new({
+  config => $config,
+  file   => 'variants.vcf',
+  format => 'vcf'
+});
+
+my $vf = $parser->next();
+
+=head1 DESCRIPTION
+
+Base class for Parsers; typically a Parser sub-class will
+read data from an ensembl-io parser class.
+
+=head1 METHODS
+
 =cut
 
 
@@ -64,6 +82,30 @@ my %FORMAT_MAP = (
   'id'      => 'ID',
   'hgvs'    => 'HGVS',
 );
+
+
+=head2 new
+
+  Arg 1      : hashref $args
+               {
+                 config    => Bio::EnsEMBL::VEP::Config,
+                 file      => string or filehandle,
+                 format    => (optional) string (vcf, ensembl, id, hgvs),
+                 delimiter => (optional) string,
+               }
+  Example    : $parser = Bio::EnsEMBL::VEP::Parser->new($args);
+  Description: Create a new Bio::EnsEMBL::VEP::Parser object. Will
+               actually return a sub-class depending on either the specified
+               or detected format.
+  Returntype : Bio::EnsEMBL::VEP::Parser
+  Exceptions : throws if:
+                - no file given
+                - invalid format specified
+                - unable to detect format 
+  Caller     : Runner
+  Status     : Stable
+
+=cut
 
 sub new {
   my $caller = shift;
@@ -107,8 +149,18 @@ sub new {
   return $self;
 }
 
-# generic next method
-# sub-classes may override it
+
+=head2 next
+
+  Example    : $vf = $parser->next();
+  Description: Fetches the next valid VariationFeature from the input file
+  Returntype : Bio::EnsEMBL::Variation::BaseVariationFeature
+  Exceptions : none
+  Caller     : InputBuffer
+  Status     : Stable
+
+=cut
+
 sub next {
   my $self = shift;
 
@@ -128,9 +180,36 @@ sub next {
   return $vf;
 }
 
+
+=head2 headers
+
+  Example    : $headers = $parser->headers();
+  Description: Gets headers from the input file. Just a stub here.
+  Returntype : arrayref of strings
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
+
 sub headers {
   return [];
 }
+
+
+=head2 file
+
+  Arg 1      : (optional) string $filename or glob *filehandle
+  Example    : $file = $parser->file();
+  Description: Getter/setter for input file. This may be an open filehandle,
+               a file name (optionally gzip or bgzip compressed), or the string
+               'STDIN' to represent reading from STDIN.
+  Returntype : string or filehandle
+  Exceptions : throws if filename does not exist
+  Caller     : new(), parser()
+  Status     : Stable
+
+=cut
 
 sub file {
   my $self = shift;
@@ -155,6 +234,21 @@ sub file {
   
   return $self->{file};
 }
+
+
+=head2 skip_empty_lines
+
+  Example    : $num_skipped = $parser->skip_empty_lines();
+  Description: Skip over any empty lines that may be in the input,
+               returning the number skipped.
+               Not used by all parsers, so not executed in the next()
+               method in this base class.
+  Returntype : int
+  Exceptions : none
+  Caller     : next()
+  Status     : Stable
+
+=cut
 
 sub skip_empty_lines {
   my $self = shift;
@@ -185,11 +279,38 @@ sub skip_empty_lines {
   return $skipped;
 }
 
+
+=head2 line_number
+  
+  Arg 1      : (optional) int $line_number
+  Example    : $ln = $parser->line_number();
+  Description: Getter/setter for the current line number.
+  Returntype : int
+  Exceptions : none
+  Caller     : next(), skip_empty_lines()
+  Status     : Stable
+
+=cut
+
 sub line_number {
   my $self = shift;
   $self->{line_number} = shift if @_;
   return $self->{line_number};
 }
+
+
+=head2 valid_chromosomes
+  
+  Arg 1      : (optional) arrayref $valid_chromosomes
+  Example    : $valids = $parser->valid_chromosomes();
+  Description: Getter/setter for the list of valid chromosomes as found
+               in the configured AnnotationSources.
+  Returntype : arrayref of strings
+  Exceptions : none
+  Caller     : validate_vf()
+  Status     : Stable
+
+=cut
 
 sub valid_chromosomes {
   my $self = shift;
@@ -197,11 +318,39 @@ sub valid_chromosomes {
   return $self->{valid_chromosomes};
 }
 
+
+=head2 delimiter
+  
+  Arg 1      : (optional) string $delimiter
+  Example    : $delim = $parser->delimiter();
+  Description: Getter/setter for the delimiter used to separate fields
+               in the input. Most formats default to tab ("\t").
+  Returntype : string
+  Exceptions : none
+  Caller     : detect_format(), parser()
+  Status     : Stable
+
+=cut
+
 sub delimiter {
   my $self = shift;
   $self->{delimiter} = shift if @_;
   return $self->{delimiter};
 }
+
+
+=head2 detect_format
+  
+  Example    : $format = $parser->detect_format();
+  Description: Attempts to detect the format of the input by analysing
+               the first line. Not 100% successful, and will not work
+               with STDIN as the filehandle cannot be "reset"
+  Returntype : string
+  Exceptions : none
+  Caller     : new()
+  Status     : Stable
+
+=cut
 
 sub detect_format {
   my $self = shift;
@@ -323,7 +472,26 @@ sub detect_format {
   return $format;
 }
 
-# takes VFs created from input, fixes and checks various things
+
+=head2 validate_vf
+  
+  Arg 1      : Bio::EnsEMBL::Variation::BaseVariationFeature
+  Example    : $is_valid = $parser->validate_vf($vf);
+  Description: Performs various (configurable) checks on a VariationFeature
+               as produced by the parser:
+                - creates a variation_name from the location+alleles if none
+                - checks if chr is in user-specified list if provided
+                - checks start and end look like numbers
+                - checks start/end are valid (start <= end + 1) and corresponds to ref allele
+                - checks chr is in valid list
+                - checks ref allele vs genome if requested
+  Returntype : bool
+  Exceptions : none
+  Caller     : next()
+  Status     : Stable
+
+=cut
+
 sub validate_vf {
   my $self = shift;
   my $vf = shift;
@@ -482,6 +650,20 @@ sub validate_vf {
   return 1;
 }
 
+
+=head2 _have_chr
+  
+  Example    : $have_chr = $parser->_have_chr();
+  Description: Checks if the chromosome name assigned in the VariationFeature
+               is valid given the list provided by valid_chromosomes(); also
+               attempts to transform by adding/removing "chr".
+  Returntype : bool
+  Exceptions : none
+  Caller     : validate_vf()
+  Status     : Stable
+
+=cut
+
 sub _have_chr {
   my ($self, $vf) = @_;
 
@@ -516,12 +698,38 @@ sub _have_chr {
   return $have_chr;
 }
 
-# validate a structural variation
+
+=head2 validate_svf
+  
+  Arg 1      : Bio::EnsEMBL::Variation::StructuralVariationFeature
+  Example    : $is_valid = $parser->validate_svf($svf);
+  Description: Stub, not currently implemented
+  Returntype : bool
+  Exceptions : none
+  Caller     : validate_vf()
+  Status     : Stable
+
+=cut
+
 sub validate_svf {
   return 1;
 }
 
-# post process VFs - remapping etc
+
+=head2 post_process_vfs
+  
+  Arg 1      : arrayref of Bio::EnsEMBL::Variation::BaseVariationFeature
+  Example    : $vfs = $parser->post_process_vfs($svf);
+  Description: Applies some optional post-processing to VariationFeatures:
+                - mapping to LRG (--lrg)
+                - minimising alleles (--minimal)
+  Returntype : arrayref of Bio::EnsEMBL::Variation::BaseVariationFeature
+  Exceptions : none
+  Caller     : next()
+  Status     : Stable
+
+=cut
+
 sub post_process_vfs {
   my $self = shift;
   my $vfs = shift;
@@ -534,6 +742,20 @@ sub post_process_vfs {
 
   return $vfs;
 }
+
+
+=head2 map_to_lrg
+  
+  Arg 1      : arrayref of Bio::EnsEMBL::Variation::BaseVariationFeature
+  Example    : $vfs = $parser->map_to_lrg($svf);
+  Description: Maps variants to LRGs, appending any successfully mapped
+               VariationFeatures to the input arrayref.
+  Returntype : arrayref of Bio::EnsEMBL::Variation::BaseVariationFeature
+  Exceptions : none
+  Caller     : post_process_vfs()
+  Status     : Stable
+
+=cut
 
 sub map_to_lrg {
   my $self = shift;
@@ -564,6 +786,24 @@ sub map_to_lrg {
 
   return \@return;
 }
+
+
+=head2 minimise_alleles
+  
+  Arg 1      : arrayref of Bio::EnsEMBL::Variation::BaseVariationFeature
+  Example    : $vfs = $parser->minimise_alleles($svf);
+  Description: Modifies VariationFeatures by reducing REF/ALT to their
+               minimal shared sequence. Same principle as
+               InputBuffer::split_variants, but runs on VFs with a single ALT.
+
+               The original allele_string, start and end keys are stored
+               on the modified VF as e.g. original_allele_string.
+  Returntype : arrayref of Bio::EnsEMBL::Variation::BaseVariationFeature
+  Exceptions : none
+  Caller     : post_process_vfs()
+  Status     : Stable
+
+=cut
 
 sub minimise_alleles {
   my $self = shift;

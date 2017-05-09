@@ -35,7 +35,15 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::AnnotationSource::Cache::BaseCacheVariation - base class for cache variation sources
 
-DO NOT USE DIRECTLY
+=head1 SYNOPSIS
+
+Should not be invoked directly
+
+=head1 DESCRIPTION
+
+Base class for annotation sources that read variant data from a cache.
+
+=head1 METHODS
 
 =cut
 
@@ -52,8 +60,25 @@ use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
 
 use base qw(
   Bio::EnsEMBL::VEP::AnnotationSource::Cache
-  Bio::EnsEMBL::VEP::AnnotationSource::BaseVariation
+  Bio::EnsEMBL::VEP::AnnotationType::Variation
 );
+
+
+=head2 new
+
+  Arg 1      : hashref $args
+               {
+                 config => Bio::EnsEMBL::VEP::Config $config,
+                 dir    => string $dir,
+               }
+  Example    : Not invoked directly
+  Description: Create a new Bio::EnsEMBL::VEP::AnnotationSource::Cache::BaseCacheVariation object.
+  Returntype : Bio::EnsEMBL::VEP::AnnotationSource::Cache::BaseCacheVariation
+  Exceptions : none
+  Caller     : CacheDir
+  Status     : Stable
+
+=cut
 
 sub new {
   my $caller = shift;
@@ -72,6 +97,20 @@ sub new {
 
   return $self;
 }
+
+
+=head2 parse_variation
+
+  Arg 1      : string $line_of_data
+  Example    : $var = $as->parse_variation($line_of_data);
+  Description: Parses a line of data read from the cache into a
+               hashref structure representing a known variant.
+  Returntype : hashref
+  Exceptions : none
+  Caller     : read_variations_from_file(), _annotate_cl(), _annotate_pm()
+  Status     : Stable
+
+=cut
 
 sub parse_variation {
   my $self = shift;
@@ -105,9 +144,37 @@ sub parse_variation {
   return \%v;
 }
 
+
+=head2 get_valid_populations
+
+  Example    : $pops = $as->get_valid_populations();
+  Description: Get list of populations for which frequency data is available
+               in this cache. Currently a bodge which actually returns all of
+               the column names.
+  Returntype : hashref
+  Exceptions : none
+  Caller     : read_variations_from_file(), _annotate_cl(), _annotate_pm()
+  Status     : Stable
+
+=cut
+
 sub get_valid_populations {
   return $_[0]->get_cache_columns;
 }
+
+
+=head2 get_frequency_data
+
+  Arg 1      : Bio::EnsEMBL::Variation::VariationFeature $vf
+  Example    : $as->get_frequency_data($vf);
+  Description: Add frequency data read from the cache to the $vf,
+               accounting for strand and alleles where necessary.
+  Returntype : none
+  Exceptions : none
+  Caller     : frequency_check_buffer()
+  Status     : Stable
+
+=cut
 
 sub get_frequency_data {
   my $self = shift;
@@ -170,6 +237,19 @@ sub get_frequency_data {
   $self->_add_check_freq_data_to_vf($vf, \%freq_data) if %freq_data;
 }
 
+
+=head2 check_frequency_filter
+
+  Example    : $as->check_frequency_filter();
+  Description: Checks frequency filter parameters, throws if they
+               are invalid.
+  Returntype : none
+  Exceptions : throws if no or invalid population given
+  Caller     : new()
+  Status     : Stable
+
+=cut
+
 sub check_frequency_filter {
   my $self = shift;
 
@@ -183,6 +263,23 @@ sub check_frequency_filter {
 
   throw("ERROR: Invalid population ".$self->{freq_pop}." specified") unless $freq_pop_full eq '1KG_ALL' || $valid{$freq_pop_full} || $valid{$freq_pop || ''};
 }
+
+
+=head2 frequency_check_buffer
+
+  Arg 1      : Bio::EnsEMBL::VEP::InputBuffer $ib
+  Example    : $as->frequency_check_buffer($ib);
+  Description: Filters the variants in an input buffer by their allele
+               frequency according to user parameters and any matching
+               known variants. Note that the contents of the InputBuffer
+               are modified by this, meaning reset_buffer() is called
+               on the InputBuffer object.
+  Returntype : none
+  Exceptions : none
+  Caller     : annotate_InputBuffer()
+  Status     : Stable
+
+=cut
 
 sub frequency_check_buffer {
   my $self = shift;
@@ -253,6 +350,22 @@ sub frequency_check_buffer {
   }
 }
 
+
+=head2 _add_check_freq_data_to_vf
+
+  Arg 1      : Bio::EnsEMBL::Variation::VariationFeature $vf
+  Arg 2      : hashref $freq_data
+  Example    : $as->_add_check_freq_data_to_vf($vf, $freq_data);
+  Description: Adds any frequency data used to filter the variant
+               to the VariationFeature object using the key
+               "_freq_check_freqs"
+  Returntype : none
+  Exceptions : none
+  Caller     : get_frequency_data()
+  Status     : Stable
+
+=cut
+
 sub _add_check_freq_data_to_vf {
   my $self = shift;
   my $vf = shift;
@@ -291,9 +404,34 @@ sub _add_check_freq_data_to_vf {
   $vf->{_freq_check_all_failed} = 1 if $pass_count == 0;
 }
 
+
+=head2 delimiter
+
+  Example    : $delim = $as->delimiter();
+  Description: Get delimiter used in cache files.
+  Returntype : string
+  Exceptions : none
+  Caller     : parse_variation()
+  Status     : Stable
+
+=cut
+
 sub delimiter {
   return qr/ /;
 }
+
+
+=head2 merge_features
+
+  Arg 1      : arrayref $var_hashes
+  Example    : $unique_vars = $as->merge_features($var_hashes)
+  Description: Compatibility method, returns arg
+  Returntype : arrayref
+  Exceptions : none
+  Caller     : annotate_InputBuffer()
+  Status     : Stable
+
+=cut
 
 sub merge_features {
   return $_[1];

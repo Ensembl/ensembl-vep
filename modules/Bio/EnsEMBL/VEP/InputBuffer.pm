@@ -35,6 +35,28 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::InputBuffer - class representing a buffer of VariationFeatures to be processed by VEP
 
+=head1 SYNOPSIS
+
+my $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
+  config => $config,
+  parser => $parser 
+});
+
+my $vfs = $ib->next();
+
+=head1 DESCRIPTION
+
+The InputBuffer class represents a chunk or buffer of VariationFeature
+objects as created by the attached Parser object. Calling next() fills
+up the buffer to the size set by the parameter buffer_size.
+
+Also contains methods for retrieving VFs in the current buffer that
+overlap a given coordinate range - this is done using either
+Set::IntervalTree (preferred if installed) or a pure perl hash-based
+lookup.
+
+=head1 METHODS
+
 =cut
 
 
@@ -59,6 +81,26 @@ BEGIN {
   }
 }
 
+
+=head2 new
+
+  Arg 1      : hashref $args
+               {
+                 config             => Bio::EnsEMBL::VEP::Config,
+                 parser             => Bio::EnsEMBL::VEP::Parser,
+                 variation_features => listref of Bio::EnsEMBL::Variation::VariationFeature (optional, added to pre-buffer),
+               }
+  Example    : $ib = Bio::EnsEMBL::VEP::InputBuffer->new($args);
+  Description: Create a new Bio::EnsEMBL::VEP::InputBuffer object.
+               If the variation_features arg is supplied, the pre-buffer
+               is filled with those VariationFeatures.
+  Returntype : Bio::EnsEMBL::VEP::InputBuffer
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
+
 sub new {
   my $caller = shift;
   my $class = ref($caller) || $caller;
@@ -81,6 +123,19 @@ sub new {
   return $self;
 }
 
+
+=head2 parser
+
+  Arg 1      : (optional) Bio::EnsEMBL::VEP::Parser $parser
+  Example    : $parser = $ib->parser();
+  Description: Get/set the associated parser
+  Returntype : Bio::EnsEMBL::VEP::Parser
+  Exceptions : throws if given ref is not a Bio::EnsEMBL::VEP::Parser
+  Caller     : next(), finish_annotation()
+  Status     : Stable
+
+=cut
+
 sub parser {
   my $self = shift;
 
@@ -92,6 +147,20 @@ sub parser {
 
   return $self->{parser};
 }
+
+
+=head2 next
+
+  Example    : $vfs = $ib->next();
+  Description: Resets buffer, fills up to buffer_size from parser,
+               returns reference to filled buffer. Returns emtpy
+               arrayref at end of file.
+  Returntype : Bio::EnsEMBL::VEP::Parser
+  Exceptions : throws if given ref is not a Bio::EnsEMBL::VEP::Parser
+  Caller     : next(), finish_annotation()
+  Status     : Stable
+
+=cut
 
 sub next {
   my $self = shift;
@@ -149,6 +218,21 @@ sub next {
   return $buffer;
 }
 
+
+=head2 get_overlapping_vfs
+  
+  Arg 1      : int $start
+  Arg 2      : int $end
+  Example    : $vfs = $ib->get_overlapping_vfs($start, $end);
+  Description: Gets all VariationFeatures overlapping the coordinate
+               range given by $start, $end
+  Returntype : arrayref of Bio::EnsEMBL::Variation::VariationFeature
+  Exceptions : none
+  Caller     : AnnotationSource
+  Status     : Stable
+
+=cut
+
 sub get_overlapping_vfs {
   my $self = shift;
   my $start = shift;
@@ -177,6 +261,19 @@ sub get_overlapping_vfs {
   }
 }
 
+
+=head2 interval_tree
+  
+  Example    : $tree = $ib->interval_tree();
+  Description: Gets interval tree populated with coordinates of
+               VariationFeatures currently in the buffer.
+  Returntype : Set::IntervalTree
+  Exceptions : none
+  Caller     : get_overlapping_vfs()
+  Status     : Stable
+
+=cut
+
 sub interval_tree {
   my $self = shift;
 
@@ -198,10 +295,28 @@ sub interval_tree {
   return $self->{temp}->{interval_tree};
 }
 
-# this is a pure-perl interval tree of sorts
-# variants are added to "branches" (keys) of a hash
-# where the key is a bin obtained by bin = int(coord / $HASH_TREE_SIZE)
-# variants can span multiple bins and so can be added to more than one branch
+
+=head2 hash_tree
+  
+  Example    : $tree = $ib->hash_tree();
+  Description: Gets hash tree populated with coordinates of
+               VariationFeatures currently in the buffer.
+
+               This is a pure-perl interval tree of sorts;
+               variants are added to "branches" (keys) of a hash,
+               where the key is a bin obtained by
+               
+               bin = int(coord / $HASH_TREE_SIZE).
+               
+               Variants can span multiple bins and so can be added
+               to more than one branch.
+  Returntype : hashref
+  Exceptions : none
+  Caller     : get_overlapping_vfs()
+  Status     : Stable
+
+=cut
+
 sub hash_tree {
   my $self = shift;
 
@@ -231,6 +346,19 @@ sub hash_tree {
   return $self->{temp}->{hash_tree};
 }
 
+
+=head2 min_max
+  
+  Example    : my ($min, $max) = @{$ib->min_max()};
+  Description: Gets the minimum and maximum coordinates spanned
+               by variants in the buffer.
+  Returntype : arrayref [$min, $max]
+  Exceptions : none
+  Caller     : AnnotationSource
+  Status     : Stable
+
+=cut
+
 sub min_max {
   my $self = shift;
 
@@ -258,6 +386,19 @@ sub min_max {
   return $self->{temp}->{min_max};
 }
 
+
+=head2 finish_annotation
+  
+  Example    : $ib->finish_annotation();
+  Description: Finalises annotation on variants in the buffer, logs stats
+               and ensures VariationFeatures have an attached slice.
+  Returntype : none
+  Exceptions : none
+  Caller     : AnnotationSource
+  Status     : Stable
+
+=cut
+
 sub finish_annotation {
   my $self = shift;
   $self->stats->log_lines_read($self->parser->line_number) if $self->parser;
@@ -268,13 +409,50 @@ sub finish_annotation {
   }
 }
 
+
+=head2 reset_buffer
+  
+  Example    : $ib->reset_buffer();
+  Description: Empties buffer and deletes interval/hash trees
+  Returntype : none
+  Exceptions : none
+  Caller     : next()
+  Status     : Stable
+
+=cut
+
 sub reset_buffer {
   $_[0]->{temp} = {};
 }
 
+
+=head2 reset_pre_buffer
+  
+  Example    : $ib->reset_pre_buffer();
+  Description: Empties pre-buffer
+  Returntype : none
+  Exceptions : none
+  Caller     : next()
+  Status     : Stable
+
+=cut
+
 sub reset_pre_buffer {
   $_[0]->{pre_buffer} = [];
 }
+
+
+=head2 buffer
+  
+  Example    : $vfs = $ib->buffer();
+  Description: Gets/sets arrayref of VariationFeatures that are the
+               current buffer "fill"
+  Returntype : arrayref of Bio::EnsEMBL::Variation::VariationFeature
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
 
 sub buffer {
   my $self = shift;
@@ -282,15 +460,69 @@ sub buffer {
   return $self->{temp}->{buffer} ||= [];
 }
 
+
+=head2 pre_buffer
+  
+  Example    : $vfs = $ib->pre_buffer();
+  Description: Gets/sets arrayref of VariationFeatures that are the
+               in the pre-buffer - used to fill buffer before reading
+               from the parser
+  Returntype : arrayref of Bio::EnsEMBL::Variation::VariationFeature
+  Exceptions : none
+  Caller     : next()
+  Status     : Stable
+
+=cut
+
 sub pre_buffer {
   return $_[0]->{pre_buffer} ||= [];
 }
+
+
+=head2 rejoin_required
+  
+  Arg 1      : (optional) bool $rejoin_required
+  Example    : $ib->rejoin_required(1);
+  Description: Gets/sets setting that informs downstream objects that
+               variants in this buffer need re-joining after undergoing
+               splitting in split_variants()
+  Returntype : bool
+  Exceptions : none
+  Caller     : next()
+  Status     : Stable
+
+=cut
 
 sub rejoin_required {
   my $self = shift;
   $self->{temp}->{rejoin_required} = shift if @_;
   return $self->{temp}->{rejoin_required} ||= 0;
 }
+
+
+=head2 split_variants
+  
+  Example    : $ib->split_variants();
+  Description: Splits VariationFeatures with multiple alternate alleles
+               into one VariationFeature per alternate allele. Links are
+               retained between split variants such that they can be
+               rejoined later; this occurs in
+               OutputFactory::rejoin_variants_in_InputBuffer().
+
+               Splitting variants allows complex entries to be resolved
+               to their minimum ALT/REF configuration before consequence
+               calling e.g.:
+
+               A/AC/G => -/C, A/G
+
+               Note that coordinates are adjusted accordingly, meaning user
+               must be careful interpreting output produced this way.
+  Returntype : bool
+  Exceptions : none
+  Caller     : next()
+  Status     : Stable
+
+=cut
 
 sub split_variants {
   my $self = shift;

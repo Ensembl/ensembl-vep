@@ -35,6 +35,25 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::TranscriptTree - class containing IntervalTree of transcript locations
 
+=head1 SYNOPSIS
+
+my $tree = Bio::EnsEMBL::VEP::TranscriptTree->new({
+  config            => $config,
+  annotation_source => $as
+});
+
+my $overlaps = $tree->fetch($chr, $start, $end);
+
+=head1 DESCRIPTION
+
+The TranscriptTree class uses a series of Set::IntervalTree objects
+to retrieve references to overlapping features.
+
+It requires an attached AnnotationSource that implements a
+populate_tree() method that will populate the tree with features.
+
+=head1 METHODS
+
 =cut
 
 
@@ -49,6 +68,29 @@ use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Set::IntervalTree;
 
+
+=head2 new
+
+  Arg 1      : hashref $args
+               {
+                 config            => Bio::EnsEMBL::VEP::Config,
+                 annotation_source => Bio::EnsEMBL::VEP::AnnotationSource,
+               }
+  Example    : $tree = Bio::EnsEMBL::VEP::TranscriptTree->new({
+                 config            => $config,
+                 annotation_source => $as
+               });
+  Description: Create a new Bio::EnsEMBL::VEP::TranscriptTree object. Requires
+               annotation_source arg to be set to a reference to a compatible
+               AnnotationSource i.e. one that implements a populate_tree()
+               method.
+  Returntype : Bio::EnsEMBL::VEP::TranscriptTree
+  Exceptions : throws if no AnnotationSource given or AnnotationSource has no populate_tree() method
+  Caller     : Runner
+  Status     : Stable
+
+=cut
+
 sub new {
   my $caller = shift;
   my $class = ref($caller) || $caller;
@@ -58,7 +100,7 @@ sub new {
   my $hashref = $_[0];
 
   my $as = $hashref->{annotation_source};
-  assert_ref($as, 'Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript');
+  assert_ref($as, 'Bio::EnsEMBL::VEP::AnnotationType::Transcript');
 
   throw("ERROR: Unable to populate tree from annotation source type ".ref($as)) unless $as->can('populate_tree');
   $as->populate_tree($self);
@@ -68,11 +110,47 @@ sub new {
   return $self;
 }
 
+
+=head2 get_chr_tree
+
+  Example    : $chr_tree = $tree->get_chr_tree($chr);
+  Description: Get the Set::IntervalTree object for this chromosome.
+  Returntype : Set::IntervalTree
+  Exceptions : none
+  Caller     : insert(), fetch()
+  Status     : Stable
+
+=cut
+
 sub get_chr_tree {
   my $self = shift;
   my $chr = shift;
   return $self->{trees}->{$chr} ||= Set::IntervalTree->new();
 }
+
+
+=head2 insert
+
+  Arg 1      : string $chromosome
+  Arg 2      : int $start
+  Arg 3      : int $end
+  Arg 4      : scalar $obj
+  Example    : [$min, $max] = $tree->insert($chr, $start, $end);
+               $tree->insert($chr, $start, $end, $obj);
+  Description: Insert given chromosome range into tree. If no object $obj
+               is provided, a fetch is first performed, and any overlapping
+               ranges are merged with this one, removed, and a single
+               expanded range re-inserted into the tree. The expanded range
+               is then returned as an arrayref [$min, $max].
+
+               If an object $obj (can be a reference or any scalar) then this
+               is inserted instead, with the provided [$start, $end] returned
+  Returntype : arrayref [$min, $max]
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
 
 sub insert {  
   my ($self, $c, $s, $e, $obj) = @_;
@@ -106,10 +184,40 @@ sub insert {
   return [$min, $max];
 }
 
+
+=head2 fetch
+
+  Arg 1      : string $chromosome
+  Arg 2      : int $start
+  Arg 3      : int $end
+  Example    : my $overlapping = $tree->fetch($chr, $start, $end)
+  Description: Fetch features overlapping the given coordinate range
+  Returntype : arrayref
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
 sub fetch {
   my ($self, $c, $s, $e) = @_;
   return $self->get_chr_tree($self->get_source_chr_name($c))->fetch($s - 1, $e);
 }
+
+
+=head2 nearest
+
+  Arg 1      : string $chromosome
+  Arg 2      : int $start
+  Arg 3      : int $end
+  Example    : my $nearest = $tree->nearest($chr, $start, $end)
+  Description: Fetch nearest features to given coordinate range
+  Returntype : whatever reference type was inserted by insert()
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
 
 sub nearest {
   my ($self, $c, $s, $e) = @_;
@@ -145,6 +253,20 @@ sub nearest {
   return [map {$search[$_]} grep {$dists{$_} == $min_dist} 0..$#search];
 }
 
+
+=head2 _get_obj_start_end
+
+  Arg 1      : hashref $obj or arrayref [$start, $end]
+  Example    : [$s, $e] = $tree->_get_obj_start_end($obj)
+  Description: Gets start and end given either an object hashref
+               or arrayref [$s, $e]
+  Returntype : arrayref [$start, $end]
+  Exceptions : none
+  Caller     : nearest()
+  Status     : Stable
+
+=cut
+
 sub _get_obj_start_end {
   my ($self, $obj) = @_;
 
@@ -161,6 +283,23 @@ sub _get_obj_start_end {
   return [$s, $e];
 }
 
+
+=head2 _get_dist
+
+  Arg 1      : int $start1
+  Arg 2      : int $end1
+  Arg 3      : int $start2
+  Arg 4      : int $end2
+  Example    : $dist = $tree->_get_dist(1, 5, 8, 12)
+  Description: Finds shortest distance between any two ends of two given
+               coordinate pairs.
+  Returntype : int
+  Exceptions : none
+  Caller     : nearest()
+  Status     : Stable
+
+=cut
+
 sub _get_dist {
   my ($self, $o_s, $o_e, $s, $e) = @_;
 
@@ -176,6 +315,20 @@ sub _get_dist {
     )
   )[0];
 }
+
+
+=head2 valid_chromosomes
+  
+  Arg 1      : (optional) arrayref $valid_chromosomes
+  Example    : $valids = $tree->valid_chromosomes();
+  Description: Getter/setter for the list of valid chromosomes as found
+               in the configured AnnotationSource.
+  Returntype : arrayref of strings
+  Exceptions : none
+  Caller     : new(), BaseVEP
+  Status     : Stable
+
+=cut
 
 sub valid_chromosomes {
   my $self = shift;

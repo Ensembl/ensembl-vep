@@ -35,6 +35,18 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::OutputFactory::BaseTab - tab-delimited output factory base class
 
+=head1 SYNOPSIS
+
+Not invoked directly
+
+=head1 DESCRIPTION
+
+Base class for tab-delimited output formats, used by
+Bio::EnsEMBL::VEP::OutputFactory::VEP_output and
+Bio::EnsEMBL::VEP::OutputFactory::Tab.
+
+=head1 METHODS
+
 =cut
 
 
@@ -46,6 +58,18 @@ package Bio::EnsEMBL::VEP::OutputFactory::BaseTab;
 use Bio::EnsEMBL::VEP::Utils qw(get_version_data);
 
 use base qw(Bio::EnsEMBL::VEP::OutputFactory);
+
+
+=head2 headers
+
+  Example    : $headers = $of->headers();
+  Description: Get list of headers to print out.
+  Returntype : listref of strings
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
 
 sub headers {
   my $self = shift;

@@ -35,6 +35,16 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::AnnotationSource::Cache - local disk annotation source
 
+=head1 SYNOPSIS
+
+Should not be invoked directly.
+
+=head1 DESCRIPTION
+
+Base class for all cache-based AnnotationSource classes.
+
+=head1 METHODS
+
 =cut
 
 
@@ -47,11 +57,35 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
 use base qw(Bio::EnsEMBL::VEP::AnnotationSource);
 
+
+=head2 dir
+
+  Example    : $dir = $as->dir();
+  Description: Gets the path to the directory containing the cache data
+  Returntype : string
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
 sub dir {
   my $self = shift;
   $self->{dir} = shift if @_;
   return $self->{dir};
 }
+
+
+=head2 valid_chromosomes
+
+  Example    : $chrs = $as->valid_chromosomes();
+  Description: Gets valid chromosome names for this cache
+  Returntype : arrayref of strings
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
 
 sub valid_chromosomes {
   return $_[0]->{valid_chromosomes} || [];

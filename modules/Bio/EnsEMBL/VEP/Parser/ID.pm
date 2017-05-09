@@ -35,6 +35,29 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::Parser::ID - ID list input parser
 
+=head1 SYNOPSIS
+
+my $parser = Bio::EnsEMBL::VEP::Parser::HGVS->new({
+  config => $config,
+  file   => 'variant_ids.txt',
+});
+
+my $vf = $parser->next();
+
+=head1 DESCRIPTION
+
+ID format parser. Variant IDs are looked up in the relevant Ensembl
+Variation database; see
+http://www.ensembl.org/info/genome/variation/sources_documentation.html
+for imported sources.
+
+One ID may return multiple VariationFeature objects as in dbSNP an rsID
+may map to multiple genomic locations; this is the reason why this and
+other parsers implement a method create_VariationFeatures that returns
+an arrayref of VariationFeatures.
+
+=head1 METHODS
+
 =cut
 
 
@@ -48,6 +71,23 @@ use base qw(Bio::EnsEMBL::VEP::Parser);
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::IO::ListBasedParser;
+
+
+=head2 new
+
+  Arg 1      : hashref $args
+               {
+                 config    => Bio::EnsEMBL::VEP::Config,
+                 file      => string or filehandle,
+               }
+  Example    : $parser = Bio::EnsEMBL::VEP::Parser::ID->new($args);
+  Description: Create a new Bio::EnsEMBL::VEP::Parser::ID object.
+  Returntype : Bio::EnsEMBL::VEP::Parser::ID
+  Exceptions : throws if offline mode (--offline) enabled
+  Caller     : Runner
+  Status     : Stable
+
+=cut
 
 sub new {
   my $caller = shift;
@@ -63,10 +103,36 @@ sub new {
   return $self;
 }
 
+
+=head2 parser
+
+  Example    : $io_parser = $parser->parser();
+  Description: Get ensembl-io parser object used to read data from input.
+  Returntype : Bio::EnsEMBL::IO::ListBasedParser
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
 sub parser {
   my $self = shift;
   return $self->{parser} ||= Bio::EnsEMBL::IO::ListBasedParser->open($self->file);
 }
+
+
+=head2 create_VariationFeatures
+
+  Example    : $vfs = $parser->create_VariationFeatures();
+  Description: Create one or more VariationFeature objects from the current line
+               of input; multiple may be returned if an rsID maps to multiple
+               genomic locations
+  Returntype : arrayref of Bio::EnsEMBL::VariationFeature
+  Exceptions : warns if ID not found in database or has no genomic mappings
+  Caller     : next()
+  Status     : Stable
+
+=cut
 
 sub create_VariationFeatures {
   my $self = shift;

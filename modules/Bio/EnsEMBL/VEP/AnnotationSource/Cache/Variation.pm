@@ -35,6 +35,22 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::AnnotationSource::Variation - class for cache variation source
 
+=head1 SYNOPSIS
+
+my $as = Bio::EnsEMBL::VEP::AnnotationSource::Cache::Variation->new({
+  config => $config,
+  dir    => $dir
+});
+
+$as->annotate_InputBuffer($ib);
+
+=head1 DESCRIPTION
+
+Cache-based annotation source for known variant data. Variants are
+stored in 1MB chunks on disk, one line per variant.
+
+=head1 METHODS
+
 =cut
 
 
@@ -51,6 +67,21 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use base qw(
   Bio::EnsEMBL::VEP::AnnotationSource::Cache::BaseCacheVariation
 );
+
+
+=head2 get_features_by_regions_uncached
+
+  Arg 1      : arrayref $regions
+  Example    : $vars = $as->get_features_by_regions_uncached($regions)
+  Description: Gets all known variants overlapping the given set of regions. See
+               Bio::EnsEMBL::VEP::AnnotationSource::get_all_regions_by_InputBuffer()
+               for information about regions.
+  Returntype : arrayref of variant hashes
+  Exceptions : none
+  Caller     : get_all_features_by_InputBuffer()
+  Status     : Stable
+
+=cut
 
 sub get_features_by_regions_uncached {
   my $self = shift;
@@ -80,6 +111,20 @@ sub get_features_by_regions_uncached {
   return \@return;
 }
 
+
+=head2 read_variations_from_file
+
+  Arg 1      : string $file
+  Example    : $vars = $as->get_features_by_regions_uncached($regions)
+  Description: Reads a cache file of variants, creating a list of variant
+               hash records
+  Returntype : arrayref of variant hashes
+  Exceptions : none
+  Caller     : get_features_by_regions_uncached()
+  Status     : Stable
+
+=cut
+
 sub read_variations_from_file {
   my $self = shift;
   my $file = shift;
@@ -98,6 +143,21 @@ sub read_variations_from_file {
 
   return \@vars;
 }
+
+
+=head2 get_dump_file_name
+
+  Arg 1      : string $chr
+  Arg 2      : string $region or int $start
+  Arg 3      : (optional) int $end
+  Example    : $file = $as->get_dump_file_name(1, "1-1000000");
+  Description: Gets file name from the cache given a region.
+  Returntype : string
+  Exceptions : none
+  Caller     : get_features_by_regions_uncached()
+  Status     : Stable
+
+=cut
 
 sub get_dump_file_name {
   my $self = shift;

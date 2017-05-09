@@ -35,6 +35,28 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::CacheDir - a class representing a "traditional" VEP cache directory
 
+=head1 SYNOPSIS
+
+my $cache_dir = Bio::EnsEMBL::VEP::CacheDir->new({
+  config   => $config,
+  root_dir => '/nfs/home/joebloggs/.vep/'
+});
+
+my $info = $cache_dir->info();
+
+my $sources = $cache_dir->get_all_AnnotationSources()
+
+=head1 DESCRIPTION
+
+The CacheDir class represents a VEP cache directory containing
+transcript data and potentially also regulatory and variation
+data.
+
+The class contains methods for determining which data is available,
+reading metadata, and generating AnnotationSource objects.
+
+=head1 METHODS
+
 =cut
 
 
@@ -50,6 +72,26 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat;
 use Bio::EnsEMBL::VEP::AnnotationSource::Cache::Variation;
 use Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix;
+
+
+=head2 new
+
+  Arg 1      : hashref $args
+               {
+                 config   => Bio::EnsEMBL::VEP::Config,
+                 dir      => string (e.g. /nfs/home/joebloggs/.vep/homo_sapiens/88_GRCh38),
+                 root_dir => string (e.g. /nfs/home/joebloggs/.vep/),
+               }
+  Example    : $obj = Bio::EnsEMBL::VEP::CacheDir->new($args);
+  Description: Create a new Bio::EnsEMBL::VEP::CacheDir object. If a root_dir
+               arg is supplied, the full dir is filled out from various
+               config parameters.
+  Returntype : Bio::EnsEMBL::VEP::CacheDir
+  Exceptions : throws if neither dir or root_dir given
+  Caller     : Bio::EnsEMBL::VEP::AnnotationSourceAdaptor
+  Status     : Stable
+
+=cut
 
 sub new {
   my $caller = shift;
@@ -70,7 +112,19 @@ sub new {
   return $self;
 }
 
-# this method is called from VEP::Runner's init() method
+
+=head2 get_all_AnnotationSources
+
+  Example    : $sources = $cache_dir->get_all_AnnotationSources();
+  Description: Get all AnnotationSources from this CacheDir given
+               user parameters from config.
+  Returntype : listref of Bio::EnsEMBL::VEP::AnnotationSource
+  Exceptions : none
+  Caller     : Bio::EnsEMBL::VEP::AnnotationSourceAdaptor
+  Status     : Stable
+
+=cut
+
 sub get_all_AnnotationSources {
   my $self = shift;
 
@@ -133,6 +187,19 @@ sub get_all_AnnotationSources {
   return $self->{_annotation_sources};
 }
 
+
+=head2 init
+
+  Example    : $cache_dir->init();
+  Description: Initialise the CacheDir object: complete the full dir path,
+               auto-detect FASTA and chromosome synonyms files.
+  Returntype : bool
+  Exceptions : none
+  Caller     : new()
+  Status     : Stable
+
+=cut
+
 sub init {
   my $self = shift;
 
@@ -155,11 +222,44 @@ sub init {
   return 1;
 }
 
+
+=head2 root_dir
+  
+  Arg 1      : (optional) string $root_dir
+  Example    : $root_dir = $cache_dir->root_dir();
+  Description: Getter/setter for root_dir field; this is the root directory
+               in which a user's VEP caches are installed.
+  Returntype : string
+  Exceptions : none
+  Caller     : internal
+  Status     : Stable
+
+=cut
+
 sub root_dir {
   my $self = shift;
   $self->{root_dir} = shift if @_;
   return $self->{root_dir};
 }
+
+
+=head2 dir
+  
+  Arg 1      : (optional) string $dir
+  Example    : $dir = $cache_dir->dir();
+  Description: Getter/setter for dir field; this is the full path for a specific
+               species/version/assembly cache.
+  Returntype : string
+  Exceptions : throws if:
+                - [root_dir]/[species] directory does not exist
+                - [species]/[version]_* does not exist
+                - [species]/[version]_[assembly] exists but [assembly] does not match assembly param
+                - multiple assemblies found for [version] but none specified or inferred from database
+                - [species]/[version]_[assembly] does not exist
+  Caller     : internal
+  Status     : Stable
+
+=cut
 
 sub dir {
   my $self = shift;
@@ -247,6 +347,20 @@ sub dir {
   return $self->{dir};
 }
 
+
+=head2 info
+  
+  Arg 1      : (optional) hashref $info
+  Example    : $info = $cache_dir->info();
+  Description: Getter/setter for info hashref. If not set, reads metadata from
+               cache info file
+  Returntype : hashref
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
+
 sub info {
   my $self = shift;
   $self->{info} = shift if @_;
@@ -286,6 +400,19 @@ sub info {
   return $self->{info};
 }
 
+
+=head2 read_cache_info_file
+  
+  Arg 1      : string $dir
+  Example    : $info = $cache_dir->read_cache_info_file($dir);
+  Description: Reads cache metadata from [dir]/info.txt
+  Returntype : hashref
+  Exceptions : none
+  Caller     : info()
+  Status     : Stable
+
+=cut
+
 sub read_cache_info_file {
   my $self = shift;
   my $dir = shift;
@@ -317,9 +444,33 @@ sub read_cache_info_file {
   return $cache_info;
 }
 
+
+=head2 version_data
+  
+  Example    : $version_data = $cache_dir->version_data();
+  Description: Gets version data for cache
+  Returntype : hashref
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
+
 sub version_data {
   return $_[0]->info->{version_data} || {};
 }
+
+
+=head2 source_type
+  
+  Example    : $source_type = $cache_dir->source_type();
+  Description: Gets configured source type (ensembl, refseq or merged)
+  Returntype : string
+  Exceptions : none
+  Caller     : dir()
+  Status     : Stable
+
+=cut
 
 sub source_type {
   my $self = shift;

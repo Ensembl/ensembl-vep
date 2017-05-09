@@ -35,6 +35,29 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::Haplo::InputBuffer - class representing a buffer of VariationFeatures to be processed
 
+=head1 SYNOPSIS
+
+my $ib = Bio::EnsEMBL::VEP::Haplo::InputBuffer->new({
+  config => $config,
+  parser => $parser,
+  transcript_tree => $tree
+});
+
+$ib->next();
+
+=head1 DESCRIPTION
+
+The Haplo InputBuffer class inherits from the Bio::EnsEMBL::VEP::InputBuffer,
+and offers similar functionality. It is intended to contain a buffer of
+VariationFeature objects as read from a Parser.
+
+It differs from its parent class in how the buffer is filled. On reading the
+first variant from the parser, the transcript tree is used to find any
+overlapping transcripts with this variant; the buffer is then filled by reading
+in variants until the coordinates no longer overlap the transcripts'.
+
+=head1 METHODS
+
 =cut
 
 
@@ -47,6 +70,24 @@ use base qw(Bio::EnsEMBL::VEP::InputBuffer);
 
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
+
+
+=head2 new
+
+  Arg 1      : hashref $args
+               {
+                 config          => Bio::EnsEMBL::VEP::Config,
+                 parser          => Bio::EnsEMBL::VEP::Haplo::Parser::VCF,
+                 transcript_tree => Bio::EnsEMBL::VEP::TranscriptTree,
+               }
+  Example    : $ib = Bio::EnsEMBL::VEP::Haplo::InputBuffer->new($args);
+  Description: Creates an InputBuffer object.
+  Returntype : Bio::EnsEMBL::VEP::Haplo::InputBuffer
+  Exceptions : throws if no transcript tree or wrong class
+  Caller     : Bio::EnsEMBL::VEP::Haplo::Runner
+  Status     : Stable
+
+=cut
 
 sub new {
   my $caller = shift;
@@ -62,6 +103,18 @@ sub new {
 
   return $self;
 }
+
+
+=head2 next
+
+  Example    : $ib->next()
+  Description: Resets buffer and fills with variants overlapping next found transcript(s)
+  Returntype : arrayref of Bio::EnsEMBL::Variation::VariationFeature objects
+  Exceptions : none
+  Caller     : Bio::EnsEMBL::VEP::Haplo::Runner
+  Status     : Stable
+
+=cut
 
 sub next {
   my $self = shift;
@@ -91,6 +144,23 @@ sub next {
   return $buffer;
 }
 
+
+=head2 get_max_from_tree
+  
+  Arg 1      : string $chromosome
+  Arg 2      : int $start
+  Arg 3      : int $end
+  Example    : my $max = $ib->get_max_from_tree($chr, $start, $end)
+  Description: Given a location, find the end of the block of transcripts
+               that overlap. Essentially finds the beginning of the next
+               intergenic region. Returns 0 if no overlapping transcripts.
+  Returntype : int
+  Exceptions : none
+  Caller     : next()
+  Status     : Stable
+
+=cut
+
 sub get_max_from_tree {
   my ($self, $c, $s, $e) = @_;
 
@@ -112,6 +182,20 @@ sub get_max_from_tree {
 
   return $prev_max;
 }
+
+
+=head2 get_max_from_tree
+  
+  Arg 1      : (optional) Bio::EnsEMBL::VEP::TranscriptTree $tree
+  Example    : my $tree = $ib->transcript_tree
+  Description: Getter/setter for the transcript tree object associated with this
+               input buffer.
+  Returntype : Bio::EnsEMBL::VEP::TranscriptTree
+  Exceptions : none
+  Caller     : get_max_from_tree()
+  Status     : Stable
+
+=cut
 
 sub transcript_tree {
   my $self = shift;

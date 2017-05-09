@@ -35,6 +35,16 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::AnnotationSource::File::BaseGXF - parent class for GFF and GTF annotation sources
 
+=head1 SYNOPSIS
+
+Should not be invoked directly
+
+=head1 DESCRIPTION
+
+Base class for GFF and GTF custom file annotation sources.
+
+=head1 METHODS
+
 =cut
 
 
@@ -56,9 +66,33 @@ use Data::Dumper;
 $Data::Dumper::Indent = 1;
 
 use base qw(
-  Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript
+  Bio::EnsEMBL::VEP::AnnotationType::Transcript
   Bio::EnsEMBL::VEP::AnnotationSource::File
 );
+
+
+=head2 new
+
+  Arg 1      : hashref $args
+               {
+                 config            => Bio::EnsEMBL::VEP::Config $config,
+                 file              => string $filename,
+                 type              => 'exact',
+                 short_name        => (optional) string $short_name,
+                 transcript_filter => (optional) string $filter,
+                 bam               => (optional) string $bam_file
+               }
+  Example    : Not invoked directly
+  Description: Create a new Bio::EnsEMBL::VEP::AnnotationSource::File::BaseGXF object.
+  Returntype : Bio::EnsEMBL::VEP::AnnotationSource::File::BaseGXF
+  Exceptions : throws if:
+                - no database or FASTA available to read sequence
+                - type is not "exact"
+               warns if --nearest specified, not currently available
+  Caller     : Bio::EnsEMBL::VEP::AnnotationSource::File->new()
+  Status     : Stable
+
+=cut
 
 sub new {
   my $caller = shift;
@@ -83,6 +117,24 @@ sub new {
 
   return $self;
 }
+
+
+=head2 get_features_by_regions_uncached
+
+  Arg 1      : arrayref $regions
+  Example    : $transcripts = $as->get_features_by_regions_uncached($regions)
+  Description: Gets all transcripts overlapping the given set of regions. See
+               Bio::EnsEMBL::VEP::AnnotationSource::get_all_regions_by_InputBuffer()
+               for information about regions. Transcripts are not yet EnsEMBL
+               objects; they are converted if lazy_load_transcript() is called.
+               This means only transcripts that actually overlap input variants
+               undergo the (time-costly) object conversion process.
+  Returntype : arrayref of transcript record hashes
+  Exceptions : none
+  Caller     : get_all_features_by_InputBuffer()
+  Status     : Stable
+
+=cut
 
 sub get_features_by_regions_uncached {
   my $self = shift;
@@ -110,10 +162,46 @@ sub get_features_by_regions_uncached {
   return \@return;
 }
 
+
+=head2 _get_transcripts_by_coords
+
+  Arg 1      : string $chr
+  Arg 2      : int $start
+  Arg 3      : int $end
+  Example    : $transcripts = $as->_get_transcripts_by_coords($chr, $start, $end)
+  Description: Gets all transcripts overlapping the given chromosomal region.
+  Returntype : arrayref of of transcript record hashes
+  Exceptions : none
+  Caller     : get_features_by_regions_uncached()
+  Status     : Stable
+
+=cut
+
 sub _get_transcripts_by_coords {
   my $self = shift;
   return $self->_create_transcripts($self->_get_records_by_coords(@_));
 }
+
+
+=head2 _get_records_by_coords
+
+  Arg 1      : string $chr
+  Arg 2      : int $start
+  Arg 3      : int $end
+  Arg 4      : (optional) int $no_rescan
+  Example    : $records = $as->_get_records_by_coords($chr, $start, $end)
+  Description: Gets all record hashrefs from file overlapping given coordinates.
+               Runs iteratively if a record overhangs either end to pick up
+               sub-records (e.g. exons). Set $no_rescan to prevent iterative
+               running:
+                - $no_rescan = 1 : don't expand search to lower coord values
+                - $no_rescan = 2 : don't expand search to higher coord values
+  Returntype : arrayref of of transcript record hashes
+  Exceptions : none
+  Caller     : _get_transcripts_by_coords()
+  Status     : Stable
+
+=cut
 
 sub _get_records_by_coords {
   my ($self, $c, $s, $e, $no_rescan) = @_;
@@ -162,6 +250,20 @@ sub _get_records_by_coords {
   return \@records;
 }
 
+
+=head2 _record_to_hash
+
+  Example    : $record_hash = $as->_record_to_hash()
+  Description: Gets a hashref representing the current parser record; contains
+               all pertinent record information and an md5 key to ease unique
+               sorting.
+  Returntype : hashref
+  Exceptions : none
+  Caller     : _get_records_by_coords()
+  Status     : Stable
+
+=cut
+
 sub _record_to_hash {
   my $self = shift;
   my $parser = $self->parser;
@@ -178,6 +280,24 @@ sub _record_to_hash {
     attributes => $parser->get_attributes,
   };
 }
+
+
+=head2 _create_transcripts
+
+  Arg 1      : arrayref $record_hashes
+  Example    : $transcripts = $as->_create_transcripts($record_hashes)
+  Description: Takes a list of record hashes as read from the source file
+               and converts them to transcript objects. This is done by
+               creating a "tree" representing the parent/child structure
+               of the records in the GFF/GTF
+               (typically gene->transcript->exon), then compiling these
+               into EnsEMBL objects (Gene, Transcript, Exon).
+  Returntype : arrayref of transcript record hashes
+  Exceptions : none
+  Caller     : _get_records_by_coords()
+  Status     : Stable
+
+=cut
 
 sub _create_transcripts {
   my $self = shift;
@@ -214,6 +334,22 @@ sub _create_transcripts {
 
   return \@transcripts;
 }
+
+
+=head2 _get_parent_child_structure
+
+  Arg 1      : arrayref $record_hashes
+  Example    : $tree = $as->_get_parent_child_structure($record_hashes)
+  Description: Takes a list of record hashes as read from the source file
+               and converts them to a "tree" representing the
+               parent/child structure of the records in the GFF/GTF
+               (typically gene->transcript->exon)
+  Returntype : hashref
+  Exceptions : throws if record found that references non-existent parent
+  Caller     : _create_transcripts()
+  Status     : Stable
+
+=cut
 
 sub _get_parent_child_structure {
   my $self = shift;
@@ -267,6 +403,24 @@ sub _get_parent_child_structure {
 
   return \%top_level;
 }
+
+
+=head2 _create_transcript
+
+  Arg 1      : hashref $transcript_record_hash
+  Arg 2      : hashref $gene_record_hash
+  Example    : $transcript = $as->_create_transcript($tr_hash, $gene_hash)
+  Description: Takes a structured transcript record hash and creates a
+               Bio::EnsEMBL::Transcript object from it.
+  Returntype : Bio::EnsEMBL::Transcript
+  Exceptions : throws if record has child records not of type "exon", "cds" or "stop_codon"
+               warns if:
+                - unable to determine biotype
+                - unable to add Exon object (typically if coordinates overlap)
+  Caller     : lazy_load_transcript()
+  Status     : Stable
+
+=cut
 
 sub _create_transcript {
   my $self = shift;
@@ -386,6 +540,22 @@ sub _create_transcript {
   return $tr;
 }
 
+
+=head2 _quick_sub_Slice
+
+  Arg 1      : Bio::EnsEMBL::Slice
+  Arg 2      : int $start
+  Arg 3      : int $end
+  Arg 4      : int $strand
+  Example    : $sub = $as->_quick_sub_Slice($slice, $start, $end, $strand)
+  Description: Faster way of creating sub slices that $slice->sub_Slice()
+  Returntype : Bio::EnsEMBL::Slice
+  Exceptions : none
+  Caller     : _create_transcript()
+  Status     : Stable
+
+=cut
+
 sub _quick_sub_Slice {
   my ($self, $slice, $start, $end, $strand) = @_;
 
@@ -398,6 +568,23 @@ sub _quick_sub_Slice {
 
   return \%new;
 }
+
+
+=head2 _add_identifiers
+
+  Arg 1      : Bio::EnsEMBL::Transcript
+  Arg 2      : hashref $transcript_record_hash
+  Arg 3      : hashref $gene_record_hash
+  Example    : $as->_add_identifiers($tr, $tr_record, $gene_record)
+  Description: Add any identifiers we can find in the transcript and/or gene
+               record to the transcript object. Currently this is only the
+               gene stable_id and gene symbol.
+  Returntype : none
+  Exceptions : none
+  Caller     : _create_transcript()
+  Status     : Stable
+
+=cut
 
 sub _add_identifiers {
   my ($self, $tr, $tr_record, $gene_record) = @_;
@@ -439,6 +626,20 @@ sub _add_identifiers {
     $tr->{_gene_symbol} = $gene_record->{attributes}->{name} || $gene_record->{attributes}->{Name};
   }
 }
+
+
+=head2 _add_translation
+
+  Arg 1      : Bio::EnsEMBL::Transcript
+  Arg 2      : arrayref $cds_record_hashes
+  Example    : $translation = $as->_add_translation($tr, $tr_record, $gene_record)
+  Description: Create the translation object for this transcript.
+  Returntype : Bio::EnsEMBL::Translation
+  Exceptions : none
+  Caller     : _create_transcript()
+  Status     : Stable
+
+=cut
 
 sub _add_translation {
   my ($self, $tr, $ordered_cdss) = @_;
@@ -483,6 +684,19 @@ sub _add_translation {
   return $translation;
 }
 
+
+=head2 _record_is_gene
+
+  Arg 1      : hashref $record_hash
+  Example    : $is_gene = $as->_record_is_gene($record_hash)
+  Description: Establish if a given record is a gene-level record.
+  Returntype : bool
+  Exceptions : none
+  Caller     : _create_transcript()
+  Status     : Stable
+
+=cut
+
 sub _record_is_gene {
   my ($self, $record) = @_;
 
@@ -493,8 +707,20 @@ sub _record_is_gene {
   return 0;
 }
 
-# converts GTF/GFF phase to Ensembl phase
-# basically 0 => 0, 1 => 2, 2 => 1; why? Because.
+
+=head2 _convert_phase
+
+  Arg 1      : int $phase
+  Example    : $ensembl_phase = $as->_convert_phase($gff_phase)
+  Description: Converts GFF exon phase to Ensembl phase.
+               0 => 0, 1 => 2, 2 => 1
+  Returntype : bool
+  Exceptions : none
+  Caller     : _create_transcript()
+  Status     : Stable
+
+=cut
+
 sub _convert_phase {
   my ($self, $phase) = @_;
 
@@ -508,7 +734,21 @@ sub _convert_phase {
   return $phase;
 }
 
-# only do the actual transcript creation when required
+
+=head2 lazy_load_transcript
+
+  Arg 1      : hashref $transcript_record_hash
+  Example    : $tr = $as->lazy_load_transcript($tr_record_hash)
+  Description: Converts given structured transcript record hash to Ensembl
+               object. This will only be called when the object is about to
+               be used, rather than when it is read from disk, saving time.
+  Returntype : Bio::EnsEMBL::Transcript
+  Exceptions : none
+  Caller     : annotate_InputBuffer()
+  Status     : Stable
+
+=cut
+
 sub lazy_load_transcript {
   my $self = shift;
   my $feature = shift;
@@ -518,7 +758,20 @@ sub lazy_load_transcript {
   return $feature->{object};
 }
 
-# merge using md5 for uniqueness
+
+=head2 merge_features
+
+  Arg 1      : arrayref $transcript_record_hashes
+  Example    : $unique_trs = $as->merge_features($tr_record_hashes)
+  Description: Return a unique list of transcript record hashes. Unique
+               sorting done on md5 key added when record was created.
+  Returntype : arrayref
+  Exceptions : none
+  Caller     : annotate_InputBuffer()
+  Status     : Stable
+
+=cut
+
 sub merge_features {
   my ($self, $features) = @_;
   my (@return, %seen);

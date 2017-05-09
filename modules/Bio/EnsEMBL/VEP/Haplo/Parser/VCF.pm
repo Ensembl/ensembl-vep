@@ -35,6 +35,28 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::Haplo::Parser::VCF - VCF input parser
 
+=head1 SYNOPSIS
+
+my $parser = Bio::EnsEMBL::VEP::Haplo::Parser::VCF->new({
+  config            => $config,
+  file              => $filename_or_handle,
+  valid_chromosomes => $listref_of_chromosome_names,
+});
+
+my $vf_hash = $parser->next();
+
+=head1 DESCRIPTION
+
+The Haplo VCF parser class inherits from Bio::EnsEMBL::VEP::Parser::VCF.
+
+It differs from a regular VEP parser in that VariationFeature objects
+are not created here, only hash references containing data allowing
+them to be lazily created later.
+
+VCF entries must have sample genotypes.
+
+=head1 METHODS
+
 =cut
 
 
@@ -49,6 +71,19 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Variation::Sample;
 use Bio::EnsEMBL::Variation::Individual;
 
+
+=head2 parser
+
+  Example    : $io_parser = $parser->parser;
+  Description: Gets the ensembl-io parser object that is used to read data
+               from the input file.
+  Returntype : Bio::EnsEMBL::IO::Parser::VCF4
+  Exceptions : none
+  Caller     : all subs
+  Status     : Stable
+
+=cut
+
 sub parser {
   my $self = shift;
 
@@ -60,6 +95,19 @@ sub parser {
 
   return $self->{parser};
 }
+
+
+=head2 samples
+
+  Example    : $samples = $parser->samples();
+  Description: Gets all sample objects associated with the samples
+               represented in the VCF input.
+  Returntype : listref of Bio::EnsEMBL::Variation::Sample
+  Exceptions : throws if VCF has no sample data
+  Caller     : Bio::EnsEMBL::VEP::AnnotationSource classes
+  Status     : Stable
+
+=cut
 
 sub samples {
   my $self = shift;
@@ -84,6 +132,18 @@ sub samples {
   return $self->{_samples};
 }
 
+
+=head2 next
+
+  Example    : $vf_hash = $parser->next();
+  Description: Gets next hash of variant data from input
+  Returntype : hashref
+  Exceptions : none
+  Caller     : Bio::EnsEMBL::VEP::InputBuffer
+  Status     : Stable
+
+=cut
+
 sub next {
   my $self = shift;
 
@@ -103,6 +163,18 @@ sub next {
 
   return $vf;
 }
+
+
+=head2 create_VariationFeatures
+
+  Example    : my $vf_hashes = $parser->create_VariationFeatures();
+  Description: Gets one or more hashrefs of variant data from input
+  Returntype : listref of hashrefs
+  Exceptions : none
+  Caller     : next()
+  Status     : Stable
+
+=cut
 
 sub create_VariationFeatures {
   my $self = shift;

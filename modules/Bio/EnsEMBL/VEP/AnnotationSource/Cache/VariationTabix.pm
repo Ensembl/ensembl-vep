@@ -35,6 +35,30 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix - class for cache variation source indexed with tabix
 
+=head1 SYNOPSIS
+
+my $as = Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix->new({
+  config => $config,
+  dir    => $dir
+});
+
+$as->annotate_InputBuffer($ib);
+
+=head1 DESCRIPTION
+
+Cache-based (tabix-converted) annotation source for known variant data.
+
+Variants are stored in one file per chromosome, named [chr]/all_vars.gz
+
+Similar format as that used by Bio::EnsEMBL::VEP::AnnotationSource::Cache::Variation,
+with some changes:
+
+ - tab "\t" used as delimiter (required by tabix)
+ - empty fields replaced by "."
+ - chromosome column added to beginning (required by tabix)
+
+=head1 METHODS
+
 =cut
 
 
@@ -63,6 +87,23 @@ BEGIN {
   }
 }
 
+
+=head2 annotate_InputBuffer
+
+  Arg 1      : Bio::EnsEMBL::VEP::InputBuffer
+  Example    : $as->annotate_InputBuffer($ib);
+  Description: Gets overlapping known variants for the variants in
+               the input buffer, checks if they are "novel" (see is_var_novel())
+               and adds them to the key "existing" on the VariationFeature
+               object. May also filter the input buffer by comparing frequencies
+               of known variants to user-specified thresholds.
+  Returntype : none
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
+
 sub annotate_InputBuffer {
   my $self = shift;
   my $buffer = shift;
@@ -81,7 +122,21 @@ sub annotate_InputBuffer {
   $self->frequency_check_buffer($buffer) if $self->{check_frequency};
 }
 
-# uses command line tabix util
+
+=head2 _annotate_cl
+
+  Arg 1      : hashref $vfs_by_chr
+  Example    : $as->_annotate_cl($vfs_by_chr);
+  Description: Uses command-line tabix tool to read variants from
+               cache files and adds known variants to input variants
+               under the "existing" key.
+  Returntype : none
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
+
 sub _annotate_cl {
   my $self = shift;
   my $by_chr = shift;
@@ -135,7 +190,22 @@ sub _annotate_cl {
   }
 }
 
-# uses tabix perl module
+
+=head2 _annotate_pm
+
+  Arg 1      : hashref $vfs_by_chr
+  Example    : $as->_annotate_pm($vfs_by_chr);
+  Description: Uses Bio::DB::HTS::Tabix to read variants from
+               cache files and adds known variants to input variants
+               under the "existing" key. Preferred to _annotate_cl()
+               for speed.
+  Returntype : none
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
+
 sub _annotate_pm {
   my $self = shift;
   my $by_chr = shift;
@@ -171,9 +241,34 @@ sub _annotate_pm {
   }
 }
 
+
+=head2 delimiter
+
+  Example    : $delim = $as->delimiter();
+  Description: Get delimiter used in cache files.
+  Returntype : string
+  Exceptions : none
+  Caller     : parse_variation()
+  Status     : Stable
+
+=cut
+
 sub delimiter {
   return "\t";
 }
+
+
+=head2 get_dump_file_name
+
+  Arg 1      : string $chr
+  Example    : $file = $as->get_dump_file_name(1);
+  Description: Gets file name from the cache given a chromosome name.
+  Returntype : string
+  Exceptions : none
+  Caller     : _annotate_cl(), _annotate_pm()
+  Status     : Stable
+
+=cut
 
 sub get_dump_file_name {
   my $self = shift;

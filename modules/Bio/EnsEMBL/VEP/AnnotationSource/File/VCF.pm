@@ -35,6 +35,31 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::AnnotationSource::File::VCF - VCF annotation source
 
+=head1 SYNOPSIS
+
+my $as = Bio::EnsEMBL::VEP::AnnotationSource::File::VCF->new({
+  config => $config,
+  file   => "my_variants.vcf.gz",
+  type   => "exact"
+});
+
+$as->annotate_InputBuffer($ib);
+
+=head1 DESCRIPTION
+
+VCF format custom annotation source. VCF files must be chromosome/pos
+sorted, compressed with bgzip and indexed with tabix.
+
+Additional fields of data from the VCF INFO field may be added to the
+custom annotation data returned by setting fields().
+
+Using the "exact" annotation type with this class enforces allele as
+well as positional checking of the data, and any INFO fields requested
+that have allele-specific data will have only the relevant data added
+depending on the alleles of the variant from the user-fed InputBuffer.
+
+=head1 METHODS
+
 =cut
 
 
@@ -50,6 +75,27 @@ use Bio::EnsEMBL::IO::Parser::VCF4Tabix;
 
 use base qw(Bio::EnsEMBL::VEP::AnnotationSource::File);
 
+
+=head2 new
+
+  Arg 1      : hashref $args
+               {
+                 config        => Bio::EnsEMBL::VEP::Config $config,
+                 file          => string $filename,
+                 short_name    => (optional) string $short_name,
+                 type          => (optional) string $type (overlap (default), exact),
+                 report_coords => (optional) bool $report_coords,
+                 fields        => arrayref $INFO_fields_to_add
+               }
+  Example    : $as = Bio::EnsEMBL::VEP::AnnotationSource::File::VCF->new($args);
+  Description: Create a new Bio::EnsEMBL::VEP::AnnotationSource::File::VCF object.
+  Returntype : Bio::EnsEMBL::VEP::AnnotationSource::File::VCF
+  Exceptions : none
+  Caller     : Bio::EnsEMBL::VEP::AnnotationSource::File->new()
+  Status     : Stable
+
+=cut
+
 sub new {
   my $caller = shift;
   my $class = ref($caller) || $caller;
@@ -63,16 +109,56 @@ sub new {
   return $self;
 }
 
+
+=head2 fields
+
+  Arg 1      : (optional) arrayref $fields
+  Example    : $fields = $as->fields()
+  Description: Getter/setter for the list of fields to be added from the VCF INFO field.
+  Returntype : arrayref of strings
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
 sub fields {
   my $self = shift;
   $self->{fields} = shift if @_;
   return $self->{fields};
 }
 
+
+=head2 parser
+
+  Example    : $parser = $as->parser();
+  Description: Get ensembl-io parser to read from file
+  Returntype : Bio::EnsEMBL::IO::Parser::VCF4Tabix
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
 sub parser {
   my $self = shift;
   return $self->{parser} ||= Bio::EnsEMBL::IO::Parser::VCF4Tabix->open($self->file);
 }
+
+
+=head2 _create_records
+ 
+  Arg 1      : bool or hashref $overlap_result
+  Example    : $records = $as->_create_records($overlap_result);
+  Description: Create a custom annotation record from the current
+               record as read from the annotation source. Adds INFO field
+               data if requested by setting fields().
+  Returntype : arrayref of hashrefs
+  Exceptions : none
+  Caller     : annotate_VariationFeature()
+  Status     : Stable
+
+=cut
 
 sub _create_records {
   my $self = shift;
@@ -154,6 +240,21 @@ sub _create_records {
   return \@records;
 }
 
+
+=head2 _get_record_name
+ 
+  Example    : $record_name = $as->_get_record_name();
+  Description: Get name for the current record using either ID as
+               found in the source or record coordinates. Defaults
+               to using first ID if multiple found, or coordinates
+               if none found.
+  Returntype : string
+  Exceptions : none
+  Caller     : _create_records()
+  Status     : Stable
+
+=cut
+
 sub _get_record_name {
   my $self = shift;
   my $parser = $self->parser;
@@ -169,6 +270,25 @@ sub _get_record_name {
     ) :
     $id;
 }
+
+
+=head2 _record_overlaps_VF
+ 
+  Arg 1      : Bio::EnsEMBL::Variation::VariationFeature
+  Example    : $overlap_ok = $as->_record_overlaps_VF($vf);
+  Description: Determine whether the given VariationFeature overlaps
+               the current record, depending on the set type(). Note
+               for "exact" type allele as well as position is matched.
+               VCF entries with multiple ALTs are treated as separate
+               REF/ALT pairs, with the REF/ALT being trimmed to the minimum
+               shared sequence before comparison to the alleles from
+               the user input variant.
+  Returntype : bool
+  Exceptions : none
+  Caller     : annotate_VariationFeature()
+  Status     : Stable
+
+=cut
 
 sub _record_overlaps_VF {
   my $self = shift;

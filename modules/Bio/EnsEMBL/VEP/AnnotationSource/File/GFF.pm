@@ -35,6 +35,26 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::AnnotationSource::File::GFF - GFF annotation source
 
+=head1 SYNOPSIS
+
+my $as = Bio::EnsEMBL::VEP::AnnotationSource::File::GFF->new({
+  config => $config,
+  file   => "my_genes.gff.gz"
+});
+
+$as->annotate_InputBuffer($ib);
+
+=head1 DESCRIPTION
+
+GFF3 format custom annotation source. GFF files must be chromosome/pos
+sorted, compressed with bgzip and indexed with tabix.
+
+Other aspects/limitations discussed here:
+
+http://www.ensembl.org/info/docs/tools/vep/script/vep_cache.html#gff
+
+=head1 METHODS
+
 =cut
 
 
@@ -92,14 +112,51 @@ my %INCLUDE_FEATURE_TYPES = map {$_ => 1} qw(
   V_gene_segment
 );
 
+
+=head2 parser
+
+  Example    : $parser = $as->parser();
+  Description: Get ensembl-io parser to read from file
+  Returntype : Bio::EnsEMBL::IO::Parser::GFF3Tabix
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
 sub parser {
   my $self = shift;
   return $self->{parser} ||= Bio::EnsEMBL::IO::Parser::GFF3Tabix->open($self->file, must_parse_metadata => 0);
 }
 
+
+=head2 include_feature_types
+
+  Example    : $types = $as->include_feature_types();
+  Description: Get hashref of GFF record types this class can parse
+  Returntype : hashref
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
 sub include_feature_types {
   return \%INCLUDE_FEATURE_TYPES;
 }
+
+
+=head2 _record_get_parent_id
+
+  Arg 1      : hashref $record_hash
+  Example    : $id = $as->_record_get_parent_id($record);
+  Description: Get ID of parent record for this record
+  Returntype : string
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
 
 sub _record_get_parent_id {
   my ($self, $record) = @_;
@@ -112,6 +169,19 @@ sub _record_get_parent_id {
   return $record->{_parent_id};
 }
 
+
+=head2 _record_get_id
+
+  Arg 1      : hashref $record_hash
+  Example    : $id = $as->_record_get_id($record);
+  Description: Get ID of this record
+  Returntype : string
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
 sub _record_get_id {
   my ($self, $record) = @_;
 
@@ -122,6 +192,24 @@ sub _record_get_id {
 
   return $record->{_id};
 }
+
+
+=head2 _record_get_biotype
+
+  Arg 1      : hashref $transcript_record_hash
+  Arg 2      : hashref $gene_record_hash
+  Example    : $biotype = $as->_record_get_biotype($tr_record, $gene_record);
+  Description: Get sequence ontology (SO) biotype of this record. Attempts to
+               find it in the "biotype" or "transcript_type" attribute fields,
+               and if that fails (as it will for RefSeq GFFs), make an
+               educated guess looking at the record type and various other
+               attributes.
+  Returntype : string
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
 
 sub _record_get_biotype {
   my ($self, $record, $gene_record) = @_;

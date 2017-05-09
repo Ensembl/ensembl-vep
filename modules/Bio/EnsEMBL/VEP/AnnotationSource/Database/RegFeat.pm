@@ -35,6 +35,20 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::AnnotationSource::Database::RegFeat - database RegFeat annotation source
 
+=head1 SYNOPSIS
+
+my $as = Bio::EnsEMBL::VEP::AnnotationSource::Database::RegFeat->new({
+  config => $config,
+});
+
+$as->annotate_InputBuffer($ib);
+
+=head1 DESCRIPTION
+
+Database-based annotation source for regulatory data.
+
+=head1 METHODS
+
 =cut
 
 
@@ -48,8 +62,24 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
 use base qw(
   Bio::EnsEMBL::VEP::AnnotationSource::Database
-  Bio::EnsEMBL::VEP::AnnotationSource::BaseRegFeat
+  Bio::EnsEMBL::VEP::AnnotationType::RegFeat
 );
+
+
+=head2 new
+
+  Arg 1      : hashref $args
+               {
+                 config => Bio::EnsEMBL::VEP::Config $config,
+               }
+  Example    : $as = Bio::EnsEMBL::VEP::AnnotationSource::Database::RegFeat->new($args);
+  Description: Create a new Bio::EnsEMBL::VEP::AnnotationSource::Database::RegFeat object.
+  Returntype : Bio::EnsEMBL::VEP::AnnotationSource::Database::RegFeat
+  Exceptions : none
+  Caller     : AnnotationSourceAdaptor
+  Status     : Stable
+
+=cut
 
 sub new {
   my $caller = shift;
@@ -67,6 +97,18 @@ sub new {
   return $self;
 }
 
+
+=head2 get_available_cell_types
+
+  Example    : $types = $as->get_available_cell_types();
+  Description: Gets cell types available in this database.
+  Returntype : arrayref of strings
+  Exceptions : none
+  Caller     : check_cell_types()
+  Status     : Stable
+
+=cut
+
 sub get_available_cell_types {
   my $self = shift;
 
@@ -83,6 +125,21 @@ sub get_available_cell_types {
 
   return $self->{available_cell_types};
 }
+
+
+=head2 get_features_by_regions_uncached
+
+  Arg 1      : arrayref $regions
+  Example    : $features = $as->get_features_by_regions_uncached($regions)
+  Description: Gets all features overlapping the given set of regions. See
+               Bio::EnsEMBL::VEP::AnnotationSource::get_all_regions_by_InputBuffer()
+               for information about regions.
+  Returntype : arrayref
+  Exceptions : none
+  Caller     : get_all_features_by_InputBuffer()
+  Status     : Stable
+
+=cut
 
 sub get_features_by_regions_uncached {
   my $self = shift;
@@ -179,6 +236,19 @@ sub get_features_by_regions_uncached {
 
   return \@return;
 }
+
+
+=head2 info
+
+  Example    : $info = $as->info()
+  Description: Gets the info hashref for this annotation source. Contains
+               the regulatory_build version.
+  Returntype : hashref
+  Exceptions : none
+  Caller     : Bio::EnsEMBL::VEP::BaseRunner
+  Status     : Stable
+
+=cut
 
 sub info {
   my $self = shift;

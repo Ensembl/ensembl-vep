@@ -35,6 +35,20 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::Config - Class used to configure VEP
 
+=head1 SYNOPSIS
+
+my $config = Bio::EnsEMBL::VEP::Config->new();
+
+my $species = $config->param('species');
+
+=head1 DESCRIPTION
+
+The Config class is used to store default and user parameters required
+for configuring a VEP runner. A reference to a single instance is passed
+around all classes derived from a VEP runner.
+
+=head1 METHODS
+
 =cut
 
 
@@ -381,6 +395,27 @@ our %DEPRECATED = (
 ## METHODS
 ##########
 
+
+=head2 new
+
+  Arg 1      : hashref $args
+               {
+                 arg1 => val1,
+                 ...
+                 argN => valN,
+               }
+  Example    : $config = Bio::EnsEMBL::VEP::Config->new($args);
+  Description: Constructor for Bio::EnsEMBL::VEP::Config. The args hashref
+               may contain any parameters that you wish to add or modify.
+               Sensible defaults should be set for most if not all parameters,
+               see the %DEFAULTS hash.
+  Returntype : Bio::EnsEMBL::VEP::Config
+  Exceptions : throws if first arg is not hashref
+  Caller     : Runner constructor
+  Status     : Stable
+
+=cut
+
 sub new {
   my $caller = shift;
   my $class = ref($caller) || $caller;
@@ -445,6 +480,21 @@ sub new {
     
   return $self;
 }
+
+
+=head2 new
+
+  Arg 1      : hashref $config_hashref
+  Example    : $config->apply_option_sets($config_hashref)
+  Description: Applies "option sets". These allow code to switch
+               on or set the value of one or more flags if a primary
+               flag is set. Option sets are hard-coded in @OPTION_SETS.
+  Returntype : hashref $config_hashref
+  Exceptions : none
+  Caller     : new()
+  Status     : Stable
+
+=cut
 
 sub apply_option_sets {
   my $self = shift;
@@ -516,13 +566,48 @@ sub apply_option_sets {
   return $config
 }
 
-# resolve whether a flag has been set
-# depends on array or scalar type
+
+=head2 _is_flag_active
+
+  Arg 1      : hashref $config_hashref
+  Arg 2      : string $flag
+  Example    : $config->apply_option_sets($config_hashref)
+  Description: Resolve whether a flag has been set. This depends on
+               if the value is defined and if defined whether it is
+               an arrayref (empty arrayref counts as unset).
+  Returntype : bool
+  Exceptions : none
+  Caller     : check_config(), apply_option_sets()
+  Status     : Stable
+
+=cut
+
 sub _is_flag_active {
   my ($self, $config, $flag) = @_;
   return 0 unless defined($config->{$flag});
   return ref($config->{$flag}) eq 'ARRAY' ? scalar @{$config->{$flag}} : $config->{$flag};
 }
+
+
+=head2 check_config
+
+  Arg 1      : hashref $config_hashref
+  Example    : $config->check_config($config_hashref)
+  Description: Applies various checks to a config hashref before
+               constructor returns successfully:
+                - turn on quiet mode when using STDOUT as output
+                - disable certain options if using --everything and --database
+                - check for valid values for flags using %VALID
+                - check for incompatible flags using %INCOMPATIBLE
+                - check for required flags using %REQUIRED
+                - check for deprecated flags using %DEPRECATED
+                - check if one of --database, --cache, --offline or --custom is specified
+  Returntype : none
+  Exceptions : throws if any of above checks fail
+  Caller     : new()
+  Status     : Stable
+
+=cut
 
 sub check_config {
   my $self = shift;
@@ -614,7 +699,19 @@ Cache: http://www.ensembl.org/info/docs/tools/vep/script/index.html#cache
   };
 }
 
-# reads config from a file
+
+=head2 read_config_from_file
+
+  Arg 1      : string $config_file
+  Example    : $config_hash = $config->read_config_from_file($config_file)
+  Description: Read config params from a flat file
+  Returntype : none
+  Exceptions : throws if cannot read from file
+  Caller     : new()
+  Status     : Stable
+
+=cut
+
 sub read_config_from_file {
   my $self = shift;
   my $file = shift;
@@ -656,7 +753,21 @@ sub read_config_from_file {
   return $config;
 }
 
-# gets/sets the value of a config parameter given a key
+
+=head2 param
+
+  Arg 1      : string $param_name
+  Arg 2      : (optional) $new_value
+  Example    : $value = $config->param($param)
+               $config->param($param, $new_value)
+  Description: Getter/setter for config parameters
+  Returntype : none
+  Exceptions : throws if no parameter name given
+  Caller     : BaseVEP param()
+  Status     : Stable
+
+=cut
+
 sub param {
   my $self = shift;
   my $key = shift;
@@ -668,9 +779,19 @@ sub param {
   return $self->{_params}->{$key};
 }
 
-# returns raw unaltered config hash as given by user
-# this will typically be the hash derived from GetOpt
-# in the VEP script
+
+=head2 _raw_config
+
+  Example    : $raw = $config->_raw_config();
+  Description: Gets the raw config hash as originally supplied by the user
+               to the new() method
+  Returntype : hashref
+  Exceptions : none
+  Caller     : internal
+  Status     : Stable
+
+=cut
+
 sub _raw_config {
   return $_[0]->{_raw_config};
 }

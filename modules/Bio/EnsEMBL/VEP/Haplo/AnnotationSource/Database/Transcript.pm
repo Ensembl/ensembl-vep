@@ -35,6 +35,20 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::Haplo::AnnotationSource::Database::Transcript - database transcript annotation source
 
+=head1 SYNOPSIS
+
+my $as = Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript->new({
+  config => $config
+});
+
+$as->annotate_InputBuffer($ib);
+
+=head1 DESCRIPTION
+
+AnnotationSource that reads transcript data from a core schema database.
+
+=head1 METHODS
+
 =cut
 
 
@@ -43,13 +57,42 @@ use warnings;
 
 package Bio::EnsEMBL::VEP::Haplo::AnnotationSource::Database::Transcript;
 
-use base qw(Bio::EnsEMBL::VEP::Haplo::AnnotationSource::BaseTranscript Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript);
+use base qw(Bio::EnsEMBL::VEP::Haplo::AnnotationType::Transcript Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript);
+
+
+=head2 populate_tree
+
+  Arg 1      : Bio::EnsEMBL::VEP::TranscriptTree
+  Example    : $as->populate_tree($tree);
+  Description: Populates the given transcript tree with data from the transcripts
+               in the database.
+  Returntype : none
+  Exceptions : none
+  Caller     : internal
+  Status     : Stable
+
+=cut
 
 sub populate_tree {
   my ($self, $tree) = @_;
   my $ta = $self->get_adaptor('core', 'transcript');
   $tree->insert($_->seq_region_name, $_->seq_region_start, $_->seq_region_end) for @{$ta->fetch_all_by_biotype('protein_coding')};
 }
+
+
+=head2 create_container
+
+  Arg 1      : Bio::EnsEMBL::Transcript
+  Arg 2      : arrayref of Bio::EnsEMBL::Variation::SampleGenotypeFeature
+  Arg 3      : arrayref of Bio::EnsEMBL::Variation::Sample
+  Example    : $thc = $as->create_container($tr, $gts, $samples);
+  Description: Creates a TranscriptHaplotypeContainer for the given transcript
+  Returntype : Bio::EnsEMBL::Variation::TranscriptHaplotypeContainer
+  Exceptions : none
+  Caller     : Bio::EnsEMBL::VEP::Haplo::BaseTranscript
+  Status     : Stable
+
+=cut
 
 sub create_container {
   my ($self, $tr, $gts, $samples) = @_;

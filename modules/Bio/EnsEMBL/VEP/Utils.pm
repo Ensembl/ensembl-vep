@@ -35,6 +35,37 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::Utils - VEP utility functions
 
+=head1 SYNOPSIS
+
+use Bio::EnsEMBL::VEP::Utils qw(
+  format_coords
+  convert_arrayref
+  merge_hashes
+  merge_arrays
+);
+
+# 5-10
+my $formatted = format_coords(5, 10);
+
+# a,b,c
+my $converted = convert_arrayref(['a', 'b', 'c']);
+
+# {
+#   a => 1,
+#   b => 2,
+# }
+my $merged = merge_hashes({a => 1}, {b => 2});
+
+# [1, 2, 3]
+my $merged2 = merge_arrays([1, 2], [2, 3]);
+
+=head1 DESCRIPTION
+
+The Utils class contains utility methods used by one or more VEP classes
+that do not depend on being a class method.
+
+=head1 METHODS
+
 =cut
 
 
@@ -83,6 +114,26 @@ BEGIN {
   }
 }
 
+
+=head2 format_coords
+
+  Arg 1      : (optional) int $start
+  Arg 2      : (optional) int $end
+  Example    : $formatted = format_coords($start, $end)
+  Description: Formats coordinates according to a few rules:
+                - $start and $end provided : "$start-$end"
+                - $end > $start : "$end-$start"
+                - $start == $end : "$start"
+                - $start but no $end : "$start-?"
+                - $end but no $start : "?-$end"
+                - no $start or $end : "?"
+  Returntype : string
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
 sub format_coords {
   my ($start, $end) = @_;
 
@@ -110,6 +161,22 @@ sub format_coords {
   }
 }
 
+
+=head2 convert_arrayref
+
+  Arg 1      : arrayref $arrayref or scalar $scalar
+  Arg 2      : (optional) string $separator
+  Example    : $converted = convert_arrayref($arrayref)
+  Description: If given an arrayref, returns string joined by $separator
+               (defaults to comma ","). If given a scalar, just returns
+               the given scalar.
+  Returntype : string
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
 sub convert_arrayref {
   if(ref($_[0]) eq 'ARRAY') {
     return join(($_[1] || ","), @{$_[0]});
@@ -118,6 +185,27 @@ sub convert_arrayref {
     return $_[0];
   }
 }
+
+
+=head2 numberify
+
+  Arg 1      : arrayref $arrayref or hashref $hashref
+  Arg 2      : (optional) hashref $exempt_keys
+  Example    : $converted = numberify($hashref)
+  Description: For each element of the arrayref or value in the hashref,
+               forces any that look like numbers to be stored as an int or float
+               rather than a string. Mostly in Perl this makes no difference,
+               but it is required when serialising to JSON to properly store
+               numbers.
+
+               If the hashref $exempt_keys is provided, any matching keys in the
+               input $hashref will not be numberified.
+  Returntype : arrayref or hashref
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
 
 sub numberify {
   my $ref = shift;
@@ -147,6 +235,25 @@ sub numberify {
   return $ref;
 }
 
+
+=head2 merge_hashes
+
+  Arg 1      : hashref $a
+  Arg 2      : hashref $b
+  Arg 3      : (optional) bool $add_values
+  Example    : $merged = merge_hashes($a, $b);
+  Description: Iteratively merges hashes $a and $b. By default the value in $a
+               is retained if a key is shared between both. If $add_values is
+               set to a true value, the values are added together (numerically)
+               if both look like a number.
+               Uses merge_arrays if any values within the hashrefs are arrayrefs.
+  Returntype : hashref
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
 sub merge_hashes {
   my ($x, $y, $add) = @_;
 
@@ -168,6 +275,20 @@ sub merge_hashes {
   return $x;
 }
 
+
+=head2 merge_arrays
+
+  Arg 1      : arrayref $a
+  Arg 2      : arrayref $b
+  Example    : $merged = merge_arrays($a, $b);
+  Description: Merges arrayrefs $a and $b, retaining only unique values.
+  Returntype : hashref
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
 sub merge_arrays {
   my ($x, $y) = @_;
 
@@ -176,6 +297,26 @@ sub merge_arrays {
 
   return $x;
 }
+
+
+=head2 get_compressed_filehandle
+
+  Arg 1      : string $filename
+  Arg 2      : (optional) bool $multistream
+  Example    : $fh = get_compressed_filehandle($file);
+  Description: Gets a filehandle for reading from a compressed input file.
+               Uses one of the following in order of preference:
+               PerlIO::gzip, gzip, IO::Uncompress::Gunzip
+
+               If $multistream is set to true, then PerlIO::gzip is skipped.
+               $multistream must be set for block-gzipped files e.g. those
+               compressed with bgzip.
+  Returntype : glob
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
 
 sub get_compressed_filehandle {
   my ($file, $multi) = @_;
@@ -203,7 +344,18 @@ sub get_compressed_filehandle {
   }
 }
 
-# gets time
+
+=head2 get_time
+
+  Example    : $time = get_time();
+  Description: Gets a timestamp of the current time.
+  Returntype : string
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
 sub get_time {
   my @time = localtime(time());
 
@@ -227,7 +379,22 @@ sub get_time {
   return $time;
 }
 
-# gets version data
+
+=head2 get_version_data
+
+  Arg 1      : (optional) string $dir_with_version_data
+  Example    : $version_data = get_version_data($dir)
+  Description: Gets a hashref of version data for VEP and any
+               Ensembl API modules installed by VEP's INSTALL.pl
+               script. $dir_with_version_data defaults to
+               "ensembl-vep/.version/"
+  Returntype : hashref
+  Exceptions : none
+  Caller     : get_version_string(), INSTALL.pl
+  Status     : Stable
+
+=cut
+
 sub get_version_data {
   my $version_dir = shift || $RealBin.'/.version';
   my %version_data = ();
@@ -255,6 +422,23 @@ sub get_version_data {
 
   return \%version_data;
 }
+
+
+=head2 get_version_string
+
+  Arg 1      : (optional) string $dir_with_version_data
+  Example    : $version_data = get_version_data($dir)
+  Description: Gets a string of version data for VEP and any
+               Ensembl API modules installed by VEP's INSTALL.pl
+               script, suitable for printing as part of a help
+               message. $dir_with_version_data defaults to
+               "ensembl-vep/.version/"
+  Returntype : string
+  Exceptions : none
+  Caller     : vep, haplo
+  Status     : Stable
+
+=cut
 
 sub get_version_string {
   my $version_data = get_version_data(@_);

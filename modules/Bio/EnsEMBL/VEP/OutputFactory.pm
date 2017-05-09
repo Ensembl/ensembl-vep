@@ -35,6 +35,30 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::OutputFactory - base class for generating VEP output
 
+=head1 SYNOPSIS
+
+# actually gets a Bio::EnsEMBL::VEP::OutputFactory::VCF
+my $of = Bio::EnsEMBL::VEP::OutputFactory->new({
+  config => $config,
+  format => 'vcf'
+});
+
+# print headers
+print "$_\n" for @{$of->headers};
+
+# print output
+print "$_\n" for @{$of->get_all_lines_by_InputBuffer($ib)};
+
+=head1 DESCRIPTION
+
+The OutputFactory class is a base class used to generate VEP output.
+
+It should not be invoked directly, but contains the bulk of the methods
+used to transform the Ensembl API objects into "flat" structures suitable
+for writing to output.
+
+=head1 METHODS
+
 =cut
 
 
@@ -84,6 +108,28 @@ my %FREQUENCY_KEYS = (
   af_esp  => [qw(AA EA)],
   af_exac => [('ExAC', map {'ExAC_'.$_} qw(Adj AFR AMR EAS FIN NFE OTH SAS))],
 );
+
+
+=head2 new
+
+  Arg 1      : hashref $args
+               {
+                 config => Bio::EnsEMBL::VEP::Config,
+                 format => string (vcf, ensembl, vep, tab, json)
+               }
+  Example    : $of = Bio::EnsEMBL::VEP::OutputFactory({
+                 config => $config,
+                 format => 'tab'
+               });
+  Description: Create a new Bio::EnsEMBL::VEP::OutputFactory object.
+               Will return the sub-class determined by the format arg.
+  Returntype : Bio::EnsEMBL::VEP::OutputFactory
+  Exceptions : throws on invalid format or if JSON format
+               requested and JSON module not installed
+  Caller     : Runner
+  Status     : Stable
+
+=cut
 
 sub new {
   my $caller = shift;
@@ -173,8 +219,20 @@ sub new {
 ### Top level methods
 #####################
 
-# this is the method that will be called by Runner
-# may be re-implemented by child classes to account for differing structure
+
+=head2 get_all_lines_by_InputBuffer
+
+  Arg 1      : Bio::EnsEMBL::VEP::InputBuffer $ib
+  Example    : $lines = $of->get_all_lines_by_InputBuffer($ib);
+  Description: Gets all lines (strings suitable for writing to output) given
+               an annotated input buffer.
+  Returntype : arrayref of strings
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
+
 sub get_all_lines_by_InputBuffer {
   my $self = shift;
   my $buffer = shift;
@@ -183,7 +241,20 @@ sub get_all_lines_by_InputBuffer {
   return [map {$self->output_hash_to_line($_)} @{$self->get_all_output_hashes_by_InputBuffer($buffer)}];
 }
 
-# this method can also be called by Runner if unprocessed output is required
+
+=head2 get_all_output_hashes_by_InputBuffer
+
+  Arg 1      : Bio::EnsEMBL::VEP::InputBuffer $ib
+  Example    : $hashes = $of->get_all_output_hashes_by_InputBuffer($ib);
+  Description: Gets all hashrefs of data (suitable for serialised writing e.g. JSON) given
+               an annotated input buffer.
+  Returntype : arrayref of hashrefs
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
+
 sub get_all_output_hashes_by_InputBuffer {
   my $self = shift;
   my $buffer = shift;
@@ -198,10 +269,22 @@ sub get_all_output_hashes_by_InputBuffer {
   ];
 }
 
-# this wrapper method does the following:
-# 1) fetches all the VariationFeatureOverlapAllele objects
-# 2) filters them if any filtering options are applied
-# 3) converts them into a flat hashref with the relevant output data
+
+=head2 get_all_output_hashes_by_VariationFeature
+
+  Arg 1      : Bio::EnsEMBL::Variation::VariationFeature $vf
+  Example    : $hashes = $of->get_all_output_hashes_by_InputBuffer($vf);
+  Description: This wrapper method does the following:
+                1) fetches all the VariationFeatureOverlapAllele objects
+                2) filters them if any filtering options are applied
+                3) converts them into a flat hashref with the relevant output data
+  Returntype : arrayref of hashrefs
+  Exceptions : none
+  Caller     : get_all_output_hashes_by_InputBuffer()
+  Status     : Stable
+
+=cut
+
 sub get_all_output_hashes_by_VariationFeature {
   my $self = shift;
   my $vf = shift;
@@ -212,8 +295,23 @@ sub get_all_output_hashes_by_VariationFeature {
   return $self->get_all_VariationFeatureOverlapAllele_output_hashes($vf, $hash);
 }
 
-# this method is separated out from get_all_output_hashes_by_VariationFeature
-# as the JSON sub-class needs this data _without_ that from VariationFeature_to_output_hash merged in
+
+=head2 get_all_VariationFeatureOverlapAllele_output_hashes
+
+  Arg 1      : Bio::EnsEMBL::Variation::VariationFeature $vf
+  Arg 2      : hashref of data obtained from VariationFeature
+  Example    : $hashes = $of->get_all_VariationFeatureOverlapAllele_output_hashes($vf, $hash);
+  Description: Takes the initial hashref of data obtained from just
+               the VariationFeature (i.e. location-based data only)
+               and then creates a hashref expanding on this for each
+               VariationFeatureOverlapAllele (e.g. TranscriptVariationAllele)
+  Returntype : arrayref of hashrefs
+  Exceptions : none
+  Caller     : get_all_output_hashes_by_VariationFeature()
+  Status     : Stable
+
+=cut
+
 sub get_all_VariationFeatureOverlapAllele_output_hashes {
   my $self = shift;
   my $vf = shift;
@@ -255,6 +353,23 @@ sub get_all_VariationFeatureOverlapAllele_output_hashes {
   return \@return;
 }
 
+
+=head2 summary_only
+
+  Arg 1      : Bio::EnsEMBL::Variation::VariationFeature $vf
+  Arg 2      : hashref of data obtained from VariationFeature
+  Arg 3      : arrayref of Bio::EnsEMBL::Variation::VariationFeatureOverlapAllele
+  Example    : $hashes = $of->summary_only($vf, $hash, $vfoas);
+  Description: Squashes data from a listref of VariationFeatureOverlapAlleles
+               into one hashref, using either a summary (list all consequence types)
+               or most severe method.
+  Returntype : arrayref of one hashref (for compliance with other methods)
+  Exceptions : none
+  Caller     : get_all_VariationFeatureOverlapAllele_output_hashes()
+  Status     : Stable
+
+=cut
+
 sub summary_only {
   my ($self, $vf, $hash, $vfoas) = @_;
 
@@ -289,6 +404,22 @@ sub summary_only {
 
   return [$hash];
 }
+
+
+=head2 get_all_VariationFeatureOverlapAlleles
+
+  Arg 1      : Bio::EnsEMBL::Variation::VariationFeature $vf
+  Example    : $vfoas = $of->get_all_VariationFeatureOverlapAlleles($vf);
+  Description: Gets all VariationFeatureOverlapAllele objects for given
+               VariationFeature, applying any filtering as configured.
+               This might be restricting to coding only, or filtering using
+               one of the pick* functions.
+  Returntype : arrayref of Bio::EnsEMBL::Variation::VariationFeatureOverlapAllele
+  Exceptions : none
+  Caller     : get_all_VariationFeatureOverlapAllele_output_hashes()
+  Status     : Stable
+
+=cut
 
 sub get_all_VariationFeatureOverlapAlleles {
   my $self = shift;
@@ -325,6 +456,22 @@ sub get_all_VariationFeatureOverlapAlleles {
   return $self->filter_VariationFeatureOverlapAlleles([map {@{$_->$method}} @{$vfos}]);
 }
 
+
+=head2 get_all_StructuralVariationOverlapAlleles
+
+  Arg 1      : Bio::EnsEMBL::Variation::VariationFeature $vf
+  Example    : $svos = $of->get_all_StructuralVariationOverlapAlleles($vf);
+  Description: Gets all StructuralVariationOverlap objects for given
+               StructuralVariation, applying any filtering as configured.
+               This might be restricting to coding only, or filtering using
+               one of the pick* functions.
+  Returntype : arrayref of Bio::EnsEMBL::Variation::StructuralVariationOverlap
+  Exceptions : none
+  Caller     : get_all_VariationFeatureOverlapAllele_output_hashes()
+  Status     : Stable
+
+=cut
+
 sub get_all_StructuralVariationOverlapAlleles {
   my $self = shift;
   my $svf = shift;
@@ -354,8 +501,22 @@ sub get_all_StructuralVariationOverlapAlleles {
   return $self->filter_VariationFeatureOverlapAlleles([map {@{$_->get_all_StructuralVariationOverlapAlleles}} @{$vfos}]);
 }
 
-# this method chooses the appropriate filtering method
-# the "flag_" options are not strictly filters, but they operate on the same logic
+
+=head2 filter_VariationFeatureOverlapAlleles
+
+  Arg 1      : arrayref of Bio::EnsEMBL::Variation::VariationFeatureOverlapAllele
+  Example    : $filtered = $of->filter_VariationFeatureOverlapAlleles($vfoas);
+  Description: Filters VariationFeatureOverlapAllele objects by various criteria,
+               choosing one per variant, allele, gene. It can also flag instead
+               of filtering.
+  Returntype : arrayref of Bio::EnsEMBL::Variation::VariationFeatureOverlapAllele
+  Exceptions : none
+  Caller     : get_all_VariationFeatureOverlapAlleles(),
+               get_all_StructuralVariationOverlapAlleles()
+  Status     : Stable
+
+=cut
+
 sub filter_VariationFeatureOverlapAlleles {
   my $self = shift;
   my $vfoas = shift;
@@ -410,15 +571,27 @@ sub filter_VariationFeatureOverlapAlleles {
   return $vfoas;
 }
 
-# picks the worst from a list of VariationFeatureOverlapAlleles
-# VFOAs are ordered by a heirarchy set in the pick_order param:
-# 1: canonical
-# 2: transcript support level
-# 3: biotype (protein coding favoured)
-# 4: consequence rank
-# 5: transcript length
-# 6: transcript from Ensembl?
-# 7: transcript from RefSeq?
+
+=head2 pick_worst_VariationFeatureOverlapAllele
+
+  Arg 1      : arrayref of Bio::EnsEMBL::Variation::VariationFeatureOverlapAllele
+  Example    : $picked = $of->pick_worst_VariationFeatureOverlapAllele($vfoas);
+  Description: Selects one VariationFeatureOverlapAllele from a list using criteria
+               defined in the param pick_order. Criteria are in this default order:
+                1: canonical
+                2: transcript support level
+                3: biotype (protein coding favoured)
+                4: consequence rank
+                5: transcript length
+                6: transcript from Ensembl?
+                7: transcript from RefSeq?
+  Returntype : Bio::EnsEMBL::Variation::VariationFeatureOverlapAllele
+  Exceptions : none
+  Caller     : filter_VariationFeatureOverlapAlleles()
+  Status     : Stable
+
+=cut
+
 sub pick_worst_VariationFeatureOverlapAllele {
   my $self = shift;
   my $vfoas = shift || [];
@@ -526,8 +699,21 @@ sub pick_worst_VariationFeatureOverlapAllele {
   return undef;
 }
 
-# pick one VariationFeatureOverlapAllele per gene
-# allow non-transcript types to pass through
+
+=head2 pick_VariationFeatureOverlapAllele_per_gene
+
+  Arg 1      : arrayref of Bio::EnsEMBL::Variation::VariationFeatureOverlapAllele
+  Example    : $picked = $of->pick_VariationFeatureOverlapAllele_per_gene($vfoas);
+  Description: Selects one VariationFeatureOverlapAllele per gene affected by the
+               given list, using pick_worst_VariationFeatureOverlapAllele to select
+               within in each gene.
+  Returntype : arrayref of Bio::EnsEMBL::Variation::VariationFeatureOverlapAllele
+  Exceptions : none
+  Caller     : filter_VariationFeatureOverlapAlleles()
+  Status     : Stable
+
+=cut
+
 sub pick_VariationFeatureOverlapAllele_per_gene {
   my $self = shift;
   my $vfoas = shift;
@@ -567,7 +753,20 @@ sub pick_VariationFeatureOverlapAllele_per_gene {
 ### data are inserted as the arguments, and return the hashref
 ############################################################################
 
-# initialize an output hash for a VariationFeature
+
+=head2 VariationFeature_to_output_hash
+
+  Arg 1      : Bio::EnsEMBL::Variation::VariationFeature
+  Example    : $hashref = $of->VariationFeature_to_output_hash($vf);
+  Description: "Flattens" a VariationFeature to a simple hash, adding information
+               pertaining just to the variant's genomic location.
+  Returntype : hashref
+  Exceptions : none
+  Caller     : get_all_output_hashes_by_VariationFeature()
+  Status     : Stable
+
+=cut
+
 sub VariationFeature_to_output_hash {
   my $self = shift;
   my $vf = shift;
@@ -621,6 +820,20 @@ sub VariationFeature_to_output_hash {
 
   return $hash;
 }
+
+
+=head2 add_colocated_variant_info
+
+  Arg 1      : Bio::EnsEMBL::Variation::VariationFeature $vf
+  Arg 2      : hashref $vf_hash
+  Example    : $hashref = $of->add_colocated_variant_info($vf, $vf_hash);
+  Description: Adds co-located variant information to hash
+  Returntype : hashref
+  Exceptions : none
+  Caller     : VariationFeature_to_output_hash()
+  Status     : Stable
+
+=cut
 
 sub add_colocated_variant_info {
   my $self = shift;
@@ -695,6 +908,21 @@ sub add_colocated_variant_info {
 
   return $hash;
 }
+
+
+=head2 add_colocated_frequency_data
+
+  Arg 1      : Bio::EnsEMBL::Variation::VariationFeature $vf
+  Arg 2      : hashref $vf_hash
+  Arg 3      : hashref $existing_variant_hash
+  Example    : $hashref = $of->add_colocated_frequency_data($vf, $vf_hash, $ex);
+  Description: Adds co-located variant frequency data information to hash
+  Returntype : hashref
+  Exceptions : none
+  Caller     : VariationFeatureOverlapAllele_to_output_hash()
+  Status     : Stable
+
+=cut
 
 sub add_colocated_frequency_data {
   my $self = shift;
@@ -778,6 +1006,22 @@ sub add_colocated_frequency_data {
   return $hash;
 }
 
+
+=head2 _add_custom_annotations_to_hash
+
+  Arg 1      : hashref $vf_hash
+  Arg 2      : string $custom_name
+  Arg 3      : listref $annotations
+  Example    : $hashref = $of->_add_custom_annotations_to_hash($vf, $vf_hash, $ex);
+  Description: Adds custom annotation data to hash
+  Returntype : hashref
+  Exceptions : none
+  Caller     : VariationFeatureOverlapAllele_to_output_hash(),
+               VariationFeature_to_output_hash()
+  Status     : Stable
+
+=cut
+
 sub _add_custom_annotations_to_hash {
   my ($self, $hash, $custom_name, $annots) = @_;
 
@@ -791,6 +1035,25 @@ sub _add_custom_annotations_to_hash {
 
   return $hash;
 }
+
+
+=head2 VariationFeatureOverlapAllele_to_output_hash
+
+  Arg 1      : Bio::EnsEMBL::Variation::VariationFeatureOverlapAllele $vfoa
+  Arg 2      : hashref $vf_hash
+  Arg 3      : Bio::EnsEMBL::Variation::VariationFeature $vf
+  Example    : $hashref = $of->VariationFeatureOverlapAllele_to_output_hash($vfoa, $vf_hash, $vf);
+  Description: Adds generic information to hash applicable to all
+               VariationFeatureOverlapAllele sub-classes.
+  Returntype : hashref
+  Exceptions : none
+  Caller     : TranscriptVariationAllele_to_output_hash(),
+               RegulatoryFeatureVariationAllele_to_output_hash(),
+               MotifFeatureVariationAllele_to_output_hash(),
+               IntergenicVariationAllele_to_output_hash()
+  Status     : Stable
+
+=cut
 
 sub VariationFeatureOverlapAllele_to_output_hash {
   my $self = shift;
@@ -842,6 +1105,21 @@ sub VariationFeatureOverlapAllele_to_output_hash {
 
   return $hash;
 }
+
+
+=head2 BaseTranscriptVariationAllele_to_output_hash
+
+  Arg 1      : Bio::EnsEMBL::Variation::BaseTranscriptVariationAllele $btva
+  Arg 2      : hashref $vf_hash
+  Example    : $hashref = $of->BaseTranscriptVariationAllele_to_output_hash($btva, $vf_hash);
+  Description: Adds information to hash applicable to transcript.
+  Returntype : hashref
+  Exceptions : none
+  Caller     : TranscriptVariationAllele_to_output_hash(),
+               TranscriptStructuralVariationAllele_to_output_hash()
+  Status     : Stable
+
+=cut
 
 sub BaseTranscriptVariationAllele_to_output_hash {
   my $self = shift;
@@ -985,6 +1263,20 @@ sub BaseTranscriptVariationAllele_to_output_hash {
   return $hash;
 }
 
+
+=head2 TranscriptVariationAllele_to_output_hash
+
+  Arg 1      : Bio::EnsEMBL::Variation::TranscriptVariationAllele $tva
+  Arg 2      : hashref $vf_hash
+  Example    : $hashref = $of->TranscriptVariationAllele_to_output_hash($tva, $vf_hash);
+  Description: Adds information to hash applicable to transcript and allele combination.
+  Returntype : hashref
+  Exceptions : none
+  Caller     : get_all_VariationFeatureOverlapAllele_output_hashes()
+  Status     : Stable
+
+=cut
+
 sub TranscriptVariationAllele_to_output_hash {
   my $self = shift;
   my ($vfoa, $hash) = @_;
@@ -1051,6 +1343,20 @@ sub TranscriptVariationAllele_to_output_hash {
   return $hash;
 }
 
+
+=head2 add_sift_polyphen
+
+  Arg 1      : Bio::EnsEMBL::Variation::TranscriptVariationAllele $tva
+  Arg 2      : hashref $vf_hash
+  Example    : $hashref = $of->add_sift_polyphen($tva, $vf_hash);
+  Description: Adds SIFT and PolyPhen data to hash.
+  Returntype : hashref
+  Exceptions : none
+  Caller     : TranscriptVariationAllele_to_output_hash()
+  Status     : Stable
+
+=cut
+
 sub add_sift_polyphen {
   my $self = shift;
   my ($vfoa, $hash) = @_;
@@ -1106,7 +1412,20 @@ sub add_sift_polyphen {
   return $hash;
 }
 
-# process RegulatoryFeatureVariationAllele
+
+=head2 RegulatoryFeatureVariationAllele_to_output_hash
+
+  Arg 1      : Bio::EnsEMBL::Variation::RegulatoryFeatureVariationAllele $rfva
+  Arg 2      : hashref $vf_hash
+  Example    : $hashref = $of->RegulatoryFeatureVariationAllele_to_output_hash($rfva, $vf_hash);
+  Description: Adds information to hash applicable to regulatory feature and allele combination.
+  Returntype : hashref
+  Exceptions : none
+  Caller     : get_all_VariationFeatureOverlapAllele_output_hashes()
+  Status     : Stable
+
+=cut
+
 sub RegulatoryFeatureVariationAllele_to_output_hash {
   my $self = shift;
   my ($vfoa, $hash) = @_;
@@ -1126,7 +1445,20 @@ sub RegulatoryFeatureVariationAllele_to_output_hash {
   return $hash;
 }
 
-# process MotifFeatureVariationAllele
+
+=head2 MotifFeatureVariationAllele_to_output_hash
+
+  Arg 1      : Bio::EnsEMBL::Variation::MotifFeatureVariationAllele $mfva
+  Arg 2      : hashref $vf_hash
+  Example    : $hashref = $of->MotifFeatureVariationAllele_to_output_hash($mfva, $vf_hash);
+  Description: Adds information to hash applicable to motif feature and allele combination.
+  Returntype : hashref
+  Exceptions : none
+  Caller     : get_all_VariationFeatureOverlapAllele_output_hashes()
+  Status     : Stable
+
+=cut
+
 sub MotifFeatureVariationAllele_to_output_hash {
   my $self = shift;
   my ($vfoa, $hash) = @_;
@@ -1158,6 +1490,20 @@ sub MotifFeatureVariationAllele_to_output_hash {
   return $hash;
 }
 
+
+=head2 get_cell_types
+
+  Arg 1      : Bio::EnsEMBL::Funcgen::MotifFeature or Bio::EnsEMBL::Funcgen::RegulatoryFeature $ft
+  Example    : $cell_types = $of->get_cell_types($ft);
+  Description: Gets cell types for this regulatory or motif feature
+  Returntype : listref of strings
+  Exceptions : none
+  Caller     : MotifFeatureVariationAllele_to_output_hash(),
+               RegulatoryFeatureVariationAllele_to_output_hash()
+  Status     : Stable
+
+=cut
+
 sub get_cell_types {
   my $self = shift;
   my $ft = shift;
@@ -1170,6 +1516,21 @@ sub get_cell_types {
   ];
 }
 
+
+=head2 IntergenicVariationAllele_to_output_hash
+
+  Arg 1      : Bio::EnsEMBL::Variation::IntergenicVariationAllele $iva
+  Arg 2      : hashref $vf_hash
+  Example    : $hashref = $of->IntergenicVariationAllele_to_output_hash($iva, $vf_hash);
+  Description: Just a placeholder really as no extra information is added for
+               intergenic variants.
+  Returntype : hashref
+  Exceptions : none
+  Caller     : get_all_VariationFeatureOverlapAllele_output_hashes()
+  Status     : Stable
+
+=cut
+
 sub IntergenicVariationAllele_to_output_hash {
   my $self = shift;
   return $self->VariationFeatureOverlapAllele_to_output_hash(@_);
@@ -1178,6 +1539,21 @@ sub IntergenicVariationAllele_to_output_hash {
 
 ### SV-type methods
 ###################
+
+
+=head2 BaseStructuralVariationOverlapAllele_to_output_hash
+
+  Arg 1      : Bio::EnsEMBL::Variation::BaseStructuralVariationOverlapAllele $bsvoa
+  Arg 2      : hashref $vf_hash
+  Example    : $hashref = $of->BaseStructuralVariationOverlapAllele_to_output_hash($bsvoa, $vf_hash);
+  Description: Adds basic information to hash applicable to all
+               StructuralVariationOverlapAllele classes.
+  Returntype : hashref
+  Exceptions : none
+  Caller     : StructuralVariationOverlapAllele_to_output_hash()
+  Status     : Stable
+
+=cut
 
 sub BaseStructuralVariationOverlapAllele_to_output_hash {
   my $self = shift;
@@ -1209,6 +1585,21 @@ sub BaseStructuralVariationOverlapAllele_to_output_hash {
 
   return $hash;
 }
+
+
+=head2 StructuralVariationOverlapAllele_to_output_hash
+
+  Arg 1      : Bio::EnsEMBL::Variation::StructuralVariationOverlapAllele $svoa
+  Arg 2      : hashref $vf_hash
+  Example    : $hashref = $of->StructuralVariationOverlapAllele_to_output_hash($svoa, $vf_hash);
+  Description: Adds basic information to hash applicable to all
+               StructuralVariationOverlapAllele classes.
+  Returntype : hashref
+  Exceptions : none
+  Caller     : get_all_VariationFeatureOverlapAllele_output_hashes()
+  Status     : Stable
+
+=cut
 
 sub StructuralVariationOverlapAllele_to_output_hash {
   my $self = shift;
@@ -1242,6 +1633,20 @@ sub StructuralVariationOverlapAllele_to_output_hash {
 
   return $hash;
 }
+
+
+=head2 TranscriptStructuralVariationAllele_to_output_hash
+
+  Arg 1      : Bio::EnsEMBL::Variation::TranscriptStructuralVariationAllele $tsva
+  Arg 2      : hashref $vf_hash
+  Example    : $hashref = $of->TranscriptStructuralVariationAllele_to_output_hash($tsva, $vf_hash);
+  Description: Adds transcript information to hash for SV overlaps.
+  Returntype : hashref
+  Exceptions : none
+  Caller     : get_all_VariationFeatureOverlapAllele_output_hashes()
+  Status     : Stable
+
+=cut
 
 sub TranscriptStructuralVariationAllele_to_output_hash {
   my $self = shift;
@@ -1282,6 +1687,21 @@ sub TranscriptStructuralVariationAllele_to_output_hash {
   return $hash;
 }
 
+
+=head2 IntergenicStructuralVariationAllele_to_output_hash
+
+  Arg 1      : Bio::EnsEMBL::Variation::IntergenicStructuralVariationAllele $isva
+  Arg 2      : hashref $vf_hash
+  Example    : $hashref = $of->IntergenicStructuralVariationAllele_to_output_hash($isva, $vf_hash);
+  Description: Just a placeholder really as no extra information is added for
+               intergenic variants.
+  Returntype : hashref
+  Exceptions : none
+  Caller     : get_all_VariationFeatureOverlapAllele_output_hashes()
+  Status     : Stable
+
+=cut
+
 sub IntergenicStructuralVariationAllele_to_output_hash {
   my $self = shift;
   return $self->BaseStructuralVariationOverlapAllele_to_output_hash(@_);
@@ -1291,9 +1711,36 @@ sub IntergenicStructuralVariationAllele_to_output_hash {
 ### Other methods
 #################
 
+
+=head2 plugins
+
+  Example    : $plugins = $of->plugins();
+  Description: Gets all plugins to be run.
+  Returntype : listref of Bio::EnsEMBL::Variation::Utils::BaseVepPlugin
+  Exceptions : none
+  Caller     : run_plugins(), get_plugin_headers()
+  Status     : Stable
+
+=cut
+
 sub plugins {
   return $_[0]->{plugins} || [];
 }
+
+
+=head2 run_plugins
+
+  Arg 1      : Bio::EnsEMBL::Variation::BaseVariationFeatureOverlapAllele $bvfoa
+  Arg 2      : hashref $vf_hash
+  Arg 3      : Bio::EnsEMBL::Variation::VariationFeature $vf
+  Example    : $vf_hash = $of->run_plugins($bvfoa, $vf_hash, $vf);
+  Description: Runs all plugins for given BaseVariationFeatureOverlapAllele
+  Returntype : hashref
+  Exceptions : none
+  Caller     : get_all_VariationFeatureOverlapAllele_output_hashes()
+  Status     : Stable
+
+=cut
 
 sub run_plugins {
   my ($self, $bvfoa, $line_hash, $vf) = @_;
@@ -1340,6 +1787,20 @@ sub run_plugins {
 
   return $skip_line ? undef : $line_hash;
 }
+
+
+=head2 rejoin_variants_in_InputBuffer
+
+  Arg 1      : Bio::EnsEMBL::VEP::InputBuffer
+  Example    : $of->rejoin_variants_in_InputBuffer($ib);
+  Description: Rejoins linked variants that were split in InputBuffer, typically
+               by user providing --minimal flag.
+  Returntype : none
+  Exceptions : none
+  Caller     : get_all_output_hashes_by_InputBuffer()
+  Status     : Stable
+
+=cut
 
 sub rejoin_variants_in_InputBuffer {
   my $self = shift;
@@ -1427,16 +1888,51 @@ sub rejoin_variants_in_InputBuffer {
 ### These will be called when generating the actual output
 ##########################################################
 
-# method to retrieve header info passed in on object creation
+
+=head2 header_info
+
+  Example    : $info = $of->header_info();
+  Description: Retrieve header info passed in on object creation
+  Returntype : hashref
+  Exceptions : none
+  Caller     : get_custom_headers(), sub-classes
+  Status     : Stable
+
+=cut
+
 sub header_info {
   my $self = shift;
   return $self->{header_info} || {};
 }
 
-# sub-classes will typically re-implement this
+
+=head2 headers
+
+  Example    : $headers = $of->headers();
+  Description: Get list of headers to print out for this output format.
+               This is a stub method, overridden in child classes.
+  Returntype : listref of strings
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
+
 sub headers {
   return [];
 }
+
+
+=head2 get_plugin_headers
+
+  Example    : $headers = $of->get_plugin_headers();
+  Description: Get headers from plugins
+  Returntype : arrayref of arrayrefs [$key, $header]
+  Exceptions : none
+  Caller     : description_headers() in child classes
+  Status     : Stable
+
+=cut
 
 sub get_plugin_headers {
   my $self = shift;
@@ -1453,6 +1949,18 @@ sub get_plugin_headers {
 
   return \@headers;
 }
+
+
+=head2 get_custom_headers
+
+  Example    : $headers = $of->get_custom_headers();
+  Description: Get headers from custom data files
+  Returntype : arrayref of arrayrefs [$key, $header]
+  Exceptions : none
+  Caller     : description_headers() in child classes
+  Status     : Stable
+
+=cut
 
 sub get_custom_headers {
   my $self = shift;
@@ -1473,7 +1981,18 @@ sub get_custom_headers {
   return \@headers;
 }
 
-# this method returns all the fields that will be populated given user parameters
+
+=head2 flag_fields
+
+  Example    : $fields = $of->flag_fields();
+  Description: Get list of fields that will appear in output given user config
+  Returntype : arrayref of strings
+  Exceptions : none
+  Caller     : fields() in child classes
+  Status     : Stable
+
+=cut
+
 sub flag_fields {
   my $self = shift;
   

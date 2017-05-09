@@ -35,6 +35,34 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::Parser::VCF - VCF input parser
 
+=head1 SYNOPSIS
+
+my $parser = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $config,
+  file   => 'variant.vcf',
+});
+
+my $vf = $parser->next();
+
+=head1 DESCRIPTION
+
+VCF format parser.
+
+4.2 spec: https://samtools.github.io/hts-specs/VCFv4.2.pdf
+
+IMPORTANT NOTE: unbalanced substitutions are encoded in VCF
+with the preceding base prepended to the REF and ALT alleles.
+In order to be processed by VEP and the Ensembl API, these are
+converted to Ensembl style by removing the prepended base and
+incrementing the start position, but only if the same first base
+is shared by *all* REF and ALT alleles.
+
+This behaviour can be modified further by using the --minimal
+flag, which reduces each REF+ALT pair to their minimal shared
+sequence.
+
+=head1 METHODS
+
 =cut
 
 
@@ -49,6 +77,23 @@ use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::IO::Parser::VCF4;
 
+
+=head2 new
+
+  Arg 1      : hashref $args
+               {
+                 config    => Bio::EnsEMBL::VEP::Config,
+                 file      => string or filehandle,
+               }
+  Example    : $parser = Bio::EnsEMBL::VEP::Parser::VCF->new($args);
+  Description: Create a new Bio::EnsEMBL::VEP::Parser::VCF object.
+  Returntype : Bio::EnsEMBL::VEP::Parser::VCF
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
+
 sub new {
   my $caller = shift;
   my $class = ref($caller) || $caller;
@@ -61,6 +106,18 @@ sub new {
   return $self;
 }
 
+
+=head2 parser
+
+  Example    : $io_parser = $parser->parser();
+  Description: Get ensembl-io parser object used to read data from input.
+  Returntype : Bio::EnsEMBL::IO::Parser::VCF4
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
 sub parser {
   my $self = shift;
 
@@ -71,6 +128,19 @@ sub parser {
 
   return $self->{parser};
 }
+
+
+=head2 headers
+
+  Example    : $headers = $parser->headers();
+  Description: Gets headers from the VCF input. Required for
+               writing output as VCF.
+  Returntype : arrayref of strings
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
 
 sub headers {
   my $self = shift;
@@ -88,6 +158,18 @@ sub headers {
 
   return $self->{headers};
 }
+
+
+=head2 next
+
+  Example    : $vf = $parser->next();
+  Description: Fetches the next valid VariationFeature from the input file
+  Returntype : Bio::EnsEMBL::Variation::BaseVariationFeature
+  Exceptions : none
+  Caller     : InputBuffer
+  Status     : Stable
+
+=cut
 
 sub next {
   my $self = shift;
@@ -117,6 +199,20 @@ sub next {
 
   return $vf;
 }
+
+
+=head2 create_VariationFeatures
+
+  Example    : $vfs = $parser->create_VariationFeatures();
+  Description: Create one or more VariationFeature objects from the current line
+               of input; multiple may be returned if multiple individuals
+               are requested using --individual.
+  Returntype : arrayref of Bio::EnsEMBL::BaseVariationFeature
+  Exceptions : warns if GP flag required and not found
+  Caller     : next()
+  Status     : Stable
+
+=cut
 
 sub create_VariationFeatures {
   my $self = shift;
@@ -273,6 +369,19 @@ sub create_VariationFeatures {
   return $self->post_process_vfs([$vf]);
 }
 
+
+=head2 create_StructuralVariationFeatures
+
+  Example    : $vfs = $parser->create_StructuralVariationFeatures();
+  Description: Create StructuralVariationFeature objects from the current line
+               of input.
+  Returntype : arrayref of Bio::EnsEMBL::StructuralVariationFeature
+  Exceptions : warns if SV type indicated but end coord can't be determined
+  Caller     : create_VariationFeatures()
+  Status     : Stable
+
+=cut
+
 sub create_StructuralVariationFeatures {
   my $self = shift;
 
@@ -357,6 +466,22 @@ sub create_StructuralVariationFeatures {
 
   return $self->post_process_vfs([$svf]);
 }
+
+
+=head2 create_individual_VariationFeatures
+ 
+  Arg 1      : Bio::EnsEMBL::VariationFeature $vf
+  Arg 2      : hashref $allele_map
+  Example    : $vfs = $parser->create_individual_VariationFeatures($vf, $map);
+  Description: Create one VariationFeature object per configured
+               individual/sample. Arg 2 $allele_map is a hashref mapping the
+               allele index to the actual ALT string it represents.
+  Returntype : arrayref of Bio::EnsEMBL::VariationFeature
+  Exceptions : none
+  Caller     : create_VariationFeatures()
+  Status     : Stable
+
+=cut
 
 sub create_individual_VariationFeatures {
   my $self = shift;

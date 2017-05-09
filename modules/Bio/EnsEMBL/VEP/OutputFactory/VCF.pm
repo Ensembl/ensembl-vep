@@ -35,6 +35,51 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::OutputFactory::VCF - VCF format output factory
 
+=head1 SYNOPSIS
+
+my $of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({
+  config => $config,
+});
+
+# print headers
+print "$_\n" for @{$of->headers};
+
+# print output
+print "$_\n" for @{$of->get_all_lines_by_InputBuffer($ib)};
+
+=head1 DESCRIPTION
+
+An OutputFactory class to generate VCF-format output.
+
+If the input was VCF, the original input line is appended with
+VEP annotations.
+
+If the input was another format, VCF lines are generated from
+scratch. In the case of unbalanced substitutions (e.g. insertions
+or deletions), this means that the base preceding the variant
+must be prepended to the REF and ALT alleles to comply with 
+VCF specification.
+
+The VEP output data itself is concatenated in a carefully delimited
+string in the INFO field of the VCF, using the (configurable) key
+CSQ. The value for the CSQ field consists of one or more
+comma-separated "chunks" of annotation representing
+one variant allele/feature combination. Each chunk contains a
+constant number of fields, separated by pipe ("|") characters, with
+the fields being defined in the VCF header. Empty values for fields
+are represented by empty strings, meaning multiple pipe characters
+may be found consecutively.
+
+The nested nature of this format means that several character
+substitutions must be used within VEP fields to preserve VCF format:
+
+,          ==> &
+=          ==> %3B
+whitespace ==> _
+
+=head1 METHODS
+
+
 =cut
 
 
@@ -71,6 +116,23 @@ my @VCF_COLS = qw(
   Existing_variation
 );
 
+
+=head2 new
+
+  Arg 1      : hashref $args
+  Example    : $of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({
+                 config => $config,
+               });
+  Description: Creates a new Bio::EnsEMBL::VEP::OutputFactory::VCF object.
+               Has its own constructor to add several params via
+               add_shortcuts()
+  Returntype : Bio::EnsEMBL::VEP::OutputFactory::VCF
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
+
 sub new {
   my $caller = shift;
   my $class = ref($caller) || $caller;
@@ -89,6 +151,18 @@ sub new {
 
   return $self;
 }
+
+
+=head2 headers
+
+  Example    : $headers = $of->headers();
+  Description: Get list of headers to print out.
+  Returntype : listref of strings
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
 
 sub headers {
   my $self = shift;
@@ -161,6 +235,20 @@ sub headers {
   return \@headers;
 }
 
+
+=head2 get_all_lines_by_InputBuffer
+
+  Arg 1      : Bio::EnsEMBL::VEP::InputBuffer $ib
+  Example    : $lines = $of->get_all_lines_by_InputBuffer($ib);
+  Description: Gets all lines (strings suitable for writing to output) given
+               an annotated input buffer, one line per input variant.
+  Returntype : arrayref of strings
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
+
 sub get_all_lines_by_InputBuffer {
   my $self = shift;
   my $buffer = shift;
@@ -217,6 +305,22 @@ sub get_all_lines_by_InputBuffer {
   return \@return;
 }
 
+
+=head2 output_hash_to_vcf_info_chunk
+
+  Arg 1      : hashref $vf_hash
+  Arg 2      : (optional) int $vf_strand
+  Example    : $chunk = $of->output_hash_to_vcf_info_chunk($vf_hash);
+  Description: Converts a hashref as retrieved from
+               get_all_output_hashes_by_VariationFeature to a pipe-separated
+               chunk suitable for adding to the CSQ key in the VCF INFO field.
+  Returntype : string
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
+
 sub output_hash_to_vcf_info_chunk {
   my $self = shift;
   my $hash = shift;
@@ -253,6 +357,18 @@ sub output_hash_to_vcf_info_chunk {
   return join('|', @chunk);
 }
 
+
+=head2 fields
+
+  Example    : $fields = $of->fields();
+  Description: Gets list of fields to be populated
+  Returntype : arrayref of strings
+  Exceptions : none
+  Caller     : output_hash_to_vcf_info_chunk()
+  Status     : Stable
+
+=cut
+
 sub fields {
   my $self = shift;
 
@@ -275,6 +391,21 @@ sub fields {
 
   return $self->{fields};
 }
+
+
+=head2 VariationFeature_to_VCF_record
+
+  Arg 1      : Bio::EnsEMBL::Variation::BaseVariationFeature $bvf
+  Example    : $vcf_arrayref = $of->VariationFeature_to_VCF_record($bvf);
+  Description: Converts a BaseVariationFeature object to an arrayref
+               representing the columns of a VCF line. May be a
+               StructuralVariationFeature
+  Returntype : arrayref of strings
+  Exceptions : none
+  Caller     : get_all_lines_by_InputBuffer(), 
+  Status     : Stable
+
+=cut
 
 sub VariationFeature_to_VCF_record {
   my $self = shift;
@@ -351,6 +482,20 @@ sub VariationFeature_to_VCF_record {
   }
 }
 
+
+=head2 get_prev_base
+
+  Arg 1      : Bio::EnsEMBL::Variation::BaseVariationFeature $bvf
+  Example    : $base = $of->get_prev_base($bvf);
+  Description: Get the base preceding the given variant's position. Will
+               use FASTA or database; returns "N" if sequence retrieval fails.
+  Returntype : string
+  Exceptions : none
+  Caller     : VariationFeature_to_VCF_record(), 
+  Status     : Stable
+
+=cut
+
 sub get_prev_base {
   my $self = shift;
   my $vf = shift;  
@@ -368,6 +513,25 @@ sub get_prev_base {
 
   return $prev_base;
 }
+
+
+=head2 write_web_output
+
+  Arg 1      : Bio::EnsEMBL::Variation::BaseVariationFeature $bvf
+  Example    : $of->write_web_output($bvf);
+  Description: Writes a line of summarised output to the web_output
+               filehandle.
+
+               The VEP web backend uses VCF as its output, but restrictions
+               in filesystems means that VEP must write a secondary
+               output file containing summary data to allow user input
+               to be rendered as a track on region-in-detail view etc.
+  Returntype : string
+  Exceptions : none
+  Caller     : get_all_lines_by_InputBuffer(), 
+  Status     : Stable
+
+=cut
 
 sub write_web_output {
   my $self = shift;
@@ -401,6 +565,18 @@ sub write_web_output {
     $id,
     $vf->display_consequence;
 }
+
+
+=head2 web_output_fh
+
+  Example    : $fh = $of->web_output_fh();
+  Description: Gets filehandle for writing web output to.
+  Returntype : glob
+  Exceptions : throws if unable to write to file
+  Caller     : write_web_output(), 
+  Status     : Stable
+
+=cut
 
 sub web_output_fh {
   my $self = shift;

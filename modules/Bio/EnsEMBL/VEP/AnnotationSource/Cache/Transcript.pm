@@ -35,6 +35,31 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript - local disk transcript annotation source
 
+=head1 SYNOPSIS
+
+my $as = Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript->new({
+  config => $config,
+  dir    => $dir
+});
+
+$as->annotate_InputBuffer($ib);
+
+=head1 DESCRIPTION
+
+Cache-based annotation source for transcript data.
+
+Data are stored as serialized objects on disk. Structure:
+
+$cache = {
+  chr => [
+    tr1,
+    tr2,
+    tr3
+  ]
+}
+
+=head1 METHODS
+
 =cut
 
 
@@ -56,8 +81,25 @@ use Bio::EnsEMBL::Analysis;
 
 use base qw(
   Bio::EnsEMBL::VEP::AnnotationSource::Cache::BaseSerialized
-  Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript
+  Bio::EnsEMBL::VEP::AnnotationType::Transcript
 );
+
+
+=head2 new
+
+  Arg 1      : hashref $args
+               {
+                 config => Bio::EnsEMBL::VEP::Config $config,
+                 dir    => string $dir,
+               }
+  Example    : $as = Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript->new($args);
+  Description: Create a new Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript object.
+  Returntype : Bio::EnsEMBL::VEP::AnnotationSource::Cache::Transcript
+  Exceptions : throws if "nearest" param set and Set::IntervalTree not installed
+  Caller     : CacheDir
+  Status     : Stable
+
+=cut
 
 sub new {
   my $caller = shift;
@@ -80,12 +122,27 @@ sub new {
 
   # generate tree here otherwise forked processes will regenerate
   if($self->{nearest}) {
-    throw("ERROR: --nearest requires Set::IntervalTree perl module to be installed\n") unless $Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript::CAN_USE_INTERVAL_TREE;
+    throw("ERROR: --nearest requires Set::IntervalTree perl module to be installed\n") unless $Bio::EnsEMBL::VEP::AnnotationType::Transcript::CAN_USE_INTERVAL_TREE;
     $self->transcript_tree();
   }
 
   return $self;
 }
+
+
+=head2 check_sift_polyphen
+
+  Example    : $ok = $as->check_sift_polyphen();
+  Description: Gets user-set SIFT/PolyPhen parameters and checks vs
+               availability in the cache. If using "safe" mode (REST, web)
+               or --everything, params are disabled if unavailable. Otherwise,
+               this method will throw.
+  Returntype : bool
+  Exceptions : throws if configured tool not available
+  Caller     : new()
+  Status     : Stable
+
+=cut
 
 sub check_sift_polyphen {
   my $self = shift;
@@ -117,6 +174,21 @@ sub check_sift_polyphen {
   return 1;
 }
 
+
+=head2 get_dump_file_name
+
+  Arg 1      : string $chr
+  Arg 2      : string $region or int $start
+  Arg 3      : (optional) int $end
+  Example    : $file = $as->get_dump_file_name(1, "1-1000000");
+  Description: Gets file name from the cache given a region.
+  Returntype : string
+  Exceptions : none
+  Caller     : get_features_by_regions_uncached()
+  Status     : Stable
+
+=cut
+
 sub get_dump_file_name {
   my $self = shift;
   my $chr  = shift;
@@ -136,6 +208,20 @@ sub get_dump_file_name {
     $self->file_suffix
   );
 }
+
+
+=head2 deserialized_obj_to_features
+
+  Arg 1      : hashref $obj
+  Example    : $features = $as->deserialized_obj_to_features($obj);
+  Description: Takes the deserialized object read from the cache file,
+               restores the objects by reattaching necessary adaptors.
+  Returntype : arrayref of Bio::EnsEMBL::Transcript
+  Exceptions : none
+  Caller     : get_features_by_regions_uncached()
+  Status     : Stable
+
+=cut
 
 sub deserialized_obj_to_features {
   my $self = shift;
@@ -170,8 +256,23 @@ sub deserialized_obj_to_features {
   return \@features;
 }
 
+
+=head2 tree_file
+
+  Example    : $file = $as->tree_file();
+  Description: Gets the filename storing data for populating the transcript
+               tree for this annotation source. If it does not exist, then the
+               file is created by scanning the cache for transcripts (this can
+               take a while and a status message is printed indicating this).
+  Returntype : string
+  Exceptions : none
+  Caller     : populate_tree()
+  Status     : Stable
+
+=cut
+
 sub tree_file {
-  my ($self, $tree) = @_;
+  my $self = shift;
 
   my $file = $self->_tree_coords_filename;
 

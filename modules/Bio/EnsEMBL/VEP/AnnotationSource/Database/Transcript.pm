@@ -35,6 +35,20 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript - database transcript annotation source
 
+=head1 SYNOPSIS
+
+my $as = Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript->new({
+  config => $config,
+});
+
+$as->annotate_InputBuffer($ib);
+
+=head1 DESCRIPTION
+
+Database-based annotation source for transcript data.
+
+=head1 METHODS
+
 =cut
 
 
@@ -50,8 +64,24 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
 use base qw(
   Bio::EnsEMBL::VEP::AnnotationSource::Database
-  Bio::EnsEMBL::VEP::AnnotationSource::BaseTranscript
+  Bio::EnsEMBL::VEP::AnnotationType::Transcript
 );
+
+
+=head2 new
+
+  Arg 1      : hashref $args
+               {
+                 config => Bio::EnsEMBL::VEP::Config $config,
+               }
+  Example    : $as = Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript->new($args);
+  Description: Create a new Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript object.
+  Returntype : Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript
+  Exceptions : warns if --nearest set
+  Caller     : AnnotationSourceAdaptor
+  Status     : Stable
+
+=cut
 
 sub new {
   my $caller = shift;
@@ -86,6 +116,21 @@ sub new {
   return $self;
 }
 
+
+=head2 check_sift_polyphen
+
+  Example    : $ok = $as->check_sift_polyphen();
+  Description: Gets user-set SIFT/PolyPhen parameters and checks vs
+               availability in the database. If using "safe" mode (REST, web)
+               or --everything, params are disabled if unavailable. Otherwise,
+               this method will throw.
+  Returntype : bool
+  Exceptions : throws if configured tool not available
+  Caller     : new()
+  Status     : Stable
+
+=cut
+
 sub check_sift_polyphen {
   my $self = shift;
 
@@ -112,10 +157,37 @@ sub check_sift_polyphen {
   return 1;
 }
 
+
+=head2 assembly
+
+  Example    : $assembly = $as->assembly();
+  Description: Get the default assembly version for the underlying database.
+  Returntype : string
+  Exceptions : none
+  Caller     : get_features_by_regions_uncached()
+  Status     : Stable
+
+=cut
+
 sub assembly {
   my $self = shift;
   return $self->{assembly} ||= $self->get_database_assembly;
 }
+
+
+=head2 get_features_by_regions_uncached
+
+  Arg 1      : arrayref $regions
+  Example    : $trs = $as->get_features_by_regions_uncached($regions)
+  Description: Gets all transcripts overlapping the given set of regions. See
+               Bio::EnsEMBL::VEP::AnnotationSource::get_all_regions_by_InputBuffer()
+               for information about regions.
+  Returntype : arrayref of Bio::EnsEMBL::Transcript
+  Exceptions : none
+  Caller     : get_all_features_by_InputBuffer(), DumpVEP pipeline
+  Status     : Stable
+
+=cut
 
 sub get_features_by_regions_uncached {
   my $self = shift;
@@ -199,6 +271,19 @@ sub get_features_by_regions_uncached {
   return \@return;
 }
 
+
+=head2 lazy_load_transcript
+
+  Arg 1      : Bio::EnsEMBL::Transcript $tr
+  Example    : $tr = $as->lazy_load_transcript($tr)
+  Description: Prefetches all transcript data (sequence, identifiers etc).
+  Returntype : Bio::EnsEMBL::Transcript
+  Exceptions : none
+  Caller     : annotate_InputBuffer()
+  Status     : Stable
+
+=cut
+
 sub lazy_load_transcript {
   my ($self, $tr) = @_;
   
@@ -209,6 +294,27 @@ sub lazy_load_transcript {
 
   return $tr;
 }
+
+
+=head2 prefetch_transcript_data
+
+  Arg 1      : Bio::EnsEMBL::Transcript $tr
+  Example    : $tr = $as->prefetch_transcript_data($tr)
+  Description: Prefetches all transcript data; data are cached on
+               key named "_variation_effect_feature_cache" on transcript
+               object. Includes:
+                - introns
+                - exons (sorted by chromosome position)
+                - translateable sequence
+                - transcript mapper
+                - 3' UTR sequence
+                - codon table
+  Returntype : Bio::EnsEMBL::Transcript
+  Exceptions : none
+  Caller     : lazy_load_transcript()
+  Status     : Stable
+
+=cut
 
 sub prefetch_transcript_data {
   my $self = shift;
@@ -248,6 +354,27 @@ sub prefetch_transcript_data {
 
   return $tr;
 }
+
+
+=head2 prefetch_translation_data
+
+  Arg 1      : Bio::EnsEMBL::Transcript $tr
+  Arg 2      : (optional) Bio::EnsEMBL::Translation $tl
+  Example    : $tr = $as->prefetch_translation_data($tr, $tl)
+  Description: Prefetches all translation (protein) data; data are cached on
+               key named "_variation_effect_feature_cache" on transcript
+               object. Includes:
+                - peptide sequence
+                - protein domains
+                - SeqEdits (e.g. selenocysteines)
+                - SIFT and PolyPhen prediction matrices
+                - identifiers
+  Returntype : Bio::EnsEMBL::Transcript
+  Exceptions : none
+  Caller     : prefetch_transcript_data()
+  Status     : Stable
+
+=cut
 
 sub prefetch_translation_data {
   my $self = shift;
@@ -298,10 +425,21 @@ sub prefetch_translation_data {
   return $tr;
 }
 
-# fetch SIFT/PolyPhen protein function prediction matrices
-# since many alt transcripts will have the same protein sequence
-# they can point to the same matrix, so we'll use a cache
-# this should speed up retrieval and reduce storage space used in the cache
+
+=head2 get_sift_polyphen
+
+  Arg 1      : hashref $vep_cache
+  Example    : $data = $as->get_sift_polyphen($tr->{_variation_effect_feature_cache})
+  Description: Gets SIFT/PolyPhen predictions. Uses an internal cache so that transcripts
+               with identical translations can share a reference to the same prediction
+               matrix.
+  Returntype : hashref
+  Exceptions : none
+  Caller     : prefetch_translation_data()
+  Status     : Stable
+
+=cut
+
 sub get_sift_polyphen {
   my $self = shift;
   my $vep_cache = shift;
@@ -325,6 +463,22 @@ sub get_sift_polyphen {
 
   return $data;
 }
+
+
+=head2 prefetch_gene_ids
+
+  Arg 1      : Bio::EnsEMBL::Transcript $tr
+  Example    : $tr = $as->prefetch_gene_ids($tr)
+  Description: Prefetches gene identifiers for this transcript:
+               - gene symbol
+               - gene symbol source
+               - HGNC ID
+  Returntype : Bio::EnsEMBL::Transcript
+  Exceptions : none
+  Caller     : get_features_by_regions_uncached()
+  Status     : Stable
+
+=cut
 
 sub prefetch_gene_ids {
   my $self = shift;
@@ -362,6 +516,21 @@ sub prefetch_gene_ids {
   return $tr;
 }
 
+
+=head2 prefetch_transcript_ids
+
+  Arg 1      : Bio::EnsEMBL::Transcript $tr
+  Example    : $tr = $as->prefetch_transcript_ids($tr)
+  Description: Prefetches transcript identifiers for this transcript:
+               - CCDS
+               - RefSeq (via xref)
+  Returntype : Bio::EnsEMBL::Transcript
+  Exceptions : none
+  Caller     : prefetch_transcript_data()
+  Status     : Stable
+
+=cut
+
 sub prefetch_transcript_ids {
   my $self = shift;
   my $tr = shift;
@@ -382,6 +551,22 @@ sub prefetch_transcript_ids {
     }
   }
 }
+
+
+=head2 prefetch_translation_ids
+
+  Arg 1      : Bio::EnsEMBL::Transcript $tr
+  Arg 2      : (optional) Bio::EnsEMBL::Translation $tl
+  Example    : $tr = $as->prefetch_translation_ids($tr)
+  Description: Prefetches translation identifiers for this transcript:
+               - Uniprot (SWISSPROT, TrEMBL, Uniparc)
+               - ENSP
+  Returntype : Bio::EnsEMBL::Transcript
+  Exceptions : none
+  Caller     : prefetch_translation_data()
+  Status     : Stable
+
+=cut
 
 sub prefetch_translation_ids {
   my $self = shift;
@@ -418,6 +603,24 @@ sub prefetch_translation_ids {
 
   return $tr;
 }
+
+
+=head2 info
+
+  Example    : $info = $as->info()
+  Description: Gets the info hashref for this annotation source. Contains
+               version information for:
+                - assembly name
+                - GENCODE version
+                - genebuild date
+                - SIFT and PolyPhen versions
+                - RefSeq GFF version (where applicable)
+  Returntype : hashref
+  Exceptions : none
+  Caller     : Bio::EnsEMBL::VEP::BaseRunner
+  Status     : Stable
+
+=cut
 
 sub info {
   my $self = shift;

@@ -35,6 +35,23 @@ limitations under the License.
 
 Bio::EnsEMBL::VEP::AnnotationSourceAdaptor - gets all AnnotationSources from initial config
 
+=head1 SYNOPSIS
+
+my $asa = Bio::EnsEMBL::VEP::AnnotationSourceAdaptor->new({
+  config => $config
+});
+
+$sources = $asa->get_all();
+
+=head1 DESCRIPTION
+
+Factory for generating AnnotationSources from configuration in supplied Bio::EnsEMBL::VEP::Config.
+
+Can create database- and file-based sources directly; uses Bio::EnsEMBL::VEP::CacheDir to generate
+cache-based sources.
+
+=head1 METHODS
+
 =cut
 
 
@@ -53,7 +70,18 @@ use Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation;
 use Bio::EnsEMBL::VEP::AnnotationSource::Database::StructuralVariation;
 use Bio::EnsEMBL::VEP::AnnotationSource::File;
 
-# this method is called from VEP::Runner's init() method
+
+=head2 get_all
+
+  Example    : $sources = $asa->get_all()
+  Description: Gets all AnnotationSources
+  Returntype : arrayref of Bio::EnsEMBL::VEP::AnnotationSource
+  Exceptions : none
+  Caller     : Bio::EnsEMBL::VEP::BaseRunner
+  Status     : Stable
+
+=cut
+
 sub get_all {
   my $self = shift;
 
@@ -66,6 +94,18 @@ sub get_all {
     )
   ];
 }
+
+
+=head2 get_all_from_cache
+
+  Example    : $sources = $asa->get_all_from_cache()
+  Description: Gets all cache AnnotationSources
+  Returntype : arrayref of Bio::EnsEMBL::VEP::AnnotationSource
+  Exceptions : none
+  Caller     : get_all()
+  Status     : Stable
+
+=cut
 
 sub get_all_from_cache {
   my $self = shift;
@@ -80,6 +120,18 @@ sub get_all_from_cache {
 
   return $cache_dir_obj->get_all_AnnotationSources();
 }
+
+
+=head2 get_all_from_database
+
+  Example    : $sources = $asa->get_all_from_database()
+  Description: Gets all database AnnotationSources
+  Returntype : arrayref of Bio::EnsEMBL::VEP::AnnotationSource
+  Exceptions : none
+  Caller     : get_all()
+  Status     : Stable
+
+=cut
 
 sub get_all_from_database {
   my $self = shift;
@@ -115,6 +167,18 @@ sub get_all_from_database {
 
   return \@as;
 }
+
+
+=head2 get_all_custom
+
+  Example    : $sources = $asa->get_all_custom()
+  Description: Gets all custom file AnnotationSources
+  Returntype : arrayref of Bio::EnsEMBL::VEP::AnnotationSource
+  Exceptions : none
+  Caller     : get_all()
+  Status     : Stable
+
+=cut
 
 sub get_all_custom {
   my $self = shift;
