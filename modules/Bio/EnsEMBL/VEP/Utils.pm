@@ -427,7 +427,7 @@ sub get_version_data {
 =head2 get_version_string
 
   Arg 1      : (optional) string $dir_with_version_data
-  Example    : $version_data = get_version_data($dir)
+  Example    : $version_string = get_version_string($dir)
   Description: Gets a string of version data for VEP and any
                Ensembl API modules installed by VEP's INSTALL.pl
                script, suitable for printing as part of a help

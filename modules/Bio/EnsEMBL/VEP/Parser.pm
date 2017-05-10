@@ -346,7 +346,7 @@ sub delimiter {
                the first line. Not 100% successful, and will not work
                with STDIN as the filehandle cannot be "reset"
   Returntype : string
-  Exceptions : none
+  Exceptions : throws if input is STDIN or cannot open file
   Caller     : new()
   Status     : Stable
 
