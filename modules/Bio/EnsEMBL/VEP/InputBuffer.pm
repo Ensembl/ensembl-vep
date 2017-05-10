@@ -182,7 +182,7 @@ sub next {
     my $vf = $pre_buffer->[0];
     
     # new chromosome
-    if($prev_chr && $vf->{chr} ne $prev_chr && $vf->{chr} !~ /LRG/ && $prev_chr !~ /LRG/) {
+    if($prev_chr && $vf->{chr} ne $prev_chr) {
       return $buffer;
     }
 
@@ -197,7 +197,7 @@ sub next {
     while(@$buffer < $buffer_size && (my $vf = $parser->next)) {
 
       # new chromosome
-      if($prev_chr && $vf->{chr} ne $prev_chr && $vf->{chr} !~ /LRG/ && $prev_chr !~ /LRG/) {
+      if($prev_chr && $vf->{chr} ne $prev_chr) {
 
         # we can't push the VF back onto the parser, so add it to $pre_buffer
         # and it will get picked up on the following next() call

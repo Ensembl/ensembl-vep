@@ -329,23 +329,6 @@ $vfs = $ib->next();
 is(scalar @$vfs, 0, 'split buffer at chromosome change - final next leaves everything empty');
 
 
-# check LRG doesnt do this
-$p = Bio::EnsEMBL::VEP::Parser::VCF->new({
-  config => $cfg,
-  file => $test_cfg->create_input_file([
-    [qw(1 123 . A G . . .)],
-    [qw(LRG_1 123 . A G . . .)],
-  ]),
-  valid_chromosomes => [1, 'LRG_1']
-});
-$ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
-$vfs = $ib->next();
-is(scalar @$vfs, 2, 'split buffer at chromosome change - LRG doesnt cause split');
-is(scalar @{$ib->pre_buffer}, 0, 'split buffer at chromosome change - LRG doesnt cause split - check pre_buffer now empty');
-
-$vfs = $ib->next();
-
-
 
 # split variants deals with complex VCF entries
 no warnings 'qw';

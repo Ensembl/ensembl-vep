@@ -143,7 +143,7 @@ sub valid_chromosomes {
     my @valid_chromosomes;
     my %chr_lengths;
 
-    foreach my $slice(@{$sa->fetch_all('toplevel')}) {
+    foreach my $slice(@{$sa->fetch_all('toplevel')}, @{$sa->fetch_all('lrg', undef, 1, undef, 1)}) {
       my $chr = $slice->seq_region_name;
       push @valid_chromosomes, $chr;
       $chr_lengths{$chr} = $slice->length;
