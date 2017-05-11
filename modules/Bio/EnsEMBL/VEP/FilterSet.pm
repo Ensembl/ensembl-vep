@@ -148,7 +148,7 @@ sub new {
   Example    : $filter_root = $fs->parse_filters($filter_string);
   Description: Takes a filter string and returns a hashref representing
                the filter structure. The structure consists of a series
-               of nodes, each having one or more children components,
+               of nodes, each having one or more child components,
                where siblings are logically linked filter units within
                the same level of parentheses.
 

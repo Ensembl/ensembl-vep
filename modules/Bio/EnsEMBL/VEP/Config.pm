@@ -482,7 +482,7 @@ sub new {
 }
 
 
-=head2 new
+=head2 apply_option_sets
 
   Arg 1      : hashref $config_hashref
   Example    : $config->apply_option_sets($config_hashref)

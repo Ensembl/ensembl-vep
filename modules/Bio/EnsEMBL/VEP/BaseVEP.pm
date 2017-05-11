@@ -395,8 +395,7 @@ sub get_slice {
 =head2 get_database_assembly
 
   Example    : $assembly = $obj->get_database_assembly()
-  Description: Gets whole-chromosome slices from slice adaptor. Creates fake slices
-               using FASTA database if no database connection available.
+  Description: Get the assembly version for the connected core database.
   Returntype : string
   Exceptions : none
   Caller     : BaseRunner, AnnotationSource::Database::Transcript

@@ -48,9 +48,10 @@ my $vf = $parser->next();
 
 HGVS format parser.
 
-See http://www.hgvs.org/mutnomen/ for spec.
+See http://varnomen.hgvs.org/ for spec.
 
-Variants can be g. (genomic), c. (transcript) or p. (protein), though
+Variants can be g. (genomic), c. (coding transcript),
+n. (non-coding transcript) or p. (protein), though
 since variants are transformed to genomic coordinates some p.
 descriptions may fail to parse if they do not unambiguously resolve
 to a genomic postion and ref/alt.
