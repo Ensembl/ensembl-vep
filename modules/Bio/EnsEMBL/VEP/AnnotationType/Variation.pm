@@ -148,8 +148,18 @@ sub is_var_novel {
   my $matched_coords = $existing_var->{start} == $new_var->start && $existing_var->{end} == $new_var->end;
   $is_novel = 0 if $matched_coords;
 
-  # can't compare alleles with e.g. HGMD_MUTATION so just include it
-  return 0 if $matched_coords && $existing_var->{allele_string} !~ /\//;
+  # can't compare alleles with e.g. HGMD_MUTATION
+  if($existing_var->{allele_string} !~ /\//) {
+    if($self->{exclude_null_alleles}) {
+      return 1;
+    }
+    elsif($matched_coords) {
+      return 0;
+    }
+    else {
+      return 1;
+    }
+  }
 
   unless($self->{no_check_alleles}) {
     my %existing_alleles;

@@ -79,10 +79,11 @@ my $existing = {
 ok(!$c->is_var_novel($existing, $input), 'is_var_novel exact match');
 
 $existing->{allele_string} = 'A/T';
-ok($c->is_var_novel($existing, $input), 'is_var_novel alleles dont match but no check');
+ok($c->is_var_novel($existing, $input), 'is_var_novel alleles dont match with check');
 
 $c->{no_check_alleles} = 1;
-ok(!$c->is_var_novel($existing, $input), 'is_var_novel alleles dont match with check');
+ok(!$c->is_var_novel($existing, $input), 'is_var_novel alleles dont match no check');
+$c->{no_check_alleles} = 0;
 
 $existing = {
   start  => 10,
@@ -92,12 +93,26 @@ $existing = {
 };
 ok(!$c->is_var_novel($existing, $input), 'is_var_novel rev strand exact match');
 
-$c->{no_check_alleles} = 0;
 $existing->{allele_string} = 'T/G';
-ok($c->is_var_novel($existing, $input), 'is_var_novel rev strand alleles dont match but no check');
+ok($c->is_var_novel($existing, $input), 'is_var_novel rev strand alleles dont match with check');
 
 $c->{no_check_alleles} = 1;
-ok(!$c->is_var_novel($existing, $input), 'is_var_novel rev strand alleles dont match with check');
+ok(!$c->is_var_novel($existing, $input), 'is_var_novel rev strand alleles dont match no check');
+$c->{no_check_alleles} = 0;
+
+# known variant missing alleles
+$existing->{allele_string} = 'NULL';
+
+ok(!$c->is_var_novel($existing, $input), 'is_var_novel missing alleles');
+
+$c->{no_check_alleles} = 1;
+ok(!$c->is_var_novel($existing, $input), 'is_var_novel missing alleles no check');
+$c->{no_check_alleles} = 0;
+
+$c->{exclude_null_alleles} = 1;
+ok($c->is_var_novel($existing, $input), 'is_var_novel missing alleles exclude_null_alleles');
+$c->{exclude_null_alleles} = 0;
+
 
 
 ## OTHER METHODS

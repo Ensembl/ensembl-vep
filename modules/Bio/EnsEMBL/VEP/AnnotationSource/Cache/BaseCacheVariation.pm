@@ -87,7 +87,7 @@ sub new {
   my $self = $class->SUPER::new(@_);
 
   # add shortcuts to these params
-  $self->add_shortcuts([qw(old_maf no_check_alleles failed check_frequency freq_pop freq_freq freq_gt_lt freq_filter)]);
+  $self->add_shortcuts([qw(old_maf no_check_alleles exclude_null_alleles failed check_frequency freq_pop freq_freq freq_gt_lt freq_filter)]);
 
   # checks on frequency filters
   $self->check_frequency_filter if $self->{check_frequency};

@@ -74,6 +74,7 @@ GetOptions(
   'check_existing',          # find existing co-located variations
   'check_svs',               # find overlapping structural variations
   'no_check_alleles',        # attribute co-located regardless of alleles
+  'exclude_null_alleles',    # exclude variants with null alleles from co-located check (e.g COSMIC)
   'check_alleles',           # DEPRECATED
   'check_frequency',         # enable frequency checking
   'gmaf',                    # DEPRECATED: USE af

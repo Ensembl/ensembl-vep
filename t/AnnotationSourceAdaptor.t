@@ -281,6 +281,7 @@ SKIP: {
       'cache_region_size' => 50000,
       'failed' => 0,
       'no_check_alleles' => undef,
+      'exclude_null_alleles' => undef,
     }, 'Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation' ),
     'get_all_from_database - variation'
   );
