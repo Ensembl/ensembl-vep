@@ -692,8 +692,9 @@ Cache: http://www.ensembl.org/info/docs/tools/vep/script/index.html#cache
 =head2 read_config_from_file
 
   Arg 1      : string $config_file
-  Example    : $config_hash = $config->read_config_from_file($config_file)
-  Description: Read config params from a flat file
+  Arg 2      : hashref $config
+  Example    : $config_hash = $config->read_config_from_file($config_file, $config)
+  Description: Read config params from a flat file and add them to config hash
   Returntype : none
   Exceptions : throws if cannot read from file
   Caller     : new()
