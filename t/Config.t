@@ -61,6 +61,9 @@ is($tmp->{test3}, 'foo', 'read_config_from_file flag not allowed multiple');
 is($tmp->{individual}, 'dave,barry', 'read_config_from_file flag list preserved comma-separated');
 is_deeply($tmp->{plugin}, [qw(foo bar too)], 'read_config_from_file flag allowed multiple');
 
+$cfg->read_config_from_file($test_cfg->{test_ini_file}, $tmp);
+is_deeply($tmp->{plugin}, [qw(foo bar too foo bar too)], 'read_config_from_file flag multiples added not overwritten');
+
 
 
 

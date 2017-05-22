@@ -413,22 +413,11 @@ sub new {
   $config->{$_} ||= [] for @ALLOW_MULTIPLE;
     
   # config file?
-  if(defined $config->{config}) {
-    my $from_file = $self->read_config_from_file($config->{config});
-
-    # copy to working config hashref
-    $config->{$_} = $from_file->{$_} for keys %$from_file;
-  }
+  $self->read_config_from_file($config->{config}, $config) if defined $config->{config};
   
   # ini file?
   my $ini_file = $config->{dir}.'/vep.ini';
-
-  if(-e $ini_file) {
-    my $from_file = $self->read_config_from_file($ini_file);
-
-    # copy to working config hashref
-    $config->{$_} = $from_file->{$_} for keys %$from_file;
-  }
+  $self->read_config_from_file($ini_file, $config) if -e $ini_file;
   
   # these flags need turning into listrefs
   foreach my $flag(grep {defined($config->{$_}) && ref($config->{$_}) ne 'ARRAY'} @LIST_FLAGS) {
@@ -618,12 +607,11 @@ Cache: http://www.ensembl.org/info/docs/tools/vep/script/index.html#cache
 sub read_config_from_file {
   my $self = shift;
   my $file = shift;
+  my $config = shift;
 
   throw("ERROR: Could not open config file \"".($file || '')."\"\n") unless $file;
 
   open CONFIG, $file or throw("ERROR: Could not open config file \"$file\"\n");
-
-  my $config = {};
 
   while(<CONFIG>) {
     next if /^\#/;
