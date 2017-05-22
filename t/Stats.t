@@ -426,14 +426,25 @@ ok($s->dump_text(*STATS), 'dump_text');
 ok($tmp =~ /^\[VEP run statistics\]/, 'dump_text - content');
 close STATS;
 
-open STATS, '>', \$tmp;
-ok($s->dump_html(*STATS), 'dump_html');
-ok($tmp =~ /^\<html\>/, 'dump_html - content');
-close STATS;
 
-my $can_use_lint = eval { require HTML::Lint; 1 };
+SKIP: {
+  
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  no warnings 'once';
+  skip 'CGI module not installed', 1 unless $Bio::EnsEMBL::VEP::Stats::CAN_USE_CGI;
 
-if($can_use_lint) {
+  open STATS, '>', \$tmp;
+  ok($s->dump_html(*STATS), 'dump_html');
+  ok($tmp =~ /^\<html\>/, 'dump_html - content');
+  close STATS;
+}
+
+SKIP: {
+  my $can_use_lint = eval { require HTML::Lint; 1 };
+  
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  skip 'HTML::Lint or CGI not installed', 1 unless $can_use_lint && $Bio::EnsEMBL::VEP::Stats::CAN_USE_CGI;
+
   my $lint = HTML::Lint->new();
 
   open STATS, '>', \$tmp;

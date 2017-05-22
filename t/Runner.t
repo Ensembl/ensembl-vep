@@ -337,7 +337,15 @@ is_deeply(
 );
 
 ok(-e $test_cfg->{user_file}.'.txt', 'dump_stats - text exists');
-ok(-e $test_cfg->{user_file}.'.html', 'dump_stats - html exists');
+
+
+SKIP: {
+  
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  no warnings 'once';
+  skip 'CGI module not installed', 1 unless $Bio::EnsEMBL::VEP::Stats::CAN_USE_CGI;
+  ok(-e $test_cfg->{user_file}.'.html', 'dump_stats - html exists');
+}
 
 unlink($test_cfg->{user_file}.'.txt');
 unlink($test_cfg->{user_file}.'.html');
