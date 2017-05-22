@@ -238,7 +238,7 @@ SKIP: {
     'annotate_InputBuffer - deletion'
   );
 
-  # insertion
+  # mixed
   $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
     config => $cfg,
     parser => Bio::EnsEMBL::VEP::Parser::VEP_input->new({
@@ -271,6 +271,107 @@ SKIP: {
     },
     'annotate_InputBuffer - mixed - snp'
   );
+
+  # test trimming of input
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
+    config => $cfg,
+    parser => Bio::EnsEMBL::VEP::Parser::VEP_input->new({
+      config => $cfg,
+      file => $test_cfg->create_input_file([
+        [qw(21 25585740 25585740 G/GC + trim_1_l)],
+        [qw(21 25585739 25585740 AG/AGC + trim_2_l)],
+        [qw(21 25585740 25585741 AG/CG + trim_1_r)],
+        [qw(21 25585740 25585742 AGT/CGT + trim_2_r)],
+        [qw(21 25585738 25585741 GGAG/GGCG + trim_both)],
+      ]),
+      valid_chromosomes => [21]
+    })
+  });
+  $ib->next;
+
+  $as->annotate_InputBuffer($ib);
+  is_deeply(
+    $ib->buffer->[0]->{_custom_annotations},
+    {
+      'foo' => [
+        { name => 'ins1', allele => 'GC', fields => {'GOO' => 'YAR'} },
+      ]
+    },
+    'annotate_InputBuffer - trim input - insertion 1'
+  );
+  is_deeply(
+    $ib->buffer->[1]->{_custom_annotations},
+    {
+      'foo' => [
+        { name => 'ins1', allele => 'AGC', fields => {'GOO' => 'YAR'} },
+      ]
+    },
+    'annotate_InputBuffer - trim input - insertion 2'
+  );
+  is_deeply(
+    $ib->buffer->[2]->{_custom_annotations},
+    {
+      'foo' => [
+        { name => 'ins1', allele => 'CG', fields => {'GOO' => 'ZAR'} },
+      ]
+    },
+    'annotate_InputBuffer - trim input - snp 1'
+  );
+  is_deeply(
+    $ib->buffer->[3]->{_custom_annotations},
+    {
+      'foo' => [
+        { name => 'ins1', allele => 'CGT', fields => {'GOO' => 'ZAR'} },
+      ]
+    },
+    'annotate_InputBuffer - trim input - snp 2'
+  );
+  is_deeply(
+    $ib->buffer->[4]->{_custom_annotations},
+    {
+      'foo' => [
+        { name => 'ins1', allele => 'GGCG', fields => {'GOO' => 'ZAR'} },
+      ]
+    },
+    'annotate_InputBuffer - trim input - snp 3'
+  );
+
+  # test trimming of VCF alleles
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
+    config => $cfg,
+    parser => Bio::EnsEMBL::VEP::Parser::VEP_input->new({
+      config => $cfg,
+      file => $test_cfg->create_input_file([
+        [qw(21 25585771 25585772 TT/- +)],
+        [qw(21 25585772 25585773 TT/- +)],
+      ]),
+      valid_chromosomes => [21]
+    })
+  });
+  $ib->next;
+
+  $as->fields(['FOO']);
+  $as->annotate_InputBuffer($ib);
+  is_deeply(
+    $ib->buffer->[0]->{_custom_annotations},
+    {
+      'foo' => [
+        { name => 'comp1', allele => '-', fields => {'FOO' => 'CAR'} },
+      ]
+    },
+    'annotate_InputBuffer - trim VCF - deletion 1'
+  );
+  is_deeply(
+    $ib->buffer->[1]->{_custom_annotations},
+    {
+      'foo' => [
+        { name => 'comp1', allele => '-', fields => {'FOO' => 'CAR'} },
+      ]
+    },
+    'annotate_InputBuffer - trim VCF - deletion 2'
+  );
+
+
 
   # SV deletion should only have overlap type applied
   $ib = Bio::EnsEMBL::VEP::InputBuffer->new({

@@ -199,15 +199,15 @@ sub _create_records {
     }
   }
 
-  # exact match returns a hashref
-  if(ref($overlap_result) eq 'HASH') {
+  # exact match returns a arrayref
+  if(ref($overlap_result) eq 'ARRAY') {
 
-    while(my $allele = shift @{$overlap_result->{alleles}}) {
-      my $index = shift @{$overlap_result->{indexes}};
+    foreach my $result_hash(@$overlap_result) {
+      my $index  = $result_hash->{index};
 
       my $record = {
         name => $self->_get_record_name,
-        allele => $allele
+        allele => $result_hash->{allele}
       };
 
       foreach my $field(keys %$fields_data) {
@@ -275,7 +275,7 @@ sub _get_record_name {
 =head2 _record_overlaps_VF
  
   Arg 1      : Bio::EnsEMBL::Variation::VariationFeature
-  Example    : $overlap_ok = $as->_record_overlaps_VF($vf);
+  Example    : $overlaps = $as->_record_overlaps_VF($vf);
   Description: Determine whether the given VariationFeature overlaps
                the current record, depending on the set type(). Note
                for "exact" type allele as well as position is matched.
@@ -283,7 +283,20 @@ sub _get_record_name {
                REF/ALT pairs, with the REF/ALT being trimmed to the minimum
                shared sequence before comparison to the alleles from
                the user input variant.
-  Returntype : bool
+
+               Returns an arrayref of hashrefs representing the matching
+               alleles and their indexes in the VCF ALT/REF ordering:
+               [
+                 {
+                   index  => $i1,
+                   allele => $a1,
+                 },
+                 {
+                   index  => $i2,
+                   allele => $a2,
+                 },
+               ]
+  Returntype : arrayref
   Exceptions : none
   Caller     : annotate_VariationFeature()
   Status     : Stable
@@ -301,44 +314,69 @@ sub _record_overlaps_VF {
   # exact more difficult, we need to check each allele
   my $parser = $self->parser;
 
+  # get the VF alleles
   my $vf_ref  = $vf->ref_allele_string;
   my %vf_alts = map {$_ => 1} @{$vf->alt_alleles};
   my $vf_strand = $vf->strand;
+
+  # VCF always forward so we might need to reverse input
+  reverse_comp(\$vf_ref) if $vf_strand < 0;
+
+  # we might need to minimise pairs of alleles if user has input weirdness
+  # so we're going to create keys for each minimised ref/alt pair
+  # also trim both ways in case?
+  my %minimised_vf_alleles;
+
+  foreach my $alt(@{$vf->alt_alleles}) {
+    my $orig_alt = $alt;
+    reverse_comp(\$alt) if $vf_strand < 0;
+
+    foreach my $direction(0, 1) {
+      my $start = $vf->{start};
+      my $ref = $vf_ref;
+      ($ref, $alt, $start) = @{trim_sequences($ref, $alt, $start, undef, 1, $direction)};
+
+      # store the original alt as when we come to report results
+      # we need to match back against the alt as it was in the user input
+      $minimised_vf_alleles{"$ref\_$alt\_$start"} = $orig_alt;
+    }    
+  }
 
   # use these as backups as we might modify them
   my $orig_start = $parser->get_raw_start;
   my $orig_ref   = $parser->get_reference;
 
-  # we're going to return a hashref containing the matched allele indexes and alleles
+  # we're going to return a list of hashrefs containing the matched allele indexes and alleles
   # that way it also passes a boolean check
-  my @matched_indexes;
-  my @matched_vf_alleles;
+  my @matches;
+
   my $i = 0;
-  foreach my $alt(@{$parser->get_alternatives}) {
+  foreach my $orig_alt(@{$parser->get_alternatives}) {
 
     # we're going to minimise the VCF alleles one by one and compare the coords
-    # first make copies of everything
-    my $start = $orig_start;
-    my $ref   = $orig_ref;
+    # we have to try trimming both directions
+    foreach my $direction(0, 1) {
 
-    ($ref, $alt, $start) = @{trim_sequences($ref, $alt, $start, undef, 1)};
+      # first make copies of everything
+      my $start = $orig_start;
+      my $ref   = $orig_ref;
+      my $alt   = $orig_alt;
 
-    # check strand before doing expensive revcomp
-    if($vf->{start} == $start) {
-      if($vf_strand < 0) {
-        reverse_comp(\$ref);
-        reverse_comp(\$alt);
-      }
+      ($ref, $alt, $start) = @{trim_sequences($ref, $alt, $start, undef, 1, $direction)};
 
-      if($vf_ref eq $ref && $vf_alts{$alt}) {
-        push @matched_indexes, $i;
-        push @matched_vf_alleles, $alt;
+      if(my $vf_alt = $minimised_vf_alleles{"$ref\_$alt\_$start"}) {
+        push @matches, {
+          index  => $i,
+          allele => $vf_alt
+        };
+        last;
       }
     }
+
     $i++;
   }
 
-  return @matched_indexes ? {indexes => \@matched_indexes, alleles => \@matched_vf_alleles} : 0;
+  return @matches ? \@matches : 0;
 }
 
 
