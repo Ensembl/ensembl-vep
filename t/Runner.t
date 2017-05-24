@@ -22,6 +22,14 @@ use B;
 
 use lib $Bin;
 use VEPTestingConfig;
+
+my $CAN_USE_CAPTURE_TINY;
+BEGIN {
+  if(eval qq{require Capture::Tiny; use Capture::Tiny qw(capture); 1}) {
+    $CAN_USE_CAPTURE_TINY = 1;
+  }
+}
+
 my $test_cfg = VEPTestingConfig->new();
 
 my $cfg_hash = $test_cfg->base_testing_cfg;
@@ -276,6 +284,70 @@ $runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, output_file => 'stdout'});
 is($runner->get_output_file_handle, '*main::STDOUT', 'get_output_file_handle - stdout');
 
 unlink($test_cfg->{user_file}.'.out');
+
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  output_file => $test_cfg->{user_file},
+  compress_output => 'gzip'
+});
+$runner->param('compress_output', 'foo'.$$);
+
+throws_ok {$runner->get_output_file_handle} qr/not found in path/, 'get_output_file_handle - compressed - missing binary';
+
+use_ok('Bio::EnsEMBL::VEP::Utils');
+SKIP: {
+  no warnings 'once';
+  skip 'gzip not in path', 4 unless $Bio::EnsEMBL::VEP::Utils::CAN_USE_GZIP;
+  
+  my $compressed_file = $test_cfg->{user_file}.'.out.gz';
+
+  $runner = Bio::EnsEMBL::VEP::Runner->new({
+    %$cfg_hash,
+    output_file => $compressed_file,
+    compress_output => 'gzip'
+  });
+
+  my $fh = $runner->get_output_file_handle;
+  is(ref($fh), 'FileHandle', 'get_output_file_handle - compressed - ref');
+
+  print $fh "Hello world\n";
+  close $fh;
+
+  ok(-e $compressed_file, 'get_output_file_handle - compressed - file exists');
+  ok(-B $compressed_file, 'get_output_file_handle - compressed - file is binary');
+
+  open IN, "gzip -dc $compressed_file |";
+  my @content = <IN>;
+  close IN;
+  is($content[0], "Hello world\n", 'get_output_file_handle - compressed - file content');
+
+  unlink($compressed_file);
+}
+
+SKIP: {
+  no warnings 'once';
+
+  skip 'gzip not in path or Capture::Tiny not installed', 2 unless $Bio::EnsEMBL::VEP::Utils::CAN_USE_GZIP && $CAN_USE_CAPTURE_TINY;
+
+
+  my ($stdout, $stderr, @result) = capture {
+
+    $runner = Bio::EnsEMBL::VEP::Runner->new({
+      %$cfg_hash,
+      output_file => 'stdout',
+      compress_output => 'gzip'
+    });
+
+    my $fh = $runner->get_output_file_handle;
+    is(ref($fh), 'FileHandle', 'get_output_file_handle - compressed stdout - ref');
+
+    print $fh "Hi\n";
+
+    close $fh;
+  };
+
+  ok($stdout, 'get_output_file_handle - compressed stdout - wrote OK');
+}
 
 # stats file
 $runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, output_file => $test_cfg->{user_file}.'.out'});

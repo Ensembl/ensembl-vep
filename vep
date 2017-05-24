@@ -109,6 +109,7 @@ GetOptions(
   # output options
   'everything|e',            # switch on EVERYTHING :-)
   'output_file|o=s',         # output file name
+  'compress_output=s',       # compress output with e.g. bgzip, gzip
   'html',                    # DEPRECATED: generate an HTML version of output
   'stats_file|sf=s',         # stats file name
   'stats_text',              # write stats as text

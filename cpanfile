@@ -8,3 +8,4 @@ recommends 'IO::Uncompress::Gunzip';
 recommends 'Bio::DB::BigFile';
 recommends 'Sereal';
 recommends 'HTML::Lint';
+recommends 'Capture::Tiny';

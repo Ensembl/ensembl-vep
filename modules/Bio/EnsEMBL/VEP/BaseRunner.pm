@@ -204,11 +204,27 @@ sub get_output_file_handle {
       throw("ERROR: Output file $output_file_name already exists. Specify a different output file with --output_file or overwrite existing file with --force_overwrite\n");
     }
     
-    if(uc($output_file_name) eq 'STDOUT') {
-      $output_file_handle = *STDOUT;
+    # compress output?
+    if(my $compress = $self->param('compress_output')) {
+
+      # check required bin in path
+      throw("ERROR: $compress not found in path\n") unless `which $compress 2>&1` =~ /\/$compress$/;
+
+      if(uc($output_file_name) eq 'STDOUT') {
+        $output_file_handle->open("| $compress -c |");
+      }
+      else {
+        $output_file_handle->open("| $compress -c >$output_file_name") or throw("ERROR: Could not write to output file $output_file_name\n");
+      }
     }
+    # normal output
     else {
-      $output_file_handle->open(">$output_file_name") or throw("ERROR: Could not write to output file $output_file_name\n");
+      if(uc($output_file_name) eq 'STDOUT') {
+        $output_file_handle = *STDOUT;
+      }
+      else {
+        $output_file_handle->open(">$output_file_name") or throw("ERROR: Could not write to output file $output_file_name\n");
+      }
     }
 
     $self->{output_file_handle} = $output_file_handle;

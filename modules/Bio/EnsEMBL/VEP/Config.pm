@@ -342,13 +342,14 @@ our @OPTION_SETS = (
 
 # valid values for certain flags
 our %VALID = (
-  format     => [qw(ensembl vcf hgvs id pileup guess)],
-  convert    => [qw(ensembl vcf hgvs pileup)],
-  terms      => [qw(SO display NCBI)],
-  sift       => [qw(s p b)],
-  polyphen   => [qw(s p b)],
-  pick_order => [qw(canonical appris tsl biotype ccds rank length ensembl refseq)],
-  nearest    => [qw(transcript gene symbol)],
+  format          => [qw(ensembl vcf hgvs id pileup guess)],
+  convert         => [qw(ensembl vcf hgvs pileup)],
+  terms           => [qw(SO display NCBI)],
+  sift            => [qw(s p b)],
+  polyphen        => [qw(s p b)],
+  pick_order      => [qw(canonical appris tsl biotype ccds rank length ensembl refseq)],
+  nearest         => [qw(transcript gene symbol)],
+  compress_output => [qw(gzip bgzip)],
 );
 
 # these flags require others to be set, no sensible defaults can be set by us
