@@ -443,10 +443,17 @@ sub _add_identifiers {
 sub _add_translation {
   my ($self, $tr, $ordered_cdss) = @_;
 
+  # get ID if available
+  my $protein_id = $ordered_cdss->[0]->{attributes}->{protein_id} || undef;
+
+  # copy protein ID to transcript object for outputfactory
+  $tr->{_protein} = $protein_id if $protein_id;
+
   # create translation object
   my $translation = $tr->{translation} ||= Bio::EnsEMBL::Translation->new(
     -TRANSCRIPT => $tr,
     -VERSION    => 1,
+    -STABLE_ID  => $protein_id,
   );
   $translation->{transcript} = $tr;
   weaken($translation->{transcript});
