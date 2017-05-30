@@ -377,6 +377,7 @@ sub check_default_dir {
     my $current_dir = cwd();
 
     if( !$NO_HTSLIB && $this_os eq 'darwin' ) {
+      print "Installation on OSX requires that you set up some paths before running this installer.\n";
       print "Have you \n";
       print "1. added $current_dir/htslib to your DYLD_LIBRARY_PATH environment variable?\n";
       print "(y/n): ";
