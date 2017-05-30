@@ -49,6 +49,9 @@ CREATE TABLE `array` (
   `description` varchar(255) DEFAULT NULL,
   `type` varchar(20) DEFAULT NULL,
   `class` varchar(20) DEFAULT NULL,
+  `is_probeset_array` tinyint(1) NOT NULL DEFAULT '0',
+  `is_linked_array` tinyint(1) NOT NULL DEFAULT '0',
+  `has_sense_interrogation` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`array_id`),
   UNIQUE KEY `vendor_name_idx` (`vendor`,`name`),
   UNIQUE KEY `class_name_idx` (`class`,`name`)
@@ -325,7 +328,7 @@ CREATE TABLE `meta` (
   PRIMARY KEY (`meta_id`),
   UNIQUE KEY `species_key_value_idx` (`species_id`,`meta_key`,`meta_value`),
   KEY `species_value_idx` (`species_id`,`meta_value`)
-) ENGINE=MyISAM AUTO_INCREMENT=648 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=659 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `meta_coord` (
   `table_name` varchar(40) NOT NULL,
@@ -401,10 +404,12 @@ CREATE TABLE `probe` (
   `array_chip_id` int(10) unsigned NOT NULL,
   `class` varchar(20) DEFAULT NULL,
   `description` varchar(255) DEFAULT NULL,
+  `probe_seq_id` int(10) DEFAULT NULL,
   PRIMARY KEY (`probe_id`,`name`,`array_chip_id`),
   KEY `probe_set_idx` (`probe_set_id`),
   KEY `array_chip_idx` (`array_chip_id`),
-  KEY `name_idx` (`name`)
+  KEY `name_idx` (`name`),
+  KEY `probe_seq_idx` (`probe_seq_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `probe_feature` (
@@ -422,13 +427,51 @@ CREATE TABLE `probe_feature` (
   KEY `seq_region_probe_probe_feature_idx` (`seq_region_id`,`seq_region_start`,`seq_region_end`,`probe_id`,`probe_feature_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
+CREATE TABLE `probe_feature_transcript` (
+  `probe_feature_transcript_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `probe_feature_id` int(10) unsigned DEFAULT NULL,
+  `stable_id` varchar(128) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`probe_feature_transcript_id`),
+  KEY `probe_feature_transcript_id_idx` (`probe_feature_transcript_id`),
+  KEY `probe_feature_id_idx` (`probe_feature_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+CREATE TABLE `probe_seq` (
+  `probe_seq_id` int(10) NOT NULL AUTO_INCREMENT,
+  `sequence` text NOT NULL,
+  `sequence_upper` text NOT NULL,
+  `sequence_upper_sha1` char(40) NOT NULL,
+  PRIMARY KEY (`probe_seq_id`),
+  UNIQUE KEY `sequence_upper_sha1` (`sequence_upper_sha1`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
 CREATE TABLE `probe_set` (
   `probe_set_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `size` smallint(6) unsigned NOT NULL,
   `family` varchar(20) DEFAULT NULL,
+  `array_chip_id` int(10) DEFAULT NULL,
   PRIMARY KEY (`probe_set_id`),
   KEY `name` (`name`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+CREATE TABLE `probe_set_transcript` (
+  `probe_set_transcript_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `probe_set_id` int(10) unsigned NOT NULL,
+  `stable_id` varchar(128) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`probe_set_transcript_id`),
+  KEY `probe_set_transcript_id_idx` (`probe_set_transcript_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+CREATE TABLE `probe_transcript` (
+  `probe_transcript_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `probe_id` int(10) unsigned NOT NULL,
+  `stable_id` varchar(128) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`probe_transcript_id`),
+  KEY `probe_transcript_id` (`probe_transcript_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `regulatory_activity` (

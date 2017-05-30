@@ -168,7 +168,7 @@ CREATE TABLE `meta` (
   PRIMARY KEY (`meta_id`),
   UNIQUE KEY `species_key_value_idx` (`species_id`,`meta_key`,`meta_value`),
   KEY `species_value_idx` (`species_id`,`meta_value`)
-) ENGINE=MyISAM AUTO_INCREMENT=119 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=121 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `meta_coord` (
   `table_name` varchar(40) NOT NULL,
@@ -400,12 +400,6 @@ CREATE TABLE `source` (
   `data_types` set('variation','variation_synonym','structural_variation','phenotype_feature','study') DEFAULT NULL,
   PRIMARY KEY (`source_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=27 DEFAULT CHARSET=latin1;
-
-CREATE TABLE `strain_gtype_poly` (
-  `variation_id` int(10) unsigned NOT NULL,
-  `sample_name` varchar(100) DEFAULT NULL,
-  PRIMARY KEY (`variation_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `structural_variation` (
   `structural_variation_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
