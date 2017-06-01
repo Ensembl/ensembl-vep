@@ -220,8 +220,8 @@ sub log_fasta_chromosomes {
   $self->{stats}->{chr_lengths} ||= {
     map {$_ => $fasta_db->length($_)}
     $fasta_db->isa('Bio::DB::Fasta') ?
-    $fasta_db->get_all_primary_ids :
-    $fasta_db->get_all_sequence_ids
+    (grep {$_ !~ /^\_\_/} $fasta_db->get_all_primary_ids) :
+    ($fasta_db->get_all_sequence_ids)
   };
 }
 
