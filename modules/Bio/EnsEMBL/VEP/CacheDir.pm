@@ -72,6 +72,7 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat;
 use Bio::EnsEMBL::VEP::AnnotationSource::Cache::Variation;
 use Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix;
+use Bio::EnsEMBL::Variation::Utils::FastaSequence;
 
 
 =head2 new
@@ -208,7 +209,15 @@ sub init {
   # check if there's a FASTA file in there
   unless($self->param('fasta') || $self->param('no_fasta')) {
     opendir CACHE, $dir;
-    my ($fa) = grep {/\.fa(\.gz)?$/} readdir CACHE;
+
+    # look for a .fa or a .fa.gz depending on whether we have Bio::DB::HTS installed
+    my $fa;
+    if($Bio::EnsEMBL::Variation::Utils::FastaSequence::CAN_USE_FAIDX) {
+      ($fa) = grep {/\.fa(\.gz)?$/} readdir CACHE;
+    }
+    else {
+      ($fa) = grep {/\.fa$/} readdir CACHE; 
+    }
     closedir CACHE;
 
     if(defined $fa) {
