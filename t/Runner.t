@@ -201,6 +201,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'use_transcript_ref' => undef,
 }, 'Bio::EnsEMBL::VEP::OutputFactory::VEP_output' ), 'get_OutputFactory');
 
+
 ok($runner->init, 'init');
 
 is_deeply(
@@ -751,11 +752,14 @@ is_deeply(
 
 
 # check whole input file
+# add HGVS to check that FASTA sequence is being retrieved OK
 $runner = Bio::EnsEMBL::VEP::Runner->new({
   %$cfg_hash,
   offline => 1,
   input_file => $test_cfg->{test_vcf},
   input_data => undef,
+  fasta => $test_cfg->{fasta},
+  hgvs => 1
 });
 
 $exp = [];
@@ -771,6 +775,8 @@ $runner = Bio::EnsEMBL::VEP::Runner->new({
   offline => 1,
   input_file => $test_cfg->{test_vcf},
   input_data => undef,
+  fasta => $test_cfg->{fasta},
+  hgvs => 1,
   fork => 2,
 });
 
@@ -796,6 +802,8 @@ $runner = Bio::EnsEMBL::VEP::Runner->new({
   offline => 1,
   input_file => $test_cfg->{test_vcf},
   input_data => undef,
+  fasta => $test_cfg->{fasta},
+  hgvs => 1,
   fork => 4,
 });
 
