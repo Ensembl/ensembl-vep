@@ -235,10 +235,20 @@ SKIP: {
   is($vep_cache->{codon_table}, 1, 'prefetch_transcript_data - codon_table');
   
   is(
+    $vep_cache->{five_prime_utr}->seq,
+    'AGGGCGGAGAAGGACTTGCGCGCGACGGTTCTCACCGCTGCT',
+    'prefetch_transcript_data - five_prime_utr'
+  );
+  
+  is(
     $vep_cache->{three_prime_utr}->seq,
     'CTGAAGATCAAAGTAAAGCAACAGAGGAATGTACATCTACCTAATAACTTTCTAAAATTTAAATATGTATAATAAAATAAATGTTTTAAATATAA',
     'prefetch_transcript_data - three_prime_utr'
   );
+
+  my $tr_same_utr = $ta->fetch_by_stable_id('ENST00000352957');
+  ok($as->prefetch_transcript_data($tr_same_utr), 'same utr - prefetch_transcript_data');
+  ok($vep_cache->{five_prime_utr} eq $tr_same_utr->{_variation_effect_feature_cache}->{five_prime_utr}, 'same utr - same ref');
   
   is(
     $vep_cache->{translateable_seq},

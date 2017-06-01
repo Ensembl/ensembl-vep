@@ -327,15 +327,9 @@ sub prefetch_transcript_data {
   $vep_cache->{translateable_seq} ||= $tr->translateable_seq;
   $vep_cache->{mapper} ||= $tr->get_TranscriptMapper;
 
-  # three prime UTR
+  # UTRs
   my $transferred = $tr->transfer($tr->feature_Slice());
-
-  eval {
-    $vep_cache->{three_prime_utr} = $transferred->three_prime_utr();
-  };
-  if($@) {
-    warn "Problem getting 3' UTR:".$@;
-  }
+  $vep_cache->{$_.'_prime_utr'} = $self->_fetch_utr($_, $transferred) for qw(five three);
 
   # codon table
   unless ($vep_cache->{codon_table}) {
@@ -353,6 +347,54 @@ sub prefetch_transcript_data {
   $self->prefetch_transcript_ids($tr);
 
   return $tr;
+}
+
+
+=head2 _fetch_utr
+
+  Arg 1      : string $five_three ('five' or 'three')
+  Arg 2      : Bio::EnsEMBL::Transcript $tr
+  Example    : $utr = $as->_fetch_utr('five', $tr)
+  Description: Get Bio::Seq object representing either the five- or
+               three-prime UTR. Uses a cache so that multiple transcripts
+               with the same UTR sequence will share a reference to the
+               same Bio::Seq object.
+  Returntype : Bio::Seq
+  Exceptions : warns if fail eval to fetch UTR
+  Caller     : prefetch_transcript_data()
+  Status     : Stable
+
+=cut
+
+sub _fetch_utr {
+  my $self = shift;
+  my $five_three = shift;
+  my $tr = shift;
+
+  my $key = $five_three.'_prime_utr';
+  my $utr;
+
+  eval {
+    if(my $this_utr = $tr->$key()) {
+      my $md5 = md5_hex($this_utr->seq);
+
+      my $utr_obj;
+      my $cache = $self->{'_utr_cache'} ||= [];
+
+      unless(($utr_obj) = map {$_->{obj}} grep {$_->{md5} eq $md5} @$cache) {
+        $utr_obj = $this_utr;
+        push @$cache, {md5 => $md5, obj => $utr_obj};
+        shift @$cache if scalar @$cache > 50;
+      }
+
+      $utr = $utr_obj;
+    }
+  };
+  if($@) {
+    warn "Problem getting $five_three prime UTR:".$@;
+  }
+
+  return $utr;
 }
 
 
