@@ -493,10 +493,10 @@ sub _forked_buffer_to_output {
         # stderr
         $self->warning_msg($data->{pid}." : ".$data->{stderr}) if $data->{stderr};
 
-        # oc_cache - used for speeding up consequence calcs
-        if(my $fork_oc_cache = $data->{oc_cache}) {
-          my $cache = $Bio::EnsEMBL::Variation::Utils::VariationEffect::_oc_cache ||= {};
-          $cache->{$_} = $fork_oc_cache->{$_} for keys %$fork_oc_cache;
+        # merge in cached data
+        if(my $fork_vep_cache = $data->{_VEP_CACHE}) {
+          my $cache = $main::_VEP_CACHE ||= {};
+          merge_hashes($cache, $fork_vep_cache);
         }
 
         # finish up
@@ -613,7 +613,7 @@ sub _forked_process {
     stderr => $stderr,
     die => $die,
     stats => $self->stats->{stats}->{counters},
-    oc_cache => $Bio::EnsEMBL::Variation::Utils::VariationEffect::_oc_cache,
+    _VEP_CACHE => $main::_VEP_CACHE,
   });
 
   exit(0);
