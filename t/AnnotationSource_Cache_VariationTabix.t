@@ -407,12 +407,19 @@ SKIP: {
 SKIP: {
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'Bio::DB::HTS::Tabix module not available', 3 unless $Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix::CAN_USE_TABIX_PM;
+  skip 'Bio::DB::HTS::Tabix module not available', 6 unless $Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix::CAN_USE_TABIX_PM;
 
   $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}, valid_chromosomes => [21]});
   $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
   $ib->next();
   $vf = $ib->buffer->[0];
+
+  my $tabix_obj = $c->_get_tabix_obj(21);
+  is(ref($tabix_obj), 'Bio::DB::HTS::Tabix', '_get_tabix_obj - ref');
+  ok($tabix_obj eq $c->_get_tabix_obj(21), '_get_tabix_obj - cache OK');
+
+  delete $c->{_tabix_obj_cache};
+  ok($tabix_obj ne $c->_get_tabix_obj(21), '_get_tabix_obj - clear cache new obj');
 
   $vf_hash = {
     21 => [$vf],
