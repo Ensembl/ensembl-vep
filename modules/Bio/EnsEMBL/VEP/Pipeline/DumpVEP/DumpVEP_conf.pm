@@ -77,19 +77,20 @@ sub default_options {
         
     # specify which servers to scan for databases to dump
     dump_servers => [
-         host => 'mysql-ens-general-prod-1',
-         port => 4525,
-         user => 'ensro',
-         pass => $self->o('dump_db_password'),
-       },
-       {
-         host => 'mysql-ens-sta-2',
-         port => 4520,
-         user => 'ensro',
-         pass => $self->o('dump_db_password'),
-         include_pattern => 'homo_sapiens',
-       },
-     ],
+      {
+        host => 'mysql-ens-general-prod-1',
+        port => 4525,
+        user => 'ensro',
+        pass => $self->o('dump_db_password'),
+      },
+      {
+        host => 'mysql-ens-sta-2',
+        port => 4520,
+        user => 'ensro',
+        pass => $self->o('dump_db_password'),
+        include_pattern => 'homo_sapiens',
+      },
+    ],
     
     # dump databases of this version number
     ensembl_release => undef,
