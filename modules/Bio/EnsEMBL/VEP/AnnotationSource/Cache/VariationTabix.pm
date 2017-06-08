@@ -215,9 +215,7 @@ sub _annotate_pm {
   foreach my $chr(keys %$by_chr) {
 
     my $source_chr = $self->get_source_chr_name($chr);
-    my $file = $self->get_dump_file_name($source_chr);
-    next unless -e $file;
-    my $tabix_obj = $self->{tabix_obj}->{$chr} ||= Bio::DB::HTS::Tabix->new(filename => $file);
+    my $tabix_obj = $self->_get_tabix_obj($source_chr);
     next unless $tabix_obj;
 
     foreach my $vf(@{$by_chr->{$chr}}) {
@@ -239,6 +237,46 @@ sub _annotate_pm {
       }
     }
   }
+}
+
+
+=head2 _get_tabix_obj
+
+  Arg 1      : string $chr
+  Example    : $as->_get_tabix_obj($chr);
+  Description: Get Bio::DB::HTS::Tabix object for this chromosome.
+               Uses a cache that limits the number of open filehandles.
+  Returntype : Bio::DB::HTS::Tabix
+  Exceptions : none
+  Caller     : _annotate_pm()
+  Status     : Stable
+
+=cut
+
+sub _get_tabix_obj {
+  my ($self, $chr) = @_;
+
+  # use a cache and limit the number of open files
+  my $cache = $self->{_tabix_obj_cache} ||= [];
+  my $tabix_obj;
+
+  unless(($tabix_obj) = map {$_->{obj}} grep {$_->{chr} eq $chr} @$cache) {
+    my $file = $self->get_dump_file_name($chr);
+    
+    if($file && -e $file) {
+      $tabix_obj = Bio::DB::HTS::Tabix->new(filename => $file);
+    }
+
+    push @$cache, { obj => $tabix_obj, chr => $chr };
+
+    # restrict number of open objects
+    while(scalar @$cache > 5) {
+      my $tmp_hash = shift @$cache;
+      $tmp_hash->{obj}->close() if $tmp_hash->{obj};
+    }
+  }
+
+  return $tabix_obj;
 }
 
 
