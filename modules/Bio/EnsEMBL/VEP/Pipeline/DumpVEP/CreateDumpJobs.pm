@@ -261,7 +261,7 @@ sub get_chr_jobs {
     }
   }
 
-  push @jobs, @{$self->add_to_jobs(\%hash, $var_db, $reg_db)};
+  push @jobs, @{$self->add_to_jobs(\%hash, $var_db, $reg_db)} if scalar keys %hash;
 
   # sort by type then length
   @jobs = sort {$a->{type} cmp $b->{type} || $b->{added_length} <=> $b->{added_length}} @jobs;
