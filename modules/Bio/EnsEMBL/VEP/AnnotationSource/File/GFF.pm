@@ -80,6 +80,7 @@ my %INCLUDE_FEATURE_TYPES = map {$_ => 1} qw(
   miRNA
   miRNA_gene
   mt_gene
+  nc_primary_transcript
   NMD_transcript_variant
   processed_pseudogene
   processed_transcript
