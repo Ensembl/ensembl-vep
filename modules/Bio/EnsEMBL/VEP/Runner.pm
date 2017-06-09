@@ -654,8 +654,9 @@ sub post_setup_checks {
   # offline needs cache, can't use HGVS
   if($self->param('offline')) {
     unless($self->fasta_db) {
-      throw("ERROR: Cannot generate HGVS coordinates in offline mode without a FASTA file (see --fasta)\n") if $self->param('hgvs');
-      throw("ERROR: Cannot check reference sequences without a FASTA file (see --fasta)\n") if $self->param('check_ref')
+      throw("ERROR: Cannot generate HGVS coordinates (--hgvs) in offline mode without a FASTA file (see --fasta)\n") if $self->param('hgvs');
+      throw("ERROR: Cannot check reference sequences (--check_ref) without a FASTA file (see --fasta)\n") if $self->param('check_ref');
+      throw("ERROR: Cannot use transcript reference sequences (--use_transcript_ref) without a FASTA file (see --fasta)\n") if $self->param('use_transcript_ref');
     }
     
     # throw("ERROR: Cannot do frequency filtering in offline mode\n") if defined($config->{check_frequency}) && $config->{freq_pop} !~ /1kg.*(all|afr|amr|asn|eur)/i;
