@@ -428,9 +428,14 @@ sub generate_test_file {
   );
 
   # get distinct seq_region_ids
+  # some species have huge numbers of seq_regions, so we're going to limit the number we analyse
+  # by picking only the 50 with the most variation_features on
   my $sth = $dba->dbc->prepare(qq{
-    SELECT DISTINCT(seq_region_id)
+    SELECT seq_region_id, COUNT(*)
     FROM variation_feature
+    GROUP BY seq_region_id
+    ORDER BY COUNT(*) DESC
+    LIMIT 50
   });
   $sth->execute;
   my @sr_ids;
