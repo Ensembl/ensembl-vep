@@ -608,8 +608,7 @@ $runner = Bio::EnsEMBL::VEP::Runner->new({
   hgvs => 1,
   offline => 1,
 });
-throws_ok {$runner->post_setup_checks} qr/Cannot generate HGVS coordinates in offline mode/, 'post_setup_checks - hgvs + offline with no fasta';
-
+throws_ok {$runner->post_setup_checks} qr/Cannot generate HGVS coordinates/, 'post_setup_checks - hgvs + offline with no fasta';
 
 $runner = Bio::EnsEMBL::VEP::Runner->new({
   %$cfg_hash,
@@ -618,6 +617,14 @@ $runner = Bio::EnsEMBL::VEP::Runner->new({
   offline => 1,
 });
 throws_ok {$runner->post_setup_checks} qr/Cannot check reference sequences/, 'post_setup_checks - check_ref + offline with no fasta';
+
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  dir => $test_cfg->{cache_root_dir}.'/sereal',
+  use_transcript_ref => 1,
+  offline => 1,
+});
+throws_ok {$runner->post_setup_checks} qr/Cannot use transcript reference sequences/, 'post_setup_checks - use_transcript_ref + offline with no fasta';
 
 $runner = Bio::EnsEMBL::VEP::Runner->new({
   %$cfg_hash,
