@@ -55,6 +55,7 @@ my %INCLUDE_FEATURE_TYPES = map {$_ => 1} qw(
   exon
   gene
   J_gene_segment
+  lnc_RNA
   lincRNA
   lincRNA_gene
   miRNA
