@@ -672,7 +672,7 @@ sub info {
 
     # core source versions
     if(my $core_mca = $self->get_adaptor('core', 'metacontainer')) {
-      foreach my $meta_key(qw(assembly.name gencode.version genebuild.initial_release_date)) {
+      foreach my $meta_key(qw(assembly.name gencode.version genebuild.initial_release_date genebuild.version)) {
         my $version = $core_mca->list_value_by_key($meta_key);
 
         my $new_key = $meta_key;
