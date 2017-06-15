@@ -51,6 +51,14 @@ $cd = Bio::EnsEMBL::VEP::CacheDir->new({config => $cfg, root_dir => $cfg_hash->{
 is($cd->param('synonyms'), $cd->dir.'/chr_synonyms.txt', 'detect synonyms');
 ok($cd->param('fasta') =~ /test\.fa/, 'detect FASTA');
 
+# don't bump off existing entries
+$cd = Bio::EnsEMBL::VEP::CacheDir->new({
+  config => Bio::EnsEMBL::VEP::Config->new({%$cfg_hash, fasta => 'foo', synonyms => 'bar'}),
+  root_dir => $cfg_hash->{dir}
+});
+is($cd->param('synonyms'), 'bar', 'dont overwrite synonyms param');
+is($cd->param('fasta'), 'foo', 'dont overwrite fasta param');
+
 unlink($cd->dir.'/chr_synonyms.txt');
 
 $cd = Bio::EnsEMBL::VEP::CacheDir->new({

@@ -226,7 +226,7 @@ sub init {
     }
   }
 
-  $self->param('synonyms', $dir.'/chr_synonyms.txt') if -e $dir.'/chr_synonyms.txt';
+  $self->param('synonyms', $dir.'/chr_synonyms.txt') if !$self->param('synonyms') && -e $dir.'/chr_synonyms.txt';
 
   return 1;
 }
