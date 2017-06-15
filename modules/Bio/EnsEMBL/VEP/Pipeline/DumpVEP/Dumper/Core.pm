@@ -52,6 +52,9 @@ sub run {
     uniprot
   );
 
+  # core doesn't use BAM (yet?)
+  delete $vep_params->{bam} if $vep_params->{bam};
+
   my $config = Bio::EnsEMBL::VEP::Config->new($vep_params);
 
   my $region_size = $self->param('region_size');
@@ -96,10 +99,15 @@ sub get_dumpable_object {
   my ($self, $as, $sr, $chr, $s) = @_;
 
   my $obj = {
-    $chr => [
-      map {$as->apply_edits($_); $as->lazy_load_transcript($_); $self->clean_transcript($_); $_}
+    $chr => $as->merge_features([
+      map {
+        $as->apply_edits($_);
+        $as->lazy_load_transcript($_);
+        $self->clean_transcript($_);
+        $_
+      }
       @{$as->get_features_by_regions_uncached([[$sr, $s]], 1)}
-    ]
+    ])
   };
 
   if(my $tr = $obj->{$chr}->[0]) {

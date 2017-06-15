@@ -49,8 +49,6 @@ sub run {
 
   $vep_params->{'core_type'} = 'otherfeatures';
 
-  $vep_params->{'bam'} = $self->param('bam');
-
   my $config = Bio::EnsEMBL::VEP::Config->new($vep_params);
 
   my $region_size = $self->param('region_size');
@@ -58,7 +56,11 @@ sub run {
   my $as = Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript->new({
     config => $config,
     cache_region_size => $region_size,
+    bam => $vep_params->{'bam'} || $self->param('bam')
   });
+
+  # bam requires synonyms loaded
+  $as->chromosome_synonyms($as->param('synonyms'));
 
   $config->param($_, 0) for qw(sift polyphen);
 

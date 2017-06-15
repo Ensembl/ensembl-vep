@@ -571,6 +571,9 @@ sub apply_edits {
         protein_features
       );
     }
+
+    # now add new spliced_seq field as this will be needed by use_transcript_ref
+    $tr->{_variation_effect_feature_cache}->{spliced_seq} = $new_tr_spliced_seq;
   }
   else {
     # flag as failed

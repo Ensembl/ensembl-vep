@@ -68,6 +68,14 @@ sub get_vep_params {
   $params->{is_multispecies} = $self->param('is_multispecies');
   $params->{no_slice_cache}  = 1;
 
+  # add synonyms file, needed by BAM
+  $params->{synonyms} = sprintf(
+    '%s/synonyms/%s_%s_chr_synonyms.txt',
+    $self->param('pipeline_dir'),
+    $self->param('species'),
+    $self->param('assembly')
+  );
+
   # sift, polyphen
   $params->{$_} = 'b' for grep {$self->param($_)} qw(sift polyphen);
 
