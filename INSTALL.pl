@@ -84,6 +84,8 @@ our (
   $CAN_USE_UNZIP,
   $CAN_USE_GZIP,
   $CAN_USE_TAR,
+  $CAN_USE_DBI,
+  $CAN_USE_DBD_MYSQL,
 );
 
 ## BEGIN BLOCK, CHECK WHAT MODULES ETC WE CAN USE
@@ -95,6 +97,14 @@ BEGIN {
 
     # set up a user agent's proxy (excluding github)
     $ua->env_proxy;
+  }
+
+  if(eval q{ use DBI; 1 }) {
+    $CAN_USE_DBI = 1;
+  }
+
+  if(eval q{ use DBD::mysql; 1 }) {
+    $CAN_USE_DBD_MYSQL = 1;
   }
 
   $CAN_USE_CURL      = 1 if `which curl` =~ /\/curl/;
@@ -156,6 +166,19 @@ if($HELP) {
   usage();
   exit(0);
 }
+
+# check user has DBI and DBD::mysql
+die(
+  "ERROR: DBI module not found. VEP requires the DBI perl module to function\n\n".
+  "http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html#requirements\n"
+) unless $CAN_USE_DBI;
+
+warn(
+  "WARNING: DBD::mysql module not found. VEP can only run in offline (--offline) mode without DBD::mysql installed\n\n".
+  "http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html#requirements\n"
+) unless $CAN_USE_DBD_MYSQL;
+
+exit(0);
 
 my $default_dir_used = check_default_dir();
 
