@@ -417,6 +417,44 @@ is_deeply(
 ok(-e $test_cfg->{user_file}.'.txt', 'dump_stats - text exists');
 
 
+# test setting up/down distance
+is(scalar (grep {/stream/} @tmp_lines), 1, 'run - count up/downstream (default)');
+
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  output_file => $test_cfg->{user_file}.'.out',
+  stats_file => $test_cfg->{user_file}.'.txt',
+  stats_html => 1,
+  stats_text => 1,
+  distance => 10000,
+  force_overwrite => 1,
+});
+
+$runner->run;
+
+open IN, $test_cfg->{user_file}.'.out';
+@tmp_lines = <IN>;
+close IN;
+is(scalar (grep {/stream/} @tmp_lines), 2, 'run - count up/downstream (10000)');
+is(scalar (grep {/DISTANCE\=7079/} @tmp_lines), 1, 'run - check distance');
+
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  output_file => $test_cfg->{user_file}.'.out',
+  stats_file => $test_cfg->{user_file}.'.txt',
+  stats_html => 1,
+  stats_text => 1,
+  distance => '10000,20000',
+  force_overwrite => 1,
+});
+
+$runner->run;
+
+open IN, $test_cfg->{user_file}.'.out';
+@tmp_lines = <IN>;
+close IN;
+is(scalar (grep {/stream/} @tmp_lines), 4, 'run - count up/downstream (1000,2000)');
+
 SKIP: {
   
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!

@@ -417,6 +417,18 @@ sub _set_package_variables {
   # suppress warnings that the FeatureAdpators spit if using no_slice_cache
   $self->{_verbose_bak} = Bio::EnsEMBL::Utils::Exception::verbose();
   Bio::EnsEMBL::Utils::Exception::verbose(1999);
+
+  # up/downstream distance
+  if(my $distances = $self->param('distance')) {
+    my ($u, $d) = @$distances;
+    $d ||= $u;
+
+    $self->{_upstream_bak} = $Bio::EnsEMBL::Variation::Utils::VariationEffect::UPSTREAM_DISTANCE;
+    $self->{_downstream_bak} = $Bio::EnsEMBL::Variation::Utils::VariationEffect::DOWNSTREAM_DISTANCE;
+
+    $Bio::EnsEMBL::Variation::Utils::VariationEffect::UPSTREAM_DISTANCE = $u;
+    $Bio::EnsEMBL::Variation::Utils::VariationEffect::DOWNSTREAM_DISTANCE = $d;
+  }
 }
 
 
@@ -439,6 +451,9 @@ sub _reset_package_variables {
   $Bio::EnsEMBL::Variation::TranscriptVariationAllele::NO_TRANSFER = $self->{_no_transfer_bak};
 
   Bio::EnsEMBL::Utils::Exception::verbose($self->{_verbose_bak});
+
+  $Bio::EnsEMBL::Variation::Utils::VariationEffect::UPSTREAM_DISTANCE = $self->{_upstream_bak} if defined($self->{_upstream_bak});
+  $Bio::EnsEMBL::Variation::Utils::VariationEffect::DOWNSTREAM_DISTANCE = $self->{_downstream_bak} if defined($self->{_downstream_bak});
 }
 
 1;

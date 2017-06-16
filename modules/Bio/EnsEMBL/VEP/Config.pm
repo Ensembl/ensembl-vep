@@ -58,6 +58,7 @@ use warnings;
 package Bio::EnsEMBL::VEP::Config;
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
+use Bio::EnsEMBL::Variation::Utils::VariationEffect;
 
 use base qw(Bio::EnsEMBL::VEP::BaseVEP);
 
@@ -82,6 +83,7 @@ our %DEFAULTS = (
   cache_region_size => 1000000,
   
   # misc settings
+  distance          => $Bio::EnsEMBL::Variation::Utils::VariationEffect::UPSTREAM_DISTANCE.','.$Bio::EnsEMBL::Variation::Utils::VariationEffect::DOWNSTREAM_DISTANCE,
   buffer_size       => 5000,
   input_file        => 'STDIN',
   delimiter         => "\t",
@@ -113,6 +115,7 @@ our @LIST_FLAGS = qw(
   pick_order
   fields
   chr
+  distance
 );
 
 # these flags can be specified more than once on the command line
