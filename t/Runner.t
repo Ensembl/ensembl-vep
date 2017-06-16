@@ -368,17 +368,22 @@ ok(-e $test_cfg->{user_file}.'.stats.txt', 'get_stats_file_handle - extension ha
 unlink($test_cfg->{user_file}.'.stats.txt');
 
 $runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, stats_file => $test_cfg->{user_file}.'.txt', force_overwrite => 1});
+unlink($test_cfg->{user_file}.'.txt');
 $runner->get_stats_file_handle('txt');
 ok(-e $test_cfg->{user_file}.'.txt', 'get_stats_file_handle - extension handling 2');
 
+unlink($test_cfg->{user_file}.'.html');
 $runner->get_stats_file_handle('html');
 ok(-e $test_cfg->{user_file}.'.html', 'get_stats_file_handle - extension handling 3');
-unlink($test_cfg->{user_file}.'.txt');
-unlink($test_cfg->{user_file}.'.html');
 
 $runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, stats_file => $test_cfg->{user_file}.'_stats', force_overwrite => 1});
+unlink($test_cfg->{user_file}.'_stats.txt');
 $runner->get_stats_file_handle('txt');
 ok(-e $test_cfg->{user_file}.'_stats.txt', 'get_stats_file_handle - extension handling 4');
+
+# clean up
+unlink($test_cfg->{user_file}.'.txt');
+unlink($test_cfg->{user_file}.'.html');
 unlink($test_cfg->{user_file}.'_stats.txt');
 
 
