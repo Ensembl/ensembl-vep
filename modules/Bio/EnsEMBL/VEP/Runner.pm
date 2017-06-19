@@ -182,7 +182,9 @@ sub run {
 
   my $fh = $self->get_output_file_handle();
 
-  print $fh "$_\n" for @{$self->get_OutputFactory->headers};
+  unless($self->param('no_headers')) {
+    print $fh "$_\n" for @{$self->get_OutputFactory->headers};
+  }
 
   while(my $line = $self->next_output_line) {
     print $fh "$line\n";

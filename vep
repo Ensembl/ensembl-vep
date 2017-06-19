@@ -32,6 +32,7 @@ GetOptions(
   # input options,
   'config=s',                # config file name
   'input_file|i=s',          # input file name
+  'input_data|data=s',       # input data
   'format=s',                # input file format
   'output_format=s',         # output file format
   'delimiter=s',             # delimiter between fields in input
@@ -111,6 +112,7 @@ GetOptions(
   'everything|e',            # switch on EVERYTHING :-)
   'output_file|o=s',         # output file name
   'compress_output=s',       # compress output with e.g. bgzip, gzip
+  'no_headers',              # don't print headers
   'html',                    # DEPRECATED: generate an HTML version of output
   'stats_file|sf=s',         # stats file name
   'stats_text',              # write stats as text
