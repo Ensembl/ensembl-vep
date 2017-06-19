@@ -253,7 +253,7 @@ sub get_stats_file_handle {
 
   my $file_name;
 
-  if($stats_file_root =~ m/^(.+?)\.(.+)$/) {
+  if($stats_file_root =~ m/^(.+)\.(.+?)$/) {
     my ($root, $ext) = ($1, $2);
     if(lc($ext) eq $type) {
       $file_name = $stats_file_root;
