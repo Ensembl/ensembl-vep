@@ -33,7 +33,9 @@ package Bio::EnsEMBL::VEP::Pipeline::DumpVEP::DumpVEP_conf;
 use strict;
 use warnings;
 
-use base ('Bio::EnsEMBL::Hive::PipeConfig::HiveGeneric_conf');
+use Bio::EnsEMBL::Hive::PipeConfig::HiveGeneric_conf;
+ # All Hive databases configuration files should inherit from HiveGeneric, directly or indirectly
+use base ('Bio::EnsEMBL::Hive::PipeConfig::EnsemblGeneric_conf');
 
 sub default_options {
   my ($self) = @_;
@@ -55,6 +57,9 @@ sub default_options {
     hive_use_triggers => 0,
     hive_auto_rebalance_semaphores => 0, 
     hive_no_init => 0,
+
+    # Registry file with location of databases
+    registry      => $self->o('registry'),
     
     # the location of your checkout of the ensembl API (the hive looks for SQL files here)
     hive_root_dir           => $ENV{'HOME'} . '/src/ensembl-hive', 
@@ -74,23 +79,6 @@ sub default_options {
 
     # contains frequency data
     data_dir                => '/nfs/production/panda/ensembl/variation/data/dump_vep/',
-        
-    # specify which servers to scan for databases to dump
-    dump_servers => [
-      {
-        host => 'mysql-ens-general-prod-1',
-        port => 4525,
-        user => 'ensro',
-        pass => $self->o('dump_db_password'),
-      },
-      {
-        host => 'mysql-ens-sta-2',
-        port => 4520,
-        user => 'ensro',
-        pass => $self->o('dump_db_password'),
-        include_pattern => 'homo_sapiens',
-      },
-    ],
     
     # dump databases of this version number
     ensembl_release => undef,
@@ -105,9 +93,12 @@ sub default_options {
     # the web interface and REST API use these in preference to the non-converted ones
     convert => 1,
     
-    # include or exclude DBs with these patterns
-    include_pattern => undef,
-    exclude_pattern => undef,
+    # include or exclude the following species from the dumps, run for a division or all the species on the server
+    species => [],
+    # Excluding mouse strains
+    antispecies => ['mus_musculus_129s1svimj', 'mus_musculus_aj', 'mus_musculus_akrj', 'mus_musculus_balbcj', 'mus_musculus_c3hhej', 'mus_musculus_c57bl6nj', 'mus_musculus_casteij', 'mus_musculus_cbaj', 'mus_musculus_dba2j', 'mus_musculus_fvbnj', 'mus_musculus_lpj', 'mus_musculus_nodshiltj', 'mus_musculus_nzohlltj', 'mus_musculus_pwkphj', 'mus_musculus_wsbeij'],
+    division    => [],
+    run_all     => 0,
 
     # include LRGs in dumps
     lrg => 1,
@@ -219,6 +210,23 @@ sub resource_classes {
   };
 }
 
+# Override the default method, to force an automatic loading of the registry in all workers
+sub beekeeper_extra_cmdline_options {
+  my ($self) = @_;
+  return
+      ' -reg_conf ' . $self->o('registry'),
+  ;
+}
+
+sub pipeline_wide_parameters {  # these parameter values are visible to all analyses, can be overridden by parameters{} and input_id{}
+    my ($self) = @_;
+    return {
+        %{$self->SUPER::pipeline_wide_parameters},          # here we inherit anything from the base class
+
+        'refseq'     => $self->o('refseq'),
+    };
+}
+
 sub pipeline_analyses {
   my ($self) = @_;
 
@@ -233,16 +241,49 @@ sub pipeline_analyses {
    
   my @analyses = (
     {
-      -logic_name    => 'init_dump_vep',
-      -module        => 'Bio::EnsEMBL::VEP::Pipeline::DumpVEP::InitDump',
+      -logic_name    => 'species_factory',
+      -module         => 'Bio::EnsEMBL::Production::Pipeline::Common::SpeciesFactory',
       -parameters    => {
-        include_pattern => $self->o('include_pattern'),
-        exclude_pattern => $self->o('exclude_pattern'),
-        dump_servers    => $self->o('dump_servers'),
-        refseq          => $self->o('refseq'),
-        @common_params
+        species     => $self->o('species'),
+        antispecies => $self->o('antispecies'),
+        division    => $self->o('division'),
+        run_all     => $self->o('run_all'),
       },
       -input_ids     => [{}],
+      -rc_name       => 'default',
+      -hive_capacity => 1,
+      -max_retry_count => 0,
+      -flow_into     => {
+        '2' => ['init_dump_vep_core'],
+        '7' => WHEN(
+            '#refseq#' => 'init_dump_vep_otherfeatures'
+            )
+      },
+    },
+
+    {
+     -logic_name    => 'init_dump_vep_core',
+      -module        => 'Bio::EnsEMBL::VEP::Pipeline::DumpVEP::InitDump',
+      -parameters    => {
+        group           => 'core',
+        @common_params
+      },
+      -rc_name       => 'default',
+      -hive_capacity => 1,
+      -max_retry_count => 0,
+      -flow_into     => {
+        '1' => $self->o('debug') ? [] : ['distribute_dumps'],
+        '2' => ['create_dump_jobs'],
+      },
+    },
+    
+    {
+     -logic_name    => 'init_dump_vep_otherfeatures',
+      -module        => 'Bio::EnsEMBL::VEP::Pipeline::DumpVEP::InitDump',
+      -parameters    => {
+        group           => 'otherfeatures',
+        @common_params
+      },
       -rc_name       => 'default',
       -hive_capacity => 1,
       -max_retry_count => 0,
