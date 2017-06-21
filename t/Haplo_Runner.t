@@ -218,12 +218,12 @@ SKIP: {
   $tmp =~ s/\t/  /g;
   is(
     $tmp,
-  qq{ENST00000352957  ENST00000352957:612A>G    ENSP00000284967:REF      HG00096  1
-ENST00000352957  ENST00000352957:91T>C,612A>G    ENSP00000284967:31S>P      HG00096  1
-ENST00000307301  ENST00000307301:612A>G    ENSP00000305682:REF      HG00096  1
-ENST00000307301  ENST00000307301:91T>C,612A>G    ENSP00000305682:31S>P      HG00096  1
-ENST00000419219  ENST00000419219:582A>G    ENSP00000404426:REF      HG00096  1
-ENST00000419219  ENST00000419219:91T>C,582A>G    ENSP00000404426:31S>P      HG00096  1
+  qq{ENST00000352957  ENST00000352957:612A>G    ENSP00000284967:REF      rs1135618  HG00096:1
+ENST00000352957  ENST00000352957:91T>C,612A>G    ENSP00000284967:31S>P      rs3989369,rs1135618  HG00096:1
+ENST00000307301  ENST00000307301:612A>G    ENSP00000305682:REF      rs1135618  HG00096:1
+ENST00000307301  ENST00000307301:91T>C,612A>G    ENSP00000305682:31S>P      rs3989369,rs1135618  HG00096:1
+ENST00000419219  ENST00000419219:582A>G    ENSP00000404426:REF      rs1135618  HG00096:1
+ENST00000419219  ENST00000419219:91T>C,582A>G    ENSP00000404426:31S>P      rs3989369,rs1135618  HG00096:1
 },
     'run - check output'
   );
@@ -302,12 +302,12 @@ ENST00000419219  ENST00000419219:91T>C,582A>G    ENSP00000404426:31S>P      HG00
   $tmp =~ s/\t/  /g;
   is(
     $tmp,
-  qq{ENST00000352957  ENST00000352957:612A>G    ENSP00000284967:REF      HG00096  1
-ENST00000352957  ENST00000352957:91T>C,612A>G    ENSP00000284967:31S>P      HG00096  1
-ENST00000307301  ENST00000307301:612A>G    ENSP00000305682:REF      HG00096  1
-ENST00000307301  ENST00000307301:91T>C,612A>G    ENSP00000305682:31S>P      HG00096  1
-ENST00000419219  ENST00000419219:582A>G    ENSP00000404426:REF      HG00096  1
-ENST00000419219  ENST00000419219:91T>C,582A>G    ENSP00000404426:31S>P      HG00096  1
+  qq{ENST00000352957  ENST00000352957:612A>G    ENSP00000284967:REF      rs1135618  HG00096:1
+ENST00000352957  ENST00000352957:91T>C,612A>G    ENSP00000284967:31S>P      rs3989369,rs1135618  HG00096:1
+ENST00000307301  ENST00000307301:612A>G    ENSP00000305682:REF      rs1135618  HG00096:1
+ENST00000307301  ENST00000307301:91T>C,612A>G    ENSP00000305682:31S>P      rs3989369,rs1135618  HG00096:1
+ENST00000419219  ENST00000419219:582A>G    ENSP00000404426:REF      rs1135618  HG00096:1
+ENST00000419219  ENST00000419219:91T>C,582A>G    ENSP00000404426:31S>P      rs3989369,rs1135618  HG00096:1
 },
     'run - use input_data'
   );
@@ -316,6 +316,164 @@ ENST00000419219  ENST00000419219:91T>C,582A>G    ENSP00000404426:31S>P      HG00
 
   # restore STDOUT
   open(STDOUT, ">&SAVE") or die "Can't restore STDOUT\n";
+}
+
+
+## test JSON output
+SKIP: {
+
+  use_ok('Bio::EnsEMBL::VEP::Haplo::Runner');
+
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  no warnings 'once';
+  skip 'Set::IntervalTree or JSON not installed', 1 unless $Bio::EnsEMBL::VEP::Haplo::Runner::CAN_USE_JSON;
+
+  my $runner = Bio::EnsEMBL::VEP::Haplo::Runner->new({%$cfg_hash, output_file => 'STDOUT', json => 1, dont_export => 'seq,aligned_sequences'});
+
+  no warnings 'once';
+  open(SAVE, ">&STDOUT") or die "Can't save STDOUT\n"; 
+
+  my $tmp;
+  close STDOUT;
+  open STDOUT, '>', \$tmp;
+
+  $runner->run();
+
+  my $json = JSON->new();
+
+  is_deeply(
+    $json->decode((split("\n", $tmp))[0]),
+    {
+      'total_population_counts' => {
+        '_all' => 2
+      },
+      'protein_haplotypes' => [
+        {
+          'count' => 1,
+          'flags' => [],
+          'population_counts' => {
+            '_all' => 1
+          },
+          'name' => 'ENSP00000284967:REF',
+          'other_hexes' => {
+            'e5745909c573dfc830946d4e6994a47d' => 1
+          },
+          'frequency' => '0.5',
+          'samples' => {
+            'HG00096' => 1
+          },
+          'contributing_variants' => [],
+          'type' => 'protein',
+          'population_frequencies' => {
+            '_all' => '0.5'
+          },
+          'hex' => '7aa776c0543c7d064e0d146b60541843',
+          'diffs' => [],
+          'has_indel' => 0
+        },
+        {
+          'count' => 1,
+          'flags' => [],
+          'population_counts' => {
+            '_all' => 1
+          },
+          'name' => 'ENSP00000284967:31S>P',
+          'other_hexes' => {
+            '2ff7fea7ee58c8a776fc97f01f9d5296' => 1
+          },
+          'frequency' => '0.5',
+          'samples' => {
+            'HG00096' => 1
+          },
+          'contributing_variants' => [
+            'rs3989369'
+          ],
+          'type' => 'protein',
+          'population_frequencies' => {
+            '_all' => '0.5'
+          },
+          'hex' => 'c6c26cfaa79a2046a684220c04b5b2e4',
+          'diffs' => [
+            {
+              'sift_score' => 1,
+              'sift_prediction' => 'tolerated',
+              'polyphen_prediction' => 'benign',
+              'diff' => '31S>P',
+              'polyphen_score' => 0
+            }
+          ],
+          'has_indel' => 0
+        }
+      ],
+      'cds_haplotypes' => [
+        {
+          'count' => 1,
+          'population_counts' => {
+            '_all' => 1
+          },
+          'name' => 'ENST00000352957:612A>G',
+          'other_hexes' => {
+            '7aa776c0543c7d064e0d146b60541843' => 1
+          },
+          'frequency' => '0.5',
+          'samples' => {
+            'HG00096' => 1
+          },
+          'contributing_variants' => [
+            'rs1135618'
+          ],
+          'type' => 'cds',
+          'hex' => 'e5745909c573dfc830946d4e6994a47d',
+          'population_frequencies' => {
+            '_all' => '0.5'
+          },
+          'diffs' => [
+            {
+              'diff' => '612A>G'
+            }
+          ],
+          'has_indel' => 0
+        },
+        {
+          'count' => 1,
+          'population_counts' => {
+            '_all' => 1
+          },
+          'name' => 'ENST00000352957:91T>C,612A>G',
+          'other_hexes' => {
+            'c6c26cfaa79a2046a684220c04b5b2e4' => 1
+          },
+          'frequency' => '0.5',
+          'samples' => {
+            'HG00096' => 1
+          },
+          'contributing_variants' => [
+            'rs3989369',
+            'rs1135618'
+          ],
+          'type' => 'cds',
+          'hex' => '2ff7fea7ee58c8a776fc97f01f9d5296',
+          'population_frequencies' => {
+            '_all' => '0.5'
+          },
+          'diffs' => [
+            {
+              'variation_feature' => 'rs3989369',
+              'variation_feature_id' => undef,
+              'diff' => '91T>C'
+            },
+            {
+              'diff' => '612A>G'
+            }
+          ],
+          'has_indel' => 0
+        }
+      ],
+      'transcript_id' => 'ENST00000352957',
+      'total_haplotype_count' => 2
+    },
+    'JSON output'
+  );
 }
 
 

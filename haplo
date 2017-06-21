@@ -59,6 +59,7 @@ GetOptions(
   'chr=s',                   # analyse only these chromosomes, e.g. 1-5,10,MT
   'phased',                  # force VCF genotypes to be interpreted as phased
   'dont_skip',               # don't skip vars that fail validation
+  'transcript_filter=s',     # transcript filter
   
   # verbosity options
   'verbose|v',               # print out a bit more info while running
@@ -68,6 +69,8 @@ GetOptions(
   'output_file|o=s',         # output file name
   'warning_file=s',          # file to write warnings to
   'force_overwrite',         # force overwrite of output file if already exists
+  'json',                    # create JSON output
+  'dont_export=s',           # list of JSON keys to exclude
   
   # cache stuff
   'database',                # must specify this to use DB now

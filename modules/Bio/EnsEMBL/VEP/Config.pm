@@ -116,6 +116,7 @@ our @LIST_FLAGS = qw(
   fields
   chr
   distance
+  dont_export
 );
 
 # these flags can be specified more than once on the command line

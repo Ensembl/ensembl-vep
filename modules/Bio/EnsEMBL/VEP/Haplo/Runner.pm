@@ -69,6 +69,14 @@ use Bio::EnsEMBL::VEP::TranscriptTree;
 use Bio::EnsEMBL::VEP::Haplo::InputBuffer;
 use Bio::EnsEMBL::VEP::Haplo::Parser::VCF;
 
+our $CAN_USE_JSON;
+
+BEGIN {
+  if(eval q{ use JSON; 1 }) {
+    $CAN_USE_JSON = 1;
+  }
+}
+
 
 =head2 new
 
@@ -122,6 +130,9 @@ sub init {
 
   return 1 if $self->{_initialized};
 
+  # check required modules etc
+  $self->post_setup_checks();
+
   # log start time
   $self->stats->start_time();
 
@@ -145,6 +156,25 @@ sub init {
   $self->stats->info($self->get_output_header_info);
 
   return $self->{_initialized} = 1;
+}
+
+
+=head2 post_setup_checks
+
+  Example    : $runner->post_setup_checks();
+  Description: Checks things from configuration.
+  Returntype : none
+  Exceptions : none
+  Caller     : init()
+  Status     : Stable
+
+=cut
+
+
+sub post_setup_checks {
+  my $self = shift;
+
+  die("ERROR: JSON module not installed\n") if $self->param('json') && !$CAN_USE_JSON;
 }
 
 
@@ -192,8 +222,8 @@ sub run {
   Arg 1      : Bio::EnsEMBL::Variation::TranscriptHaplotypeContainer $thc
   Example    : $runner->dump_TranscriptHaplotypeContainer($thc);
   Description: Writes a TranscriptHaplotypeContainer object to a flat file
-               ($self->get_output_file_handle) as a series of lines, each line
-               representing a unique CDS haplotype.
+               ($self->get_output_file_handle), either in tab-delimited or
+               JSON format.
   Returntype : none
   Exceptions : none
   Caller     : run()
@@ -206,6 +236,17 @@ sub dump_TranscriptHaplotypeContainer {
 
   my $fh = $self->get_output_file_handle;
 
+  if($self->param('json')) {
+    my $json = $self->{_json} || JSON->new->convert_blessed;
+
+    $thc->_dont_export($_) for @{$self->param('dont_export') || []};
+
+    print $fh $json->encode($thc);
+    print $fh "\n";
+    
+    return;
+  }
+
   my $tr = $thc->transcript;
   my $tr_stable_id = $tr->stable_id;
 
@@ -217,48 +258,45 @@ sub dump_TranscriptHaplotypeContainer {
 
     my $sample_counts = $ch->get_all_sample_counts;
 
-    foreach my $sample(keys %$sample_counts) {
+    my $freqs = "";
+    my $ph = $ch->get_ProteinHaplotype;
 
-      my $freqs = "";
-      my $ph = $ch->get_ProteinHaplotype;
+    if(my $freq_data = $self->haplotype_frequencies->{$ph->_hex}) {
+      my $tr_freq_data;
 
-      if(my $freq_data = $self->haplotype_frequencies->{$ph->_hex}) {
-        my $tr_freq_data;
-
-        if(scalar @$freq_data > 1) {
-          if($freq_data->[0]->{transcript}) {
-            ($tr_freq_data) = grep {$_->{transcript} eq $tr_stable_id} @$freq_data;
-          }
-          else {
-            foreach my $tr_freq_data(@$freq_data) {
-              $freqs = join(",", map {$_.'='.$tr_freq_data->{$_}} keys %$tr_freq_data);
-            }
-          }
+      if(scalar @$freq_data > 1) {
+        if($freq_data->[0]->{transcript}) {
+          ($tr_freq_data) = grep {$_->{transcript} eq $tr_stable_id} @$freq_data;
         }
         else {
-          $tr_freq_data = $freq_data->[0];
+          foreach my $tr_freq_data(@$freq_data) {
+            $freqs = join(",", map {$_.'='.$tr_freq_data->{$_}} keys %$tr_freq_data);
+          }
         }
-
-        $freqs = join(",",
-          map {$_.'='.$tr_freq_data->{$_}}
-          grep {$_ ne 'transcript'}
-          keys %$tr_freq_data
-        );
+      }
+      else {
+        $tr_freq_data = $freq_data->[0];
       }
 
-      my @out = (
-        $tr_stable_id,
-        $ch->name,
-        join(",", @{$ch->get_all_flags}),
-        $ph->name,
-        join(",", @{$ph->get_all_flags}),
-        $freqs,
-        $sample,
-        $sample_counts->{$sample},
+      $freqs = join(",",
+        map {$_.'='.$tr_freq_data->{$_}}
+        grep {$_ ne 'transcript'}
+        keys %$tr_freq_data
       );
-
-      print $fh join("\t", @out)."\n";
     }
+
+    my @out = (
+      $tr_stable_id,
+      $ch->name,
+      join(",", @{$ch->get_all_flags}),
+      $ph->name,
+      join(",", @{$ph->get_all_flags}),
+      $freqs,
+      join(",", map {$_->variation_name} @{$ch->get_all_VariationFeatures}),
+      join(",", map {$_.':'.$sample_counts->{$_}} sort keys %$sample_counts)
+    );
+
+    print $fh join("\t", @out)."\n";
   }
 }
 
