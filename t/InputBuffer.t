@@ -184,6 +184,45 @@ is_deeply(
   'get_overlapping_vfs - big SV 2'
 );
 
+# insertion between 11 and 12
+$ib->buffer->[0]->{start}++;
+
+# reset trees
+delete $ib->{temp}->{interval_tree};
+delete $ib->{temp}->{hash_tree};
+
+is_deeply(
+  $ib->get_overlapping_vfs(25592910, 25592911),
+  [$ib->buffer->[0]],
+  'get_overlapping_vfs - ins 1'
+);
+
+is_deeply(
+  $ib->get_overlapping_vfs(25592912, 25592913),
+  [$ib->buffer->[0]],
+  'get_overlapping_vfs - ins 2'
+);
+
+is_deeply(
+  $ib->get_overlapping_vfs(25592911, 25592912),
+  [$ib->buffer->[0]],
+  'get_overlapping_vfs - ins 3'
+);
+
+is_deeply(
+  $ib->get_overlapping_vfs(25592909, 25592910),
+  [],
+  'get_overlapping_vfs - ins 4'
+);
+
+is_deeply(
+  $ib->get_overlapping_vfs(25592913, 25592914),
+  [],
+  'get_overlapping_vfs - ins 5'
+);
+
+$ib->buffer->[0]->{start}--;
+
 SKIP: {
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
@@ -194,6 +233,9 @@ SKIP: {
   $Bio::EnsEMBL::VEP::InputBuffer::CAN_USE_INTERVAL_TREE = 0;
 
   delete $ib->{temp}->{interval_tree};
+  delete $ib->{temp}->{hash_tree};
+
+  $DB::single = 1;
 
   is_deeply(
     $ib->get_overlapping_vfs(25592911, 25592911),
@@ -254,6 +296,45 @@ SKIP: {
     [$fake_sv],
     'get_overlapping_vfs no tree - big SV 2'
   );
+
+  # insertion between 11 and 12
+  $ib->buffer->[0]->{start}++;
+
+  # reset trees
+  delete $ib->{temp}->{interval_tree};
+  delete $ib->{temp}->{hash_tree};
+
+  is_deeply(
+    $ib->get_overlapping_vfs(25592910, 25592911),
+    [$ib->buffer->[0]],
+    'get_overlapping_vfs no tree - ins 1'
+  );
+
+  is_deeply(
+    $ib->get_overlapping_vfs(25592912, 25592913),
+    [$ib->buffer->[0]],
+    'get_overlapping_vfs no tree - ins 2'
+  );
+
+  is_deeply(
+    $ib->get_overlapping_vfs(25592911, 25592912),
+    [$ib->buffer->[0]],
+    'get_overlapping_vfs no tree - ins 3'
+  );
+
+  is_deeply(
+    $ib->get_overlapping_vfs(25592909, 25592910),
+    [],
+    'get_overlapping_vfs no tree - ins 4'
+  );
+
+  is_deeply(
+    $ib->get_overlapping_vfs(25592913, 25592914),
+    [],
+    'get_overlapping_vfs no tree - ins 5'
+  );
+
+  $ib->buffer->[0]->{start}--;
 
   $Bio::EnsEMBL::VEP::InputBuffer::CAN_USE_INTERVAL_TREE = $orig;
 }
