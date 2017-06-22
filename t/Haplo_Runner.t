@@ -411,34 +411,6 @@ SKIP: {
           'population_counts' => {
             '_all' => 1
           },
-          'name' => 'ENST00000352957:612A>G',
-          'other_hexes' => {
-            '7aa776c0543c7d064e0d146b60541843' => 1
-          },
-          'frequency' => '0.5',
-          'samples' => {
-            'HG00096' => 1
-          },
-          'contributing_variants' => [
-            'rs1135618'
-          ],
-          'type' => 'cds',
-          'hex' => 'e5745909c573dfc830946d4e6994a47d',
-          'population_frequencies' => {
-            '_all' => '0.5'
-          },
-          'diffs' => [
-            {
-              'diff' => '612A>G'
-            }
-          ],
-          'has_indel' => 0
-        },
-        {
-          'count' => 1,
-          'population_counts' => {
-            '_all' => 1
-          },
           'name' => 'ENST00000352957:91T>C,612A>G',
           'other_hexes' => {
             'c6c26cfaa79a2046a684220c04b5b2e4' => 1
@@ -462,6 +434,34 @@ SKIP: {
               'variation_feature_id' => undef,
               'diff' => '91T>C'
             },
+            {
+              'diff' => '612A>G'
+            }
+          ],
+          'has_indel' => 0
+        },
+        {
+          'count' => 1,
+          'population_counts' => {
+            '_all' => 1
+          },
+          'name' => 'ENST00000352957:612A>G',
+          'other_hexes' => {
+            '7aa776c0543c7d064e0d146b60541843' => 1
+          },
+          'frequency' => '0.5',
+          'samples' => {
+            'HG00096' => 1
+          },
+          'contributing_variants' => [
+            'rs1135618'
+          ],
+          'type' => 'cds',
+          'hex' => 'e5745909c573dfc830946d4e6994a47d',
+          'population_frequencies' => {
+            '_all' => '0.5'
+          },
+          'diffs' => [
             {
               'diff' => '612A>G'
             }
