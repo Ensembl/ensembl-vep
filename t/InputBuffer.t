@@ -193,13 +193,13 @@ delete $ib->{temp}->{hash_tree};
 
 is_deeply(
   $ib->get_overlapping_vfs(25592910, 25592911),
-  [$ib->buffer->[0]],
+  [],
   'get_overlapping_vfs - ins 1'
 );
 
 is_deeply(
   $ib->get_overlapping_vfs(25592912, 25592913),
-  [$ib->buffer->[0]],
+  [],
   'get_overlapping_vfs - ins 2'
 );
 
@@ -207,18 +207,6 @@ is_deeply(
   $ib->get_overlapping_vfs(25592911, 25592912),
   [$ib->buffer->[0]],
   'get_overlapping_vfs - ins 3'
-);
-
-is_deeply(
-  $ib->get_overlapping_vfs(25592909, 25592910),
-  [],
-  'get_overlapping_vfs - ins 4'
-);
-
-is_deeply(
-  $ib->get_overlapping_vfs(25592913, 25592914),
-  [],
-  'get_overlapping_vfs - ins 5'
 );
 
 $ib->buffer->[0]->{start}--;
@@ -306,13 +294,13 @@ SKIP: {
 
   is_deeply(
     $ib->get_overlapping_vfs(25592910, 25592911),
-    [$ib->buffer->[0]],
+    [],
     'get_overlapping_vfs no tree - ins 1'
   );
 
   is_deeply(
     $ib->get_overlapping_vfs(25592912, 25592913),
-    [$ib->buffer->[0]],
+    [],
     'get_overlapping_vfs no tree - ins 2'
   );
 
@@ -320,18 +308,6 @@ SKIP: {
     $ib->get_overlapping_vfs(25592911, 25592912),
     [$ib->buffer->[0]],
     'get_overlapping_vfs no tree - ins 3'
-  );
-
-  is_deeply(
-    $ib->get_overlapping_vfs(25592909, 25592910),
-    [],
-    'get_overlapping_vfs no tree - ins 4'
-  );
-
-  is_deeply(
-    $ib->get_overlapping_vfs(25592913, 25592914),
-    [],
-    'get_overlapping_vfs no tree - ins 5'
   );
 
   $ib->buffer->[0]->{start}--;
