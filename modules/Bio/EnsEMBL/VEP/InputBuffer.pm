@@ -163,7 +163,10 @@ sub get_overlapping_vfs {
     my $hash_tree = $self->hash_tree;
 
     return [
-      grep {overlap($_->{start}, $_->{end}, $start, $end)}
+      grep {  # checking both overlaps is quicker than sorting here
+        overlap($_->{start}, $_->{end}, $start, $end) ||
+        overlap($_->{end}, $_->{start}, $start, $end)
+      }
       values %{{
         map {$_->{_hash_tree_id} => $_}                  # use _hash_tree_id to uniquify
         map {@{$hash_tree->{$_} || []}}                  # tree might be empty
