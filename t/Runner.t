@@ -199,6 +199,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'allele_number' => undef,
   'max_af' => undef,
   'use_transcript_ref' => undef,
+  'af_gnomad' => undef,
 }, 'Bio::EnsEMBL::VEP::OutputFactory::VEP_output' ), 'get_OutputFactory');
 
 

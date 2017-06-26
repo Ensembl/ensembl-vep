@@ -103,10 +103,11 @@ my %FORMAT_MAP = (
 my %DISTANCE_CONS = (upstream_gene_variant => 1, downstream_gene_variant => 1);
 
 my %FREQUENCY_KEYS = (
-  af      => ['AF'],
-  af_1kg  => [qw(AFR AMR ASN EAS EUR SAS)],
-  af_esp  => [qw(AA EA)],
-  af_exac => [('ExAC', map {'ExAC_'.$_} qw(Adj AFR AMR EAS FIN NFE OTH SAS))],
+  af        => ['AF'],
+  af_1kg    => [qw(AFR AMR ASN EAS EUR SAS)],
+  af_esp    => [qw(AA EA)],
+  af_exac   => [('ExAC', map {'ExAC_'.$_} qw(Adj AFR AMR EAS FIN NFE OTH SAS))],
+  af_gnomad => [('gnomAD', map {'gnomAD_'.$_} qw(AFR AMR ASJ EAS FIN NFE OTH SAS))],
 );
 
 
@@ -164,6 +165,7 @@ sub new {
     af_1kg
     af_esp
     af_exac
+    af_gnomad
     max_af
     pubmed
 
@@ -976,7 +978,7 @@ sub add_colocated_frequency_data {
 
         # update max_af data if required
         # make sure we don't include any combined-level pops
-        if($self->{max_af} && $key ne 'AF' && $key ne 'ExAC' && $key ne 'ExAC_Adj') {
+        if($self->{max_af} && $key ne 'AF' && $key ne 'ExAC' && $key ne 'ExAC_Adj' && $key ne 'gnomAD') {
           if($f > $max_af) {
             $max_af = $f;
             @max_af_pops = ($key);

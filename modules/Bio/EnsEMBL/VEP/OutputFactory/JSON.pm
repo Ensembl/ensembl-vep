@@ -364,6 +364,7 @@ sub add_colocated_variant_info {
       AFR AMR ASN EAS SAS EUR
       AA EA
       ExAC ExAC_Adj ExAC_AFR ExAC_AMR ExAC_EAS ExAC_FIN ExAC_NFE ExAC_OTH ExAC_SAS
+      gnomAD gnomAD_AFR gnomAD_AMR gnomAD_ASJ gnomAD_EAS gnomAD_FIN gnomAD_NFE gnomAD_OTH gnomAD_SAS
     )) {
       my $tmp = $ex->{$pop};
       my $lc_pop = lc($pop);
