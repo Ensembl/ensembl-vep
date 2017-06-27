@@ -1,7 +1,6 @@
 requires 'DBI';
 requires 'Set::IntervalTree';
 requires 'JSON';
-requires 'CGI';
 recommends 'DBD::mysql';
 recommends 'PerlIO::gzip';
 recommends 'IO::Uncompress::Gunzip';

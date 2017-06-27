@@ -460,13 +460,7 @@ open IN, $test_cfg->{user_file}.'.out';
 close IN;
 is(scalar (grep {/stream/} @tmp_lines), 4, 'run - count up/downstream (1000,2000)');
 
-SKIP: {
-  
-  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  no warnings 'once';
-  skip 'CGI module not installed', 1 unless $Bio::EnsEMBL::VEP::Stats::CAN_USE_CGI;
-  ok(-e $test_cfg->{user_file}.'.html', 'dump_stats - html exists');
-}
+ok(-e $test_cfg->{user_file}.'.html', 'dump_stats - html exists');
 
 unlink($test_cfg->{user_file}.'.txt');
 unlink($test_cfg->{user_file}.'.html');

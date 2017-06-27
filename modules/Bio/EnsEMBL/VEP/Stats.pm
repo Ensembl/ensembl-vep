@@ -71,14 +71,6 @@ use Bio::EnsEMBL::Variation::Utils::Constants;
 use Bio::EnsEMBL::VEP::Constants;
 use Bio::EnsEMBL::VEP::Utils qw(get_time);
 
-our $CAN_USE_CGI;
-
-BEGIN {
-  if (eval q{ require CGI; 1 }) {
-    $CAN_USE_CGI = 1;
-  }
-}
-
 
 =head2 new
 
@@ -846,49 +838,52 @@ sub dump_html {
 
   my $finished_stats = $self->finished_stats;
 
-  my $cgi = CGI->new();
-
   print $fh $self->stats_html_head($finished_stats->{charts});
       
   # create menu
-  print $fh $cgi->div(
-    {class => 'sidemenu'},
-    $cgi->div(
-      {class => 'sidemenu_head'},
-      "Links"
-    ),
-    $cgi->div(
-      {class => 'sidemenu_body'},
-      $cgi->ul(
-        $cgi->li([
-          $cgi->a({href => '#masthead'}, "Top of page"),
-          $cgi->a({href => '#run_stats'}, "VEP run statistics"),
-          $cgi->a({href => '#gen_stats'}, "General statistics"),
-          map {
-            $cgi->a({href => '#'.$_->{id}}, $_->{title})
-          } grep { !$_->{no_link} } @{$finished_stats->{charts}},
-        ])
-      ),
-    )
-  );
+  print $fh
+    '<div class="sidemenu">'.
+      '<div class="sidemenu_head">Links</div>'.
+      '<div class="sidemenu_body">'.
+        '<ul>'.
+          join('', map {sprintf('<li><a href="#%s">%s</a></li>', $_->[0], $_->[1])} (
+            ['masthead', 'Top of page'],
+            ['run_stats', 'VEP run statistics'],
+            ['gen_stats', 'General statistics'],
+            map {
+              [$_->{id}, $_->{title}]
+            } grep { !$_->{no_link} } @{$finished_stats->{charts}},
+          )).
+        '</ul>'.
+      '</div>'.
+    '</div>';
   
   print $fh "<div class='main_content'>";
   
-  print $fh $cgi->h3({id => 'run_stats'}, "VEP run statistics");
-
-  print $fh $cgi->table({class => 'stats_table'}, $cgi->Tr([map {$cgi->td($_)} @{$finished_stats->{run_stats}}]));
+  print $fh
+    '<h3 id="run_stats">VEP run statistics</h3>'.
+    '<table class="stats_table">'.
+      join('', map {'<tr>'.join('', map {'<td>'.$_.'</td>'} @$_).'</tr>'} @{$finished_stats->{run_stats}}).
+    '</table>';
   
   # vars in/out stats
-  print $fh $cgi->h3({id => 'gen_stats'}, "General statistics");
-  print $fh $cgi->table({class => 'stats_table'}, $cgi->Tr([map {$cgi->td($_)} @{$finished_stats->{general_stats}}]));
+  print $fh
+    '<h3 id="gen_stats">General statistics</h3>'.
+    '<table class="stats_table">'.
+      join('', map {'<tr>'.join('', map {'<td>'.$_.'</td>'} @$_).'</tr>'} @{$finished_stats->{general_stats}}).
+    '</table>';
   
   foreach my $chart(@{$finished_stats->{charts}}) {
     my $height = $chart->{height} || ($chart->{type} eq 'pie' ? '400' : '200');
     
-    print $fh $cgi->hr();
-    print $fh $cgi->h3({id => $chart->{id}}, $chart->{title});
-    print $fh $cgi->div({id => $chart->{id}."_".$chart->{type}, style => 'width: 800px; height: '.$height.'px'}, '&nbsp;');
-    print $fh $cgi->div({id => $chart->{id}."_table", style => 'width: 800px; height: 200px'}, '&nbsp;') unless $chart->{no_table};
+    print $fh
+      '<hr/>'.
+      sprintf('<h3 id="%s">%s</h3>', $chart->{id}, $chart->{title}).
+      sprintf('<div id="%s" style="width: 800px; height: %ipx">&nbsp;</div>', $chart->{id}."_".$chart->{type}, $height);
+
+    print $fh
+      sprintf('<div id="%s_table" style="width: 800px; height: 200px">&nbsp;</div>', $chart->{id})
+      unless $chart->{no_table};
   }
   
   print $fh '</div>';

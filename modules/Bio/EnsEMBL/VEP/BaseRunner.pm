@@ -297,13 +297,13 @@ sub dump_stats {
 
   unless($self->param('no_stats')) {
 
-    if($self->param('stats_text') || !$Bio::EnsEMBL::VEP::Stats::CAN_USE_CGI) {
+    if($self->param('stats_text')) {
       my $fh = $self->get_stats_file_handle('txt');
       $self->stats->dump_text($fh);
       close $fh;
     }
 
-    if($self->param('stats_html') && $Bio::EnsEMBL::VEP::Stats::CAN_USE_CGI) {
+    if($self->param('stats_html')) {
       my $fh = $self->get_stats_file_handle('html');
       $self->stats->dump_html($fh);
       close $fh;
