@@ -564,6 +564,7 @@ sub apply_edits {
     if(my $vep_cache = $tr->{_variation_effect_feature_cache}) {
       delete $vep_cache->{$_} for qw(
         mapper
+        five_prime_utr
         three_prime_utr
         translateable_seq
         peptide
