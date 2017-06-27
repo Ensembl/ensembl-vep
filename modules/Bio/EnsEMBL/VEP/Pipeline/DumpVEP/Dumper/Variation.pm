@@ -38,6 +38,7 @@ use Bio::EnsEMBL::VEP::Config;
 use Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation;
 use Bio::EnsEMBL::VEP::AnnotationSource::Cache::Variation;
 use Bio::EnsEMBL::Variation::Utils::Sequence qw(trim_sequences);
+use Scalar::Util qw(looks_like_number);
 
 our $CAN_USE_TABIX_PM;
 
@@ -374,10 +375,13 @@ sub freqs_from_vcf {
                 # there will be one item in @split for each of the original alts
                 # since we may not be dealing with all the alts here
                 # we have to use the indexes and alts we logged in %alt_indexes
-                $v->{$store_name} = join(',',
-                  map {$alt_indexes{$_}.':'.($split[$_] == 0 ? 0 : $split[$_])}
+                my $tmp_f = join(',',
+                  map {$alt_indexes{$_}.':'.($split[$_] == 0 ? 0 : sprintf('%.4g', $split[$_]))}
+                  grep {looks_like_number($split[$_])}
                   @sorted_alt_indexes
                 );
+
+                $v->{$store_name} = $tmp_f if defined($tmp_f) && $tmp_f ne '';
               }
               elsif(exists($info->{$info_prefix.'AC'.$info_suffix})) {
                 my $c = $info->{$info_prefix.'AC'.$info_suffix};
@@ -393,10 +397,13 @@ sub freqs_from_vcf {
                 # ESP VCFs include REF as last allele, just to annoy everyone
                 pop @split if scalar @split > scalar @orig_alts;
 
-                $v->{$store_name} = join(',',
+                my $tmp_f = join(',',
                   map {$alt_indexes{$_}.':'.($split[$_] ? sprintf('%.4g', $split[$_] / $n) : 0)}
+                  grep {looks_like_number($split[$_])}
                   @sorted_alt_indexes
                 );
+
+                $v->{$store_name} = $tmp_f if defined($tmp_f) && $tmp_f ne '';
               }
             }
           }

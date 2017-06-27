@@ -35,7 +35,7 @@ our %DEFAULTS = (
     allele_string strand minor_allele minor_allele_freq
     clin_sig phenotype_or_disease pubmed
     AFR AMR EAS EUR SAS AA EA
-    ExAC ExAC_AFR ExAC_AMR ExAC_Adj ExAC_EAS ExAC_FIN ExAC_NFE ExAC_OTH ExAC_SAS
+    gnomAD gnomAD_AFR gnomAD_AMR gnomAD_ASJ gnomAD_EAS gnomAD_FIN gnomAD_NFE gnomAD_OTH gnomAD_SAS
   )],
 
   chr_synonyms   => $Bin.'/testdata/chr_synonyms.txt',
@@ -43,6 +43,7 @@ our %DEFAULTS = (
   haplo_freqs_nh => $Bin.'/testdata/haplotype_frequencies_nh.txt',
 
   sereal_dir     => $Bin.'/testdata/cache/sereal/homo_sapiens/84_GRCh38',
+  exac_root_dir  => $Bin.'/testdata/cache/exac/',
 
   fasta          => $Bin.'/testdata/cache/homo_sapiens/84_GRCh38/test.fa',
 

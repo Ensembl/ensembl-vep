@@ -67,17 +67,19 @@ is_deeply(
       'everything' => undef,
       'filter' => [],
       'info' => {
-        'polyphen' => '2.2.2',
         'sift' => 'sift5.2.2',
-        'COSMIC' => '75',
-        'ESP' => '20141103',
+        'polyphen' => '2.2.2',
+        '1000genomes' => 'phase3',
+        'COSMIC' => '80',
+        'ESP' => 'V2-SSA137',
+        'gnomAD' => '170228',
         'gencode' => 'GENCODE 24',
-        'HGMD-PUBLIC' => '20154',
         'genebuild' => '2014-07',
+        'HGMD-PUBLIC' => '20164',
         'regbuild' => '13.0',
-        'assembly' => 'GRCh38.p5',
-        'dbSNP' => '146',
-        'ClinVar' => '201601'
+        'dbSNP' => '149',
+        'ClinVar' => '201704',
+        'assembly' => 'GRCh38.p5'
       },
       'valid_chromosomes' => [21, 'LRG_485'],
       'bam' => undef,
@@ -135,17 +137,19 @@ is(ref($info->{input_headers}), 'ARRAY', 'get_output_header_info - input_headers
 is_deeply(
   $info->{version_data}, 
   {
-    'polyphen' => '2.2.2',
     'sift' => 'sift5.2.2',
-    'COSMIC' => '75',
-    'ESP' => '20141103',
+    'polyphen' => '2.2.2',
+    '1000genomes' => 'phase3',
+    'COSMIC' => '80',
+    'ESP' => 'V2-SSA137',
+    'gnomAD' => '170228',
     'gencode' => 'GENCODE 24',
-    'HGMD-PUBLIC' => '20154',
     'genebuild' => '2014-07',
+    'HGMD-PUBLIC' => '20164',
     'regbuild' => '13.0',
-    'assembly' => 'GRCh38.p5',
-    'dbSNP' => '146',
-    'ClinVar' => '201601'
+    'dbSNP' => '149',
+    'ClinVar' => '201704',
+    'assembly' => 'GRCh38.p5'
   },
   'get_output_header_info - version_data'
 );
@@ -403,7 +407,7 @@ ok($runner->run, 'run - ok');
 open IN, $test_cfg->{user_file}.'.out';
 my @tmp_lines = <IN>;
 close IN;
-is(scalar @tmp_lines, 38, 'run - count lines');
+is(scalar @tmp_lines, 40, 'run - count lines');
 
 is_deeply(
   [grep {!/^\#/} @tmp_lines],

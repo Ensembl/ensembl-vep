@@ -135,27 +135,37 @@ my $features = $c->read_variations_from_file(
   )
 );
 is(ref($features), 'ARRAY', 'read_variations_from_file ref');
+
 is_deeply($features->[0], {
   'phenotype_or_disease' => 0,
-  'somatic' => 0,
-  'strand' => 1,
-  'variation_name' => 'rs753123870',
-  'allele_string' => 'G/C',
+  'SAS' => 'T:0',
   'failed' => 0,
-  'end' => '25973491',
-  'start' => '25973491'
+  'somatic' => 0,
+  'AFR' => 'T:0',
+  'strand' => 1,
+  'allele_string' => 'C/T',
+  'minor_allele_freq' => '0.0002',
+  'AMR' => 'T:0',
+  'EUR' => 'T:0.001',
+  'clin_sig' => '',
+  'EAS' => 'T:0',
+  'end' => '25000001',
+  'variation_name' => 'rs574523538',
+  'minor_allele' => 'T',
+  'start' => '25000001',
+  'pubmed' => ''
 }, 'read_variations_from_file first el');
 
 $features = $c->get_features_by_regions_uncached([[$test_cfg->{cache_chr}, $test_cfg->{cache_s}]]);
 is(ref($features), 'ARRAY', 'get_features_by_regions_uncached ref 1');
 is(ref($features->[0]), 'HASH', 'get_features_by_regions_uncached ref 2');
-is($features->[0]->{variation_name}, 'rs753123870', 'get_features_by_regions_uncached variation_name');
+is($features->[0]->{variation_name}, 'rs574523538', 'get_features_by_regions_uncached variation_name');
 
 # # now we should be able to retrieve the same from memory
 $features = $c->get_features_by_regions_cached([[$test_cfg->{cache_chr}, $test_cfg->{cache_s}]]);
 is(ref($features), 'ARRAY', 'get_features_by_regions_cached ref 1');
 is(ref($features->[0]), 'HASH', 'get_features_by_regions_cached ref 2');
-is($features->[0]->{variation_name}, 'rs753123870', 'get_features_by_regions_cached variation_name');
+is($features->[0]->{variation_name}, 'rs574523538', 'get_features_by_regions_cached variation_name');
 
 $c->clean_cache();
 is_deeply($c->cache, {}, 'clean_cache');
@@ -184,13 +194,13 @@ is_deeply(
 $features = $c->get_all_features_by_InputBuffer($ib);
 is(ref($features), 'ARRAY', 'get_all_features_by_InputBuffer ref 1');
 is(ref($features->[0]), 'HASH', 'get_all_features_by_InputBuffer ref 2');
-is($features->[0]->{variation_name}, 'rs753123870', 'get_all_features_by_InputBuffer variation_name 1');
-is($features->[-1]->{variation_name}, 'rs773346245', 'get_all_features_by_InputBuffer variation_name 2');
-is(scalar @$features, 23650, 'get_all_features_by_InputBuffer count');
+is($features->[0]->{variation_name}, 'rs142513484', 'get_all_features_by_InputBuffer variation_name 1');
+is($features->[-1]->{variation_name}, 'COSM5057537', 'get_all_features_by_InputBuffer variation_name 2');
+is(scalar @$features, 24257, 'get_all_features_by_InputBuffer count');
 
 # do it again to get them from memory
 $features = $c->get_all_features_by_InputBuffer($ib);
-is($features->[0]->{variation_name}, 'rs753123870', 'get_all_features_by_InputBuffer again');
+is($features->[0]->{variation_name}, 'rs142513484', 'get_all_features_by_InputBuffer again');
 
 $ib->next();
 is_deeply($c->get_all_features_by_InputBuffer($ib), [], 'get_all_features_by_InputBuffer on empty buffer');
@@ -205,30 +215,30 @@ my $vf = $ib->buffer->[0];
 
 is_deeply($vf->{existing}, [
   {
+    'gnomAD_ASJ' => 'T:0',
     'phenotype_or_disease' => 0,
-    'ExAC_AMR' => 'T:0.000173',
-    'SAS' => 'T:0.0000',
+    'gnomAD_SAS' => 'T:0',
+    'SAS' => 'T:0',
+    'gnomAD' => 'T:0.0003478',
     'failed' => 0,
-    'ExAC_NFE' => 'T:0',
-    'AA' => 'T:0.005',
+    'gnomAD_AMR' => 'T:0.0003236',
+    'AA' => 'T:0.004998',
     'somatic' => 0,
-    'ExAC_SAS' => 'T:0',
-    'AFR' => 'T:0.0030',
+    'AFR' => 'T:0.003',
     'strand' => 1,
+    'gnomAD_FIN' => 'T:0',
     'allele_string' => 'C/T',
-    'ExAC_Adj' => 'T:0.0004133',
+    'gnomAD_AFR' => 'T:0.004643',
     'minor_allele_freq' => '0.0010',
-    'ExAC_FIN' => 'T:0',
     'AMR' => 'T:0.0014',
-    'EUR' => 'T:0.0000',
+    'gnomAD_OTH' => 'T:0',
+    'gnomAD_EAS' => 'T:0',
+    'EUR' => 'T:0',
     'clin_sig' => '',
-    'EAS' => 'T:0.0000',
+    'EAS' => 'T:0',
     'end' => 25585733,
-    'ExAC' => 'T:4.119e-04',
-    'ExAC_OTH' => 'T:0',
-    'ExAC_AFR' => 'T:0.004681',
+    'gnomAD_NFE' => 'T:1.886e-05',
     'variation_name' => 'rs142513484',
-    'ExAC_EAS' => 'T:0',
     'minor_allele' => 'T',
     'EA' => 'T:0',
     'start' => 25585733,
@@ -256,30 +266,30 @@ is_deeply(
   $ib->buffer->[0]->{existing},
   [
     {
+      'gnomAD_ASJ' => 'T:0',
       'phenotype_or_disease' => '1',
-      'ExAC_AMR' => 'T:0.0003457',
-      'SAS' => 'T:0.0000',
+      'gnomAD_SAS' => 'T:0',
+      'SAS' => 'T:0',
+      'gnomAD' => 'T:9.75e-05',
       'failed' => 0,
-      'ExAC_NFE' => 'T:2.998e-05',
+      'gnomAD_AMR' => 'T:0.0005957',
       'AA' => undef,
       'somatic' => 0,
-      'ExAC_SAS' => 'T:0',
-      'AFR' => 'T:0.0000',
+      'AFR' => 'T:0',
       'strand' => 1,
+      'gnomAD_FIN' => 'T:0',
       'allele_string' => 'C/T',
-      'ExAC_Adj' => 'T:5.768e-05',
+      'gnomAD_AFR' => 'T:0',
       'minor_allele_freq' => '0.0002',
-      'ExAC_FIN' => 'T:0',
       'AMR' => 'T:0.0014',
-      'EUR' => 'T:0.0000',
+      'gnomAD_OTH' => 'T:0.0001823',
+      'gnomAD_EAS' => 'T:0',
+      'EUR' => 'T:0',
       'clin_sig' => 'not_provided,pathogenic',
-      'EAS' => 'T:0.0000',
+      'EAS' => 'T:0',
       'end' => 25891796,
-      'ExAC' => 'T:5.765e-05',
-      'ExAC_OTH' => 'T:0.001101',
-      'ExAC_AFR' => 'T:0',
+      'gnomAD_NFE' => 'T:2.687e-05',
       'variation_name' => 'rs63750066',
-      'ExAC_EAS' => 'T:0',
       'minor_allele' => 'T',
       'EA' => undef,
       'start' => 25891796,

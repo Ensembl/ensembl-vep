@@ -126,6 +126,7 @@ is_deeply(
 
 $ib = get_annotated_buffer({
   check_existing => 1,
+  pubmed => 1,
   input_file => $test_cfg->create_input_file([qw(21 25272769 . C T . . .)])
 });
 
@@ -140,8 +141,7 @@ is_deeply(
       1
     ],
     'PUBMED' => [
-      '20708005',
-      'test'
+      '20708005'
     ],
   },
   'add_colocated_variant_info - pubmed',
@@ -707,11 +707,11 @@ is_deeply(
   $of->add_colocated_frequency_data($vf, {Allele => 'T'}, $vf->{existing}->[0]),
   {
     Allele => 'T',
-    AFR_AF => ['0.0030'],
+    AFR_AF => ['0.003'],
     AMR_AF => ['0.0014'],
-    EAS_AF => ['0.0000'],
-    EUR_AF => ['0.0000'],
-    SAS_AF => ['0.0000'],
+    EAS_AF => ['0'],
+    EUR_AF => ['0'],
+    SAS_AF => ['0'],
   },
   'add_colocated_frequency_data - af_1kg',
 );
@@ -733,7 +733,8 @@ $of->{af} = 0;
 
 $ib = get_annotated_buffer({
   check_existing => 1,
-  input_file => $test_cfg->create_input_file([qw(21 25891796 . C T . . .)])
+  input_file => $test_cfg->create_input_file([qw(21 25891796 . C T . . .)]),
+  dir => $test_cfg->{exac_root_dir},
 });
 $of->{af_exac} = 1;
 
@@ -775,6 +776,48 @@ $of->{af_exac} = 0;
 
 $ib = get_annotated_buffer({
   check_existing => 1,
+  input_file => $test_cfg->create_input_file([qw(21 25891796 . C T . . .)]),
+});
+$of->{af_gnomad} = 1;
+
+is_deeply(
+  $of->add_colocated_frequency_data($ib->buffer->[0], {Allele => 'T'}, $ib->buffer->[0]->{existing}->[0]),
+  {
+    'Allele' => 'T',
+    'gnomAD_NFE_AF' => [
+      '2.687e-05'
+    ],
+    'gnomAD_AF' => [
+      '9.75e-05'
+    ],
+    'gnomAD_OTH_AF' => [
+      '0.0001823'
+    ],
+    'gnomAD_AFR_AF' => [
+      '0'
+    ],
+    'gnomAD_EAS_AF' => [
+      '0'
+    ],
+    'gnomAD_AMR_AF' => [
+      '0.0005957'
+    ],
+    'gnomAD_SAS_AF' => [
+      '0'
+    ],
+    'gnomAD_FIN_AF' => [
+      '0'
+    ],
+    'gnomAD_ASJ_AF' => [
+      '0'
+    ]
+  },
+  'add_colocated_frequency_data - af_gnomad',
+);
+$of->{af_gnomad} = 0;
+
+$ib = get_annotated_buffer({
+  check_existing => 1,
   input_file => $test_cfg->create_input_file([qw(21 25975223 . G A . . .)])
 });
 
@@ -787,7 +830,7 @@ is_deeply(
       '0',
     ],
     'EA_AF' => [
-      '0.0008',
+      '0.000814',
     ],
   },
   'add_colocated_frequency_data - af_esp',
@@ -806,9 +849,9 @@ is_deeply(
   $of->add_colocated_frequency_data($ib->buffer->[0], {Allele => 'G'}, $ib->buffer->[0]->{existing}->[0]),
   {
     'Allele' => 'G',
-    'MAX_AF' => '0.755',
+    'MAX_AF' => '0.8223',
     'MAX_AF_POPS' => [
-      'ExAC_NFE',
+      'gnomAD_ASJ',
     ],
   },
   'add_colocated_frequency_data - max_af',
