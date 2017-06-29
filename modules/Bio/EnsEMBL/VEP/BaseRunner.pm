@@ -294,8 +294,8 @@ sub get_stats_file_handle {
 
 sub dump_stats {
   my $self = shift;
-
-  unless($self->param('no_stats')) {
+  
+  unless($self->param('no_stats') || (uc($self->param('output_file')) eq 'STDOUT')) {
 
     if($self->param('stats_text') || !$Bio::EnsEMBL::VEP::Stats::CAN_USE_CGI) {
       my $fh = $self->get_stats_file_handle('txt');
