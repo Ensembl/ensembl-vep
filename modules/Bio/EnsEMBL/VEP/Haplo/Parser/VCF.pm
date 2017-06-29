@@ -181,15 +181,12 @@ sub create_VariationFeatures {
 
   my $parser = $self->parser();
 
-  my $gts = $parser->get_samples_genotypes(undef, 1);
-  return [] unless scalar keys %$gts;
-
   return [{
     chr => $parser->get_seqname,
     start => $parser->get_raw_start,
     end => $parser->get_raw_end,
     ids => $parser->get_IDs,
-    gts => $gts,
+    record => \@{$parser->{record}},
     alleles => $parser->get_reference.','.$parser->get_raw_alternatives,
   }];
 }

@@ -67,20 +67,20 @@ is(ref($p->parser), 'Bio::EnsEMBL::IO::Parser::VCF4', 'parser ref');
 is_deeply(
   $p->next,
   {
-    'alleles' => 'T,C',
+    'alleles' => 'C,T',
+    'record' => [
+      '21', '25585733', 'rs142513484', 'C', 'T', '.', '.', '.', 'GT', '0|0'
+    ],
     'ids' => [
-      'rs1135618'
+      'rs142513484'
     ],
     'chr' => '21',
-    'gts' => {
-      'HG00096' => 'C|C'
-    },
-    'end' => 25597391,
-    'start' => '25597391'
+    'end' => 25585733,
+    'start' => '25585733'
   },
   'next - accounts for header fetch'
 );
 
-is($p->next->{ids}->[0], 'rs3989369', 'next again');
+is($p->next->{ids}->[0], 'rs187353664', 'next again');
 
 done_testing();

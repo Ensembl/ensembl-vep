@@ -80,28 +80,25 @@ sub annotate_InputBuffer {
   my @return;
 
   my $samples = $buffer->parser->samples;
+  my $io_parser = $buffer->parser->parser;
 
   foreach my $tr(@{$self->get_all_features_by_InputBuffer($buffer)}) {
-    my ($s, $e);
-    if(ref($tr) eq 'HASH') {
-      ($s, $e) = ($tr->{start}, $tr->{end});
-    }
-    else {
-      ($s, $e) = ($tr->seq_region_start, $tr->seq_region_end);
-    }
-
-    my $vfs = $buffer->get_overlapping_vfs($s, $e);
-    next unless @$vfs;
 
     $tr = $self->lazy_load_transcript($tr);
     next unless $tr && $tr->{biotype} eq 'protein_coding';
 
     next if $self->filter_set && !$self->filter_set->evaluate($tr);
 
+    # we only want variants overlapping the exons
+    my @vfs = 
+      map {@{$buffer->get_overlapping_vfs($_->seq_region_start, $_->seq_region_end)}}
+      @{$tr->{_variation_effect_feature_cache}->{sorted_exons} || $tr->get_all_Exons};
+    next unless @vfs;
+
     my @gts;
 
-    foreach my $vf_hash(@$vfs) {
-      push @gts, @{$self->get_genotypes($vf_hash, $samples)};
+    foreach my $vf_hash(@vfs) {
+      push @gts, @{$self->get_genotypes($vf_hash, $samples, $io_parser)};
     }
 
     if(@gts) {
@@ -150,9 +147,12 @@ sub create_vf {
 
   Arg 1      : hashref $vf_hash
   Arg 2      : arrayref of Bio::EnsEMBL::Variation::Sample $samples
-  Example    : my $gts = $as->get_genotypes($vf_hash, $samples);
+  Arg 3      : Bio::EnsEMBL::IO::Parser::VCF4 $parser
+  Example    : my $gts = $as->get_genotypes($vf_hash, $samples, $parser);
   Description: Creates SampleGenotypeFeature objects from the variant hashes
-               and samples from the InputBuffer
+               and samples from the InputBuffer. The parser object is used
+               to lazy-load genotypes from the VCF record used to generate
+               the $vf_hash.
   Returntype : arrayref of Bio::EnsEMBL::Variation::SampleGenotypeFeature
   Exceptions : none
   Caller     : annotate_InputBuffer()
@@ -161,18 +161,25 @@ sub create_vf {
 =cut
 
 sub get_genotypes {
-  my ($self, $hash, $samples) = @_;
+  my ($self, $hash, $samples, $parser) = @_;
 
   if(!exists($hash->{gt_objects})) {
     my @gts;
     my $vf = $hash->{vf} ||= $self->create_vf($hash);
 
-    foreach my $sample(keys %{$hash->{gts}}) {
+    # "re-inject" the raw VCF record into the parser object
+    # this allows us to lazy-fetch the genotypes here
+    my $bak = $parser->{record};
+    $parser->{record} = $hash->{record};
+    my $raw_gts = $parser->get_samples_genotypes(undef, 1);
+    $parser->{record} = $bak;
+
+    foreach my $sample(keys %$raw_gts) {
       push @gts, Bio::EnsEMBL::Variation::SampleGenotypeFeature->new_fast({
         # _variation_id     => $vf->{_variation_id},
         variation_feature => $vf,
         sample            => $samples->{$sample},
-        genotype          => [split(/\||\/|\\/, $hash->{gts}->{$sample})],
+        genotype          => [split(/\||\/|\\/, $raw_gts->{$sample})],
         phased            => 1,
         start             => $vf->start,
         end               => $vf->end,

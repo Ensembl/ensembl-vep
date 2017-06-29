@@ -129,7 +129,7 @@ sub next {
     my $max = 0;
     my $vf;
 
-    while(!$max && ($vf = $parser->next)) {
+    while(!$max && ($vf = @$pre_buffer ? shift @$pre_buffer : $parser->next)) {
       $max = $self->get_max_from_tree($vf->{chr}, $vf->{start}, $vf->{end});
     }
 
@@ -139,6 +139,8 @@ sub next {
       push @$buffer, $vf;
       $vf = $parser->next;
     }
+
+    push @$pre_buffer, $vf if $vf;
   }
 
   return $buffer;

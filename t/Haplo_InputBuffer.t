@@ -32,7 +32,7 @@ SKIP: {
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
   no warnings 'once';
-  skip 'Set::IntervalTree not installed', 9 unless $Bio::EnsEMBL::VEP::AnnotationType::Transcript::CAN_USE_INTERVAL_TREE;
+  skip 'Set::IntervalTree not installed', 13 unless $Bio::EnsEMBL::VEP::AnnotationType::Transcript::CAN_USE_INTERVAL_TREE;
 
   # use test
   use_ok('Bio::EnsEMBL::VEP::Haplo::InputBuffer');
@@ -51,41 +51,68 @@ SKIP: {
 
   $ib = $runner->get_InputBuffer;
 
+  my $vfs = $ib->next;
+
+  is(scalar @$vfs, 34, 'next - count');
+
   is_deeply(
-    $ib->next,
-    [
-      {
-        'alleles' => 'T,C',
-        'ids' => [
-          'rs1135618'
-        ],
-        'chr' => '21',
-        'gts' => {
-          'HG00096' => 'C|C'
-        },
-        'end' => 25597391,
-        'start' => 25597391
-      },
-      {
-        'alleles' => 'A,G',
-        'ids' => [
-          'rs3989369'
-        ],
-        'chr' => '21',
-        'gts' => {
-          'HG00096' => 'A|G'
-        },
-        'end' => 25606638,
-        'start' => 25606638
-      }
-    ],
-    'next'
+    $vfs->[0],
+    {
+      'alleles' => 'C,T',
+      'record' => [
+        '21', '25585733', 'rs142513484', 'C', 'T', '.', '.', '.', 'GT', '0|0'
+      ],
+      'ids' => [
+        'rs142513484'
+      ],
+      'chr' => '21',
+      'end' => 25585733,
+      'start' => '25585733'
+    },
+    'next - first element'
   );
+
+  is_deeply(
+    $vfs->[-1],
+    {
+      'alleles' => 'A,G',
+      'record' => [
+        '21', '25607474', 'rs141666402', 'A', 'G', '.', '.', '.', 'GT', '0|0'
+      ],
+      'ids' => [
+        'rs141666402'
+      ],
+      'chr' => '21',
+      'end' => 25607474,
+      'start' => 25607474
+    },
+    'next - last element'
+  );
+
+  is_deeply(
+    $ib->next->[0],
+    {
+      'alleles' => 'C,A',
+      'record' => [
+        '21', '25639842', 'rs8132639', 'C', 'A', '.', '.', '.', 'GT', '0|0'
+      ],
+      'ids' => [
+        'rs8132639'
+      ],
+      'chr' => '21',
+      'end' => 25639842,
+      'start' => 25639842
+    },
+    'next again - first element'
+  );
+
+  ok(@{$ib->next} > 0, 'next again 2');
+  
 
   is_deeply(
     $ib->next,
     [],
-    'next again empty'
+    'next again 3 empty'
   );
 }
 

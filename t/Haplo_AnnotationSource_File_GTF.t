@@ -72,7 +72,7 @@ SKIP: {
   my $ib = $runner->get_InputBuffer;
   $ib->next();
 
-  is(scalar @{$ib->buffer}, 2, 'input buffer next count');
+  is(scalar @{$ib->buffer}, 34, 'input buffer next count');
 
   my $result = $as->annotate_InputBuffer($ib);
 
