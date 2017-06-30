@@ -133,6 +133,13 @@ sub init {
 
   $self->stats->info($self->get_output_header_info);
 
+  # get stats file handle now
+  # otherwise we don't know if this will fail til the end of the run
+  unless($self->param('no_stats')) {
+    $self->get_stats_file_handle('txt') if $self->param('stats_text');
+    $self->get_stats_file_handle('html') if $self->param('stats_html');
+  }
+
   return $self->{_initialized} = 1;
 }
 

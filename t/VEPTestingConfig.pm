@@ -120,6 +120,7 @@ sub base_testing_cfg {
     assembly      => $self->{cache_assembly},
     offline       => 1,
     database      => 0,
+    no_stats      => 1,
   }
 }
 

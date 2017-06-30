@@ -26,6 +26,9 @@ use Bio::EnsEMBL::VEP::Utils qw(get_time);
 my $test_cfg = VEPTestingConfig->new();
 
 my $cfg_hash = $test_cfg->base_testing_cfg;
+$cfg_hash->{no_stats} = 0;
+$cfg_hash->{output_file} = $test_cfg->{user_file}.'.out';
+$cfg_hash->{force_overwrite} = 1;
 
 ## BASIC TESTS
 ##############
@@ -274,7 +277,7 @@ is_deeply(
 
 
 $runner = get_annotated_buffer_runner({
-  input_file => $test_cfg->create_input_file([qw(21 25585733 . C T . . .)])
+  input_file => $test_cfg->create_input_file([qw(21 25585733 . C T . . .)]),
 });
 $runner->get_OutputFactory->get_all_lines_by_InputBuffer($runner->get_InputBuffer);
 $s = $runner->stats;
@@ -449,6 +452,9 @@ SKIP: {
 
   close STATS;
 }
+
+unlink($test_cfg->{user_file}.'.out_summary.html');
+unlink($test_cfg->{user_file}.'.out_summary.txt');
 
 
 sub get_annotated_buffer_runner {

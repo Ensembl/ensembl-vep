@@ -249,35 +249,40 @@ sub get_stats_file_handle {
   my $self = shift;
   my $type = shift;
 
-  my $stats_file_root = $self->param('stats_file') || $self->param('output_file').'_summary';
+  unless(exists($self->{stats_file_handle}->{$type})) {
 
-  my $file_name;
+    my $stats_file_root = $self->param('stats_file') || $self->param('output_file').'_summary';
 
-  if($stats_file_root =~ m/^(.+)\.(.+?)$/) {
-    my ($root, $ext) = ($1, $2);
-    if(lc($ext) eq $type) {
-      $file_name = $stats_file_root;
-    }
-    elsif(lc($ext) =~ /^(txt|html)$/) {
-      $file_name = $root.'.'.$type;
+    my $file_name;
+
+    if($stats_file_root =~ m/^(.+)\.(.+?)$/) {
+      my ($root, $ext) = ($1, $2);
+      if(lc($ext) eq $type) {
+        $file_name = $stats_file_root;
+      }
+      elsif(lc($ext) =~ /^(txt|html)$/) {
+        $file_name = $root.'.'.$type;
+      }
+      else {
+        $file_name = $stats_file_root.'.'.$type;
+      }
     }
     else {
       $file_name = $stats_file_root.'.'.$type;
     }
-  }
-  else {
-    $file_name = $stats_file_root.'.'.$type;
-  }
-      
-  # check if file exists
-  if(-e $file_name && !$self->param('force_overwrite')) {
-    throw("ERROR: Stats file $file_name already exists. Specify a different output file with --stats_file or overwrite existing file with --force_overwrite\n");
-  }
-  
-  my $fh = FileHandle->new();
-  $fh->open(">$file_name") or throw("ERROR: Could not write to stats file $file_name\n");
+        
+    # check if file exists
+    if(-e $file_name && !$self->param('force_overwrite')) {
+      throw("ERROR: Stats file $file_name already exists. Specify a different output file with --stats_file, overwrite existing file with --force_overwrite or disable stats with --no_stats\n");
+    }
+    
+    my $fh = FileHandle->new();
+    $fh->open(">$file_name") or throw("ERROR: Could not write to stats file $file_name\n");
 
-  return $fh;
+    $self->{stats_file_handle}->{$type} = $fh;
+  }
+
+  return $self->{stats_file_handle}->{$type};
 }
 
 

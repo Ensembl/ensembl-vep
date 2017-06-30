@@ -199,7 +199,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'pubmed' => undef,
   'header_info' => $info,
   'plugins' => [],
-  'no_stats' => undef,
+  'no_stats' => 1,
   'allele_number' => undef,
   'max_af' => undef,
   'use_transcript_ref' => undef,
@@ -360,6 +360,7 @@ $runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, output_file => $test_cfg->
 is(ref($runner->get_stats_file_handle('txt')), 'FileHandle', 'get_stats_file_handle - txt ref');
 ok(-e $test_cfg->{user_file}.'.out_summary.txt', 'get_stats_file_handle - txt file exists');
 
+delete $runner->{stats_file_handle};
 throws_ok {$runner->get_stats_file_handle('txt')} qr/Stats file .+ already exists/, 'get_stats_file_handle - fail on existing';
 unlink($test_cfg->{user_file}.'.out_summary.txt');
 
@@ -400,6 +401,7 @@ $runner = Bio::EnsEMBL::VEP::Runner->new({
   stats_file => $test_cfg->{user_file}.'.txt',
   stats_html => 1,
   stats_text => 1,
+  no_stats => 0,
 });
 
 ok($runner->run, 'run - ok');
@@ -451,6 +453,7 @@ $runner = Bio::EnsEMBL::VEP::Runner->new({
   stats_text => 1,
   distance => '10000,20000',
   force_overwrite => 1,
+  no_stats => 0,
 });
 
 $runner->run;
@@ -471,8 +474,7 @@ unlink($test_cfg->{user_file}.'.out');
 $runner = Bio::EnsEMBL::VEP::Runner->new({
   %$cfg_hash,
   fasta => $test_cfg->{fasta},
-  no_stats => 1,
-});
+  });
 $runner->init();
 
 # use of B gleaned from http://www.perlmonks.org/?node_id=413556
