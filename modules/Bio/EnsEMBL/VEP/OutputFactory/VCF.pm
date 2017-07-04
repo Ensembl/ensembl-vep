@@ -281,7 +281,8 @@ sub get_all_lines_by_InputBuffer {
 
     # we have to create one if input wasnt VCF
     else {
-      $line = $self->VariationFeature_to_VCF_record($vf);
+      $vf->{slice} ||= $self->get_slice($vf->{chr});
+      $line = $vf->to_VCF_record();
       $line->[7] = '' if ($line->[7] || '') eq '.';
     }
 
@@ -390,128 +391,6 @@ sub fields {
   }
 
   return $self->{fields};
-}
-
-
-=head2 VariationFeature_to_VCF_record
-
-  Arg 1      : Bio::EnsEMBL::Variation::BaseVariationFeature $bvf
-  Example    : $vcf_arrayref = $of->VariationFeature_to_VCF_record($bvf);
-  Description: Converts a BaseVariationFeature object to an arrayref
-               representing the columns of a VCF line. May be a
-               StructuralVariationFeature
-  Returntype : arrayref of strings
-  Exceptions : none
-  Caller     : get_all_lines_by_InputBuffer(), 
-  Status     : Stable
-
-=cut
-
-sub VariationFeature_to_VCF_record {
-  my $self = shift;
-  my $vf = shift;
-
-  # look for imbalance in the allele string
-  if(ref($vf) eq 'Bio::EnsEMBL::Variation::VariationFeature') {
-    my %allele_lengths;
-    my @alleles = split '\/', $vf->allele_string;
-
-    map {reverse_comp(\$_)} @alleles if $vf->strand < 0;
-
-    foreach my $allele(@alleles) {
-      $allele =~ s/\-//g;
-      $allele_lengths{length($allele)} = 1;
-    }
-
-    # in/del/unbalanced
-    if(scalar keys %allele_lengths > 1) {
-
-      my $prev_base = $self->get_prev_base($vf);
-
-      for my $i(0..$#alleles) {
-        $alleles[$i] =~ s/\-//g;
-        $alleles[$i] = $prev_base.$alleles[$i];
-      }
-
-      return [
-        $vf->{chr} || $vf->seq_region_name,
-        $vf->start - 1,
-        $vf->variation_name || '.',
-        shift @alleles,
-        (join ",", @alleles),
-        '.', '.', '.'
-      ];
-
-    }
-
-    # balanced sub
-    else {
-      return [
-        $vf->{chr} || $vf->seq_region_name,
-        $vf->start,
-        $vf->variation_name || '.',
-        shift @alleles,
-        (join ",", @alleles),
-        '.', '.', '.'
-      ];
-    }
-  }
-
-  # SV
-  else {
-
-    # convert to SO term
-    my %terms = (
-      insertion => 'INS',
-      deletion => 'DEL',
-      tandem_duplication => 'TDUP',
-      duplication => 'DUP'
-    );
-
-    my $alt = '<'.($terms{$vf->class_SO_term} || $vf->class_SO_term).'>';
-
-    return [
-      $vf->{chr} || $vf->seq_region_name,
-      $vf->start - 1,
-      $vf->variation_name || '.',
-      $self->get_prev_base($vf),
-      $alt,
-      '.', '.',
-      'END='.$vf->end
-    ];
-  }
-}
-
-
-=head2 get_prev_base
-
-  Arg 1      : Bio::EnsEMBL::Variation::BaseVariationFeature $bvf
-  Example    : $base = $of->get_prev_base($bvf);
-  Description: Get the base preceding the given variant's position. Will
-               use FASTA or database; returns "N" if sequence retrieval fails.
-  Returntype : string
-  Exceptions : none
-  Caller     : VariationFeature_to_VCF_record(), 
-  Status     : Stable
-
-=cut
-
-sub get_prev_base {
-  my $self = shift;
-  my $vf = shift;  
-
-  # we need the ref base before the variation
-  # default to N in case we cant get it
-  my $prev_base = 'N';
-
-  $vf->{slice} ||= $self->get_slice($vf->{chr});
-
-  if(defined($vf->{slice})) {
-    my $slice = $vf->slice->sub_Slice($vf->start - 1, $vf->start - 1);
-    $prev_base = $slice->seq if defined($slice);
-  }
-
-  return $prev_base;
 }
 
 

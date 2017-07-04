@@ -219,82 +219,6 @@ is(
   'output_hash_to_vcf_info_chunk - ";" uri encoded'
 );
 
-## VariationFeature_to_VCF_record
-#################################
-
-is_deeply(
-  $of->VariationFeature_to_VCF_record(get_vf({allele_string => 'A/G'})),
-  [1, 1, '.', 'A', 'G', '.', '.', '.'],
-  'VariationFeature_to_VCF_record'
-);
-
-is_deeply(
-  $of->VariationFeature_to_VCF_record(get_vf({allele_string => 'A/G', strand => -1})),
-  [1, 1, '.', 'T', 'C', '.', '.', '.'],
-  'VariationFeature_to_VCF_record - rev strand'
-);
-
-is_deeply(
-  $of->VariationFeature_to_VCF_record(get_vf({allele_string => 'A/G/T'})),
-  [1, 1, '.', 'A', 'G,T', '.', '.', '.'],
-  'VariationFeature_to_VCF_record - multiple alts'
-);
-
-is_deeply(
-  $of->VariationFeature_to_VCF_record(get_vf({allele_string => 'AG/CT'})),
-  [1, 1, '.', 'AG', 'CT', '.', '.', '.'],
-  'VariationFeature_to_VCF_record - balanced non-SNP'
-);
-
-is_deeply(
-  $of->VariationFeature_to_VCF_record(get_vf({allele_string => 'A/-', start => 2, end => 2})),
-  [1, 1, '.', 'NA', 'N', '.', '.', '.'],
-  'VariationFeature_to_VCF_record - deletion - no seq lookup'
-);
-
-is_deeply(
-  $of->VariationFeature_to_VCF_record(get_vf({allele_string => '-/A', start => 2})),
-  [1, 1, '.', 'N', 'NA', '.', '.', '.'],
-  'VariationFeature_to_VCF_record - insertion - no seq lookup'
-);
-
-is_deeply(
-  $of->VariationFeature_to_VCF_record(get_vf({allele_string => 'A/-/G', start => 2, end => 2})),
-  [1, 1, '.', 'NA', 'N,NG', '.', '.', '.'],
-  'VariationFeature_to_VCF_record - mixed - no seq lookup'
-);
-
-is_deeply(
-  $of->VariationFeature_to_VCF_record(
-    Bio::EnsEMBL::Variation::StructuralVariationFeature->new_fast({
-      class_SO_term => 'deletion',
-      start => 11,
-      end => 20,
-      chr => 1,
-    })
-  ),
-  [1, 10, '.', 'N', '<DEL>', '.', '.', 'END=20'],
-  'VariationFeature_to_VCF_record - SV'
-);
-
-# test with sequence fetch
-is_deeply(
-  get_runner({
-    input_file => $test_cfg->{test_vcf},
-    dir => $test_cfg->{cache_root_dir},
-    vcf => 1,
-  })->get_OutputFactory->VariationFeature_to_VCF_record(
-    get_vf({
-      allele_string => 'A/-',
-      start => 25585733,
-      end => 25585733,
-      chr => 21,
-    })
-  ),
-  [21, 25585732, '.', 'GA', 'G', '.', '.', '.'],
-  'VariationFeature_to_VCF_record - deletion - seq lookup'
-);
-
 
 ## get_all_lines_by_InputBuffer
 ###############################
@@ -437,6 +361,21 @@ is_deeply(
   "non-VCF input"
 );
 
+# test converting to VCF from different input
+$ib = get_runner({
+  input_file => $test_cfg->create_input_file([qw(21 25585733 25585733 C/- 1)]),
+  dir => $test_cfg->{cache_root_dir},
+  fasta => $test_cfg->{fasta},
+})->get_InputBuffer;
+$of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({config => $ib->config});
+
+is_deeply(
+  $of->get_all_lines_by_InputBuffer($ib)->[0],
+  "21\t25585732\t21_25585733_C/-\tGC\tG\t.\t.\t".
+  'CSQ=-|3_prime_UTR_variant|MODIFIER||ENSG00000154719|Transcript|ENST00000307301||||||1122|||||||-1|,-|frameshift_variant|HIGH||ENSG00000154719|Transcript|ENST00000352957||||||1033|991|331|A/X|Gca/ca|||-1|,-|upstream_gene_variant|MODIFIER||ENSG00000260583|Transcript|ENST00000567517||||||||||||2407|-1|',
+  "non-VCF input - deletion"
+);
+
 # test keep vs trash existing CSQ
 $ib = get_runner({
   input_file => $test_cfg->create_input_file([qw(21 25585733 . C T . . CSQ=foo;BAR=blah)]),
@@ -505,6 +444,7 @@ is(
 $ib = get_runner({
   input_file => $test_cfg->create_input_file([qw(21 25585733 25585735 DEL 1)]),
   dir => $test_cfg->{cache_root_dir},
+  fasta => $test_cfg->{fasta},
 })->get_InputBuffer;
 $of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({config => $ib->config});
 $ib->buffer->[0]->{transcript_variations} = {};
