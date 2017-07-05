@@ -183,6 +183,7 @@ sub next {
     
     # new chromosome
     if($prev_chr && $vf->{chr} ne $prev_chr) {
+      $self->split_variants() if $self->{minimal};
       return $buffer;
     }
 
@@ -202,6 +203,8 @@ sub next {
         # we can't push the VF back onto the parser, so add it to $pre_buffer
         # and it will get picked up on the following next() call
         push @$pre_buffer, $vf;
+        
+        $self->split_variants() if $self->{minimal};
         return $buffer;
       }
 
