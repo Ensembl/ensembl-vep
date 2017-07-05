@@ -97,18 +97,19 @@ sub fetch_input {
   );
 
   if($self->param('eg')) {
-    my $dir_suffix = "/".$species_hash{division};
+    my $pipeline_dump_dir = $self->param('pipeline_dir')."/".$species_hash{division};
+    $species_hash{pipeline_dump_dir} = $pipeline_dump_dir;
     my $mca = $dba->get_MetaContainerAdaptor;
 
     if($mca->is_multispecies == 1) {
       my $collection_db = $1 if($mca->dbc->dbname()=~/(.+)\_core/);
-      $dir_suffix = $dir_suffix."/".$collection_db;
+      $species_hash{dir_suffix} = "/".$collection_db;
     }
-    $species_hash{dir_suffix} = $dir_suffix;
     $species_hash{assembly}   = $mca->single_value_by_key('assembly.default');
     $species_hash{db_version} = $mca->schema_version();
   }
   else {
+    $species_hash{pipeline_dump_dir} = $self->param('pipeline_dir');
     $species_hash{db_version} = $self->param('ensembl_release');
   }
 
@@ -183,13 +184,13 @@ sub get_chr_jobs {
 
   # dump synonyms
   if($self->param('group') eq 'core') {
-    make_path($self->param('pipeline_dir').'/synonyms');
+    make_path($species_hash->{pipeline_dump_dir}.'/synonyms');
 
     my $srsa = $dba->get_SeqRegionSynonymAdaptor();
 
     open SYN, sprintf(
       ">%s/synonyms/%s_%s_chr_synonyms.txt",
-      $self->param('pipeline_dir'),
+      $species_hash->{pipeline_dump_dir},
       $species_hash->{species},
       $species_hash->{assembly}
     ) or die "ERROR: Could not write to synonyms file\n";

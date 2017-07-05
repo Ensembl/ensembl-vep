@@ -224,20 +224,18 @@ sub pipeline_wide_parameters {  # these parameter values are visible to all anal
         %{$self->SUPER::pipeline_wide_parameters},          # here we inherit anything from the base class
 
         'refseq'     => $self->o('refseq'),
+        'ensembl_release' => $self->o('ensembl_release'),
+        'eg_version' => $self->o('eg_version'),
+        'eg' => $self->o('eg'),
+        'pipeline_dir' => $self->o('pipeline_dir'),
+        'debug' => $self->o('debug'),
+        'region_size' => $self->o('region_size'),
+        'division' => $self->o('division'),
     };
 }
 
 sub pipeline_analyses {
   my ($self) = @_;
-
-  my @common_params = map {$_ => $self->o($_) || undef} qw(
-    ensembl_release
-    eg_version
-    eg
-    pipeline_dir
-    debug
-    region_size
-  );
    
   my @analyses = (
     {
@@ -254,6 +252,7 @@ sub pipeline_analyses {
       -hive_capacity => 1,
       -max_retry_count => 0,
       -flow_into     => {
+        '1' =>  $self->o('debug') ? [] : ['distribute_dumps' => {}],
         '2' => ['init_dump_vep_core'],
         '7' => WHEN(
             '#refseq#' => 'init_dump_vep_otherfeatures'
@@ -266,13 +265,11 @@ sub pipeline_analyses {
       -module        => 'Bio::EnsEMBL::VEP::Pipeline::DumpVEP::InitDump',
       -parameters    => {
         group           => 'core',
-        @common_params
       },
       -rc_name       => 'default',
       -hive_capacity => 1,
       -max_retry_count => 0,
       -flow_into     => {
-        '1' => $self->o('debug') ? [] : ['distribute_dumps'],
         '2' => ['create_dump_jobs'],
       },
     },
@@ -282,13 +279,11 @@ sub pipeline_analyses {
       -module        => 'Bio::EnsEMBL::VEP::Pipeline::DumpVEP::InitDump',
       -parameters    => {
         group           => 'otherfeatures',
-        @common_params
       },
       -rc_name       => 'default',
       -hive_capacity => 1,
       -max_retry_count => 0,
       -flow_into     => {
-        '1' => $self->o('debug') ? [] : ['distribute_dumps'],
         '2' => ['create_dump_jobs'],
       },
     },
@@ -299,7 +294,6 @@ sub pipeline_analyses {
       -parameters    => {
         merged          => $self->o('merged'),
         lrg             => $self->o('lrg'),
-        @common_params
       },
       -rc_name       => 'default',
       -analysis_capacity => 20,
@@ -323,7 +317,6 @@ sub pipeline_analyses {
       -module        => 'Bio::EnsEMBL::VEP::Pipeline::DumpVEP::Dumper::Core',
       -parameters    => {
         species_flags  => $self->o('species_flags'),
-        @common_params
       },
       -rc_name       => 'default',
       -analysis_capacity => 10,
@@ -335,7 +328,6 @@ sub pipeline_analyses {
       -module        => 'Bio::EnsEMBL::VEP::Pipeline::DumpVEP::Dumper::Otherfeatures',
       -parameters    => {
         species_flags  => $self->o('species_flags'),
-        @common_params
       },
       -rc_name       => 'default',
       -analysis_capacity => 10,
@@ -348,7 +340,6 @@ sub pipeline_analyses {
       -parameters    => {
         species_flags  => $self->o('species_flags'),
         convert        => $self->o('convert'),
-        @common_params
       },
       -rc_name       => 'default',
       -analysis_capacity => 10,
@@ -360,7 +351,6 @@ sub pipeline_analyses {
       -module        => 'Bio::EnsEMBL::VEP::Pipeline::DumpVEP::Dumper::Regulation',
       -parameters    => {
         species_flags  => $self->o('species_flags'),
-        @common_params
       },
       -rc_name       => 'default',
       -analysis_capacity => 10,
@@ -372,7 +362,6 @@ sub pipeline_analyses {
       -logic_name    => 'merge_vep',
       -module        => 'Bio::EnsEMBL::VEP::Pipeline::DumpVEP::MergeVEP',
       -parameters    => {
-        @common_params
       },
       -wait_for      => ['dump_vep_core', 'dump_vep_otherfeatures'],
       -analysis_capacity => 20,
@@ -386,7 +375,6 @@ sub pipeline_analyses {
       -module        => 'Bio::EnsEMBL::VEP::Pipeline::DumpVEP::JoinVEP',
       -parameters    => {
         convert => $self->o('convert'),
-        @common_params
       },
       -wait_for      => ['dump_vep_core', 'dump_vep_otherfeatures', 'dump_vep_variation', 'dump_vep_regulation', 'merge_vep'],
       -analysis_capacity => 20,
@@ -401,7 +389,6 @@ sub pipeline_analyses {
       -parameters    => {
         convert => $self->o('convert'),
         lrg     => $self->o('lrg'),
-        @common_params
       },
       -wait_for      => ['join_vep'],
       -analysis_capacity => 50,
@@ -413,7 +400,7 @@ sub pipeline_analyses {
     {
       -logic_name => 'finish_dump',
       -module     => 'Bio::EnsEMBL::VEP::Pipeline::DumpVEP::FinishDump',
-      -parameters => { @common_params },
+      -parameters => { },
       -wait_for   => ['join_vep'],
       -max_retry_count => 0,
     },
@@ -421,7 +408,7 @@ sub pipeline_analyses {
     {
       -logic_name => 'distribute_dumps',
       -module     => 'Bio::EnsEMBL::VEP::Pipeline::DumpVEP::DistributeDumps',
-      -parameters => { @common_params },
+      -parameters => { },
       -wait_for   => ['join_vep'],
       -max_retry_count => 0,
     },

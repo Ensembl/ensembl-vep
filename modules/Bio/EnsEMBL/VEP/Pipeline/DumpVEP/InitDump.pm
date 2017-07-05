@@ -70,7 +70,6 @@ sub run {
     ]
   );
 
-  $self->dataflow_output_id({}, 1);
   $self->dataflow_output_id($self->param('species_jobs'), 2);
   return;
 }

@@ -40,14 +40,39 @@ use File::Spec;
 
 sub run {
   my $self = shift;
-  my $version = $self->required_param('ensembl_release');
-  my $dir = $self->required_param('pipeline_dir').'/dumps';
-
-  foreach my $folder (qw/web production rest/) {
-    make_path("$dir/$folder") if (!-d "$dir/$folder");
+  my $eg = $self->required_param('eg');
+  my $version;
+  my $dir;
+  # For Ensembl Genomes divisions
+  if ($eg)
+  {
+    $version = $self->required_param('eg_version');
+    my $division = $self->param('division') || [];
+    my @division = ( ref($division) eq 'ARRAY' ) ? @$division : ($division);
+    if ( scalar(@division) ) {
+      foreach my $division (@division) {
+        $dir=$self->required_param('pipeline_dir')."/".$division.'/dumps';
+        $self->DistributeProduction($dir);
+        $self->DistributeWeb($dir);
+      }
+    }
+  }
+  # For Ensembl division
+  else {
+    $version = $self->required_param('ensembl_release');
+    $dir = $self->required_param('pipeline_dir').'/dumps';
+    $self->DistributeRest($dir,$version);
+    $self->DistributeProduction($dir);
+    $self->DistributeWeb($dir);
   }
 
-  # rest
+}
+
+
+#Distribute the REST dumps, only for human
+sub DistributeRest{
+  my ($self,$dir,$version) = @_;
+  make_path("$dir/rest") if (!-d "$dir/rest");
   foreach my $assembly (qw/GRCh37 GRCh38/) {
     foreach my $suffix('', qw(_refseq _merged)) {
       my $file = "homo_sapiens$suffix\_vep_$version\_$assembly\_tabixconverted.tar.gz";
@@ -58,32 +83,75 @@ sub run {
       }
     }
   }
+}
 
-  # production web 
-  opendir (DIR, $dir) or die $!;
-  while (my $file = readdir(DIR)) {
-    if ($file =~ /gz$/ && $file !~ /tabix/) {
-      $self->link_file("$dir/$file", "$dir/production/$file");
-      $self->link_file("$dir/$file", "$dir/web/$file");
+#Distribute the Production dumps for the FTP site
+sub DistributeProduction {
+  my ($self,$dir) = @_;
+  make_path("$dir/production") if (!-d "$dir/production");
+  opendir (my $dh, $dir) or die $!;
+  while (my $content = readdir($dh)) {
+    if ($content =~ /collection$/)
+    {
+      make_path("$dir/production/$content") if (!-d "$dir/production/$content");
+      opendir (my $dh_collection, "$dir/$content") or die $!;
+      while (my $file_collection = readdir($dh_collection)) {
+        if ($file_collection =~ /gz$/ && $file_collection !~ /tabix/) {
+          $self->link_file("$dir/$content/$file_collection", "$dir/production/$content/$file_collection");
+        }
+      }
+      $dh_collection->close();
+      $self->compute_checksums("$dir/production/$content/");
+    }
+    elsif ($content =~ /gz$/ && $content !~ /tabix/) {
+      $self->link_file("$dir/$content", "$dir/production/$content");
     }
   }
-  closedir (DIR) or die $!;
+  $dh->close();
+  $self->compute_checksums("$dir/production/");
+}
 
-  opendir (DIR, $dir) or die $!;
-  while (my $file = readdir(DIR)) {
-    if ($file =~ /tabix/) {
-      my $file_no_tabix = $file;
+
+# Distribute the Web dumps for the VEP browser tool.
+# These dumps are tabix-converted (they contain files that require tabix to be installed to access)
+# only species with variant data are tabix-converted
+# you get a big speed increase when looking up co-located variants on the web interface using a tabix-based cache vs not
+# VEP installer does include an attempt to install Bio::DB::HTS which allows use of the converted dumps but it doesnt have a 100% success rate. We are experiencing issues with OSX ATM, for example
+sub DistributeWeb{
+  my ($self,$dir) = @_;
+  make_path("$dir/web") if (!-d "$dir/web");
+  opendir (my $dh, $dir) or die $!;
+  while (my $content = readdir($dh)) {
+    if ($content =~ /collection$/)
+    {
+      make_path("$dir/web/$content") if (!-d "$dir/web/$content");
+      opendir (my $dh_collection, "$dir/$content") or die $!;
+      while (my $file_collection = readdir($dh_collection)) {
+        if ($file_collection =~ /gz$/ && $file_collection !~ /tabix/) {
+          $self->link_file("$dir/$content/$file_collection", "$dir/web/$content/$file_collection");
+        }
+        elsif ($file_collection =~ /tabix/) {
+          my $file_collection_no_tabix = $file_collection;
+          $file_collection_no_tabix =~ s/\_tabixconverted//;
+          $self->link_file("$dir/$content/$file_collection", "$dir/web/$content/$file_collection_no_tabix");
+        }
+      }
+      $dh_collection->close();
+    }
+    elsif ($content =~ /gz$/ && $content !~ /tabix/) {
+      $self->link_file("$dir/$content", "$dir/web/$content");
+    }
+    elsif ($content =~ /tabix/) {
+      my $file_no_tabix = $content;
       $file_no_tabix =~ s/\_tabixconverted//;
-      $self->link_file("$dir/$file", "$dir/web/$file_no_tabix");
+      $self->link_file("$dir/$content", "$dir/web/$file_no_tabix");
     }
   }
-  closedir (DIR) or die $!;
-
-  compute_checksums("$dir/production/");
+  $dh->close();
 }
 
 sub compute_checksums {
-  my $dir = shift;
+  my ($self,$dir) = @_;
   opendir(my $dh, $dir) or die $!;
   my @files = sort {$a cmp $b} readdir($dh);
   closedir($dh) or die $!;

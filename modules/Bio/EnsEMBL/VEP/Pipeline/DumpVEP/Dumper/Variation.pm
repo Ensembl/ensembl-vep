@@ -419,7 +419,7 @@ sub pubmed {
     my %pm;
     my $file = sprintf(
       '%s/pubmed_%s_%s_%s.txt',
-      $self->required_param('pipeline_dir'),
+      $self->required_param('pipeline_dump_dir'),
       $self->required_param('species'),
       $self->required_param('ensembl_release'),
       $self->required_param('assembly')
