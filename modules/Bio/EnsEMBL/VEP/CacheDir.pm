@@ -406,6 +406,12 @@ sub info {
       throw("ERROR: Mismatch in assembly versions from config (".$config_assembly.") and cache info.txt file (".$info->{assembly}.")\n");
     }
 
+    # enable use_transcript_ref
+    if($info->{bam} && !$self->param('use_given_ref')) {
+      $self->status_msg("INFO: BAM-edited cache detected, enabling --use_transcript_ref; use --use_given_ref to override this\n");
+      $self->param('use_transcript_ref', 1);
+    }
+
     ## NOT CURRENTLY BEING USED, COMMENTED OUT AS NO UNIT TEST
     # check if any disabled options are in use
     # these are set in the cache info file

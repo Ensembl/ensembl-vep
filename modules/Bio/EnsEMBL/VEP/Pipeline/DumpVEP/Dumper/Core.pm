@@ -80,14 +80,16 @@ sub run {
 }
 
 sub dump_info {
-  my ($self, $as, $dir) = @_;
+  my ($self, $as, $dir, $extra) = @_;
 
   my $info_file = $dir.'/info.txt_core';
   return if -e $info_file;
 
-  open OUT, ">$info_file";
+  open OUT, ">$info_file" or die "Could not write to info file $info_file\n";
 
   print OUT "$_\t".$self->param($_)."\n" for qw(species assembly sift polyphen);
+
+  print OUT "$_\t".$extra->{$_}."\n" for keys %{$extra || {}};
 
   my $info = $as->info;
   print OUT "source_$_\t".$info->{$_}."\n" for keys %$info;

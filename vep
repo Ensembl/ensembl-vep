@@ -179,6 +179,7 @@ GetOptions(
   # these flags are for use with RefSeq caches
   'bam=s',                   # bam file used to modify transcripts
   'use_transcript_ref',      # extract the reference allele from the transcript (or genome)
+  'use_given_ref',           # override use_transcript_ref setting that may be set from cache info
 
   # custom file stuff
   'custom=s' => ($config->{custom} ||= []),        # specify custom tabixed bgzipped or bigWig file with annotation

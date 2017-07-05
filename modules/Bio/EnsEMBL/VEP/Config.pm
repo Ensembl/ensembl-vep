@@ -342,6 +342,13 @@ our @OPTION_SETS = (
       use_transcript_ref => 1,
     }
   },
+
+  {
+    flags => ['use_given_ref'],
+    set   => {
+      use_transcript_ref => 0,
+    }
+  },
 );
 
 # valid values for certain flags

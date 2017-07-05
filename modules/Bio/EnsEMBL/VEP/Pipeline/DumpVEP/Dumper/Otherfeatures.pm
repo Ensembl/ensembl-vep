@@ -52,11 +52,12 @@ sub run {
   my $config = Bio::EnsEMBL::VEP::Config->new($vep_params);
 
   my $region_size = $self->param('region_size');
+  my $bam = $vep_params->{'bam'} || $self->param('bam');
 
   my $as = Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript->new({
     config => $config,
     cache_region_size => $region_size,
-    bam => $vep_params->{'bam'} || $self->param('bam')
+    bam => $bam
   });
 
   # bam requires synonyms loaded
@@ -72,7 +73,10 @@ sub run {
 
   $self->dump_chrs($as, $cache);
 
-  $self->dump_info($as, $self->get_cache_dir($vep_params));
+  my $extra = {};
+  $extra->{bam} = (split('/', $bam))[-1] if $bam;
+
+  $self->dump_info($as, $self->get_cache_dir($vep_params), $extra);
   
   return;
 }
