@@ -49,7 +49,7 @@ sub param_defaults {
 sub run {
   my $self = shift;
 
-  my $data_dir = $self->param('pipeline_dir').$self->param('dir_suffix');
+  my $data_dir = $self->data_dir;
 
   # do merging
   my $ens_root = $data_dir.'/'.$self->species_suffix;

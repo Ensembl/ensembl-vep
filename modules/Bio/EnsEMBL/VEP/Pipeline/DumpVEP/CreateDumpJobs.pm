@@ -75,6 +75,7 @@ sub fetch_input {
     port
     user
     pass
+    division
   );
 
   $species_hash{type} = $group eq 'otherfeatures' ? 'refseq' : 'core';
@@ -96,17 +97,19 @@ sub fetch_input {
   );
 
   if($self->param('eg')) {
+    my $pipeline_dump_dir = $self->param('pipeline_dir')."/".$species_hash{division};
+    $species_hash{pipeline_dump_dir} = $pipeline_dump_dir;
     my $mca = $dba->get_MetaContainerAdaptor;
 
     if($mca->is_multispecies == 1) {
       my $collection_db = $1 if($mca->dbc->dbname()=~/(.+)\_core/);
       $species_hash{dir_suffix} = "/".$collection_db;
     }
-
     $species_hash{assembly}   = $mca->single_value_by_key('assembly.default');
     $species_hash{db_version} = $mca->schema_version();
   }
   else {
+    $species_hash{pipeline_dump_dir} = $self->param('pipeline_dir');
     $species_hash{db_version} = $self->param('ensembl_release');
   }
 
@@ -181,13 +184,13 @@ sub get_chr_jobs {
 
   # dump synonyms
   if($self->param('group') eq 'core') {
-    make_path($self->param('pipeline_dir').'/synonyms');
+    make_path($species_hash->{pipeline_dump_dir}.'/synonyms');
 
     my $srsa = $dba->get_SeqRegionSynonymAdaptor();
 
     open SYN, sprintf(
       ">%s/synonyms/%s_%s_chr_synonyms.txt",
-      $self->param('pipeline_dir'),
+      $species_hash->{pipeline_dump_dir},
       $species_hash->{species},
       $species_hash->{assembly}
     ) or die "ERROR: Could not write to synonyms file\n";
@@ -270,10 +273,7 @@ sub get_chr_jobs {
 }
 
 sub count_vars {
-  my $self = shift;
-  my $var_db_name = shift;
-  my $species_hash = shift;
-  my $slice = shift;
+  my ($self, $var_db_name, $species_hash, $slice) = @_;
 
   return 0 unless $var_db_name;
 
@@ -303,10 +303,7 @@ sub count_vars {
 }
 
 sub count_regfeats {
-  my $self = shift;
-  my $reg_db_name = shift;
-  my $species_hash = shift;
-  my $slice = shift;
+  my ($self, $reg_db_name, $species_hash, $slice) = @_;
 
   return 0 unless $reg_db_name;
 
@@ -330,10 +327,7 @@ sub count_regfeats {
 }
 
 sub add_to_jobs {
-  my $self = shift;
-  my $hash = shift;
-  my $var_db = shift;
-  my $reg_db = shift;
+  my ($self, $hash, $var_db, $reg_db) = @_;
 
   my @jobs;
 

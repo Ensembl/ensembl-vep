@@ -38,12 +38,12 @@ use base qw(Bio::EnsEMBL::Variation::Pipeline::BaseVariationProcess);
 
 sub data_dir {
   my $self = shift;
-  return $self->param('pipeline_dir').$self->param('dir_suffix'); 
+  return $self->param('pipeline_dump_dir').$self->param('dir_suffix');
 }
 
 sub dump_dir {
   my $self = shift;
-  return $self->param('pipeline_dir').'/dumps'.$self->param('dir_suffix');
+  return $self->param('pipeline_dump_dir').'/dumps'.$self->param('dir_suffix');
 }
 
 sub link_dir_contents {

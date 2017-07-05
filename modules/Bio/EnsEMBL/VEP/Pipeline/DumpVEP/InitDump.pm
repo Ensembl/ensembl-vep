@@ -42,171 +42,92 @@ my $DEBUG = 0;
 
 sub param_defaults {
   return {
-    'refseq' => 0,
-    'include_pattern' => '',
-    'exclude_pattern' => '',
+    'group' => 'core'
   };
 }
 
-sub fetch_input {
+sub run {
   my $self = shift;
+  my $species = $self->required_param('species');
+  my $group = $self->required_param('group');
+
+  my $dba = Bio::EnsEMBL::Registry->get_DBAdaptor($species, $group);
+  my $dbc = $dba->dbc();
+  my $current_db_name = $dbc->dbname();
   
+  #Special case for otherfeatures
+  if ($current_db_name =~ /otherfeatures/) {
+    if ($self->has_refseq($dbc, $current_db_name) <= 0) {
+      $self->warning("$current_db_name doesn't have any RefSeq Transcripts, skipping it");
+      return;
+    }
+  }
   $self->param(
     'species_jobs',
     [
-      map {@{$self->get_all_species_jobs_by_server($_)}}
-      @{$self->required_param('dump_servers')}
+      map {@{$self->generate_species_jobs($_,$group,$dba,$dbc,$current_db_name)}}
+      $species,
     ]
   );
 
-  return;
-}
-
-sub write_output {
-  my $self = shift;
-
-  $self->dataflow_output_id({}, 1);
   $self->dataflow_output_id($self->param('species_jobs'), 2);
-  
   return;
 }
 
-sub get_all_species_jobs_by_server {
-  my $self = shift;
-  my $server = shift;
+sub generate_species_jobs {
+  my ($self, $species, $group, $dba, $dbc, $current_db_name) = @_;
 
-  my $connection_string = sprintf(
-    "DBI:mysql(RaiseError=>1):host=%s;port=%s",
-    $server->{host},
-    $server->{port}
-  );
-  
-  # connect to DB
-  my $dbc = DBI->connect(
-    $connection_string, $server->{user}, $server->{pass}
-  );
+  my @return;
   
   my $version = $self->param('eg_version') || $self->required_param('ensembl_release');
 
-  my $sth = $dbc->prepare(qq{
-    SHOW DATABASES LIKE '%\_core\_$version%'
-  });
-  $sth->execute();
-  
-  my $db;
-  $sth->bind_columns(\$db);
-  
-  my @dbs;
-  push @dbs, $db while $sth->fetch;
-  $sth->finish;
-  
-  # refseq?
-  if($self->param('refseq')) {
-    $sth = $dbc->prepare(qq{
-      SHOW DATABASES LIKE '%\_otherfeatures\_$version%'
-    });
-    $sth->execute();
-    $sth->bind_columns(\$db);
+  my $species_ids = $self->get_species_id_hash($dbc, $current_db_name);
     
-    push @dbs, $db while $sth->fetch;
-    $sth->finish;
-  }
-
-  # remove master and coreexpression
-  @dbs = grep {$_ !~ /master|express/} @dbs;
-
-  # filter on pattern if given
-  my $pattern = exists($server->{include_pattern}) ? $server->{include_pattern} : $self->param('include_pattern');
-  my $exclude = exists($server->{exclude_pattern}) ? $server->{exclude_pattern} : $self->param('exclude_pattern');
-  @dbs = grep {$_ =~ /$pattern/i} @dbs if $pattern;
-  @dbs = grep {$_ !~ /$exclude/i} @dbs if $exclude;
-
-  my @return;
-
-  foreach my $current_db_name (@dbs) {
-
-    next if $self->is_strain($dbc, $current_db_name) && $current_db_name =~ /mus_musculus/;
-
-    my $group = 'core';
+  # do we have a variation DB?
+  my $var_db_name = $self->has_var_db($dbc, $current_db_name);
     
-    # special case otherfeatures
-    if($current_db_name =~ /otherfeatures/) {
+  # do we have a regulation DB?
+  my $reg_db_name = $self->has_reg_build($dbc, $current_db_name);
 
-      # check it has refseq transcripts
-      $sth = $dbc->prepare(qq{
-        SELECT COUNT(*)
-        FROM $current_db_name\.transcript
-        WHERE stable_id LIKE 'NM%'
-        OR source = 'refseq'
-      });
-      $sth->execute;
+  my $species_count = 0;
+    
+  foreach my $species_id(keys %$species_ids) {
+    my $assembly = $self->get_assembly($dbc, $current_db_name, $species_id);
+    next unless $assembly;
       
-      my $count;
-      $sth->bind_columns(\$count);
-      $sth->fetch;
-      $sth->finish();
-      next unless $count;
+    # copy server details
+    my %species_hash;
+      
+    $species_hash{species} = $species_ids->{$species_id};
+    $species_hash{species_id} = $species_id;
+    $species_hash{assembly} = $assembly;
+    $species_hash{dbname} = $current_db_name;
+    $species_hash{group} = $group;
+    $species_hash{is_multispecies} = scalar keys %$species_ids > 1 ? 1 : 0;
+    $species_hash{variation} = $var_db_name;
+    $species_hash{regulation} = $reg_db_name;
+    $species_hash{host} = $dbc->host();
+    $species_hash{port} = $dbc->port();
+    $species_hash{user} = $dbc->username();
+    $species_hash{pass} = $dbc->password();
+    $species_hash{division} = $self->division($dba);
 
-      $group = 'otherfeatures';
+    # do we have SIFT or PolyPhen?
+    if($var_db_name) {
+      my $has_sift_poly = $self->has_sift_poly($dbc, $var_db_name, $species_id);
+      $species_hash{$_} = $has_sift_poly->{$_} for keys %$has_sift_poly;
     }
 
-    my $species_ids = $self->get_species_id_hash($dbc, $current_db_name);
-    
-    # do we have a variation DB?
-    my $var_db_name = $self->has_var_db($dbc, $current_db_name);
-    
-    # do we have a regulation DB?
-    my $reg_db_name = $self->has_reg_build($dbc, $current_db_name);
-
-    my $species_count = 0;
-    
-    foreach my $species_id(keys %$species_ids) {
-      my $assembly = $self->get_assembly($dbc, $current_db_name, $species_id);
-      next unless $assembly;
-      
-      # copy server details
-      my %species_hash = %$server;
-      
-      $species_hash{species} = $species_ids->{$species_id};
-      $species_hash{species_id} = $species_id;
-      $species_hash{assembly} = $assembly;
-      $species_hash{dbname} = $current_db_name;
-      $species_hash{group} = $group;
-      $species_hash{is_multispecies} = scalar keys %$species_ids > 1 ? 1 : 0;
-      $species_hash{variation} = $var_db_name;
-      $species_hash{regulation} = $reg_db_name;
-      
-      # do we have SIFT or PolyPhen?
-      if($var_db_name) {
-        my $has_sift_poly = $self->has_sift_poly($dbc, $var_db_name, $species_id);
-        $species_hash{$_} = $has_sift_poly->{$_} for keys %$has_sift_poly;
-      }
-
-      push @return, \%species_hash;
-    }
-
-    $species_count++;
-    
-    die("ERROR: Problem getting species and assembly names from $current_db_name; check coord_system table\n") unless $species_count;
+    push @return, \%species_hash;
   }
-  
+
+  $species_count++;
+
+  die("ERROR: Problem getting species and assembly names from $current_db_name; check coord_system table\n") unless $species_count;
+
+  $dbc->disconnect_if_idle();
+
   return \@return;
-}
-
-sub is_strain {
-  my ($self, $dbc, $current_db_name) = @_;
-
-  my $sth = $dbc->prepare("select meta_value from ".$current_db_name.".meta where meta_key = 'species.strain';");
-  $sth->execute();
-  my $strain_value;
-  $sth->bind_columns(\$strain_value);
-  $sth->execute();
-  $sth->fetch();
-  $sth->finish();
-
-  return 1 if $strain_value && $strain_value !~ /^reference/;
-
-  return $current_db_name =~ /mus_musculus_.+?_(core|otherfeatures)/;
 }
 
 sub get_species_id_hash {
@@ -240,9 +161,7 @@ sub get_assembly {
 }
 
 sub has_var_db {
-  my $self = shift;
-  my $dbc = shift;
-  my $current_db_name = shift;
+  my ($self, $dbc, $current_db_name) = @_;
 
   my $var_db_name = $current_db_name;
   $var_db_name =~ s/core|otherfeatures/variation/;
@@ -256,11 +175,28 @@ sub has_var_db {
   return $has_var_db ? $var_db_name : undef;
 }
 
+sub has_refseq {
+  my ($self, $dbc, $current_db_name) = @_;
+
+  # check it has refseq transcripts
+    my $sth = $dbc->prepare(qq{
+        SELECT COUNT(*)
+        FROM $current_db_name\.transcript
+        WHERE stable_id LIKE 'NM%'
+        OR source = 'refseq'
+    });
+    $sth->execute;
+    
+    my $count;
+    $sth->bind_columns(\$count);
+    $sth->fetch;
+    $sth->finish();
+
+  return $count ? $count : undef;
+}
+
 sub has_sift_poly {
-  my $self = shift;
-  my $dbc = shift;
-  my $var_db_name = shift;
-  my $species_id = shift;
+  my ($self, $dbc, $var_db_name, $species_id) = @_;
   $species_id ||= 0;
 
   my $sth = $dbc->prepare(qq{
@@ -286,9 +222,7 @@ sub has_sift_poly {
 }
 
 sub has_reg_build {
-  my $self = shift;
-  my $dbc = shift;
-  my $current_db_name = shift;
+  my ($self, $dbc, $current_db_name) = @_;
 
   my $reg_db_name = $current_db_name;
   $reg_db_name =~ s/core|otherfeatures/funcgen/;
@@ -309,6 +243,15 @@ sub has_reg_build {
   }
 
   return $has_reg_build ? $reg_db_name : undef;
+}
+
+sub division {
+    my ($self, $dba) = @_;
+    my ($division) = @{$dba->get_MetaContainer()->list_value_by_key('species.division')};
+    return if ! $division;
+    $division =~ s/^Ensembl//;
+
+return lc($division);
 }
 
 1;

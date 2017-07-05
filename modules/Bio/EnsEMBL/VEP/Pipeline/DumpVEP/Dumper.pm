@@ -54,7 +54,7 @@ sub get_vep_params {
   my $params = {};
 
   # basic params
-  $params->{dir}     = $self->required_param('pipeline_dir').$self->param('dir_suffix');
+  $params->{dir}     = $self->data_dir;
   $params->{debug}   = $self->param('debug');
   $params->{species} = $self->required_param('species');
   $params->{host}    = $self->required_param('host');

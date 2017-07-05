@@ -64,7 +64,7 @@ sub rm_dirs {
   my $species  = $self->required_param('species');
   my $assembly = $self->required_param('assembly');
   my $version  = $self->param('eg_version') || $self->required_param('ensembl_release');
-  my $dir      = $self->required_param('pipeline_dir').$self->param('dir_suffix');
+  my $dir      = $self->data_dir;
 
   rmtree(
     sprintf(
@@ -88,7 +88,7 @@ sub rm_dirs {
   }
 
   # and the same in the dumps/ dir
-  $dir = $self->required_param('pipeline_dir').'/dumps/'.$self->param('dir_suffix');
+  $dir = $self->dump_dir;
   $species_dir = "$dir/$species$type";
   
   if(opendir DIR, $species_dir) {

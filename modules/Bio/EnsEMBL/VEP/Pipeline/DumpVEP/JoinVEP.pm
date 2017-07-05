@@ -257,7 +257,7 @@ sub copy_synonyms {
   $self->link_file(
     sprintf(
       '%s/synonyms/%s_%s_chr_synonyms.txt',
-      $self->param('pipeline_dir'),
+      $self->param('pipeline_dump_dir'),
       $self->param('species'),
       $self->param('assembly')
     ),
