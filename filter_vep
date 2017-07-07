@@ -400,7 +400,7 @@ sub usage {
 # filter_vep #
 #------------#
 
-http://www.ensembl.org/info/docs/variation/vep/vep_script.html#filter
+http://www.ensembl.org/info/docs/tools/vep/script/vep_filter.html
 
 Usage:
 ./filter_vep [arguments]
@@ -441,8 +441,7 @@ Usage:
                           match missense_variant, synonymous_variant etc.
                           Requires database connection; defaults to connecting
                           to ensembldb.ensembl.org. Use --host, --port, --user,
-                          --password, --version as per
-                          variant_effect_predictor.pl to change connection
-                          parameters.
+                          --password, --version as per ./vep to change
+                          connection parameters.
 };
 }

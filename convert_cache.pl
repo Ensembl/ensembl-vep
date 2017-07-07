@@ -576,7 +576,7 @@ sub usage {
 # convert_cache.pl #
 #---------------#
 
-http://www.ensembl.org/info/docs/variation/vep/vep_script.html#convert_cache
+http://www.ensembl.org/info/docs/tools/vep/script/vep_cache.html#convert
 
 Usage:
 perl convert_cache.pl [arguments]
