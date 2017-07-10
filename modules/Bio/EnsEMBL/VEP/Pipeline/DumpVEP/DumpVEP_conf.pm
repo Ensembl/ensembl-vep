@@ -103,9 +103,6 @@ sub default_options {
     # include LRGs in dumps
     lrg => 1,
 
-    # ensembl genomes flag
-    eg => 0,
-
     # don't change this unless you know what you're doing!!!
     region_size => 1e6,
     
@@ -242,7 +239,6 @@ sub pipeline_wide_parameters {  # these parameter values are visible to all anal
         'refseq'     => $self->o('refseq'),
         'ensembl_release' => $self->o('ensembl_release'),
         'eg_version' => $self->o('eg_version'),
-        'eg' => $self->o('eg'),
         'pipeline_dir' => $self->o('pipeline_dir'),
         'debug' => $self->o('debug'),
         'region_size' => $self->o('region_size'),

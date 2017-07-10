@@ -40,32 +40,24 @@ use File::Spec;
 
 sub run {
   my $self = shift;
-  my $eg = $self->required_param('eg');
-  my $version;
+  my $version = $self->param('eg_version') || $self->required_param('ensembl_release');
   my $dir;
-  # For Ensembl Genomes divisions
-  if ($eg)
-  {
-    $version = $self->required_param('eg_version');
-    my $division = $self->param('division') || [];
-    my @division = ( ref($division) eq 'ARRAY' ) ? @$division : ($division);
-    if ( scalar(@division) ) {
-      foreach my $division (@division) {
-        $dir=$self->required_param('pipeline_dir')."/".$division.'/dumps';
-        $self->DistributeProduction($dir);
-        $self->DistributeWeb($dir);
-      }
+  my $division = $self->param('division') || [];
+  my @division = ( ref($division) eq 'ARRAY' ) ? @$division : ($division);
+  # If division param is defined.
+  if ( scalar(@division) ) {
+    foreach my $division (@division) {
+      $dir=$self->required_param('pipeline_dir')."/".$division.'/dumps';
+      $self->DistributeProduction($dir);
+      $self->DistributeWeb($dir);
     }
   }
-  # For Ensembl division
   else {
-    $version = $self->required_param('ensembl_release');
     $dir = $self->required_param('pipeline_dir').'/dumps';
     $self->DistributeRest($dir,$version);
     $self->DistributeProduction($dir);
     $self->DistributeWeb($dir);
   }
-
 }
 
 
