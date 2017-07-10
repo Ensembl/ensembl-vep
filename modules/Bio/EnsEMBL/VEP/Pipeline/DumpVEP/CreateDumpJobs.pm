@@ -96,22 +96,23 @@ sub fetch_input {
     -species_id => $species_hash{species_id},
   );
 
-  if($self->param('eg')) {
+  if($species_hash{division}) {
     my $pipeline_dump_dir = $self->param('pipeline_dir')."/".$species_hash{division};
     $species_hash{pipeline_dump_dir} = $pipeline_dump_dir;
-    my $mca = $dba->get_MetaContainerAdaptor;
-
-    if($mca->is_multispecies == 1) {
-      my $collection_db = $1 if($mca->dbc->dbname()=~/(.+)\_core/);
-      $species_hash{dir_suffix} = "/".$collection_db;
-    }
-    $species_hash{assembly}   = $mca->single_value_by_key('assembly.default');
-    $species_hash{db_version} = $mca->schema_version();
   }
   else {
     $species_hash{pipeline_dump_dir} = $self->param('pipeline_dir');
-    $species_hash{db_version} = $self->param('ensembl_release');
   }
+
+  #Processing Collections
+  my $mca = $dba->get_MetaContainerAdaptor;
+
+  if($mca->is_multispecies == 1) {
+    my $collection_db = $1 if($mca->dbc->dbname()=~/(.+)\_core/);
+    $species_hash{dir_suffix} = "/".$collection_db;
+    $species_hash{assembly}   = $mca->single_value_by_key('assembly.default');
+  }
+  $species_hash{db_version} = $mca->schema_version();
 
   # create join jobs
   my @join_jobs = (\%species_hash);
