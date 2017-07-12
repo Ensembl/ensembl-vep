@@ -387,6 +387,8 @@ sub _get_parent_child_structure {
   }
 
   # now deal with orphans
+  my %parents_not_found = ();
+
   foreach my $record(@orphans) {
     my $parent_id = $self->_record_get_parent_id($record);
 
@@ -394,9 +396,14 @@ sub _get_parent_child_structure {
       push @{$top_level->{_children}}, $record;
     }
     else {
-      throw("ERROR: Parent record for the following not found:\n".Dumper($record)."\n");
+      $parents_not_found{$parent_id} = 1;
     }
   }
+
+  $self->warning_msg(
+    "WARNING: Parent entries with the following IDs were not found or skipped due to invalid types: ".
+    join(", ", keys %parents_not_found)
+  ) if scalar keys %parents_not_found;
 
   # now prune the structure so we're left with only true top level records
   delete $top_level{$_} for grep {$self->_record_get_parent_id($top_level{$_})} keys %top_level;
@@ -436,7 +443,7 @@ sub _create_transcript {
 
   my $biotype = $self->_record_get_biotype($tr_record, $gene_record);
   unless($biotype) {
-    warn("WARNING: Unable to determine biotype of $id");
+    $self->warning_msg("WARNING: Unable to determine biotype of $id");
     return;  
   }
 
@@ -530,7 +537,7 @@ sub _create_transcript {
     # sometimes this can fail if the coordinates overlap
     eval {$tr->add_Exon($exon, $exon_record->{attributes}->{rank});};
     if($@) {
-      warn("WARNING: Failed to add exon to transcript ".$tr->stable_id."\n$@");
+      $self->warning_msg("WARNING: Failed to add exon to transcript ".$tr->stable_id."\n$@");
       return;
     }
   }

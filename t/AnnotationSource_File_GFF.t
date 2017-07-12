@@ -188,26 +188,25 @@ SKIP: {
   ######################
 
   # parent/child structure broken
-  throws_ok {
-    $as->_get_parent_child_structure([
-      {
-        md5 => 1,
-        attributes => { parent => 'foo', id => 'test1' }
-      }
-    ])
-  } qr/Parent record for the following not found/, '_get_parent_child_structure - parent not found';
-
-  # invalid child type
-  $records = $as->_get_records_by_coords(21, 25585733, 25585733);
-  $records->[0]->{type} = 'foo';
-  throws_ok { map {$as->lazy_load_transcript($_)} @{$as->_create_transcripts($records)} } qr/unexpected type of child record/, '_create_transcripts - unexpected type of child';
-
   no warnings 'once';
   open(SAVE, ">&STDERR") or die "Can't save STDERR\n"; 
 
   my $tmp;
   close STDERR;
   open STDERR, '>', \$tmp;
+
+  $as->_get_parent_child_structure([
+    {
+      md5 => 1,
+      attributes => { parent => 'foo', id => 'test1' }
+    }
+  ]);
+  ok($tmp =~ /Parent entries with the following IDs were not found/, '_get_parent_child_structure - parent not found');
+
+  # invalid child type
+  $records = $as->_get_records_by_coords(21, 25585733, 25585733);
+  $records->[0]->{type} = 'foo';
+  throws_ok { map {$as->lazy_load_transcript($_)} @{$as->_create_transcripts($records)} } qr/unexpected type of child record/, '_create_transcripts - unexpected type of child';
 
   $records = $as->_get_records_by_coords(21, 25585733, 25585733);
   delete $records->[3]->{attributes}->{biotype};
