@@ -103,6 +103,7 @@ sub new {
     uniprot
     domains
     use_transcript_ref
+    no_prefetch
   )]);
 
   if($self->param('nearest')) {
@@ -288,7 +289,7 @@ sub lazy_load_transcript {
   my ($self, $tr) = @_;
   
   unless($tr->{_vep_lazy_loaded}) {
-    $self->prefetch_transcript_data($tr);
+    $self->prefetch_transcript_data($tr) unless $self->{no_prefetch};
     $tr->{_vep_lazy_loaded} = 1;
   }
 

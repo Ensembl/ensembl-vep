@@ -1,0 +1,235 @@
+#!/usr/bin/env perl
+# Copyright [2016-2017] EMBL-European Bioinformatics Institute
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+# http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+use strict;
+use warnings;
+
+use Getopt::Long;
+use FindBin qw($RealBin);
+use lib $RealBin;
+use lib $RealBin.'/modules';
+use Bio::EnsEMBL::VEP::Runner;
+use Bio::EnsEMBL::VEP::Utils qw(get_version_string);
+
+my $config = {
+  hgvs => 1,
+  hgvsg => 1,
+  check_existing => 1,
+  failed => 1,
+  database => 1,
+  lrg => 1,
+  no_prefetch => 1,
+  ambiguous_hgvs => 1,
+  no_stats => 1,
+  json => 1,
+};
+
+my $arg_count = scalar @ARGV;
+my @argv_copy = @ARGV;
+
+GetOptions(
+  $config,
+  'help',                    # displays help message
+  
+  # input options,
+  'config=s',                # config file name
+  'input_file|i=s',          # input file name
+  'input_data|data=s',       # input data
+  'format=s',                # input file format
+  'output_format=s',         # output file format
+  'delimiter=s',             # delimiter between fields in input
+  
+  # DB options
+  'species|s=s',             # species e.g. human, homo_sapiens
+  'registry=s',              # registry file
+  'host=s',                  # database host
+  'port=s',                  # database port
+  'user|u=s',                # database user name
+  'password=s',              # database password
+  'db_version=i',            # Ensembl database version to use e.g. 62
+  'assembly|a=s',            # assembly version to use
+  'genomes',                 # automatically sets DB params for e!Genomes
+  'refseq',                  # use otherfeatures RefSeq DB instead of Ensembl
+  'merged',                  # use merged cache
+  'all_refseq',              # report consequences on all transcripts in RefSeq cache, includes CCDS, EST etc
+  'gencode_basic',           # limit to using just GenCode basic transcript set
+  'is_multispecies=i',       # '1' for a multispecies database (e.g protists_euglenozoa1_collection_core_29_82_1)
+
+  # runtime options
+  'transcript_filter=s' => ($config->{transcript_filter} ||= []), # filter transcripts
+  'exclude_predicted',
+  'minimal',                 # convert input alleles to minimal representation
+  'pick',                    # used defined criteria to return most severe line
+  'pick_allele',             # choose one con per allele
+  'per_gene',                # choose one con per gene
+  'pick_allele_gene',        # choose one con per gene, allele
+  'flag_pick',               # flag one con per line
+  'flag_pick_allele',        # flag one con per allele
+  'flag_pick_allele_gene',   # flag one con per gene, allele
+  'pick_order=s',            # define the order of categories used by the --*pick* flags
+  'buffer_size=i',           # number of variations to read in before analysis
+  'failed=i',                # include failed variations when finding existing
+  
+  # verbosity options
+  'verbose|v',               # print out a bit more info while running
+  'quiet',                   # print nothing to STDOUT (unless using -o stdout)
+  'no_progress',             # don't display progress bars
+  
+  # output options
+  'output_file|o=s',         # output file name
+  'warning_file=s',          # file to write warnings to
+  'force_overwrite',         # force overwrite of output file if already exists
+  'shift_hgvs=i',            # disable/enable 3-prime shifting of HGVS indels to comply with standard
+  'lrg',                     # enable LRG-based features
+  'fields=s',                # define your own output fields
+  'synonyms=s',              # file of chromosome synonyms
+
+  # these flags are for use with RefSeq caches
+  'bam=s',                   # bam file used to modify transcripts
+  'use_transcript_ref',      # extract the reference allele from the transcript (or genome)
+  'use_given_ref',           # override use_transcript_ref setting that may be set from cache info
+
+  # debug
+  'debug',                   # print out debug info
+) or die "ERROR: Failed to parse command-line flags\n";
+
+&usage && exit(0) if (!$arg_count) || $config->{help};
+
+my $runner = Bio::EnsEMBL::VEP::Runner->new($config);
+$_->{cache_region_size} = 1 for @{$runner->get_all_AnnotationSources};
+
+my %results;
+my @order;
+
+my $want_keys = {
+  hgvsc => 1,
+  hgvsg => 1,
+  hgvsp => 1,
+  id => 1,
+};
+
+while(my $line = $runner->next_output_line(1)) {
+  delete($line->{id});
+  my $line_id = $line->{input};
+  add_to_array(\@order, $line_id);
+  find_in_ref($line, $want_keys, $results{$line_id} ||= {input => $line_id});
+}
+
+$runner->finish();
+
+$config->{refseq} = 1;
+$config->{check_existing} = 0;
+$runner = Bio::EnsEMBL::VEP::Runner->new($config);
+
+while(my $line = $runner->next_output_line(1)) {
+  delete($line->{id});
+  my $line_id = $line->{input};
+  add_to_array(\@order, $line_id);
+  find_in_ref($line, $want_keys, $results{$line_id} ||= {input => $line_id});
+}
+
+$runner->finish();
+
+use Data::Dumper;
+$Data::Dumper::Maxdepth = 3;
+$Data::Dumper::Indent = 1;
+print STDERR Dumper [map {$results{$_}} @order];
+
+sub find_in_ref {
+  my ($ref, $want_keys, $return, $this_key) = @_;
+
+  $return ||= {};
+
+  if(ref($ref) eq 'HASH') {
+    foreach my $key(keys %$ref) {
+
+  $DB::single = 1 if $key eq 'id';
+      if(ref($ref->{$key})) {
+        find_in_ref($ref->{$key}, $want_keys, $return, $key);
+      }
+      else {
+        add_to_array($return->{$key} ||= [], $ref->{$key}) if $want_keys->{$key};
+      }
+    }
+  }
+  elsif(ref($ref) eq 'ARRAY') {
+    foreach my $el(@$ref) {
+      if(ref($el)) {
+        find_in_ref($el, $want_keys, $return);
+      }
+      else {
+        add_to_array($return->{$this_key} ||= [], $el) if $this_key && $want_keys->{$this_key};
+      }
+    } 
+  }
+  elsif($this_key && $want_keys->{$this_key}) {
+    add_to_array($return->{$this_key} ||= [], $ref);
+  }
+
+  return $return;
+}
+
+sub add_to_array {
+  my ($results, $new) = @_;
+  my %seen = map {$_ => 1} @$results;
+  push @$results, $new unless $seen{$new};
+}
+
+
+
+# outputs usage message
+sub usage {
+
+  my $versions = get_version_string($RealBin.'/.version');
+
+  my $usage =<<END;
+#----------------------------------#
+# ENSEMBL VARIANT EFFECT PREDICTOR #
+#----------------------------------#
+
+Versions:
+  $versions
+
+Help: dev\@ensembl.org , helpdesk\@ensembl.org
+Twitter: \@ensembl , \@EnsemblWill
+
+http://www.ensembl.org/info/docs/tools/vep/script/index.html
+
+Usage:
+./vep [--cache|--offline|--database] [arguments]
+
+Basic options
+=============
+
+--help                 Display this message and quit
+
+-i | --input_file      Input file
+-o | --output_file     Output file
+--force_overwrite      Force overwriting of output file
+--species [species]    Species to use [default: "human"]
+                       
+--everything           Shortcut switch to turn on commonly used options. See web
+                       documentation for details [default: off]                       
+--fork [num_forks]     Use forking to improve script runtime
+
+For full option documentation see:
+http://www.ensembl.org/info/docs/tools/vep/script/vep_options.html
+
+END
+
+  print $usage;
+}
+
+
+1;

@@ -101,6 +101,8 @@ sub new {
   # requires db connection
   throw("ERROR: Cannot use HGVS format in offline mode") if $self->param('offline');
 
+  $self->add_shortcuts(['ambiguous_hgvs']);
+
   return $self;
 }
 
@@ -157,28 +159,31 @@ sub create_VariationFeatures {
   my $sa  = $self->get_adaptor($core_group, 'Slice');
   my $ta  = $self->get_adaptor($core_group, 'Transcript');
 
-  my $vf;
+  my $vfs;
 
   # not all hgvs notations are supported yet, so we have to wrap it in an eval
-  eval { $vf = $vfa->fetch_by_hgvs_notation($hgvs, $sa, $ta) };
+  eval { $vfs = $vfa->fetch_by_hgvs_notation($hgvs, $sa, $ta, $self->{ambiguous_hgvs}) };
 
-  if(!defined($vf) || (defined $@ && length($@) > 1)) {
+  if(!defined($vfs) || !scalar(@$vfs) || (defined $@ && length($@) > 1)) {
     $self->warning_msg("WARNING: Unable to parse HGVS notation \'$hgvs\'\n$@");
     return $self->create_VariationFeatures;
   }
 
-  # transfer to whole chromosome slice
-  $vf = $vf->transfer($vf->slice->seq_region_Slice);
+  foreach my $vf(@$vfs) {
 
-  # name it after the HGVS
-  $vf->{variation_name} = $hgvs;
+    # transfer to whole chromosome slice
+    $vf = $vf->transfer($vf->slice->seq_region_Slice);
 
-  # add chr attrib
-  $vf->{chr} = $vf->slice->seq_region_name;
+    # name it after the HGVS
+    $vf->{variation_name} = $hgvs;
 
-  $vf->{_line} = [$hgvs];
+    # add chr attrib
+    $vf->{chr} = $vf->slice->seq_region_name;
 
-  return $self->post_process_vfs([$vf]);
+    $vf->{_line} = [$hgvs];
+  }
+
+  return $self->post_process_vfs($vfs);
 }
 
 1;
