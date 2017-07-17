@@ -193,6 +193,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'ccds' => undef,
   'hgvs' => undef,
   'hgvsg' => undef,
+  'hgvsg_use_accession' => undef,
   'merged' => undef,
   'af_1kg' => undef,
   'tsl' => undef,
