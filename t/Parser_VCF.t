@@ -78,6 +78,20 @@ is_deeply($vf, bless( {
 
 is(ref($p->next), 'Bio::EnsEMBL::Variation::VariationFeature', 'next again');
 
+# check not shorting out on non-variant lines
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $cfg,
+  file => $test_cfg->create_input_file([
+    [qw(21 25587759 test1 C A . . .)],
+    [qw(21 25587760 test2 C . . . .)],
+    [qw(21 25587761 test3 C . . . .)],
+    [qw(21 25587762 test4 C A . . .)]
+  ]),
+  valid_chromosomes => [21]
+});
+
+is($p->next->variation_name, 'test1', 'no shorting out 1');
+is($p->next->variation_name, 'test4', 'no shorting out 2');
 
 
 ## FORMAT TESTS
