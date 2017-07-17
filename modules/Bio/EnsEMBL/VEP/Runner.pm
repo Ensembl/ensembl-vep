@@ -74,6 +74,7 @@ use Storable qw(freeze thaw);
 use IO::Socket;
 use IO::Select;
 use FileHandle;
+use Scalar::Util qw(openhandle);
 
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
@@ -169,6 +170,10 @@ sub finish {
   $self->dump_stats unless $self->param('no_stats');
 
   revert_fasta() if $self->fasta_db;
+
+  if(my $warning_fh = $self->config->{warning_fh}) {
+    close($warning_fh) if openhandle($warning_fh);
+  }
 }
 
 
@@ -223,9 +228,7 @@ sub run_rest {
   my $self = shift;
   my $input = shift;
 
-  $self->{_warning_string} = '';
-  open WARNINGS, '>', \$self->{_warning_string};
-  $self->config->{warning_fh} = *WARNINGS;
+  $self->internalise_warnings();
 
   $self->param('input_data', $input);
   $self->param('output_format', 'json');
@@ -244,6 +247,29 @@ sub run_rest {
   close WARNINGS;
 
   return \@return;
+}
+
+
+=head2 internalise_warnings
+
+  Example    : $runner->internalise_warnings();
+               $runner->run($dodgy_input);
+               $warnings = $runner->warnings();
+  Description: Instead of printing warnings/errors to STDERR (or file
+               if using --warning_file), store internally. Warnings
+               can then be retrieved using warnings();
+  Returntype : none
+  Exceptions : none
+  Caller     : run_rest()
+  Status     : Stable
+
+=cut
+
+sub internalise_warnings {
+  my $self = shift;
+  $self->{_warning_string} = '';
+  open WARNINGS, '>', \$self->{_warning_string};
+  $self->config->{warning_fh} = *WARNINGS;
 }
 
 
