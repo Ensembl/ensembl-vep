@@ -138,6 +138,7 @@ GetOptions(
   'hgvsg',                   # add HGVS g. also
   'hgvsg_use_accession',     # force HGVSg to return on chromosome accession instead of input chr name
   'shift_hgvs=i',            # disable/enable 3-prime shifting of HGVS indels to comply with standard
+  'ambiguous_hgvs',          # allow input HGVSp. to resolve to many input variants
   'sift=s',                  # SIFT predictions
   'polyphen=s',              # PolyPhen predictions
   'humdiv',                  # use humDiv instead of humVar for PolyPhen

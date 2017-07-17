@@ -53,7 +53,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg && !$@;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 16 unless $can_use_db;
+  skip 'No local database configured', 23 unless $can_use_db;
 
   my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens');
   
@@ -130,6 +130,24 @@ SKIP: {
   delete($vf->{$_}) for qw(adaptor variation slice variation_name _line);
   is_deeply($vf, $expected, 'protein');
 
+  # multiple
+  my @vfs;
+  $p = Bio::EnsEMBL::VEP::Parser::HGVS->new({
+    config => $cfg,
+    file => $test_cfg->create_input_file('ENSP00000284967.6:p.Glu2Asp'),
+    valid_chromosomes => [21],
+  });
+  $p->{ambiguous_hgvs} = 1;
+
+  while($vf = $p->next) {
+    push @vfs, $vf;
+  }
+  is_deeply(
+    [sort map {$_->{allele_string}} @vfs],
+    ['G/C', 'G/T'],
+    'protein - multiple'
+  );
+
   # capture warning
   no warnings 'once';
   open(SAVE, ">&STDERR") or die "Can't save STDERR\n"; 
@@ -154,20 +172,22 @@ SKIP: {
   is(ref($vf), 'Bio::EnsEMBL::Variation::VariationFeature', 'skip past invalid HGVS type');
   ok($tmp =~ /Unable to parse HGVS notation/, 'invalid HGVS type warning msg');
 
+  $tmp = '';
+  $vf = Bio::EnsEMBL::VEP::Parser::HGVS->new({
+    config => $cfg,
+    file => $test_cfg->create_input_file('ENSP00000284967.6:p.Glu2Asp'),
+    valid_chromosomes => [21],
+  })->next();
+  is($vf, undef, 'ambiguous protein without ambiguous_hgvs');
+  ok($tmp =~ /Could not uniquely determine nucleotide change/, 'ambiguous protein without ambiguous_hgvs msg');
+
   open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
 
   ## REFSEQ
   #########
 
-  $cfg = Bio::EnsEMBL::VEP::Config->new({
-    %$db_cfg,
-    database => 1,
-    offline => 0,
-    species => 'homo_vepiens',
-    refseq => 1,
-  });
-
+  # should fetch RefSeq OK by switching core adaptor type automatically
   $vf = Bio::EnsEMBL::VEP::Parser::HGVS->new({
     config => $cfg,
     file => $test_cfg->create_input_file('NM_017446.3:c.991G>A'),
@@ -185,6 +205,33 @@ SKIP: {
 
   delete($vf->{$_}) for qw(adaptor variation slice variation_name _line);
   is_deeply($vf, $expected, 'refseq protein');
+
+
+  # now try with refseq db as primary
+  $cfg = Bio::EnsEMBL::VEP::Config->new({
+    %$db_cfg,
+    database => 1,
+    offline => 0,
+    species => 'homo_vepiens',
+    refseq => 1,
+  });
+
+  $vf = Bio::EnsEMBL::VEP::Parser::HGVS->new({
+    config => $cfg,
+    file => $test_cfg->create_input_file('NM_017446.3:c.991G>A'),
+    valid_chromosomes => [21],
+  })->next();
+
+  delete($vf->{$_}) for qw(adaptor variation slice variation_name _line);
+  is_deeply($vf, $expected, 'refseq primary - refseq coding');
+
+  $vf = Bio::EnsEMBL::VEP::Parser::HGVS->new({
+    config => $cfg,
+    file => $test_cfg->create_input_file('ENST00000352957.8:c.991G>A'),
+    valid_chromosomes => [21],
+  })->next();
+  delete($vf->{$_}) for qw(adaptor variation slice variation_name _line);
+  is_deeply($vf, $expected, 'refseq primary - ENST coding');
 
 
 

@@ -20,19 +20,22 @@ use FindBin qw($RealBin);
 use lib $RealBin;
 use lib $RealBin.'/modules';
 use Bio::EnsEMBL::VEP::Runner;
-use Bio::EnsEMBL::VEP::Utils qw(get_version_string);
+use Bio::EnsEMBL::VEP::Utils qw(get_version_string find_in_ref merge_arrays);
 
 my $config = {
+  database => 1,
+  merged => 1,
+  lrg => 1,
   hgvs => 1,
   hgvsg => 1,
   check_existing => 1,
   failed => 1,
-  database => 1,
-  lrg => 1,
   no_prefetch => 1,
   ambiguous_hgvs => 1,
+  hgvsg_use_accession => 1,
   no_stats => 1,
   json => 1,
+  quiet => 1,
 };
 
 my $arg_count = scalar @ARGV;
@@ -106,84 +109,43 @@ GetOptions(
 
 &usage && exit(0) if (!$arg_count) || $config->{help};
 
-my $runner = Bio::EnsEMBL::VEP::Runner->new($config);
-$_->{cache_region_size} = 1 for @{$runner->get_all_AnnotationSources};
+main($config);
 
-my %results;
-my @order;
+sub main {
+  my $config = shift;
 
-my $want_keys = {
-  hgvsc => 1,
-  hgvsg => 1,
-  hgvsp => 1,
-  id => 1,
-};
+  my (%results, @order);
 
-while(my $line = $runner->next_output_line(1)) {
-  delete($line->{id});
-  my $line_id = $line->{input};
-  add_to_array(\@order, $line_id);
-  find_in_ref($line, $want_keys, $results{$line_id} ||= {input => $line_id});
+  # use default transcript set (Ensembl)
+  my $runner = Bio::EnsEMBL::VEP::Runner->new($config);
+  $_->{cache_region_size} = 1 for @{$runner->get_all_AnnotationSources};
+  $runner->internalise_warnings();
+  get_data_from_runner($runner, \%results, \@order);
+
+  use Data::Dumper;
+  $Data::Dumper::Maxdepth = 3;
+  $Data::Dumper::Indent = 1;
+  print STDERR Dumper [map {$results{$_}} @order];
 }
 
-$runner->finish();
+sub get_data_from_runner {
+  my ($runner, $results, $order) = @_;
 
-$config->{refseq} = 1;
-$config->{check_existing} = 0;
-$runner = Bio::EnsEMBL::VEP::Runner->new($config);
+  my $want_keys = {
+    hgvsc => 1,
+    hgvsg => 1,
+    hgvsp => 1,
+    id => 1,
+  };
 
-while(my $line = $runner->next_output_line(1)) {
-  delete($line->{id});
-  my $line_id = $line->{input};
-  add_to_array(\@order, $line_id);
-  find_in_ref($line, $want_keys, $results{$line_id} ||= {input => $line_id});
-}
-
-$runner->finish();
-
-use Data::Dumper;
-$Data::Dumper::Maxdepth = 3;
-$Data::Dumper::Indent = 1;
-print STDERR Dumper [map {$results{$_}} @order];
-
-sub find_in_ref {
-  my ($ref, $want_keys, $return, $this_key) = @_;
-
-  $return ||= {};
-
-  if(ref($ref) eq 'HASH') {
-    foreach my $key(keys %$ref) {
-
-  $DB::single = 1 if $key eq 'id';
-      if(ref($ref->{$key})) {
-        find_in_ref($ref->{$key}, $want_keys, $return, $key);
-      }
-      else {
-        add_to_array($return->{$key} ||= [], $ref->{$key}) if $want_keys->{$key};
-      }
-    }
-  }
-  elsif(ref($ref) eq 'ARRAY') {
-    foreach my $el(@$ref) {
-      if(ref($el)) {
-        find_in_ref($el, $want_keys, $return);
-      }
-      else {
-        add_to_array($return->{$this_key} ||= [], $el) if $this_key && $want_keys->{$this_key};
-      }
-    } 
-  }
-  elsif($this_key && $want_keys->{$this_key}) {
-    add_to_array($return->{$this_key} ||= [], $ref);
+  while(my $line = $runner->next_output_line(1)) {
+    delete($line->{id});
+    my $line_id = $line->{input};
+    merge_arrays($order, [$line_id]);
+    find_in_ref($line, $want_keys, $results->{$line_id} ||= {input => $line_id});
   }
 
-  return $return;
-}
-
-sub add_to_array {
-  my ($results, $new) = @_;
-  my %seen = map {$_ => 1} @$results;
-  push @$results, $new unless $seen{$new};
+  $runner->finish();
 }
 
 
@@ -194,37 +156,26 @@ sub usage {
   my $versions = get_version_string($RealBin.'/.version');
 
   my $usage =<<END;
-#----------------------------------#
-# ENSEMBL VARIANT EFFECT PREDICTOR #
-#----------------------------------#
+#---------------#
+# ID TRANSLATOR #
+#---------------#
 
 Versions:
   $versions
 
 Help: dev\@ensembl.org , helpdesk\@ensembl.org
-Twitter: \@ensembl , \@EnsemblWill
 
-http://www.ensembl.org/info/docs/tools/vep/script/index.html
-
-Usage:
-./vep [--cache|--offline|--database] [arguments]
+Example usage:
+./id_translator --input_data "rs699"
 
 Basic options
 =============
 
 --help                 Display this message and quit
 
--i | --input_file      Input file
--o | --output_file     Output file
---force_overwrite      Force overwriting of output file
+--input_data | --data  Input as string
+--input_file | -i      Input file
 --species [species]    Species to use [default: "human"]
-                       
---everything           Shortcut switch to turn on commonly used options. See web
-                       documentation for details [default: off]                       
---fork [num_forks]     Use forking to improve script runtime
-
-For full option documentation see:
-http://www.ensembl.org/info/docs/tools/vep/script/vep_options.html
 
 END
 

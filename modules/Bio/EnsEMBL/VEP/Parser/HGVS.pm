@@ -153,19 +153,34 @@ sub create_VariationFeatures {
   # remove whitespace
   $hgvs =~ s/\s+//g;
 
-  my $core_group = $self->param('core_type');
+  my $param_core_group = $self->param('core_type');
+  my @core_groups = sort {($b eq $param_core_group) cmp ($a eq $param_core_group)} qw(core otherfeatures);
   
   my $vfa = $self->get_adaptor('variation', 'VariationFeature');
-  my $sa  = $self->get_adaptor($core_group, 'Slice');
-  my $ta  = $self->get_adaptor($core_group, 'Transcript');
+  my $vfs = [];
+  my $errors = '';
 
-  my $vfs;
+  foreach my $core_group(@core_groups) {
+    my $sa  = $self->get_adaptor($core_group, 'Slice');
+    my $ta  = $self->get_adaptor($core_group, 'Transcript');
 
-  # not all hgvs notations are supported yet, so we have to wrap it in an eval
-  eval { $vfs = $vfa->fetch_by_hgvs_notation($hgvs, $sa, $ta, $self->{ambiguous_hgvs}) };
+    # not all hgvs notations are supported yet, so we have to wrap it in an eval
+    eval {
+      if($self->{ambiguous_hgvs}) {
+        $vfs = $vfa->fetch_all_possible_by_hgvs_notation($hgvs, $sa, $ta);
+      }
+      else {
+        push @$vfs, $vfa->fetch_by_hgvs_notation($hgvs, $sa, $ta);
+      }
+    };
 
-  if(!defined($vfs) || !scalar(@$vfs) || (defined $@ && length($@) > 1)) {
-    $self->warning_msg("WARNING: Unable to parse HGVS notation \'$hgvs\'\n$@");
+    $errors .= $@ if $@ && length($@) > 1;
+
+    last if @$vfs;
+  }
+
+  unless(@$vfs) {
+    $self->warning_msg("WARNING: Unable to parse HGVS notation \'$hgvs\'\n$errors");
     return $self->create_VariationFeatures;
   }
 
