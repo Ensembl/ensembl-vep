@@ -95,6 +95,7 @@ sub new {
     assembly
     gencode_basic
     all_refseq
+    merged
     sift
     polyphen
     everything
@@ -253,6 +254,9 @@ sub get_features_by_regions_uncached {
         $tr->{_gene_stable_id} = $gene_stable_id;
         $tr->{_gene} = $gene;
         $self->prefetch_gene_ids($tr);
+
+        # flag transcript source if using "merged" (ie both core and otherfeatures DBs)
+        $tr->{_source_cache} = $self->{core_type} eq 'otherfeatures' ? 'RefSeq' : 'Ensembl' if $self->{merged};
 
         # indicate if canonical
         $tr->{is_canonical} = 1 if defined $canonical_tr_id and $tr->dbID eq $canonical_tr_id;

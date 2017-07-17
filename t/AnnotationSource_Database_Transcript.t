@@ -46,7 +46,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg && !$@;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 82 unless $can_use_db;
+  skip 'No local database configured', 83 unless $can_use_db;
 
   my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens') if $can_use_db;
 
@@ -268,6 +268,12 @@ SKIP: {
   is(ref($features), 'ARRAY', 'get_features_by_regions_cached ref 1');
   is(ref($features->[0]), 'Bio::EnsEMBL::Transcript', 'get_features_by_regions_cached ref 2');
   is($features->[0]->stable_id, 'ENST00000456917', 'get_features_by_regions_cached stable_id');
+
+  # test merged flag setting transcript source
+  $as->{merged} = 1;
+  $features = $as->get_features_by_regions_uncached([[21, 511]]);
+  is($features->[0]->{_source_cache}, 'Ensembl', 'get_features_by_regions_uncached - merged sets _source_cache');
+  $as->{merged} = undef;
 
   $as->clean_cache();
   is_deeply($as->cache, {}, 'clean_cache');

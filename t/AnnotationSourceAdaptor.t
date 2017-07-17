@@ -257,6 +257,8 @@ SKIP: {
       'filter' => [],
       'bam' => undef,
       'use_transcript_ref' => undef,
+      'no_prefetch' => undef,
+      'merged' => undef,
       'info' => {
         'genebuild' => '2014-07',
         'gencode' => 'GENCODE 24',

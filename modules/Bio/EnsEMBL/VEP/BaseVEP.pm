@@ -368,7 +368,7 @@ sub get_slice {
   if(!exists($cache->{$chr})) {
     my $slice;
 
-    if(my $sa = $self->get_adaptor($self->param('core_type'), 'Slice')) {
+    if(my $sa = $self->get_adaptor(($self->{core_type} || $self->param('core_type')), 'Slice')) {
       $slice = $sa->fetch_by_region(undef, $chr);
     }
 

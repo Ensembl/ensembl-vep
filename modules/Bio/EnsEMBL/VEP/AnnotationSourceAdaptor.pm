@@ -144,11 +144,28 @@ sub get_all_from_database {
   unless($self->param('cache') || ($self->param('custom') && !$self->param('database'))) {
     my $module = $self->module_prefix.'::AnnotationSource::Database::Transcript';
     eval "require $module";
-    push @as, $module->new({
-      config => $self->config,
-      filter => $self->param('transcript_filter'),
-      bam    => $self->param('bam'),
-    }) if $self->param('database');
+
+    if($self->param('database')) {
+      push @as, $module->new({
+        config => $self->config,
+        filter => $self->param('transcript_filter'),
+        bam    => $self->param('bam'),
+      });
+
+      # special case merged
+      if($self->param('merged')) {
+        my $core_type_bak = $self->param('core_type');
+        $self->param('core_type', 'otherfeatures');
+
+        push @as, $module->new({
+          config => $self->config,
+          filter => $self->param('transcript_filter'),
+          bam    => $self->param('bam'),
+        });
+
+        $self->param('core_type', $core_type_bak);
+      }
+    }
 
     push @as, Bio::EnsEMBL::VEP::AnnotationSource::Database::RegFeat->new({
       config => $self->config,

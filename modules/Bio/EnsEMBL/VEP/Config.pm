@@ -377,7 +377,6 @@ our %INCOMPATIBLE = (
   database    => [qw(af_1kg af_esp af_exac af_gnomad max_af pubmed offline cache)],
   quiet       => [qw(verbose)],
   refseq      => [qw(gencode_basic merged)],
-  merged      => [qw(database)],
   json        => [qw(vcf gvf tab)],
   vcf         => [qw(json gvf tab)],
   gvf         => [qw(vcf json tab)],
