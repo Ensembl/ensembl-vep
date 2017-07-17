@@ -257,7 +257,8 @@ sub create_VariationFeatures {
       $non_variant = 1;
     }
     else {
-      return [];
+      $parser->next();
+      return $self->create_VariationFeatures;
     }
   }
 
@@ -274,7 +275,8 @@ sub create_VariationFeatures {
 
     unless(defined($chr) and defined($start)) {
       $self->warning_msg("No GP flag found in INFO column on line ".$self->line_number);
-      return [];
+      $parser->next();
+      return $self->create_VariationFeatures;
     }
   }
 
