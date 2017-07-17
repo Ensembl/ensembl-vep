@@ -89,6 +89,7 @@ use vars qw(@ISA @EXPORT_OK);
   &numberify
   &merge_hashes
   &merge_arrays
+  &find_in_ref
   &get_compressed_filehandle
   &get_version_data
   &get_version_string
@@ -296,6 +297,63 @@ sub merge_arrays {
   push @$x, grep {!$tmp{$_}} @$y;
 
   return $x;
+}
+
+
+=head2 find_in_ref
+
+  Arg 1      : ref $ref
+  Arg 2      : hashref $required_keys
+  Arg 3      : (optional) hashref $return
+  Arg 4      : (optional) string $this_key
+  Example    : $data = find_in_ref($ref, {foo => 1});
+  Description: Find values for the keys specified in $required_keys in the
+               arbitrarily nested data structure $ref. Values found for
+               the required keys are added to the $return hashref as:
+               {
+                 key1 => [value1],
+                 key2 => [value2, value3]
+               }
+
+               Optional args $return and $this_key are used internally as
+               the method runs recursively.
+  Returntype : hashref
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
+sub find_in_ref {
+  my ($ref, $want_keys, $return, $this_key) = @_;
+
+  $return ||= {};
+
+  if(ref($ref) eq 'HASH') {
+    foreach my $key(keys %$ref) {
+      if(ref($ref->{$key})) {
+        find_in_ref($ref->{$key}, $want_keys, $return, $key);
+      }
+      else {
+        merge_arrays($return->{$key} ||= [], [$ref->{$key}]) if $want_keys->{$key};
+      }
+    }
+  }
+  elsif(ref($ref) eq 'ARRAY') {
+    foreach my $el(@$ref) {
+      if(ref($el)) {
+        find_in_ref($el, $want_keys, $return);
+      }
+      else {
+        merge_arrays($return->{$this_key} ||= [], [$el]) if $this_key && $want_keys->{$this_key};
+      }
+    } 
+  }
+  elsif($this_key && $want_keys->{$this_key}) {
+    merge_arrays($return->{$this_key} ||= [], [$ref]);
+  }
+
+  return $return;
 }
 
 

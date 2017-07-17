@@ -24,6 +24,7 @@ use Bio::EnsEMBL::VEP::Utils qw(
   numberify
   merge_hashes
   merge_arrays
+  find_in_ref
   get_time
   get_compressed_filehandle
   get_version_data
@@ -160,7 +161,55 @@ is_deeply(
 );
 
 
+## find_in_ref
+##############
 
+my $want_keys = { foo => 1, bar => 1};
+
+is_deeply(
+  find_in_ref(
+    { foo => 'hello' },
+    $want_keys
+  ),
+  { foo => ['hello'] },
+  'find_in_ref - simple'
+);
+
+is_deeply(
+  find_in_ref(
+    { foo => 'hello', bar => 'bye' },
+    $want_keys
+  ),
+  { foo => ['hello'], bar => ['bye'] },
+  'find_in_ref - two keys'
+);
+
+is_deeply(
+  find_in_ref(
+    [ {foo => 'hello'}, {foo => 'bye'} ],
+    $want_keys
+  ),
+  { foo => ['hello', 'bye'] },
+  'find_in_ref - multiple values'
+);
+
+is_deeply(
+  find_in_ref(
+    { foo => ['hello', 'bye'] },
+    $want_keys
+  ),
+  { foo => ['hello', 'bye'] },
+  'find_in_ref - multiple values in arrayref'
+);
+
+is_deeply(
+  find_in_ref(
+    { foo => [ {foo => 'hello'}, {bar => 'bye'} ] },
+    $want_keys
+  ),
+  { foo => ['hello'], bar => ['bye'] },
+  'find_in_ref - dont get non-scalars'
+);
 
 
 ## get_compressed_filehandle
