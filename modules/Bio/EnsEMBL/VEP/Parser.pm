@@ -761,6 +761,8 @@ sub map_to_lrg {
   my $self = shift;
   my $vfs = shift;
 
+  return $vfs if $self->{dont_map_to_lrg};
+
   my @return;
 
   foreach my $vf(@$vfs) {
@@ -770,10 +772,23 @@ sub map_to_lrg {
 
     # make sure the VF has an attached slice
     $vf->{slice} ||= $self->get_slice($vf->{chr});
-    next unless defined($vf->{slice});
+    unless(defined($vf->{slice})) {
+      push @return, $vfs;
+      next;
+    }
+
+    if($self->{can_map_to_lrg} || $vf->{slice}->coord_system->adaptor->fetch_by_name('lrg')) {
+      $self->{can_map_to_lrg} = 1;
+    }
+    else {
+      $self->{dont_map_to_lrg} = 1;
+      return $vfs;
+    }
 
     # transform LRG <-> chromosome
-    my $new_vf = $vf->transform($vf->{slice}->coord_system->name eq 'lrg' ? 'chromosome' : 'lrg');
+    my $new_vf;
+
+    eval { $new_vf = $vf->transform($vf->{slice}->coord_system->name eq 'lrg' ? 'chromosome' : 'lrg') };
 
     # add it to the array if transformation worked
     if(defined($new_vf)) {
