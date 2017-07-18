@@ -78,7 +78,7 @@ use Bio::EnsEMBL::VEP::Utils qw(find_in_ref merge_arrays);
                parameters.
   Returntype : Bio::EnsEMBL::VEP::IDTranslator
   Exceptions : throws on invalid configuration, see Bio::EnsEMBL::VEP::Config
-  Caller     : haplo
+  Caller     : id_translator
   Status     : Stable
 
 =cut
@@ -120,6 +120,21 @@ sub new {
   return $self;
 }
 
+
+=head2 init
+
+  Example    : $idt->init();
+  Description: Runs some initialisation processes:
+               - connect to DB
+               - get annotation sources
+               - set cache_region_size parameter to minimum value
+               - internalise warnings
+  Returntype : bool
+  Caller     : translate(), translate_all()
+  Status     : Stable
+
+=cut
+
 sub init {
   my $self = shift;
 
@@ -133,6 +148,18 @@ sub init {
   return 1;
 }
 
+
+=head2 translate_all
+
+  Example    : my $results = $idt->translate_all();
+  Description: Get all translation results for the input file
+               set up at initialisation or with $self->param('input_file')
+  Returntype : hashref
+  Caller     : id_translator
+  Status     : Stable
+
+=cut
+
 sub translate_all {
   my $self = shift;
 
@@ -144,6 +171,18 @@ sub translate_all {
 
   return $results;
 }
+
+
+=head2 translate
+  
+  Arg 1      : string $input_data
+  Example    : my $results = $idt->translate('rs699');
+  Description: Get translation results for given input string
+  Returntype : hashref
+  Caller     : general
+  Status     : Stable
+
+=cut
 
 sub translate {
   my $self = shift;
@@ -161,6 +200,18 @@ sub translate {
   return $results;
 }
 
+
+=head2 reset
+  
+  Example    : $idt->reset();
+  Description: Reset input parameters. Used by translate() to prevent
+               persistence of input, format etc settings between calls
+               to translate()
+  Caller     : translate()
+  Status     : Stable
+
+=cut
+
 sub reset {
   my $self = shift;
 
@@ -168,6 +219,16 @@ sub reset {
   $self->param('format', 'guess');
   $self->param('input_data', undef);
 }
+
+
+=head2 _get_all_results
+  
+  Example    : my $results = $idt->_get_all_results();
+  Description: Internal method used to fetch results for set up object.
+  Caller     : translate(), translate_all()
+  Status     : Stable
+
+=cut
 
 sub _get_all_results {
   my $self = shift;
