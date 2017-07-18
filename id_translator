@@ -19,24 +19,10 @@ use Getopt::Long;
 use FindBin qw($RealBin);
 use lib $RealBin;
 use lib $RealBin.'/modules';
-use Bio::EnsEMBL::VEP::Runner;
-use Bio::EnsEMBL::VEP::Utils qw(get_version_string find_in_ref merge_arrays);
+use Bio::EnsEMBL::VEP::IDTranslator;
+use Bio::EnsEMBL::VEP::Utils qw(get_version_string);
 
-my $config = {
-  database => 1,
-  merged => 1,
-  lrg => 1,
-  hgvs => 1,
-  hgvsg => 1,
-  check_existing => 1,
-  failed => 1,
-  no_prefetch => 1,
-  ambiguous_hgvs => 1,
-  hgvsg_use_accession => 1,
-  no_stats => 1,
-  json => 1,
-  quiet => 1,
-};
+my $config = {};
 
 my $arg_count = scalar @ARGV;
 my @argv_copy = @ARGV;
@@ -116,36 +102,10 @@ sub main {
 
   my (%results, @order);
 
-  # use default transcript set (Ensembl)
-  my $runner = Bio::EnsEMBL::VEP::Runner->new($config);
-  $_->{cache_region_size} = 1 for @{$runner->get_all_AnnotationSources};
-  $runner->internalise_warnings();
-  get_data_from_runner($runner, \%results, \@order);
-
-  use Data::Dumper;
-  $Data::Dumper::Maxdepth = 3;
-  $Data::Dumper::Indent = 1;
-  print STDERR Dumper [map {$results{$_}} @order];
-}
-
-sub get_data_from_runner {
-  my ($runner, $results, $order) = @_;
-
-  my $want_keys = {
-    hgvsc => 1,
-    hgvsg => 1,
-    hgvsp => 1,
-    id => 1,
-  };
-
-  while(my $line = $runner->next_output_line(1)) {
-    delete($line->{id});
-    my $line_id = $line->{input};
-    merge_arrays($order, [$line_id]);
-    find_in_ref($line, $want_keys, $results->{$line_id} ||= {input => $line_id});
-  }
-
-  $runner->finish();
+  my $idt = Bio::EnsEMBL::VEP::IDTranslator->new($config);
+ 
+  use JSON;
+  print JSON->new->pretty->encode($idt->translate_all);
 }
 
 
