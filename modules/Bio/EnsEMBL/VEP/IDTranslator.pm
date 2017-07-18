@@ -105,14 +105,14 @@ sub new {
 
   $config->{fields} ||= 'id,hgvsg,hgvsc,hgvsp';
 
-  my %opt_map = ('id' => 'check_existing');
-  my %set_fields = map {$_ => 1} split(',', $config->{fields});
+  my %set_fields = map {$_ => 1} ref($config->{fields}) eq 'ARRAY' ? @{$config->{fields}} : split(',', $config->{fields});
 
   # do some trickery to make sure we're not running unnecessary code
   # this first one only switches on the HGVS options for the requested fields  
   $config->{$_} = 1 for grep {$_ =~ /^hgvs/} keys %set_fields;
 
   # and this one switches on check_existing if the user wants variant IDs
+  my %opt_map = ('id' => 'check_existing');
   $config->{$opt_map{$_}} = 1 for grep {$set_fields{$_}} keys %opt_map;
   
   my $self = $class->SUPER::new($config);
