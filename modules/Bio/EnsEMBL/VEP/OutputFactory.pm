@@ -185,7 +185,8 @@ sub new {
     gene_phenotype
 
     total_length
-    hgvs
+    hgvsc
+    hgvsp
     hgvsg
     hgvsg_use_accession
     sift
@@ -213,7 +214,7 @@ sub new {
 
   $self->{header_info} = $hashref->{header_info} if $hashref->{header_info};
 
-  $self->{plugins} = $hashref->{plugins} if $hashref->{plugins};
+  $self->{plugins} = $hashref->{plugins} if $hashref->{plugins};;
 
   return $self;
 }
@@ -1342,17 +1343,22 @@ sub TranscriptVariationAllele_to_output_hash {
     }
 
     # HGVS
-    if($self->{hgvs}) {
+    if($self->{hgvsc}) {
       my $hgvs_t = $vfoa->hgvs_transcript;
+      my $offset = $vfoa->hgvs_offset;
+
+      $hash->{HGVSc} = $hgvs_t if $hgvs_t;
+      $hash->{HGVS_OFFSET} = $offset if $offset;
+    }
+
+    if($self->{hgvsp}) {
       my $hgvs_p = $vfoa->hgvs_protein;
       my $offset = $vfoa->hgvs_offset;
 
       # URI encode "="
       $hgvs_p =~ s/\=/\%3D/g if $hgvs_p && !$self->{no_escape};
 
-      $hash->{HGVSc} = $hgvs_t if $hgvs_t;
       $hash->{HGVSp} = $hgvs_p if $hgvs_p;
-
       $hash->{HGVS_OFFSET} = $offset if $offset;
     }
   }

@@ -1108,18 +1108,21 @@ is_deeply(
 );
 $of->{total_length} = 0;
 
-$of->{hgvs} = 1;
+$of->{hgvsc} = 1;
 is(
   $of->TranscriptVariationAllele_to_output_hash($vfoa)->{HGVSc},
   'ENST00000352957.8:c.991G>A',
   'TranscriptVariationAllele_to_output_hash - HGVSc'
 );
+$of->{hgvsc} = 0;
+
+$of->{hgvsp} = 1;
 is(
   $of->TranscriptVariationAllele_to_output_hash($vfoa)->{HGVSp},
   'ENSP00000284967.6:p.Ala331Thr',
   'TranscriptVariationAllele_to_output_hash - HGVSp'
 );
-$of->{hgvs} = 0;
+$of->{hgvsp} = 0;
 
 $vfoa = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[0];
 is_deeply(

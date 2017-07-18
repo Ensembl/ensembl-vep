@@ -684,13 +684,13 @@ sub post_setup_checks {
     !$self->fasta_db
   ) {
     $self->status_msg("INFO: Disabling --hgvs; using --offline and no FASTA file found\n");
-    $self->param('hgvs', 0);
+    $self->param($_, 0) for qw(hgvs hgvsc hgvsp);
   }
   
   # offline needs cache, can't use HGVS
   if($self->param('offline')) {
     unless($self->fasta_db) {
-      throw("ERROR: Cannot generate HGVS coordinates (--hgvs) in offline mode without a FASTA file (see --fasta)\n") if $self->param('hgvs');
+      throw("ERROR: Cannot generate HGVS coordinates (--hgvs) in offline mode without a FASTA file (see --fasta)\n") if $self->param('hgvs') || $self->param('hgvsc') || $self->param('hgvsp');
       throw("ERROR: Cannot check reference sequences (--check_ref) without a FASTA file (see --fasta)\n") if $self->param('check_ref');
       throw("ERROR: Cannot use transcript reference sequences (--use_transcript_ref) without a FASTA file (see --fasta)\n") if $self->param('use_transcript_ref');
     }
@@ -709,7 +709,7 @@ sub post_setup_checks {
 
     # and these depend on either DB or FASTA DB
     unless($self->fasta_db) {
-      foreach my $param(grep {$self->param($_)} qw(hgvs check_ref)) {
+      foreach my $param(grep {$self->param($_)} qw(hgvs hgvsc hgvsp check_ref)) {
         $self->status_msg("INFO: Database will be accessed when using --$param");
       }
     }

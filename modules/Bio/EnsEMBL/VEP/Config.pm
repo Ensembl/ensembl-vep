@@ -162,6 +162,14 @@ our @OPTION_SETS = (
   },
   
   {
+    flags => ['hgvs'],
+    set   => {
+      hgvsc => 1,
+      hgvsp => 1,
+    },
+  },
+  
+  {
     flags => ['genomes'],
     set   => {
       host => 'mysql-eg-publicsql.ebi.ac.uk',
@@ -354,7 +362,6 @@ our @OPTION_SETS = (
 # valid values for certain flags
 our %VALID = (
   format          => [qw(ensembl vcf hgvs id pileup guess)],
-  convert         => [qw(ensembl vcf hgvs pileup)],
   terms           => [qw(SO display NCBI)],
   sift            => [qw(s p b)],
   polyphen        => [qw(s p b)],
