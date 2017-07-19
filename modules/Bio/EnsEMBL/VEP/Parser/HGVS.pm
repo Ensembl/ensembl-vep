@@ -71,6 +71,7 @@ package Bio::EnsEMBL::VEP::Parser::HGVS;
 
 use base qw(Bio::EnsEMBL::VEP::Parser);
 
+use Bio::EnsEMBL::VEP::Utils qw(merge_arrays);
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::IO::ListBasedParser;
@@ -158,7 +159,7 @@ sub create_VariationFeatures {
   
   my $vfa = $self->get_adaptor('variation', 'VariationFeature');
   my $vfs = [];
-  my $errors = '';
+  my @errors;
 
   foreach my $core_group(@core_groups) {
     my $sa  = $self->get_adaptor($core_group, 'Slice');
@@ -174,13 +175,14 @@ sub create_VariationFeatures {
       }
     };
 
-    $errors .= $@ if $@ && length($@) > 1;
+    # only log unique errors
+    merge_arrays(\@errors, [$@]) if $@ && length($@) > 1;
 
     last if @$vfs;
   }
 
   unless(@$vfs) {
-    $self->warning_msg("WARNING: Unable to parse HGVS notation \'$hgvs\'\n$errors");
+    $self->warning_msg("WARNING: Unable to parse HGVS notation \'$hgvs\'\n".join("\n", @errors));
     return $self->create_VariationFeatures;
   }
 
