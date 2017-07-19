@@ -70,6 +70,7 @@ our @FLAG_FIELDS = (
   { flag => 'user',            fields => ['IMPACT','DISTANCE','STRAND','FLAGS'] },
   { flag => 'flag_pick',       fields => ['PICK'] },
   { flag => 'flag_pick_allele',fields => ['PICK'] },
+  { flag => 'flag_pick_allele_gene', fields => ['PICK'] },
   { flag => 'variant_class',   fields => ['VARIANT_CLASS']},
   { flag => 'minimal',         fields => ['MINIMISED']},
 
