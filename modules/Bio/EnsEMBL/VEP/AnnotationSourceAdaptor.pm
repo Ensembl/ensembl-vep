@@ -153,7 +153,7 @@ sub get_all_from_database {
       });
 
       # special case merged
-      if($self->param('merged')) {
+      if($self->param('merged') && $self->get_adaptor('otherfeatures', 'slice')) {
         my $core_type_bak = $self->param('core_type');
         $self->param('core_type', 'otherfeatures');
 
