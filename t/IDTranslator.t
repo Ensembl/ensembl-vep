@@ -105,6 +105,16 @@ SKIP: {
     );
   }
 
+  is_deeply(
+    [map {@{$_->{hgvsg}}} @{$idt->translate("JAM2:c.721A>T")}],
+    [
+       "21:g.25706002A>T",
+       "21:g.25709954A>T",
+       "21:g.25712347A>T"
+    ],
+    'translate - from gene gives multiple hgvsg'
+  );
+
   my $bak = $idt->param('fields');
   $idt->param('fields', ['hgvsg']);
   is_deeply(

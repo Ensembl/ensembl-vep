@@ -96,11 +96,12 @@ sub new {
     check_existing
     failed
     no_prefetch
-    ambiguous_hgvs
     hgvsg_use_accession
+    ambiguous_hgvs
     no_stats
     json
     quiet
+    buffer_size
   );
 
   $config->{fields} ||= 'id,hgvsg,hgvsc,hgvsp';
@@ -244,6 +245,11 @@ sub _get_all_results {
     
     merge_arrays($order, [$line_id]);
     find_in_ref($line, \%want_keys, $results->{$line_id} ||= {input => $line_id});
+
+    if(@{$self->warnings}) {
+      $results->{$line_id}->{warnings} = [map {$_->{msg}} @{$self->warnings}];
+      $self->internalise_warnings();
+    }
   }
 
   return [map {$results->{$_}} @$order];

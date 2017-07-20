@@ -186,6 +186,19 @@ sub create_VariationFeatures {
     return $self->create_VariationFeatures;
   }
 
+  # warn if this looks like a gene
+  if($hgvs =~ /\:[cnp]\./ && $hgvs !~ /^(ENS|[NX][CGMRP]\_|LRG\_)/) {
+    my $gene_name = (split(':', $hgvs))[0];
+    $self->warning_msg(
+      "WARNING: Possible invalid use of gene name '$gene_name' as HGVS reference; ".
+      (
+        $self->{ambiguous_hgvs} ?
+        "$hgvs may resolve to multiple genomic locations" :
+        "most likely transcript will be selected"
+      )
+    );
+  }
+
   foreach my $vf(@$vfs) {
 
     # transfer to whole chromosome slice

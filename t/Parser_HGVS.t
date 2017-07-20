@@ -53,7 +53,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg && !$@;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 23 unless $can_use_db;
+  skip 'No local database configured', 24 unless $can_use_db;
 
   my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens');
   
@@ -148,12 +148,32 @@ SKIP: {
     'protein - multiple'
   );
 
+
   # capture warning
   no warnings 'once';
   open(SAVE, ">&STDERR") or die "Can't save STDERR\n"; 
 
   close STDERR;
   open STDERR, '>', \$tmp;
+
+  # multiple from gene input
+  @vfs = ();
+  $p = Bio::EnsEMBL::VEP::Parser::HGVS->new({
+    config => $cfg,
+    file => $test_cfg->create_input_file('JAM2:c.721A>T'),
+    valid_chromosomes => [21],
+  });
+  $p->{ambiguous_hgvs} = 1;
+
+  while($vf = $p->next) {
+    push @vfs, $vf;
+  }
+  is_deeply(
+    [sort {$a <=> $b} map {$_->{start}} @vfs],
+    [25706002, 25706002, 25709954, 25712347],
+    'gene - multiple'
+  );
+  ok($tmp =~ /invalid use of gene name/, 'using gene name warns');
 
   $vf = Bio::EnsEMBL::VEP::Parser::HGVS->new({
     config => $cfg,

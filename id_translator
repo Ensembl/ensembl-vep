@@ -97,12 +97,13 @@ main($config);
 sub main {
   my $config = shift;
 
-  my (%results, @order);
-
   my $idt = Bio::EnsEMBL::VEP::IDTranslator->new($config);
  
+  my $results = $idt->translate_all;
+  push @$results, {warnings => [map {$_->{msg}} @{$idt->warnings}]} unless @$results;
+
   use JSON;
-  print JSON->new->pretty->encode($idt->translate_all);
+  print JSON->new->pretty->encode($results);
 }
 
 
