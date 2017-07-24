@@ -320,6 +320,7 @@ sub pipeline_analyses {
         '8' => ['join_vep'],
         '9' => ['qc_vep'],
         '10' => $self->o('debug') ? [] : ['finish_dump'],
+      -wait_for      => ['init_dump_vep_core','init_dump_vep_otherfeatures'],
       },
     },
 
