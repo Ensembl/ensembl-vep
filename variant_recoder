@@ -19,7 +19,7 @@ use Getopt::Long;
 use FindBin qw($RealBin);
 use lib $RealBin;
 use lib $RealBin.'/modules';
-use Bio::EnsEMBL::VEP::IDTranslator;
+use Bio::EnsEMBL::VEP::VariantRecoder;
 use Bio::EnsEMBL::VEP::Utils qw(get_version_string);
 
 my $config = {};
@@ -97,10 +97,10 @@ main($config);
 sub main {
   my $config = shift;
 
-  my $idt = Bio::EnsEMBL::VEP::IDTranslator->new($config);
+  my $vr = Bio::EnsEMBL::VEP::VariantRecoder->new($config);
  
-  my $results = $idt->translate_all;
-  push @$results, {warnings => [map {$_->{msg}} @{$idt->warnings}]} unless @$results;
+  my $results = $vr->recode_all;
+  push @$results, {warnings => [map {$_->{msg}} @{$vr->warnings}]} unless @$results;
 
   use JSON;
   print JSON->new->pretty->encode($results);
@@ -114,9 +114,9 @@ sub usage {
   my $versions = get_version_string($RealBin.'/.version');
 
   my $usage =<<END;
-#---------------#
-# ID TRANSLATOR #
-#---------------#
+#-----------------#
+# VARIANT RECODER #
+#-----------------#
 
 Versions:
   $versions
@@ -124,7 +124,7 @@ Versions:
 Help: dev\@ensembl.org , helpdesk\@ensembl.org
 
 Example usage:
-./id_translator --input_data "rs699"
+./variant_recoder --input_data "rs699"
 
 Basic options
 =============

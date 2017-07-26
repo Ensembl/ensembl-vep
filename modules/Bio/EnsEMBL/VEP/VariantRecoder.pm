@@ -27,23 +27,23 @@ limitations under the License.
 
 =cut
 
-# EnsEMBL module for Bio::EnsEMBL::VEP::IDTranslator
+# EnsEMBL module for Bio::EnsEMBL::VEP::VariantRecoder
 #
 #
 
 =head1 NAME
 
-Bio::EnsEMBL::VEP::IDTranslator - IDTranslator runner class
+Bio::EnsEMBL::VEP::VariantRecoder - VariantRecoder runner class
 
 =head1 SYNOPSIS
 
-my $idt = Bio::EnsEMBL::VEP::IDTranslator->new();
-my $translated = $idt->translate('rs699');
+my $idt = Bio::EnsEMBL::VEP::VariantRecoder->new();
+my $recoded = $idt->recode('rs699');
 
 =head1 DESCRIPTION
 
-The IDTranslator class serves as a wrapper for a number of
-VEP classes that is used to "translate" variant identifiers
+The VariantRecoder class serves as a wrapper for a number of
+VEP classes that is used to "recode" variant identifiers
 to all possible alternatives:
 
 - variant IDs
@@ -59,7 +59,7 @@ to all possible alternatives:
 use strict;
 use warnings;
 
-package Bio::EnsEMBL::VEP::IDTranslator;
+package Bio::EnsEMBL::VEP::VariantRecoder;
 
 use base qw(Bio::EnsEMBL::VEP::Runner);
 
@@ -71,14 +71,14 @@ use Bio::EnsEMBL::VEP::Utils qw(find_in_ref merge_arrays);
 =head2 new
 
   Arg 1      : hashref $config
-  Example    : $runner = Bio::EnsEMBL::VEP::IDTranslator->new($config);
-  Description: Creates a new IDTranslator object. The $config hash passed is
+  Example    : $runner = Bio::EnsEMBL::VEP::VariantRecoder->new($config);
+  Description: Creates a new VariantRecoder object. The $config hash passed is
                used to create a Bio::EnsEMBL::VEP::Config object; see docs
-               for this object and the id_translator script itself for allowed
+               for this object and the variant_recoder script itself for allowed
                parameters.
-  Returntype : Bio::EnsEMBL::VEP::IDTranslator
+  Returntype : Bio::EnsEMBL::VEP::VariantRecoder
   Exceptions : throws on invalid configuration, see Bio::EnsEMBL::VEP::Config
-  Caller     : id_translator
+  Caller     : variant_recoder
   Status     : Stable
 
 =cut
@@ -131,7 +131,7 @@ sub new {
                - set cache_region_size parameter to minimum value
                - internalise warnings
   Returntype : bool
-  Caller     : translate(), translate_all()
+  Caller     : recode(), recode_all()
   Status     : Stable
 
 =cut
@@ -150,18 +150,18 @@ sub init {
 }
 
 
-=head2 translate_all
+=head2 recode_all
 
-  Example    : my $results = $idt->translate_all();
-  Description: Get all translation results for the input file
+  Example    : my $results = $idt->recode_all();
+  Description: Get all recoding results for the input file
                set up at initialisation or with $self->param('input_file')
   Returntype : hashref
-  Caller     : id_translator
+  Caller     : variant_recoder
   Status     : Stable
 
 =cut
 
-sub translate_all {
+sub recode_all {
   my $self = shift;
 
   $self->init();
@@ -174,18 +174,18 @@ sub translate_all {
 }
 
 
-=head2 translate
+=head2 recode
   
   Arg 1      : string $input_data
-  Example    : my $results = $idt->translate('rs699');
-  Description: Get translation results for given input string
+  Example    : my $results = $idt->recode('rs699');
+  Description: Get recoding results for given input string
   Returntype : hashref
   Caller     : general
   Status     : Stable
 
 =cut
 
-sub translate {
+sub recode {
   my $self = shift;
   my $input = shift;
 
@@ -205,10 +205,10 @@ sub translate {
 =head2 reset
   
   Example    : $idt->reset();
-  Description: Reset input parameters. Used by translate() to prevent
+  Description: Reset input parameters. Used by recode() to prevent
                persistence of input, format etc settings between calls
-               to translate()
-  Caller     : translate()
+               to recode()
+  Caller     : recode()
   Status     : Stable
 
 =cut
@@ -226,7 +226,7 @@ sub reset {
   
   Example    : my $results = $idt->_get_all_results();
   Description: Internal method used to fetch results for set up object.
-  Caller     : translate(), translate_all()
+  Caller     : recode(), recode_all()
   Status     : Stable
 
 =cut

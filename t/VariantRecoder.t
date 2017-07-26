@@ -30,7 +30,7 @@ my $cfg_hash = $test_cfg->base_testing_cfg;
 ##############
 
 # use test
-use_ok('Bio::EnsEMBL::VEP::IDTranslator');
+use_ok('Bio::EnsEMBL::VEP::VariantRecoder');
 
 
 
@@ -50,23 +50,23 @@ SKIP: {
 
   my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens') if $can_use_db;
   
-  my $idt = Bio::EnsEMBL::VEP::IDTranslator->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1});
-  ok($idt, 'new is defined');
+  my $vr = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens'});
+  ok($vr, 'new is defined');
 
-  is($idt->param('input_data', 'rs142513484'), 'rs142513484', 'set input_data');
+  is($vr->param('input_data', 'rs142513484'), 'rs142513484', 'set input_data');
 
-  is(ref($idt), 'Bio::EnsEMBL::VEP::IDTranslator', 'check class');
+  is(ref($vr), 'Bio::EnsEMBL::VEP::VariantRecoder', 'check class');
 
-  ok($idt->init(), 'init');
-  ok($idt->{parser}, 'init sets parser');
-  ok($idt->{input_buffer}, 'init sets input_buffer');
+  ok($vr->init(), 'init');
+  ok($vr->{parser}, 'init sets parser');
+  ok($vr->{input_buffer}, 'init sets input_buffer');
 
-  $idt->reset();
-  ok(!$idt->{parser}, 'reset deletes parser');
-  ok(!$idt->{input_buffer}, 'reset deletes input_buffer');
-  ok(!$idt->param('input_data'), 'reset deletes input_data');
+  $vr->reset();
+  ok(!$vr->{parser}, 'reset deletes parser');
+  ok(!$vr->{input_buffer}, 'reset deletes input_buffer');
+  ok(!$vr->param('input_data'), 'reset deletes input_data');
 
-  throws_ok {$idt->translate()} qr/No input data/, 'translate - no input';
+  throws_ok {$vr->recode()} qr/No input data/, 'recode - no input';
 
   foreach my $input(qw(
     rs142513484
@@ -77,7 +77,7 @@ SKIP: {
     NP_059142.2:p.Ala331Thr
   )) {
     is_deeply(
-      $idt->translate($input),
+      $vr->recode($input),
       [
         {
           "hgvsp" => [
@@ -101,24 +101,24 @@ SKIP: {
           ]
         }
       ],
-      'translate - '.$input
+      'recode - '.$input
     );
   }
 
   is_deeply(
-    [map {@{$_->{hgvsg}}} @{$idt->translate("JAM2:c.721A>T")}],
+    [map {@{$_->{hgvsg}}} @{$vr->recode("JAM2:c.721A>T")}],
     [
        "21:g.25706002A>T",
        "21:g.25709954A>T",
        "21:g.25712347A>T"
     ],
-    'translate - from gene gives multiple hgvsg'
+    'recode - from gene gives multiple hgvsg'
   );
 
-  my $bak = $idt->param('fields');
-  $idt->param('fields', ['hgvsg']);
+  my $bak = $vr->param('fields');
+  $vr->param('fields', ['hgvsg']);
   is_deeply(
-    $idt->translate("rs142513484"),
+    $vr->recode("rs142513484"),
     [
       {
         "input" => "rs142513484",
@@ -127,17 +127,17 @@ SKIP: {
         ]
       }
     ],
-    'translate - limit fields'
+    'recode - limit fields'
   );
-  $idt->param('fields', $bak);
+  $vr->param('fields', $bak);
 
-  $idt->param('input_file', $test_cfg->{idt_vcf});
-  my $results = $idt->translate_all();
+  $vr->param('input_file', $test_cfg->{vr_vcf});
+  my $results = $vr->recode_all();
 
   is_deeply(
     [map {$_->{hgvsg}->[0]} @$results],
     ['21:g.25585733C>T', '21:g.25587701T>C', '21:g.25587758G>A'],
-    'translate_all'
+    'recode_all'
   );
 };
 
