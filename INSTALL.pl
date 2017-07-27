@@ -178,7 +178,6 @@ warn(
   "http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html#requirements\n"
 ) unless $CAN_USE_DBD_MYSQL;
 
-exit(0);
 
 my $default_dir_used = check_default_dir();
 
