@@ -133,6 +133,12 @@ sub init {
 
   $self->stats->info($self->get_output_header_info);
 
+  # get stats file handle now
+  # otherwise we don't know if this will fail til the end of the run
+  unless($self->param('no_stats')) {
+    $self->stats->log_chromosomes($self->chr_lengths);
+  }
+
   return $self->{_initialized} = 1;
 }
 

@@ -122,9 +122,9 @@ ok(
 );
 
 is_deeply(
-  $bv->stats->{stats}->{chr_lengths},
+  $bv->chr_lengths,
   {21 => 46709983},
-  'fasta_db - stored chr lengths'
+  'chr lengths'
 );
 
 is_deeply(

@@ -359,7 +359,9 @@ sub _get_fake_adaptor {
 
 sub get_slice {
   my $self = shift;
-  my $chr = shift;
+  my $orig_chr = shift;
+
+  my $chr = $self->get_source_chr_name($orig_chr, 'slices', [keys %{$self->chr_lengths}]);
 
   my $cache = $self->{_slice_cache} ||= {};
 
@@ -448,14 +450,57 @@ sub fasta_db {
         -OFFLINE => $self->param('offline'),
         -SYNONYMS => $self->chromosome_synonyms,
       );
-
-      $self->stats->log_fasta_chromosomes($fasta_db);
     }
 
     $self->config->{_fasta_db} = $fasta_db;
   }
 
   return $self->config->{_fasta_db};
+}
+
+
+=head2 chr_lengths
+
+  Example    : $chr_lengths = $obj->chr_lengths()
+  Description: Gets all valid chromosome names and their lengths from slice
+               adaptor if available, or FASTA database if not
+  Returntype : hashref
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
+sub chr_lengths {
+  my $self = shift;
+
+  if(!exists($self->{_chr_lengths})) {
+    my %chr_lengths;
+    
+    if(
+      my $sa = $self->get_adaptor(
+        $self->{core_type} || $self->param('core_type'),
+        'Slice'
+      )
+    ) {
+      foreach my $slice(@{$sa->fetch_all('toplevel')}, @{$sa->fetch_all('lrg', undef, 1, undef, 1)}) {
+        my $chr = $slice->seq_region_name;
+        $chr_lengths{$chr} = $slice->length;
+      }
+    }
+
+    elsif(my $fasta_db = $self->fasta_db) {
+      %chr_lengths =
+        map {$_ => $fasta_db->length($_)}
+        $fasta_db->isa('Bio::DB::Fasta') ?
+        (grep {$_ !~ /^\_\_/} $fasta_db->get_all_primary_ids) :
+        ($fasta_db->get_all_sequence_ids);
+    }
+
+    $self->{_chr_lengths} = \%chr_lengths;
+  }
+
+  return $self->{_chr_lengths};
 }
 
 

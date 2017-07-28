@@ -199,39 +199,12 @@ sub log_lines_read {
 }
 
 
-=head2 log_fasta_chromosomes
-
-  Arg 1      : Bio::DB::Fasta or Bio::DB::HTS::Faidx $fasta_db
-  Example    : $stats->log_fasta_chromosomes($fasta_db);
-  Description: Logs the chromosome names and lengths as retrieved
-               from FASTA db.
-  Returntype : none
-  Exceptions : none
-  Caller     : BaseVEP
-  Status     : Stable
-
-=cut
-
-sub log_fasta_chromosomes {
-  my ($self, $fasta_db) = @_;
-
-  return unless $fasta_db;
-  
-  $self->{stats}->{chr_lengths} ||= {
-    map {$_ => $fasta_db->length($_)}
-    $fasta_db->isa('Bio::DB::Fasta') ?
-    $fasta_db->get_all_primary_ids :
-    $fasta_db->get_all_sequence_ids
-  };
-}
-
-
-=head2 log_db_chromosomes
+=head2 log_chromosomes
 
   Arg 1      : hashref $chr_names_and_lengths
-  Example    : $stats->log_db_chromosomes($lengths);
-  Description: Logs the chromosome names and lengths as retrieved
-               from core database.
+  Example    : $stats->log_chromosomes($lengths);
+  Description: Logs the chromosome names and lengths as retrieved from
+               core database or FASTA db
   Returntype : none
   Exceptions : none
   Caller     : BaseVEP
@@ -239,7 +212,7 @@ sub log_fasta_chromosomes {
 
 =cut
 
-sub log_db_chromosomes {
+sub log_chromosomes {
   $_[0]->{stats}->{chr_lengths} ||= $_[1];
 }
 
