@@ -345,7 +345,7 @@ $vfs = $ib->next();
 is(scalar @$vfs, 0, 'next again - finished');
 
 $ib->reset_buffer();
-delete($ib->{$_}) for qw(_config _adaptors _slice_cache _species _coord_system);
+delete($ib->{$_}) for qw(_config _adaptors _slice_cache _species _coord_system _chr_name_map _chr_lengths);
 is_deeply($ib, bless( {
   'buffer_size' => 5,
   'pre_buffer' => [],

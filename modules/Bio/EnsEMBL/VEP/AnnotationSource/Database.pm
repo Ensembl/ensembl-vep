@@ -132,28 +132,7 @@ sub get_slice {
 =cut
 
 sub valid_chromosomes {
-  my $self = shift;
-
-  if(!exists($self->{valid_chromosomes})) {
-    my $sa = $self->get_adaptor(
-      $self->{core_type} || $self->param('core_type'),
-      'Slice'
-    );
-
-    my @valid_chromosomes;
-    my %chr_lengths;
-
-    foreach my $slice(@{$sa->fetch_all('toplevel')}, @{$sa->fetch_all('lrg', undef, 1, undef, 1)}) {
-      my $chr = $slice->seq_region_name;
-      push @valid_chromosomes, $chr;
-      $chr_lengths{$chr} = $slice->length;
-    }
-
-    $self->{valid_chromosomes} = \@valid_chromosomes;
-    $self->stats->log_db_chromosomes(\%chr_lengths);
-  }
-
-  return $self->{valid_chromosomes};
+  return $_[0]->{valid_chromosomes} ||= [sort keys %{$_[0]->chr_lengths}];
 }
 
 1;
