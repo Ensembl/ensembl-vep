@@ -70,7 +70,7 @@ package Bio::EnsEMBL::VEP::AnnotationSource::File::VCF;
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
-use Bio::EnsEMBL::Variation::Utils::Sequence qw(trim_sequences);
+use Bio::EnsEMBL::Variation::Utils::Sequence qw(get_matched_variant_alleles);
 use Bio::EnsEMBL::IO::Parser::VCF4Tabix;
 
 use base qw(Bio::EnsEMBL::VEP::AnnotationSource::File);
@@ -203,11 +203,11 @@ sub _create_records {
   if(ref($overlap_result) eq 'ARRAY') {
 
     foreach my $result_hash(@$overlap_result) {
-      my $index  = $result_hash->{index};
+      my $index  = $result_hash->{b_index};
 
       my $record = {
         name => $self->_get_record_name,
-        allele => $result_hash->{allele}
+        allele => $result_hash->{a_allele}
       };
 
       foreach my $field(keys %$fields_data) {
@@ -285,15 +285,19 @@ sub _get_record_name {
                the user input variant.
 
                Returns an arrayref of hashrefs representing the matching
-               alleles and their indexes in the VCF ALT/REF ordering:
+               alleles and their indexes:
                [
                  {
-                   index  => $i1,
-                   allele => $a1,
+                   a_index  => $VF_index_1,
+                   a_allele => $VF_allele_1,
+                   b_index  => $VCF_ALT_index_1,
+                   b_allele => $VCF_allele_1,
                  },
                  {
-                   index  => $i2,
-                   allele => $a2,
+                   a_index  => $VF_index_2,
+                   a_allele => $VF_allele_2,
+                   b_index  => $VCF_ALT_index_2,
+                   b_allele => $VCF_allele_2,
                  },
                ]
   Returntype : arrayref
@@ -314,69 +318,21 @@ sub _record_overlaps_VF {
   # exact more difficult, we need to check each allele
   my $parser = $self->parser;
 
-  # get the VF alleles
-  my $vf_ref  = $vf->ref_allele_string;
-  my %vf_alts = map {$_ => 1} @{$vf->alt_alleles};
-  my $vf_strand = $vf->strand;
-
-  # VCF always forward so we might need to reverse input
-  reverse_comp(\$vf_ref) if $vf_strand < 0;
-
-  # we might need to minimise pairs of alleles if user has input weirdness
-  # so we're going to create keys for each minimised ref/alt pair
-  # also trim both ways in case?
-  my %minimised_vf_alleles;
-
-  foreach my $alt(@{$vf->alt_alleles}) {
-    my $orig_alt = $alt;
-    reverse_comp(\$alt) if $vf_strand < 0;
-
-    foreach my $direction(0, 1) {
-      my $start = $vf->{start};
-      my $ref = $vf_ref;
-      ($ref, $alt, $start) = @{trim_sequences($ref, $alt, $start, undef, 1, $direction)};
-
-      # store the original alt as when we come to report results
-      # we need to match back against the alt as it was in the user input
-      $minimised_vf_alleles{"$ref\_$alt\_$start"} = $orig_alt;
-    }    
-  }
-
-  # use these as backups as we might modify them
-  my $orig_start = $parser->get_raw_start;
-  my $orig_ref   = $parser->get_reference;
-
-  # we're going to return a list of hashrefs containing the matched allele indexes and alleles
-  # that way it also passes a boolean check
-  my @matches;
-
-  my $i = 0;
-  foreach my $orig_alt(@{$parser->get_alternatives}) {
-
-    # we're going to minimise the VCF alleles one by one and compare the coords
-    # we have to try trimming both directions
-    foreach my $direction(0, 1) {
-
-      # first make copies of everything
-      my $start = $orig_start;
-      my $ref   = $orig_ref;
-      my $alt   = $orig_alt;
-
-      ($ref, $alt, $start) = @{trim_sequences($ref, $alt, $start, undef, 1, $direction)};
-
-      if(my $vf_alt = $minimised_vf_alleles{"$ref\_$alt\_$start"}) {
-        push @matches, {
-          index  => $i,
-          allele => $vf_alt
-        };
-        last;
-      }
+  my $matches = get_matched_variant_alleles(
+    {
+      ref    => $vf->ref_allele_string,
+      alts   => $vf->alt_alleles,
+      pos    => $vf->{start},
+      strand => $vf->strand
+    },
+    {
+      ref  => $parser->get_reference,
+      alts => $parser->get_alternatives,
+      pos  => $parser->get_raw_start,
     }
+  );
 
-    $i++;
-  }
-
-  return @matches ? \@matches : 0;
+  return @$matches ? $matches : 0;
 }
 
 
