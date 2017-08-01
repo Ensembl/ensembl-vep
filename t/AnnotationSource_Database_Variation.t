@@ -187,6 +187,12 @@ SKIP: {
       'variation_name' => 'rs142513484',
       'minor_allele' => 'T',
       'start' => 25585733,
+      'matched_alleles' => [{
+        a_allele => 'T',
+        a_index => 0,
+        b_allele => 'T',
+        b_index => 0,
+      }]
     }],
     'annotate_InputBuffer'
   );
@@ -222,6 +228,12 @@ SKIP: {
       'variation_name' => 'rs63750066',
       'minor_allele' => 'T',
       'start' => 25891796,
+      'matched_alleles' => [{
+        a_allele => 'T',
+        a_index => 0,
+        b_allele => 'T',
+        b_index => 0,
+      }]
     }],
     'annotate_InputBuffer - phenotype_or_disease'
   );

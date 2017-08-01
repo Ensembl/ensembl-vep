@@ -62,13 +62,14 @@ $ib->finish_annotation();
 
 my $vf = $ib->buffer->[0];
 my $exp = {
+  'Allele' => 'T',
   'Existing_variation' => [
     'rs142513484'
   ]
 };
 
 is_deeply(
-  $of->add_colocated_variant_info($vf, {}),
+  $of->add_colocated_variant_info($vf, {Allele => 'T'}),
   $exp,
   'add_colocated_variant_info',
 );
@@ -80,8 +81,9 @@ $ib->buffer->[0]->{_freq_check_freqs} = {
   }
 };
 is_deeply(
-  $of->add_colocated_variant_info($ib->buffer->[0], {}),
+  $of->add_colocated_variant_info($ib->buffer->[0], {Allele => 'T'}),
   {
+    'Allele' => 'T',
     'Existing_variation' => [
       'rs142513484',
     ],
@@ -101,8 +103,9 @@ $ib = get_annotated_buffer({
 });
 
 is_deeply(
-  $of->add_colocated_variant_info($ib->buffer->[0], {}),
+  $of->add_colocated_variant_info($ib->buffer->[0], {Allele => 'T'}),
   {
+    'Allele' => 'T',
     'PHENO' => [
       1,
       1
@@ -132,8 +135,9 @@ $ib = get_annotated_buffer({
 
 $of->{pubmed} = 1;
 is_deeply(
-  $of->add_colocated_variant_info($ib->buffer->[0], {}),
+  $of->add_colocated_variant_info($ib->buffer->[0], {Allele => 'T'}),
   {
+    'Allele' => 'T',
     'Existing_variation' => [
       'rs9977253',
     ],
@@ -158,8 +162,9 @@ $ib = get_annotated_buffer({
 });
 
 is_deeply(
-  $of->add_colocated_variant_info($ib->buffer->[0], {}),
+  $of->add_colocated_variant_info($ib->buffer->[0], {Allele => 'A'}),
   {
+    'Allele' => 'A',
     'Existing_variation' => [
       'rs145564988',
       'COSM1029633',
@@ -687,15 +692,15 @@ is_deeply(
 );
 
 is_deeply(
-  $of->add_colocated_frequency_data($vf, {Allele => 'C'}, $vf->{existing}->[0]),
-  {Allele => 'C', AF => ['0.999']},
-  'add_colocated_frequency_data - af other allele',
-);
-
-is_deeply(
   $of->add_colocated_frequency_data($vf, {Allele => 'G'}, $vf->{existing}->[0]),
   {Allele => 'G'},
   'add_colocated_frequency_data - af absent allele',
+);
+
+is_deeply(
+  $of->add_colocated_frequency_data($vf, {Allele => 'C'}, $vf->{existing}->[0]),
+  {Allele => 'C', AF => ['0.999']},
+  'add_colocated_frequency_data - af other allele',
 );
 
 $of->{af} = 0;

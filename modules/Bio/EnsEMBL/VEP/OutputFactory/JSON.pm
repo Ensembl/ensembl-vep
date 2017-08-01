@@ -215,6 +215,7 @@ sub get_all_output_hashes_by_InputBuffer {
 
     # get other data from super methods
     my $extra_hash = $self->VariationFeature_to_output_hash($vf);
+    $self->add_colocated_variant_info_JSON($vf, $extra_hash);
     $hash->{lc($_)} = $extra_hash->{$_} for grep {!$SKIP_KEYS{$_}} keys %$extra_hash;
 
     $self->add_VariationFeatureOverlapAllele_info($vf, $hash);
@@ -346,7 +347,7 @@ sub add_VariationFeatureOverlapAllele_info {
 
 =cut
 
-sub add_colocated_variant_info {
+sub add_colocated_variant_info_JSON {
   my $self = shift;
   my $vf = shift;
   my $hash = shift;
@@ -357,7 +358,7 @@ sub add_colocated_variant_info {
     my $ex;
     %$ex = %$ex_orig;
 
-    delete $ex->{$_} for qw(failed);
+    delete $ex->{$_} for qw(failed matched_alleles);
 
     # frequencies
     foreach my $pop(grep {defined($ex->{$_})} qw(
@@ -395,6 +396,25 @@ sub add_colocated_variant_info {
   }
 
   return $hash;
+}
+
+
+=head2 add_colocated_variant_info
+
+  Arg 1      : Bio::EnsEMBL::Variation::VariationFeature $vf
+  Arg 2      : hashref $vf_hash
+  Example    : $hashref = $of->add_colocated_variant_info($vf, $vf_hash, $ex);
+  Description: Just a stub; colocated data is added by add_colocated_variant_info_JSON()
+               in this class.
+  Returntype : hashref
+  Exceptions : none
+  Caller     : VariationFeatureOverlapAllele_to_output_hash()
+  Status     : Stable
+
+=cut
+
+sub add_colocated_variant_info {
+  return $_[1];
 }
 
 

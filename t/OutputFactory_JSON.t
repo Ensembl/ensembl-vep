@@ -114,7 +114,7 @@ SKIP: {
   );
 
   is_deeply(
-    $of->add_colocated_variant_info($vf, {}),
+    $of->add_colocated_variant_info_JSON($vf, {}),
     {
       'colocated_variants' => [
         {
@@ -160,7 +160,7 @@ SKIP: {
         }
       ]
     },
-    'add_colocated_variant_info'
+    'add_colocated_variant_info_JSON'
   );
 
   $ib = get_annotated_buffer({input_file => $test_cfg->{test_vcf}});

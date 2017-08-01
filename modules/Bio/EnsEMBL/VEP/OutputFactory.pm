@@ -75,7 +75,7 @@ use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
 use Bio::EnsEMBL::Variation::Utils::Constants;
-use Bio::EnsEMBL::VEP::Utils qw(format_coords);
+use Bio::EnsEMBL::VEP::Utils qw(format_coords merge_arrays);
 use Bio::EnsEMBL::VEP::Constants;
 
 use Bio::EnsEMBL::VEP::OutputFactory::VEP_output;
@@ -778,9 +778,6 @@ sub VariationFeature_to_output_hash {
     Location            => ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start}, $vf->{end}),
   };
 
-  # overlapping variants
-  $self->add_colocated_variant_info($vf, $hash);
-
   # overlapping SVs
   if($vf->{overlapping_svs}) {
     $hash->{SV} = [sort keys %{$vf->{overlapping_svs}}];
@@ -844,6 +841,8 @@ sub add_colocated_variant_info {
 
   return unless $vf->{existing} && scalar @{$vf->{existing}};
 
+  my $this_allele = $hash->{Allele};
+
   my $tmp = {};
 
   # use these to sort variants
@@ -867,6 +866,11 @@ sub add_colocated_variant_info {
     }
     @{$vf->{existing}}
   ) {
+
+    # check allele match
+    if(my $matched = $ex->{matched_alleles}) {
+      next unless grep {$_->{a_allele} eq $this_allele} @$matched;
+    }
 
     # ID
     push @{$hash->{Existing_variation}}, $ex->{variation_name} if $ex->{variation_name};
@@ -930,10 +934,7 @@ sub add_colocated_frequency_data {
   my $self = shift;
   my ($vf, $hash, $ex) = @_;
 
-  return unless grep {$self->{$_}} keys %FREQUENCY_KEYS or $self->{max_af};
-
-  my $this_allele = $hash->{Allele};
-  reverse_comp(\$this_allele) if $vf->strand ne $ex->{strand};
+  return $hash unless grep {$self->{$_}} keys %FREQUENCY_KEYS or $self->{max_af};
 
   my @ex_alleles = split('/', $ex->{allele_string});
 
@@ -942,6 +943,10 @@ sub add_colocated_frequency_data {
 
   my @keys = keys %FREQUENCY_KEYS;
   @keys = grep {$self->{$_}} @keys unless $self->{max_af};
+
+  my $this_allele = $hash->{Allele} if exists($hash->{Allele});
+  my ($matched_allele) = grep {$_->{a_allele} eq $this_allele} @{$ex->{matched_alleles} || []};
+  return $hash unless $matched_allele || (grep {$_ eq 'af'} @keys);
 
   my $max_af = 0;
   my @max_af_pops;
@@ -964,16 +969,28 @@ sub add_colocated_frequency_data {
       }
 
       # interpolate the frequency for the remaining allele if there's only 1
-      $freq_data{(keys %remaining)[0]} = 1 - $total if scalar keys %remaining == 1;
+      # we can only do this reliably for the AF key as only the minor AF is stored
+      # for others we expect all ALTs to have a store frequency, those without cannot be reliably interpolated
+      my $interpolated = 0;
+      if(scalar @ex_alleles == 2 && scalar keys %remaining == 1 && $key eq 'AF') {
+        $freq_data{(keys %remaining)[0]} = 1 - $total;
+        $interpolated = 1;
+      }
 
-      if(exists($freq_data{$this_allele})) {
+      if(
+        ($matched_allele && exists($freq_data{$matched_allele->{b_allele}})) ||
+        ($interpolated && $freq_data{$this_allele})
+      ) {
 
-        my $f = $freq_data{$this_allele};
+        my $f =
+          $matched_allele && exists($freq_data{$matched_allele->{b_allele}}) ?
+          $freq_data{$matched_allele->{b_allele}} :
+          $freq_data{$this_allele};
 
         # record the frequency if requested
         if($self->{$group}) {
           my $out_key = $key eq 'AF' ? 'AF' : $key.'_AF';
-          push @{$hash->{$out_key}}, $f;
+          merge_arrays($hash->{$out_key} ||= [], [$f]);
         }
 
         # update max_af data if required
@@ -1099,6 +1116,9 @@ sub VariationFeatureOverlapAllele_to_output_hash {
       ]
     );
   }
+
+  # colocated
+  $self->add_colocated_variant_info($vf, $hash);
 
   # frequency data
   foreach my $ex(@{$vf->{existing} || []}) {

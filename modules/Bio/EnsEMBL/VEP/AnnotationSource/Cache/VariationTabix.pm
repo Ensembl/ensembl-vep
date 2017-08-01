@@ -154,11 +154,15 @@ sub _annotate_cl {
       my @tmp_list = sort {$a->{start} <=> $b->{start}} splice @$list, 0, $max;
       $p += scalar @tmp_list;
 
-      my $region_string = join " ", map {
-        $source_chr.':'.($_->{start} > $_->{end} ?
-        $_->{end}.'-'.$_->{start} :
-        $_->{start}.'-'.$_->{end})
-      } @tmp_list;
+      my $max_length = 1;
+      my @regions;
+
+      foreach my $var(@tmp_list) {
+        my $l = ($var->{end} - $var->{start}) + 1;
+        $max_length = $l if $l > $max_length;
+        push @regions, $source_chr.':'.($var->{start} - 1).'-'.($var->{end} + 1);
+      }
+      my $region_string = join " ", @regions;
 
       open VARS, "tabix -f $file $region_string 2>&1 |"
         or throw "\nERROR: Could not open tabix pipe for $file\n";
@@ -170,15 +174,14 @@ sub _annotate_cl {
       VAR: while(<VARS>) {
         chomp;
         my $existing = $self->parse_variation($_);
+        next unless $self->filter_variation($existing);
 
-        foreach my $input(@{$hash{$existing->{start}} || []}) {
-          if(
-            $self->filter_variation($existing) &&
-            !$self->is_var_novel($existing, $input)
-          ) {
-            push @{$input->{existing}}, $existing unless
-              grep {$_->{variation_name} eq $existing->{variation_name}}
-              @{$input->{existing} || []};
+        for my $start(grep {defined($hash{$_})} (($existing->{start} - $max_length)..($existing->{end} + $max_length))) {
+          foreach my $vf(@{$hash{$start}}) {
+            next if grep {$_->{variation_name} eq $existing->{variation_name}} @{$vf->{existing} || []};
+
+            my $matched = $self->compare_existing($vf, $existing);
+            push @{$vf->{existing}}, $matched if $matched;
           }
         }
       }
@@ -189,7 +192,6 @@ sub _annotate_cl {
     }
   }
 }
-
 
 =head2 _annotate_pm
 
@@ -225,15 +227,12 @@ sub _annotate_pm {
       while(my $line = $iter->next) {
         chomp $line;
         my $existing = $self->parse_variation($line);
+        next unless $self->filter_variation($existing);
 
-        if(
-          $self->filter_variation($existing) &&
-          !$self->is_var_novel($existing, $vf)
-        ) {
-          push @{$vf->{existing}}, $existing unless
-            grep {$_->{variation_name} eq $existing->{variation_name}}
-            @{$vf->{existing} || []};
-        }
+        next if grep {$_->{variation_name} eq $existing->{variation_name}} @{$vf->{existing} || []};
+
+        my $matched = $self->compare_existing($vf, $existing);
+        push @{$vf->{existing}}, $matched if $matched;
       }
     }
   }

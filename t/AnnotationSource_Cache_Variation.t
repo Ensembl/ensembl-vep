@@ -76,13 +76,49 @@ my $existing = {
   allele_string => 'A/G',
 };
 
-ok(!$c->is_var_novel($existing, $input), 'is_var_novel exact match');
+is_deeply(
+  $c->compare_existing($input, $existing),
+  {
+    %$existing,
+    matched_alleles => [{
+      a_index => 0,
+      a_allele => 'G',
+      b_index => 0,
+      b_allele => 'G',
+    }]
+  },
+  'compare_existing exact match'
+);
+
+$input->{allele_string} = 'A/G/T';
+is_deeply(
+  $c->compare_existing($input, $existing),
+  {
+    %$existing,
+    matched_alleles => [{
+      a_index => 0,
+      a_allele => 'G',
+      b_index => 0,
+      b_allele => 'G',
+    }]
+  },
+  'compare_existing exact match from multiple'
+);
+$input->{allele_string} = 'A/G';
 
 $existing->{allele_string} = 'A/T';
-ok($c->is_var_novel($existing, $input), 'is_var_novel alleles dont match with check');
+is(
+  $c->compare_existing($input, $existing),
+  undef,
+  'compare_existing alleles dont match with check'
+);
 
 $c->{no_check_alleles} = 1;
-ok(!$c->is_var_novel($existing, $input), 'is_var_novel alleles dont match no check');
+is(
+  $c->compare_existing($input, $existing),
+  $existing,
+  'compare_existing alleles dont match with check'
+);
 $c->{no_check_alleles} = 0;
 
 $existing = {
@@ -91,26 +127,55 @@ $existing = {
   strand => -1,
   allele_string => 'T/C',
 };
-ok(!$c->is_var_novel($existing, $input), 'is_var_novel rev strand exact match');
+
+is_deeply(
+  $c->compare_existing($input, $existing),
+  {
+    %$existing,
+    matched_alleles => [{
+      a_index => 0,
+      a_allele => 'G',
+      b_index => 0,
+      b_allele => 'C',
+    }]
+  },
+  'compare_existing rev strand exact match'
+);
 
 $existing->{allele_string} = 'T/G';
-ok($c->is_var_novel($existing, $input), 'is_var_novel rev strand alleles dont match with check');
+is(
+  $c->compare_existing($input, $existing),
+  undef,
+  'compare_existing rev strand alleles dont match with check'
+);
 
 $c->{no_check_alleles} = 1;
-ok(!$c->is_var_novel($existing, $input), 'is_var_novel rev strand alleles dont match no check');
+is_deeply(
+  $c->compare_existing($input, $existing),
+  $existing,
+  'compare_existing rev strand alleles dont match no check'
+);
 $c->{no_check_alleles} = 0;
 
 # known variant missing alleles
 $existing->{allele_string} = 'NULL';
 
-ok(!$c->is_var_novel($existing, $input), 'is_var_novel missing alleles');
+is_deeply(
+  $c->compare_existing($input, $existing),
+  $existing,
+  'compare_existing missing alleles'
+);
 
 $c->{no_check_alleles} = 1;
-ok(!$c->is_var_novel($existing, $input), 'is_var_novel missing alleles no check');
+is_deeply(
+  $c->compare_existing($input, $existing),
+  $existing,
+  'compare_existing missing alleles no check'
+);
 $c->{no_check_alleles} = 0;
 
 $c->{exclude_null_alleles} = 1;
-ok($c->is_var_novel($existing, $input), 'is_var_novel missing alleles exclude_null_alleles');
+is($c->compare_existing($input, $existing), undef, 'compare_existing missing alleles exclude_null_alleles');
 $c->{exclude_null_alleles} = 0;
 
 
@@ -242,7 +307,15 @@ is_deeply($vf->{existing}, [
     'minor_allele' => 'T',
     'EA' => 'T:0',
     'start' => 25585733,
-    'pubmed' => ''
+    'pubmed' => '',
+    'matched_alleles' => [
+      {
+        'a_index' => 0,
+        'a_allele' => 'T',
+        'b_allele' => 'T',
+        'b_index' => 0
+      }
+    ],
   }
 ], 'annotate_InputBuffer');
 
@@ -256,10 +329,7 @@ $c->annotate_InputBuffer($ib);
 is($vf->{existing}, undef, 'annotate_InputBuffer - miss by one');
 
 # construct one to test phenotype_or_disease and clin_sig
-$p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, valid_chromosomes => [21], file => $test_cfg->create_input_file([qw(21 25891796 . C T . . .)])});
-$ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
-$ib->next;
-
+$ib = get_ib([qw(21 25891796 . C T . . .)]);
 $c->annotate_InputBuffer($ib);
 
 is_deeply(
@@ -293,7 +363,15 @@ is_deeply(
       'minor_allele' => 'T',
       'EA' => undef,
       'start' => 25891796,
-      'pubmed' => ''
+      'pubmed' => '',
+      'matched_alleles' => [
+        {
+          'a_index' => 0,
+          'a_allele' => 'T',
+          'b_allele' => 'T',
+          'b_index' => 0
+        }
+      ],
     },
     {
       'phenotype_or_disease' => '1',
@@ -312,6 +390,78 @@ is_deeply(
   'annotate_InputBuffer - phenotype_or_disease'
 );
 
+
+# test some nastiness
+no warnings 'qw';
+
+$ib = get_ib([qw(21 8987005 . A AGCG . . .)]);
+$c->annotate_InputBuffer($ib);
+is_deeply(
+  $ib->buffer->[0]->{existing}->[0]->{matched_alleles},
+  [
+    {
+      'a_index' => 0,
+      'a_allele' => 'GCG',
+      'b_allele' => 'GCG',
+      'b_index' => 0
+    }
+  ],
+  'nastiness 1'
+);
+
+$ib = get_ib([qw(21 8987004 . TA C,TAGCG . . .)]);
+$c->annotate_InputBuffer($ib);
+is_deeply(
+  $ib->buffer->[0]->{existing}->[0]->{matched_alleles},
+  [
+    {
+      'a_index' => 1,
+      'a_allele' => 'TAGCG',
+      'b_allele' => 'GCG',
+      'b_index' => 0
+    }
+  ],
+  'nastiness 2'
+);
+
+$ib = get_ib([qw(21 8987004 . TAT TAGCGT . . .)]);
+$c->annotate_InputBuffer($ib);
+is_deeply(
+  $ib->buffer->[0]->{existing}->[0]->{matched_alleles},
+  [
+    {
+      'a_index' => 0,
+      'a_allele' => 'AGCGT',
+      'b_allele' => 'GCG',
+      'b_index' => 0
+    }
+  ],
+  'nastiness 3'
+);
+
+$ib = get_ib([qw(21 8987004 . TAT TAGCGT,TAGTGT . . .)]);
+$c->annotate_InputBuffer($ib);
+is_deeply(
+  $ib->buffer->[0]->{existing}->[0]->{matched_alleles},
+  [
+    {
+      'a_index' => 0,
+      'a_allele' => 'AGCGT',
+      'b_allele' => 'GCG',
+      'b_index' => 0
+    },
+    {
+      'a_index' => 1,
+      'a_allele' => 'AGTGT',
+      'b_allele' => 'GTG',
+      'b_index' => 1
+    }
+  ],
+  'nastiness 4'
+);
+
+
+# test old_maf setting
 $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}, valid_chromosomes => [21]});
 $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
 $ib->next();
@@ -324,3 +474,16 @@ $c->{old_maf} = 0;
 
 # done
 done_testing();
+
+sub get_ib {
+  my $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
+    config => $cfg,
+    parser => Bio::EnsEMBL::VEP::Parser::VCF->new({
+      config => $cfg,
+      valid_chromosomes => [21],
+      file => $test_cfg->create_input_file(shift)
+    })
+  });
+  $ib->next;
+  return $ib;
+}

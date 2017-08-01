@@ -57,6 +57,7 @@ use Scalar::Util qw(weaken);
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
+use Bio::EnsEMBL::Variation::Utils::Sequence qw(get_matched_variant_alleles);
 
 
 =head2 annotate_InputBuffer
@@ -84,7 +85,8 @@ sub annotate_InputBuffer {
       grep {ref($_) ne 'Bio::EnsEMBL::Variation::StructuralVariationFeature'}
       @{$buffer->get_overlapping_vfs($existing_vf->{start}, $existing_vf->{end})}
     ) {
-      push @{$vf->{existing}}, $existing_vf unless $self->is_var_novel($existing_vf, $vf);
+      my $matched = $self->compare_existing($vf, $existing_vf);
+      push @{$vf->{existing}}, $matched if $matched;
     }
   }
 
@@ -120,62 +122,67 @@ sub get_cache_columns {
 }
 
 
-=head2 is_var_novel
+=head2 compare_existing
 
-  Arg 1      : hashref $known_var
-  Arg 2      : Bio::EnsEMBL::Variation::VariationFeature $input_vf
-  Example    : $is_novel = $as->is_var_novel($known_var, $input_vf);
+  Arg 1      : Bio::EnsEMBL::Variation::VariationFeature $input_vf
+  Arg 2      : hashref $existing_var
+  Example    : my $matched = $as->compare_existing($input_vf, $existing_var);
   Description: Compares a VariationFeature as created from user input to
                a known variant from the cache/database and determines if
-               the input variant is novel. To do this the alleles of each
-               are compared - if any of the alleles in the input variant
-               are not found in the known variant (accounting for strand)
-               then the input variant is considered to be novel.
-  Returntype : bool
+               the two "match". If they do, a copy of $existing_var is returned,
+               typically with a "matched_alleles" hash key containing matched
+               alleles as returned by the Utils method
+               get_matched_variant_alleles().
+  Returntype : hashref $matched_existing_var
   Exceptions : none
   Caller     : annotate_InputBuffer()
   Status     : Stable
 
 =cut
 
-sub is_var_novel {
-  my $self = shift;
-  my $existing_var = shift;
-  my $new_var = shift;
+sub compare_existing {
+  my ($self, $input_var, $existing_var) = @_;
 
-  my $is_novel = 1;
-  
-  my $matched_coords = $existing_var->{start} == $new_var->start && $existing_var->{end} == $new_var->end;
-  $is_novel = 0 if $matched_coords;
-
-  # can't compare alleles with e.g. HGMD_MUTATION
+  # special case existing var with unknown alleles e.g. HGMD_MUTATION
   if($existing_var->{allele_string} !~ /\//) {
     if($self->{exclude_null_alleles}) {
-      return 1;
+      return undef;
     }
-    elsif($matched_coords) {
-      return 0;
+    elsif($existing_var->{start} == $input_var->{start} && $existing_var->{end} == $input_var->{end}) {
+      return $existing_var;
+    }
+  }
+
+  elsif($self->{no_check_alleles}) {
+    if($existing_var->{start} == $input_var->{start} && $existing_var->{end} == $input_var->{end}) {
+      return $existing_var;
     }
     else {
-      return 1;
+      return undef;
     }
   }
 
-  unless($self->{no_check_alleles}) {
-    my %existing_alleles;
-
-    $existing_alleles{$_} = 1 for split '\/', $existing_var->{allele_string};
-
-    my $seen_new = 0;
-    foreach my $a(grep {$_ ne 'N'} split '\/', ($new_var->allele_string || "")) {
-      reverse_comp(\$a) if $new_var->strand ne $existing_var->{strand};
-      $seen_new = 1 unless defined $existing_alleles{$a};
+  my $matched_alleles = get_matched_variant_alleles(
+    {
+      allele_string => $input_var->{allele_string},
+      pos => $input_var->{start},
+      strand => $input_var->{strand}
+    },
+    {
+      allele_string => $existing_var->{allele_string},
+      pos => $existing_var->{start},
+      strand => $existing_var->{strand}
     }
-
-    $is_novel = 1 if $seen_new;
+  );
+    
+  # make a copy as we're going to add allele data to it
+  if(@$matched_alleles) {
+    my %existing_var_copy = %{$existing_var};
+    $existing_var_copy{matched_alleles} = $matched_alleles;
+    return \%existing_var_copy;
   }
 
-  return $is_novel;
+  return undef;
 }
 
 

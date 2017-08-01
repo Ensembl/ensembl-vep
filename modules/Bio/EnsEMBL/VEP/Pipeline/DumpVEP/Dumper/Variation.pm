@@ -37,7 +37,7 @@ use FileHandle;
 use Bio::EnsEMBL::VEP::Config;
 use Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation;
 use Bio::EnsEMBL::VEP::AnnotationSource::Cache::Variation;
-use Bio::EnsEMBL::Variation::Utils::Sequence qw(trim_sequences);
+use Bio::EnsEMBL::Variation::Utils::Sequence qw(trim_sequences get_matched_variant_alleles);
 use Scalar::Util qw(looks_like_number);
 
 our $CAN_USE_TABIX_PM;
@@ -260,9 +260,7 @@ sub freqs_from_vcf {
   # put into a hash so we can lookup by pos
   my %by_pos;
   for(@list) {
-    # add both start and start - 1 to match indels with preceding base attached
     push @{$by_pos{$_->{start}}}, $_;
-    push @{$by_pos{$_->{start} - 1}}, $_;  
   }
   
   # iterate over each VCF file in the config
@@ -280,74 +278,32 @@ sub freqs_from_vcf {
 
     while($parser->next) {
 
-      my $orig_ref = $parser->get_reference;
-      my $orig_start = $parser->get_raw_start;
-      my @orig_alts = @{$parser->get_alternatives};
+      my $vcf_ref  = $parser->get_reference;
+      my $vcf_pos  = $parser->get_raw_start;
+      my @vcf_alts = @{$parser->get_alternatives};
 
-      # trim alts and group by resolved start position
-      my $alts_by_start = {};
+      # scan from from pos to inferred end
+      for my $start(grep {$by_pos{$_}} ($vcf_pos..(($vcf_pos + length($vcf_ref)) - 1))) {
 
-      foreach my $alt_index(0..$#orig_alts) {
+        foreach my $v(@{$by_pos{$start}}) {
+          $DB::single = 1 if $v->{variation_name} eq 'TMP_ESP_1_179086420_179086420';
 
-        my $orig_alt = $orig_alts[$alt_index];
-
-        # use trim sequences to get the minimal representation of each allele
-        my ($ref, $alt, $start) = @{trim_sequences($orig_ref, $orig_alt, $orig_start, undef, 1)};
-
-        push @{$alts_by_start->{$start}}, {
-          r => $ref,
-          a => $alt,
-          i => $alt_index
-        };
-      }
-
-      # treat each group of ref+alts with same start as a separate variant
-      # this is to account for ExAC which has lines containing both SNPs and indels
-      foreach my $start(sort {$a <=> $b} keys %$alts_by_start) {
-
-        # dont consider variants already done by this file
-        # can happen with SNPs and indels on separate lines that resolve to same start pos
-        my @possibles = grep {!($_->{_done_vcf} && $_->{_done_vcf}->{$file})} @{$by_pos{$start}};
-        next unless scalar @possibles;
-
-        # get data for this alt group
-        my $hashes = $alts_by_start->{$start};
-        my $ref = $hashes->[0]->{r};                                  # ref should be the same for all
-        my @alts = map {$_->{a}} @$hashes;
-        my %alt_indexes = map {$_->{i} => $_->{a}} @$hashes;
-        my @sorted_alt_indexes = sort {$a <=> $b} keys %alt_indexes;
-
-        foreach my $v(@possibles) {
-          my $match = 0;
-
-          if(grep {$v->{variation_name} eq $_} @{$parser->get_IDs || []}) {
-            $match = 1;
-          }
-
-          # allele string and coords match
-          elsif($v->{start} == $start) {
-            if($v->{allele_string} eq join('/', $ref, @alts)) {
-              $match = 1;
+          my $matches = get_matched_variant_alleles(
+            {
+              allele_string => $v->{allele_string},
+              pos           => $v->{start},
+              strand        => $v->{strand},
+            },
+            {
+              ref  => $vcf_ref,
+              alts => \@vcf_alts,
+              pos  => $vcf_pos,
             }
-            else {
-              my @v_alleles = split('/', $v->{allele_string});
+          );
 
-              # ref allele must match
-              if($v_alleles[0] eq $ref) {
+          if(@$matches) {
 
-                # check if _all_ of the VCF alleles exist in the allele string
-                # if one or more doesn't, the allele frequencies won't be valid
-                my %h = map {$_ => 1} @v_alleles;
-                my @m = grep {$h{$_}} ($ref, @alts);
-                $match = 1 if scalar @m == scalar @alts + 1;
-              }
-            }
-          }
-
-          if($match) {
-
-            # mark this variant done by this file
-            $v->{_done_vcf}->{$file} = 1;
+            my %allele_map = map {$_->{b_index} => $_->{a_allele}} @$matches;
 
             # get INFO field data from VCF
             my $info = $parser->get_info;
@@ -365,8 +321,7 @@ sub freqs_from_vcf {
                 $info_prefix = $pop.'_';
               }
 
-              my $store_name = $prefix.$pop;
-              $store_name =~ s/\_$//;
+              my $tmp_f;
 
               if(exists($info->{$info_prefix.'AF'.$info_suffix})) {
                 my $f = $info->{$info_prefix.'AF'.$info_suffix};
@@ -374,14 +329,13 @@ sub freqs_from_vcf {
 
                 # there will be one item in @split for each of the original alts
                 # since we may not be dealing with all the alts here
-                # we have to use the indexes and alts we logged in %alt_indexes
-                my $tmp_f = join(',',
-                  map {$alt_indexes{$_}.':'.($split[$_] == 0 ? 0 : sprintf('%.4g', $split[$_]))}
+                # we have to use the indexes and alts we logged in %allele_map
+                $tmp_f = join(',',
+                  map {$allele_map{$_}.':'.($split[$_] == 0 ? 0 : sprintf('%.4g', $split[$_]))}
+                  grep {$allele_map{$_}}
                   grep {looks_like_number($split[$_])}
-                  @sorted_alt_indexes
+                  0..$#split
                 );
-
-                $v->{$store_name} = $tmp_f if defined($tmp_f) && $tmp_f ne '';
               }
               elsif(exists($info->{$info_prefix.'AC'.$info_suffix})) {
                 my $c = $info->{$info_prefix.'AC'.$info_suffix};
@@ -395,15 +349,21 @@ sub freqs_from_vcf {
                 next unless $n;
 
                 # ESP VCFs include REF as last allele, just to annoy everyone
-                pop @split if scalar @split > scalar @orig_alts;
+                pop @split if scalar @split > scalar @vcf_alts;
 
-                my $tmp_f = join(',',
-                  map {$alt_indexes{$_}.':'.($split[$_] ? sprintf('%.4g', $split[$_] / $n) : 0)}
+                $tmp_f = join(',',
+                  map {$allele_map{$_}.':'.($split[$_] ? sprintf('%.4g', $split[$_] / $n) : 0)}
+                  grep {$allele_map{$_}}
                   grep {looks_like_number($split[$_])}
-                  @sorted_alt_indexes
+                  0..$#split
                 );
+              }              
 
-                $v->{$store_name} = $tmp_f if defined($tmp_f) && $tmp_f ne '';
+              if(defined($tmp_f) && $tmp_f ne '') {
+                my $store_name = $prefix.$pop;
+                $store_name =~ s/\_$//;
+                
+                $v->{$store_name} = $v->{$store_name} ? $v->{$store_name}.','.$tmp_f : $tmp_f;
               }
             }
           }

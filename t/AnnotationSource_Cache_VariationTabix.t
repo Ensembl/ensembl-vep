@@ -91,7 +91,15 @@ my $exp = [{
   'minor_allele' => 'T',
   'EA' => 'T:0',
   'start' => 25585733,
-  'pubmed' => undef
+  'pubmed' => undef,
+  'matched_alleles' => [
+    {
+      'a_index' => 0,
+      'a_allele' => 'T',
+      'b_allele' => 'T',
+      'b_index' => 0
+    }
+  ],
 }];
 
 use_ok('Bio::EnsEMBL::VEP::InputBuffer');
@@ -165,10 +173,7 @@ SKIP: {
   is(scalar (grep {$_->{existing}} @{$ib->buffer}), 132, 'annotate_InputBuffer count annotated');
 
   # construct one to test phenotype_or_disease and clin_sig
-  $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, valid_chromosomes => [21], file => $test_cfg->create_input_file([qw(21 25891796 . C T . . .)])});
-  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
-  $ib->next;
-
+  $ib = get_ib([qw(21 25891796 . C T . . .)]);
   $c->annotate_InputBuffer($ib);
 
   is_deeply(
@@ -234,7 +239,15 @@ SKIP: {
         'minor_allele' => 'T',
         'EA' => undef,
         'start' => 25891796,
-        'pubmed' => undef
+        'pubmed' => undef,,
+        'matched_alleles' => [
+          {
+            'a_index' => 0,
+            'a_allele' => 'T',
+            'b_allele' => 'T',
+            'b_index' => 0
+          }
+        ],
       }
     ],
     'annotate_InputBuffer - phenotype_or_disease'
@@ -400,6 +413,79 @@ SKIP: {
 
   # reset
   $c->{freq_freq} = $orig{freq_freq};
+  $c->{no_check_alleles} = 0;
+
+
+
+
+  # test some nastiness
+  no warnings 'qw';
+
+  $ib = get_ib([qw(21 8987005 . A AGCG . . .)]);
+  $c->annotate_InputBuffer($ib);
+  is_deeply(
+    $ib->buffer->[0]->{existing}->[0]->{matched_alleles},
+    [
+      {
+        'a_index' => 0,
+        'a_allele' => 'GCG',
+        'b_allele' => 'GCG',
+        'b_index' => 0
+      }
+    ],
+    'nastiness 1'
+  );
+
+  $ib = get_ib([qw(21 8987004 . TA C,TAGCG . . .)]);
+  $c->annotate_InputBuffer($ib);
+  is_deeply(
+    $ib->buffer->[0]->{existing}->[0]->{matched_alleles},
+    [
+      {
+        'a_index' => 1,
+        'a_allele' => 'TAGCG',
+        'b_allele' => 'GCG',
+        'b_index' => 0
+      }
+    ],
+    'nastiness 2'
+  );
+
+  $ib = get_ib([qw(21 8987004 . TAT TAGCGT . . .)]);
+  $c->annotate_InputBuffer($ib);
+  is_deeply(
+    $ib->buffer->[0]->{existing}->[0]->{matched_alleles},
+    [
+      {
+        'a_index' => 0,
+        'a_allele' => 'AGCGT',
+        'b_allele' => 'GCG',
+        'b_index' => 0
+      }
+    ],
+    'nastiness 3'
+  );
+
+  $ib = get_ib([qw(21 8987004 . TAT TAGCGT,TAGTGT . . .)]);
+  $c->annotate_InputBuffer($ib);
+  is_deeply(
+    $ib->buffer->[0]->{existing}->[0]->{matched_alleles},
+    [
+      {
+        'a_index' => 0,
+        'a_allele' => 'AGCGT',
+        'b_allele' => 'GCG',
+        'b_index' => 0
+      },
+      {
+        'a_index' => 1,
+        'a_allele' => 'AGTGT',
+        'b_allele' => 'GTG',
+        'b_index' => 1
+      }
+    ],
+    'nastiness 4'
+  );
 }
 
 
@@ -475,7 +561,90 @@ SKIP: {
   is_deeply($vf->{existing}, $exp, 'annotate_InputBuffer - _annotate_cl');
 
   is(scalar (grep {$_->{existing}} @{$ib->buffer}), 132, 'annotate_InputBuffer count annotated');
+
+
+  # test some nastiness
+  no warnings 'qw';
+
+  $ib = get_ib([qw(21 8987005 . A AGCG . . .)]);
+  $c->annotate_InputBuffer($ib);
+  is_deeply(
+    $ib->buffer->[0]->{existing}->[0]->{matched_alleles},
+    [
+      {
+        'a_index' => 0,
+        'a_allele' => 'GCG',
+        'b_allele' => 'GCG',
+        'b_index' => 0
+      }
+    ],
+    'nastiness 1 - _annotate_cl'
+  );
+
+  $ib = get_ib([qw(21 8987004 . TA C,TAGCG . . .)]);
+  $c->annotate_InputBuffer($ib);
+  is_deeply(
+    $ib->buffer->[0]->{existing}->[0]->{matched_alleles},
+    [
+      {
+        'a_index' => 1,
+        'a_allele' => 'TAGCG',
+        'b_allele' => 'GCG',
+        'b_index' => 0
+      }
+    ],
+    'nastiness 2 - _annotate_cl'
+  );
+
+  $ib = get_ib([qw(21 8987004 . TAT TAGCGT . . .)]);
+  $c->annotate_InputBuffer($ib);
+  is_deeply(
+    $ib->buffer->[0]->{existing}->[0]->{matched_alleles},
+    [
+      {
+        'a_index' => 0,
+        'a_allele' => 'AGCGT',
+        'b_allele' => 'GCG',
+        'b_index' => 0
+      }
+    ],
+    'nastiness 3 - _annotate_cl'
+  );
+
+  $ib = get_ib([qw(21 8987004 . TAT TAGCGT,TAGTGT . . .)]);
+  $c->annotate_InputBuffer($ib);
+  is_deeply(
+    $ib->buffer->[0]->{existing}->[0]->{matched_alleles},
+    [
+      {
+        'a_index' => 0,
+        'a_allele' => 'AGCGT',
+        'b_allele' => 'GCG',
+        'b_index' => 0
+      },
+      {
+        'a_index' => 1,
+        'a_allele' => 'AGTGT',
+        'b_allele' => 'GTG',
+        'b_index' => 1
+      }
+    ],
+    'nastiness 4 - _annotate_cl'
+  );
 }
 
 # done
 done_testing();
+
+sub get_ib {
+  my $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
+    config => $cfg,
+    parser => Bio::EnsEMBL::VEP::Parser::VCF->new({
+      config => $cfg,
+      valid_chromosomes => [21],
+      file => $test_cfg->create_input_file(shift)
+    })
+  });
+  $ib->next;
+  return $ib;
+}
