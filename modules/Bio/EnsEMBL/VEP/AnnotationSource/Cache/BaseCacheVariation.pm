@@ -136,10 +136,10 @@ sub parse_variation {
     }
   }
 
-  # sanity check frequency data
-  foreach my $pop(grep {defined($v{$_})} qw(AFR AMR ASN EAS EUR SAS AA EA)) {
-    $v{$pop} = undef unless $v{$pop} =~ /^([ACGTN-]+\:)?(0|0\.\d+|1)$/;
-  }
+  # # sanity check frequency data
+  # foreach my $pop(grep {defined($v{$_})} qw(AFR AMR ASN EAS EUR SAS AA EA)) {
+  #   $v{$pop} = undef unless $v{$pop} =~ /^(([ACGTN\-]+?\:)([\-e\.\d]+)\,?)+$/i;
+  # }
 
   return \%v;
 }

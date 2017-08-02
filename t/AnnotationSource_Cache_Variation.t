@@ -343,7 +343,7 @@ is_deeply(
       'gnomAD' => 'T:9.75e-05',
       'failed' => 0,
       'gnomAD_AMR' => 'T:0.0005957',
-      'AA' => undef,
+      'AA' => '',
       'somatic' => 0,
       'AFR' => 'T:0',
       'strand' => 1,
@@ -361,7 +361,7 @@ is_deeply(
       'gnomAD_NFE' => 'T:2.687e-05',
       'variation_name' => 'rs63750066',
       'minor_allele' => 'T',
-      'EA' => undef,
+      'EA' => '',
       'start' => 25891796,
       'pubmed' => '',
       'matched_alleles' => [
