@@ -261,6 +261,9 @@ sub registry {
       }
 
       eval { $reg->set_reconnect_when_lost() };
+
+      # silence version check warnings, we'll frequently use non-current DB versions
+      $reg->no_version_check(1);
     }
 
     $config->{_registry} = $reg;
