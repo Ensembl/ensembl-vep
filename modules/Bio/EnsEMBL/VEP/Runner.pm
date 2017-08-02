@@ -447,6 +447,9 @@ sub _forked_buffer_to_output {
   my $vfs = $buffer->next();
   return [] unless $vfs && scalar @$vfs;
 
+  # log lines read here
+  $self->stats->log_lines_read($buffer->parser->line_number) if $buffer->parser && !$self->param('no_stats');
+
   my $fork_number = $self->param('fork');
   my $buffer_size = $self->param('buffer_size');
   my $delta = 0.5;
