@@ -51,6 +51,7 @@ our (
   $DEST_DIR,
   $ENS_CVS_ROOT,
   $API_VERSION,
+  $DATA_VERSION,
   $ASSEMBLY,
   $ENS_GIT_ROOT,
   $BIOPERL_URL,
@@ -135,26 +136,27 @@ my $VEP_MODULE_NAME = 'ensembl-vep';
 our (@store_species, @indexes, @files, $ftp, $dirname);
 
 GetOptions(
-  'DESTDIR|d=s'  => \$DEST_DIR,
-  'VERSION|v=i'  => \$API_VERSION,
-  'ASSEMBLY|y=s' => \$ASSEMBLY,
-  'BIOPERL|b=s'  => \$BIOPERL_URL,
-  'CACHEURL|u=s' => \$CACHE_URL,
-  'CACHEDIR|c=s' => \$CACHE_DIR,
-  'FASTAURL|f=s' => \$FASTA_URL,
-  'HELP|h'       => \$HELP,
-  'NO_UPDATE|n'  => \$NO_UPDATE,
-  'SPECIES|s=s'  => \$SPECIES,
-  'PLUGINS|g=s'  => \$PLUGINS,
-  'PLUGINURL=s'  => \$PLUGIN_URL,
-  'AUTO|a=s'     => \$AUTO,
-  'QUIET|q'      => \$QUIET,
-  'PREFER_BIN|p' => \$PREFER_BIN,
-  'CONVERT|t'    => \$CONVERT,
-  'TEST'         => \$TEST,
-  'NO_HTSLIB|l'  => \$NO_HTSLIB,
-  'NO_TEST'      => \$NO_TEST,
-  'NO_BIOPERL'   => \$NO_BIOPERL
+  'DESTDIR|d=s'        => \$DEST_DIR,
+  'VERSION|v=i'        => \$API_VERSION,
+  'CACHE_VERSION|e=i'  => \$DATA_VERSION,
+  'ASSEMBLY|y=s'       => \$ASSEMBLY,
+  'BIOPERL|b=s'        => \$BIOPERL_URL,
+  'CACHEURL|u=s'       => \$CACHE_URL,
+  'CACHEDIR|c=s'       => \$CACHE_DIR,
+  'FASTAURL|f=s'       => \$FASTA_URL,
+  'HELP|h'             => \$HELP,
+  'NO_UPDATE|n'        => \$NO_UPDATE,
+  'SPECIES|s=s'        => \$SPECIES,
+  'PLUGINS|g=s'        => \$PLUGINS,
+  'PLUGINURL=s'        => \$PLUGIN_URL,
+  'AUTO|a=s'           => \$AUTO,
+  'QUIET|q'            => \$QUIET,
+  'PREFER_BIN|p'       => \$PREFER_BIN,
+  'CONVERT|t'          => \$CONVERT,
+  'TEST'               => \$TEST,
+  'NO_HTSLIB|l'        => \$NO_HTSLIB,
+  'NO_TEST'            => \$NO_TEST,
+  'NO_BIOPERL'         => \$NO_BIOPERL
 ) or die("ERROR: Failed to parse arguments");
 
 # load version data
@@ -191,11 +193,12 @@ $dirname            = dirname(__FILE__) || '.';
 $ENS_GIT_ROOT ||= 'https://github.com/Ensembl/';
 $BIOPERL_URL  ||= 'https://github.com/bioperl/bioperl-live/archive/release-1-6-924.zip';
 $API_VERSION  ||= $CURRENT_VERSION_DATA->{$VEP_MODULE_NAME}->{release};
+$DATA_VERSION ||= $API_VERSION;
 $CACHE_DIR    ||= $ENV{HOME} ? $ENV{HOME}.'/.vep' : 'cache';
 $FTP_USER     ||= 'anonymous';
 
-$CACHE_URL  ||= "ftp://ftp.ensembl.org/pub/release-$API_VERSION/variation/VEP";
-$FASTA_URL  ||= "ftp://ftp.ensembl.org/pub/release-$API_VERSION/fasta/";
+$CACHE_URL  ||= "ftp://ftp.ensembl.org/pub/release-$DATA_VERSION/variation/VEP";
+$FASTA_URL  ||= "ftp://ftp.ensembl.org/pub/release-$DATA_VERSION/fasta/";
 $PLUGIN_URL ||= 'https://raw.githubusercontent.com/Ensembl/VEP_plugins';
 
 # using PREFER_BIN can save memory when extracting archives
@@ -1014,12 +1017,12 @@ sub cache() {
     print "For more species, see http://www.ensembl.org/info/docs/tools/vep/script/vep_cache.html#pre\n";
 
     @files = (
-      "bos_taurus_vep_".$API_VERSION."_UMD3.1.tar.gz",
-      "danio_rerio_vep_".$API_VERSION."_Zv9.tar.gz",
-      "homo_sapiens_vep_".$API_VERSION."_GRCh37.tar.gz",
-      "homo_sapiens_vep_".$API_VERSION."_GRCh38.tar.gz",
-      "mus_musculus_vep_".$API_VERSION."_GRCm38.tar.gz",
-      "rattus_norvegicus_vep_".$API_VERSION."_Rnor_5.0.tar.gz",
+      "bos_taurus_vep_".$DATA_VERSION."_UMD3.1.tar.gz",
+      "danio_rerio_vep_".$DATA_VERSION."_Zv9.tar.gz",
+      "homo_sapiens_vep_".$DATA_VERSION."_GRCh37.tar.gz",
+      "homo_sapiens_vep_".$DATA_VERSION."_GRCh38.tar.gz",
+      "mus_musculus_vep_".$DATA_VERSION."_GRCm38.tar.gz",
+      "rattus_norvegicus_vep_".$DATA_VERSION."_Rnor_5.0.tar.gz",
     );
   }
 
@@ -1056,7 +1059,7 @@ sub cache() {
 
           my @assemblies = ();
           foreach my $m(@matches) {
-            $files[$m-1] =~ m/\_vep\_$API_VERSION\_(.+?)\.tar\.gz/;
+            $files[$m-1] =~ m/\_vep\_$DATA_VERSION\_(.+?)\.tar\.gz/;
             push @assemblies, $1 if $1;
           }
 
@@ -1103,14 +1106,14 @@ sub cache() {
     push @store_species, $species;
 
     # check if user already has this species and version
-    if(-e "$CACHE_DIR/$species/$API_VERSION\_$assembly") {
+    if(-e "$CACHE_DIR/$species/$DATA_VERSION\_$assembly") {
 
       my $ok;
 
-      print "\nWARNING: It looks like you already have the cache for $species $assembly (v$API_VERSION) installed.\n" unless $QUIET;
+      print "\nWARNING: It looks like you already have the cache for $species $assembly (v$DATA_VERSION) installed.\n" unless $QUIET;
 
       if($AUTO) {
-        print "\nDelete the folder $CACHE_DIR/$species/$API_VERSION\_$assembly and re-run INSTALL.pl if you want to re-install\n";
+        print "\nDelete the folder $CACHE_DIR/$species/$DATA_VERSION\_$assembly and re-run INSTALL.pl if you want to re-install\n";
       }
       else {
         print "If you continue the existing cache will be overwritten.\nAre you sure you want to continue (y/n)? ";
@@ -1123,7 +1126,7 @@ sub cache() {
         next;
       }
 
-      rmtree("$CACHE_DIR/$species/$API_VERSION\_$assembly") or die "ERROR: Could not delete directory $CACHE_DIR/$species/$API_VERSION\_$assembly\n";
+      rmtree("$CACHE_DIR/$species/$DATA_VERSION\_$assembly") or die "ERROR: Could not delete directory $CACHE_DIR/$species/$DATA_VERSION\_$assembly\n";
     }
 
     if($species =~ /refseq/i) {
@@ -1180,7 +1183,7 @@ sub cache() {
     # convert?
     if($CONVERT && !$TEST) {
       print " - converting cache\n" unless $QUIET;
-      system("perl $dirname/convert_cache.pl --dir $CACHE_DIR --species $species --version $API_VERSION\_$assembly") == 0 or print STDERR "WARNING: Failed to run convert script\n";
+      system("perl $dirname/convert_cache.pl --dir $CACHE_DIR --species $species --version $DATA_VERSION\_$assembly") == 0 or print STDERR "WARNING: Failed to run convert script\n";
     }
   }
 }
@@ -1201,7 +1204,7 @@ sub fasta() {
     # change URL to point to last e! version that had GRCh37 downloads
     elsif($FASTA_URL =~ /ftp/) {
       print "\nWARNING: Changing FTP URL for GRCh37\n";
-      $FASTA_URL =~ s/$API_VERSION/75/;
+      $FASTA_URL =~ s/$DATA_VERSION/75/;
     }
   }
 
@@ -1316,7 +1319,7 @@ sub fasta() {
 
     die("ERROR: Unable to parse assembly name from $file\n") unless $assembly;
 
-    my $ex = "$CACHE_DIR/$orig_species/$API_VERSION\_$assembly/$file";
+    my $ex = "$CACHE_DIR/$orig_species/$DATA_VERSION\_$assembly/$file";
     my $ex_unpacked = $ex;
     $ex_unpacked =~ s/\.gz$//;
     if(-e $ex || -e $ex_unpacked) {
@@ -1332,7 +1335,7 @@ sub fasta() {
     # create path
     mkdir($CACHE_DIR) unless -d $CACHE_DIR || $TEST;
     mkdir("$CACHE_DIR/$orig_species") unless -d "$CACHE_DIR/$orig_species" || $TEST;
-    mkdir("$CACHE_DIR/$orig_species/$API_VERSION\_$assembly") unless -d "$CACHE_DIR/$orig_species/$API_VERSION\_$assembly" || $TEST;
+    mkdir("$CACHE_DIR/$orig_species/$DATA_VERSION\_$assembly") unless -d "$CACHE_DIR/$orig_species/$DATA_VERSION\_$assembly" || $TEST;
 
     if($ftp) {
       print " - downloading $file\n" unless $QUIET;
@@ -1373,7 +1376,7 @@ sub fasta() {
 
     elsif($NO_HTSLIB) {
       print " - extracting data\n" unless $QUIET;
-      unpack_arch($ex, "$CACHE_DIR/$orig_species/$API_VERSION\_$assembly/") unless $TEST;
+      unpack_arch($ex, "$CACHE_DIR/$orig_species/$DATA_VERSION\_$assembly/") unless $TEST;
 
       print " - attempting to index\n" unless $QUIET;
       eval q{
@@ -1710,7 +1713,8 @@ Options
 -h | --help        Display this message and quit
 
 -d | --DESTDIR     Set destination directory for API install (default = './')
--v | --VERSION     Set API version to install (default = $VERSION)
+-v | --VERSION     Set API and data (cache, FASTA) version to install (default = $VERSION)
+--CACHE_VERSION    Set data (cache, FASTA) version to install if different from --VERSION (default = $VERSION)
 -c | --CACHEDIR    Set destination directory for cache files (default = '$ENV{HOME}/.vep/')
 
 -a | --AUTO        Run installer without user prompts. Use "a" (API + Faidx/htslib),
