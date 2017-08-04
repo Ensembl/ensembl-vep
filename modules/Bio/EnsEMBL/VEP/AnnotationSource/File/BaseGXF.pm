@@ -59,6 +59,7 @@ use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
 use Bio::EnsEMBL::Transcript;
 use Bio::EnsEMBL::Translation;
 use Bio::EnsEMBL::Exon;
+use Bio::EnsEMBL::Attribute;
 
 use Scalar::Util qw(weaken);
 use Digest::MD5 qw(md5_hex);
@@ -631,6 +632,14 @@ sub _add_identifiers {
 
   if(!$tr->{_gene_symbol} && $gene_record) {
     $tr->{_gene_symbol} = $gene_record->{attributes}->{name} || $gene_record->{attributes}->{Name};
+  }
+
+  # add TSL
+  if(my $tsl = $tr_record->{attributes}->{transcript_support_level} || $tr_record->{attributes}->{tsl}) {
+    push @{$tr->{attributes}}, Bio::EnsEMBL::Attribute->new_fast({
+      code => 'TSL',
+      value => 'tsl'.$tsl,
+    });
   }
 }
 
