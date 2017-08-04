@@ -686,15 +686,19 @@ sub warning_msg {
   $text = 'WARNING: '.$text unless $text =~ /^warn/i;
   $text = $text."\n" unless $text =~ /\n$/;
 
+  # check if we've seen this warning before
+  my $to_check = $text;
+  $to_check =~ s/line \d+\n?$//;
+  return if $self->{_seen_warnings} && $self->{_seen_warnings}->{$to_check};
+  $self->{_seen_warnings}->{$to_check} = 1;
+
   # $self->config->{warning_count}++ if $self->config;
 
   my $fh = $self->warning_fh;
 
   print $fh $text;
 
-  unless($self->param('quiet')) {
-    warn($self->param('no_progress') ? $text : "\n$text");
-  }
+  warn($text) unless $self->param('quiet');
 }
 
 
