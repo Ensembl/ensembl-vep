@@ -328,7 +328,7 @@ CREATE TABLE `meta` (
   PRIMARY KEY (`meta_id`),
   UNIQUE KEY `species_key_value_idx` (`species_id`,`meta_key`,`meta_value`),
   KEY `species_value_idx` (`species_id`,`meta_value`)
-) ENGINE=MyISAM AUTO_INCREMENT=659 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=663 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `meta_coord` (
   `table_name` varchar(40) NOT NULL,
@@ -422,6 +422,8 @@ CREATE TABLE `probe_feature` (
   `analysis_id` smallint(5) unsigned NOT NULL,
   `mismatches` tinyint(4) NOT NULL,
   `cigar_line` varchar(50) DEFAULT NULL,
+  `hit_id` varchar(255) DEFAULT NULL,
+  `source` enum('genomic','transcript') DEFAULT NULL,
   PRIMARY KEY (`probe_feature_id`),
   KEY `probe_idx` (`probe_id`),
   KEY `seq_region_probe_probe_feature_idx` (`seq_region_id`,`seq_region_start`,`seq_region_end`,`probe_id`,`probe_feature_id`)
@@ -462,7 +464,8 @@ CREATE TABLE `probe_set_transcript` (
   `stable_id` varchar(128) NOT NULL,
   `description` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`probe_set_transcript_id`),
-  KEY `probe_set_transcript_id_idx` (`probe_set_transcript_id`)
+  KEY `probe_set_transcript_id_idx` (`probe_set_transcript_id`),
+  KEY `probe_set_transcript_stable_id_idx` (`stable_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `probe_transcript` (
@@ -471,7 +474,8 @@ CREATE TABLE `probe_transcript` (
   `stable_id` varchar(128) NOT NULL,
   `description` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`probe_transcript_id`),
-  KEY `probe_transcript_id` (`probe_transcript_id`)
+  KEY `probe_transcript_id` (`probe_transcript_id`),
+  KEY `probe_transcript_stable_id_idx` (`stable_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `regulatory_activity` (

@@ -1,4 +1,4 @@
-534	\N	schema_version	89
+534	\N	schema_version	90
 80	\N	patch	patch_50_51_b.sql|multispecies
 83	\N	patch	patch_50_51_c.sql|associated_feature_type
 82	\N	patch	patch_50_51_a.sql|cell_type_description
@@ -212,3 +212,7 @@
 656	\N	patch	patch_88_89_i.sql|New columns for array table
 657	\N	patch	patch_88_89_j.sql|Added array_chip_id column to probe_set table
 658	\N	patch	patch_88_89_k.sql|Added probe_seq_id column to probe table
+659	\N	patch	patch_89_90_a.sql|schema_version
+660	\N	patch	patch_89_90_b.sql|probe feature columns
+661	\N	patch	patch_89_90_c.sql|Adds stable id index for probe_transcript table
+662	\N	patch	patch_89_90_d.sql|Adds stable id index for probe_set_transcript table
