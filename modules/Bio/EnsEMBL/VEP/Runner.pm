@@ -712,7 +712,7 @@ sub post_setup_checks {
 
     # and these depend on either DB or FASTA DB
     unless($self->fasta_db) {
-      foreach my $param(grep {$self->param($_)} qw(hgvs hgvsc hgvsp check_ref)) {
+      foreach my $param(grep {$self->param($_)} qw(hgvs hgvsc hgvsp check_ref use_transcript_ref)) {
         $self->status_msg("INFO: Database will be accessed when using --$param");
       }
     }
