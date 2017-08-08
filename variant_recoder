@@ -34,7 +34,7 @@ GetOptions(
   # input options,
   'config=s',                # config file name
   'input_file|i=s',          # input file name
-  'input_data|data=s',       # input data
+  'input_data|id=s',         # input data
   'format=s',                # input file format
   'output_format=s',         # output file format
   'delimiter=s',             # delimiter between fields in input
