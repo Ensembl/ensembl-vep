@@ -314,14 +314,14 @@ sub update() {
   my $message;
 
   # don't have latest
-  if($current_branch ne $default_branch_number) {
+  if($current_branch < $default_branch_number) {
     $message = 
       "Version check reports a newer release of $module is available ".
-      "(installed: $current_branch, available: $default_branch)\n";
+      "(installed: $current_branch, available: $default_branch_number)\n";
   }
 
   # do have latest, but there might be updates
-  else {
+  elsif($current_branch == $default_branch_number) {
     my $git_sub = get_vep_sub_version($current_branch);
     my $have_sub = $CURRENT_VERSION_DATA->{$module}->{sub};
 
@@ -988,7 +988,7 @@ sub cache() {
   mkdir($CACHE_DIR.'/tmp') unless -e $CACHE_DIR.'/tmp';
 
   # get list of species
-  print "\Getting list of available cache files\n" unless $QUIET;
+  print " - getting list of available cache files\n" unless $QUIET;
 
   my $num = 1;
   my $species_list;
@@ -1181,9 +1181,20 @@ sub cache() {
     }
 
     # convert?
-    if($CONVERT && !$TEST) {
-      print " - converting cache\n" unless $QUIET;
-      system("perl $dirname/convert_cache.pl --dir $CACHE_DIR --species $species --version $DATA_VERSION\_$assembly") == 0 or print STDERR "WARNING: Failed to run convert script\n";
+    my $bgzip = `which bgzip`;
+    chomp($bgzip);
+    $bgzip ||= "$HTSLIB_DIR/bgzip";
+
+    my $tabix = `which tabix`;
+    chomp($tabix);
+    $tabix ||= "$HTSLIB_DIR/tabix";
+
+    if(((-e $bgzip && -e $tabix) || $CONVERT) && !$TEST) {
+      unless($QUIET) {
+        print " - converting cache, this may take some time but will allow VEP to look up variants and frequency data much faster\n";
+        print " - use CTRL-C to cancel if you do not wish to convert this cache now (you may run convert_cache.pl later)\n";
+      }
+      system("perl $dirname/convert_cache.pl --dir $CACHE_DIR --species $species --version $DATA_VERSION\_$assembly --bgzip $bgzip --tabix $tabix") == 0 or print STDERR "WARNING: Failed to run convert script\n";
     }
   }
 }
@@ -1279,11 +1290,13 @@ sub fasta() {
     $species =~ s/_merged//;
 
     my @files;
+    my $dna_path;
 
     if($ftp) {
       $ftp->cwd($species) or die "ERROR: Could not change directory to $species\n$@\n";
-      $ftp->cwd('dna') or die "ERROR: Could not change directory to dna\n$@\n";
+      $ftp->cwd('dna_index') or $ftp->cwd('dna') or die "ERROR: Could not change directory to dna\n$@\n";
       @files = $ftp->ls;
+      $dna_path = $ftp->pwd =~ /dna_index/ ? 'dna_index' : 'dna';
     }
     else {
       if(!opendir DIR, "$FASTA_URL/$species/dna") {
@@ -1340,7 +1353,7 @@ sub fasta() {
     if($ftp) {
       print " - downloading $file\n" unless $QUIET;
       if(!$TEST) {
-        $ftp->get($file, $ex) or download_to_file("$FASTA_URL/$species/dna/$file", $ex);
+        $ftp->get($file, $ex) or download_to_file("$FASTA_URL/$species/$dna_path/$file", $ex);
       }
     }
     else {
@@ -1355,21 +1368,37 @@ sub fasta() {
     eval q{ use Bio::DB::HTS::Faidx; };
     my $can_use_faidx = $@ ? 0 : 1;
 
-    if($can_use_faidx && -e $bgzip && $CAN_USE_GZIP) {
-      print " - converting sequence data to bgzip format, this may take some time...\n" unless $QUIET;
-      my $curdir = getcwd;
-      my $bgzip_convert = "gzip -dc $ex | $bgzip -c > $ex\.bgz; mv $ex\.bgz $ex";
-      my $bgzip_result = `$bgzip_convert` unless $TEST;
+    if($can_use_faidx) {
 
-      if( $? != 0 ) {
-        die "FASTA gzip to bgzip conversion failed: $bgzip_result\n" unless $TEST;
-      }
-      else {
-        print " - conversion successful\n";
+      if($dna_path !~ /dna_index/ && -e $bgzip && $CAN_USE_GZIP) {
+        print " - converting sequence data to bgzip format, this may take some time...\n" unless $QUIET;
+        my $curdir = getcwd;
+        my $bgzip_convert = "gzip -dc $ex | $bgzip -c > $ex\.bgz; mv $ex\.bgz $ex";
+        my $bgzip_result = `$bgzip_convert` unless $TEST;
+
+        if( $? != 0 ) {
+          die "FASTA gzip to bgzip conversion failed: $bgzip_result\n" unless $TEST;
+        }
+        else {
+          print " - conversion successful\n";
+        }
       }
 
-      Bio::DB::HTS::Faidx->new($ex) unless $TEST;
-      print " - indexing OK\n" unless $QUIET;
+      my $got_indexes = 0;
+      foreach my $index_file(grep {/$file\..+/} @files) {
+        if(!$TEST) {
+          $index_file =~ /$file(\..+)/;
+          print " - downloading $index_file\n" unless $QUIET;
+          $ftp->get($index_file, $ex.$1) or download_to_file("$FASTA_URL/$species/$dna_path/$index_file", $ex.$1);
+          $got_indexes++;
+        }
+      }
+
+      unless($got_indexes == 2) {
+        print " - indexing FASTA file\n" unless $QUIET;
+        Bio::DB::HTS::Faidx->new($ex) unless $TEST;
+        print " - indexing OK\n" unless $QUIET;
+      }
 
       print "\nThe FASTA file should be automatically detected by the VEP when using --cache or --offline.\nIf it is not, use \"--fasta $ex\"\n\n" unless $QUIET;
     }
@@ -1386,6 +1415,7 @@ sub fasta() {
         print "Indexing failed - VEP will attempt to index the file the first time you use it\n" unless $QUIET;
       }
       else {
+        print " - indexing FASTA file\n" unless $QUIET;
         Bio::DB::Fasta->new($ex_unpacked) unless $TEST;
         print " - indexing OK\n" unless $QUIET;
       }

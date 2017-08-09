@@ -68,6 +68,7 @@ use warnings;
 package Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix;
 
 use Scalar::Util qw(weaken);
+use FindBin qw($RealBin);
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
@@ -75,14 +76,18 @@ use base qw(
   Bio::EnsEMBL::VEP::AnnotationSource::Cache::BaseCacheVariation
 );
 
-our ($CAN_USE_TABIX_PM, $CAN_USE_TABIX_CL);
+our ($CAN_USE_TABIX_PM, $CAN_USE_TABIX_CL, $TABIX_BIN);
 
 BEGIN {
   if (eval q{ require Bio::DB::HTS::Tabix; 1 }) {
     $CAN_USE_TABIX_PM = 1;
   }
 
-  if (`which tabix` =~ /\/tabix/) {
+  $TABIX_BIN = `which tabix`;
+  chomp($TABIX_BIN);
+  $TABIX_BIN ||= "$RealBin/htslib/tabix";
+
+  if (-e $TABIX_BIN) {
     $CAN_USE_TABIX_CL = 1;
   }
 }
@@ -164,7 +169,7 @@ sub _annotate_cl {
       }
       my $region_string = join " ", @regions;
 
-      open VARS, "tabix -f $file $region_string 2>&1 |"
+      open VARS, "$TABIX_BIN -f $file $region_string 2>&1 |"
         or throw "\nERROR: Could not open tabix pipe for $file\n";
 
       # convert list to hash so we can look up quickly by position
