@@ -450,6 +450,7 @@ sub check_api() {
   my $has_api = {};
   my $updates = {};
   my $core_version;
+  my @unknown_versions = ();
 
   foreach my $module_hash(@API_MODULES) {
 
@@ -462,7 +463,13 @@ sub check_api() {
     if($has_api->{$module}) {
       my $have_sub = $CURRENT_VERSION_DATA->{$module} ? ($CURRENT_VERSION_DATA->{$module}->{sub} || '') : '';
       my $git_sub = get_module_sub_version($module);
-      $updates->{$module} = [$have_sub, $git_sub] if $have_sub ne $git_sub;
+
+      if($have_sub) {
+        $updates->{$module} = [$have_sub, $git_sub] if $have_sub ne $git_sub;
+      }
+      else {
+        push @unknown_versions, $module;
+      }
 
       if($module eq 'ensembl') {
         $core_version = Bio::EnsEMBL::Registry->software_version;
@@ -477,7 +484,7 @@ sub check_api() {
 
   my $message;
 
-  if($total == 4) {
+  if($total == scalar @API_MODULES) {
 
     if(defined($core_version)) {
       if(!looks_like_number($API_VERSION)) {
@@ -499,7 +506,17 @@ sub check_api() {
             );
         }
         else {
-          $message = "It looks like you already have v$API_VERSION of the API installed.\nYou shouldn't need to install the API";
+          $message = "It looks like you already have v$API_VERSION of the API installed.\n";
+
+          if(@unknown_versions) {
+            $message .=
+              "No version information was available for the following modules:\n".
+              join("\n", map {" - ".$_} @unknown_versions).
+              "\nUpdates may be available but you will need to perform these manually.";
+          }
+          else {
+            $message .= "You shouldn't need to install the API";
+          }
         }
       }
 
