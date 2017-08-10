@@ -137,4 +137,23 @@ Haplotype frequencies may be loaded and assigned to observed haplotypes using `-
 
 > Note these files are temporarily hosted on 3rd party servers and may be subject to change or removal while the software remains in the development phase.
 
+<a name="bioperl-ext"></a>
+### bioperl-ext
+`haplo` can make use of a fast compiled alignment algorithm from the [bioperl-ext](https://github.com/bioperl/bioperl-ext) package; this can speed up analysis, particularly in longer transcripts where insertions and/or deletions are introduced. The bioperl-ext package is no longer maintained and requires some tweaking to install. The following instructions install the package in `$HOME/perl5`; edit `PREFIX=[path]` to change this. You may also need to edit the `export` command to point to the path created for the architecture on your machine.
 
+```bash
+git clone https://github.com/bioperl/bioperl-ext.git
+cd bioperl-ext/Bio/Ext/Align/
+perl -pi -e"s|(cd libs.+)CFLAGS=\\\'|\$1CFLAGS=\\\'-fPIC |" Makefile.PL
+perl Makefile.PL PREFIX=~/perl5
+make
+make install
+cd -
+export PERL5LIB=${PERL5LIB}:${HOME}/perl5/lib/x86_64-linux-gnu/perl/5.22.1/
+```
+
+If successful the following should print `OK`:
+
+```bash
+perl -MBio::Tools::dpAlign -e"print qq{OK\n}"
+```
