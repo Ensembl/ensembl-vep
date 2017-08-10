@@ -164,6 +164,20 @@ is_deeply(
   'chromosome_syonyms - content check'
 );
 
+# fasta_dir
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  offline => 1,
+  database => 0,
+  input_file => $test_cfg->{test_vcf},
+  fasta_dir => $test_cfg->{fasta_dir}
+});
+$bv = Bio::EnsEMBL::VEP::BaseVEP->new({config => $runner->config});
+
+ok($bv->fasta_db, 'fasta_dir - fasta_db OK');
+is($bv->param('fasta'), $test_cfg->{fasta_dir}.'/Homo_sapiens.GRCh38.toplevel.test.fa', 'fasta_dir - fasta param set');
+
+
 ## status_msg tests require we mess with STDOUT
 ###############################################
 

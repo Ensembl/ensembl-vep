@@ -445,6 +445,33 @@ sub fasta_db {
   if(!exists($self->config->{_fasta_db})) {
     my $fasta_db;
 
+    # work out fasta path if fasta_dir given
+    if(my $fasta_dir = $self->param('fasta_dir')) {
+      if(opendir DIR, $fasta_dir) {
+        my ($species, $assembly) = ($self->species, $self->param('assembly'));
+        my $can_use_faidx = $Bio::EnsEMBL::Variation::Utils::FastaSequence::CAN_USE_FAIDX;
+
+        my @files =
+          sort {  # prefer toplevel, bgzipped
+            $a !~ /toplevel/ <=> $b !~ /toplevel/ ||
+            $a !~ /gz$/ <=> $b !~ /gz$/
+          }
+          grep {  # find only those matching species, assembly, bgzipped only if Bio::DB::HTS::Faidx installed
+            (/\.fa$/ || ($can_use_faidx && /\.fa.gz$/)) &&
+            /$species/i &&
+            /$assembly/i
+          } readdir DIR;
+        closedir DIR;
+
+        if(@files) {
+          $self->param('fasta', $fasta_dir.'/'.$files[0]);
+        }
+        else {
+          $self->warning_msg("No compatible FASTA files found in $fasta_dir");
+        }
+      }
+    }
+
     if(my $fasta_file = $self->param('fasta')) {
 
       $fasta_db = setup_fasta(

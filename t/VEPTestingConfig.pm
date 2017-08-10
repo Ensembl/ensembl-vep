@@ -46,6 +46,7 @@ our %DEFAULTS = (
   exac_root_dir  => $Bin.'/testdata/cache/exac/',
 
   fasta          => $Bin.'/testdata/cache/homo_sapiens/84_GRCh38/test.fa',
+  fasta_dir      => $Bin.'/testdata/fasta',
 
   test_ini_file  => $Bin.'/testdata/vep.ini',
   registry_file  => $Bin.'/testdata/vep.registry',
