@@ -151,6 +151,23 @@ is_deeply($vf, bless( {
   'start' => 25587760
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'deletion ignore SVTYPE');
 
+# deletion with SVTYPE field
+$vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $cfg,
+  file => $test_cfg->create_input_file([qw(21 25587759 test A AC . . SVLEN=1)]),
+  valid_chromosomes => [21]
+})->next();
+delete($vf->{adaptor}); delete($vf->{_line});
+is_deeply($vf, bless( {
+  'chr' => '21',
+  'strand' => 1,
+  'variation_name' => 'test',
+  'map_weight' => 1,
+  'allele_string' => '-/C',
+  'end' => 25587759,
+  'start' => 25587760
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'insertion ignore SVLEN');
+
 # multiple alts
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,

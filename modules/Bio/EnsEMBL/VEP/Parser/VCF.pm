@@ -245,9 +245,10 @@ sub create_VariationFeatures {
   my ($chr, $start, $end, $ids) = (
     $parser->get_seqname,
     $parser->get_raw_start,
-    $parser->get_raw_end,
+    $parser->get_raw_start,
     $parser->get_IDs,
   );
+  $end += length($ref) - 1;
 
   # non-variant
   my $non_variant = 0;
