@@ -708,9 +708,9 @@ sub generate_general_stats {
       )
       : '-'
     ],
-    ['Overlapped genes', $stats->{gene}],
-    ['Overlapped transcripts', $stats->{transcript}],
-    ['Overlapped regulatory features', $stats->{regulatoryfeature} || '-'],
+    ['Overlapped genes', $stats->{gene} || 0],
+    ['Overlapped transcripts', $stats->{transcript} || 0],
+    ['Overlapped regulatory features', $stats->{regulatoryfeature} || ($self->param('regulatory') ? 0 : '-')],
   ];
 }
 
