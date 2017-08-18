@@ -22,6 +22,12 @@ use lib $RealBin.'/modules';
 use Bio::EnsEMBL::VEP::VariantRecoder;
 use Bio::EnsEMBL::VEP::Utils qw(get_version_string);
 
+BEGIN {
+  unless(eval q{require JSON;}) {
+    die("ERROR: variant_recoder requires JSON perl library\n");
+  }
+}
+
 my $config = {};
 
 my $arg_count = scalar @ARGV;
@@ -36,8 +42,8 @@ GetOptions(
   'input_file|i=s',          # input file name
   'input_data|id=s',         # input data
   'format=s',                # input file format
-  'output_format=s',         # output file format
   'delimiter=s',             # delimiter between fields in input
+  'pretty',                  # print prettified JSON
   
   # DB options
   'species|s=s',             # species e.g. human, homo_sapiens
@@ -68,15 +74,8 @@ GetOptions(
   'buffer_size=i',           # number of variations to read in before analysis
   'failed=i',                # include failed variations when finding existing
   
-  # verbosity options
-  'verbose|v',               # print out a bit more info while running
-  'quiet',                   # print nothing to STDOUT (unless using -o stdout)
-  'no_progress',             # don't display progress bars
-  
   # output options
-  'output_file|o=s',         # output file name
   'warning_file=s',          # file to write warnings to
-  'force_overwrite',         # force overwrite of output file if already exists
   'shift_hgvs=i',            # disable/enable 3-prime shifting of HGVS indels to comply with standard
   'lrg',                     # enable LRG-based features
   'fields=s',                # define your own output fields
@@ -103,8 +102,10 @@ sub main {
   my $results = $vr->recode_all;
   push @$results, {warnings => [map {$_->{msg}} @{$vr->warnings}]} unless @$results;
 
-  use JSON;
-  print JSON->new->pretty->encode($results);
+  my $json = JSON->new;
+  $json->pretty if $vr->param('pretty');
+
+  print $json->encode($results);
 }
 
 
@@ -132,9 +133,10 @@ Basic options
 
 --help                 Display this message and quit
 
---input_data | --data  Input as string
+--input_data | --id    Input as string
 --input_file | -i      Input file
 --species [species]    Species to use [default: "human"]
+--pretty               Print prettified JSON
 
 END
 
