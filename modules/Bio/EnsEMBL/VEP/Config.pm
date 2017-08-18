@@ -178,6 +178,14 @@ our @OPTION_SETS = (
   },
   
   {
+    flags => ['grch37'],
+    set   => {
+      port => 3337,
+      assembly => 'GRCh37',
+    },
+  },
+  
+  {
     flags => ['refseq'],
     set   => {
       core_type => 'otherfeatures',

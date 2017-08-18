@@ -46,6 +46,7 @@ GetOptions(
   'password=s',              # database password
   'db_version=i',            # Ensembl database version to use e.g. 62
   'assembly|a=s',            # assembly version to use
+  'grch37',                  # set for using GRCh37
   'genomes',                 # automatically sets DB params for e!Genomes
   'refseq',                  # use otherfeatures RefSeq DB instead of Ensembl
   'merged',                  # use merged cache
