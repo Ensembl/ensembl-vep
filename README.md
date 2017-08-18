@@ -2,6 +2,7 @@
 # ensembl-vep
 * **VEP** (Variant Effect Predictor) predicts the functional effects of genomic variants.
 * **Haplosaurus** uses phased genotype data to predict whole-transcript haplotype sequences.
+* **Variant Recoder** translates between different variant encodings.
 
 ##### Table of contents
 * [Installation and requirements](#install)
@@ -13,6 +14,8 @@
   * [Output](#haplooutput)
   * [Flags](#haploflags)
   * [Frequency data](#haplofreq)
+* [Variant Recoder](#recoder)
+  * [Usage](#vepusage)
 
 ---
 <a name="install"></a>
@@ -157,3 +160,71 @@ If successful the following should print `OK`:
 ```bash
 perl -MBio::Tools::dpAlign -e"print qq{OK\n}"
 ```
+
+---
+<a name="recoder"></a>
+## Variant Recoder
+`variant_recoder` is a tool for translating between different variant encodings. It accepts as input any format supported by VEP (VCF, variant ID, HGVS), with extensions to allow for parsing of potentially ambiguous HGVS notations. For each input variant, `variant_recoder` reports all possible encodings including variant IDs from [all sources imported into the Ensembl database](http://www.ensembl.org/info/genome/variation/sources_documentation.html) and HGVS (genomic, transcript and protein), reported on Ensembl, RefSeq and LRG sequences.
+
+<a name="recoderusage"></a>
+### Usage
+`variant_recoder` depends on database access for identifier lookup, and cannot be used in offline mode as per VEP. The output format is JSON and the [JSON perl module](http://search.cpan.org/dist/JSON/) is required.
+
+```bash
+./variant_recoder --id [input_data_string]
+./variant_recoder -i [input_file] --species [species]
+```
+
+<a name="recoderoutput"></a>
+### Output
+Output is a JSON array of objects, one per input variant, with the following keys:
+* **input**: input string
+* **id**: variant identifiers
+* **hgvsg**: HGVS genomic nomenclature
+* **hgvsc**: HGVS transcript nomenclature
+* **hgvsp**: HGVS protein nomenclature
+* **warnings**: Warnings generated e.g. for invalid HGVS
+
+Use `--pretty` to pre-format and indent JSON output.
+
+Example output:
+```bash
+./variant_recoder --id "AGT:p.Met268Thr" --pretty
+[
+   {
+      "input" : "AGT:p.Met268Thr",
+      "id" : [
+         "rs699",
+         "CM920010"
+      ],
+      "hgvsg" : [
+         "NC_000001.11:g.230710048A>G"
+      ],
+      "hgvsc" : [
+         "ENST00000366667.4:c.803T>C",
+         "NM_000029.3:c.803T>C"
+      ],
+      "hgvsp" : [
+         "ENSP00000355627.4:p.Met268Thr",
+         "NP_000020.1:p.Met268Thr"
+      ],
+      "warnings" : [
+         "Possible invalid use of gene name 'AGT' as HGVS reference; AGT:p.Met268Thr may resolve to multiple genomic locations"
+      ]
+   }
+]
+```
+
+<a name="recoderopts"></a>
+### Options
+`variant_recoder` shares many of the same command line flags as VEP. Others are unique to `variant_recoder`.
+
+* `-id|--input_data [input_string]`: a single variant as a string.
+* `-i|--input_file [input_file]`: input file containing one or more variants, one per line. Mixed formats disallowed.
+* `--species`: species to use (default: homo_sapiens).
+* `--grch37`: use GRCh37 assembly instead of GRCh38.
+* `--genomes`: set database parameters for [Ensembl Genomes](http://ensemblgenomes.org/) species.
+* `--pretty`: write pre-formatted indented JSON.
+* `--fields [field1,field2]`: limit output fields. Comma-separated list, one or more of: `id`, `hgvsg`, `hgvsc`, `hgvsp`.
+* `--host [db_host]`: change database host from default `ensembldb.ensembl.org` (UK); geographic mirrors are `useastdb.ensembl.org` (US East Coast) and `asiadb.ensembl.org` (Asia). `--user`, `--port` and `--pass` may also be set.
+* `--pick`, `--per_gene`, `--pick_allele`, `--pick_allele_gene`, `--pick_order`: set and customise transcript selection process, see [VEP documentation](http://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick)
