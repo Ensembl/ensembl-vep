@@ -39,6 +39,15 @@ RUN ensembl-vep/travisci/build_c.sh
 WORKDIR $HTSLIB_DIR
 RUN make install
 
+# install bioperl-ext, faster alignments for haplo
+WORKDIR $HOME/src
+RUN git clone https://github.com/bioperl/bioperl-ext.git
+WORKDIR bioperl-ext/Bio/Ext/Align/
+RUN perl -pi -e"s|(cd libs.+)CFLAGS=\\\'|\$1CFLAGS=\\\'-fPIC |" Makefile.PL
+RUN perl Makefile.PL
+RUN make
+RUN make install
+
 # install perl dependencies
 WORKDIR $HOME/src
 RUN cpanm --installdeps --with-recommends --notest --cpanfile ensembl/cpanfile .
