@@ -114,17 +114,17 @@ sub configure {
       }
     }
 
-    throw("ERROR: At least one filter must contain \"Consequence is [value]\" when using --ontology\n") unless $changed;
-
-    connect_to_db($config);
-
-    my $oa = $config->{reg}->get_adaptor('Multi','Ontology','OntologyTerm');
-    throw("ERROR: Could not fetch OntologyTerm adaptor\n") unless $oa;
-
     $config->{filter_set} = Bio::EnsEMBL::VEP::FilterSet->new(@{$config->{filter}});
 
-    $config->{filter_set}->ontology_adaptor($oa);
-    $config->{filter_set}->ontology_name('SO');    
+    if($changed) {
+      connect_to_db($config);
+      
+      my $oa = $config->{reg}->get_adaptor('Multi','Ontology','OntologyTerm');
+      throw("ERROR: Could not fetch OntologyTerm adaptor\n") unless $oa;
+
+      $config->{filter_set}->ontology_adaptor($oa);
+      $config->{filter_set}->ontology_name('SO');    
+    }
   }
   
   else {
