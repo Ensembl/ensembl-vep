@@ -56,7 +56,7 @@ sub run {
   delete $vep_params->{bam} if $vep_params->{bam};
 
   my $config = Bio::EnsEMBL::VEP::Config->new($vep_params);
-
+  $config->{_registry} = 'Bio::EnsEMBL::Registry';
   my $region_size = $self->param('region_size');
 
   my $as = Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript->new({
@@ -76,6 +76,8 @@ sub run {
 
   $self->dump_info($as, $self->get_cache_dir($vep_params));
   
+  Bio::EnsEMBL::Registry->get_DBAdaptor($vep_params->{species},'core')->dbc()->disconnect_if_idle();
+
   return;
 }
 
