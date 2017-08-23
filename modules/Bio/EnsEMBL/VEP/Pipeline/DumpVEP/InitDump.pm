@@ -103,7 +103,7 @@ sub generate_species_jobs {
     $species_hash{assembly} = $assembly;
     $species_hash{dbname} = $current_db_name;
     $species_hash{group} = $group;
-    $species_hash{is_multispecies} = scalar keys %$species_ids > 1 ? 1 : 0;
+    $species_hash{is_multispecies} = $current_db_name =~ "_collection" ? 1 : 0;
     $species_hash{variation} = $var_db_name;
     $species_hash{regulation} = $reg_db_name;
     $species_hash{host} = $dbc->host();
