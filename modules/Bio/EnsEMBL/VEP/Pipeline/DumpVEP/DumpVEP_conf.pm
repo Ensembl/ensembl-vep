@@ -51,18 +51,8 @@ sub default_options {
 
   return {
 
-    # general pipeline options that you should change to suit your environment
-    hive_force_init => 1,
-    hive_use_param_stack => 0,
-    hive_use_triggers => 0,
-    hive_auto_rebalance_semaphores => 0, 
-    hive_no_init => 0,
-
-    # Registry file with location of databases
-    registry      => $self->o('registry'),
-    
-    # the location of your checkout of the ensembl API (the hive looks for SQL files here)
-    hive_root_dir           => $ENV{'HOME'} . '/src/ensembl-hive', 
+    %{ $self->SUPER::default_options()
+      },    # inherit other stuff from the base class
     
     # a name for your pipeline (will also be used in the name of the hive database)    
     pipeline_name           => 'dump_vep',
@@ -70,12 +60,6 @@ sub default_options {
     # a directory to keep hive output files and your registry file, you should
     # create this if it doesn't exist
     pipeline_dir            => '/hps/nobackup/production/ensembl/'.$ENV{'USER'}.'/'.$self->o('pipeline_name').'/'.$self->o('ensembl_release'),
-
-    # a directory where hive workers will dump STDOUT and STDERR for their jobs
-    # if you use lots of workers this directory can get quite big, so it's
-    # a good idea to keep it on lustre, or some other place where you have a 
-    # healthy quota!
-    output_dir              => $self->o('pipeline_dir').'/hive_output',
 
     # contains frequency data
     data_dir                => '/nfs/production/panda/ensembl/variation/data/dump_vep/',
@@ -189,23 +173,6 @@ sub default_options {
     urgent_lsf_options  => '-q production-rh7 -R"select[mem>2000] rusage[mem=2000]" -M2000',
     highmem_lsf_options => '-q production-rh7 -R"select[mem>15000] rusage[mem=15000]" -M15000', # this is Sanger LSF speak for "give me 15GB of memory"
     long_lsf_options    => '-q production-rh7 -R"select[mem>2000] rusage[mem=2000]" -M2000',
-
-    # init_pipeline.pl will create the hive database on this machine, naming it
-    # <username>_<pipeline_name>, and will drop any existing database with this
-    # name
-
-    hive_db_host    => 'mysql-ens-var-prod-1.ebi.ac.uk',
-    hive_db_port    => 4449,
-    hive_db_user    => 'ensadmin',
-
-    pipeline_db => {
-      -host   => $self->o('hive_db_host'),
-      -port   => $self->o('hive_db_port'),
-      -user   => $self->o('hive_db_user'),
-      -pass   => $self->o('hive_db_password'),            
-      -dbname => $ENV{'USER'}.'_'.$self->o('pipeline_name').'_'.$self->o('ensembl_release'),
-      -driver => 'mysql',
-    },
     
     debug => 0,
     qc => 1,
