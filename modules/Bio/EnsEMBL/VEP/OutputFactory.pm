@@ -940,6 +940,62 @@ sub add_colocated_frequency_data {
 
   my @ex_alleles = split('/', $ex->{allele_string});
 
+
+
+  ##################################
+  ## HACK FIX FOR RELEASE 90 DATA ##
+  ##################################
+  if(
+    !defined($ex->{AF}) &&
+    !defined($ex->{minor_allele_freq}) && (
+      defined($ex->{AFR}) ||
+      defined($ex->{AMR}) ||
+      defined($ex->{EAS}) ||
+      defined($ex->{EUR}) ||
+      defined($ex->{SAS})
+    )
+  ) {
+
+    # counts are the same across autosomes and X/Y
+    # pop AFs use wrong total in the VCFs used to generate the caches ATM
+    my %counts = (
+      AFR => 1322,
+      AMR => 694,
+      EAS => 1008,
+      EUR => 1006,
+      SAS => 978
+    );
+
+    my $chr = $vf->{chr};
+    $chr =~ s/chr//i;
+
+    # but the totals used to calculate AF are different (as they should be)
+    my $all_count = 5008;
+    if(($ex->{chr} || $chr || '') eq 'X') {
+      $all_count = 3775;
+    }
+    elsif(($ex->{chr} || $chr || '') eq 'Y') {
+      $all_count = 2466;
+    }
+
+    my %total_counts = ();
+    foreach my $pop(grep {exists($ex->{$_})} keys %counts) {
+      foreach my $pair(split(',', $ex->{$pop})) {
+        my ($a, $f) = split(':', $pair);
+        $total_counts{$a} += $counts{$pop} * $f;
+      }
+    }
+
+    my %freqs = map {$_ => sprintf("%.4g", $total_counts{$_} / $all_count)} keys %total_counts;
+
+    $ex->{AF} = join(',', map {$_.':'.$freqs{$_}} keys %freqs);
+  }
+  ##################
+  ## END HACK FIX ##
+  ##################
+
+
+
   # gmaf stored a bit differently, but we can get it in the same format
   $ex->{AF} = $ex->{minor_allele}.':'.$ex->{minor_allele_freq} if $ex->{minor_allele};
 
