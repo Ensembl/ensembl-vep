@@ -60,7 +60,7 @@ sub get_vep_params {
   $params->{host}    = $self->required_param('host');
   $params->{port}    = $self->required_param('port');
   $params->{user}    = $self->required_param('user');
-  $params->{pass}    = $self->required_param('pass') ? $self->required_param('pass') : '';
+  $params->{pass}    = $self->required_param('pass') || '';
 
   $params->{db_version}      = $self->required_param('db_version');
   $params->{cache_version}   = $self->param('eg_version') || $self->param('ensembl_release');
