@@ -235,7 +235,7 @@ sub pipeline_analyses {
         '2' => ['init_dump_vep_core'],
         '7' => WHEN(
             '#refseq#' => 'init_dump_vep_otherfeatures'
-            )
+          )
       },
     },
 
@@ -262,6 +262,7 @@ sub pipeline_analyses {
       -rc_name       => 'default',
       -hive_capacity => 1,
       -max_retry_count => 0,
+      -can_be_empty   => 1,
       -flow_into     => {
         '2' => ['create_dump_jobs'],
       },
@@ -301,7 +302,6 @@ sub pipeline_analyses {
       -rc_name       => 'default',
       -analysis_capacity => 10,
       -max_retry_count => 0,
-      # -can_be_empty   => 1,
     },
     {
       -logic_name    => 'dump_vep_otherfeatures',
