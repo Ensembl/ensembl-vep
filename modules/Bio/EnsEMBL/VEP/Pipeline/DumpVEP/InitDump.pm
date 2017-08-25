@@ -81,7 +81,7 @@ sub generate_species_jobs {
   
   my $version = $self->param('eg_version') || $self->required_param('ensembl_release');
 
-  my $species_ids = $self->get_species_id_hash($dbc, $current_db_name);
+  my $species_id = $self->get_species_id($dbc, $current_db_name, $species);
     
   # do we have a variation DB?
   my $var_db_name = $self->has_var_db($dbc, $current_db_name);
@@ -91,35 +91,33 @@ sub generate_species_jobs {
 
   my $species_count = 0;
     
-  foreach my $species_id(keys %$species_ids) {
-    my $assembly = $self->get_assembly($dbc, $current_db_name, $species_id);
-    next unless $assembly;
+  my $assembly = $self->get_assembly($dbc, $current_db_name, $species_id);
+  next unless $assembly;
       
-    # copy server details
-    my %species_hash;
+  # copy server details
+  my %species_hash;
       
-    $species_hash{species} = $species_ids->{$species_id};
-    $species_hash{species_id} = $species_id;
-    $species_hash{assembly} = $assembly;
-    $species_hash{dbname} = $current_db_name;
-    $species_hash{group} = $group;
-    $species_hash{is_multispecies} = $current_db_name =~ "_collection" ? 1 : 0;
-    $species_hash{variation} = $var_db_name;
-    $species_hash{regulation} = $reg_db_name;
-    $species_hash{host} = $dbc->host();
-    $species_hash{port} = $dbc->port();
-    $species_hash{user} = $dbc->username();
-    $species_hash{pass} = $dbc->password();
-    $species_hash{division} = $self->division($dba);
+  $species_hash{species} = $species;
+  $species_hash{species_id} = $species_id;
+  $species_hash{assembly} = $assembly;
+  $species_hash{dbname} = $current_db_name;
+  $species_hash{group} = $group;
+  $species_hash{is_multispecies} = $current_db_name =~ "_collection" ? 1 : 0;
+  $species_hash{variation} = $var_db_name;
+  $species_hash{regulation} = $reg_db_name;
+  $species_hash{host} = $dbc->host();
+  $species_hash{port} = $dbc->port();
+  $species_hash{user} = $dbc->username();
+  $species_hash{pass} = $dbc->password();
+  $species_hash{division} = $self->division($dba);
 
-    # do we have SIFT or PolyPhen?
-    if($var_db_name) {
-      my $has_sift_poly = $self->has_sift_poly($dbc, $var_db_name, $species_id);
-      $species_hash{$_} = $has_sift_poly->{$_} for keys %$has_sift_poly;
-    }
-
-    push @return, \%species_hash;
+  # do we have SIFT or PolyPhen?
+  if($var_db_name) {
+    my $has_sift_poly = $self->has_sift_poly($dbc, $var_db_name, $species_id);
+    $species_hash{$_} = $has_sift_poly->{$_} for keys %$has_sift_poly;
   }
+
+  push @return, \%species_hash;
 
   $species_count++;
 
@@ -130,20 +128,14 @@ sub generate_species_jobs {
   return \@return;
 }
 
-sub get_species_id_hash {
-  my ($self, $dbc, $current_db_name) = @_;
+sub get_species_id {
+  my ($self, $dbc, $current_db_name, $species) = @_;
 
-  # get species names by id
-  my $sth = $dbc->prepare("select species_id, meta_value from ".$current_db_name.".meta where meta_key = 'species.production_name';");
-  $sth->execute();
-  
-  my ($species_id, $value, $species_ids);
-  $sth->bind_columns(\$species_id, \$value);
-  
-  $species_ids->{$species_id} = $value while $sth->fetch();
-  $sth->finish();
-
-  return $species_ids;
+  # get species id
+  my $species_id = $dbc->sql_helper()
+                    ->execute_simple( -SQL =>qq/select species_id from $current_db_name.meta where meta_key = 'species.production_name' and meta_value ='$species';/);
+ 
+  return $species_id->[0];
 }
 
 sub get_assembly {
