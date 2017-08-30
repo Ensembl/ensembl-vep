@@ -3,8 +3,7 @@ FROM ubuntu
 
 # update aptitude and install some required packages
 # a lot of them are required for Bio::DB::BigFile
-RUN apt-get update && apt-get -y install build-essential cpanminus curl git manpages perl perl-base vim wget mysql-client libmysqlclient-dev libssl-dev unzip apache2 libmysqlclient-dev libpng12-dev libssl-dev openssl
-
+RUN apt-get update && apt-get -y install apache2 build-essential cpanminus curl git libmysqlclient-dev libpng12-dev libssl-dev manpages mysql-client openssl perl perl-base unzip vim wget
 # install ensembl dependencies
 RUN cpanm DBI DBD::mysql
 
