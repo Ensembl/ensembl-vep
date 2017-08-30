@@ -1271,6 +1271,9 @@ sub BaseTranscriptVariationAllele_to_output_hash {
     my $hgnc_id = $tr->{_gene_hgnc_id} if defined($tr->{_gene_hgnc_id});
 
     $hash->{SYMBOL} = $symbol if defined($symbol) && $symbol ne '-';
+    ## encode spaces in symbol name for VCF
+    $hash->{SYMBOL} =~ s/\s/\%20/g if $self->param('output_format') eq 'vcf' && !$self->{no_escape};
+
     $hash->{SYMBOL_SOURCE} = $source if defined($source) && $source ne '-';
     $hash->{HGNC_ID} = $hgnc_id if defined($hgnc_id) && $hgnc_id ne '-';
   }
