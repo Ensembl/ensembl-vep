@@ -283,7 +283,7 @@ sub freqs_from_vcf {
       my @vcf_alts = @{$parser->get_alternatives};
 
       # scan from from pos to inferred end
-      for my $start(grep {$by_pos{$_}} ($vcf_pos..(($vcf_pos + length($vcf_ref)) - 1))) {
+      for my $start(grep {$by_pos{$_}} ($vcf_pos..($vcf_pos + length($vcf_ref)))) {
 
         foreach my $v(@{$by_pos{$start}}) {
           $DB::single = 1 if $v->{variation_name} eq 'TMP_ESP_1_179086420_179086420';
