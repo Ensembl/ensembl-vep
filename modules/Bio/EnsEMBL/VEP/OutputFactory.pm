@@ -1348,6 +1348,40 @@ sub BaseTranscriptVariationAllele_to_output_hash {
     }
   }
 
+  # miRNA structure
+  if($self->{mirna} && (my ($mirna_attrib) = grep {$_->code eq 'ncRNA'} @attribs)) {
+    my ($start, $end, $struct) = split /\s+|\:/, $mirna_attrib->value;
+
+    my ($cdna_start, $cdna_end) = ($tv->cdna_start, $tv->cdna_end);
+
+    if($struct && $struct =~ /[\(\.\)]+/ && overlap($start, $end, $cdna_start, $cdna_end) {
+    
+      # parse out structure
+      my @struct;
+      while($struct =~ m/([\.\(\)])([0-9]+)?/g) {
+        my $num = $2 || 1;
+        push @struct, $1 for(1..$num);
+      }
+      
+      # get struct element types overlapped by variant
+      my %chars;
+      for my $pos($cdna_start..$cdna_end) {
+        $pos -= $start;
+        next if $pos < 0 or $pos > scalar @struct;
+        $chars{$struct[$pos]} = 1;
+      }
+      
+      # map element types to SO terms
+      my %map = (
+        '(' => 'miRNA_stem',
+        ')' => 'miRNA_stem',
+        '.' => 'miRNA_loop'
+      );
+      
+      $hash->{miRNA} = join(",", sort map {$map{$_}} keys %chars);
+    }
+  }
+
   return $hash;
 }
 
