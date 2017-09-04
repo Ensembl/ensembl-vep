@@ -133,7 +133,7 @@ sub get_all_regions_by_InputBuffer {
     $max = $vf_e if $vf_e > $max;
 
     # convert to region-size
-    my ($r_s, $r_e) = map {int(($_ - 1) / $cache_region_size)} ($vf_s, $vf_e);
+    my ($r_s, $r_e) = map {int(($_ - 1) / $cache_region_size)} ($vf_s - $up_down_size, $vf_e + $up_down_size);
 
     # add all regions between r_s and r_e inclusive
     for(my $s = $r_s; $s <= $r_e; $s++) {

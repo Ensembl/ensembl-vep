@@ -383,6 +383,27 @@ SKIP: {
   $ib->next();
   is_deeply($as->get_all_features_by_InputBuffer($ib), [], 'get_all_features_by_InputBuffer on empty buffer');
 
+  # test upstream
+  $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->create_input_file([qw(21 13002936 . C A)])});
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+  $ib->next();
+
+  is_deeply(
+    $as->get_all_regions_by_InputBuffer($ib),
+    [
+      [
+        '21',
+        259
+      ],
+      [
+        '21',
+        260
+      ],
+    ],
+    'get_all_regions_by_InputBuffer - include upstream'
+  );
+
+
   # reset
   $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}});
   $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
