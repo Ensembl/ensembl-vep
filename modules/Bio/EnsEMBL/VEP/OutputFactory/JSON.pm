@@ -370,7 +370,7 @@ sub add_colocated_variant_info_JSON {
       my $tmp = $ex->{$pop};
       my $lc_pop = lc($pop);
 
-      if($tmp =~ /(\w)\:([\d\.\-e]+)/) {
+      if($tmp =~ /(\D)\:([\d\.\-e]+)/) {
         $ex->{$lc_pop.'_maf'} = $2;
         $ex->{$lc_pop.'_allele'} = $1;
       }
