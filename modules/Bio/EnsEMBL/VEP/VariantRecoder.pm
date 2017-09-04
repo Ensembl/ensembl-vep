@@ -115,6 +115,9 @@ sub new {
   # and this one switches on check_existing if the user wants variant IDs
   my %opt_map = ('id' => 'check_existing');
   $config->{$opt_map{$_}} = 1 for grep {$set_fields{$_}} keys %opt_map;
+
+  # set up/down distance to 0, we only want overlaps
+  $config->{distance} = 0;
   
   my $self = $class->SUPER::new($config);
 
@@ -128,7 +131,6 @@ sub new {
   Description: Runs some initialisation processes:
                - connect to DB
                - get annotation sources
-               - set cache_region_size parameter to minimum value
                - internalise warnings
   Returntype : bool
   Caller     : recode(), recode_all()
@@ -143,7 +145,6 @@ sub init {
 
   $self->SUPER::init();
 
-  $_->{cache_region_size} = 1 for @{$self->get_all_AnnotationSources};
   $self->internalise_warnings();
 
   return 1;
