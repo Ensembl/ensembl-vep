@@ -877,6 +877,26 @@ $runner->{_test_die} = 1;
 
 throws_ok {$runner->next_output_line} qr/TEST DIE/, 'fork - test die';
 
+
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  offline => 1,
+  fork => 1,
+});
+$runner->param('warning_file', 'STDERR');
+$runner->{_kill_child} = 'KILL';
+throws_ok {$runner->next_output_line} qr/Forked process.+ died.+read-through/, 'fork - kill child';
+
+
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  offline => 1,
+  fork => 1,
+});
+$runner->param('warning_file', 'STDERR');
+$runner->{_kill_self} = 'KILL';
+throws_ok {$runner->next_output_line} qr/Forked process.+ died.+read-through/, 'fork - child kill self';
+
 # restore STDERR
 open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 

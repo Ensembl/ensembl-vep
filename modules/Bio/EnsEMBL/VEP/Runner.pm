@@ -423,7 +423,7 @@ sub _forked_buffer_to_output {
   my $minForkSize = 50;
   my $maxForkSize = int($buffer_size / (2 * $fork_number)) || 1;
   my $active_forks = 0;
-  my (@pids, %by_pid);
+  my (@pids, %by_pid, %children_reported_back);
   my $sel = IO::Select->new;
 
   # loop while variants in @$vfs or forks running
@@ -458,6 +458,9 @@ sub _forked_buffer_to_output {
         elsif($pid) {
           push @pids, $pid;
           $active_forks++;
+
+          # for testing
+          kill $self->{_kill_child}, $pid if $self->{_kill_child};
         }
         elsif($pid == 0) {
           $self->_forked_process($buffer, \@tmp, $parent, $output_as_hash);
@@ -465,7 +468,7 @@ sub _forked_buffer_to_output {
       }
     }
 
-    # read child input
+    # read child output
     while(my @ready = $sel->can_read()) {
       my $no_read = 1;
 
@@ -505,6 +508,9 @@ sub _forked_buffer_to_output {
           $cache->{$_} = $fork_oc_cache->{$_} for keys %$fork_oc_cache;
         }
 
+        # report this child as done
+        $children_reported_back{$data->{pid}} = 1;
+
         # finish up
         $sel->remove($fh);
         $fh->close;
@@ -512,13 +518,33 @@ sub _forked_buffer_to_output {
       }
 
       # read-through detected, DIE
-      throw("\nERROR: Forked process(es) died\n") if $no_read;
+      throw("\nERROR: Forked process(es) died: read-through of cross-process communication detected\n") if $no_read;
 
       last if $active_forks < $fork_number;
     }
   }
 
-  waitpid($_, 0) for @pids;
+  for my $pid(@pids) {
+    if(waitpid($pid, 0) > 0) {
+      my ($rc, $sig, $core) = ($? >> 8, $? & 127, $? & 128);
+      if($core){
+        throw("\nERROR: Forked process PID $pid dumped core\n");
+      }
+      elsif($sig == 9) {
+        throw("\nERROR: Forked process PID $pid was killed\n");
+      }
+      elsif($rc != 0) {
+        throw("\nERROR: Forked process PID $pid returned non-zero return code $rc\n");
+      }
+    }
+    else {
+      throw("\nERROR: Forked process PID $pid disappeared\n");
+    }
+  }
+
+  # check any children didn't report back
+  my @unclean = grep {!$children_reported_back{$_}} @pids;
+  throw("\nERROR: Forked process(es) ".join(", ", @unclean)." did not finish cleanly") if @unclean;
 
   # sort data by dispatched PID order
   my @return = map {@{$by_pid{$_} || []}} @pids;
@@ -558,6 +584,14 @@ sub _forked_process {
   my $vfs = shift;
   my $parent = shift;
   my $output_as_hash = shift;
+
+  # for testing
+  kill $self->{_kill_self}, $$ if $self->{_kill_self};
+
+  # simulate a memory leak
+  # my $loop = 1;
+  # my $mem_leak = sub { my ($a, $b); $a = \$b; $b = \$a; print STDERR "$$ ".($loop / 1e6)."\n" if ++$loop % 1e6 == 0};
+  # &$mem_leak() while(1);
 
   # redirect and capture STDERR
   $self->config->{warning_fh} = *STDERR;
