@@ -81,7 +81,7 @@ for dep_repo in "${dep_repos[@]}"; do
 
     echo "Checking API triggered builds in the last hour"
     if travis_api /repo/$dep_repo/builds?build.event_type=api | python3 travisci/api_build_run_last_hour.py | grep -q "True"; then
-	echo "Recent API-triggered build running ... skip."
+	echo "Detected recent API-triggered build (run in the last hour) ... skip."
 	continue
     fi
     
