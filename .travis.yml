@@ -33,9 +33,6 @@ before_install:
   - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-io.git
   - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-funcgen.git
   - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-variation.git
-  # - git clone --branch master --depth 1 https://github.com/Ensembl/Bio-HTS
-  # - wget https://github.com/bioperl/bioperl-live/archive/release-1-6-924.zip
-  # - unzip release-1-6-924.zip
   - export CWD=$PWD
   - export DEPS=$HOME/dependencies
   - mkdir -p $DEPS
@@ -61,7 +58,16 @@ install:
 
 script: "./travisci/harness.sh"
 
+# Add build stage to trigger dependent builds, run sequentially after all test jobs
+# specified by the build matrix expansion have completed successfully
+jobs:
+  include:
+    - stage: trigger_dependent_builds
+      script: ./travisci/trigger-dependent-build.sh
+
 notifications:
   email:
     on_success: always
     on_failure: always
+  slack:
+    secure: IJVCl9JXQZdDnXPvKEz+G5RsCXe3NgYgSddvaN2nyXwH4MMJsZMzta0jkPz2MMU1T3jZ++leQ7lY5T+gyWia4ZuuxJ7TVxboK7m5F5Zl2eB9UIFWiHfWp257v9LsAgXPQOvDRl6L0dfvo/LuDtYWI9jf+gP//9xHShmkiA5Z6danXB+c/dHQrIxUQkR1y5qEqiRJrPaq0C+0b4fRQhzy9roVhGki6H7Nt0dWQ6pF/Y4+FQV+OlLCiyz7nA1Me6jiDLFdzRLkOlD2Ppx9awXpAbT03tCxhCJySYhy6mW6QVEqaezFizYFtIZZVN5ySZ+8GsoAQmVBycjc6gXZeH0YiabETb1xloslflFcsyMmazHeAXs/4m50qRxAuZE101GHuqI5Gb49GTi1lB4BQrVZqJ54tL4s7j14v5MRMB2pMXApKuE2u82Rsi6PkwGM+NePiAIDJNZYOfWYs7RboLFpR77s/1qxBfhVGE8TFSwbDoCqJslC6/o2aVro3T3KS26QUqJ4dwT2ks+2qPXGuALhasJi5Oc8Rxc/fhZw8aj9Jv422gf1fqjSC5+JOtYAXBtRdQt4E4LX/QBolEBjWvY8ha+ce94M/gLaZFFOQFf9CdyM+x+GqCBimOemOxiA9A5vTwUUgsjhX+MDa7SXUg0BzFjwYdyTPw8xOiqkflZHdQc=
