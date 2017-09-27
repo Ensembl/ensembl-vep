@@ -740,6 +740,13 @@ sub post_process_vfs {
   # minimise alleles?
   $vfs = $self->minimise_alleles($vfs) if $self->{minimal};
 
+  # copy start, end coords to seq_region_start, seq_region_end
+  # otherwise for circular chromosomes the core API will try to do a DB lookup and die
+  foreach my $vf(@$vfs) {
+    $vf->seq_region_start($vf->{start});
+    $vf->seq_region_end($vf->{end});
+  }
+
   return $vfs;
 }
 
@@ -854,11 +861,13 @@ sub minimise_alleles {
         $new_vf->allele_string($ref.'/'.$alt);
         $new_vf->{start}                  = $start;
         $new_vf->{end}                    = $end;
+        $new_vf->{seq_region_start}       = $start;
+        $new_vf->{seq_region_end}         = $end;
         $new_vf->{original_allele_string} = $vf->{allele_string};
         $new_vf->{original_start}         = $vf->{start};
         $new_vf->{original_end}           = $vf->{end};
         $new_vf->{minimised}              = 1;
-
+        
         push @return, $new_vf;
       }
     }

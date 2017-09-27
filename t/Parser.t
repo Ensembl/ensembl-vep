@@ -84,7 +84,9 @@ is_deeply(
     'original_start' => 1,
     'strand' => 1,
     'allele_string' => 'A/T',
-    'start' => 2
+    'start' => 2,
+    'seq_region_start' => 2,
+    'seq_region_end' => 1,
   }, 'Bio::EnsEMBL::Variation::VariationFeature'),
   "minimal"
 );

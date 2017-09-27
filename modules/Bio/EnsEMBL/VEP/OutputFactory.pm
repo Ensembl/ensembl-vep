@@ -1908,9 +1908,9 @@ sub rejoin_variants_in_InputBuffer {
       # do consequence stuff
       $self->get_all_output_hashes_by_VariationFeature($vf);
 
-      $vf->{allele_string} = $vf->{original_allele_string};
-      $vf->{start}         = $vf->{original_start};
-      $vf->{end}           = $vf->{original_end};
+      $vf->{allele_string}    = $vf->{original_allele_string};
+      $vf->{seq_region_start} = $vf->{start} = $vf->{original_start};
+      $vf->{seq_region_end}   = $vf->{end}   = $vf->{original_end};
 
       push @joined_list, $vf;
     }
