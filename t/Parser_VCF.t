@@ -73,7 +73,9 @@ is_deeply($vf, bless( {
   'map_weight' => 1,
   'allele_string' => 'C/T',
   'end' => 25585733,
-  'start' => 25585733
+  'start' => 25585733,
+  'seq_region_end' => 25585733,
+  'seq_region_start' => 25585733
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'next');
 
 is(ref($p->next), 'Bio::EnsEMBL::Variation::VariationFeature', 'next again');
@@ -114,7 +116,9 @@ is_deeply($vf, bless( {
   'map_weight' => 1,
   'allele_string' => 'C/-',
   'end' => 25587760,
-  'start' => 25587760
+  'start' => 25587760,
+  'seq_region_end' => 25587760,
+  'seq_region_start' => 25587760
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'deletion');
 
 # insertion
@@ -131,7 +135,9 @@ is_deeply($vf, bless( {
   'map_weight' => 1,
   'allele_string' => '-/C',
   'end' => 25587759,
-  'start' => 25587760
+  'start' => 25587760,
+  'seq_region_end' => 25587759,
+  'seq_region_start' => 25587760
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'insertion');
 
 # deletion with SVTYPE field
@@ -148,7 +154,9 @@ is_deeply($vf, bless( {
   'map_weight' => 1,
   'allele_string' => 'C/-',
   'end' => 25587760,
-  'start' => 25587760
+  'start' => 25587760,
+  'seq_region_end' => 25587760,
+  'seq_region_start' => 25587760
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'deletion ignore SVTYPE');
 
 # deletion with SVTYPE field
@@ -165,7 +173,9 @@ is_deeply($vf, bless( {
   'map_weight' => 1,
   'allele_string' => '-/C',
   'end' => 25587759,
-  'start' => 25587760
+  'start' => 25587760,
+  'seq_region_end' => 25587759,
+  'seq_region_start' => 25587760
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'insertion ignore SVLEN');
 
 # multiple alts
@@ -182,7 +192,9 @@ is_deeply($vf, bless( {
   'map_weight' => 1,
   'allele_string' => 'A/C/G',
   'end' => 25587759,
-  'start' => 25587759
+  'start' => 25587759,
+  'seq_region_end' => 25587759,
+  'seq_region_start' => 25587759
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'multiple alts');
 
 # mixed types - different first base
@@ -199,7 +211,9 @@ is_deeply($vf, bless( {
   'map_weight' => 1,
   'allele_string' => 'A/C/GG',
   'end' => 25587759,
-  'start' => 25587759
+  'start' => 25587759,
+  'seq_region_end' => 25587759,
+  'seq_region_start' => 25587759
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'mixed types - different first base');
 
 # mixed types - different first base
@@ -216,7 +230,9 @@ is_deeply($vf, bless( {
   'map_weight' => 1,
   'allele_string' => '-/C/T',
   'end' => 25587759,
-  'start' => 25587760
+  'start' => 25587760,
+  'seq_region_end' => 25587759,
+  'seq_region_start' => 25587760
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'mixed types - same first base');
 
 # stubby - nothing after ALT
@@ -233,7 +249,9 @@ is_deeply($vf, bless( {
   'map_weight' => 1,
   'allele_string' => 'G/C',
   'end' => 25587759,
-  'start' => 25587759
+  'start' => 25587759,
+  'seq_region_end' => 25587759,
+  'seq_region_start' => 25587759
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'stubby');
 
 # non-variant
@@ -251,6 +269,8 @@ is_deeply($vf, bless( {
   'allele_string' => 'G',
   'end' => 25587759,
   'start' => 25587759,
+  'seq_region_end' => 25587759,
+  'seq_region_start' => 25587759,
   'non_variant' => 1,
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'non-variant');
 
@@ -276,6 +296,8 @@ is_deeply($vf, bless( {
   'allele_string' => 'G/C/*',
   'end' => 25587759,
   'start' => 25587759,
+  'seq_region_end' => 25587759,
+  'seq_region_start' => 25587759
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), '*-type 1');
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
@@ -292,6 +314,8 @@ is_deeply($vf, bless( {
   'allele_string' => 'G/C/<DEL:*>',
   'end' => 25587759,
   'start' => 25587759,
+  'seq_region_end' => 25587759,
+  'seq_region_start' => 25587759
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), '*-type 2 ');
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
@@ -309,6 +333,8 @@ is_deeply($vf, bless( {
   'allele_string' => 'C/-/*',
   'end' => 25587760,
   'start' => 25587760,
+  'seq_region_end' => 25587760,
+  'seq_region_start' => 25587760
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), '*-type with deletion');
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
@@ -326,6 +352,8 @@ is_deeply($vf, bless( {
   'allele_string' => '-/C/*',
   'end' => 25587759,
   'start' => 25587760,
+  'seq_region_end' => 25587759,
+  'seq_region_start' => 25587760
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), '*-type with insertion');
 
 # minimal
@@ -341,12 +369,14 @@ is_deeply($vf, bless( {
   'original_allele_string' => 'CAT/CCT',
   'original_end' => 25587760,
   'end' => 25587759,
+  'seq_region_end' => 25587759,
   'original_start' => '25587758',
   'strand' => 1,
   'variation_name' => 'test',
   'map_weight' => 1,
   'allele_string' => 'A/C',
-  'start' => 25587759
+  'start' => 25587759,
+  'seq_region_start' => 25587759
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'minimal');
 
 
@@ -363,7 +393,9 @@ is_deeply($vf, bless( {
   'map_weight' => 1,
   'allele_string' => 'C/T/CAA',
   'end' => 25587758,
-  'start' => 25587758
+  'start' => 25587758,
+  'seq_region_end' => 25587758,
+  'seq_region_start' => 25587758
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'minimal - multiple alts pass through here');
 
 
@@ -374,11 +406,13 @@ $expected = bless( {
   'inner_end' => 25587769,
   'outer_start' => 25587759,
   'end' => 25587769,
+  'seq_region_end' => 25587769,
   'inner_start' => 25587759,
   'strand' => 1,
   'class_SO_term' => 'duplication',
   'variation_name' => 'sv_dup',
-  'start' => 25587759
+  'start' => 25587759,
+  'seq_region_start' => 25587759
 }, 'Bio::EnsEMBL::Variation::StructuralVariationFeature' );
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
@@ -425,11 +459,13 @@ is_deeply($vf, bless( {
   'inner_end' => 25587765,
   'outer_start' => 25587756,
   'end' => 25587769,
+  'seq_region_end' => 25587769,
   'inner_start' => 25587761,
   'strand' => 1,
   'class_SO_term' => 'duplication',
   'variation_name' => 'sv_dup',
-  'start' => 25587759
+  'start' => 25587759,
+  'seq_region_start' => 25587759
 }, 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature fuzzy');
 
 no warnings 'once';
@@ -466,7 +502,9 @@ is_deeply($vf, bless( {
   'map_weight' => 1,
   'allele_string' => 'A/G',
   'end' => 25586000,
-  'start' => 25586000
+  'start' => 25586000,
+  'seq_region_end' => 25586000,
+  'seq_region_start' => 25586000
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'gp');
 
 # GP flag not found
@@ -507,6 +545,8 @@ is_deeply($vf, bless( {
   'allele_string' => 'A/G',
   'end' => 25587759,
   'start' => 25587759,
+  'seq_region_end' => 25587759,
+  'seq_region_start' => 25587759,
   'genotype' => ['A', 'G'],
   'individual' => 'dave',
   'phased' => 1,
@@ -522,6 +562,8 @@ is_deeply($vf, bless( {
   'allele_string' => 'A/G',
   'end' => 25587759,
   'start' => 25587759,
+  'seq_region_end' => 25587759,
+  'seq_region_start' => 25587759,
   'genotype' => ['G', 'G'],
   'individual' => 'barry',
   'phased' => 0,
@@ -537,6 +579,8 @@ is_deeply($vf, bless( {
   'allele_string' => 'A',
   'end' => 25587759,
   'start' => 25587759,
+  'seq_region_end' => 25587759,
+  'seq_region_start' => 25587759,
   'genotype' => ['A', 'A'],
   'individual' => 'jeff',
   'phased' => 0,
@@ -565,6 +609,8 @@ is_deeply($vf, bless( {
   'allele_string' => 'A/A',
   'end' => 25587759,
   'start' => 25587759,
+  'seq_region_end' => 25587759,
+  'seq_region_start' => 25587759,
   'genotype' => ['A', 'A'],
   'individual' => 'jeff',
   'phased' => 0,

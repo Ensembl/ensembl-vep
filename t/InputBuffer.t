@@ -73,7 +73,9 @@ is_deeply($vfs->[0], bless( {
   'map_weight' => 1,
   'allele_string' => 'C/T',
   'end' => 25585733,
-  'start' => '25585733'
+  'start' => 25585733,
+  'seq_region_end' => 25585733,
+  'seq_region_start' => 25585733
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'next first variant');
 
 
@@ -89,7 +91,9 @@ is_deeply($vfs->[0], bless( {
   'map_weight' => 1,
   'allele_string' => 'A/G',
   'end' => 25592911,
-  'start' => '25592911'
+  'start' => 25592911,
+  'seq_region_end' => 25592911,
+  'seq_region_start' => 25592911
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'next again first variant');
 
 is_deeply($ib->min_max, [25592911, 25603910], 'min_max');
@@ -419,7 +423,9 @@ is_deeply($ib->buffer, [
     'alt_allele' => 'T',
     'map_weight' => 1,
     'allele_string' => 'C/T',
-    'start' => 1
+    'start' => 1,
+    'seq_region_start' => 1,
+    'seq_region_end' => 1,
   }, 'Bio::EnsEMBL::Variation::VariationFeature' ),
   bless( {
     'chr' => '1',
@@ -431,7 +437,9 @@ is_deeply($ib->buffer, [
     'alt_allele' => '-',
     'map_weight' => 1,
     'allele_string' => 'AGAAGAAAG/-',
-    'start' => 2
+    'start' => 2,
+    'seq_region_start' => 2,
+    'seq_region_end' => 10,
   }, 'Bio::EnsEMBL::Variation::VariationFeature' )
 ], 'minimal - split_variants');
 
@@ -461,7 +469,9 @@ is_deeply(
     'map_weight' => 1,
     'allele_string' => 'CAG/TAG/T',
     'end' => 3,
-    'start' => 1
+    'start' => 1,
+    'seq_region_start' => 1,
+    'seq_region_end' => 3,
   }, 'Bio::EnsEMBL::Variation::VariationFeature' ),
   'minimal - doesnt affect non-minimisable'
 );

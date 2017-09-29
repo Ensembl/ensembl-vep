@@ -92,10 +92,12 @@ SKIP: {
     'chr' => '21',
     '_source_id' => '1',
     'end' => 25585733,
+    'seq_region_end' => 25585733,
     'flank_match' => '1',
     'minor_allele_frequency' => '0.000998403',
     'minor_allele' => 'T',
     'start' => 25585733,
+    'seq_region_start' => 25585733,
     '_line' => ['rs142513484'],
     '_source_name' => 'dbSNP',
   }, 'Bio::EnsEMBL::Variation::VariationFeature' );
