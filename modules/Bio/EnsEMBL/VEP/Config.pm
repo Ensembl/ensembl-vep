@@ -369,7 +369,7 @@ our @OPTION_SETS = (
 
 # valid values for certain flags
 our %VALID = (
-  format          => [qw(ensembl vcf hgvs id pileup guess)],
+  format          => [qw(ensembl vcf hgvs id pileup region guess)],
   terms           => [qw(SO display NCBI)],
   sift            => [qw(s p b)],
   polyphen        => [qw(s p b)],
@@ -397,6 +397,7 @@ our %INCOMPATIBLE = (
   gvf         => [qw(vcf json tab)],
   tab         => [qw(vcf gvf json)],
   individual  => [qw(minimal)],
+  check_ref   => [qw(lookup_ref)],
 );
 
 # deprecated/replaced flags

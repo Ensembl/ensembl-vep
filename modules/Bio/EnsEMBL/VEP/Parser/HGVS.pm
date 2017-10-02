@@ -168,10 +168,20 @@ sub create_VariationFeatures {
     # not all hgvs notations are supported yet, so we have to wrap it in an eval
     eval {
       if($self->{ambiguous_hgvs}) {
-        $vfs = $vfa->fetch_all_possible_by_hgvs_notation($hgvs, $sa, $ta);
+        $vfs = $vfa->fetch_all_possible_by_hgvs_notation(
+          -hgvs               => $hgvs,
+          -slice_adaptor      => $sa,
+          -transcript_adaptor => $ta,
+          -replace_ref        => $self->{lookup_ref} || 0,
+        );
       }
       else {
-        push @$vfs, $vfa->fetch_by_hgvs_notation($hgvs, $sa, $ta);
+        push @$vfs, $vfa->fetch_by_hgvs_notation(
+          -hgvs               => $hgvs,
+          -slice_adaptor      => $sa,
+          -transcript_adaptor => $ta,
+          -replace_ref        => $self->{lookup_ref} || 0,
+        );
       }
     };
 
@@ -213,7 +223,12 @@ sub create_VariationFeatures {
     $vf->{_line} = [$hgvs];
   }
 
-  return $self->post_process_vfs($vfs);
+  # post_process_vfs will do lookup_ref again, we've already done it
+  my $prev = $self->{lookup_ref} || 0;
+  my $return = $self->post_process_vfs($vfs);
+  $self->{lookup_ref} = $prev;
+
+  return $return;
 }
 
 1;

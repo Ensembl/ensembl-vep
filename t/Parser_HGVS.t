@@ -132,6 +132,16 @@ SKIP: {
   delete($vf->{$_}) for qw(adaptor variation slice variation_name _line);
   is_deeply($vf, $expected, 'protein');
 
+  $p = Bio::EnsEMBL::VEP::Parser::HGVS->new({
+    config => $cfg,
+    file => $test_cfg->create_input_file('ENST00000352957.8:c.991N>A'),
+    valid_chromosomes => [21],
+  });
+  $p->{lookup_ref} = 1;
+  $vf = $p->next();
+  delete($vf->{$_}) for qw(adaptor variation slice variation_name _line);
+  is_deeply($vf, $expected, 'coding - lookup_ref');
+
   # multiple
   my @vfs;
   $p = Bio::EnsEMBL::VEP::Parser::HGVS->new({

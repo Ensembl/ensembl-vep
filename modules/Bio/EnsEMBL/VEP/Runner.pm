@@ -729,6 +729,7 @@ sub post_setup_checks {
     unless($self->fasta_db) {
       throw("ERROR: Cannot generate HGVS coordinates (--hgvs) in offline mode without a FASTA file (see --fasta)\n") if $self->param('hgvs') || $self->param('hgvsc') || $self->param('hgvsp');
       throw("ERROR: Cannot check reference sequences (--check_ref) without a FASTA file (see --fasta)\n") if $self->param('check_ref');
+      throw("ERROR: Cannot look up reference sequences (--lookup_ref) without a FASTA file (see --fasta)\n") if $self->param('lookup_ref');
       throw("ERROR: Cannot use transcript reference sequences (--use_transcript_ref) without a FASTA file (see --fasta); you may wish to use --use_given_ref\n") if $self->param('use_transcript_ref');
     }
     
@@ -746,7 +747,7 @@ sub post_setup_checks {
 
     # and these depend on either DB or FASTA DB
     unless($self->fasta_db) {
-      foreach my $param(grep {$self->param($_)} qw(hgvs hgvsc hgvsp check_ref use_transcript_ref)) {
+      foreach my $param(grep {$self->param($_)} qw(hgvs hgvsc hgvsp lookup_ref check_ref use_transcript_ref)) {
         $self->status_msg("INFO: Database will be accessed when using --$param");
       }
     }
