@@ -186,6 +186,21 @@ is(scalar @tmp, 4, 'merge_features refseq count before merge');
 @tmp = @{$c->merge_features(\@tmp)};
 is(scalar @tmp, 3, 'merge_features refseq removes duplicates');
 
+# check removal of duplicates when source is same for all duplicates
+@tmp = grep {$_->{_gene_symbol} eq 'MRPL39'} @$features;
+my $to_copy = $tmp[-1];
+%copy = %{$to_copy};
+push @tmp, bless(\%copy, ref($to_copy));
+my %copy2 = %{$to_copy};
+push @tmp, bless(\%copy2, ref($to_copy));
+$tmp[-1]->{dbID} -= 1;
+$tmp[-2]->{dbID} -= 2;
+
+is(scalar @tmp, 5, 'merge_features refseq count before merge (source same)');
+@tmp = @{$c->merge_features(\@tmp)};
+is(scalar @tmp, 3, 'merge_features refseq removes duplicates (source same)');
+is($tmp[-1]->{dbID}, 11214669, 'merge features refseq leaves lowest dbID');
+
 $c->{source_type} = 'ensembl';
 
 $features = $c->get_features_by_regions_uncached([[$test_cfg->{cache_chr}, $test_cfg->{cache_s}]]);
