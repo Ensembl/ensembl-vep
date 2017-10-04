@@ -97,6 +97,7 @@ use Bio::EnsEMBL::IO::ListBasedParser;
   Description: Create a new Bio::EnsEMBL::VEP::Parser::Region object.
   Returntype : Bio::EnsEMBL::VEP::Parser::Region
   Exceptions : throws if no database or FASTA available for reference allele lookup
+               throws if --check_ref param set
   Caller     : Runner
   Status     : Stable
 
@@ -145,7 +146,7 @@ sub parser {
   Description: Create a VariationFeature object from the current line
                of input. 
   Returntype : arrayref of Bio::EnsEMBL::VariationFeature
-  Exceptions : warns if ID not found in database or has no genomic mappings
+  Exceptions : none
   Caller     : next()
   Status     : Stable
 
