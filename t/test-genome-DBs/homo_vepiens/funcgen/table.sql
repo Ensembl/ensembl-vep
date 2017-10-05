@@ -1,3 +1,77 @@
+CREATE TABLE `alignment` (
+  `alignment_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `analysis_id` smallint(5) unsigned NOT NULL,
+  `name` varchar(100) DEFAULT NULL,
+  `bam_file_id` int(11) DEFAULT NULL,
+  `bigwig_file_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`alignment_id`),
+  UNIQUE KEY `name_idx` (`name`),
+  KEY `analysis_idx` (`analysis_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2489 DEFAULT CHARSET=latin1;
+
+CREATE TABLE `alignment_qc_chance` (
+  `alignment_qc_chance` int(10) unsigned NOT NULL,
+  `signal_alignment_id` int(10) unsigned NOT NULL,
+  `analysis_id` smallint(5) unsigned DEFAULT NULL,
+  `p` double DEFAULT NULL,
+  `q` double DEFAULT NULL,
+  `divergence` double DEFAULT NULL,
+  `z_score` double DEFAULT NULL,
+  `percent_genome_enriched` double DEFAULT NULL,
+  `input_scaling_factor` double DEFAULT NULL,
+  `differential_percentage_enrichment` double DEFAULT NULL,
+  `control_enrichment_stronger_than_chip_at_bin` double DEFAULT NULL,
+  `first_nonzero_bin_at` double DEFAULT NULL,
+  `pcr_amplification_bias_in_Input_coverage_of_1_percent_of_genome` double DEFAULT NULL,
+  `path` varchar(512) NOT NULL,
+  PRIMARY KEY (`alignment_qc_chance`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+CREATE TABLE `alignment_qc_flagstats` (
+  `alignment_qc_flagstats_id` int(10) unsigned NOT NULL,
+  `alignment_id` int(10) unsigned NOT NULL,
+  `analysis_id` smallint(5) unsigned DEFAULT NULL,
+  `category` varchar(100) NOT NULL,
+  `qc_passed_reads` int(10) unsigned DEFAULT NULL,
+  `qc_failed_reads` int(10) unsigned DEFAULT NULL,
+  `path` varchar(512) NOT NULL,
+  `bam_file` varchar(512) NOT NULL,
+  PRIMARY KEY (`alignment_qc_flagstats_id`),
+  UNIQUE KEY `name_exp_idx` (`alignment_qc_flagstats_id`,`category`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+CREATE TABLE `alignment_qc_phantom_peak` (
+  `alignment_qc_phantom_peak_id` int(10) unsigned NOT NULL,
+  `analysis_id` smallint(5) unsigned DEFAULT NULL,
+  `alignment_id` int(10) unsigned NOT NULL,
+  `filename` varchar(512) NOT NULL,
+  `numReads` int(10) unsigned NOT NULL,
+  `estFragLen` double DEFAULT NULL,
+  `estFragLen2` double DEFAULT NULL,
+  `estFragLen3` double DEFAULT NULL,
+  `corr_estFragLen` double DEFAULT NULL,
+  `corr_estFragLen2` double DEFAULT NULL,
+  `corr_estFragLen3` double DEFAULT NULL,
+  `phantomPeak` int(10) unsigned NOT NULL,
+  `corr_phantomPeak` double DEFAULT NULL,
+  `argmin_corr` int(10) DEFAULT NULL,
+  `min_corr` double DEFAULT NULL,
+  `NSC` double DEFAULT NULL,
+  `RSC` double DEFAULT NULL,
+  `QualityTag` int(10) DEFAULT NULL,
+  `path` varchar(512) NOT NULL,
+  PRIMARY KEY (`alignment_qc_phantom_peak_id`),
+  KEY `filename_idx` (`filename`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+CREATE TABLE `alignment_read_file` (
+  `alignment_read_file_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `alignment_id` int(10) unsigned NOT NULL,
+  `read_file_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`alignment_read_file_id`,`alignment_id`),
+  UNIQUE KEY `rset_table_idname_idx` (`alignment_id`,`read_file_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
 CREATE TABLE `analysis` (
   `analysis_id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
   `created` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
@@ -25,21 +99,6 @@ CREATE TABLE `analysis_description` (
   `web_data` text,
   UNIQUE KEY `analysis_idx` (`analysis_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-
-CREATE TABLE `annotated_feature` (
-  `annotated_feature_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `seq_region_id` int(10) unsigned NOT NULL,
-  `seq_region_start` int(10) unsigned NOT NULL,
-  `seq_region_end` int(10) unsigned NOT NULL,
-  `seq_region_strand` tinyint(1) NOT NULL,
-  `display_label` varchar(60) DEFAULT NULL,
-  `score` double DEFAULT NULL,
-  `feature_set_id` int(10) unsigned NOT NULL,
-  `summit` int(10) unsigned DEFAULT NULL,
-  PRIMARY KEY (`annotated_feature_id`),
-  UNIQUE KEY `seq_region_feature_set_idx` (`seq_region_id`,`seq_region_start`,`feature_set_id`),
-  KEY `feature_set_idx` (`feature_set_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 MAX_ROWS=100000000 AVG_ROW_LENGTH=39;
 
 CREATE TABLE `array` (
   `array_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -116,38 +175,16 @@ CREATE TABLE `binding_matrix` (
   KEY `feature_type_idx` (`feature_type_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=265 DEFAULT CHARSET=latin1;
 
-CREATE TABLE `coord_system` (
-  `coord_system_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(40) NOT NULL,
-  `version` varchar(255) NOT NULL DEFAULT '',
-  `rank` int(11) NOT NULL,
-  `attrib` set('default_version','sequence_level') DEFAULT NULL,
-  `schema_build` varchar(10) NOT NULL DEFAULT '',
-  `core_coord_system_id` int(10) NOT NULL,
-  `species_id` int(10) NOT NULL DEFAULT '1',
-  `is_current` tinyint(1) DEFAULT '1',
-  PRIMARY KEY (`name`,`version`,`schema_build`,`species_id`),
-  KEY `name_version_idx` (`name`,`version`),
-  KEY `coord_species_idx` (`species_id`),
-  KEY `coord_system_id_idx` (`coord_system_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2474 DEFAULT CHARSET=latin1;
-
-CREATE TABLE `data_set` (
-  `data_set_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `feature_set_id` int(10) unsigned NOT NULL DEFAULT '0',
-  `name` varchar(200) DEFAULT NULL,
-  PRIMARY KEY (`data_set_id`,`feature_set_id`),
-  UNIQUE KEY `name_idx` (`name`)
-) ENGINE=MyISAM AUTO_INCREMENT=1210 DEFAULT CHARSET=latin1;
-
-CREATE TABLE `dbfile_registry` (
+CREATE TABLE `data_file` (
+  `data_file_id` int(11) NOT NULL AUTO_INCREMENT,
   `table_id` int(10) unsigned NOT NULL,
   `table_name` varchar(32) NOT NULL,
   `path` varchar(255) NOT NULL,
   `file_type` enum('BAM','BAMCOV','BIGBED','BIGWIG','VCF','CRAM','DIR') NOT NULL DEFAULT 'BAM',
   `md5sum` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`table_id`,`table_name`,`file_type`),
-  UNIQUE KEY `table_id_name_path_idx` (`table_id`,`table_name`,`path`)
+  PRIMARY KEY (`data_file_id`),
+  UNIQUE KEY `table_id_name_path_idx` (`table_id`,`table_name`,`path`),
+  UNIQUE KEY `data_file_id` (`data_file_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `epigenome` (
@@ -156,7 +193,7 @@ CREATE TABLE `epigenome` (
   `display_label` varchar(30) NOT NULL,
   `description` varchar(80) DEFAULT NULL,
   `production_name` varchar(120) DEFAULT NULL,
-  `gender` enum('male','female','hermaphrodite','mixed','unknown') DEFAULT NULL,
+  `gender` enum('male','female','hermaphrodite','mixed','unknown') DEFAULT 'unknown',
   `ontology_accession` varchar(20) DEFAULT NULL,
   `ontology` enum('EFO','CL') DEFAULT NULL,
   `tissue` varchar(50) DEFAULT NULL,
@@ -248,29 +285,14 @@ CREATE TABLE `feature_set` (
   `feature_set_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `feature_type_id` int(10) unsigned NOT NULL,
   `analysis_id` smallint(5) unsigned NOT NULL,
-  `epigenome_id` int(10) unsigned DEFAULT NULL,
   `name` varchar(100) DEFAULT NULL,
   `type` enum('annotated','regulatory','external','segmentation','mirna_target') DEFAULT NULL,
   `description` varchar(80) DEFAULT NULL,
   `display_label` varchar(80) DEFAULT NULL,
-  `experiment_id` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`feature_set_id`),
   UNIQUE KEY `name_idx` (`name`),
-  KEY `feature_type_idx` (`feature_type_id`),
-  KEY `experiment_idx` (`experiment_id`),
-  KEY `epigenome_idx` (`epigenome_id`)
+  KEY `feature_type_idx` (`feature_type_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1213 DEFAULT CHARSET=latin1;
-
-CREATE TABLE `feature_set_qc_prop_reads_in_peaks` (
-  `feature_set_qc_prop_reads_in_peaks_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `analysis_id` smallint(5) unsigned DEFAULT NULL,
-  `feature_set_id` int(10) unsigned NOT NULL,
-  `prop_reads_in_peaks` double DEFAULT NULL,
-  `total_reads` int(10) DEFAULT NULL,
-  `path` varchar(512) NOT NULL,
-  `bam_file` varchar(512) NOT NULL,
-  PRIMARY KEY (`feature_set_qc_prop_reads_in_peaks_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `feature_type` (
   `feature_type_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -300,26 +322,6 @@ CREATE TABLE `identity_xref` (
   PRIMARY KEY (`object_xref_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
-CREATE TABLE `input_subset` (
-  `input_subset_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `epigenome_id` int(10) unsigned DEFAULT NULL,
-  `experiment_id` int(10) unsigned NOT NULL,
-  `feature_type_id` int(10) unsigned NOT NULL,
-  `name` varchar(300) NOT NULL,
-  `biological_replicate` tinyint(3) unsigned NOT NULL DEFAULT '1',
-  `technical_replicate` tinyint(3) unsigned NOT NULL DEFAULT '1',
-  `is_control` tinyint(3) unsigned NOT NULL,
-  `analysis_id` smallint(5) unsigned NOT NULL,
-  `read_length` int(10) DEFAULT NULL,
-  `is_paired_end` tinyint(1) DEFAULT NULL,
-  `paired_with` int(10) DEFAULT NULL,
-  `file_size` bigint(20) DEFAULT NULL,
-  PRIMARY KEY (`input_subset_id`),
-  UNIQUE KEY `name_exp_idx` (`name`,`experiment_id`),
-  KEY `analysis_idx` (`analysis_id`),
-  KEY `experiment_idx` (`experiment_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 MAX_ROWS=100000000 AVG_ROW_LENGTH=30;
-
 CREATE TABLE `meta` (
   `meta_id` int(10) NOT NULL AUTO_INCREMENT,
   `species_id` int(10) unsigned DEFAULT '1',
@@ -328,7 +330,7 @@ CREATE TABLE `meta` (
   PRIMARY KEY (`meta_id`),
   UNIQUE KEY `species_key_value_idx` (`species_id`,`meta_key`,`meta_value`),
   KEY `species_value_idx` (`species_id`,`meta_value`)
-) ENGINE=MyISAM AUTO_INCREMENT=663 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=698 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `meta_coord` (
   `table_name` varchar(40) NOT NULL,
@@ -394,6 +396,44 @@ CREATE TABLE `ontology_xref` (
   UNIQUE KEY `object_xref_id_2` (`object_xref_id`,`source_xref_id`,`linkage_type`),
   KEY `object_xref_id` (`object_xref_id`),
   KEY `source_xref_id` (`source_xref_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+CREATE TABLE `peak` (
+  `peak_id` int(10) unsigned NOT NULL,
+  `seq_region_id` int(10) unsigned NOT NULL,
+  `seq_region_start` int(10) unsigned NOT NULL,
+  `seq_region_end` int(10) unsigned NOT NULL,
+  `seq_region_strand` tinyint(1) NOT NULL,
+  `score` double DEFAULT NULL,
+  `peak_calling_id` int(10) unsigned NOT NULL,
+  `summit` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`peak_id`),
+  UNIQUE KEY `seq_region_feature_set_idx` (`seq_region_id`,`seq_region_start`,`peak_calling_id`),
+  KEY `feature_set_idx` (`peak_calling_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 MAX_ROWS=100000000 AVG_ROW_LENGTH=39;
+
+CREATE TABLE `peak_calling` (
+  `peak_calling_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(300) NOT NULL,
+  `display_label` varchar(300) NOT NULL,
+  `feature_type_id` int(10) unsigned NOT NULL,
+  `analysis_id` smallint(5) unsigned NOT NULL,
+  `alignment_id` int(10) unsigned NOT NULL,
+  `epigenome_id` int(10) unsigned DEFAULT NULL,
+  `experiment_id` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`peak_calling_id`),
+  UNIQUE KEY `peak_calling_id_idx` (`peak_calling_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+CREATE TABLE `peak_calling_qc_prop_reads_in_peaks` (
+  `peak_calling_qc_prop_reads_in_peaks_id` int(10) unsigned NOT NULL,
+  `analysis_id` smallint(5) unsigned DEFAULT NULL,
+  `peak_calling_id` int(10) unsigned NOT NULL,
+  `prop_reads_in_peaks` double DEFAULT NULL,
+  `total_reads` int(10) DEFAULT NULL,
+  `path` varchar(512) NOT NULL,
+  `bam_file` varchar(512) NOT NULL,
+  PRIMARY KEY (`peak_calling_qc_prop_reads_in_peaks_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `probe` (
@@ -475,7 +515,36 @@ CREATE TABLE `probe_transcript` (
   `description` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`probe_transcript_id`),
   KEY `probe_transcript_id` (`probe_transcript_id`),
-  KEY `probe_transcript_stable_id_idx` (`stable_id`)
+  KEY `probe_transcript_stable_id_idx` (`stable_id`),
+  KEY `probe_transcript_idx` (`probe_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+CREATE TABLE `read_file` (
+  `read_file_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(300) NOT NULL,
+  `analysis_id` smallint(5) unsigned NOT NULL,
+  `is_paired_end` tinyint(1) DEFAULT NULL,
+  `paired_with` int(10) DEFAULT NULL,
+  `file_size` bigint(20) DEFAULT NULL,
+  `read_length` int(10) DEFAULT NULL,
+  `md5sum` varchar(45) DEFAULT NULL,
+  `file` text,
+  `notes` text,
+  PRIMARY KEY (`read_file_id`),
+  UNIQUE KEY `read_file_id_idx` (`read_file_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+CREATE TABLE `read_file_experimental_configuration` (
+  `read_file_experimental_configuration_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `read_file_id` int(10) unsigned DEFAULT NULL,
+  `experiment_id` int(10) unsigned NOT NULL,
+  `biological_replicate` tinyint(3) unsigned NOT NULL DEFAULT '1',
+  `technical_replicate` tinyint(3) unsigned NOT NULL DEFAULT '1',
+  `paired_end_tag` int(11) DEFAULT NULL,
+  `multiple` int(11) DEFAULT '1',
+  PRIMARY KEY (`read_file_experimental_configuration_id`),
+  UNIQUE KEY `name_exp_idx` (`experiment_id`,`biological_replicate`,`technical_replicate`),
+  KEY `experiment_idx` (`experiment_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `regulatory_activity` (
@@ -534,87 +603,6 @@ CREATE TABLE `regulatory_feature` (
   KEY `stable_id_idx` (`stable_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=201 DEFAULT CHARSET=latin1;
 
-CREATE TABLE `result_set` (
-  `result_set_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `analysis_id` smallint(5) unsigned NOT NULL,
-  `name` varchar(100) DEFAULT NULL,
-  `epigenome_id` int(10) unsigned DEFAULT NULL,
-  `feature_type_id` int(10) unsigned DEFAULT NULL,
-  `feature_class` enum('result','dna_methylation','segmentation') DEFAULT NULL,
-  `experiment_id` int(10) unsigned DEFAULT NULL,
-  PRIMARY KEY (`result_set_id`),
-  UNIQUE KEY `name_idx` (`name`),
-  KEY `feature_type_idx` (`feature_type_id`),
-  KEY `analysis_idx` (`analysis_id`),
-  KEY `feature_class_idx` (`feature_class`),
-  KEY `experiment_idx` (`experiment_id`),
-  KEY `epigenome_idx` (`epigenome_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2489 DEFAULT CHARSET=latin1;
-
-CREATE TABLE `result_set_input` (
-  `result_set_input_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `result_set_id` int(10) unsigned NOT NULL,
-  `table_id` int(10) unsigned NOT NULL,
-  `table_name` enum('input_subset') DEFAULT NULL,
-  PRIMARY KEY (`result_set_input_id`,`result_set_id`),
-  UNIQUE KEY `rset_table_idname_idx` (`result_set_id`,`table_id`,`table_name`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-
-CREATE TABLE `result_set_qc_chance` (
-  `result_set_qc_chance_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `signal_result_set_id` int(10) unsigned DEFAULT NULL,
-  `analysis_id` smallint(5) unsigned DEFAULT NULL,
-  `p` double DEFAULT NULL,
-  `q` double DEFAULT NULL,
-  `divergence` double DEFAULT NULL,
-  `z_score` double DEFAULT NULL,
-  `percent_genome_enriched` double DEFAULT NULL,
-  `input_scaling_factor` double DEFAULT NULL,
-  `differential_percentage_enrichment` double DEFAULT NULL,
-  `control_enrichment_stronger_than_chip_at_bin` double DEFAULT NULL,
-  `first_nonzero_bin_at` double DEFAULT NULL,
-  `pcr_amplification_bias_in_Input_coverage_of_1_percent_of_genome` double DEFAULT NULL,
-  `path` varchar(512) NOT NULL,
-  PRIMARY KEY (`result_set_qc_chance_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-
-CREATE TABLE `result_set_qc_flagstats` (
-  `result_set_qc_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `result_set_id` int(10) unsigned DEFAULT NULL,
-  `analysis_id` smallint(5) unsigned DEFAULT NULL,
-  `category` varchar(100) NOT NULL,
-  `qc_passed_reads` int(10) unsigned DEFAULT NULL,
-  `qc_failed_reads` int(10) unsigned DEFAULT NULL,
-  `path` varchar(512) NOT NULL,
-  `bam_file` varchar(512) NOT NULL,
-  PRIMARY KEY (`result_set_qc_id`),
-  UNIQUE KEY `name_exp_idx` (`result_set_qc_id`,`category`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-
-CREATE TABLE `result_set_qc_phantom_peak` (
-  `result_set_qc_phantom_peak_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `analysis_id` smallint(5) unsigned DEFAULT NULL,
-  `result_set_id` int(10) unsigned NOT NULL,
-  `filename` varchar(512) NOT NULL,
-  `numReads` int(10) unsigned NOT NULL,
-  `estFragLen` double DEFAULT NULL,
-  `estFragLen2` double DEFAULT NULL,
-  `estFragLen3` double DEFAULT NULL,
-  `corr_estFragLen` double DEFAULT NULL,
-  `corr_estFragLen2` double DEFAULT NULL,
-  `corr_estFragLen3` double DEFAULT NULL,
-  `phantomPeak` int(10) unsigned NOT NULL,
-  `corr_phantomPeak` double DEFAULT NULL,
-  `argmin_corr` int(10) DEFAULT NULL,
-  `min_corr` double DEFAULT NULL,
-  `NSC` double DEFAULT NULL,
-  `RSC` double DEFAULT NULL,
-  `QualityTag` int(10) DEFAULT NULL,
-  `path` varchar(512) NOT NULL,
-  PRIMARY KEY (`result_set_qc_phantom_peak_id`),
-  KEY `filename_idx` (`filename`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-
 CREATE TABLE `segmentation_feature` (
   `segmentation_feature_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `seq_region_id` int(10) unsigned NOT NULL,
@@ -641,39 +629,6 @@ CREATE TABLE `segmentation_file` (
   KEY `epigenome_idx` (`epigenome_id`),
   KEY `analysis_idx` (`analysis_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=39 DEFAULT CHARSET=latin1;
-
-CREATE TABLE `seq_region` (
-  `seq_region_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `coord_system_id` int(10) unsigned NOT NULL,
-  `core_seq_region_id` int(10) unsigned NOT NULL,
-  `schema_build` varchar(10) NOT NULL DEFAULT '',
-  PRIMARY KEY (`name`,`schema_build`,`coord_system_id`),
-  KEY `coord_system_id` (`coord_system_id`),
-  KEY `seq_region_id_idx` (`seq_region_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=1494 DEFAULT CHARSET=latin1;
-
-CREATE TABLE `status` (
-  `table_id` int(10) unsigned NOT NULL DEFAULT '0',
-  `table_name` varchar(32) NOT NULL DEFAULT '',
-  `status_name_id` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`table_id`,`table_name`,`status_name_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-
-CREATE TABLE `status_name` (
-  `status_name_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(60) DEFAULT NULL,
-  PRIMARY KEY (`status_name_id`),
-  UNIQUE KEY `status_name_idx` (`name`)
-) ENGINE=MyISAM AUTO_INCREMENT=32 DEFAULT CHARSET=latin1;
-
-CREATE TABLE `supporting_set` (
-  `data_set_id` int(10) unsigned NOT NULL,
-  `supporting_set_id` int(10) unsigned NOT NULL,
-  `type` enum('result','feature','input') NOT NULL DEFAULT 'result',
-  PRIMARY KEY (`data_set_id`,`supporting_set_id`,`type`),
-  KEY `type_idx` (`type`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `unmapped_object` (
   `unmapped_object_id` int(10) unsigned NOT NULL AUTO_INCREMENT,

@@ -1,4 +1,4 @@
-534	\N	schema_version	90
+534	\N	schema_version	91
 80	\N	patch	patch_50_51_b.sql|multispecies
 83	\N	patch	patch_50_51_c.sql|associated_feature_type
 82	\N	patch	patch_50_51_a.sql|cell_type_description
@@ -216,3 +216,38 @@
 660	\N	patch	patch_89_90_b.sql|probe feature columns
 661	\N	patch	patch_89_90_c.sql|Adds stable id index for probe_transcript table
 662	\N	patch	patch_89_90_d.sql|Adds stable id index for probe_set_transcript table
+663	\N	patch	patch_90_91_a.sql|schema_version
+664	\N	patch	patch_90_91_b.sql|Remove sequence regions from previous releases
+665	\N	patch	patch_90_91_c.sql|Translate sequence region ids of regulatory features
+666	\N	patch	patch_90_91_d.sql|Replace regulatory features with updated ones
+667	\N	patch	patch_90_91_e.sql|Translate sequence region ids of segmentation features
+668	\N	patch	patch_90_91_f.sql|Replace segmentation features with updated ones
+669	\N	patch	patch_90_91_g.sql|Translate sequence region ids of probe features
+670	\N	patch	patch_90_91_h.sql|Replace probe features with updated ones
+671	\N	patch	patch_90_91_i.sql|Translate sequence region ids of annotated features
+672	\N	patch	patch_90_91_j.sql|Replace annotated features with updated ones
+673	\N	patch	patch_90_91_k.sql|Translate sequence region ids of external features
+674	\N	patch	patch_90_91_l.sql|Replace external features with updated ones
+675	\N	patch	patch_90_91_m.sql|Translate sequence region ids of mi rna target features
+676	\N	patch	patch_90_91_n.sql|Replace mi rna target features with updated ones
+677	\N	patch	patch_90_91_o.sql|Translate sequence region ids of motif features
+678	\N	patch	patch_90_91_p.sql|Replace motif features with updated ones
+679	\N	patch	patch_90_91_q.sql|Drop seq_region table
+680	\N	patch	patch_90_91_r.sql|Translate coord_system_ids in meta_coord table
+681	\N	patch	patch_90_91_s.sql|Replace meta coord table with the updated table
+682	\N	patch	patch_90_91_t.sql|Drop coord_system table
+683	\N	patch	patch_90_91_u.sql|Set default gender to unknown for epigenomes
+684	\N	patch	patch_90_91_v.sql|Create read_file table and populate it
+685	\N	patch	patch_90_91_w.sql|Create read_file_experimental_configuration table and populate it
+686	\N	patch	patch_90_91_x.sql|Rename result_set to alignment in various tables and columns
+687	\N	patch	patch_90_91_y.sql|Rename annotated_feature to peak
+688	\N	patch	patch_90_91_z.sql|Drop input_subset table
+689	\N	patch	patch_90_91_za.sql|Move peak_callings from feature_set to peak_calling
+690	\N	patch	patch_90_91_zb.sql|Rename another table
+691	\N	patch	patch_90_91_zc.sql|Remove peak_callings from the feature_set table
+692	\N	patch	patch_90_91_zd.sql|Drop data_set table
+693	\N	patch	patch_90_91_ze.sql|Drop supporting_set table
+694	\N	patch	patch_90_91_zf.sql|Drop status tables
+695	\N	patch	patch_90_91_zg.sql|rename table dbfile_registry to data_file and change the way alignments link to it
+696	\N	patch	patch_90_91_zh.sql|Add new columns to read_file_experimental_configuration table
+697	\N	patch	patch_90_91_zi.sql|Create probe_id index on probe_transcript table
