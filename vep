@@ -134,6 +134,7 @@ GetOptions(
   'biotype',                 # add biotype of transcript to output
   'hgnc',                    # add HGNC gene ID to extra column
   'symbol',                  # add gene symbol (e.g. HGNC)
+  'transcript_version',      # add transcript version to stable id in feature column
   'gene_phenotype',          # indicate if genes are phenotype-associated
   'hgvs',                    # add HGVS names to extra column
   'hgvsg',                   # add HGVS g. also

@@ -889,6 +889,14 @@ is_deeply(
   'BaseTranscriptVariationAllele_to_output_hash'
 );
 
+$of->{transcript_version} = 1;
+is(
+  $of->BaseTranscriptVariationAllele_to_output_hash($vfoa, {Consequence => ['upstream_gene_variant']})->{Feature},
+  'ENST00000567517.1',
+  'BaseTranscriptVariationAllele_to_output_hash'
+);
+$of->{transcript_version} = 0;
+
 ($vf) = grep {$_->{variation_name} eq 'rs199510789'} @{$ib->buffer};
 ($vfoa) = grep {$_->feature->stable_id eq 'ENST00000419219'} @{$of->get_all_VariationFeatureOverlapAlleles($vf)};
 
