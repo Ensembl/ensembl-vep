@@ -60,14 +60,11 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
 
 
-our ($CAN_USE_HTS, $CAN_USE_CIGAR, $CAN_USE_INTERVAL_TREE);
+our ($CAN_USE_HTS, $CAN_USE_INTERVAL_TREE);
 
 BEGIN {
   if (eval q{ require Bio::DB::HTS; 1 }) {
     $CAN_USE_HTS = 1;
-  }
-  if (eval q{ require Bio::Cigar; 1 }) {
-    $CAN_USE_CIGAR = 1;
   }
   if (eval q{ require Bio::EnsEMBL::VEP::TranscriptTree; 1 }) {
     $CAN_USE_INTERVAL_TREE = 1;
@@ -554,24 +551,24 @@ sub apply_edits {
   eval {$new_tr_spliced_seq = $tr->spliced_seq};
 
   my $cmp = !$@ && $new_tr_spliced_seq eq $bam_seq;
-  if($DEBUG) {
-    my $status = $cmp ? 'OK' : 'FAILED';
-    my $error = $@ ? "\t$@" : "";
-    $error =~ s/\s+$//g;
+  # if($DEBUG) {
+  #   my $status = $cmp ? 'OK' : 'FAILED';
+  #   my $error = $@ ? "\t$@" : "";
+  #   $error =~ s/\s+$//g;
 
-    print STDERR
-      "$status $stable_id STRAND $mapping_strand OPS ".
-      join(", ", map {$_.":".$seen_ops{$_}} sort keys %seen_ops).
-      " EDITS ".
-      (join(", ", map {$_->value} grep {$_->code eq '_rna_edit'} @{$tr->get_all_Attributes}) || 'NONE').
-      "$error\n";
+  #   print STDERR
+  #     "$status $stable_id STRAND $mapping_strand OPS ".
+  #     join(", ", map {$_.":".$seen_ops{$_}} sort keys %seen_ops).
+  #     " EDITS ".
+  #     (join(", ", map {$_->value} grep {$_->code eq '_rna_edit'} @{$tr->get_all_Attributes}) || 'NONE').
+  #     "$error\n";
 
-    if($status eq 'FAILED') {
-      open OUT, ">$stable_id.fa";
-      print OUT "\>BAM\n$bam_seq\n\>PRE\n$pre_edit_seq\n\>TR\n".$new_tr_spliced_seq;
-      close OUT;
-    }
-  }
+  #   if($status eq 'FAILED') {
+  #     open OUT, ">$stable_id.fa";
+  #     print OUT "\>BAM\n$bam_seq\n\>PRE\n$pre_edit_seq\n\>TR\n".$new_tr_spliced_seq;
+  #     close OUT;
+  #   }
+  # }
   
   if($cmp) {
     # flag successful
