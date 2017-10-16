@@ -72,7 +72,8 @@ GetOptions(
   'failed=i',                # include failed variations when finding existing
   'gp',                      # read coords from GP part of INFO column in VCF (probably only relevant to 1KG)
   'chr=s',                   # analyse only these chromosomes, e.g. 1-5,10,MT
-  'check_ref',               # check supplied reference allele against DB
+  'check_ref',               # check supplied reference allele against DB/FASTA
+  'lookup_ref',              # replace supplied reference allele with allele from DB/FASTA
   'check_existing',          # find existing co-located variations
   'check_svs',               # find overlapping structural variations
   'no_check_alleles',        # attribute co-located regardless of alleles

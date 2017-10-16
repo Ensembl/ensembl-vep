@@ -194,6 +194,30 @@ is($p->validate_vf($vf), 1, 'validate_vf - check_ref long ok');
 
 $p->{check_ref} = 0;
 
+# lookup_ref
+$p->{lookup_ref} = 1;
+$p->param('fasta', $test_cfg->{fasta});
+$p->fasta_db();
+
+$vf = get_vf({chr => 21, start => 25585733, end => 25585733, allele_string => 'N/T'});
+is($p->validate_vf($vf), 1, 'validate_vf - lookup_ref pass');
+is($vf->allele_string, 'C/T', 'validate_vf - lookup_ref seq OK');
+
+$vf = get_vf({chr => 21, start => 25585733, end => 25585733, allele_string => 'N/T', strand => -1});
+is($p->validate_vf($vf), 1, 'validate_vf - lookup_ref -ve pass');
+is($vf->allele_string, 'G/T', 'validate_vf - lookup_ref -ve seq OK');
+
+$vf = get_vf({chr => 21, start => 25585733, end => 25585733, allele_string => 'N/-'});
+is($p->validate_vf($vf), 1, 'validate_vf - lookup_ref deletion pass');
+is($vf->allele_string, 'C/-', 'validate_vf - lookup_ref deletion seq OK');
+
+$vf = get_vf({allele_string => '-/T', start => 2, end => 1});
+is($p->validate_vf($vf), 1, 'validate_vf - lookup_ref insertion');
+is($vf->allele_string, '-/T', 'validate_vf - lookup_ref insertion seq');
+
+$p->{lookup_ref} = 0;
+
+
 # restore STDERR
 open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
@@ -239,12 +263,35 @@ is($p->detect_format, 'ensembl', 'detect_format - VEP_input multiple');
 $p->file($test_cfg->create_input_file('21 25587759 25587769 DUP + test'));
 is($p->detect_format, 'ensembl', 'detect_format - VEP_input SV');
 
+$p->file($test_cfg->create_input_file('21:25587759-25587759:1/A'));
+is($p->detect_format, 'region', 'detect_format - region');
+
+$p->file($test_cfg->create_input_file('21:25587759-25587759:1/DUP'));
+is($p->detect_format, 'region', 'detect_format - region SV');
+
+$p->file($test_cfg->create_input_file('chr21:25587759-25587759:1/A'));
+is($p->detect_format, 'region', 'detect_format - region chr');
+
+$p->file($test_cfg->create_input_file('CHR_21:25587759-25587759:1/A'));
+is($p->detect_format, 'region', 'detect_format - region CHR_');
+
+$p->file($test_cfg->create_input_file('21:25587759-25587759/A'));
+is($p->detect_format, 'region', 'detect_format - region no strand');
+
+$p->file($test_cfg->create_input_file('21:25587759-25587759:+1/A'));
+is($p->detect_format, 'region', 'detect_format - region +ve strand');
+
+$p->file($test_cfg->create_input_file('21:25587759-25587759:-1/A'));
+is($p->detect_format, 'region', 'detect_format - region -ve strand');
+
+$p->file($test_cfg->create_input_file('21:25587759-25587759:1:A'));
+is($p->detect_format, 'region', 'detect_format - region : separator');
+
 $p->file($test_cfg->create_input_file([qw(chr1 60 T A)]));
 is($p->detect_format, 'pileup', 'detect_format - pileup');
 
 $p->file($test_cfg->create_input_file('21 25587759 25587769'));
 is($p->detect_format, undef, 'detect_format - incomplete');
-
 
 
 ## OTHER TESTS
