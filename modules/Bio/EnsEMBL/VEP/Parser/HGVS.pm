@@ -225,6 +225,7 @@ sub create_VariationFeatures {
 
   # post_process_vfs will do lookup_ref again, we've already done it
   my $prev = $self->{lookup_ref} || 0;
+  $self->{lookup_ref} = 0;
   my $return = $self->post_process_vfs($vfs);
   $self->{lookup_ref} = $prev;
 
