@@ -165,6 +165,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'pick_allele' => undef,
   'coding_only' => undef,
   'refseq' => undef,
+  'output_format' => 'vep',
   'no_escape' => undef,
   'total_length' => undef,
   'per_gene' => undef,
