@@ -145,6 +145,7 @@ sub new {
     process_ref_homs
     coding_only
     terms
+    output_format
     no_escape
     pick_order
     allele_number
@@ -1272,7 +1273,7 @@ sub BaseTranscriptVariationAllele_to_output_hash {
 
     $hash->{SYMBOL} = $symbol if defined($symbol) && $symbol ne '-';
     ## encode spaces in symbol name for VCF
-    $hash->{SYMBOL} =~ s/\s/\%20/g if $hash->{SYMBOL} && $self->param('output_format') eq 'vcf' && !$self->{no_escape};
+    $hash->{SYMBOL} =~ s/\s/\%20/g if $hash->{SYMBOL} && $self->{output_format} eq 'vcf' && !$self->{no_escape};
 
     $hash->{SYMBOL_SOURCE} = $source if defined($source) && $source ne '-';
     $hash->{HGNC_ID} = $hgnc_id if defined($hgnc_id) && $hgnc_id ne '-';
