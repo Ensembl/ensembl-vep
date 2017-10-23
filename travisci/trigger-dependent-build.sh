@@ -23,6 +23,7 @@
 # The authorisation token
 auth_token=MdFujR8JsfCR9uJdw7jrPg
 
+
 # The Travis API endpoint. .com and .org are the commercial and free versions,
 # respectively; enterprise users will have their own hostname.
 endpoint=https://api.travis-ci.org
@@ -72,7 +73,7 @@ if [ "${TRAVIS_BRANCH}" != "master" ] || [ "${TRAVIS_PULL_REQUEST}" != "false" ]
 fi
 
 # The list of downstream dependent repos
-dep_repos=("avullo%2Fensembl%2Drest")
+dep_repos=("Ensembl%2Fensembl%2Drest")
 
 for dep_repo in "${dep_repos[@]}"; do
     # Get the ID of the dependent repo
