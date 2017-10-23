@@ -139,7 +139,7 @@ CREATE TABLE `meta` (
   `species_id` int(1) unsigned DEFAULT NULL,
   PRIMARY KEY (`meta_id`),
   UNIQUE KEY `key_value_idx` (`meta_key`,`meta_value`)
-) ENGINE=MyISAM AUTO_INCREMENT=38 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=39 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `ontology` (
   `ontology_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -160,14 +160,14 @@ CREATE TABLE `relation` (
   PRIMARY KEY (`relation_id`),
   UNIQUE KEY `child_parent_idx` (`child_term_id`,`parent_term_id`,`relation_type_id`,`intersection_of`,`ontology_id`),
   KEY `parent_idx` (`parent_term_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=91957 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=91958 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `relation_type` (
   `relation_type_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(64) NOT NULL,
   PRIMARY KEY (`relation_type_id`),
   UNIQUE KEY `name_idx` (`name`)
-) ENGINE=MyISAM AUTO_INCREMENT=95 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=96 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `subset` (
   `subset_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -201,5 +201,5 @@ CREATE TABLE `term` (
   UNIQUE KEY `accession_idx` (`accession`),
   UNIQUE KEY `ontology_acc_idx` (`ontology_id`,`accession`),
   KEY `name_idx` (`name`)
-) ENGINE=MyISAM AUTO_INCREMENT=47451 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=47452 DEFAULT CHARSET=latin1;
 

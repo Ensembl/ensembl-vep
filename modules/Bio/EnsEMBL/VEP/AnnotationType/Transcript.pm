@@ -60,14 +60,11 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
 
 
-our ($CAN_USE_HTS, $CAN_USE_CIGAR, $CAN_USE_INTERVAL_TREE);
+our ($CAN_USE_HTS, $CAN_USE_INTERVAL_TREE);
 
 BEGIN {
   if (eval q{ require Bio::DB::HTS; 1 }) {
     $CAN_USE_HTS = 1;
-  }
-  if (eval q{ require Bio::Cigar; 1 }) {
-    $CAN_USE_CIGAR = 1;
   }
   if (eval q{ require Bio::EnsEMBL::VEP::TranscriptTree; 1 }) {
     $CAN_USE_INTERVAL_TREE = 1;
@@ -280,25 +277,42 @@ sub merge_features {
   }
 
   ## hack to copy HGNC IDs and RefSeq stuff
-  my %counts;
+  my %by_stable_id;
   foreach my $tr(@return) {
     $tr->{_gene_hgnc_id} = $hgnc_ids{$tr->{_gene_symbol}} if defined($tr->{_gene_symbol}) && defined($hgnc_ids{$tr->{_gene_symbol}});
 
     if($source_type_is_refseq) {
       $tr->{$_} ||= $refseq_stuff{$tr->{_gene}->stable_id}->{$_} for qw(_gene_symbol _gene_symbol_source _gene_hgnc_id);
-      $counts{$tr->{stable_id}}++;
+      push @{$by_stable_id{$tr->{stable_id}}}, $tr;
     }
   }
 
   ## now remove duplicates...
   if($source_type_is_refseq) {
     my @new;
+    my %done_stable_id = ();
+
     foreach my $tr(@return) {
-      if($counts{$tr->{stable_id}} > 1) {
-        push @new, $tr unless $tr->{source} eq 'ensembl';
+      my $stable_id = $tr->{stable_id};
+      next if $done_stable_id{$stable_id};
+      $done_stable_id{$stable_id} = 1;
+
+      my @all_with_stable_id = @{$by_stable_id{$stable_id}};
+
+      if(scalar @all_with_stable_id == 1) {
+        push @new, @all_with_stable_id;
       }
       else {
-        push @new, $tr;
+        # try and find one with source 'ensembl'
+        my ($ensembl_tr) = grep {$_->{source} eq 'ensembl'} @all_with_stable_id;
+
+        if($ensembl_tr) {
+          push @new, $ensembl_tr;
+        }
+        else {
+          # just take the one with the lowest dbID
+          push @new, (sort {$a->dbID <=> $b->dbID} @all_with_stable_id)[0];
+        }
       }
     }
 
@@ -537,24 +551,24 @@ sub apply_edits {
   eval {$new_tr_spliced_seq = $tr->spliced_seq};
 
   my $cmp = !$@ && $new_tr_spliced_seq eq $bam_seq;
-  if($DEBUG) {
-    my $status = $cmp ? 'OK' : 'FAILED';
-    my $error = $@ ? "\t$@" : "";
-    $error =~ s/\s+$//g;
+  # if($DEBUG) {
+  #   my $status = $cmp ? 'OK' : 'FAILED';
+  #   my $error = $@ ? "\t$@" : "";
+  #   $error =~ s/\s+$//g;
 
-    print STDERR
-      "$status $stable_id STRAND $mapping_strand OPS ".
-      join(", ", map {$_.":".$seen_ops{$_}} sort keys %seen_ops).
-      " EDITS ".
-      (join(", ", map {$_->value} grep {$_->code eq '_rna_edit'} @{$tr->get_all_Attributes}) || 'NONE').
-      "$error\n";
+  #   print STDERR
+  #     "$status $stable_id STRAND $mapping_strand OPS ".
+  #     join(", ", map {$_.":".$seen_ops{$_}} sort keys %seen_ops).
+  #     " EDITS ".
+  #     (join(", ", map {$_->value} grep {$_->code eq '_rna_edit'} @{$tr->get_all_Attributes}) || 'NONE').
+  #     "$error\n";
 
-    if($status eq 'FAILED') {
-      open OUT, ">$stable_id.fa";
-      print OUT "\>BAM\n$bam_seq\n\>PRE\n$pre_edit_seq\n\>TR\n".$new_tr_spliced_seq;
-      close OUT;
-    }
-  }
+  #   if($status eq 'FAILED') {
+  #     open OUT, ">$stable_id.fa";
+  #     print OUT "\>BAM\n$bam_seq\n\>PRE\n$pre_edit_seq\n\>TR\n".$new_tr_spliced_seq;
+  #     close OUT;
+  #   }
+  # }
   
   if($cmp) {
     # flag successful

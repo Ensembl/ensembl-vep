@@ -102,6 +102,7 @@ SKIP: {
     'file_bak' => $test_cfg->{test_vcf},
     'line_number' => 0,
     'check_ref' => undef,
+    'lookup_ref' => undef,
     'chr' => undef,
     'dont_skip' => undef,
     'valid_chromosomes' => {21 => 1, LRG_485 => 1},

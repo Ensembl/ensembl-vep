@@ -91,10 +91,12 @@ SKIP: {
     '_source_id' => undef,
     'analysis' => undef,
     'end' => 25585733,
+    'seq_region_end' => 25585733,
     'minor_allele_frequency' => undef,
     'overlap_consequences' => undef,
     'minor_allele' => undef,
-    'start' => 25585733
+    'start' => 25585733,
+    'seq_region_start' => 25585733
   }, 'Bio::EnsEMBL::Variation::VariationFeature' );
 
   $vf = $p->next();
@@ -129,6 +131,16 @@ SKIP: {
   })->next();
   delete($vf->{$_}) for qw(adaptor variation slice variation_name _line);
   is_deeply($vf, $expected, 'protein');
+
+  $p = Bio::EnsEMBL::VEP::Parser::HGVS->new({
+    config => $cfg,
+    file => $test_cfg->create_input_file('ENST00000352957.8:c.991N>A'),
+    valid_chromosomes => [21],
+  });
+  $p->{lookup_ref} = 1;
+  $vf = $p->next();
+  delete($vf->{$_}) for qw(adaptor variation slice variation_name _line);
+  is_deeply($vf, $expected, 'coding - lookup_ref');
 
   # multiple
   my @vfs;
@@ -284,10 +296,12 @@ SKIP: {
     '_source_id' => undef,
     'analysis' => undef,
     'end' => 6674,
+    'seq_region_end' => 6674,
     'minor_allele_frequency' => undef,
     'overlap_consequences' => undef,
     'minor_allele' => undef,
-    'start' => 6674
+    'start' => 6674,
+    'seq_region_start' => 6674
   }, 'Bio::EnsEMBL::Variation::VariationFeature' );
 
   $vf = Bio::EnsEMBL::VEP::Parser::HGVS->new({
@@ -348,11 +362,13 @@ SKIP: {
     '_source_id' => undef,
     'chr' => '21',
     'end' => 43774705,
+    'seq_region_end' => 43774705,
     'analysis' => undef,
     'minor_allele_frequency' => undef,
     'overlap_consequences' => undef,
     'minor_allele' => undef,
-    'start' => 43774705
+    'start' => 43774705,
+    'seq_region_start' => 43774705
   }, 'Bio::EnsEMBL::Variation::VariationFeature' );
 
   $vf = $p->next;
@@ -412,10 +428,12 @@ SKIP: {
       '_source_id' => undef,
       'analysis' => undef,
       'end' => 25585733,
+      'seq_region_end' => 25585733,
       'minor_allele_frequency' => undef,
       'overlap_consequences' => undef,
       'minor_allele' => undef,
-      'start' => 25585733
+      'start' => 25585733,
+      'seq_region_start' => 25585733
     }, 'Bio::EnsEMBL::Variation::VariationFeature' ),
     'core db only - genomic hgvs'
   );

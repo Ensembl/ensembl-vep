@@ -567,9 +567,9 @@ sub split_variants {
 
         # give it a new allele string and coords
         $new_vf->allele_string($ref.'/'.$alt);
-        $new_vf->{start} = $start;
-        $new_vf->{end} = $end;
-        $new_vf->{alt_allele} = $alt;
+        $new_vf->{seq_region_start} = $new_vf->{start} = $start;
+        $new_vf->{seq_region_end}   = $new_vf->{end}   = $end;
+        $new_vf->{alt_allele}       = $alt;
 
         # $new_vf->{variation_name} = 'merge_'.$alt;
 

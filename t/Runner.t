@@ -101,6 +101,7 @@ is_deeply($runner->get_Parser, bless({
   'file_bak' => *Bio::EnsEMBL::VEP::Runner::IN,
   'line_number' => 0,
   'check_ref' => undef,
+  'lookup_ref' => undef,
   'chr' => undef,
   'dont_skip' => undef,
   'valid_chromosomes' => {21 => 1, LRG_485 => 1},
@@ -117,6 +118,7 @@ is_deeply($runner->get_InputBuffer, bless({
     'file_bak' => *Bio::EnsEMBL::VEP::Runner::IN,
     'line_number' => 0,
     'check_ref' => undef,
+    'lookup_ref' => undef,
     'chr' => undef,
     'dont_skip' => undef,
     'valid_chromosomes' => {21 => 1, LRG_485 => 1},
@@ -206,6 +208,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'max_af' => undef,
   'use_transcript_ref' => undef,
   'af_gnomad' => undef,
+  'transcript_version' => undef,
 }, 'Bio::EnsEMBL::VEP::OutputFactory::VEP_output' ), 'get_OutputFactory');
 
 

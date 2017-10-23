@@ -843,7 +843,7 @@ sub dump_html {
   print $fh
     '<h3 id="gen_stats">General statistics</h3>'.
     '<table class="stats_table">'.
-      join('', map {'<tr>'.join('', map {'<td>'.$_.'</td>'} @$_).'</tr>'} @{$finished_stats->{general_stats}}).
+      join('', map {'<tr>'.join('', map {'<td>'.($_ || 0).'</td>'} @$_).'</tr>'} @{$finished_stats->{general_stats}}).
     '</table>';
   
   foreach my $chart(@{$finished_stats->{charts}}) {

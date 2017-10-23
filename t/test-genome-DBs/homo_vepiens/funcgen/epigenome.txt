@@ -1,22 +1,22 @@
 1	HeLa-S3	HeLa-S3	Human Epithelial Carcinoma Cells	HeLa_S3	female	efo:EFO_0002791	\N	cervix
 2	GM06990	GM06990	Human B-Lymphocyte cell line	GM06990	female	efo:EFO_0002783	\N	blood
 3	U2OS	U2OS	Human Bone Osteosarcoma Epithelial Cells	U2OS	female	efo:EFO_0002869	\N	bone
-4	CD4	CD4	Human CD4 T-Cells	CD4	\N	CL:CL_0000492	\N	blood
+4	CD4	CD4	Human CD4 T-Cells	CD4	unknown	CL:CL_0000492	\N	blood
 5	IMR90	IMR90	Human Fetal Lung Fibroblast	IMR90	female	efo:EFO_0001196	\N	lung
 6	HL-60	HL-60	Human Promyelotic Leukemia Cells	HL_60	female	efo:EFO_0002793	\N	blood
 7	HepG2	HepG2	Human hepatocellular liver carcinoma cell line	HepG2	male	efo:EFO_0001187	\N	liver
-8	Lymphoblastoid	Lymphoblastoid	Lymphoblastoid cells	Lymphoblastoid	\N	efo:EFO_0000572	\N	blood
-10	CD133	CD133	Human CD133+ Hematopoietic Stem Cell	CD133	\N	\N	\N	blood
-11	CD36	CD36	Human CD36+ Erythrocyte Precursor Cell	CD36	\N	\N	\N	blood
+8	Lymphoblastoid	Lymphoblastoid	Lymphoblastoid cells	Lymphoblastoid	unknown	efo:EFO_0000572	\N	blood
+10	CD133	CD133	Human CD133+ Hematopoietic Stem Cell	CD133	unknown	\N	\N	blood
+11	CD36	CD36	Human CD36+ Erythrocyte Precursor Cell	CD36	unknown	\N	\N	blood
 14	K562	K562	Human myelogenous leukaemia cell line	K562	female	efo:EFO_0002067	\N	blood
 15	GM12878	GM12878	Human B-Lymphocyte cell line	GM12878	female	efo:EFO_0002784	\N	blood
 16	HUVEC	HUVEC	Human umbilical vein endothelial cell line	HUVEC	female	efo:EFO_0002795	\N	endothelium
 17	NHEK	NHEK	Normal human epidermal keratinocyte cell line	NHEK	female	efo:EFO_0002799	\N	skin
-18	H1ESC	H1ESC	Human Embryonic Stem Cells	H1ESC	\N	efo:EFO_0003042	\N	embryonic stem cell
+18	H1ESC	H1ESC	Human Embryonic Stem Cells	H1ESC	unknown	efo:EFO_0003042	\N	embryonic stem cell
 20	K562b	K562b	Human myelogenous leukaemia line (alternative)	K562b	female	\N	\N	blood
-21	NH-A	NH-A	Normal Human Astrocytes	NH_A	\N	\N	\N	nervous
-22	HSMM	HSMM	Human Skeletal Muscle Myoblasts	HSMM	\N	\N	\N	muscle
-23	HMEC	HMEC	Human Mammary Epithelial Cells	HMEC	\N	\N	\N	breast
+21	NH-A	NH-A	Normal Human Astrocytes	NH_A	unknown	\N	\N	nervous
+22	HSMM	HSMM	Human Skeletal Muscle Myoblasts	HSMM	unknown	\N	\N	muscle
+23	HMEC	HMEC	Human Mammary Epithelial Cells	HMEC	unknown	\N	\N	breast
 24	A549	A549	Epithelial Lung Carcinoma	A549	male	\N	\N	\N
 25	AG04449	AG04449	Fetal thigh fibroblast	AG04449	male	\N	\N	\N
 26	AG04450	AG04450	Fetal lung fibroblast	AG04450	male	\N	\N	\N
@@ -24,7 +24,7 @@
 28	AG09319	AG09319	Adult human gum tissue fibroblast	AG09319	female	\N	\N	\N
 29	AG10803	AG10803	Adult Human Abdominal Skin Fibroblasts	AG10803	male	\N	\N	\N
 30	Caco-2	Caco-2	Colorectal Adenocarcinoma	Caco_2	male	efo:EFO_0002817	\N	colon
-31	Chorion	Chorion	Chorion Cells	Chorion	\N	\N	\N	\N
+31	Chorion	Chorion	Chorion Cells	Chorion	unknown	\N	\N	\N
 32	CMK	CMK	Human Acute Megakaryocytic Leukemia Cells	CMK	female	\N	\N	\N
 33	GM10847	GM10847	Lymphoblastoid	GM10847	female	\N	\N	\N
 34	GM12801	GM12801	B-Lymphocyte	GM12801	male	\N	\N	\N
@@ -36,7 +36,7 @@
 40	GM12875	GM12875	B-Lymphocyte	GM12875	female	\N	\N	\N
 41	GM12891	GM12891	B-Lymphocyte	GM12891	male	\N	\N	\N
 42	GM12892	GM12892	B-Lymphocyte	GM12892	female	\N	\N	\N
-43	GM15510	GM15510	Lymphoblastoid	GM15510	\N	\N	\N	\N
+43	GM15510	GM15510	Lymphoblastoid	GM15510	unknown	\N	\N	\N
 44	GM18505	GM18505	Lymphoblastoid	GM18505	female	\N	\N	\N
 45	GM18507	GM18507	Lymphoblastoid	GM18507	male	\N	\N	\N
 46	GM18526	GM18526	Lymphoblastoid	GM18526	female	\N	\N	\N
@@ -46,49 +46,49 @@
 50	GM19238	GM19238	B-Lymphocyte	GM19238	female	\N	\N	\N
 51	GM19239	GM19239	B-Lymphocyte	GM19239	male	\N	\N	\N
 52	GM19240	GM19240	B-Lymphocyte	GM19240	female	\N	\N	\N
-53	H7ESC	H7ESC	Undifferentiated Human Embryonic Stem Cells	H7ESC	\N	\N	\N	\N
+53	H7ESC	H7ESC	Undifferentiated Human Embryonic Stem Cells	H7ESC	unknown	\N	\N	\N
 54	H9ESC	H9ESC	Human Embryonic Stem Cells	H9ESC	female	\N	\N	\N
-55	HAEpiC	HAEpiC	Human Amniotic Epithelial Cells	HAEpiC	\N	\N	\N	\N
-56	HCF	HCF	Human Cardiac Fibroblasts	HCF	\N	\N	\N	\N
-57	HCM	HCM	Human Cardiac Myocytes	HCM	\N	\N	\N	\N
-58	HCPEpiC	HCPEpiC	Human Choroid Plexus Epithelial Cells	HCPEpiC	\N	\N	\N	\N
+55	HAEpiC	HAEpiC	Human Amniotic Epithelial Cells	HAEpiC	unknown	\N	\N	\N
+56	HCF	HCF	Human Cardiac Fibroblasts	HCF	unknown	\N	\N	\N
+57	HCM	HCM	Human Cardiac Myocytes	HCM	unknown	\N	\N	\N
+58	HCPEpiC	HCPEpiC	Human Choroid Plexus Epithelial Cells	HCPEpiC	unknown	\N	\N	\N
 59	HCT116	HCT116	Colorectal Carcinoma	HCT116	male	\N	\N	\N
-60	HEEpiC	HEEpiC	Human Esophageal Epithelial Cells	HEEpiC	\N	\N	\N	\N
-61	HEK293b	HEK293b	Embryonic Kidney (Variant)	HEK293b	\N	\N	\N	\N
-62	HEK293	HEK293	Embryonic Kidney	HEK293	\N	\N	\N	\N
+60	HEEpiC	HEEpiC	Human Esophageal Epithelial Cells	HEEpiC	unknown	\N	\N	\N
+61	HEK293b	HEK293b	Embryonic Kidney (Variant)	HEK293b	unknown	\N	\N	\N
+62	HEK293	HEK293	Embryonic Kidney	HEK293	unknown	\N	\N	\N
 63	HepG2b	HepG2b	Human Hepatocellular Liver Carcinoma Cell (alternative)	HepG2b	male	\N	\N	\N
-64	HGF	HGF	Human Gingival Fibroblasts	HGF	\N	\N	\N	\N
-65	HIPEpiC	HIPEpiC	Human Iris Pigment Epithelial Cells	HIPEpiC	\N	\N	\N	\N
-66	HNPCEpiC	HNPCEpiC	Human Non-Pignment Ciliary Epithelial Cells	HNPCEpiC	\N	\N	\N	\N
-67	HRCEpiC	HRCEpiC	Human Renal Cortical Epithelial Cells	HRCEpiC	\N	\N	\N	\N
-68	HRE	HRE	Human Renal Epithelial Cells	HRE	\N	\N	\N	\N
-69	HRPEpiC	HRPEpiC	Human Retinal Pigment Epithelial Cells	HRPEpiC	\N	\N	\N	\N
+64	HGF	HGF	Human Gingival Fibroblasts	HGF	unknown	\N	\N	\N
+65	HIPEpiC	HIPEpiC	Human Iris Pigment Epithelial Cells	HIPEpiC	unknown	\N	\N	\N
+66	HNPCEpiC	HNPCEpiC	Human Non-Pignment Ciliary Epithelial Cells	HNPCEpiC	unknown	\N	\N	\N
+67	HRCEpiC	HRCEpiC	Human Renal Cortical Epithelial Cells	HRCEpiC	unknown	\N	\N	\N
+68	HRE	HRE	Human Renal Epithelial Cells	HRE	unknown	\N	\N	\N
+69	HRPEpiC	HRPEpiC	Human Retinal Pigment Epithelial Cells	HRPEpiC	unknown	\N	\N	\N
 70	Jurkat	Jurkat	T Lymphoblastoid	Jurkat	male	\N	\N	\N
 71	LHSR	LHSR	Human Prostate Epthelial Cells	LHSR	female	\N	\N	\N
 72	MCF7	MCF7	Breast Cancert	MCF7	female	\N	\N	\N
-73	Medullo	Medullo	Medulloblastoma	Medullo	\N	\N	\N	\N
-74	Melano	Melano	Melanocytes	Melano	\N	\N	\N	\N
-75	NB4	NB4	Acute Promyelocytic Leukemia Cell Line	NB4	\N	\N	\N	\N
-76	NHBE	NHBE	Normal Human Bronchial Epithelial Cells	NHBE	\N	\N	\N	\N
-77	NHDF-neo	NHDF-neo	Neonatal Human Dermal Fibroblasts	NHDF_neo	\N	\N	\N	\N
-78	NHLF	NHLF	Normal Human Long Fibroblasts	NHLF	\N	\N	\N	\N
+73	Medullo	Medullo	Medulloblastoma	Medullo	unknown	\N	\N	\N
+74	Melano	Melano	Melanocytes	Melano	unknown	\N	\N	\N
+75	NB4	NB4	Acute Promyelocytic Leukemia Cell Line	NB4	unknown	\N	\N	\N
+76	NHBE	NHBE	Normal Human Bronchial Epithelial Cells	NHBE	unknown	\N	\N	\N
+77	NHDF-neo	NHDF-neo	Neonatal Human Dermal Fibroblasts	NHDF_neo	unknown	\N	\N	\N
+78	NHLF	NHLF	Normal Human Long Fibroblasts	NHLF	unknown	\N	\N	\N
 79	NT2-D1	NTERA-2 cl.D1	Malignant Pluripotent Testicular Embryonal Carcinoma	NT2_D1	male	efo:EFO_0005236	\N	blood
-80	Panc1	Panc1	Pancreatic Carcinoma	Panc1	\N	\N	\N	\N
+80	Panc1	Panc1	Pancreatic Carcinoma	Panc1	unknown	\N	\N	\N
 81	PanIslets	PanIslets	Human Pancreatic Islets	PanIslets	male	\N	\N	\N
 82	PFSK1	PFSK1	Neurectodermal cell line	PFSK1	male	\N	\N	\N
-83	SAEC	SAEC	Small Airway Epithelial Cells	SAEC	\N	\N	\N	\N
-84	SKMC	SKMC	Human Skeletal Muscle Cells	SKMC	\N	\N	\N	\N
+83	SAEC	SAEC	Small Airway Epithelial Cells	SAEC	unknown	\N	\N	\N
+84	SKMC	SKMC	Human Skeletal Muscle Cells	SKMC	unknown	\N	\N	\N
 85	SKNMC	SKNMC	Neuroepithelioma Cell Line	SKNMC	female	\N	\N	\N
 86	SKNSHRA	SKNSHRA	Neuroblastoma Cell Line Differentiated with Retinoic acid	SKNSHRA	female	\N	\N	\N
-87	Th1	Th1	Primary Human Th1 T Cells	Th1	\N	\N	\N	\N
-88	Th2	Th2	Primary Human Th2 T Cells	Th2	\N	\N	\N	\N
+87	Th1	Th1	Primary Human Th1 T Cells	Th1	unknown	\N	\N	\N
+88	Th2	Th2	Primary Human Th2 T Cells	Th2	unknown	\N	\N	\N
 89	WERIRB1	WERIRB1	Retinoblastoma	WERIRB1	male	\N	\N	\N
-90	RPTEC	RPTEC	Renal Proximal Tubule Epithelial Cells	RPTEC	\N	\N	\N	\N
+90	RPTEC	RPTEC	Renal Proximal Tubule Epithelial Cells	RPTEC	unknown	\N	\N	\N
 91	ProgFib	ProgFib	Fibroblasts, Hutchinson-Gilford progeria syndrome	ProgFib	male	\N	\N	\N
-92	HSMMtube	HSMMtube	skeletal muscle myotubes differentiated from the HSMM cell line	HSMMtube	\N	\N	\N	\N
-93	Osteobl	Osteobl	Osteoblasts (NHOst)	Osteobl	\N	\N	\N	\N
-94	MCF10A-Er-Src	MCF10A-Er-Src	Mammary gland, non-tumorigenic epithelial, inducible cell line	MCF10A_Er_Src	\N	\N	\N	\N
-95	HPAEpiC	HPAEpiC	Pulmonary alveolar epithelial cells	HPAEpiC	\N	\N	\N	\N
+92	HSMMtube	HSMMtube	skeletal muscle myotubes differentiated from the HSMM cell line	HSMMtube	unknown	\N	\N	\N
+93	Osteobl	Osteobl	Osteoblasts (NHOst)	Osteobl	unknown	\N	\N	\N
+94	MCF10A-Er-Src	MCF10A-Er-Src	Mammary gland, non-tumorigenic epithelial, inducible cell line	MCF10A_Er_Src	unknown	\N	\N	\N
+95	HPAEpiC	HPAEpiC	Pulmonary alveolar epithelial cells	HPAEpiC	unknown	\N	\N	\N
 96	Fibrobl	Fibrobl	Child Fibroblast	Fibrobl	female	\N	\N	\N
 97	GM12878-XiMat	GM12878-XiMat	Lymphoblastoid, Epstein-Barr Virus, Cloned for maternal X inactivation	GM12878_XiMat	female	\N	\N	\N
 98	BJ	BJ	Foreskin fibroblast	BJ	male	\N	\N	\N

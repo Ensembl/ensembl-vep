@@ -72,6 +72,7 @@ use Bio::EnsEMBL::VEP::Parser::VCF;
 use Bio::EnsEMBL::VEP::Parser::VEP_input;
 use Bio::EnsEMBL::VEP::Parser::ID;
 use Bio::EnsEMBL::VEP::Parser::HGVS;
+use Bio::EnsEMBL::VEP::Parser::Region;
 
 use Scalar::Util qw(openhandle looks_like_number);
 use FileHandle;
@@ -81,6 +82,7 @@ my %FORMAT_MAP = (
   'ensembl' => 'VEP_input',
   'id'      => 'ID',
   'hgvs'    => 'HGVS',
+  'region'  => 'Region'
 );
 
 
@@ -113,7 +115,7 @@ sub new {
   
   my $self = $class->SUPER::new(@_);
 
-  $self->add_shortcuts([qw(dont_skip check_ref chr lrg minimal delimiter)]);
+  $self->add_shortcuts([qw(dont_skip check_ref chr lrg minimal delimiter lookup_ref)]);
 
   my $hashref = $_[0];
 
@@ -404,8 +406,16 @@ sub detect_format {
     my @data = split $delimiter, $_;
     next unless @data;
 
-    # HGVS: ENST00000285667.3:c.1047_1048insC
+    # region chr21:10-10:1/A
     if (
+      scalar @data == 1 &&
+      $data[0] =~ /^[^\:]+\:\d+\-\d+(\:[\-\+]?1)?[\/\:](ins|dup|del|[ACGTN-]+)$/i
+    ) {
+      $format = 'region';
+    }
+
+    # HGVS: ENST00000285667.3:c.1047_1048insC
+    elsif (
       scalar @data == 1 &&
       $data[0] =~ /^([^\:]+)\:.*?([cgmrp]?)\.?([\*\-0-9]+.*)$/i
     ) {
@@ -622,16 +632,12 @@ sub validate_vf {
       $ok = 1;
     }
     else {
-      $vf->{slice} ||= $self->get_slice($vf->{chr});
+      my $slice_ref_allele = $self->_get_ref_allele($vf);
 
-      my $slice_ref = $vf->{slice}->sub_Slice($vf->{start}, $vf->{end}, $vf->{strand});
-
-      if(!defined($slice_ref)) {
+      if(!defined($slice_ref_allele)) {
         $self->warning_msg("WARNING: Could not fetch sub-slice from ".$vf->{chr}.":".$vf->{start}."\-".$vf->{end}."\(".$vf->{strand}."\) on line ".$self->line_number);
       }
-
       else {
-        $slice_ref_allele = $slice_ref->seq;
         $ok = (uc($slice_ref_allele) eq uc($ref_allele) ? 1 : 0);
       }
     }
@@ -647,7 +653,44 @@ sub validate_vf {
     }
   }
 
+  elsif($self->{lookup_ref}) {
+    my $slice_ref_allele = $ref_allele eq '' ? '' : $self->_get_ref_allele($vf);
+
+    if(!defined($slice_ref_allele)) {
+      $self->warning_msg("WARNING: Could not reference allele for ".$vf->{chr}.":".$vf->{start}."\-".$vf->{end}."\(".$vf->{strand}."\) on line ".$self->line_number);
+      return 0;
+    }
+
+    $vf->{allele_string} = join('/', map {$_ || '-'} ($slice_ref_allele, @alleles));
+  }
+
   return 1;
+}
+
+
+=head2 _get_ref_allele
+  
+  Example    : $ref_allele = $parser->_get_ref_allele($vf);
+  Description: Looks up the reference sequence covered by the given
+               VariationFeature. Uses a slice that will fetch from
+               FASTA (if configured) or database (assuming not in
+               offline mode). Returns undef if it failed to fetch an
+               appropriate slice.
+  Returntype : string
+  Exceptions : none
+  Caller     : validate_vf()
+  Status     : Stable
+
+=cut
+
+sub _get_ref_allele {
+  my ($self, $vf) = @_;
+
+  $vf->{slice} ||= $self->get_slice($vf->{chr});
+
+  my $slice_ref = $vf->{slice}->sub_Slice($vf->{start}, $vf->{end}, $vf->{strand});
+
+  return $slice_ref ? $slice_ref->seq : undef;
 }
 
 
@@ -739,6 +782,13 @@ sub post_process_vfs {
 
   # minimise alleles?
   $vfs = $self->minimise_alleles($vfs) if $self->{minimal};
+
+  # copy start, end coords to seq_region_start, seq_region_end
+  # otherwise for circular chromosomes the core API will try to do a DB lookup and die
+  foreach my $vf(@$vfs) {
+    $vf->seq_region_start($vf->{start});
+    $vf->seq_region_end($vf->{end});
+  }
 
   return $vfs;
 }
@@ -854,11 +904,13 @@ sub minimise_alleles {
         $new_vf->allele_string($ref.'/'.$alt);
         $new_vf->{start}                  = $start;
         $new_vf->{end}                    = $end;
+        $new_vf->{seq_region_start}       = $start;
+        $new_vf->{seq_region_end}         = $end;
         $new_vf->{original_allele_string} = $vf->{allele_string};
         $new_vf->{original_start}         = $vf->{start};
         $new_vf->{original_end}           = $vf->{end};
         $new_vf->{minimised}              = 1;
-
+        
         push @return, $new_vf;
       }
     }
