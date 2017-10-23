@@ -1020,11 +1020,11 @@ sub cache() {
       $ftp->cwd($sub) or die "ERROR: Could not change directory to $sub\n$@\n";
     }
 
-    push @files, sort grep {$_ =~ /tar.gz/} $ftp->ls;
+    push @files, grep {$_ =~ /tar.gz/} $ftp->ls;
   }
   else {
     opendir DIR, $CACHE_URL;
-    @files = sort grep {$_ =~ /tar.gz/} readdir DIR;
+    @files = grep {$_ =~ /tar.gz/} readdir DIR;
     closedir DIR;
   }
 
@@ -1041,6 +1041,10 @@ sub cache() {
       "mus_musculus_vep_".$DATA_VERSION."_GRCm38.tar.gz",
       "rattus_norvegicus_vep_".$DATA_VERSION."_Rnor_5.0.tar.gz",
     );
+  }
+  else {
+    # sort
+    @files = sort {($a =~ /homo_sapiens/) <=> ($b =~ /homo_sapiens/) || $a cmp $b} @files;
   }
 
   foreach my $file(@files) {
