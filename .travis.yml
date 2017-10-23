@@ -8,7 +8,10 @@ perl:
   - "5.22"
 
 env:
+  matrix:
   - COVERALLS=true  DB=mysql
+  global:
+    secure: txA5GX+ymx+tM8VmVcpm38jMnOLn47ycmRgQxWZDFGBGk9e0g1PlDfIuyOt18wliLrNjV2InHy972FGJKlnGG1PwGAZctceUwjtrJhkqWfefAIvGiyyBUPVbJNV6C/D+1xNbD8LvObdLlNxH+ci/Ra1VAEHKKVLAywpU5JOh7eYKs+Jm1pqXZJvg0RiHqq/uULs+hYHNmmIlqRwBEHsHKyarTVHCCzbeiidzkkQuf7lQpJaDteO97r9P3npoBNijqDs3lQuSGblUzcjDuoAiQ5UhmxyU2yYU/x6lsVRETsKaVrvlJQJPXARAef5UE6mGDx4COcC6hz13wm7lHFrVSvThixNoxgslhcb8v9HmfGVIOxO5pHWnLTSNYUzEMp55SvavAyNdmqY6z9AXiDyOxruRGCkysUT8GwQTwMiXTn4/Qh8Tqe9kYbHXW4fEi7VQk8eo1HsQHdRw0xo8voBqoGVpPnk4E1FPs6OXTZbCQw61YqvJD8SO5wr+JaUl04FdRLOuP/iPwr1thFoDAhYU10Io2ztNlVgeeE1NJkLGpifY7fluQ+a0ddh3Tuq4y8tYXjesYBTGCSb+N7wGL/iV1w4mA7675F75B4o/Pau50QX5KxwU/+X02g6aOV2W0k9mFgbInaQu3VVfcRcN8lolbaHPeiAiwYjvDJatV181wiM=
 
 sudo: required
 dist: trusty
@@ -58,8 +61,6 @@ install:
 
 script: "./travisci/harness.sh"
 
-# Add build stage to trigger dependent builds, run sequentially after all test jobs
-# specified by the build matrix expansion have completed successfully
 jobs:
   include:
     - stage: trigger_dependent_builds
@@ -69,5 +70,3 @@ notifications:
   email:
     on_success: always
     on_failure: always
-  slack:
-    secure: IJVCl9JXQZdDnXPvKEz+G5RsCXe3NgYgSddvaN2nyXwH4MMJsZMzta0jkPz2MMU1T3jZ++leQ7lY5T+gyWia4ZuuxJ7TVxboK7m5F5Zl2eB9UIFWiHfWp257v9LsAgXPQOvDRl6L0dfvo/LuDtYWI9jf+gP//9xHShmkiA5Z6danXB+c/dHQrIxUQkR1y5qEqiRJrPaq0C+0b4fRQhzy9roVhGki6H7Nt0dWQ6pF/Y4+FQV+OlLCiyz7nA1Me6jiDLFdzRLkOlD2Ppx9awXpAbT03tCxhCJySYhy6mW6QVEqaezFizYFtIZZVN5ySZ+8GsoAQmVBycjc6gXZeH0YiabETb1xloslflFcsyMmazHeAXs/4m50qRxAuZE101GHuqI5Gb49GTi1lB4BQrVZqJ54tL4s7j14v5MRMB2pMXApKuE2u82Rsi6PkwGM+NePiAIDJNZYOfWYs7RboLFpR77s/1qxBfhVGE8TFSwbDoCqJslC6/o2aVro3T3KS26QUqJ4dwT2ks+2qPXGuALhasJi5Oc8Rxc/fhZw8aj9Jv422gf1fqjSC5+JOtYAXBtRdQt4E4LX/QBolEBjWvY8ha+ce94M/gLaZFFOQFf9CdyM+x+GqCBimOemOxiA9A5vTwUUgsjhX+MDa7SXUg0BzFjwYdyTPw8xOiqkflZHdQc=
