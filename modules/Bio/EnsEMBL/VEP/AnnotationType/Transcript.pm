@@ -60,14 +60,11 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
 
 
-our ($CAN_USE_HTS, $CAN_USE_CIGAR, $CAN_USE_INTERVAL_TREE);
+our ($CAN_USE_HTS, $CAN_USE_INTERVAL_TREE);
 
 BEGIN {
   if (eval q{ require Bio::DB::HTS; 1 }) {
     $CAN_USE_HTS = 1;
-  }
-  if (eval q{ require Bio::Cigar; 1 }) {
-    $CAN_USE_CIGAR = 1;
   }
   if (eval q{ require Bio::EnsEMBL::VEP::TranscriptTree; 1 }) {
     $CAN_USE_INTERVAL_TREE = 1;
