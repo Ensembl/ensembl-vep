@@ -80,6 +80,12 @@ sub dump_info {
   # indicate contains regulation data
   print OUT "regulatory\t1\n";
 
+  # cell types
+  my $cell_types = @{$as->get_available_cell_types};
+  if($cell_types && @$cell_types) {
+    print OUT "cell_types\t".join(",", @$cell_types)."\n";
+  }
+
   my $info = $as->info;
   print OUT "source_$_\t".$info->{$_}."\n" for keys %$info;
 
