@@ -132,7 +132,7 @@ sub configure {
     $version_count += keys %{$versions{$sp}};
   }
 
-  die "ERROR: No valid direcotories found\n" unless $version_count;
+  die "ERROR: No valid directories found\n" unless $version_count;
   
   if(!defined($config->{version}) && $version_count > 1) {
     my $msg = keys %versions ? " or select one of the following:\n".join("\n",
@@ -342,8 +342,9 @@ sub get_chr_files {
   my ($dir, $chrs, $type) = @_;
 
   my %chr_files;
+  $type = '' if $type eq '_tr';
 
-  foreach my $chr(@$chrs) {    
+  foreach my $chr(@$chrs) {
     opendir DIR, $dir.'/'.$chr;
     my @files = grep {-f $dir.'/'.$chr.'/'.$_ && /\d+$type\.gz$/} readdir DIR;
     closedir DIR;
