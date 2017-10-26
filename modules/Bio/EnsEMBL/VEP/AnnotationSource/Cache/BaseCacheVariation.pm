@@ -53,7 +53,7 @@ use warnings;
 
 package Bio::EnsEMBL::VEP::AnnotationSource::Cache::BaseCacheVariation;
 
-use Scalar::Util qw(weaken);
+use Scalar::Util qw(weaken looks_like_number);
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
@@ -201,7 +201,11 @@ sub get_frequency_data {
     my $total_freq = 0;
 
     # special case 1KG_ALL
-    if($freq_pop_full eq '1KG_ALL' && defined($ex->{minor_allele_freq}) && defined($ex->{minor_allele})) {
+    if(
+      $freq_pop_full eq '1KG_ALL' &&
+      $ex->{minor_allele} &&
+      defined($ex->{minor_allele_freq}) && looks_like_number($ex->{minor_allele_freq})
+    ) {
       my $a = $ex->{minor_allele};
       my $f = $ex->{minor_allele_freq};
       
