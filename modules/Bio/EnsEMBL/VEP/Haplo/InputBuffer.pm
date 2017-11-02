@@ -186,7 +186,7 @@ sub get_max_from_tree {
 }
 
 
-=head2 get_max_from_tree
+=head2 transcript_tree
   
   Arg 1      : (optional) Bio::EnsEMBL::VEP::TranscriptTree $tree
   Example    : my $tree = $ib->transcript_tree
