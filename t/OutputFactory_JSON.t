@@ -113,6 +113,9 @@ SKIP: {
     'add_VariationFeatureOverlapAllele_info'
   );
 
+  $vf->{existing}->[0]->{pubmed} = "10,20,30";
+  $vf->{existing}->[0]->{clin_sig} = "pathogenic,benign";
+
   is_deeply(
     $of->add_colocated_variant_info_JSON($vf, {}),
     {
@@ -156,7 +159,9 @@ SKIP: {
           'afr_maf' => '0.003',
           'eur_maf' => '0',
           'gnomad_allele' => 'T',
-          'gnomad_afr_allele' => 'T'
+          'gnomad_afr_allele' => 'T',
+          'pubmed' => [10, 20, 30],
+          'clin_sig' => ["pathogenic", "benign"],
         }
       ]
     },

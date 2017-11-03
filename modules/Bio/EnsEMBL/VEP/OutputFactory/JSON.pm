@@ -115,6 +115,11 @@ my %NUMBERIFY_EXEMPT = (
   'id' => 1,
 );
 
+my @LIST_FIELDS = qw(
+  clin_sig
+  pubmed
+);
+
 
 =head2 new
 
@@ -390,6 +395,11 @@ sub add_colocated_variant_info_JSON {
     foreach my $key(grep {defined($ex->{$_})} keys %RENAME_KEYS) {
       $ex->{$RENAME_KEYS{$key}} = $ex->{$key};
       delete $ex->{$key};
+    }
+
+    # lists
+    foreach my $field(grep {defined($ex->{$_})} @LIST_FIELDS) {
+      $ex->{$field} = [split(',', $ex->{$field})];
     }
 
     push @{$hash->{colocated_variants}}, $ex;
