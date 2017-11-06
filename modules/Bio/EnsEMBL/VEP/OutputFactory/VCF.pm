@@ -346,6 +346,8 @@ sub output_hash_to_vcf_info_chunk {
       if(defined($data)) {
         $data =~ s/\,/\&/g;
         $data =~ s/\;/\%3B/g;
+        $data =~ s/\s+/\_/g;
+        $data =~ s/\|/\&/g;
       }
 
       push @chunk, $data;

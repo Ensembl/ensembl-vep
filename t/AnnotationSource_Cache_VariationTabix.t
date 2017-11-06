@@ -269,6 +269,13 @@ SKIP: {
   my $bak = $c->{freq_pop};
   $c->{freq_pop} = 'foo';
   throws_ok { $c->check_frequency_filter } qr/Invalid population/, 'check_frequency_filter - fails on missing pop';
+
+  $c->{freq_pop} = 'gnomAD_AFR_AF';
+  throws_ok { $c->check_frequency_filter } qr/Invalid population/, 'check_frequency_filter - fails on pop with AF added';
+
+  $c->{freq_pop} = 'ExAC_AFR';
+  throws_ok { $c->check_frequency_filter } qr/Invalid population/, 'check_frequency_filter - fails on pop for incorrect grouping';
+
   $c->{freq_pop} = $bak;
 
   # get_frequency_data
