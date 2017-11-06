@@ -263,14 +263,10 @@ sub check_frequency_filter {
 
   my %valid = map {$_ => 1} @{$self->get_valid_populations};
 
-  use Data::Dumper;
-  $Data::Dumper::Maxdepth = 3;
-  $Data::Dumper::Indent = 1;
-  print STDERR Dumper \%valid;
-
-  print STDERR "$freq_group $freq_pop $freq_pop_full\n";
-
-  throw("ERROR: Invalid population ".$self->{freq_pop}." specified") unless $freq_pop_full eq '1KG_ALL' || $valid{$freq_pop_full} || $valid{$freq_pop || ''};
+  throw("ERROR: Invalid population ".$self->{freq_pop}." specified")
+    unless $freq_pop_full eq '1KG_ALL' ||
+    $valid{$freq_pop_full} ||
+    ($freq_group eq '1KG' && $valid{$freq_pop || ''});
 }
 
 
