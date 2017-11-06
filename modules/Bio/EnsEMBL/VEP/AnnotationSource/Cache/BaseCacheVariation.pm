@@ -258,9 +258,17 @@ sub check_frequency_filter {
 
   my $freq_pop_full = uc($self->{freq_pop});
   $freq_pop_full =~ s/EXAC/ExAC/;
+  $freq_pop_full =~ s/ADJ/Adj/;
   my ($freq_group, $freq_pop) = split('_', $freq_pop_full);
 
   my %valid = map {$_ => 1} @{$self->get_valid_populations};
+
+  use Data::Dumper;
+  $Data::Dumper::Maxdepth = 3;
+  $Data::Dumper::Indent = 1;
+  print STDERR Dumper \%valid;
+
+  print STDERR "$freq_group $freq_pop $freq_pop_full\n";
 
   throw("ERROR: Invalid population ".$self->{freq_pop}." specified") unless $freq_pop_full eq '1KG_ALL' || $valid{$freq_pop_full} || $valid{$freq_pop || ''};
 }
