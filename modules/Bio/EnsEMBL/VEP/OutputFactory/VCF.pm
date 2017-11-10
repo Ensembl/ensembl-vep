@@ -275,7 +275,7 @@ sub get_all_lines_by_InputBuffer {
 
       # nuke existing CSQ field?
       if($line->[7] =~ /(^|\;)$fieldname\=/ && !$self->{keep_csq}) {
-        $line->[7] =~ s/(^|\;)$fieldname\=\S+?(\;|$)(\S|$)/$1$3/;
+        $line->[7] =~ s/(^|\;)$fieldname\=\S+?(\;|$)(\S|$)/$3/;
       }
     }
 

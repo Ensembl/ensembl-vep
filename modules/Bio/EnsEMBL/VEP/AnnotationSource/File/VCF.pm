@@ -176,6 +176,11 @@ sub _create_records {
 
     foreach my $field(grep {exists($info->{$_})} @$fields) {
       my $value = $info->{$field};
+
+      # substitute in a value of 1 for absent; some keys in VCF do not have a value
+      # but VEP needs something to write out
+      $value = 1 if !defined($value);
+
       my @return;
 
       if($value =~ /\,/) {
