@@ -161,13 +161,13 @@ SKIP: {
 
   # VCF info fields
   delete($ib->buffer->[0]->{_custom_annotations});
-  $as->fields(['FOO', 'GOO']);
+  $as->fields(['FOO', 'GOO', 'NOVALUE']);
   $as->annotate_InputBuffer($ib);
   is_deeply(
     $ib->buffer->[0]->{_custom_annotations},
     {
       'test.vcf.gz' => [
-        { name => 'test1', fields => { 'FOO' => 'BAR', 'GOO' => 'CAR,STAR' } }
+        { name => 'test1', fields => { 'FOO' => 'BAR', 'GOO' => 'CAR,STAR', 'NOVALUE' => 1 } }
       ]
     },
     'annotate_InputBuffer - fields'
@@ -183,7 +183,7 @@ SKIP: {
     $ib->buffer->[0]->{_custom_annotations},
     {
       'test.vcf.gz' => [
-        { name => 'test1', fields => { 'FOO' => 'BAR', 'GOO' => 'CAR,STAR' } }
+        { name => 'test1', fields => { 'FOO' => 'BAR', 'GOO' => 'CAR,STAR', 'NOVALUE' => 1 } }
       ],
       'foo' => [
         { name => 'test1', allele => 'T', fields => { 'GOO' => 'CAR' } }

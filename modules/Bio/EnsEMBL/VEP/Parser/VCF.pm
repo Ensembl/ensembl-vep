@@ -220,7 +220,7 @@ sub create_VariationFeatures {
   my $parser = $self->parser();
   my $record = $parser->{record};
 
-  return [] unless $record;
+  return [] unless $record && @$record;
 
   $self->line_number($self->line_number + 1);
 

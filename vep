@@ -148,7 +148,7 @@ GetOptions(
   'condel=s',                # Condel predictions
   'variant_class',           # get SO variant type
   'regulatory',              # enable regulatory stuff
-  'cell_type=s' => ($config->{cell_type} ||= []),             # filter cell types for regfeats
+  'cell_type=s',             # filter cell types for regfeats
   'convert=s',               # DEPRECATED: convert input to another format (doesn't run VEP)
   'no_intergenic',           # don't print out INTERGENIC consequences
   'gvf',                     # DEPRECATED: produce gvf output
