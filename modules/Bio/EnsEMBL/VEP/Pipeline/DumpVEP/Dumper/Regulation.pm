@@ -81,7 +81,7 @@ sub dump_info {
   print OUT "regulatory\t1\n";
 
   # cell types
-  my $cell_types = @{$as->get_available_cell_types};
+  my $cell_types = $as->get_available_cell_types;
   if($cell_types && @$cell_types) {
     print OUT "cell_types\t".join(",", @$cell_types)."\n";
   }
