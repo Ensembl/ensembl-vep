@@ -722,6 +722,21 @@ foreach my $flag(qw(lrg check_sv check_ref hgvs)) {
 open(STDOUT, ">&SAVE") or die "Can't restore STDOUT\n";
 
 
+## CHECK BAM-EDITED REF MATCH PASSES THROUGH
+############################################
+
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  gff => $test_cfg->{bam_edit_gff},
+  bam => $test_cfg->{bam_edit_bam},
+  input_data => "21 10524654 . C A",
+  pick => 1,
+  fasta => $test_cfg->{fasta},
+  synonyms => $test_cfg->{chr_synonyms},
+});
+
+ok($runner->next_output_line, 'bam-edited transcript ref match passes through');
+
 
 ## FORKING
 ##########

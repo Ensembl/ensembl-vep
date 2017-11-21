@@ -493,8 +493,6 @@ sub apply_edits {
     if($edit_ops{$op}) {
       $seen_ops{$op}++;
 
-      $DB::single = 1;
-
       my $q_s = $current_q_pos;
 
       my ($t_s, $t_e);
