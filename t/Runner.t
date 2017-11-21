@@ -731,7 +731,6 @@ $runner = Bio::EnsEMBL::VEP::Runner->new({
   synonyms => $test_cfg->{chr_synonyms},
 });
 
-print STDERR $runner->next_output_line;
 ok($runner->next_output_line, 'bam-edited transcript ref match passes through');
 
 
