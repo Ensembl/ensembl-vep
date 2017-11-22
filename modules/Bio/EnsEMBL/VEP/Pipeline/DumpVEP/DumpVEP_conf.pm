@@ -313,6 +313,7 @@ sub pipeline_analyses {
       -analysis_capacity => 10,
       -can_be_empty   => 1,
       -max_retry_count => 0,
+      -wait_for      => ['create_dump_jobs'],
     },
     {
       -logic_name    => 'dump_vep_variation',
