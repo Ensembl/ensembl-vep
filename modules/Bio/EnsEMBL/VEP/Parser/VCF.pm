@@ -68,6 +68,7 @@ sequence.
 
 use strict;
 use warnings;
+no warnings 'recursion';
 
 package Bio::EnsEMBL::VEP::Parser::VCF;
 

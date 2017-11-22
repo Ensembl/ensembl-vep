@@ -63,6 +63,7 @@ an arrayref of VariationFeatures.
 
 use strict;
 use warnings;
+no warnings 'recursion';
 
 package Bio::EnsEMBL::VEP::Parser::ID;
 

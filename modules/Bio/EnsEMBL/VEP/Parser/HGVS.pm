@@ -66,6 +66,7 @@ locations, so not available in --offline mode.
 
 use strict;
 use warnings;
+no warnings 'recursion';
 
 package Bio::EnsEMBL::VEP::Parser::HGVS;
 
