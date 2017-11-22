@@ -118,7 +118,6 @@ sub get_dumpable_object {
   };
 
   if(my $tr = $obj->{$chr}->[0]) {
-    $DB::single = 1;
     delete $tr->{slice}->{adaptor};
     delete $tr->{slice}->{coord_system}->{adaptor};
 

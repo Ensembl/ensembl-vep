@@ -60,6 +60,7 @@ http://www.ensembl.org/info/docs/tools/vep/vep_formats.html#default
 
 use strict;
 use warnings;
+no warnings 'recursion';
 
 package Bio::EnsEMBL::VEP::Parser::VEP_input;
 
