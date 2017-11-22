@@ -52,6 +52,9 @@ sub run {
   my $config = Bio::EnsEMBL::VEP::Config->new($vep_params);
 
   my $region_size = $self->param('region_size');
+  my $hive_dbc = $self->dbc;
+  $hive_dbc->disconnect_if_idle() if defined $hive_dbc;
+
   my $bam = $vep_params->{'bam'} || $self->param('bam');
 
   my $as = Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript->new({

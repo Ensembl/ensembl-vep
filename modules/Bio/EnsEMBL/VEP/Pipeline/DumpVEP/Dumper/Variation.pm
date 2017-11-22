@@ -65,6 +65,9 @@ sub run {
 
   my $region_size = $self->param('region_size');
 
+  my $hive_dbc = $self->dbc;
+  $hive_dbc->disconnect_if_idle() if defined $hive_dbc;
+
   my $as = Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation->new({
     config => $config,
     cache_region_size => $region_size,
