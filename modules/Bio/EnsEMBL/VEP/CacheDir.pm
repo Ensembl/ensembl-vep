@@ -410,6 +410,7 @@ sub info {
     if($info->{bam} && !$self->param('use_given_ref')) {
       $self->status_msg("INFO: BAM-edited cache detected, enabling --use_transcript_ref; use --use_given_ref to override this\n");
       $self->param('use_transcript_ref', 1);
+      $self->param('bam_edited', 1);
     }
 
     ## NOT CURRENTLY BEING USED, COMMENTED OUT AS NO UNIT TEST
