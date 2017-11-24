@@ -1008,6 +1008,7 @@ $ib = get_annotated_buffer({
   species => 'homo_sapiens',
   dir => $test_cfg->{cache_root_dir},
   refseq => 1,
+  fasta => $test_cfg->{fasta},
 });
 
 $vfoa = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[0];
@@ -1015,7 +1016,6 @@ $vfoa = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[0];
 is_deeply(
   $of->BaseTranscriptVariationAllele_to_output_hash($vfoa)->{REFSEQ_MATCH},
   [
-    'rseq_ens_match_cds',
     'rseq_mrna_nonmatch',
     'rseq_cds_mismatch'
   ],

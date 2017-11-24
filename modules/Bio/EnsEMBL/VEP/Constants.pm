@@ -87,7 +87,7 @@ our @FLAG_FIELDS = (
   { flag => 'refseq',          fields => ['REFSEQ_MATCH'] },
   { flag => 'merged',          fields => ['REFSEQ_MATCH', 'SOURCE'] },
   { flag => 'use_transcript_ref', fields => ['GIVEN_REF', 'USED_REF']},
-  { flag => 'bam',             fields => ['BAM_EDIT']},
+  { flag => 'bam_edited',      fields => ['BAM_EDIT']},
   { flag => 'custom',          fields => ['SOURCE'] },
   { flag => 'gene_phenotype',  fields => ['GENE_PHENO'] },
   { flag => 'nearest',         fields => ['NEAREST'] },
