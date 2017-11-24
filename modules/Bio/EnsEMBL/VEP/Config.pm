@@ -356,6 +356,7 @@ our @OPTION_SETS = (
     flags => ['bam'],
     set   => {
       use_transcript_ref => 1,
+      bam_edited => 1,
     }
   },
 

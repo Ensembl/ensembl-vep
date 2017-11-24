@@ -7,6 +7,7 @@ host	ens-variation3
 variation_cols	chr,variation_name,failed,somatic,start,end,allele_string,strand,minor_allele,minor_allele_freq,clin_sig,phenotype_or_disease,pubmed,AFR,AMR,EAS,EUR,SAS,AA,EA,ExAC,ExAC_AFR,ExAC_AMR,ExAC_Adj,ExAC_EAS,ExAC_FIN,ExAC_NFE,ExAC_OTH,ExAC_SAS
 port	3306
 build	all
+bam	interim_GRCh38.p10_knownrefseq_alignments_2017-01-13.bam
 polyphen	b
 regulatory	1
 assembly	GRCh38

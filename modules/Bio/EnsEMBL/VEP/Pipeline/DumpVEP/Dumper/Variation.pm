@@ -137,25 +137,12 @@ sub dump_info {
   my $info_file = $dir.'/info.txt_variation';
   return if -e $info_file;
 
-  open OUT, ">$info_file";
+  my $fh = FileHandle->new;
+  $fh->open(">$info_file");
 
-  # var cache cols
-  print OUT
-    "variation_cols\t".
-    join(",",
-      @{$as->get_cache_columns()},
-      'pubmed',
-      map {@{$_->{prefixed_pops} || $_->{pops}}} @{$self->{freq_vcf} || []}
-    )."\n";
+  $self->_generic_dump_info($fh, $as);
 
-  my $info = $as->info;
-  print OUT "source_$_\t".$info->{$_}."\n" for keys %$info;
-
-  printf OUT "source_%s\t%s\n", $_->{name}, $_->{version} for
-    grep {defined($_->{name}) && defined($_->{version})}
-    @{$self->{freq_vcf} || []};
-  
-  close OUT;
+  $fh->close();
 
   $self->dump_info_converted($as, $dir) if $self->param('convert');
 }
@@ -166,10 +153,21 @@ sub dump_info_converted {
   my $info_file = $dir.'/info.txt_variation_converted';
   return if -e $info_file;
 
-  open OUT, ">$info_file";
+  my $fh = FileHandle->new;
+  $fh->open(">$info_file");
+
+  $self->_generic_dump_info($fh, $as);
+
+  print $fh "var_type\ttabix\n";
+
+  $fh->close();
+}
+
+sub _generic_dump_info {
+  my ($self, $fh, $as) = @_;
 
   # var cache cols
-  print OUT
+  print $fh
     "variation_cols\t".
     join(",",
       'chr',
@@ -178,12 +176,12 @@ sub dump_info_converted {
       map {@{$_->{prefixed_pops} || $_->{pops}}} @{$self->{freq_vcf} || []}
     )."\n";
 
-  print OUT "var_type\ttabix\n";
-
   my $info = $as->info;
-  print OUT "source_$_\t".$info->{$_}."\n" for keys %$info;
+  print $fh "source_$_\t".$info->{$_}."\n" for keys %$info;
 
-  close OUT;
+  printf $fh "source_%s\t%s\n", $_->{name}, $_->{version} for
+    grep {defined($_->{name}) && defined($_->{version})}
+    @{$self->{freq_vcf} || []};
 }
 
 sub get_dumpable_object {
