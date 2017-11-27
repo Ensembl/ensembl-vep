@@ -372,14 +372,14 @@ sub _get_record_name {
 
   my $name = $parser->get_name;
 
-  return ($self->report_coords || !$name) ?
+  return ($self->report_coords || !defined($name)) ?
     sprintf(
       '%s:%i-%i',
       $parser->get_seqname,
       $parser->get_start,
       $parser->get_end
     ) :
-    $parser->get_name;
+    $name;
 }
 
 
