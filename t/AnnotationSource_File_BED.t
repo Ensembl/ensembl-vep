@@ -101,6 +101,32 @@ SKIP: {
     'annotate_InputBuffer - exact, additive'
   );
 
+  # 0 is a valid "name" field in BED
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
+    config => $cfg,
+    parser => Bio::EnsEMBL::VEP::Parser::VCF->new({
+      config => $cfg,
+      file => $test_cfg->create_input_file([qw(21 25585741 rs142513484 C T . . .)]),
+      valid_chromosomes => [21]
+    })
+  });
+  $ib->next();
+  $as->type('overlap');
+  $as->annotate_InputBuffer($ib);
+
+  is_deeply(
+    $ib->buffer->[0]->{_custom_annotations},
+    {
+      'foo' => [
+        { name => 'test1' },
+        { name => 0 }
+      ]
+    },
+    'annotate_InputBuffer - 0 valid name in BED'
+  );
+  $as->type('exact');
+
+
   # out by one
   delete($ib->buffer->[0]->{_custom_annotations});
 
