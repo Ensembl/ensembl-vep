@@ -62,6 +62,7 @@ sub configure {
     start => 1,
     limit => 1e12,
     output_file => 'stdout',
+    vcf_info_field => 'CSQ',
 
     host => 'ensembldb.ensembl.org',
     port => 3306,
@@ -82,6 +83,7 @@ sub configure {
     'format=s',                # input format
     'gz',                      # force read as gzipped
     'only_matched',            # rewrite CSQ field in VCF with only matched "blobs"
+    'vcf_info_field=s',        # VCF INFO field name to parse
     
     'ontology|y',              # use ontology for matching consequence terms
     'host=s',                  # DB options
@@ -215,7 +217,9 @@ sub main {
       throw("ERROR: Could not detect input file format - perhaps you need to specify it with --format?\n") unless $config->{format};
       throw("ERROR: --only_matched is compatible only with VCF files\n") if $config->{format} ne 'vcf' && $config->{only_matched};
       
-      my (@data, @chunks, $vcf_info_field);
+      my (@data, @chunks);
+
+      my $vcf_info_field = $config->{vcf_info_field};
       
       if($config->{format} eq 'tab') {
         push @data, parse_line($line, \@headers, "\t");
@@ -234,9 +238,8 @@ sub main {
         }
         
         # get CSQ stuff
-        if($line =~ m/(CSQ|ANN)\=(.+?)(\;|$|\s)/) {
-          $vcf_info_field = $1;
-          @chunks = split('\,', $2);
+        while($line =~ m/($vcf_info_field)\=(.+?)(\;|$|\s)/g) {
+          push @chunks, split('\,', $2);
           push @data,
             map {parse_line($_, \@headers, '\|', $main_data)}
             @chunks;
@@ -292,7 +295,9 @@ sub parse_headers {
     
     # field definition (VCF)
     if($hash_count == 2) {
-      if($raw_header =~ /INFO\=\<ID\=(CSQ|ANN)/) {
+      my $vcf_info_field = $config->{vcf_info_field};
+
+      if($raw_header =~ /INFO\=\<ID\=($vcf_info_field)/) {
         $raw_header =~ m/Format\: (.+?)\"/;
         $config->{headers} = [split '\|', $1];
       }
@@ -433,6 +438,12 @@ Usage:
                           --only_matched will remove blocks that do not pass the
                           filters. By default, the script prints out the entire
                           VCF line if any of the blocks pass the filters.
+
+--vcf_info_field [key]    With VCF input files, by default filter_vep expects to
+                          find VEP annotations encoded in the CSQ INFO key; VEP
+                          itself can be configured to write to a different key
+                          (with the equivalent --vcf_info_field flag). Use this
+                          flag to change the INFO key VEP expects to decode.
                           
 --ontology           -y   Use Sequence Ontology to match consequence terms. Use
                           with operator "is" to match against all child terms of
