@@ -194,6 +194,8 @@ sub new {
     sift
     polyphen
     polyphen_analysis
+
+    cell_type
   )]);
 
   my $hashref = $_[0];

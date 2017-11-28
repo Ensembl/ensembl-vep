@@ -210,6 +210,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'use_transcript_ref' => undef,
   'af_gnomad' => undef,
   'transcript_version' => undef,
+  'cell_type' => undef,
 }, 'Bio::EnsEMBL::VEP::OutputFactory::VEP_output' ), 'get_OutputFactory');
 
 
