@@ -438,6 +438,12 @@ Usage:
                           --only_matched will remove blocks that do not pass the
                           filters. By default, the script prints out the entire
                           VCF line if any of the blocks pass the filters.
+
+--vcf_info_field [key]    With VCF input files, by default filter_vep expects to
+                          find VEP annotations encoded in the CSQ INFO key; VEP
+                          itself can be configured to write to a different key
+                          (with the equivalent --vcf_info_field flag). Use this
+                          flag to change the INFO key VEP expects to decode.
                           
 --ontology           -y   Use Sequence Ontology to match consequence terms. Use
                           with operator "is" to match against all child terms of
