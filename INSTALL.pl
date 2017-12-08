@@ -89,6 +89,15 @@ our (
   $CAN_USE_DBD_MYSQL,
 );
 
+
+## VERSIONS OF INSTALLED SOFTWARE
+## MAY BE UPDATED IF SUCCESSFULLY TESTED
+########################################
+our $HTSLIB_VERSION  = '1.3.2';           # frozen due to introduced dependency on lzma, bz2
+our $BIOHTS_VERSION  = '2.9';             # latest as of release/91
+our $BIOPERL_VERSION = 'release-1-6-924'; # frozen, no pressing need to update
+
+
 ## BEGIN BLOCK, CHECK WHAT MODULES ETC WE CAN USE
 #################################################
 
@@ -191,7 +200,7 @@ $DEST_DIR          .= '/Bio';
 $dirname            = dirname(__FILE__) || '.';
 
 $ENS_GIT_ROOT ||= 'https://github.com/Ensembl/';
-$BIOPERL_URL  ||= 'https://github.com/bioperl/bioperl-live/archive/release-1-6-924.zip';
+$BIOPERL_URL  ||= "https://github.com/bioperl/bioperl-live/archive/$BIOPERL_VERSION.zip";
 $API_VERSION  ||= $CURRENT_VERSION_DATA->{$VEP_MODULE_NAME}->{release};
 $DATA_VERSION ||= $API_VERSION;
 $CACHE_DIR    ||= $ENV{HOME} ? $ENV{HOME}.'/.vep' : 'cache';
@@ -761,7 +770,7 @@ END
 
   # STEP 2: Check out HTSLIB / or make this a download?
   print(" - checking out HTSLib\n");
-  system "git clone -b 1.3.2 https://github.com/samtools/htslib.git";
+  system "git clone -b $HTSLIB_VERSION https://github.com/samtools/htslib.git";
   -d './htslib' or die "git clone seems to have failed. Could not find $htslib_install_dir/htslib directory";
   chdir './htslib';
 
@@ -806,7 +815,7 @@ sub install_biodbhts() {
 
   #Now install Bio::DB::HTS proper
   my $biodbhts_github_url = "https://github.com/Ensembl/Bio-HTS";
-  my $biodbhts_zip_github_url = "$biodbhts_github_url/archive/master.zip";
+  my $biodbhts_zip_github_url = "$biodbhts_github_url/archive/$BIOHTS_VERSION.zip";
   my $biodbhts_zip_download_file = $DEST_DIR.'/tmp/biodbhts.zip';
 
   mkdir $DEST_DIR unless -d $DEST_DIR;
@@ -815,7 +824,7 @@ sub install_biodbhts() {
   print " - unpacking $biodbhts_zip_download_file to $DEST_DIR/tmp/\n" unless $QUIET;
   unpack_arch($biodbhts_zip_download_file, "$DEST_DIR/tmp/");
 
-  my $tmp_name = -d "$DEST_DIR/tmp/Bio-HTS-master" ? 'Bio-HTS-master' : 'Bio-DB-HTS-master';
+  my $tmp_name = -d "$DEST_DIR/tmp/Bio-HTS-$BIOHTS_VERSION" ? "Bio-HTS-$BIOHTS_VERSION" : "Bio-DB-HTS-$BIOHTS_VERSION";
 
   print "$DEST_DIR/tmp/$tmp_name - moving files to $BIODBHTS_DIR\n" unless $QUIET;
   rmtree($BIODBHTS_DIR);
