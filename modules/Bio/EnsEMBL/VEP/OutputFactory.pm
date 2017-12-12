@@ -75,6 +75,7 @@ use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
 use Bio::EnsEMBL::Variation::Utils::Constants;
+use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
 use Bio::EnsEMBL::VEP::Utils qw(format_coords merge_arrays);
 use Bio::EnsEMBL::VEP::Constants;
 
@@ -185,6 +186,7 @@ sub new {
     appris
     transcript_version
     gene_phenotype
+    mirna
 
     total_length
     hgvsc
@@ -1354,7 +1356,11 @@ sub BaseTranscriptVariationAllele_to_output_hash {
 
     my ($cdna_start, $cdna_end) = ($tv->cdna_start, $tv->cdna_end);
 
-    if($struct && $struct =~ /[\(\.\)]+/ && overlap($start, $end, $cdna_start, $cdna_end) {
+    if(
+      defined($struct) && $struct =~ /[\(\.\)]+/ &&
+      $start && $end && $cdna_start && $cdna_end &&
+      overlap($start, $end, $cdna_start, $cdna_end)
+    ) {
     
       # parse out structure
       my @struct;

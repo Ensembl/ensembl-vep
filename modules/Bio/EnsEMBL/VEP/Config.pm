@@ -158,6 +158,7 @@ our @OPTION_SETS = (
       appris         => 1,
       variant_class  => 1,
       gene_phenotype => 1,
+      mirna          => 1,
     },
   },
   
