@@ -1384,7 +1384,7 @@ sub BaseTranscriptVariationAllele_to_output_hash {
         '.' => 'miRNA_loop'
       );
       
-      $hash->{miRNA} = join(",", sort map {$map{$_}} keys %chars);
+      $hash->{miRNA} = [sort map {$map{$_}} keys %chars];
     }
   }
 

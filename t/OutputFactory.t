@@ -1013,17 +1013,17 @@ $ib = get_annotated_buffer({
 
 $vf = $ib->buffer->[0];
 ($vfoa) = grep {$_->feature->stable_id eq 'ENST00000385060'} @{$of->get_all_VariationFeatureOverlapAlleles($vf)};
-is(
+is_deeply(
   $of->BaseTranscriptVariationAllele_to_output_hash($vfoa)->{miRNA},
-  'miRNA_stem',
+  ['miRNA_stem'],
   'BaseTranscriptVariationAllele_to_output_hash - miRNA stem'
 );
 
 $vf = $ib->buffer->[1];
 ($vfoa) = grep {$_->feature->stable_id eq 'ENST00000385060'} @{$of->get_all_VariationFeatureOverlapAlleles($vf)};
-is(
+is_deeply(
   $of->BaseTranscriptVariationAllele_to_output_hash($vfoa)->{miRNA},
-  'miRNA_loop',
+  ['miRNA_loop'],
   'BaseTranscriptVariationAllele_to_output_hash - miRNA loop'
 );
 
