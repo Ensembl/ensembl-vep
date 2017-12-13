@@ -243,7 +243,7 @@ is(
   $lines[0],
   "rs142513484\t21:25585733\tT\tENSG00000154719\tENST00000307301\tTranscript\t3_prime_UTR_variant\t1122\t".
   "-\t-\t-\t-\trs142513484\tMODIFIER\t-\t-1\t-\tSNV\tMRPL39\tHGNC\tHGNC:14027\tprotein_coding\tYES\t5\tA2\t".
-  "CCDS33522.1\tENSP00000305682\tQ9NYK5\t-\tUPI00001AEAC0\t-\t-\t-\t11/11\t-\t-\tENST00000307301.11:c.*18G>A\t".
+  "CCDS33522.1\tENSP00000305682\tQ9NYK5\t-\tUPI00001AEAC0\t-\t-\t-\t11/11\t-\t-\t-\tENST00000307301.11:c.*18G>A\t".
   "-\t-\t0.0010\t0.003\t0.0014\t0\t0\t0\t0.004998\t0\t0.0003478\t0.004643\t0.0003236\t0\t0\t0\t1.886e-05\t0\t0\t".
   "0.004998\tAA\t-\t-\t-\t-\t-\t-\t-\t-",
   'get_all_lines_by_InputBuffer - everything'

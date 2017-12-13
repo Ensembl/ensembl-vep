@@ -137,6 +137,7 @@ GetOptions(
   'symbol',                  # add gene symbol (e.g. HGNC)
   'transcript_version',      # add transcript version to stable id in feature column
   'gene_phenotype',          # indicate if genes are phenotype-associated
+  'mirna',                   # identify miRNA structural elements overlapped by variant
   'hgvs',                    # add HGVS names to extra column
   'hgvsg',                   # add HGVS g. also
   'hgvsg_use_accession',     # force HGVSg to return on chromosome accession instead of input chr name

@@ -75,6 +75,7 @@ use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
 use Bio::EnsEMBL::Variation::Utils::Constants;
+use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
 use Bio::EnsEMBL::VEP::Utils qw(format_coords merge_arrays);
 use Bio::EnsEMBL::VEP::Constants;
 
@@ -185,6 +186,7 @@ sub new {
     appris
     transcript_version
     gene_phenotype
+    mirna
 
     total_length
     hgvsc
@@ -1345,6 +1347,47 @@ sub BaseTranscriptVariationAllele_to_output_hash {
       $value =~ s/principal/P/;
       $value =~ s/alternative/A/;
       $hash->{APPRIS} = $value;
+    }
+  }
+
+  # miRNA structure
+  if($self->{mirna} && (my ($mirna_attrib) = grep {$_->code eq 'ncRNA'} @attribs)) {
+    my ($start, $end, $struct) = split /\s+|\:/, $mirna_attrib->value;
+
+    my ($cdna_start, $cdna_end) = ($tv->cdna_start, $tv->cdna_end);
+
+    if(
+      defined($struct) && $struct =~ /[\(\.\)]+/ &&
+      $start && $end && $cdna_start && $cdna_end &&
+      overlap($start, $end, $cdna_start, $cdna_end)
+    ) {
+
+      # account for insertions
+      ($cdna_start, $cdna_end) = ($cdna_end, $cdna_start) if $cdna_start > $cdna_end;
+    
+      # parse out structure
+      my @struct;
+      while($struct =~ m/([\.\(\)])([0-9]+)?/g) {
+        my $num = $2 || 1;
+        push @struct, $1 for(1..$num);
+      }
+      
+      # get struct element types overlapped by variant
+      my %chars;
+      for my $pos($cdna_start..$cdna_end) {
+        $pos -= $start;
+        next if $pos < 0 or $pos > scalar @struct;
+        $chars{$struct[$pos]} = 1;
+      }
+      
+      # map element types to SO terms
+      my %map = (
+        '(' => 'miRNA_stem',
+        ')' => 'miRNA_stem',
+        '.' => 'miRNA_loop'
+      );
+      
+      $hash->{miRNA} = [sort map {$map{$_}} keys %chars];
     }
   }
 
