@@ -1361,6 +1361,9 @@ sub BaseTranscriptVariationAllele_to_output_hash {
       $start && $end && $cdna_start && $cdna_end &&
       overlap($start, $end, $cdna_start, $cdna_end)
     ) {
+
+      # account for insertions
+      ($cdna_start, $cdna_end) = ($cdna_end, $cdna_start) if $cdna_start > $cdna_end;
     
       # parse out structure
       my @struct;
