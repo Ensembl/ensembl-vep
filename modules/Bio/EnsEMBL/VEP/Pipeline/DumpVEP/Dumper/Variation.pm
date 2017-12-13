@@ -115,8 +115,8 @@ sub run {
 
       $self->run_system_command(
         sprintf(
-          "sort -k%i,%in %s/%s/all_vars | bgzip -c > %s/%s/all_vars.gz",
-          $start_i, $start_i, $root, $chr, $root, $chr
+          "cat %s/%s/all_vars | sort -k%i,%in | bgzip -c > %s/%s/all_vars.gz",
+          $root, $chr, $start_i, $start_i, $root, $chr
         )
       );
 
