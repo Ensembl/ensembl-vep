@@ -140,7 +140,7 @@ sub dump_info {
   my $fh = FileHandle->new;
   $fh->open(">$info_file");
 
-  $self->_generic_dump_info($fh, $as);
+  $self->_generic_dump_info($fh, $as, 0);
 
   $fh->close();
 
@@ -156,7 +156,7 @@ sub dump_info_converted {
   my $fh = FileHandle->new;
   $fh->open(">$info_file");
 
-  $self->_generic_dump_info($fh, $as);
+  $self->_generic_dump_info($fh, $as, 1);
 
   print $fh "var_type\ttabix\n";
 
@@ -164,17 +164,17 @@ sub dump_info_converted {
 }
 
 sub _generic_dump_info {
-  my ($self, $fh, $as) = @_;
+  my ($self, $fh, $as, $converted) = @_;
 
   # var cache cols
-  print $fh
-    "variation_cols\t".
-    join(",",
-      'chr',
-      @{$as->get_cache_columns()},
-      'pubmed',
-      map {@{$_->{prefixed_pops} || $_->{pops}}} @{$self->{freq_vcf} || []}
-    )."\n";
+  my @cols = (
+    @{$as->get_cache_columns()},
+    'pubmed',
+    map {@{$_->{prefixed_pops} || $_->{pops}}} @{$self->{freq_vcf} || []}
+  );
+  unshift @cols, 'chr' if $converted;
+  
+  print $fh "variation_cols\t".join(",", @cols)."\n";
 
   my $info = $as->info;
   print $fh "source_$_\t".$info->{$_}."\n" for keys %$info;
