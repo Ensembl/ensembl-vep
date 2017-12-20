@@ -113,6 +113,7 @@ my %RENAME_KEYS = (
 my %NUMBERIFY_EXEMPT = (
   'seq_region_name' => 1,
   'id' => 1,
+  'gene_symbol' => 1,
 );
 
 my @LIST_FIELDS = qw(

@@ -118,7 +118,7 @@ sub create_VariationFeatures {
 
   $self->line_number($self->line_number + 1);
 
-  my ($chr, $start, $end, $allele_string, $strand, $var_name) = (
+  my ($chr, $start, $end, $allele_string, $strand, $var_name) = map {$_ =~ s/\s+$// if defined($_); $_} (
     $parser->get_seqname,
     $parser->get_start,
     $parser->get_end,
