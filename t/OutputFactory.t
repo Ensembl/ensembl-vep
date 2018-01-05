@@ -1000,6 +1000,46 @@ foreach my $flag(@flags) {
   $of->{$flag->[0]} = 0;
 }
 
+
+# test miRNA
+$of->{mirna} = 1;
+
+$ib = get_annotated_buffer({
+  input_file => $test_cfg->create_input_file([
+    [qw(21 25573985 25573985 C T . . .)],
+    [qw(21 25573987 25573987 C CG . . .)],
+    [qw(21 25573994 25573994 C T . . .)]
+  ])
+});
+
+$vf = $ib->buffer->[0];
+($vfoa) = grep {$_->feature->stable_id eq 'ENST00000385060'} @{$of->get_all_VariationFeatureOverlapAlleles($vf)};
+is_deeply(
+  $of->BaseTranscriptVariationAllele_to_output_hash($vfoa)->{miRNA},
+  ['miRNA_stem'],
+  'BaseTranscriptVariationAllele_to_output_hash - miRNA stem'
+);
+
+$vf = $ib->buffer->[1];
+($vfoa) = grep {$_->feature->stable_id eq 'ENST00000385060'} @{$of->get_all_VariationFeatureOverlapAlleles($vf)};
+is_deeply(
+  $of->BaseTranscriptVariationAllele_to_output_hash($vfoa)->{miRNA},
+  ['miRNA_stem'],
+  'BaseTranscriptVariationAllele_to_output_hash - miRNA stem insertion'
+);
+
+$vf = $ib->buffer->[2];
+($vfoa) = grep {$_->feature->stable_id eq 'ENST00000385060'} @{$of->get_all_VariationFeatureOverlapAlleles($vf)};
+is_deeply(
+  $of->BaseTranscriptVariationAllele_to_output_hash($vfoa)->{miRNA},
+  ['miRNA_loop'],
+  'BaseTranscriptVariationAllele_to_output_hash - miRNA loop'
+);
+
+$of->{mirna} = 0;
+
+
+
 # REFSEQ_MATCH - use refseq cache
 $of->{refseq} = 1;
 

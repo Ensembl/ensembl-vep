@@ -211,6 +211,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'af_gnomad' => undef,
   'transcript_version' => undef,
   'cell_type' => undef,
+  'mirna' => undef,
 }, 'Bio::EnsEMBL::VEP::OutputFactory::VEP_output' ), 'get_OutputFactory');
 
 

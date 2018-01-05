@@ -99,6 +99,7 @@ our @FLAG_FIELDS = (
   # transcript/protein stuff
   { flag => 'numbers',         fields => ['EXON','INTRON'] },
   { flag => 'domains',         fields => ['DOMAINS'] },
+  { flag => 'mirna',           fields => ['miRNA'] },
   { flag => 'hgvs',            fields => ['HGVSc','HGVSp','HGVS_OFFSET'] },
   { flag => 'hgvsg',           fields => ['HGVSg'] },
 
@@ -153,6 +154,7 @@ our %FIELD_DESCRIPTIONS = (
   'TREMBL'             => 'UniProtKB/TrEMBL accession',
   'UNIPARC'            => 'UniParc accession',
   'NEAREST'            => 'Identifier(s) of nearest transcription start site',
+  'miRNA'              => 'SO terms of overlapped miRNA secondary structure feature(s)',
   'HGVSc'              => 'HGVS coding sequence name',
   'HGVSp'              => 'HGVS protein sequence name',
   'HGVSg'              => 'HGVS genomic sequence name',
