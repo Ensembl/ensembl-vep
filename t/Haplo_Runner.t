@@ -82,7 +82,7 @@ SKIP: {
           'ClinVar' => '201704',
           'assembly' => 'GRCh38.p5'
         },
-        'valid_chromosomes' => [21, 'LRG_485'],
+        'valid_chromosomes' => [21, 'LRG_485', 'MT'],
         'bam' => undef,
         'use_transcript_ref' => undef,
         'nearest' => undef,
@@ -94,7 +94,7 @@ SKIP: {
   # setup_db_connection should return silently in offline mode
   ok(!$runner->setup_db_connection(), 'setup_db_connection');
 
-  is_deeply($runner->valid_chromosomes, [21, 'LRG_485'], 'valid_chromosomes');
+  is_deeply($runner->valid_chromosomes, [21, 'LRG_485', 'MT'], 'valid_chromosomes');
 
   is_deeply($runner->get_Parser, bless({
     '_config' => $runner->config,
@@ -105,7 +105,7 @@ SKIP: {
     'lookup_ref' => undef,
     'chr' => undef,
     'dont_skip' => undef,
-    'valid_chromosomes' => {21 => 1, LRG_485 => 1},
+    'valid_chromosomes' => {21 => 1, LRG_485 => 1, MT => 1},
     'minimal' => undef,
     'lrg' => undef,
     'delimiter' => "\t",
@@ -123,7 +123,7 @@ SKIP: {
     $runner->get_TranscriptTree,
     bless( {
       '_config' => $runner->config,
-      'valid_chromosomes' => [21, 'LRG_485'],
+      'valid_chromosomes' => [21, 'LRG_485', 'MT'],
     }, 'Bio::EnsEMBL::VEP::TranscriptTree' ),
     'get_TranscriptTree'
   );
