@@ -208,7 +208,7 @@ is_deeply(
       'gnomAD_SAS'
     ],
     'assembly' => 'GRCh38',
-    'valid_chromosomes' => [21, 'LRG_485', 'MT'],
+    'valid_chromosomes' => [21, 'LRG_485'],
   },
   'info'
 );

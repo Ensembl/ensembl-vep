@@ -77,7 +77,7 @@ my $exp = [
       'ClinVar' => '201704',
       'assembly' => 'GRCh38.p5'
     },
-    'valid_chromosomes' => [21, 'LRG_485', 'MT'],
+    'valid_chromosomes' => [21, 'LRG_485'],
     'bam' => undef,
     'use_transcript_ref' => undef,
     'nearest' => undef,
