@@ -1172,6 +1172,16 @@ is(
 );
 $of->{hgvsp} = 0;
 
+$DB::single = 1;
+$of->{ambiguity} = 1;
+is(
+  $of->TranscriptVariationAllele_to_output_hash($vfoa)->{AMBIGUITY},
+  'Y',
+  'TranscriptVariationAllele_to_output_hash - Ambiguity'
+);
+$of->{ambiguity} = 0;
+
+
 $vfoa = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[0];
 is_deeply(
   $of->TranscriptVariationAllele_to_output_hash($vfoa, {}),

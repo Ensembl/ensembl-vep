@@ -1471,7 +1471,7 @@ sub TranscriptVariationAllele_to_output_hash {
     }
   }
 
-  if($self->param('ambiguity') && defined($vfoa->variation_feature->ambig_code())) {
+  if($self->{ambiguity} && defined($vfoa->variation_feature->ambig_code())) {
     $hash->{AMBIGUITY} = $vfoa->variation_feature->ambig_code();
   }
 
