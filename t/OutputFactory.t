@@ -1172,7 +1172,6 @@ is(
 );
 $of->{hgvsp} = 0;
 
-$DB::single = 1;
 $of->{ambiguity} = 1;
 is(
   $of->TranscriptVariationAllele_to_output_hash($vfoa)->{AMBIGUITY},

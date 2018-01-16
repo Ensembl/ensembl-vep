@@ -808,6 +808,12 @@ sub VariationFeature_to_output_hash {
 
   # minimised?
   $hash->{MINIMISED} = 1 if $vf->{minimised};
+  
+  my $ambiguity_code = $vf->ambig_code();
+  
+  if($self->{ambiguity} && defined($ambiguity_code)) {
+    $hash->{AMBIGUITY} = $ambiguity_code;
+  }
 
   # custom annotations
   foreach my $custom_name(keys %{$vf->{_custom_annotations} || {}}) {
@@ -1471,9 +1477,7 @@ sub TranscriptVariationAllele_to_output_hash {
     }
   }
 
-  if($self->{ambiguity} && defined($vfoa->variation_feature->ambig_code())) {
-    $hash->{AMBIGUITY} = $vfoa->variation_feature->ambig_code();
-  }
+
 
   if($self->{use_transcript_ref}) {
     my $ref_tva = $tv->get_reference_TranscriptVariationAllele;

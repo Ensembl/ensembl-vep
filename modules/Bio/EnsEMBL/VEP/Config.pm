@@ -99,7 +99,6 @@ our %DEFAULTS = (
   terminal_width    => 48,
   vcf_info_field    => 'CSQ',
   ucsc_data_root    => 'http://hgdownload.cse.ucsc.edu/goldenpath/',
-  ambiguity         => 0,
   
   # frequency filtering
   freq_freq         => 0.01,
