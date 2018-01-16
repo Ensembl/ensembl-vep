@@ -187,6 +187,7 @@ sub new {
     transcript_version
     gene_phenotype
     mirna
+    ambiguity
 
     total_length
     hgvsc
@@ -1468,6 +1469,10 @@ sub TranscriptVariationAllele_to_output_hash {
       $hash->{HGVSp} = $hgvs_p if $hgvs_p;
       $hash->{HGVS_OFFSET} = $offset if $offset;
     }
+  }
+
+  if($self->param('ambiguity') && defined($vfoa->variation_feature->ambig_code())) {
+    $hash->{AMBIGUITY} = $vfoa->variation_feature->ambig_code();
   }
 
   if($self->{use_transcript_ref}) {

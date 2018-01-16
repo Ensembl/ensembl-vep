@@ -91,6 +91,7 @@ our @FLAG_FIELDS = (
   { flag => 'custom',          fields => ['SOURCE'] },
   { flag => 'gene_phenotype',  fields => ['GENE_PHENO'] },
   { flag => 'nearest',         fields => ['NEAREST'] },
+  { flag => 'ambiguity',       fields => ['AMBIGUITY'] },
 
   # non-synonymous predictions
   { flag => 'sift',            fields => ['SIFT'] },
@@ -218,6 +219,7 @@ our %FIELD_DESCRIPTIONS = (
   'GENE_PHENO'         => 'Indicates if gene is associated with a phenotype, disease or trait',
   'MINIMISED'          => 'Alleles in this variant have been converted to minimal representation before consequence calculation',
   'HGVS_OFFSET'        => 'Indicates by how many bases the HGVS notations for this variant have been shifted',
+  'AMBIGUITY'          => 'Allele ambiguity code',
 );
 
 our @DEFAULT_OUTPUT_COLS = qw(
