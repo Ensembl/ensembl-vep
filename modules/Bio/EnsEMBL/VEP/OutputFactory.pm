@@ -809,10 +809,12 @@ sub VariationFeature_to_output_hash {
   # minimised?
   $hash->{MINIMISED} = 1 if $vf->{minimised};
   
-  my $ambiguity_code = $vf->ambig_code();
-  
-  if($self->{ambiguity} && defined($ambiguity_code)) {
-    $hash->{AMBIGUITY} = $ambiguity_code;
+  if(ref($vf) eq 'Bio::EnsEMBL::Variation::VariationFeature') {
+    my $ambiguity_code = $vf->ambig_code();
+    
+    if($self->{ambiguity} && defined($ambiguity_code)) {
+      $hash->{AMBIGUITY} = $ambiguity_code;
+    }
   }
 
   # custom annotations

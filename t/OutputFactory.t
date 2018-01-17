@@ -279,7 +279,19 @@ is_deeply(
 );
 delete($ib->buffer->[0]->{nearest});
 
-
+$of->{ambiguity} = 1;
+is_deeply(
+  $of->VariationFeature_to_output_hash($ib->buffer->[0]),
+  {
+    'Uploaded_variation' => 'indtest',
+    'Location' => '21:25587759',
+    'AMBIGUITY' => 'R',
+    'IND' => 'dave',
+    'ZYG' => 'HET',
+  },
+  'VariationFeature_to_output_hash - ambiguity'
+);
+$of->{ambiguity} = 0;
 
 
 ## pick_worst_VariationFeatureOverlapAllele
@@ -1171,15 +1183,6 @@ is(
   'TranscriptVariationAllele_to_output_hash - HGVSp'
 );
 $of->{hgvsp} = 0;
-
-$of->{ambiguity} = 1;
-is(
-  $of->TranscriptVariationAllele_to_output_hash($vfoa)->{AMBIGUITY},
-  'Y',
-  'TranscriptVariationAllele_to_output_hash - Ambiguity'
-);
-$of->{ambiguity} = 0;
-
 
 $vfoa = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[0];
 is_deeply(
