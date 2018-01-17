@@ -187,6 +187,7 @@ sub new {
     transcript_version
     gene_phenotype
     mirna
+    ambiguity
 
     total_length
     hgvsc
@@ -807,6 +808,14 @@ sub VariationFeature_to_output_hash {
 
   # minimised?
   $hash->{MINIMISED} = 1 if $vf->{minimised};
+  
+  if(ref($vf) eq 'Bio::EnsEMBL::Variation::VariationFeature') {
+    my $ambiguity_code = $vf->ambig_code();
+    
+    if($self->{ambiguity} && defined($ambiguity_code)) {
+      $hash->{AMBIGUITY} = $ambiguity_code;
+    }
+  }
 
   # custom annotations
   foreach my $custom_name(keys %{$vf->{_custom_annotations} || {}}) {
@@ -1469,6 +1478,8 @@ sub TranscriptVariationAllele_to_output_hash {
       $hash->{HGVS_OFFSET} = $offset if $offset;
     }
   }
+
+
 
   if($self->{use_transcript_ref}) {
     my $ref_tva = $tv->get_reference_TranscriptVariationAllele;

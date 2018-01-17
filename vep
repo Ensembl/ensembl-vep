@@ -167,6 +167,7 @@ GetOptions(
   'total_length',            # give total length alongside positions e.g. 14/203
   'allele_number',           # indicate allele by number to avoid confusion with VCF conversions
   'no_escape',               # don't percent-escape HGVS strings
+  'ambiguity',               # Add allele ambiguity code
   
   # cache stuff
   'database',                # must specify this to use DB now

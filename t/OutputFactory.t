@@ -279,7 +279,19 @@ is_deeply(
 );
 delete($ib->buffer->[0]->{nearest});
 
-
+$of->{ambiguity} = 1;
+is_deeply(
+  $of->VariationFeature_to_output_hash($ib->buffer->[0]),
+  {
+    'Uploaded_variation' => 'indtest',
+    'Location' => '21:25587759',
+    'AMBIGUITY' => 'R',
+    'IND' => 'dave',
+    'ZYG' => 'HET',
+  },
+  'VariationFeature_to_output_hash - ambiguity'
+);
+$of->{ambiguity} = 0;
 
 
 ## pick_worst_VariationFeatureOverlapAllele
