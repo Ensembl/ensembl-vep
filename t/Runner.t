@@ -212,7 +212,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'transcript_version' => undef,
   'cell_type' => undef,
   'mirna' => undef,
-  'ambiguity' => 0,
+  'ambiguity' => undef,
 }, 'Bio::EnsEMBL::VEP::OutputFactory::VEP_output' ), 'get_OutputFactory');
 
 
