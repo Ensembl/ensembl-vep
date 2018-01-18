@@ -192,8 +192,13 @@ sub create_VariationFeatures {
     last if @$vfs;
   }
 
-  unless(@$vfs) {
-    $self->warning_msg("WARNING: Unable to parse HGVS notation \'$hgvs\'\n".join("\n", @errors));
+  unless(@$vfs || scalar(@errors) == 0) {
+    my @known_messages = ('MSG: Region requested must be smaller than 5kb');
+    
+    my @grep_names = grep(/^MSG:/, split(/\n/, $errors[0]));
+    my @error_message = grep($grep_names[0] eq $_ , @known_messages) ? @grep_names : @errors;
+    
+    $self->warning_msg("WARNING: Unable to parse HGVS notation \'$hgvs\'\n".join("\n", @error_message));
     return $self->create_VariationFeatures;
   }
 
