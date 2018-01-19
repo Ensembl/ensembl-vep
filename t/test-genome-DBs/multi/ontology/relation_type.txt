@@ -1,4 +1,4 @@
-relation_type_id	name
+96	name
 1	is_a
 2	negatively_regulates
 3	never_in_taxon
