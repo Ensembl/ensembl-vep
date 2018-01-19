@@ -1,4 +1,4 @@
-relation_id	child_term_id	parent_term_id	relation_type_id	intersection_of	ontology_id
+91958	0	0	0	0	0
 89137	45112	45220	1	0	5
 89138	45113	46511	1	0	5
 89139	45114	45113	1	0	5

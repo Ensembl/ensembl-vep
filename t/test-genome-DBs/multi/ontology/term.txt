@@ -1,4 +1,4 @@
-term_id	ontology_id	subsets	accession	name	definition	is_root	is_obsolete
+47452	0	subsets	accession	name	definition	0	0
 45111	5	SOFA	SO:0000000	Sequence_Ontology	"" []	0	1
 45112	5	SOFA	SO:0000001	region	"A sequence_feature with an extent greater than zero. A nucleotide region is composed of bases and a polypeptide region is composed of amino acids." [SO:ke]	0	0
 45113	5	NULL	SO:0000002	sequence_secondary_structure	"A folded sequence." [SO:ke]	0	0
