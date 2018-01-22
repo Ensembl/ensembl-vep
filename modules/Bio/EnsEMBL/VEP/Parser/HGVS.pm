@@ -193,12 +193,9 @@ sub create_VariationFeatures {
   }
 
   unless(@$vfs || scalar(@errors) == 0) {
-    #my @known_messages = ('MSG: Region requested must be smaller than 5kb');
-    $DB::single = 1;
     my %known_messages_hash = ('MSG: Region requested must be smaller than 5kb' => 0);
     
     my @grep_names = grep(/^MSG:/, split(/\n/, $errors[0]));
-    #my @error_message = grep($grep_names[0] eq $_ , @known_messages) ? @grep_names : @errors;
     my @error_message = exists( $known_messages_hash{$grep_names[0]}) ? @grep_names : @errors;
     
     $self->warning_msg("WARNING: Unable to parse HGVS notation \'$hgvs\'\n".join("\n", @error_message));
