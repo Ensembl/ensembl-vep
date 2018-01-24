@@ -413,6 +413,19 @@ is_deeply(
 
 # test keep vs trash existing CSQ
 $ib = get_runner({
+  input_file => $test_cfg->create_input_file([qw(21 25585733 . C T . . BAR=blah;CSQ=foo;BAR2=blah2)]),
+  dir => $test_cfg->{cache_root_dir},
+})->get_InputBuffer;
+$of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({config => $ib->config});
+
+is_deeply(
+  $of->get_all_lines_by_InputBuffer($ib)->[0],
+  "21\t25585733\t.\tC\tT\t.\t.\t".
+  'BAR=blah;BAR2=blah2;CSQ=T|3_prime_UTR_variant|MODIFIER||ENSG00000154719|Transcript|ENST00000307301||||||1122|||||||-1|,T|missense_variant|MODERATE||ENSG00000154719|Transcript|ENST00000352957||||||1033|991|331|A/T|Gca/Aca|||-1|,T|upstream_gene_variant|MODIFIER||ENSG00000260583|Transcript|ENST00000567517||||||||||||2407|-1|',
+  "trash existing CSQ 1"
+);
+
+$ib = get_runner({
   input_file => $test_cfg->create_input_file([qw(21 25585733 . C T . . CSQ=foo;BAR=blah)]),
   dir => $test_cfg->{cache_root_dir},
 })->get_InputBuffer;
@@ -422,7 +435,7 @@ is_deeply(
   $of->get_all_lines_by_InputBuffer($ib)->[0],
   "21\t25585733\t.\tC\tT\t.\t.\t".
   'BAR=blah;CSQ=T|3_prime_UTR_variant|MODIFIER||ENSG00000154719|Transcript|ENST00000307301||||||1122|||||||-1|,T|missense_variant|MODERATE||ENSG00000154719|Transcript|ENST00000352957||||||1033|991|331|A/T|Gca/Aca|||-1|,T|upstream_gene_variant|MODIFIER||ENSG00000260583|Transcript|ENST00000567517||||||||||||2407|-1|',
-  "trash existing CSQ 1"
+  "trash existing CSQ 2"
 );
 
 $ib = get_runner({
@@ -435,7 +448,7 @@ is_deeply(
   $of->get_all_lines_by_InputBuffer($ib)->[0],
   "21\t25585733\t.\tC\tT\t.\t.\t".
   'BAR=blah;CSQ=T|3_prime_UTR_variant|MODIFIER||ENSG00000154719|Transcript|ENST00000307301||||||1122|||||||-1|,T|missense_variant|MODERATE||ENSG00000154719|Transcript|ENST00000352957||||||1033|991|331|A/T|Gca/Aca|||-1|,T|upstream_gene_variant|MODIFIER||ENSG00000260583|Transcript|ENST00000567517||||||||||||2407|-1|',
-  "trash existing CSQ 2"
+  "trash existing CSQ 3"
 );
 
 $of->{keep_csq} = 1;
