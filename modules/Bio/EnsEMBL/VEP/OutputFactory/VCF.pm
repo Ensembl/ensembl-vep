@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2017] EMBL-European Bioinformatics Institute
+Copyright [2016-2018] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -176,7 +176,15 @@ sub headers {
   
   # input was VCF
   if($info->{input_headers} && scalar @{$info->{input_headers}}) {
-    push @headers, @{$info->{input_headers}};
+    if ($self->{keep_csq}) {
+      push @headers, @{$info->{input_headers}};
+    }
+    else {
+      my $fieldname = $self->{vcf_info_field} || 'CSQ';
+      foreach my $input_header (@{$info->{input_headers}}) {
+        push @headers, $input_header unless ($input_header =~ /ID=$fieldname,/i || $input_header =~ /^##VEP/);
+      }
+    }
     $col_heading = pop @headers;
   }
 

@@ -1,4 +1,4 @@
-# Copyright [2016-2017] EMBL-European Bioinformatics Institute
+# Copyright [2016-2018] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -324,16 +324,16 @@ is(
   "21\t25585733\trs142513484\tC\tT\t.\t.\t".
   'CSQ=T|3_prime_UTR_variant|MODIFIER|MRPL39|ENSG00000154719|Transcript|ENST00000307301|protein_coding|'.
   '11/11||ENST00000307301.11:c.*18G>A||1122|||||rs142513484||-1||SNV|HGNC|HGNC:14027|YES|5|A2|CCDS33522.1|'.
-  'ENSP00000305682|Q9NYK5||UPI00001AEAC0||||||0.0010|0.003|0.0014|0|0|0|0.004998|0|0.0003478|0.004643|'.
+  'ENSP00000305682|Q9NYK5||UPI00001AEAC0|||||||0.0010|0.003|0.0014|0|0|0|0.004998|0|0.0003478|0.004643|'.
   '0.0003236|0|0|0|1.886e-05|0|0|0.004998|AA||||||||,'.
   'T|missense_variant|MODERATE|MRPL39|ENSG00000154719|Transcript|ENST00000352957|protein_coding|'.
   '10/10||ENST00000352957.8:c.991G>A|ENSP00000284967.6:p.Ala331Thr|1033|991|331|A/T|Gca/Aca|rs142513484|'.
   '|-1||SNV|HGNC|HGNC:14027||1|P3|CCDS13573.1|ENSP00000284967|Q9NYK5||UPI00001AEE66||tolerated_low_confidence(0.17)|'.
-  'benign(0.021)|||0.0010|0.003|0.0014|0|0|0|0.004998|0|0.0003478|0.004643|0.0003236|0|0|0|1.886e-05|0|0|0.004998|AA||||||||,'.
+  'benign(0.021)||||0.0010|0.003|0.0014|0|0|0|0.004998|0|0.0003478|0.004643|0.0003236|0|0|0|1.886e-05|0|0|0.004998|AA||||||||,'.
   'T|upstream_gene_variant|MODIFIER|AP000223.42|ENSG00000260583|Transcript|ENST00000567517|antisense||||||||||'.
-  'rs142513484|2407|-1||SNV|Clone_based_vega_gene||YES|||||||||||||0.0010|0.003|0.0014|0|0|0|0.004998|0|'.
+  'rs142513484|2407|-1||SNV|Clone_based_vega_gene||YES||||||||||||||0.0010|0.003|0.0014|0|0|0|0.004998|0|'.
   '0.0003478|0.004643|0.0003236|0|0|0|1.886e-05|0|0|0.004998|AA||||||||,T|regulatory_region_variant|MODIFIER|'.
-  '||RegulatoryFeature|ENSR00001963192|TF_binding_site||||||||||rs142513484||||SNV||||||||||||||||0.0010|0.003|'.
+  '||RegulatoryFeature|ENSR00001963192|TF_binding_site||||||||||rs142513484||||SNV|||||||||||||||||0.0010|0.003|'.
   '0.0014|0|0|0|0.004998|0|0.0003478|0.004643|0.0003236|0|0|0|1.886e-05|0|0|0.004998|AA||||||||'.
   "\tGT\t0|0",
   'get_all_lines_by_InputBuffer - everything'
@@ -413,6 +413,19 @@ is_deeply(
 
 # test keep vs trash existing CSQ
 $ib = get_runner({
+  input_file => $test_cfg->create_input_file([qw(21 25585733 . C T . . BAR=blah;CSQ=foo;BAR2=blah2)]),
+  dir => $test_cfg->{cache_root_dir},
+})->get_InputBuffer;
+$of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({config => $ib->config});
+
+is_deeply(
+  $of->get_all_lines_by_InputBuffer($ib)->[0],
+  "21\t25585733\t.\tC\tT\t.\t.\t".
+  'BAR=blah;BAR2=blah2;CSQ=T|3_prime_UTR_variant|MODIFIER||ENSG00000154719|Transcript|ENST00000307301||||||1122|||||||-1|,T|missense_variant|MODERATE||ENSG00000154719|Transcript|ENST00000352957||||||1033|991|331|A/T|Gca/Aca|||-1|,T|upstream_gene_variant|MODIFIER||ENSG00000260583|Transcript|ENST00000567517||||||||||||2407|-1|',
+  "trash existing CSQ 1"
+);
+
+$ib = get_runner({
   input_file => $test_cfg->create_input_file([qw(21 25585733 . C T . . CSQ=foo;BAR=blah)]),
   dir => $test_cfg->{cache_root_dir},
 })->get_InputBuffer;
@@ -422,7 +435,7 @@ is_deeply(
   $of->get_all_lines_by_InputBuffer($ib)->[0],
   "21\t25585733\t.\tC\tT\t.\t.\t".
   'BAR=blah;CSQ=T|3_prime_UTR_variant|MODIFIER||ENSG00000154719|Transcript|ENST00000307301||||||1122|||||||-1|,T|missense_variant|MODERATE||ENSG00000154719|Transcript|ENST00000352957||||||1033|991|331|A/T|Gca/Aca|||-1|,T|upstream_gene_variant|MODIFIER||ENSG00000260583|Transcript|ENST00000567517||||||||||||2407|-1|',
-  "trash existing CSQ 1"
+  "trash existing CSQ 2"
 );
 
 $ib = get_runner({
@@ -435,7 +448,7 @@ is_deeply(
   $of->get_all_lines_by_InputBuffer($ib)->[0],
   "21\t25585733\t.\tC\tT\t.\t.\t".
   'BAR=blah;CSQ=T|3_prime_UTR_variant|MODIFIER||ENSG00000154719|Transcript|ENST00000307301||||||1122|||||||-1|,T|missense_variant|MODERATE||ENSG00000154719|Transcript|ENST00000352957||||||1033|991|331|A/T|Gca/Aca|||-1|,T|upstream_gene_variant|MODIFIER||ENSG00000260583|Transcript|ENST00000567517||||||||||||2407|-1|',
-  "trash existing CSQ 2"
+  "trash existing CSQ 3"
 );
 
 $of->{keep_csq} = 1;
@@ -445,6 +458,7 @@ is_deeply(
   'BAR=blah;CSQ=foo;CSQ=T|3_prime_UTR_variant|MODIFIER||ENSG00000154719|Transcript|ENST00000307301||||||1122|||||||-1|,T|missense_variant|MODERATE||ENSG00000154719|Transcript|ENST00000352957||||||1033|991|331|A/T|Gca/Aca|||-1|,T|upstream_gene_variant|MODIFIER||ENSG00000260583|Transcript|ENST00000567517||||||||||||2407|-1|',
   "keep existing CSQ"
 );
+
 $of->{keep_csq} = 0;
 
 # check we dont trash BCSQ
@@ -471,6 +485,28 @@ $of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({config => $ib->config});
 
 @lines = @{$of->get_all_lines_by_InputBuffer($ib)};
 ok($lines[0] =~ /EFF/ && $lines[0] !~ /CSQ/, 'vcf_info_field');
+
+
+# Avoid duplicated CSQ info metadata
+my $runner2 = get_runner({
+  input_file => $test_cfg->{test_vcf2},
+  dir => $test_cfg->{cache_root_dir},
+  vcf => 1,
+});
+
+$of = $runner2->get_OutputFactory;
+
+is_deeply(
+  [map {$of->headers->[$_]} (0,2,3)],
+  [
+    '##fileformat=VCFv4.1',
+    '##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|SYMBOL_SOURCE|HGNC_ID">',
+    "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT"
+  ],
+  'headers (all but VEP) - from input test2'
+);
+ok($of->headers->[1] =~ /^##VEP/, 'headers (VEP header) - from input test2');
+
 
 
 # no cons
@@ -579,6 +615,40 @@ close IN;
 
 is($lines[0], "21\t25585733\t25585733\tC/100BP_SEQ\t1\trs142513484\tmissense_variant\n", 'web_output - allele truncation');
 
+
+
+## RefSeq MT transcripts have odd names - check they are not filtered out
+$ib = get_runner({
+  input_file => $test_cfg->create_input_file([qw(MT 12848 rs267606899 C T . . .)]),
+  refseq => 1,
+  use_given_ref => 1,
+  offline => 1,
+  dir => $test_cfg->{cache_root_dir},
+})->get_InputBuffer;
+
+$of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({config => $ib->config});
+
+
+is(
+  $of->get_all_lines_by_InputBuffer($ib)->[0],
+  'MT	12848	rs267606899	C	T	.	.	CSQ='.
+'T|downstream_gene_variant|MODIFIER||4508|Transcript|4508||||||||||||3641|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
+'T|downstream_gene_variant|MODIFIER||4509|Transcript|4509||||||||||||4276|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
+'T|downstream_gene_variant|MODIFIER||4513|Transcript|4513||||||||||||4579|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
+'T|downstream_gene_variant|MODIFIER||4514|Transcript|4514||||||||||||2858|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
+'T|upstream_gene_variant|MODIFIER||4519|Transcript|4519||||||||||||1899|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
+'T|downstream_gene_variant|MODIFIER||4537|Transcript|4537||||||||||||2444|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
+'T|downstream_gene_variant|MODIFIER||4538|Transcript|4538||||||||||||711|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
+'T|downstream_gene_variant|MODIFIER||4539|Transcript|4539||||||||||||2082|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
+'T|missense_variant|MODERATE||4540|Transcript|4540||||||512|512|171|A/V|gCa/gTa|||1||rseq_mrna_nonmatch&rseq_no_comparison,'.
+'T|downstream_gene_variant|MODIFIER||4541|Transcript|4541||||||||||||1301|-1||rseq_mrna_nonmatch&rseq_no_comparison,'.
+'T|downstream_gene_variant|MODIFIER||4556|Transcript|4556||||||||||||1826|-1||rseq_mrna_nonmatch&rseq_no_comparison,'.
+'T|downstream_gene_variant|MODIFIER||4563|Transcript|4563||||||||||||2790|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
+'T|downstream_gene_variant|MODIFIER||4564|Transcript|4564||||||||||||642|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
+'T|downstream_gene_variant|MODIFIER||4566|Transcript|4566||||||||||||4484|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
+'T|downstream_gene_variant|MODIFIER||4568|Transcript|4568||||||||||||512|1||rseq_mrna_nonmatch&rseq_no_comparison,T|downstream_gene_variant|MODIFIER||4571|Transcript|4571||||||||||||3108|-1||rseq_mrna_nonmatch&rseq_no_comparison,T|downstream_gene_variant|MODIFIER||4573|Transcript|4573||||||||||||2379|1||rseq_mrna_nonmatch&rseq_no_comparison,T|downstream_gene_variant|MODIFIER||4575|Transcript|4575||||||||||||583|1||rseq_mrna_nonmatch&rseq_no_comparison,T|upstream_gene_variant|MODIFIER||4576|Transcript|4576||||||||||||3040|1||rseq_mrna_nonmatch&rseq_no_comparison',
+  "RefSeq MT transcripts are returned"
+);
 
 
 # done
