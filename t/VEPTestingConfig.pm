@@ -1,4 +1,4 @@
-# Copyright [2016-2017] EMBL-European Bioinformatics Institute
+# Copyright [2016-2018] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ our %DEFAULTS = (
   registry_file  => $Bin.'/testdata/vep.registry',
 
   test_vcf       => $Bin.'/testdata/input/test.vcf',
+  test_vcf2      => $Bin.'/testdata/input/test2.vcf',
   vr_vcf         => $Bin.'/testdata/input/idt_test.vcf',
   windows_vcf    => $Bin.'/testdata/input/windows.vcf',
   test_gzvcf     => $Bin.'/testdata/input/test.vcf.gz',
