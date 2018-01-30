@@ -123,7 +123,8 @@ ok(
 
 is_deeply(
   $bv->chr_lengths,
-  {21 => 46709983},
+  {21 => 46709983,
+   MT => 16569 },
   'chr lengths'
 );
 
