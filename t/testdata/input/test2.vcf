@@ -1,0 +1,4 @@
+##fileformat=VCFv4.1
+##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|SYMBOL_SOURCE|HGNC_ID">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	HG00096
+21	25585733	rs142513484	C	T	.	.	CSQ=T|3_prime_UTR_variant|MODIFIER|MRPL39|ENSG00000154719|Transcript|ENST00000307301|protein_coding|11/11||||1122|||||||-1||HGNC|HGNC:14027,T|missense_variant|MODERATE|MRPL39|ENSG00000154719|Transcript|ENST00000352957|protein_coding|10/10||||1033|991|331|A/T|Gca/Aca|||-1||HGNC|HGNC:14027,T|upstream_gene_variant|MODIFIER|AP000223.1|ENSG00000260583|Transcript|ENST00000567517|antisense_RNA|||||||||||2407|-1||Clone_based_ensembl_gene|	GT	0|0
