@@ -207,17 +207,18 @@ sub filter_transcript {
   if(
     !$self->{all_refseq} &&
     (
-      # we only want RefSeq transcripts e.g. NM_12930
+      # we only want RefSeq transcripts e.g. NM_12930,
+      # or 4540 for MT transcripts
       (
         $self->{source_type} eq 'refseq' &&
-        ($t->stable_id || '') !~ /^[A-Z]{2}\_\d+/
+        ($t->stable_id || '') !~ /^[A-Z]{2}\_\d+|^\d{4}$/
       ) ||
 
       # and the same from the merged cache
       (
         $self->{source_type} eq 'merged' &&
         ($t->{_source_cache} || '') eq 'RefSeq' &&
-        ($t->stable_id || '') !~ /^[A-Z]{2}\_\d+/
+        ($t->stable_id || '') !~ /^[A-Z]{2}\_\d+|^\d{4}$/
       )
     )
   ) {
