@@ -203,8 +203,7 @@ sub get_features_by_regions_uncached {
             %cl =
               map {$_->[0] => $_->[1]}
               map {$_->[0] =~ s/ /\_/g; $_}
-              map {[$_->epigenome->display_label, $_->activity]}
-              grep {!$_->_is_multicell}
+              map {[$_->get_Epigenome->display_label, $_->activity]}
               @{$rf->regulatory_activity};
           }
 
@@ -213,8 +212,7 @@ sub get_features_by_regions_uncached {
             %cl =
               map {$_->[0] => $_->[1]}
               map {$_->[0] =~ s/ /\_/g; $_}
-              map {[$_->epigenome->display_label, $_->activity]}
-              grep {!$_->_is_multicell}
+              map {[$_->get_Epigenome->display_label, $_->activity]}
               map {@{$_->regulatory_activity}}
               @{$rfa->fetch_all_by_attribute_feature($rf)};
           }
