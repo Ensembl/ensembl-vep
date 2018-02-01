@@ -486,6 +486,27 @@ $of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({config => $ib->config});
 ok($lines[0] =~ /EFF/ && $lines[0] !~ /CSQ/, 'vcf_info_field');
 
 
+# Avoid duplicated CSQ info metadata
+my $runner2 = get_runner({
+  input_file => $test_cfg->{test_vcf2},
+  dir => $test_cfg->{cache_root_dir},
+  vcf => 1,
+});
+
+$of = $runner2->get_OutputFactory;
+
+is_deeply(
+  [map {$of->headers->[$_]} (0,2,3)],
+  [
+    '##fileformat=VCFv4.1',
+    '##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|SYMBOL_SOURCE|HGNC_ID">',
+    "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tHG00096"
+  ],
+  'headers (all but VEP) - from input test2'
+);
+ok($of->headers->[1] =~ /^##VEP/, 'headers (VEP header) - from input test2');
+
+
 # no cons
 $ib = get_runner({
   input_file => $test_cfg->create_input_file([qw(21 25585733 25585733 C/T 1)]),

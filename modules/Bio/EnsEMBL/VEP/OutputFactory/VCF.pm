@@ -176,7 +176,15 @@ sub headers {
   
   # input was VCF
   if($info->{input_headers} && scalar @{$info->{input_headers}}) {
-    push @headers, @{$info->{input_headers}};
+    if ($self->{keep_csq}) {
+      push @headers, @{$info->{input_headers}};
+    }
+    else {
+      my $fieldname = $self->{vcf_info_field} || 'CSQ';
+      foreach my $input_header (@{$info->{input_headers}}) {
+        push @headers, $input_header unless ($input_header =~ /ID=$fieldname,/i || $input_header =~ /^##VEP/);
+      }
+    }
     $col_heading = pop @headers;
   }
 
