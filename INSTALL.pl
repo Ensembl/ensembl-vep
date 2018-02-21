@@ -376,7 +376,6 @@ sub update() {
 sub check_default_dir {
   my $this_os =  $^O;
   my $default_dir_used;
-  $DB::single = 1;
   # check if $DEST_DIR is default
   if(defined($DEST_DIR)) {
     print "Using non-default API installation directory $DEST_DIR.\n";
