@@ -376,28 +376,40 @@ sub update() {
 sub check_default_dir {
   my $this_os =  $^O;
   my $default_dir_used;
-
+  $DB::single = 1;
   # check if $DEST_DIR is default
   if(defined($DEST_DIR)) {
     print "Using non-default API installation directory $DEST_DIR.\n";
     print "Please note this just specifies the location for downloaded API files. The vep script will remain in its current location where ensembl-vep was unzipped.\n";
-    print "Have you \n";
-    print "1. added $DEST_DIR to your PERL5LIB environment variable?\n";
-    print "2. added $DEST_DIR/htslib to your PATH environment variable?\n";
-    if( $this_os eq 'darwin' && !$NO_HTSLIB) {
-      print "3. added $DEST_DIR/htslib to your DYLD_LIBRARY_PATH environment variable?\n";
-    }
-    print "(y/n): ";
+    if(!defined($AUTO)){
+      print "Have you \n";
+      print "1. added $DEST_DIR to your PERL5LIB environment variable?\n";
+      print "2. added $DEST_DIR/htslib to your PATH environment variable?\n";
+      if( $this_os eq 'darwin' && !$NO_HTSLIB) {
+        print "3. added $DEST_DIR/htslib to your DYLD_LIBRARY_PATH environment variable?\n";
+      }
+      print "(y/n): ";
 
-    my $ok = <>;
-    if($ok !~ /^y/i) {
-      print "Exiting. Please \n";
+      my $ok = <>;
+      if($ok !~ /^y/i) {
+        print "Exiting. Please \n";
+        print "1. add $DEST_DIR to your PERL5LIB environment variable\n";
+        print "2. add $DEST_DIR/htslib to your PATH environment variable\n";
+        if( $this_os eq 'darwin' && !$NO_HTSLIB) {
+          print "3. add $DEST_DIR/htslib to your DYLD_LIBRARY_PATH environment variable\n";
+        }
+        exit(0);
+      }
+    }
+    else {
+      print "\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n\n";
+      print "PLEASE REMEMBER TO \n";
       print "1. add $DEST_DIR to your PERL5LIB environment variable\n";
       print "2. add $DEST_DIR/htslib to your PATH environment variable\n";
       if( $this_os eq 'darwin' && !$NO_HTSLIB) {
         print "3. add $DEST_DIR/htslib to your DYLD_LIBRARY_PATH environment variable\n";
+        print "\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n";
       }
-      exit(0);
     }
     if( ! -d $DEST_DIR ) {
       mkdir $DEST_DIR || die "Could not make destination directory $DEST_DIR"
@@ -412,14 +424,23 @@ sub check_default_dir {
 
     if( !$NO_HTSLIB && $this_os eq 'darwin' ) {
       print "Installation on OSX requires that you set up some paths before running this installer.\n";
-      print "Have you \n";
-      print "1. added $current_dir/htslib to your DYLD_LIBRARY_PATH environment variable?\n";
-      print "(y/n): ";
-      my $ok = <>;
-      if($ok !~ /^y/i) {
-        print "Exiting. Please \n";
+      if(!defined($AUTO)){
+        print "Have you \n";
+        print "1. added $current_dir/htslib to your DYLD_LIBRARY_PATH environment variable?\n";
+        print "(y/n): ";
+        my $ok = <>;
+        if($ok !~ /^y/i) {
+          print "Exiting. Please \n";
+          print "1. add $current_dir/htslib to your DYLD_LIBRARY_PATH environment variable\n";
+          exit(0);
+        }
+      }
+      else{
+        print "\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n";
+        #print "\nPLEASE REMEMBER TO ADD $current_dir/htslib TO YOUR DYLD_LIBRARY_PATH ENVIRONMENT VARIABLE\n";
+        print "\nPLEASE REMEMBER TO \n";
         print "1. add $current_dir/htslib to your DYLD_LIBRARY_PATH environment variable\n";
-        exit(0);
+        print "\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n";
       }
     }
   }
