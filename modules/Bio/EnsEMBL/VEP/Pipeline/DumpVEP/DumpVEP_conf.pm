@@ -132,7 +132,7 @@ sub default_options {
             bam => $self->o('data_dir').'/interim_GRCh38.p10_knownrefseq_alignments_2017-01-13.bam',
             freq_vcf => [
               {
-                file => $self->o('data_dir').'/1KG.phase3.GRCh38.vcf.gz',
+                file => $self->o('data_dir').'/1KG.phase3.GRCh38_2018_02_26.vcf.gz',
                 pops => [qw(AFR AMR EAS EUR SAS)],
                 name => '1000genomes',
                 version => 'phase3'
