@@ -710,7 +710,7 @@ can put strain on the Ensembl servers, limiting availability to other users.
 To enable using databases, add the flag "--database".
 
 Documentation
-Installer: http://www.ensembl.org/info/docs/tools/vep/vep_script.html#installer
+Installer: http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html#installer
 Cache: http://www.ensembl.org/info/docs/tools/vep/script/index.html#cache
 
     }
