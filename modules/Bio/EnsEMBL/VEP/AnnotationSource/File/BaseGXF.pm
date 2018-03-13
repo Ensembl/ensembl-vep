@@ -373,31 +373,42 @@ sub _get_parent_child_structure {
   # sub-features frequently won't appear in order after their parents
   # so we need to track orphans and add them later
   my @orphans;
-
+  my %parent_children;
   foreach my $record(@$records) {
-    if(my $parent_id = $self->_record_get_parent_id($record)) {
+    my $record_id = $self->_record_get_id($record);
+
+    foreach my $parent_id (@{$self->_record_get_parent_ids($record)}) {
+      next unless ($parent_id);
       if(my $top_level = $top_level{$parent_id}) {
         push @{$top_level->{_children}}, $record;
+        $parent_children{$parent_id}{$record_id} = 1;
       }
       else {
         push @orphans, $record;
       }
     }
 
-    $top_level{$self->_record_get_id($record)} = $record;
+    $top_level{$record_id} = $record;
   }
 
   # now deal with orphans
   my %parents_not_found = ();
 
   foreach my $record(@orphans) {
-    my $parent_id = $self->_record_get_parent_id($record);
+    my $record_id = $self->_record_get_id($record);
 
-    if(my $top_level = $top_level{$parent_id}) {
-      push @{$top_level->{_children}}, $record;
-    }
-    else {
-      $parents_not_found{$parent_id} = 1;
+    foreach my $parent_id (@{$self->_record_get_parent_ids($record)}) {
+      # Check if the relation parent/record has already been found: use case where a record is related to more than one parent record
+      # e.g. an exon linked to several transcripts
+      next if ($parent_children{$parent_id}{$record_id});
+
+      if(my $top_level = $top_level{$parent_id}) {
+        push @{$top_level->{_children}}, $record;
+        $parent_children{$parent_id}{$record_id} = 1;
+      }
+      else {
+        $parents_not_found{$parent_id} = 1;
+      }
     }
   }
 
@@ -407,8 +418,12 @@ sub _get_parent_child_structure {
   ) if scalar keys %parents_not_found;
 
   # now prune the structure so we're left with only true top level records
-  delete $top_level{$_} for grep {$self->_record_get_parent_id($top_level{$_})} keys %top_level;
-
+  foreach my $entry_id (keys(%top_level)) {
+    my $parent_ids = $self->_record_get_parent_ids($top_level{$entry_id});
+    if (scalar(@$parent_ids) && $parent_ids->[0] ne '') {
+      delete $top_level{$entry_id};
+    }
+  }
   return \%top_level;
 }
 

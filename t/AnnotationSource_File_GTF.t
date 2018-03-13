@@ -61,7 +61,7 @@ SKIP: {
 
   # _get_records_by_coords
   my $records = $as->_get_records_by_coords(21, 25585733, 25585733);
-  is(scalar @$records, 76, '_get_records_by_coords - count');
+  is(scalar @$records, 77, '_get_records_by_coords - count');
 
   is_deeply(
     $records->[0],
@@ -102,13 +102,13 @@ SKIP: {
 
   is(
     scalar (grep {!overlap($_->{start}, $_->{end}, 25585733, 25585733)} @$records),
-    58,
+    59,
     '_get_records_by_coords - non-overlapping sub-features count'
   );
 
   my $trs = [map {$as->lazy_load_transcript($_)} @{$as->_create_transcripts($records)}];
 
-  is(scalar @$trs, 3, "_create_transcripts - count");
+  is(scalar @$trs, 4, "_create_transcripts - count");
   is($trs->[0]->stable_id, "ENST00000307301", "stable_id");
   is($trs->[0]->{_gene_stable_id}, "ENSG00000154719", "_gene_stable_id");
   is($trs->[0]->{_gene_symbol}, "MRPL39", "_gene_symbol");
@@ -149,6 +149,7 @@ SKIP: {
       'ENST00000456904' => 'antisense',
       'ENST00000419694' => 'lincRNA',
       'ENST00000419219' => 'protein_coding',
+      'ENST00000419219_1' => 'protein_coding', # Fake transcript to test exons having 2 parents
       'ENST00000400532' => 'protein_coding',
       'ENST00000596669' => 'retained_intron',
       'ENST00000477351' => 'processed_transcript',
