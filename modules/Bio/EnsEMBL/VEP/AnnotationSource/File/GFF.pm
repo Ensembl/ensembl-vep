@@ -153,7 +153,7 @@ sub include_feature_types {
   Arg 1      : hashref $record_hash
   Example    : $ids = $as->_record_get_parent_ids($record);
   Description: Get IDs of parent records for this record
-  Returntype : listref of string
+  Returntype : listref of strings
   Exceptions : none
   Caller     : general
   Status     : Stable
