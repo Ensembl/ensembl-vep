@@ -566,7 +566,8 @@ sub get_input {
     }
   }
 
-  if(defined($input) && $input =~ /([\w\.\-]+)?\:?\(?([\-\d\.e]*)\)?/ && $field ne 'CELL_TYPE') {
+  if(defined($input) && $input =~ /([\w\.\-]+)?\:?\(?([\-\d\.e]*)\)?/
+                     && $field ne 'CELL_TYPE' && $field !~/HGVS/) {
 
     my ($text, $num) = ($1, $2);
     
