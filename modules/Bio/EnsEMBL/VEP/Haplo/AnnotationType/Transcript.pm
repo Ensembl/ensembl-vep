@@ -85,7 +85,7 @@ sub annotate_InputBuffer {
   foreach my $tr(@{$self->get_all_features_by_InputBuffer($buffer)}) {
 
     $tr = $self->lazy_load_transcript($tr);
-    next unless $tr && $tr->{biotype} eq 'protein_coding';
+    next unless $tr && $tr->biotype->name eq 'protein_coding';
 
     next if $self->filter_set && !$self->filter_set->evaluate($tr);
 

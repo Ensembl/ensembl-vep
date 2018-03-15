@@ -125,7 +125,7 @@ SKIP: {
 
   $trs = [map {$as->lazy_load_transcript($_)} @{$as->_create_transcripts($as->_get_records_by_coords(21, 255e5, 26e6))}];
   is_deeply(
-    {map {$_->stable_id => $_->biotype} @$trs},
+    {map {$_->stable_id => $_->biotype->name} @$trs},
     {
       'ENST00000440126' => 'protein_coding',
       'ENST00000457143' => 'protein_coding',
@@ -339,7 +339,7 @@ SKIP: {
   $trs = [map {$as->lazy_load_transcript($_)} @{$as->_create_transcripts($as->_get_records_by_coords('NC_000021.9', 255e5, 26e6))}];
 
   is_deeply(
-    {map {$_->stable_id => $_->biotype} @$trs},
+    {map {$_->stable_id => $_->biotype->name} @$trs},
     {
       'XR_937621.2' => 'lncRNA',
       'NR_024092.1' => 'lncRNA',

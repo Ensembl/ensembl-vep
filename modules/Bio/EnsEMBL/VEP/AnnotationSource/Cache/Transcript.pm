@@ -298,7 +298,7 @@ sub tree_file {
 
         # we can use parent classes methods to fetch transcripts into memory
         foreach my $t(
-          grep {$_->biotype eq 'protein_coding'}
+          grep {$_->biotype->name eq 'protein_coding'}
           @{$self->get_features_by_regions_uncached([[$c, ($s - 1) / $cache_region_size]])}
         ) {
           print TR "$c\t".join("\t", @{$self->_tree_file_data($t)})."\n";
