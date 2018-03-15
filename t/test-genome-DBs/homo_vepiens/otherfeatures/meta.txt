@@ -144,3 +144,5 @@
 854	\N	patch	patch_90_91_d.sql|remove_external_data
 855	\N	patch	patch_91_92_a.sql|schema_version
 856	\N	patch	patch_91_92_b.sql|add_cigar_line_align_type
+857	\N	patch	patch_92_93_a.sql|schema_version
+858	\N	patch	patch_92_93_b.sql|biotype_table
