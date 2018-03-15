@@ -65,7 +65,7 @@ SKIP: {
 
   # _get_records_by_coords
   my $records = $as->_get_records_by_coords(21, 25585733, 25585733);
-  is(scalar @$records, 74, '_get_records_by_coords - count');
+  is(scalar @$records, 75, '_get_records_by_coords - count');
 
   is_deeply(
     $records->[0],
@@ -94,14 +94,14 @@ SKIP: {
 
   is(
     scalar (grep {!overlap($_->{start}, $_->{end}, 25585733, 25585733)} @$records),
-    56,
+    57,
     '_get_records_by_coords - non-overlapping sub-features count'
   );
 
 
   my $trs = [map {$as->lazy_load_transcript($_)} @{$as->_create_transcripts($records)}];
 
-  is(scalar @$trs, 3, "_create_transcripts - count");
+  is(scalar @$trs, 4, "_create_transcripts - count");
   is($trs->[0]->stable_id, "ENST00000307301", "stable_id");
   is($trs->[0]->{_gene_stable_id}, "ENSG00000154719", "_gene_stable_id");
   is($trs->[0]->{_gene_symbol}, "MRPL39", "_gene_symbol");
@@ -153,6 +153,7 @@ SKIP: {
       'ENST00000456904' => 'antisense',
       'ENST00000419694' => 'lincRNA',
       'ENST00000419219' => 'protein_coding',
+      'ENST00000419219_1' => 'protein_coding', # Fake transcript to test exons having 2 parents
       'ENST00000400532' => 'protein_coding',
       'ENST00000596669' => 'retained_intron',
       'ENST00000477351' => 'processed_transcript',
@@ -220,14 +221,14 @@ SKIP: {
 
   $records = $as->_get_records_by_coords(21, 25585733, 25585733);
   delete $records->[3]->{attributes}->{biotype};
-  is(scalar (grep {defined($_)} map {$as->lazy_load_transcript($_)} @{$as->_create_transcripts($records)}), 2, 'no biotype skips transcript');
+  is(scalar (grep {defined($_)} map {$as->lazy_load_transcript($_)} @{$as->_create_transcripts($records)}), 3, 'no biotype skips transcript');
   ok($tmp =~ /Unable to determine biotype/, 'no biotype warning message');
 
   # overlapping exons
   $records = $as->_get_records_by_coords(21, 25585733, 25585733);
   $records->[0]->{end} += 1e5;
   delete($records->[0]->{attributes}->{rank});
-  is(scalar (grep {defined($_)} map {$as->lazy_load_transcript($_)} @{$as->_create_transcripts($records)}), 2, 'overlapping exons skips transcript');
+  is(scalar (grep {defined($_)} map {$as->lazy_load_transcript($_)} @{$as->_create_transcripts($records)}), 3, 'overlapping exons skips transcript');
   ok($tmp =~ /Failed to add exon to transcript/, 'overlapping exons warning message');
 
   # restore STDERR

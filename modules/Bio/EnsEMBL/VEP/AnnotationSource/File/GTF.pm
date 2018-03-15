@@ -118,23 +118,24 @@ sub include_feature_types {
 }
 
 
-=head2 _record_get_parent_id
+=head2 _record_get_parent_ids
 
   Arg 1      : hashref $record_hash
-  Example    : $id = $as->_record_get_parent_id($record);
-  Description: Get ID of parent record for this record
-  Returntype : string
+  Example    : $ids = $as->_record_get_parent_ids($record);
+  Description: Get IDs of parent records for this record
+  Returntype : listref of strings
   Exceptions : none
   Caller     : general
   Status     : Stable
 
 =cut
 
-sub _record_get_parent_id {
+sub _record_get_parent_ids {
   my ($self, $record) = @_;
   if(!exists($record->{_parent_id})) {
     my $type = lc($record->{type});
-    $record->{_parent_id} = $PARENTS{$type} ? $record->{attributes}->{$PARENTS{$type}.'_id'} : undef;
+    my @parent_ids = ($PARENTS{$type}) ? split(',',$record->{attributes}->{$PARENTS{$type}.'_id'}) : ();
+    $record->{_parent_id} = \@parent_ids;
   }
   return $record->{_parent_id};
 }

@@ -80,7 +80,7 @@ SKIP: {
 
   is_deeply(
     [sort map {$_->transcript->stable_id} @$result],
-    [qw(ENST00000307301 ENST00000352957  ENST00000419219)],
+    [qw(ENST00000307301 ENST00000352957  ENST00000419219  ENST00000419219_1)],
     'annotate_InputBuffer - stable_ids'
   );
 
@@ -93,14 +93,18 @@ SKIP: {
     ],
     [
       '03f82458a34fda1fdf74803a02cf0a45',
+      '03f82458a34fda1fdf74803a02cf0a45',
+      '1a040be3cfa8edb6cc091f942d42dcf6',
       '1a040be3cfa8edb6cc091f942d42dcf6',
       '252ea7bfa7d0b130fc696ff25f4fc33c',
       '2ff7fea7ee58c8a776fc97f01f9d5296',
+      '41d44949cb17e204c3e76ce6d67aa27d',
       '41d44949cb17e204c3e76ce6d67aa27d',
       '68f1b015c35163ade06017b7b6bce1ab',
       '79d615f301917d96d4cefaea29702508',
       '7aa776c0543c7d064e0d146b60541843',
       '91212e92e2a1940184a2eb77fd115d5c',
+      'b3dd19425bfa07a93783baf201f79a70',
       'b3dd19425bfa07a93783baf201f79a70',
       'c6c26cfaa79a2046a684220c04b5b2e4',
       'e5745909c573dfc830946d4e6994a47d'
