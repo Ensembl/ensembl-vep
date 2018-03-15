@@ -148,28 +148,34 @@ sub include_feature_types {
 }
 
 
-=head2 _record_get_parent_id
+=head2 _record_get_parent_ids
 
   Arg 1      : hashref $record_hash
-  Example    : $id = $as->_record_get_parent_id($record);
-  Description: Get ID of parent record for this record
-  Returntype : string
+  Example    : $ids = $as->_record_get_parent_ids($record);
+  Description: Get IDs of parent records for this record
+  Returntype : listref of strings
   Exceptions : none
   Caller     : general
   Status     : Stable
 
 =cut
 
-sub _record_get_parent_id {
+sub _record_get_parent_ids {
   my ($self, $record) = @_;
 
   if(!exists($record->{_parent_id})) {
     my $attributes = $record->{attributes};
-    $record->{_parent_id} = $attributes->{Parent} || $attributes->{parent};
+
+    my $parents = $attributes->{Parent} || $attributes->{parent};
+    # An record can be linked to more than one parent records
+    # e.g. an exon can be linked to several transcripts
+    my @parent_ids = ($parents) ? split(',',$parents) : ();
+    $record->{_parent_id} = \@parent_ids;
   }
 
   return $record->{_parent_id};
 }
+
 
 
 =head2 _record_get_id
