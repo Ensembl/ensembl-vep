@@ -635,7 +635,7 @@ sub pick_worst_VariationFeatureOverlapAllele {
 
       # 0 is "best"
       $info->{canonical} = $tr->is_canonical ? 0 : 1;
-      $info->{biotype} = $tr->biotype->name eq 'protein_coding' ? 0 : 1;
+      $info->{biotype} = $tr->biotype eq 'protein_coding' ? 0 : 1;
       $info->{ccds} = $tr->{_ccds} && $tr->{_ccds} ne '-' ? 0 : 1;
       $info->{lc($tr->{_source_cache})} = 0 if exists($tr->{_source_cache});
 
@@ -1279,7 +1279,7 @@ sub BaseTranscriptVariationAllele_to_output_hash {
   $hash->{CANONICAL} = 'YES' if $self->{canonical} && $tr->is_canonical;
 
   # biotype
-  $hash->{BIOTYPE} = $tr->biotype if $self->{biotype} && $tr->biotype;
+  $hash->{BIOTYPE} = $tr->biotype->name if $self->{biotype} && $tr->biotype;
 
   # source cache self transcript if using --merged
   $hash->{SOURCE} = $tr->{_source_cache} if defined $tr->{_source_cache};
