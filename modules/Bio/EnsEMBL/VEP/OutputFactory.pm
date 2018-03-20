@@ -1279,7 +1279,7 @@ sub BaseTranscriptVariationAllele_to_output_hash {
   $hash->{CANONICAL} = 'YES' if $self->{canonical} && $tr->is_canonical;
 
   # biotype
-  $hash->{BIOTYPE} = $tr->biotype->name if $self->{biotype} && $tr->biotype;
+  $hash->{BIOTYPE} = $tr->biotype if $self->{biotype} && $tr->biotype;
 
   # source cache self transcript if using --merged
   $hash->{SOURCE} = $tr->{_source_cache} if defined $tr->{_source_cache};
