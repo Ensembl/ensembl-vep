@@ -163,7 +163,7 @@ sub main {
   my $out_fh = FileHandle->new();
   
   if(-e $config->{output_file} && !$config->{force_overwrite}) {
-    throw("ERROR: Output file ", $config->{output_file}, " already exists. Specify a different output file with --output_file or overwrite existing file with --force_overwrite\n");
+    throw("ERROR: Output file " . $config->{output_file} . " already exists. Specify a different output file with --output_file or overwrite existing file with --force_overwrite\n");
   }
   elsif($config->{output_file} =~ /stdout/i) {
     $out_fh = *STDOUT;
