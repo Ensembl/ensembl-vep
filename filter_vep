@@ -172,7 +172,8 @@ sub main {
     $out_fh->open(">".$config->{output_file}) or throw("ERROR: Could not write to output file ".$config->{output_file}."\n");
   }
   
-  my (@raw_headers, @headers, $count, $line_number);
+  my (@raw_headers, @headers, $line_number);
+  my $count = 0;
   my $filter_set = $config->{filter_set};
   
   while(<$in_fh>) {
