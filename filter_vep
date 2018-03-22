@@ -326,6 +326,7 @@ sub parse_line {
   my %data = %{$main_data || {}};
   
   chomp $line;
+  # Use -1 in split to keep trailing empty fields
   my @split = split($delimiter, $line, -1);
   
   $data{$headers->[$_]} = $split[$_] for 0..$#split;
