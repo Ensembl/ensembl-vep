@@ -172,7 +172,8 @@ sub main {
     $out_fh->open(">".$config->{output_file}) or throw("ERROR: Could not write to output file ".$config->{output_file}."\n");
   }
   
-  my (@raw_headers, @headers, $count, $line_number);
+  my (@raw_headers, @headers, $line_number);
+  my $count = 0;
   my $filter_set = $config->{filter_set};
   
   while(<$in_fh>) {
@@ -325,7 +326,8 @@ sub parse_line {
   my %data = %{$main_data || {}};
   
   chomp $line;
-  my @split = split($delimiter, $line);
+  # Use -1 in split to keep trailing empty fields
+  my @split = split($delimiter, $line, -1);
   
   $data{$headers->[$_]} = $split[$_] for 0..$#split;
   
