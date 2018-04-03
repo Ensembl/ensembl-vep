@@ -40,6 +40,11 @@ The following modules are optional but most users will benefit from installing t
   * [PerlIO::gzip](http://search.cpan.org/~nwclark/PerlIO-gzip-0.19/gzip.pm) - faster compressed file parsing
   * [Bio::DB::BigFile](http://search.cpan.org/~lds/Bio-BigFile-1.07/lib/Bio/DB/BigFile.pm) - required for reading custom annotation data from BigWig files
  
+#### Docker
+A docker image for VEP is available from [DockerHub](https://hub.docker.com/r/ensemblorg/ensembl-vep).
+
+See [documentation](http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html#docker) for the Docker installation instructions.
+ 
 ---
 
 <a name="vep"></a>
