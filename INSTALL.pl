@@ -1693,7 +1693,7 @@ sub download_to_file {
   $url =~ s/([a-z])\//$1\:21\// if $url =~ /ftp/ && $url !~ /\:21/;
 
   if($CAN_USE_CURL) {
-    my $response = `curl -s -o $file -w '%{http_code}' --location $url `;
+    my $response = `curl -s -o $file -w '%{http_code}' --location "$url" `;
     if ( $response != 200) {
       print "curl failed ($response), trying to fetch using LWP::Simple\n" unless $QUIET;
       $CAN_USE_CURL = 0;
