@@ -1,5 +1,5 @@
 1	\N	schema_type	core
-2	\N	schema_version	92
+2	\N	schema_version	93
 3	\N	patch	patch_73_74_a.sql|schema_version
 4	\N	patch	patch_73_74_b.sql|remove_dnac
 5	\N	patch	patch_73_74_c.sql|remove_unconventional_transcript_association

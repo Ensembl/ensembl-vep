@@ -239,7 +239,7 @@ CREATE TABLE `phenotype_feature_attrib` (
 CREATE TABLE `phenotype_ontology_accession` (
   `phenotype_id` int(11) unsigned NOT NULL,
   `accession` varchar(255) NOT NULL,
-  `mapped_by_attrib` set('437','438','439','440','441','442','443','444') DEFAULT NULL,
+  `mapped_by_attrib` set('437','438','439','440','441','442','443','444','588', '589','590','591','592','593','594'),
   `mapping_type` enum('is','involves') DEFAULT NULL,
   PRIMARY KEY (`phenotype_id`,`accession`),
   KEY `accession_idx` (`accession`)
@@ -570,7 +570,7 @@ CREATE TABLE `variation` (
   `minor_allele_freq` float DEFAULT NULL,
   `minor_allele_count` int(10) unsigned DEFAULT NULL,
   `clinical_significance` set('uncertain significance','not provided','benign','likely benign','likely pathogenic','pathogenic','drug response','histocompatibility','other','confers sensitivity','risk factor','association','protective') DEFAULT NULL,
-  `evidence_attribs` set('367','368','369','370','371','372','418','421') DEFAULT NULL,
+  `evidence_attribs` set('367','368','369','370','371','372','418','421','573','585') DEFAULT NULL,
   `display` int(1) DEFAULT '1',
   PRIMARY KEY (`variation_id`),
   UNIQUE KEY `name` (`name`),
@@ -612,7 +612,7 @@ CREATE TABLE `variation_feature` (
   `minor_allele_count` int(10) unsigned DEFAULT NULL,
   `alignment_quality` double DEFAULT NULL,
   `clinical_significance` set('uncertain significance','not provided','benign','likely benign','likely pathogenic','pathogenic','drug response','histocompatibility','other','confers sensitivity','risk factor','association','protective') DEFAULT NULL,
-  `evidence_attribs` set('367','368','369','370','371','372','418','421') DEFAULT NULL,
+  `evidence_attribs` set('367','368','369','370','371','372','418','421','573','585') DEFAULT NULL,
   `display` int(1) DEFAULT '1',
   PRIMARY KEY (`variation_feature_id`),
   KEY `pos_idx` (`seq_region_id`,`seq_region_start`,`seq_region_end`),

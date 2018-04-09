@@ -49,7 +49,7 @@
 57	\N	patch	patch_77_78_c.sql|Drop the table study_variation
 58	\N	patch	patch_77_78_d.sql|Extend the index type_val_idx in the table attrib
 59	\N	patch	patch_77_78_e.sql|add indexes on father_ and mother_individual_id and population name
-2	\N	schema_version	92
+2	\N	schema_version	93
 60	\N	patch	patch_78_79_a.sql|schema version
 61	\N	patch	patch_78_79_b.sql|change the column attrib_type_id by attrib_id in the variation_attrib table
 62	\N	patch	patch_78_79_c.sql|Store more detailed Sift information
@@ -97,3 +97,6 @@
 128	\N	patch	patch_91_92_b.sql|Add index on feature_stable_id in regulatory_feature_variation and motif_feature_variation
 129	\N	patch	patch_91_92_c.sql|Change the column zygosity in the table structural_variation_sample
 130	\N	patch	patch_91_92_d.sql|create table to store names of submitters to ClinVar etc
+131	\N	patch	patch_92_93_a.sql|schema version
+132	\N	patch	patch_92_93_b.sql|Extend phenotype_ontology_accession mapped_by_attrib predefined set
+133	\N	patch	patch_92_93_c.sql|Add new evidence attribs to the variation and variation_feature tables
