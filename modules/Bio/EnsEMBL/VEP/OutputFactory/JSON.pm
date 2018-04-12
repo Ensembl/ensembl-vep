@@ -377,11 +377,11 @@ sub add_colocated_variant_info_JSON {
       my $lc_pop = lc($pop);
 
       if($tmp =~ /(\D)\:([\d\.\-e]+)/) {
-        $ex->{$lc_pop.'_maf'} = $2;
+        $ex->{$lc_pop.'_af'} = $2;
         $ex->{$lc_pop.'_allele'} = $1;
       }
       else {
-        $ex->{$lc_pop.'_maf'} = $tmp;
+        $ex->{$lc_pop.'_af'} = $tmp;
       }
 
       delete $ex->{$pop};
@@ -389,7 +389,7 @@ sub add_colocated_variant_info_JSON {
 
     # remove empty
     foreach my $key(keys %$ex) {
-      delete $ex->{$key} if !defined($ex->{$key}) || $ex->{$key} eq '' || ($key !~ /maf/ && $ex->{$key} eq 0);
+      delete $ex->{$key} if !defined($ex->{$key}) || $ex->{$key} eq '' || ($key !~ /af/ && $ex->{$key} eq 0);
     }
 
     # rename
