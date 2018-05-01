@@ -221,7 +221,6 @@ sub get_all_output_hashes_by_InputBuffer {
 
     # get other data from super methods
     my $extra_hash = $self->VariationFeature_to_output_hash($vf);
-    $self->add_colocated_variant_info_JSON($vf, $extra_hash);
     $hash->{lc($_)} = $extra_hash->{$_} for grep {!$SKIP_KEYS{$_}} keys %$extra_hash;
 
     $self->add_VariationFeatureOverlapAllele_info($vf, $hash);
@@ -235,6 +234,12 @@ sub get_all_output_hashes_by_InputBuffer {
       delete $hash->{$key};
     }
 
+    my $variant_allele = $hash->{transcript_consequences}[0]->{variant_allele};
+    foreach my $ex_orig(@{$vf->{existing} || []}) {
+      my $frequency_hash = {Allele => $variant_allele};
+      $self->SUPER::add_colocated_frequency_data($vf, $frequency_hash, $ex_orig);
+      $self->add_colocated_variant_info_JSON($hash, $frequency_hash, $ex_orig);
+    }
     push @return, $hash;
   }
 
@@ -355,56 +360,47 @@ sub add_VariationFeatureOverlapAllele_info {
 
 sub add_colocated_variant_info_JSON {
   my $self = shift;
-  my $vf = shift;
   my $hash = shift;
+  my $frequency_hash = shift;
+  my $ex_orig = shift;
+  
+  # work on a copy as we're going to modify/delete things
+  my $ex;
+  %$ex = %$ex_orig;
 
-  foreach my $ex_orig(@{$vf->{existing} || []}) {
-
-    # work on a copy as we're going to modify/delete things
-    my $ex;
-    %$ex = %$ex_orig;
-
-    delete $ex->{$_} for qw(failed matched_alleles);
-
-    # frequencies
-    foreach my $pop(grep {defined($ex->{$_})} qw(
-      AFR AMR ASN EAS SAS EUR
-      AA EA
-      ExAC ExAC_Adj ExAC_AFR ExAC_AMR ExAC_EAS ExAC_FIN ExAC_NFE ExAC_OTH ExAC_SAS
-      gnomAD gnomAD_AFR gnomAD_AMR gnomAD_ASJ gnomAD_EAS gnomAD_FIN gnomAD_NFE gnomAD_OTH gnomAD_SAS
-    )) {
-      my $tmp = $ex->{$pop};
-      my $lc_pop = lc($pop);
-
-      if($tmp =~ /(\D)\:([\d\.\-e]+)/) {
-        $ex->{$lc_pop.'_af'} = $2;
-        $ex->{$lc_pop.'_allele'} = $1;
-      }
-      else {
-        $ex->{$lc_pop.'_af'} = $tmp;
-      }
-
-      delete $ex->{$pop};
-    }
-
-    # remove empty
-    foreach my $key(keys %$ex) {
-      delete $ex->{$key} if !defined($ex->{$key}) || $ex->{$key} eq '' || ($key !~ /af/ && $ex->{$key} eq 0);
-    }
-
-    # rename
-    foreach my $key(grep {defined($ex->{$_})} keys %RENAME_KEYS) {
-      $ex->{$RENAME_KEYS{$key}} = $ex->{$key};
-      delete $ex->{$key};
-    }
-
-    # lists
-    foreach my $field(grep {defined($ex->{$_})} @LIST_FIELDS) {
-      $ex->{$field} = [split(',', $ex->{$field})];
-    }
-
-    push @{$hash->{colocated_variants}}, $ex;
+  delete $ex->{$_} for qw(failed matched_alleles);
+  
+  my $allele = $frequency_hash->{Allele};
+  # frequencies
+  foreach my $pop (grep {defined($frequency_hash->{"$_\_AF"})} qw(
+    AFR AMR ASN EAS SAS EUR
+    AA EA
+    ExAC ExAC_Adj ExAC_AFR ExAC_AMR ExAC_EAS ExAC_FIN ExAC_NFE ExAC_OTH ExAC_SAS
+    gnomAD gnomAD_AFR gnomAD_AMR gnomAD_ASJ gnomAD_EAS gnomAD_FIN gnomAD_NFE gnomAD_OTH gnomAD_SAS
+  )) {
+    my $lc_pop = lc($pop);
+    $ex->{"$lc_pop\_af"} = $frequency_hash->{"$pop\_AF"}[0] + 0;
+    $ex->{"$lc_pop\_allele"} = $allele;
+    delete $ex->{$pop};
   }
+
+  # remove empty
+  foreach my $key(keys %$ex) {
+    delete $ex->{$key} if !defined($ex->{$key}) || $ex->{$key} eq '' || ($key !~ /af/ && $ex->{$key} eq 0);
+  }
+
+  # rename
+  foreach my $key(grep {defined($ex->{$_})} keys %RENAME_KEYS) {
+    $ex->{$RENAME_KEYS{$key}} = $ex->{$key};
+    delete $ex->{$key};
+  }
+
+  # lists
+  foreach my $field(grep {defined($ex->{$_})} @LIST_FIELDS) {
+    $ex->{$field} = [split(',', $ex->{$field})];
+  }
+
+  push @{$hash->{colocated_variants}}, $ex;
 
   return $hash;
 }
