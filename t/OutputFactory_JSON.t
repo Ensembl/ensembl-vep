@@ -115,9 +115,17 @@ SKIP: {
 
   $vf->{existing}->[0]->{pubmed} = "10,20,30";
   $vf->{existing}->[0]->{clin_sig} = "pathogenic,benign";
+  my $ex = $vf->{existing}->[0];
 
+  my $frequency_hash = {Allele => 'T'};
+  my $super_of = Bio::EnsEMBL::VEP::OutputFactory->new({config => $cfg});
+  $super_of->{af_1kg} = 1;
+  $super_of->{af_esp} = 1;
+  $super_of->{af_gnomad} = 1;
+  $super_of->{af_exac} = 1;
+  $super_of->add_colocated_frequency_data({}, $frequency_hash, $ex);
   is_deeply(
-    $of->add_colocated_variant_info_JSON($vf, {}),
+    $of->add_colocated_variant_info_JSON({}, $frequency_hash, $ex),
     {
       'colocated_variants' => [
         {
@@ -237,7 +245,6 @@ SKIP: {
     'get_all_lines_by_InputBuffer - check first'
   );
 
-
   $ib = get_annotated_buffer({
     input_file => $test_cfg->{test_vcf},
     everything => 1,
@@ -263,7 +270,7 @@ SKIP: {
           'sas_allele' => 'T',
           'sas_af' => '0',
           'amr_allele' => 'T',
-          'minor_allele_freq' => '0.001',
+          'minor_allele_freq' => '0.0010',
           'gnomad_eas_af' => '0',
           'gnomad_fin_af' => '0',
           'gnomad_oth_af' => '0',
@@ -401,7 +408,6 @@ SKIP: {
     },
     'get_all_lines_by_InputBuffer - everything'
   );
-
 
   # check rejoin on minimal
   no warnings 'qw';
