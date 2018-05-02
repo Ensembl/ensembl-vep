@@ -234,11 +234,19 @@ sub get_all_output_hashes_by_InputBuffer {
       delete $hash->{$key};
     }
 
-    my $variant_allele = $hash->{transcript_consequences}[0]->{variant_allele};
+    # get all alleles and remove ref allele
+    my $allele_string = $hash->{allele_string};
+    my @alleles = split('/', $allele_string);
+    shift @alleles;
+
     foreach my $ex_orig(@{$vf->{existing} || []}) {
-      my $frequency_hash = {Allele => $variant_allele};
-      $self->SUPER::add_colocated_frequency_data($vf, $frequency_hash, $ex_orig);
-      $self->add_colocated_variant_info_JSON($hash, $frequency_hash, $ex_orig);
+      my @allele_frequency_hashes = ();
+      foreach my $allele (@alleles) {
+        my $frequency_hash = {Allele => $allele};
+        $self->SUPER::add_colocated_frequency_data($vf, $frequency_hash, $ex_orig);
+        push @allele_frequency_hashes, $frequency_hash;
+      }
+      $self->add_colocated_variant_info_JSON($hash, \@allele_frequency_hashes, $ex_orig);
     }
     push @return, $hash;
   }
@@ -348,8 +356,8 @@ sub add_VariationFeatureOverlapAllele_info {
 =head2 add_colocated_variant_info
 
   Arg 1      : Bio::EnsEMBL::Variation::VariationFeature $vf
-  Arg 2      : hashref $vf_hash
-  Example    : $hashref = $of->add_colocated_variant_info($vf, $vf_hash);
+  Arg 2      : arrayref of hashref $frequency_hashes
+  Example    : $hashref = $of->add_colocated_variant_info($vf, $frequency_hashes);
   Description: Adds co-located variant information to hash
   Returntype : hashref
   Exceptions : none
@@ -361,7 +369,7 @@ sub add_VariationFeatureOverlapAllele_info {
 sub add_colocated_variant_info_JSON {
   my $self = shift;
   my $hash = shift;
-  my $frequency_hash = shift;
+  my $frequency_hashes = shift;
   my $ex_orig = shift;
   
   # work on a copy as we're going to modify/delete things
@@ -369,21 +377,24 @@ sub add_colocated_variant_info_JSON {
   %$ex = %$ex_orig;
 
   delete $ex->{$_} for qw(failed matched_alleles);
-  
-  my $allele = $frequency_hash->{Allele};
-  # frequencies
-  foreach my $pop (grep {defined($frequency_hash->{"$_\_AF"})} qw(
-    AFR AMR ASN EAS SAS EUR
-    AA EA
-    ExAC ExAC_Adj ExAC_AFR ExAC_AMR ExAC_EAS ExAC_FIN ExAC_NFE ExAC_OTH ExAC_SAS
-    gnomAD gnomAD_AFR gnomAD_AMR gnomAD_ASJ gnomAD_EAS gnomAD_FIN gnomAD_NFE gnomAD_OTH gnomAD_SAS
-  )) {
-    my $lc_pop = lc($pop);
-    $ex->{"$lc_pop\_af"} = $frequency_hash->{"$pop\_AF"}[0] + 0;
-    $ex->{"$lc_pop\_allele"} = $allele;
-    delete $ex->{$pop};
+ 
+  my $frequencies = {};
+  foreach my $frequency_hash (@$frequency_hashes) {
+    my $allele = $frequency_hash->{Allele};
+    # frequencies
+    foreach my $pop (grep {defined($frequency_hash->{"$_\_AF"})} qw(
+      AFR AMR ASN EAS SAS EUR
+      AA EA
+      ExAC ExAC_Adj ExAC_AFR ExAC_AMR ExAC_EAS ExAC_FIN ExAC_NFE ExAC_OTH ExAC_SAS
+      gnomAD gnomAD_AFR gnomAD_AMR gnomAD_ASJ gnomAD_EAS gnomAD_FIN gnomAD_NFE gnomAD_OTH gnomAD_SAS
+    )) {
+      my $lc_pop = lc($pop);
+      $frequencies->{$allele}->{$lc_pop} = $frequency_hash->{"$pop\_AF"}[0];
+      delete $ex->{$pop};
+    }
   }
-
+ 
+  $ex->{frequencies} = $frequencies if (keys %$frequencies);
   # remove empty
   foreach my $key(keys %$ex) {
     delete $ex->{$key} if !defined($ex->{$key}) || $ex->{$key} eq '' || ($key !~ /af/ && $ex->{$key} eq 0);
