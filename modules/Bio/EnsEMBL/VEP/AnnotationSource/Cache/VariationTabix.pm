@@ -186,6 +186,7 @@ sub _annotate_cl {
             next if grep {$_->{variation_name} eq $existing->{variation_name}} @{$vf->{existing} || []};
 
             my $matched = $self->compare_existing($vf, $existing);
+            $DB::single = 1;
             push @{$vf->{existing}}, $matched if $matched;
           }
         }
@@ -236,8 +237,10 @@ sub _annotate_pm {
 
         next if grep {$_->{variation_name} eq $existing->{variation_name}} @{$vf->{existing} || []};
 
+        $DB::single = 1;
         my $matched = $self->compare_existing($vf, $existing);
         push @{$vf->{existing}}, $matched if $matched;
+        
       }
     }
   }

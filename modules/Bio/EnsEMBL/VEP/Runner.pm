@@ -225,6 +225,7 @@ sub run {
 =cut
 
 sub run_rest {
+    $DB::single = 1;
   my $self = shift;
   my $input = shift;
 
@@ -361,6 +362,7 @@ sub next_output_line {
     push @$output_buffer, @{$self->_forked_buffer_to_output($self->get_InputBuffer, $output_as_hash)};
   }
   else {
+
     push @$output_buffer, @{$self->_buffer_to_output($self->get_InputBuffer, $output_as_hash)};
   }
 
@@ -408,7 +410,6 @@ sub _buffer_to_output {
   # this can happen if an annotation source filters out variants
   # NB we dont want to do this if we've been called from within a fork otherwise duplication will happen
   return $self->_buffer_to_output($input_buffer, $output_as_hash) unless scalar @{$input_buffer->buffer} || $self->param('fork');
-
   if($output_as_hash) {
     push @output, @{$output_factory->get_all_output_hashes_by_InputBuffer($input_buffer)};
   }
@@ -785,7 +786,7 @@ sub get_Parser {
       open IN, '<', \$input_data;
       $self->param('input_file', *IN);
     }
-
+    $DB::single = 1;
     $self->{parser} = Bio::EnsEMBL::VEP::Parser->new({
       config            => $self->config,
       format            => $self->param('format'),

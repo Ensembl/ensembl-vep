@@ -93,6 +93,7 @@ our %DEFAULTS = (
   output_format     => 'vep',
   terms             => 'SO',
   failed            => 0,
+  no_shift          => 0,
   core_type         => 'core',
   polyphen_analysis => 'humvar',
   pick_order        => [qw(canonical appris tsl biotype ccds rank length ensembl refseq)],
