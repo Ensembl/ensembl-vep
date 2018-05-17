@@ -240,18 +240,39 @@ sub get_overlapping_vfs {
   my $self = shift;
   my $start = shift;
   my $end = shift;
-
   ($start, $end) = ($end, $start) if $start > $end;
-
+  #$DB::single = 1 if $start eq '9489169';
   if(my $tree = $self->interval_tree) {
-    return [
-      grep { overlap($_->{start}, $_->{end}, $start, $end) }
-      @{$tree->fetch($start - 1, $end)}
-    ];
+    #my @test =       grep { overlap($_->{start}, $_->{end}, $start, $end) ||  ((defined($_->{unshifted_start}) && defined($_->{unshifted_end})) ? overlap($_->{unshifted_start}, $_->{unshifted_end}, $start, $end) : 0) }
+    #      @{$tree->fetch($start - 1, $end)};
+    
+    my @empty ;
+
+    foreach my $vf (@{$tree->fetch($start - 1, $end)})
+    {
+      if (overlap($vf->{start}, $vf->{end}, $start, $end)) #|| (defined($vf->{unshifted_end}) == 1) ? overlap($vf->{unshifted_start}, $vf->{unshifted_end}, $start, $end) : 0){
+      {
+        push(@empty, $vf);
+      }
+      if((defined($vf->{unshifted_end}) && (defined($vf->{unshifted_start}))))
+      {
+        if (overlap($vf->{unshifted_start}, $vf->{unshifted_end}, $start, $end)) 
+        {
+          push(@empty, $vf);
+        }
+      }
+    }
+        #$DB::single = 1;
+    return [@empty];
+        return [
+          grep { overlap($_->{start}, $_->{end}, $start, $end) }
+          @{$tree->fetch($start - 1, $end)}
+        ];
+        #
   }
   else {
     my $hash_tree = $self->hash_tree;
-
+    
     return [
       grep { overlap($_->{start}, $_->{end}, $start, $end) }
       values %{{
@@ -282,7 +303,6 @@ sub get_overlapping_vfs {
 
 sub interval_tree {
   my $self = shift;
-
   if(!exists($self->{temp}->{interval_tree})) {
 
     return $self->{temp}->{interval_tree} = undef unless $CAN_USE_INTERVAL_TREE;
@@ -290,6 +310,9 @@ sub interval_tree {
     my $tree = Set::IntervalTree->new();
 
     foreach my $vf(@{$self->buffer}) {
+      $DB::single = 1;
+      #map { $_->get_reference_TranscriptVariationAllele->_return_3prime} 
+              #@{ $vf->get_all_TranscriptVariations };
       my ($s, $e) = ($vf->{start}, $vf->{end});
       ($s, $e) = ($e, $s) if $s > $e;
       $tree->insert($vf, $s - 1, $e);
@@ -330,8 +353,11 @@ sub hash_tree {
 
     my $hash_tree = {};
     my $hash_tree_id = 1;
-
     foreach my $vf(@{$self->buffer}) {
+      #UNLESS NO SHIFTING
+      $DB::single = 1;
+      #map { $_->get_reference_TranscriptVariationAllele->_return_3prime} 
+      #        @{ $vf->get_all_TranscriptVariations };
       my ($vf_s, $vf_e) = ($vf->{start}, $vf->{end});
       ($vf_s, $vf_e) = ($vf_e, $vf_s) if $vf_s > $vf_e;
       my ($h_s, $h_e) = map {int($_ / $HASH_TREE_SIZE)} ($vf_s, $vf_e);

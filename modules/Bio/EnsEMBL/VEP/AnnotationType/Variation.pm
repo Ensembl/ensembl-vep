@@ -79,13 +79,27 @@ use Bio::EnsEMBL::Variation::Utils::Sequence qw(get_matched_variant_alleles);
 sub annotate_InputBuffer {
   my $self = shift;
   my $buffer = shift;
-
   foreach my $existing_vf(@{$self->get_all_features_by_InputBuffer($buffer)}) {
-    foreach my $vf(
+    my @stuff =     @{$buffer->get_overlapping_vfs($existing_vf->{start}, $existing_vf->{end})};
+    $DB::single = 1;
+    
+    my @toGrepOver = (
       grep {ref($_) ne 'Bio::EnsEMBL::Variation::StructuralVariationFeature'}
       @{$buffer->get_overlapping_vfs($existing_vf->{start}, $existing_vf->{end})}
-    ) {
+    );
+    
+    #if(defined($existing_vf->{unshifted_start}) && defined($existing_vf->{unshifted_end}))
+    #{
+    #  $DB::single = 1;
+    #  my @toGrepOver2 = (
+    #    grep {ref($_) ne 'Bio::EnsEMBL::Variation::StructuralVariationFeature'}
+    #    @{$buffer->get_overlapping_vfs($existing_vf->{unshifted_start}, $existing_vf->{unshifted_end})}
+    #    );
+    #    push @toGrepOver, @toGrepOver2;
+    #}
+    foreach my $vf(@toGrepOver) {
       my $matched = $self->compare_existing($vf, $existing_vf);
+      $DB::single = 1;
       push @{$vf->{existing}}, $matched if $matched;
     }
   }
@@ -143,6 +157,7 @@ sub get_cache_columns {
 sub compare_existing {
   my ($self, $input_var, $existing_var) = @_;
 
+$DB::single = 1;
   # special case existing var with unknown alleles e.g. HGMD_MUTATION
   if($existing_var->{allele_string} !~ /\//) {
     if($self->{exclude_null_alleles}) {
@@ -174,7 +189,25 @@ sub compare_existing {
       strand => $existing_var->{strand}
     }
   );
-    
+      $DB::single = 1;
+  if(defined($input_var->{unshifted_allele_string}))
+  {
+    my $matched_alleles_unshifted = get_matched_variant_alleles(
+      {
+        allele_string => $input_var->{unshifted_allele_string},
+        pos => $input_var->{unshifted_start},
+        strand => $input_var->{strand}
+      },
+      {
+        allele_string => $existing_var->{allele_string},
+        pos => $existing_var->{start},
+        strand => $existing_var->{strand}
+      }
+    );
+
+    push @$matched_alleles, @$matched_alleles_unshifted;
+  }   
+  
   # make a copy as we're going to add allele data to it
   if(@$matched_alleles) {
     my %existing_var_copy = %{$existing_var};

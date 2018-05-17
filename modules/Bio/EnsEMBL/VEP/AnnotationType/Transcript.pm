@@ -105,7 +105,9 @@ sub annotate_InputBuffer {
     my $slice;
 
     # get overlapping VFs
+
     my $vfs = $buffer->get_overlapping_vfs($fs, $fe);
+        #$DB::single = 1;
     next unless @$vfs;
 
     # lazy load transcript
@@ -117,7 +119,7 @@ sub annotate_InputBuffer {
 
     # apply edits
     $self->apply_edits($tr);
-
+    
     foreach my $vf(@$vfs) {
       $vf->{slice} ||= $slice ||=  $tr->{slice};
 
@@ -139,6 +141,7 @@ sub annotate_InputBuffer {
           -no_ref_check      => 1,
           -no_transfer       => 1,
           -use_feature_ref   => $use_feature_ref,
+          -no_shift          => $self->param('no_shift')
         );
 
         $vf->add_TranscriptVariation($tv);

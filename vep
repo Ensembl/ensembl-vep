@@ -168,6 +168,7 @@ GetOptions(
   'allele_number',           # indicate allele by number to avoid confusion with VCF conversions
   'no_escape',               # don't percent-escape HGVS strings
   'ambiguity',               # Add allele ambiguity code
+  'no_shift',                # disables shifting of all variants to 3prime
   
   # cache stuff
   'database',                # must specify this to use DB now
