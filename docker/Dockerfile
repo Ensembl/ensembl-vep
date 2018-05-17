@@ -10,7 +10,7 @@ RUN apt-get update && apt-get -y install \
     curl \
     git \
     libmysqlclient-dev \
-    libpng12-dev \
+    libpng-dev \
     libssl-dev \
     locales \
     manpages \
