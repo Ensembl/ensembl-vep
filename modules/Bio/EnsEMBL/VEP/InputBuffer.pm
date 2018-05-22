@@ -241,7 +241,6 @@ sub get_overlapping_vfs {
   my $start = shift;
   my $end = shift;
   ($start, $end) = ($end, $start) if $start > $end;
-  #$DB::single = 1 if $start eq '9489169';
   if(my $tree = $self->interval_tree) {
     #my @test =       grep { overlap($_->{start}, $_->{end}, $start, $end) ||  ((defined($_->{unshifted_start}) && defined($_->{unshifted_end})) ? overlap($_->{unshifted_start}, $_->{unshifted_end}, $start, $end) : 0) }
     #      @{$tree->fetch($start - 1, $end)};
@@ -262,7 +261,6 @@ sub get_overlapping_vfs {
         }
       }
     }
-        #$DB::single = 1;
     return [@empty];
         return [
           grep { overlap($_->{start}, $_->{end}, $start, $end) }
@@ -310,7 +308,7 @@ sub interval_tree {
     my $tree = Set::IntervalTree->new();
 
     foreach my $vf(@{$self->buffer}) {
-      $DB::single = 1;
+
       #map { $_->get_reference_TranscriptVariationAllele->_return_3prime} 
               #@{ $vf->get_all_TranscriptVariations };
       my ($s, $e) = ($vf->{start}, $vf->{end});
@@ -355,7 +353,6 @@ sub hash_tree {
     my $hash_tree_id = 1;
     foreach my $vf(@{$self->buffer}) {
       #UNLESS NO SHIFTING
-      $DB::single = 1;
       #map { $_->get_reference_TranscriptVariationAllele->_return_3prime} 
       #        @{ $vf->get_all_TranscriptVariations };
       my ($vf_s, $vf_e) = ($vf->{start}, $vf->{end});

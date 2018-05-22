@@ -225,7 +225,6 @@ sub run {
 =cut
 
 sub run_rest {
-    $DB::single = 1;
   my $self = shift;
   my $input = shift;
 
@@ -786,7 +785,6 @@ sub get_Parser {
       open IN, '<', \$input_data;
       $self->param('input_file', *IN);
     }
-    $DB::single = 1;
     $self->{parser} = Bio::EnsEMBL::VEP::Parser->new({
       config            => $self->config,
       format            => $self->param('format'),
