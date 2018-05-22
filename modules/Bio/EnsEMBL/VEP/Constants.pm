@@ -220,6 +220,8 @@ our %FIELD_DESCRIPTIONS = (
   'MINIMISED'          => 'Alleles in this variant have been converted to minimal representation before consequence calculation',
   'HGVS_OFFSET'        => 'Indicates by how many bases the HGVS notations for this variant have been shifted',
   'AMBIGUITY'          => 'Allele ambiguity code',
+  'OverlapBP'          => 'Number of base pairs overlapping with the corresponding structural variation feature',
+  'OverlapPC'          => 'Percentage of corresponding structural variation feature overlapped by the given input'
 );
 
 our @DEFAULT_OUTPUT_COLS = qw(
