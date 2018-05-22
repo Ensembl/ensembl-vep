@@ -81,7 +81,6 @@ sub annotate_InputBuffer {
   my $buffer = shift;
   foreach my $existing_vf(@{$self->get_all_features_by_InputBuffer($buffer)}) {
     my @stuff =     @{$buffer->get_overlapping_vfs($existing_vf->{start}, $existing_vf->{end})};
-    $DB::single = 1;
     
     my @toGrepOver = (
       grep {ref($_) ne 'Bio::EnsEMBL::Variation::StructuralVariationFeature'}
@@ -90,7 +89,6 @@ sub annotate_InputBuffer {
     
     #if(defined($existing_vf->{unshifted_start}) && defined($existing_vf->{unshifted_end}))
     #{
-    #  $DB::single = 1;
     #  my @toGrepOver2 = (
     #    grep {ref($_) ne 'Bio::EnsEMBL::Variation::StructuralVariationFeature'}
     #    @{$buffer->get_overlapping_vfs($existing_vf->{unshifted_start}, $existing_vf->{unshifted_end})}
@@ -99,7 +97,6 @@ sub annotate_InputBuffer {
     #}
     foreach my $vf(@toGrepOver) {
       my $matched = $self->compare_existing($vf, $existing_vf);
-      $DB::single = 1;
       push @{$vf->{existing}}, $matched if $matched;
     }
   }
@@ -157,7 +154,6 @@ sub get_cache_columns {
 sub compare_existing {
   my ($self, $input_var, $existing_var) = @_;
 
-$DB::single = 1;
   # special case existing var with unknown alleles e.g. HGMD_MUTATION
   if($existing_var->{allele_string} !~ /\//) {
     if($self->{exclude_null_alleles}) {
@@ -189,7 +185,6 @@ $DB::single = 1;
       strand => $existing_var->{strand}
     }
   );
-      $DB::single = 1;
   if(defined($input_var->{unshifted_allele_string}))
   {
     my $matched_alleles_unshifted = get_matched_variant_alleles(

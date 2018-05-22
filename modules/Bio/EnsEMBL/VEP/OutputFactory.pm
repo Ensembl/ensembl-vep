@@ -886,12 +886,11 @@ sub add_colocated_variant_info {
     # check allele match
     
     my $matched_alleles2;
-    $DB::single = 1;
+
     if(my $matched = $ex->{matched_alleles}) {
       next unless (grep {$_->{a_allele} eq $this_allele} @$matched) || (grep {$_->{a_allele} eq $unshifted_allele} @$matched) ;
       #my $matched_alleles =  grep {$_->{a_allele} eq $this_allele} @$matched;
       #$matched_alleles2 = grep {$_->{a_allele} eq $unshifted_allele} @$matched if $vf->{shifted_flag};
-      #$DB::single = 1;
       #push @$matched_alleles, @$matched_alleles2;
       #next unless @$matched_alleles;
     }
@@ -970,7 +969,6 @@ sub add_colocated_frequency_data {
   
   my $this_allele = $hash->{Allele} if exists($hash->{Allele});
   my $this_allele_shifted = $vf->{shifted_allele_string} if $vf->{shifted_flag};
-    $DB::single = 1;
   my ($matched_allele) = grep {$_->{a_allele} eq $this_allele || $_->{a_allele} eq $this_allele_shifted} @{$ex->{matched_alleles} || []};
   #my ($matched_allele2) = grep {$_->{a_allele} eq $this_allele_shifted} @{$ex->{matched_alleles} || []} if $vf->{shifted_flag};
   
@@ -1375,7 +1373,7 @@ sub BaseTranscriptVariationAllele_to_output_hash {
 sub TranscriptVariationAllele_to_output_hash {
   my $self = shift;
   my ($vfoa, $hash) = @_;
-        $DB::single = 1;
+
   # run "super" methods
   $hash = $self->VariationFeatureOverlapAllele_to_output_hash(@_);
   $hash = $self->BaseTranscriptVariationAllele_to_output_hash(@_);
@@ -1413,6 +1411,7 @@ sub TranscriptVariationAllele_to_output_hash {
     }
 
     # HGVS
+    $DB::single = 1;
     if($self->{hgvsc}) {
       my $hgvs_t = $vfoa->hgvs_transcript;
       my $offset = $vfoa->hgvs_offset;
