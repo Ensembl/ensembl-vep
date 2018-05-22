@@ -1,5 +1,5 @@
 ### docker container for ensembl-vep
-FROM ubuntu
+FROM ubuntu:16.04
 
 # update aptitude and install some required packages
 # a lot of them are required for Bio::DB::BigFile
