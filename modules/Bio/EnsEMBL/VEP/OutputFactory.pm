@@ -354,6 +354,7 @@ sub get_all_VariationFeatureOverlapAllele_output_hashes {
 
     # run plugins
     $output = $self->run_plugins($vfoa, $output, $vf);
+    
     # log stats
     $self->stats->log_VariationFeatureOverlapAllele($vfoa, $output) unless $self->{no_stats};
 
@@ -854,6 +855,7 @@ sub add_colocated_variant_info {
   my $self = shift;
   my $vf = shift;
   my $hash = shift;
+  
   return unless $vf->{existing} && scalar @{$vf->{existing}};
 
   my $this_allele = $hash->{Allele};
@@ -970,8 +972,7 @@ sub add_colocated_frequency_data {
   my $this_allele = $hash->{Allele} if exists($hash->{Allele});
   my $this_allele_shifted = $vf->{shifted_allele_string} if $vf->{shifted_flag};
   my ($matched_allele) = grep {$_->{a_allele} eq $this_allele || $_->{a_allele} eq $this_allele_shifted} @{$ex->{matched_alleles} || []};
-  #my ($matched_allele2) = grep {$_->{a_allele} eq $this_allele_shifted} @{$ex->{matched_alleles} || []} if $vf->{shifted_flag};
-  
+
   return $hash unless $matched_allele || (grep {$_ eq 'af'} @keys);
 
   my $max_af = 0;
@@ -1103,6 +1104,7 @@ sub _add_custom_annotations_to_hash {
 sub VariationFeatureOverlapAllele_to_output_hash {
   my $self = shift;
   my ($vfoa, $hash, $vf) = @_;
+  
   my @ocs = sort {$a->rank <=> $b->rank} @{$vfoa->get_all_OverlapConsequences};
 
   # consequence type(s)
@@ -1398,6 +1400,7 @@ sub TranscriptVariationAllele_to_output_hash {
 
         $hash->{Amino_acids} = $vfoa->pep_allele_string;
         $hash->{Codons}      = $vfoa->display_codon_allele_string;
+      
         $hash->{CDS_position}  = format_coords($tv->cds_start, $tv->cds_end);
         $hash->{CDS_position} .= '/'.length($vep_cache->{translateable_seq})
           if $self->{total_length} && $vep_cache->{translateable_seq};
@@ -1411,7 +1414,6 @@ sub TranscriptVariationAllele_to_output_hash {
     }
 
     # HGVS
-    $DB::single = 1;
     if($self->{hgvsc}) {
       my $hgvs_t = $vfoa->hgvs_transcript;
       my $offset = $vfoa->hgvs_offset;
