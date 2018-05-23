@@ -110,7 +110,6 @@ sub create_VariationFeatures {
   my $self = shift;
 
   my $parser = $self->parser;
-    $DB::single = 1;
   $parser->next();
 
   $self->skip_empty_lines();
