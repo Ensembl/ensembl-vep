@@ -21,7 +21,7 @@
 <a name="install"></a>
 
 ### Installation and requirements
-The VEP package requires Perl (>=5.10 recommended, tested on 5.8, 5.10, 5.14, 5.18, 5.22) and the [DBI](http://search.cpan.org/~timb/DBI/DBI.pm) package installed.
+The VEP package requires Perl (>=5.10 recommended, tested on 5.10, 5.14, 5.18, 5.22) and the [DBI](http://search.cpan.org/~timb/DBI/DBI.pm) package installed.
 The remaining dependencies can be installed using the included [INSTALL.pl](http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html#installer) script. Basic instructions:
 ```bash
 git clone https://github.com/Ensembl/ensembl-vep.git
@@ -39,6 +39,11 @@ The following modules are optional but most users will benefit from installing t
   * [JSON](http://search.cpan.org/dist/JSON/) - required for writing JSON output
   * [PerlIO::gzip](http://search.cpan.org/~nwclark/PerlIO-gzip-0.19/gzip.pm) - faster compressed file parsing
   * [Bio::DB::BigFile](http://search.cpan.org/~lds/Bio-BigFile-1.07/lib/Bio/DB/BigFile.pm) - required for reading custom annotation data from BigWig files
+ 
+#### Docker
+A docker image for VEP is available from [DockerHub](https://hub.docker.com/r/ensemblorg/ensembl-vep).
+
+See [documentation](http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html#docker) for the Docker installation instructions.
  
 ---
 

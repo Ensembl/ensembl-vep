@@ -115,51 +115,47 @@ SKIP: {
 
   $vf->{existing}->[0]->{pubmed} = "10,20,30";
   $vf->{existing}->[0]->{clin_sig} = "pathogenic,benign";
+  my $ex = $vf->{existing}->[0];
 
+  my $frequency_hash = {Allele => 'T'};
+  my $super_of = Bio::EnsEMBL::VEP::OutputFactory->new({config => $cfg});
+  $super_of->{af_1kg} = 1;
+  $super_of->{af_esp} = 1;
+  $super_of->{af_gnomad} = 1;
+  $super_of->{af_exac} = 1;
+  $super_of->add_colocated_frequency_data({}, $frequency_hash, $ex);
   is_deeply(
-    $of->add_colocated_variant_info_JSON($vf, {}),
+    $of->add_colocated_variant_info_JSON({}, [$frequency_hash], $ex),
     {
       'colocated_variants' => [
         {
-          'aa_maf' => '0.004998',
-          'gnomad_nfe_maf' => '1.886e-05',
-          'ea_maf' => '0',
-          'gnomad_nfe_allele' => 'T',
-          'gnomad_afr_maf' => '0.004643',
-          'eas_allele' => 'T',
-          'amr_maf' => '0.0014',
+          'frequencies' => {
+            'T' => {
+              'amr' => '0.0014',
+              'gnomad_sas' => '0',
+              'gnomad' => '0.0003478',
+              'ea' => '0',
+              'gnomad_oth' => '0',
+              'gnomad_asj' => '0',
+              'gnomad_nfe' => '1.886e-05',
+              'aa' => '0.004998',
+              'gnomad_afr' => '0.004643',
+              'afr' => '0.003',
+              'gnomad_amr' => '0.0003236',
+              'gnomad_fin' => '0',
+              'sas' => '0',
+              'gnomad_eas' => '0',
+              'eur' => '0',
+              'eas' => '0'
+            }
+          },
           'id' => 'rs142513484',
-          'sas_allele' => 'T',
-          'sas_maf' => '0',
-          'amr_allele' => 'T',
           'minor_allele_freq' => '0.0010',
-          'gnomad_eas_maf' => '0',
-          'gnomad_fin_maf' => '0',
-          'gnomad_oth_maf' => '0',
-          'eas_maf' => '0',
-          'gnomad_fin_allele' => 'T',
-          'gnomad_eas_allele' => 'T',
-          'end' => 25585733,
-          'eur_allele' => 'T',
-          'gnomad_sas_maf' => '0',
-          'gnomad_asj_allele' => 'T',
-          'ea_allele' => 'T',
           'minor_allele' => 'T',
-          'gnomad_amr_maf' => '0.0003236',
+          'end' => 25585733,
           'start' => 25585733,
-          'gnomad_amr_allele' => 'T',
-          'gnomad_sas_allele' => 'T',
-          'gnomad_asj_maf' => '0',
           'strand' => 1,
-          'gnomad_maf' => '0.0003478',
-          'aa_allele' => 'T',
           'allele_string' => 'C/T',
-          'gnomad_oth_allele' => 'T',
-          'afr_allele' => 'T',
-          'afr_maf' => '0.003',
-          'eur_maf' => '0',
-          'gnomad_allele' => 'T',
-          'gnomad_afr_allele' => 'T',
           'pubmed' => [10, 20, 30],
           'clin_sig' => ["pathogenic", "benign"],
         }
@@ -237,7 +233,6 @@ SKIP: {
     'get_all_lines_by_InputBuffer - check first'
   );
 
-
   $ib = get_annotated_buffer({
     input_file => $test_cfg->{test_vcf},
     everything => 1,
@@ -252,45 +247,33 @@ SKIP: {
       'input' => "21\t25585733\trs142513484\tC\tT\t.\t.\t.\tGT\t0|0",
       'colocated_variants' => [
         {
-          'aa_maf' => '0.004998',
-          'gnomad_nfe_maf' => '1.886e-05',
-          'ea_maf' => '0',
-          'gnomad_nfe_allele' => 'T',
-          'gnomad_afr_maf' => '0.004643',
-          'eas_allele' => 'T',
-          'amr_maf' => '0.0014',
+          'frequencies' => {
+            'T' => {
+              'amr' => '0.0014',
+              'gnomad_sas' => '0',
+              'gnomad' => '0.0003478',
+              'ea' => '0',
+              'gnomad_oth' => '0',
+              'gnomad_asj' => '0',
+              'gnomad_nfe' => '1.886e-05',
+              'aa' => '0.004998',
+              'gnomad_afr' => '0.004643',
+              'afr' => '0.003',
+              'gnomad_amr' => '0.0003236',
+              'gnomad_fin' => '0',
+              'sas' => '0',
+              'gnomad_eas' => '0',
+              'eur' => '0',
+              'eas' => '0'
+            }
+          },
           'id' => 'rs142513484',
-          'sas_allele' => 'T',
-          'sas_maf' => '0',
-          'amr_allele' => 'T',
-          'minor_allele_freq' => '0.001',
-          'gnomad_eas_maf' => '0',
-          'gnomad_fin_maf' => '0',
-          'gnomad_oth_maf' => '0',
-          'eas_maf' => '0',
-          'gnomad_fin_allele' => 'T',
-          'gnomad_eas_allele' => 'T',
+          'minor_allele_freq' => '0.0010',
           'end' => 25585733,
-          'eur_allele' => 'T',
-          'gnomad_sas_maf' => '0',
-          'gnomad_asj_allele' => 'T',
-          'ea_allele' => 'T',
           'minor_allele' => 'T',
-          'gnomad_amr_maf' => '0.0003236',
           'start' => 25585733,
-          'gnomad_amr_allele' => 'T',
-          'gnomad_sas_allele' => 'T',
-          'gnomad_asj_maf' => '0',
           'strand' => 1,
-          'gnomad_maf' => '0.0003478',
-          'aa_allele' => 'T',
           'allele_string' => 'C/T',
-          'gnomad_oth_allele' => 'T',
-          'afr_allele' => 'T',
-          'afr_maf' => '0.003',
-          'eur_maf' => '0',
-          'gnomad_allele' => 'T',
-          'gnomad_afr_allele' => 'T'
         }
       ],
       'assembly_name' => 'GRCh38',
@@ -401,7 +384,6 @@ SKIP: {
     },
     'get_all_lines_by_InputBuffer - everything'
   );
-
 
   # check rejoin on minimal
   no warnings 'qw';

@@ -593,12 +593,13 @@ sub validate_vf {
 
   # insertion should have start = end + 1
   if($vf->{allele_string} =~ /^\-\// && $vf->{start} != $vf->{end} + 1) {
+    my $variant_name = (defined $vf->name) ? "for variant (".$vf->name.") " : "";
     $self->warning_msg(
       "WARNING: Alleles look like an insertion (".
       $vf->{allele_string}.
       ") but coordinates are not start = end + 1 (START=".
       $vf->{start}.", END=".$vf->{end}.
-      ") on line ".$self->line_number."\n"
+      ") ".$variant_name."on line ".$self->line_number."\n"
     );
     return 0;
   }

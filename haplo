@@ -114,7 +114,7 @@ Versions:
   $versions
 
 Help: dev\@ensembl.org , helpdesk\@ensembl.org
-Twitter: \@ensembl , \@EnsemblWill
+Twitter: \@ensembl
 
 Usage:
 perl haplo.pl [--cache|--offline|--database] [arguments]

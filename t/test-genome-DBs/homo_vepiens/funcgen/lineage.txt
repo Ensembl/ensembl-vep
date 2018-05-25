@@ -1,3 +1,0 @@
-1	endoderm	efo:EFO_0002545	\N
-2	ectoderm	efo:EFO_0000414	\N
-3	mesoderm	efo:EFO_0001981	\N
