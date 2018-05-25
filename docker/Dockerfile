@@ -65,6 +65,14 @@ RUN perl Makefile.PL
 RUN make
 RUN make install
 
+# install Ensembl::XS
+WORKDIR $OPT/src
+RUN git clone https://github.com/Ensembl/ensembl-xs.git
+WORKDIR ensembl-xs
+RUN perl Makefile.PL
+RUN make
+RUN make install
+
 # install perl dependencies
 WORKDIR $OPT/src
 RUN cpanm --installdeps --with-recommends --notest --cpanfile ensembl/cpanfile .
