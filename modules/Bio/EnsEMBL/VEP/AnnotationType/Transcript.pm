@@ -116,7 +116,7 @@ sub annotate_InputBuffer {
 
     # apply edits
     $self->apply_edits($tr);
-    
+
     foreach my $vf(@$vfs) {
       $vf->{slice} ||= $slice ||=  $tr->{slice};
 

@@ -1391,8 +1391,17 @@ sub TranscriptVariationAllele_to_output_hash {
 
     # exonic only
     if($pre->{exon}) {
-
-      $hash->{cDNA_position}  = format_coords($tv->cdna_start, $tv->cdna_end);
+      my $shifting_offset = 0;
+      if($tr->strand() > 0)
+      {
+        $shifting_offset = defined($vfoa->base_variation_feature->{shift_length}) ? $vfoa->base_variation_feature->{shift_length} : 0;
+      }
+      elsif($tr->strand < 0)
+      {
+        $shifting_offset = defined($vfoa->base_variation_feature->{shift_length}) ? 0 - $vfoa->base_variation_feature->{shift_length} : 0;
+      }
+      
+      $hash->{cDNA_position}  = format_coords($tv->cdna_start + $shifting_offset, $tv->cdna_end + $shifting_offset);
       $hash->{cDNA_position} .= '/'.$tr->length if $self->{total_length};
 
       # coding only
@@ -1415,7 +1424,7 @@ sub TranscriptVariationAllele_to_output_hash {
 
     # HGVS
     if($self->{hgvsc}) {
-      my $hgvs_t = $vfoa->hgvs_transcript;
+      my $hgvs_t = $vfoa->hgvs_transcript(undef, $self->param('no_shift'));
       my $offset = $vfoa->hgvs_offset;
 
       $hash->{HGVSc} = $hgvs_t if $hgvs_t;
