@@ -245,7 +245,7 @@ SKIP: {
       3_prime_UTR_variant
       1122
       - - - - -
-      IMPACT=MODIFIER;STRAND=-1;test=test1;test_FOO=BAR
+      IMPACT=MODIFIER;STRAND=-1;test=test1;test_FILTER=PASS;test_FOO=BAR
     )),
     'get_all_lines_by_InputBuffer - custom'
   );
