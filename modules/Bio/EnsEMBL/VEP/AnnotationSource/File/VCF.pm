@@ -75,7 +75,6 @@ use Bio::EnsEMBL::IO::Parser::VCF4Tabix;
 
 use base qw(Bio::EnsEMBL::VEP::AnnotationSource::File);
 
-
 =head2 new
 
   Arg 1      : hashref $args
@@ -104,7 +103,7 @@ sub new {
 
   my $hashref = $_[0];
 
-  $self->fields($hashref->{fields}) if $hashref->{fields};
+  $self->fields($hashref->{fields}) if $hashref->{fields};      ## report INFO & FILTER fields
 
   return $self;
 }
@@ -127,7 +126,6 @@ sub fields {
   $self->{fields} = shift if @_;
   return $self->{fields};
 }
-
 
 =head2 parser
 
@@ -202,7 +200,11 @@ sub _create_records {
         $fields_data->{$field} = $value;
       }
     }
+    ## extract pass/fail info from filter column
+    $fields_data->{FILTER} .= $parser->get_raw_filter_results();
+    $fields_data->{FILTER} =~ s/\;/\,/g;
   }
+
 
   # exact match returns a arrayref
   if(ref($overlap_result) eq 'ARRAY') {
