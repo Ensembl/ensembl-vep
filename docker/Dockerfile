@@ -65,6 +65,17 @@ RUN perl Makefile.PL
 RUN make
 RUN make install
 
+# install ensembl-xs, faster run using re-implementation in C of some of the Perl subroutines
+WORKDIR $OPT/src
+RUN wget https://github.com/Ensembl/ensembl-xs/archive/2.3.2.zip -O ensembl-xs.zip
+RUN unzip -q ensembl-xs.zip
+RUN mv ensembl-xs-2.3.2 ensembl-xs
+RUN rm ensembl-xs.zip
+WORKDIR ensembl-xs
+RUN perl Makefile.PL
+RUN make
+RUN make install
+
 # install perl dependencies
 WORKDIR $OPT/src
 RUN cpanm --installdeps --with-recommends --notest --cpanfile ensembl/cpanfile .
