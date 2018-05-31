@@ -381,7 +381,8 @@ sub _get_parent_child_structure {
       next unless ($parent_id);
       if(my $top_level = $top_level{$parent_id}) {
         push @{$top_level->{_children}}, $record;
-        $parent_children{$parent_id}{$record_id} = 1;
+        # record id can be shared across multiple CDS lines, so key on position as well as id
+        $parent_children{$parent_id}{$record_id}{$record->{start}} = 1;
       }
       else {
         push @orphans, $record;
@@ -400,11 +401,11 @@ sub _get_parent_child_structure {
     foreach my $parent_id (@{$self->_record_get_parent_ids($record)}) {
       # Check if the relation parent/record has already been found: use case where a record is related to more than one parent record
       # e.g. an exon linked to several transcripts
-      next if ($parent_children{$parent_id}{$record_id});
+      next if ($parent_children{$parent_id}{$record_id}{$record->{start}});
 
       if(my $top_level = $top_level{$parent_id}) {
         push @{$top_level->{_children}}, $record;
-        $parent_children{$parent_id}{$record_id} = 1;
+        $parent_children{$parent_id}{$record_id}{$record->{start}} = 1;
       }
       else {
         $parents_not_found{$parent_id} = 1;
