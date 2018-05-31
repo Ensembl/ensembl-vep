@@ -300,6 +300,7 @@ sub run_test_set {
   my $has_var = $self->param('variation') ? 1 : 0;
   my $has_reg = $self->param('regulation') ? 1 : 0;
 
+  Bio::EnsEMBL::Registry->clear();
   # create a VEP Runner
   my $runner = Bio::EnsEMBL::VEP::Runner->new({
     species => $self->param('species'),
@@ -544,6 +545,7 @@ sub human_frequency_checks {
   my $has_var = $self->param('variation') ? 1 : 0;
   my $has_reg = $self->param('regulation') ? 1 : 0;
 
+  Bio::EnsEMBL::Registry->clear();
   # create a VEP Runner
   my $runner = Bio::EnsEMBL::VEP::Runner->new({
     species => $self->param('species'),
