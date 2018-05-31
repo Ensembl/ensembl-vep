@@ -92,22 +92,22 @@ SKIP: {
       @$result
     ],
     [
-      '16570808b8ddb650ee56b96014558f9b',
-      '16570808b8ddb650ee56b96014558f9b',
+      '03f82458a34fda1fdf74803a02cf0a45',
+      '03f82458a34fda1fdf74803a02cf0a45',
+      '1a040be3cfa8edb6cc091f942d42dcf6',
+      '1a040be3cfa8edb6cc091f942d42dcf6',
       '252ea7bfa7d0b130fc696ff25f4fc33c',
       '2ff7fea7ee58c8a776fc97f01f9d5296',
+      '41d44949cb17e204c3e76ce6d67aa27d',
+      '41d44949cb17e204c3e76ce6d67aa27d',
       '68f1b015c35163ade06017b7b6bce1ab',
       '79d615f301917d96d4cefaea29702508',
       '7aa776c0543c7d064e0d146b60541843',
       '91212e92e2a1940184a2eb77fd115d5c',
-      '94ff8944bf646ca899b02a47fb556538',
-      '94ff8944bf646ca899b02a47fb556538',
+      'b3dd19425bfa07a93783baf201f79a70',
+      'b3dd19425bfa07a93783baf201f79a70',
       'c6c26cfaa79a2046a684220c04b5b2e4',
-      'dd28ba77bee626084bf09e31bce6910f',
-      'dd28ba77bee626084bf09e31bce6910f',
       'e5745909c573dfc830946d4e6994a47d',
-      'ed6ea6dd536ad6d751a1737039bc15eb',
-      'ed6ea6dd536ad6d751a1737039bc15eb'
     ],
     'annotate_InputBuffer - TH hexes'
   );
