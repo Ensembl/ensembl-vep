@@ -1447,7 +1447,7 @@ sub TranscriptVariationAllele_to_output_hash {
   my $vep_cache = $tr->{_variation_effect_feature_cache};
 
   my $pre = $vfoa->_pre_consequence_predicates();
-
+  $DB::single = 1;
   if($pre->{within_feature}) {
 
     # exonic only
@@ -1470,12 +1470,12 @@ sub TranscriptVariationAllele_to_output_hash {
 
         $hash->{Amino_acids} = $vfoa->pep_allele_string;
         $hash->{Codons}      = $vfoa->display_codon_allele_string;
-      
-        $hash->{CDS_position}  = format_coords($tv->cds_start, $tv->cds_end);
+        $shifting_offset = 0 if $tv->{_boundary_shift} == 1;
+        $hash->{CDS_position}  = format_coords($tv->cds_start + $shifting_offset, $tv->cds_end + $shifting_offset);
         $hash->{CDS_position} .= '/'.length($vep_cache->{translateable_seq})
           if $self->{total_length} && $vep_cache->{translateable_seq};
 
-        $hash->{Protein_position}  = format_coords($tv->translation_start, $tv->translation_end);
+        $hash->{Protein_position}  = format_coords($tv->translation_start + $shifting_offset, $tv->translation_end + $shifting_offset);
         $hash->{Protein_position} .= '/'.length($vep_cache->{peptide})
           if $self->{total_length} && $vep_cache->{peptide};
 
