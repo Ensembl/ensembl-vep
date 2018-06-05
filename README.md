@@ -169,7 +169,7 @@ perl -MBio::Tools::dpAlign -e"print qq{OK\n}"
 ---
 <a name="recoder"></a>
 ## Variant Recoder
-`variant_recoder` is a tool for translating between different variant encodings. It accepts as input any format supported by VEP (VCF, variant ID, HGVS), with extensions to allow for parsing of potentially ambiguous HGVS notations. For each input variant, `variant_recoder` reports all possible encodings including variant IDs from [all sources imported into the Ensembl database](http://www.ensembl.org/info/genome/variation/sources_documentation.html) and HGVS (genomic, transcript and protein), reported on Ensembl, RefSeq and LRG sequences.
+`variant_recoder` is a tool for translating between different variant encodings. It accepts as input any format supported by VEP (VCF, variant ID, HGVS), with extensions to allow for parsing of potentially ambiguous HGVS notations. For each input variant, `variant_recoder` reports all possible encodings including variant IDs from [all sources imported into the Ensembl database](http://www.ensembl.org/info/genome/variation/species/sources_documentation.html) and HGVS (genomic, transcript and protein), reported on Ensembl, RefSeq and LRG sequences.
 
 <a name="recoderusage"></a>
 ### Usage
