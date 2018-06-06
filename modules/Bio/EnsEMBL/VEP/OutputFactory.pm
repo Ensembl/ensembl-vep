@@ -909,7 +909,7 @@ sub add_colocated_variant_info {
   return unless $vf->{existing} && scalar @{$vf->{existing}};
 
   my $this_allele = $hash->{Allele};
-  my $unshifted_allele = $vf->{shifted_allele_string};
+  my $shifted_allele = $vf->{shifted_allele_string};
 
   my $tmp = {};
 
@@ -937,14 +937,8 @@ sub add_colocated_variant_info {
 
     # check allele match
     
-    my $matched_alleles2;
-
     if(my $matched = $ex->{matched_alleles}) {
-      next unless (grep {$_->{a_allele} eq $this_allele} @$matched) || (grep {$_->{a_allele} eq $unshifted_allele} @$matched) ;
-      #my $matched_alleles =  grep {$_->{a_allele} eq $this_allele} @$matched;
-      #$matched_alleles2 = grep {$_->{a_allele} eq $unshifted_allele} @$matched if $vf->{shifted_flag};
-      #push @$matched_alleles, @$matched_alleles2;
-      #next unless @$matched_alleles;
+      next unless (grep {$_->{a_allele} eq $this_allele} @$matched) || (grep {$_->{a_allele} eq $shifted_allele} @$matched) ;
     }
 
     # ID
@@ -1447,7 +1441,7 @@ sub TranscriptVariationAllele_to_output_hash {
   my $vep_cache = $tr->{_variation_effect_feature_cache};
 
   my $pre = $vfoa->_pre_consequence_predicates();
-  $DB::single = 1;
+
   if($pre->{within_feature}) {
 
     # exonic only
@@ -1470,7 +1464,7 @@ sub TranscriptVariationAllele_to_output_hash {
 
         $hash->{Amino_acids} = $vfoa->pep_allele_string;
         $hash->{Codons}      = $vfoa->display_codon_allele_string;
-        $shifting_offset = 0 if $tv->{_boundary_shift} == 1;
+        $shifting_offset = 0 if defined($tv->{_boundary_shift}) && $tv->{_boundary_shift} == 1;
         $hash->{CDS_position}  = format_coords($tv->cds_start + $shifting_offset, $tv->cds_end + $shifting_offset);
         $hash->{CDS_position} .= '/'.length($vep_cache->{translateable_seq})
           if $self->{total_length} && $vep_cache->{translateable_seq};
