@@ -860,7 +860,7 @@ sub add_colocated_variant_info {
 
   my $this_allele = $hash->{Allele};
   my $shifted_allele = $vf->{shifted_allele_string};
-
+  $shifted_allele ||= "";
   my $tmp = {};
 
   # use these to sort variants
@@ -965,6 +965,7 @@ sub add_colocated_frequency_data {
   
   my $this_allele = $hash->{Allele} if exists($hash->{Allele});
   my $this_allele_shifted = $vf->{shifted_allele_string} if $vf->{shifted_flag};
+  $this_allele_shifted ||= "";
   my ($matched_allele) = grep {$_->{a_allele} eq $this_allele || $_->{a_allele} eq $this_allele_shifted} @{$ex->{matched_alleles} || []};
 
   return $hash unless $matched_allele || (grep {$_ eq 'af'} @keys);
