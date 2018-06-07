@@ -48,7 +48,7 @@ my $vf = $parser->next();
 
 ID format parser. Variant IDs are looked up in the relevant Ensembl
 Variation database; see
-http://www.ensembl.org/info/genome/variation/sources_documentation.html
+https://www.ensembl.org/info/genome/variation/species/sources_documentation.html
 for imported sources.
 
 One ID may return multiple VariationFeature objects as in dbSNP an rsID
