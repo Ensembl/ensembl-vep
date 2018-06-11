@@ -1457,20 +1457,37 @@ sub TranscriptVariationAllele_to_output_hash {
         $shifting_offset = defined($vfoa->base_variation_feature->{shift_length}) ? 0 - $vfoa->base_variation_feature->{shift_length} : 0;
       }
       
-      $hash->{cDNA_position}  = format_coords($tv->cdna_start + $shifting_offset, $tv->cdna_end + $shifting_offset);
+      if(defined($tv->cdna_start) && defined($tv->cdna_end))
+      {
+        $hash->{cDNA_position}  = format_coords($tv->cdna_start + $shifting_offset, $tv->cdna_end + $shifting_offset);  
+      }
+      else{
+        $hash->{cDNA_position}  = format_coords($tv->cdna_start, $tv->cdna_end);  
+      }
       $hash->{cDNA_position} .= '/'.$tr->length if $self->{total_length};
-
       # coding only
       if($pre->{coding}) {
 
         $hash->{Amino_acids} = $vfoa->pep_allele_string;
         $hash->{Codons}      = $vfoa->display_codon_allele_string;
         $shifting_offset = 0 if defined($tv->{_boundary_shift}) && $tv->{_boundary_shift} == 1;
-        $hash->{CDS_position}  = format_coords($tv->cds_start + $shifting_offset, $tv->cds_end + $shifting_offset);
+        if(defined($tv->cds_start) && defined($tv->cds_end))
+        {
+          $hash->{CDS_position}  = format_coords($tv->cds_start + $shifting_offset, $tv->cds_end + $shifting_offset);
+        }
+        else{
+          $hash->{CDS_position}  = format_coords($tv->cds_start, $tv->cds_end); 
+        }
         $hash->{CDS_position} .= '/'.length($vep_cache->{translateable_seq})
           if $self->{total_length} && $vep_cache->{translateable_seq};
 
-        $hash->{Protein_position}  = format_coords($tv->translation_start + $shifting_offset, $tv->translation_end + $shifting_offset);
+        if(defined($tv->translation_start) && defined($tv->translation_end))
+        {
+          $hash->{Protein_position}  = format_coords($tv->translation_start + $shifting_offset, $tv->translation_end + $shifting_offset);
+        }
+        else{
+          $hash->{Protein_position}  = format_coords($tv->translation_start, $tv->translation_end);
+        }
         $hash->{Protein_position} .= '/'.length($vep_cache->{peptide})
           if $self->{total_length} && $vep_cache->{peptide};
 
