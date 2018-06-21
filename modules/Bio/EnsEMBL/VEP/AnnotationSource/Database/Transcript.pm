@@ -59,7 +59,6 @@ package Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript;
 
 use Scalar::Util qw(weaken);
 use Digest::MD5 qw(md5_hex);
-
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
 use base qw(
@@ -245,13 +244,16 @@ sub get_features_by_regions_uncached {
       }
 
       foreach my $tr(@{$gene->get_all_Transcripts}) {
-        next unless $self->filter_transcript($tr);
-
+	next unless $self->filter_transcript($tr);
         # in human and mouse otherfeatures DB, there may be duplicate genes
         # skip those from analysis refseq_human_import and refseq_mouse_import
         next if $self->{core_type} eq 'otherfeatures' && $self->assembly !~ /GRCh37/i && $tr->analysis && $tr->analysis->logic_name =~ /^refseq_[a-z]+_import$/;
 
-        $tr->{_gene_stable_id} = $gene_stable_id;
+        if(defined($tr->display_xref) and $self->{core_type} eq 'otherfeatures'){
+	  $tr->{stable_id} = $tr->display_xref->{display_id};
+	}
+        
+	$tr->{_gene_stable_id} = $gene_stable_id;
         $tr->{_gene} = $gene;
         $self->prefetch_gene_ids($tr);
 

@@ -170,19 +170,19 @@ sub has_var_db {
 sub has_refseq {
   my ($self, $dbc, $current_db_name) = @_;
 
-  # check it has refseq transcripts
-    my $sth = $dbc->prepare(qq{
-        SELECT COUNT(*)
-        FROM $current_db_name\.transcript
-        WHERE stable_id LIKE 'NM%'
-        OR source = 'refseq'
-    });
-    $sth->execute;
+  my $sth = $dbc->prepare(qq{
+      SELECT COUNT(*)
+      FROM $current_db_name\.transcript t LEFT JOIN $current_db_name\.xref x ON x.xref_id = t.display_xref_id
+      WHERE t.source LIKE '%refseq%'
+      OR x.display_label like 'NM%'
+  });
+  
+  $sth->execute;
     
-    my $count;
-    $sth->bind_columns(\$count);
-    $sth->fetch;
-    $sth->finish();
+  my $count;
+  $sth->bind_columns(\$count);
+  $sth->fetch;
+  $sth->finish();
 
   return $count ? $count : undef;
 }
