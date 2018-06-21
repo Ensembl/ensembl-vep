@@ -109,12 +109,12 @@ sub new {
 sub get_all_features_by_InputBuffer {
   my $self = shift;
   my $buffer = shift;
-  
+
   my $regions = $self->get_all_regions_by_InputBuffer($buffer);
 
   my @not_cached;
   my @features;
-  
+
   # attempt to fetch from memory first
   foreach my $region(@$regions) {
     my $cache_features = $self->get_features_by_regions_cached([$region]);
@@ -249,7 +249,7 @@ sub filter_features_by_min_max {
   my $features = shift;
   my $min = shift;
   my $max = shift;
-  
+
   my $up_down_size = defined($self->{up_down_size}) ? $self->{up_down_size} : $self->up_down_size();
   $min -= $up_down_size;
   $max += $up_down_size;
