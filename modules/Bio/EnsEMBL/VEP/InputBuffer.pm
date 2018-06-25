@@ -240,50 +240,42 @@ sub get_overlapping_vfs {
   my $self = shift;
   my $start = shift;
   my $end = shift;
-  
+  my @to_search_over;
   ($start, $end) = ($end, $start) if $start > $end;
   
-  if(my $tree = $self->interval_tree) {
-    
-    my @vfs ;
-
-    foreach my $vf (@{$tree->fetch($start - 1, $end)})
+  if(my $tree = $self->interval_tree)
+  {
+    @to_search_over = @{$tree->fetch($start - 1, $end)};
+  }
+  else{
+    $tree = $self->hash_tree unless($tree);  
+    @to_search_over = values %{{
+      map {$_->{_hash_tree_id} => $_}   # use _hash_tree_id to uniquify
+      map {@{$tree->{$_} || []}} # tree might be empty
+      (
+        int($start / $HASH_TREE_SIZE) # start of range
+        ..
+        (int($end / $HASH_TREE_SIZE) + 1) # end of range
+      )
+    }};
+  }      
+  
+  my @vfs;
+  foreach my $vf (@to_search_over)
+  {
+    if (overlap($vf->{start}, $vf->{end}, $start, $end))
     {
-      if (overlap($vf->{start}, $vf->{end}, $start, $end)) #|| (defined($vf->{unshifted_end}) == 1) ? overlap($vf->{unshifted_start}, $vf->{unshifted_end}, $start, $end) : 0){
+      push(@vfs, $vf);
+    }
+    if((defined($vf->{unshifted_end}) && (defined($vf->{unshifted_start}))))
+    {
+      if (overlap($vf->{unshifted_start}, $vf->{unshifted_end}, $start, $end)) 
       {
         push(@vfs, $vf);
       }
-      if((defined($vf->{unshifted_end}) && (defined($vf->{unshifted_start}))))
-      {
-        if (overlap($vf->{unshifted_start}, $vf->{unshifted_end}, $start, $end)) 
-        {
-          push(@vfs, $vf);
-        }
-      }
     }
-    return [@vfs];
-        return [
-          grep { overlap($_->{start}, $_->{end}, $start, $end) }
-          @{$tree->fetch($start - 1, $end)}
-        ];
-        #
   }
-  else {
-    my $hash_tree = $self->hash_tree;
-    
-    return [
-      grep { overlap($_->{start}, $_->{end}, $start, $end) }
-      values %{{
-        map {$_->{_hash_tree_id} => $_}                  # use _hash_tree_id to uniquify
-        map {@{$hash_tree->{$_} || []}}                  # tree might be empty
-        (
-          int($start / $HASH_TREE_SIZE)      # start of range
-          ..
-          (int($end / $HASH_TREE_SIZE) + 1)  # end of range
-        )
-      }}
-    ];
-  }
+  return [@vfs];
 }
 
 
