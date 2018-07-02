@@ -671,6 +671,12 @@ sub prefetch_translation_ids {
   # Ensembl protein ID
   if($self->{protein}) {
     $tr->{_protein} = $tl->stable_id;
+    my @entries = grep {$_->{dbname} eq 'GenBank'} @{$tl->get_all_DBEntries};
+    if(scalar @entries == 1)
+    {
+      $tr->{_protein} = $entries[0]->{primary_id};
+      $tl->{stable_id} = $entries[0]->{primary_id};
+    }
   }
 
   return $tr;
