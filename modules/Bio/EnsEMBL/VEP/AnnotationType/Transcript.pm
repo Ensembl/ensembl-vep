@@ -224,7 +224,7 @@ sub filter_transcript {
   ) {
     return 0;
   }
-
+  return 0 if $t->analysis() && $t->analysis()->logic_name() eq 'estgene';
   return 1;
 }
 
