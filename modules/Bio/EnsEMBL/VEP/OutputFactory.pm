@@ -542,7 +542,10 @@ sub filter_VariationFeatureOverlapAlleles {
   # pick worst per allele?
   elsif($self->{pick_allele}) {
     my %by_allele;
-    push @{$by_allele{$_->variation_feature_seq}}, $_ for @$vfoas;
+    # Check as the 'variation_feature_seq' method doesn't exist for StructuralVariationOverlapAllele object
+    foreach my $vfoa (grep {$_->can('variation_feature_seq')} @$vfoas) {
+      push @{$by_allele{$vfoa->variation_feature_seq}}, $vfoa;
+    }
     return [map {$self->pick_worst_VariationFeatureOverlapAllele($by_allele{$_})} keys %by_allele];
   }
 
@@ -554,7 +557,10 @@ sub filter_VariationFeatureOverlapAlleles {
   # pick worst per allele and gene?
   elsif($self->{pick_allele_gene}) {
     my %by_allele;
-    push @{$by_allele{$_->variation_feature_seq}}, $_ for @$vfoas;
+    # Check as the 'variation_feature_seq' method doesn't exist for StructuralVariationOverlapAllele object
+    foreach my $vfoa (grep {$_->can('variation_feature_seq')} @$vfoas) {
+      push @{$by_allele{$vfoa->variation_feature_seq}}, $vfoa;
+    }
     return [map {@{$self->pick_VariationFeatureOverlapAllele_per_gene($by_allele{$_})}} keys %by_allele];
   }
 
@@ -568,14 +574,20 @@ sub filter_VariationFeatureOverlapAlleles {
   # flag worst per allele?
   elsif($self->{flag_pick_allele}) {
     my %by_allele;
-    push @{$by_allele{$_->variation_feature_seq}}, $_ for @$vfoas;
+    # Check as the 'variation_feature_seq' method doesn't exist for StructuralVariationOverlapAllele object
+    foreach my $vfoa (grep {$_->can('variation_feature_seq')} @$vfoas) {
+      push @{$by_allele{$vfoa->variation_feature_seq}}, $vfoa;
+    }
     $self->pick_worst_VariationFeatureOverlapAllele($by_allele{$_})->{PICK} = 1 for keys %by_allele;
   }
 
   # flag worst per allele and gene?
   elsif($self->{flag_pick_allele_gene}) {
     my %by_allele;
-    push @{$by_allele{$_->variation_feature_seq}}, $_ for @$vfoas;
+    # Check as the 'variation_feature_seq' method doesn't exist for StructuralVariationOverlapAllele object
+    foreach my $vfoa (grep {$_->can('variation_feature_seq')} @$vfoas) {
+      push @{$by_allele{$vfoa->variation_feature_seq}}, $vfoa;
+    }
     map {$_->{PICK} = 1} map {@{$self->pick_VariationFeatureOverlapAllele_per_gene($by_allele{$_})}} keys %by_allele;
   }
 
@@ -1649,6 +1661,8 @@ sub IntergenicVariationAllele_to_output_hash {
 sub BaseStructuralVariationOverlapAllele_to_output_hash {
   my $self = shift;
   my ($vfoa, $hash) = @_;
+
+  return $hash if (!$vfoa);
 
   my $svf = $vfoa->base_variation_feature;
 

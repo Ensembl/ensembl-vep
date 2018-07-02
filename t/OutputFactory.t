@@ -1504,7 +1504,25 @@ is_deeply(
 );
 $of->{flag_pick} = 0;
 
+$of->{pick_allele} = 1;
+my @vfoa_pick_allele = grep {$_->{PICK_ALLELE}} @{$of->get_all_StructuralVariationOverlapAlleles($ib->buffer->[0])};
+ok(scalar(@vfoa_pick_allele) == 0, 'SV - StructuralVariationOverlapAllele_to_output_hash - pick_allele');
+$of->{pick_allele} = 0;
 
+$of->{pick_allele_gene} = 1;
+my @vfoa_pick_allele_gene = grep {$_->{PICK_ALLELE_GENE}} @{$of->get_all_StructuralVariationOverlapAlleles($ib->buffer->[0])};
+ok(scalar(@vfoa_pick_allele_gene) == 0, 'SV - StructuralVariationOverlapAllele_to_output_hash - pick_allele_gene');
+$of->{pick_allele_gene} = 0;
+
+$of->{flag_pick_allele} = 1;
+my @vfoa_flag_pick_allele = grep {$_->{FLAG_PICK_ALLELE}} @{$of->get_all_StructuralVariationOverlapAlleles($ib->buffer->[0])};
+ok(scalar(@vfoa_flag_pick_allele) == 0, 'SV - StructuralVariationOverlapAllele_to_output_hash - flag_pick_allele');
+$of->{flag_pick_allele} = 0;
+
+$of->{flag_pick_allele_gene} = 1;
+my @vfoa_flag_pick_allele_gene = grep {$_->{FLAG_PICK_ALLELE_GENE}} @{$of->get_all_StructuralVariationOverlapAlleles($ib->buffer->[0])};
+ok(scalar(@vfoa_flag_pick_allele_gene) == 0, 'SV - StructuralVariationOverlapAllele_to_output_hash - flag_pick_allele_gene');
+$of->{flag_pick_allele_gene} = 0;
 
 # regulatory
 $ib = get_annotated_buffer({
