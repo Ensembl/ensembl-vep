@@ -535,7 +535,20 @@ sub prefetch_gene_ids {
   my $tr = shift;
 
   $tr->{_gene} ||= $tr->get_Gene();
-
+  if( $self->{core_type} eq 'otherfeatures'){
+    #Pulls correct gene symbol for RefSeq using xrefs
+    my @entries = grep {$_->{dbname} eq 'EntrezGene'} @{$tr->get_Gene()->get_all_DBEntries};
+    if(scalar @entries eq 1)
+    {
+      $tr->get_Gene()->stable_id($entries[0]->{primary_id});
+      $tr->{_gene_symbol}  = $entries[0]->{primary_id};
+      $tr->{_gene_symbol_source} = $entries[0]->{dbname};
+      $tr->{_gene_symbol_id} = $entries[0]->{primary_id};
+      $tr->{_gene_hgnc_id} = $entries[0]->{primary_id} if $entries[0]->{dbname} eq 'HGNC';
+      $tr->{_gene_stable_id} = $entries[0]->{primary_id};
+    }
+  }
+  else {
   # gene symbol - get from gene cache if found already
   if(defined($tr->{_gene}->{_symbol})) {
     $tr->{_gene_symbol} = $tr->{_gene}->{_symbol};
@@ -576,7 +589,7 @@ sub prefetch_gene_ids {
       $tr->{_gene_stable_id} = $entries[0]->{primary_id};
     }
   }
-
+  }
 
   return $tr;
 }
