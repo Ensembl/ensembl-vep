@@ -249,9 +249,9 @@ sub get_features_by_regions_uncached {
         # skip those from analysis refseq_human_import and refseq_mouse_import
         next if $self->{core_type} eq 'otherfeatures' && $self->assembly !~ /GRCh37/i && $tr->analysis && $tr->analysis->logic_name =~ /^refseq_[a-z]+_import$/;
 
-        if(defined($tr->display_xref) and $self->{core_type} eq 'otherfeatures'){
+        if($self->{core_type} eq 'otherfeatures' && defined($tr->display_xref)){
 	         $tr->{stable_id} = $tr->display_xref->{display_id};
-	      }
+        }
         
 	      $tr->{_gene_stable_id} = $gene_stable_id;
         $tr->{_gene} = $gene;
@@ -659,6 +659,8 @@ sub prefetch_translation_ids {
   # Ensembl protein ID
   if($self->{protein}) {
     $tr->{_protein} = $tl->stable_id;
+    # With the new RefSeq otherfeatures database, RefSeq identifiers can be accessed through get_all_DB_Entries.
+    # Identifiers are accessed this way and relavent objects updated.
     my @entries = grep {$_->{dbname} eq 'GenBank'} @{$tl->get_all_DBEntries};
     if(scalar @entries == 1)
     {
