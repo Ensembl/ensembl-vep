@@ -509,7 +509,7 @@ sub get_all_StructuralVariationOverlapAlleles {
   # grep out non-coding?
   @$vfos = grep {$_->can('affects_cds') && $_->affects_cds} @$vfos if $self->{coding_only};
 
-  return $self->filter_VariationFeatureOverlapAlleles([map {@{$_->get_all_StructuralVariationOverlapAlleles}} @{$vfos}]);
+  return $self->filter_StructuralVariationOverlapAlleles([map {@{$_->get_all_StructuralVariationOverlapAlleles}} @{$vfos}]);
 }
 
 
@@ -522,8 +522,7 @@ sub get_all_StructuralVariationOverlapAlleles {
                of filtering.
   Returntype : arrayref of Bio::EnsEMBL::Variation::VariationFeatureOverlapAllele
   Exceptions : none
-  Caller     : get_all_VariationFeatureOverlapAlleles(),
-               get_all_StructuralVariationOverlapAlleles()
+  Caller     : get_all_VariationFeatureOverlapAlleles()
   Status     : Stable
 
 =cut
@@ -583,6 +582,53 @@ sub filter_VariationFeatureOverlapAlleles {
 }
 
 
+=head2 filter_StructuralVariationOverlapAlleles
+
+  Arg 1      : arrayref of Bio::EnsEMBL::Variation::StructuralVariationOverlapAlleles
+  Example    : $filtered = $of->filter_StructuralVariationOverlapAlleles($svoas);
+  Description: Filters StructuralVariationOverlapAlleles objects by various criteria,
+               choosing one per variant, allele, gene. It can also flag instead
+               of filtering.
+  Returntype : arrayref of Bio::EnsEMBL::Variation::StructuralVariationOverlapAlleles
+  Exceptions : none
+  Caller     : get_all_StructuralVariationOverlapAlleles()
+  Status     : Stable
+
+=cut
+
+sub filter_StructuralVariationOverlapAlleles {
+  my $self = shift;
+  my $svoas = shift;
+
+  return [] unless $svoas && scalar @$svoas;
+
+  # pick worst? pick worst per allele?
+  if($self->{pick} || $self->{pick_allele}) {
+    return [$self->pick_worst_VariationFeatureOverlapAllele($svoas)];
+  }
+
+  # pick per gene? pick worst per allele and gene?
+  elsif($self->{per_gene} || $self->{pick_allele_gene}) {
+    return $self->pick_VariationFeatureOverlapAllele_per_gene($svoas);
+  }
+
+  # flag picked? flag worst per allele?
+  elsif($self->{flag_pick} || $self->{flag_pick_allele}) {
+    if(my $worst = $self->pick_worst_VariationFeatureOverlapAllele($svoas)) {
+      $worst->{PICK} = 1;
+    }
+  }
+
+  # flag worst per allele and gene?
+  elsif($self->{flag_pick_allele_gene}) {
+    map {$_->{PICK} = 1} @{$self->pick_VariationFeatureOverlapAllele_per_gene($svoas)};
+  }
+
+  return $svoas;
+
+}
+
+
 =head2 pick_worst_VariationFeatureOverlapAllele
 
   Arg 1      : arrayref of Bio::EnsEMBL::Variation::VariationFeatureOverlapAllele
@@ -598,7 +644,8 @@ sub filter_VariationFeatureOverlapAlleles {
                 7: transcript from RefSeq?
   Returntype : Bio::EnsEMBL::Variation::VariationFeatureOverlapAllele
   Exceptions : none
-  Caller     : filter_VariationFeatureOverlapAlleles()
+  Caller     : filter_VariationFeatureOverlapAlleles(),
+               filter_StructuralVariationOverlapAlleles()
   Status     : Stable
 
 =cut
@@ -720,7 +767,8 @@ sub pick_worst_VariationFeatureOverlapAllele {
                within in each gene.
   Returntype : arrayref of Bio::EnsEMBL::Variation::VariationFeatureOverlapAllele
   Exceptions : none
-  Caller     : filter_VariationFeatureOverlapAlleles()
+  Caller     : filter_VariationFeatureOverlapAlleles(),
+               filter_StructuralVariationOverlapAlleles()
   Status     : Stable
 
 =cut
