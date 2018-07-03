@@ -564,6 +564,7 @@ sub prefetch_gene_ids {
   }
 
   if( $self->{core_type} eq 'otherfeatures'){
+    #Pulls correct gene symbol for RefSeq using xrefs
     my @entries = grep {$_->{dbname} eq 'EntrezGene'} @{$tr->get_Gene()->get_all_DBEntries};
     if(scalar @entries eq 1)
     {
