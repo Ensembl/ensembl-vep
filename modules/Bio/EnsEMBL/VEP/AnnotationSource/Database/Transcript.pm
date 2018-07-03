@@ -245,6 +245,7 @@ sub get_features_by_regions_uncached {
 
       foreach my $tr(@{$gene->get_all_Transcripts}) {
         next unless $self->filter_transcript($tr);
+        next if $tr->analysis() && $tr->analysis()->logic_name() eq 'estgene';
         # in human and mouse otherfeatures DB, there may be duplicate genes
         # skip those from analysis refseq_human_import and refseq_mouse_import
         next if $self->{core_type} eq 'otherfeatures' && $self->assembly !~ /GRCh37/i && $tr->analysis && $tr->analysis->logic_name =~ /^refseq_[a-z]+_import$/;
@@ -256,18 +257,7 @@ sub get_features_by_regions_uncached {
         $tr->{_gene_stable_id} = $gene_stable_id;
         $tr->{_gene} = $gene;
         $self->prefetch_gene_ids($tr);
-        if( $self->{core_type} eq 'otherfeatures'){
-          my @entries = grep {$_->{dbname} eq 'EntrezGene'} @{$tr->get_Gene()->get_all_DBEntries};
-          if(scalar @entries eq 1)
-          {
-            $tr->get_Gene()->stable_id($entries[0]->{primary_id});
-            $tr->{_gene_symbol}  = $entries[0]->{primary_id};
-            $tr->{_gene_symbol_source} = $entries[0]->{dbname};
-            $tr->{_gene_symbol_id} = $entries[0]->{primary_id};
-            $tr->{_gene_hgnc_id} = $entries[0]->{primary_id} if $entries[0]->{dbname} eq 'HGNC';
-            $tr->{_gene_stable_id} = $entries[0]->{primary_id};
-          }
-        }
+
         # flag transcript source if using "merged" (ie both core and otherfeatures DBs)
         $tr->{_source_cache} = $self->{core_type} eq 'otherfeatures' ? 'RefSeq' : 'Ensembl' if $self->{merged};
 
@@ -572,6 +562,20 @@ sub prefetch_gene_ids {
     $tr->{_gene}->{_symbol_source} = $tr->{_gene_symbol_source};
     $tr->{_gene}->{_hgnc_id} = $tr->{_gene_hgnc_id} if defined($tr->{_gene_hgnc_id});
   }
+
+  if( $self->{core_type} eq 'otherfeatures'){
+    my @entries = grep {$_->{dbname} eq 'EntrezGene'} @{$tr->get_Gene()->get_all_DBEntries};
+    if(scalar @entries eq 1)
+    {
+      $tr->get_Gene()->stable_id($entries[0]->{primary_id});
+      $tr->{_gene_symbol}  = $entries[0]->{primary_id};
+      $tr->{_gene_symbol_source} = $entries[0]->{dbname};
+      $tr->{_gene_symbol_id} = $entries[0]->{primary_id};
+      $tr->{_gene_hgnc_id} = $entries[0]->{primary_id} if $entries[0]->{dbname} eq 'HGNC';
+      $tr->{_gene_stable_id} = $entries[0]->{primary_id};
+    }
+  }
+
 
   return $tr;
 }
