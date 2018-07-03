@@ -1,4 +1,4 @@
-534	\N	schema_version	93
+534	\N	schema_version	94
 80	\N	patch	patch_50_51_b.sql|multispecies
 83	\N	patch	patch_50_51_c.sql|associated_feature_type
 82	\N	patch	patch_50_51_a.sql|cell_type_description
@@ -277,3 +277,7 @@
 721	\N	patch	patch_92_93_u.sql|Create probemapping meta table
 722	\N	patch	patch_92_93_v.sql|Create probemapping statistic table
 723	\N	patch	patch_92_93_w.sql|Modify index name_exp_idx from table read_file_experimental_configuration
+724	\N	patch	patch_93_94_a.sql|schema_version
+725	\N	patch	patch_93_94_b.sql|Modify column display_label length from epigenome table
+726	\N	patch	patch_93_94_c.sql|Adds table segmentation_cell_table_ctcf
+727	\N	patch	patch_93_94_d.sql|Adds table segmentation_cell_table_without_ctcf
