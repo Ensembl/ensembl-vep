@@ -59,7 +59,6 @@ package Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript;
 
 use Scalar::Util qw(weaken);
 use Digest::MD5 qw(md5_hex);
-
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
 use base qw(
@@ -246,11 +245,15 @@ sub get_features_by_regions_uncached {
 
       foreach my $tr(@{$gene->get_all_Transcripts}) {
         next unless $self->filter_transcript($tr);
-
+        next if $tr->analysis() && $tr->analysis()->logic_name() eq 'estgene';
         # in human and mouse otherfeatures DB, there may be duplicate genes
         # skip those from analysis refseq_human_import and refseq_mouse_import
         next if $self->{core_type} eq 'otherfeatures' && $self->assembly !~ /GRCh37/i && $tr->analysis && $tr->analysis->logic_name =~ /^refseq_[a-z]+_import$/;
 
+        if($self->{core_type} eq 'otherfeatures' && defined($tr->display_xref)){
+	         $tr->{stable_id} = $tr->display_xref->{display_id};
+        }
+        
         $tr->{_gene_stable_id} = $gene_stable_id;
         $tr->{_gene} = $gene;
         $self->prefetch_gene_ids($tr);
@@ -532,7 +535,20 @@ sub prefetch_gene_ids {
   my $tr = shift;
 
   $tr->{_gene} ||= $tr->get_Gene();
-
+  if( $self->{core_type} eq 'otherfeatures'){
+    #Pulls correct gene symbol for RefSeq using xrefs
+    my @entries = grep {$_->{dbname} eq 'EntrezGene'} @{$tr->get_Gene()->get_all_DBEntries};
+    if(scalar @entries eq 1)
+    {
+      $tr->get_Gene()->stable_id($entries[0]->{primary_id});
+      $tr->{_gene_symbol}  = $entries[0]->{primary_id};
+      $tr->{_gene_symbol_source} = $entries[0]->{dbname};
+      $tr->{_gene_symbol_id} = $entries[0]->{primary_id};
+      $tr->{_gene_hgnc_id} = $entries[0]->{primary_id} if $entries[0]->{dbname} eq 'HGNC';
+      $tr->{_gene_stable_id} = $entries[0]->{primary_id};
+    }
+  }
+  else {
   # gene symbol - get from gene cache if found already
   if(defined($tr->{_gene}->{_symbol})) {
     $tr->{_gene_symbol} = $tr->{_gene}->{_symbol};
@@ -553,11 +569,26 @@ sub prefetch_gene_ids {
       my ($entry) = @{$tr->{_gene}->get_all_DBEntries('RefSeq_gene_name')};
       $tr->{_gene_symbol} = $entry->display_id if $entry;
     }
-
+    
     # cache it on the gene object too
     $tr->{_gene}->{_symbol} = $tr->{_gene_symbol};
     $tr->{_gene}->{_symbol_source} = $tr->{_gene_symbol_source};
     $tr->{_gene}->{_hgnc_id} = $tr->{_gene_hgnc_id} if defined($tr->{_gene_hgnc_id});
+  }
+
+  if( $self->{core_type} eq 'otherfeatures'){
+    #Pulls correct gene symbol for RefSeq using xrefs
+    my @entries = grep {$_->{dbname} eq 'EntrezGene'} @{$tr->get_Gene()->get_all_DBEntries};
+    if(scalar @entries eq 1)
+    {
+      $tr->get_Gene()->stable_id($entries[0]->{primary_id});
+      $tr->{_gene_symbol}  = $entries[0]->{primary_id};
+      $tr->{_gene_symbol_source} = $entries[0]->{dbname};
+      $tr->{_gene_symbol_id} = $entries[0]->{primary_id};
+      $tr->{_gene_hgnc_id} = $entries[0]->{primary_id} if $entries[0]->{dbname} eq 'HGNC';
+      $tr->{_gene_stable_id} = $entries[0]->{primary_id};
+    }
+  }
   }
 
   return $tr;
@@ -646,6 +677,14 @@ sub prefetch_translation_ids {
   # Ensembl protein ID
   if($self->{protein}) {
     $tr->{_protein} = $tl->stable_id;
+    # With the new RefSeq otherfeatures database, RefSeq identifiers can be accessed through get_all_DB_Entries.
+    # Identifiers are accessed this way and relavent objects updated.
+    my @entries = grep {$_->{dbname} eq 'GenBank'} @{$tl->get_all_DBEntries};
+    if(scalar @entries == 1)
+    {
+      $tr->{_protein} = $entries[0]->{primary_id};
+      $tl->{stable_id} = $entries[0]->{primary_id};
+    }
   }
 
   return $tr;
