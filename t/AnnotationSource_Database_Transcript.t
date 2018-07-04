@@ -496,7 +496,7 @@ SKIP: {
   $as->clean_cache();
   $as->{all_refseq} = 1;
   $features = $as->get_all_features_by_InputBuffer($ib);
-  is(scalar @$features, 64, 'refseq - get_all_features_by_InputBuffer count - all_refseq');
+  is(scalar @$features, 51, 'refseq - get_all_features_by_InputBuffer count - all_refseq');
   $as->{all_refseq} = 0;
 
 
