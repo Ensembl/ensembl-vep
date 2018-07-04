@@ -542,7 +542,8 @@ sub prefetch_gene_ids {
     {
       $tr->get_Gene()->stable_id($entries[0]->{primary_id});
       $tr->{_gene_symbol}  = $entries[0]->{primary_id};
-      $tr->{_gene_symbol_source} = $entries[0]->{dbname};
+      $tr->{_gene_symbol}  = $tr->{_gene}->display_xref ? $tr->{_gene}->display_xref->display_id : $entries[0]->{primary_id};
+$tr->{_gene_symbol_source} = $entries[0]->{dbname};
       $tr->{_gene_symbol_id} = $entries[0]->{primary_id};
       $tr->{_gene_hgnc_id} = $entries[0]->{primary_id} if $entries[0]->{dbname} eq 'HGNC';
       $tr->{_gene_stable_id} = $entries[0]->{primary_id};
@@ -581,12 +582,12 @@ sub prefetch_gene_ids {
     my @entries = grep {$_->{dbname} eq 'EntrezGene'} @{$tr->get_Gene()->get_all_DBEntries};
     if(scalar @entries eq 1)
     {
-      $tr->get_Gene()->stable_id($entries[0]->{primary_id});
-      $tr->{_gene_symbol}  = $entries[0]->{primary_id};
-      $tr->{_gene_symbol_source} = $entries[0]->{dbname};
-      $tr->{_gene_symbol_id} = $entries[0]->{primary_id};
-      $tr->{_gene_hgnc_id} = $entries[0]->{primary_id} if $entries[0]->{dbname} eq 'HGNC';
-      $tr->{_gene_stable_id} = $entries[0]->{primary_id};
+#      $tr->get_Gene()->stable_id($entries[0]->{primary_id});
+#      $tr->{_gene_symbol}  = $entries[0]->{primary_id};
+#      $tr->{_gene_symbol_source} = $entries[0]->{dbname};
+#      $tr->{_gene_symbol_id} = $entries[0]->{primary_id};
+#      $tr->{_gene_hgnc_id} = $entries[0]->{primary_id} if $entries[0]->{dbname} eq 'HGNC';
+#      $tr->{_gene_stable_id} = $entries[0]->{primary_id};
     }
   }
   }
