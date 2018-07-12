@@ -1903,12 +1903,63 @@ ok($tmp =~ /went wrong/, 'run_plugins - new fails message');
 open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
 
+## HGVS shifting
+################
+
+$of->{hgvs}  = 1;
+$of->{hgvsg} = 1;
+my $input_file_example = $test_cfg->create_input_file([qw(21 25592985 hgvsins A ATAAA . . .)]);
+
+# Shifting ON
+$ib = get_annotated_buffer({
+  input_file => $input_file_example,
+  shift_hgvs => 1
+},1);
+
+my $vfoa = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[0];
+is_deeply(
+  $of->VariationFeatureOverlapAllele_to_output_hash($vfoa, {}, $ib->buffer->[0]),
+  {
+    "IMPACT" => "MODIFIER",
+    "Consequence" => [
+      "intron_variant"
+    ],
+    "HGVSg" => "21:g.25592986_25592989dup",
+    "Allele" => "TAAA"
+  },
+  'HGVS 3prime shifting - ON'
+);
+
+# Shifting OFF
+$ib = get_annotated_buffer({
+  input_file => $input_file_example,
+  shift_hgvs => 0
+},1);
+
+$vfoa = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[0];
+is_deeply(
+  $of->VariationFeatureOverlapAllele_to_output_hash($vfoa, {}, $ib->buffer->[0]),
+  {
+    "IMPACT" => "MODIFIER",
+    "Consequence" => [
+      "intron_variant"
+    ],
+    "HGVSg" => "21:g.25592982_25592985dup",
+    "Allele" => "TAAA"
+  },
+  'HGVS 3prime shifting - OFF'
+);
+
+$of->{hgvs}  = 0;
+$of->{hgvsg} = 0;
+
 
 # done
 done_testing();
 
 sub get_annotated_buffer {
   my $tmp_cfg = shift;
+  my $set_package_variables = shift;
 
   my $runner = Bio::EnsEMBL::VEP::Runner->new({
     %$cfg_hash,
@@ -1917,6 +1968,10 @@ sub get_annotated_buffer {
   });
 
   $runner->init;
+  # Force setting the package variables as the 'run' method is not used here
+  if ($set_package_variables) {
+    $runner->_set_package_variables();
+  }
 
   my $ib = $runner->get_InputBuffer;
   $ib->next();
