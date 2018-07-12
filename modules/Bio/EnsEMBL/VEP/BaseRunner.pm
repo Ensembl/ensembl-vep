@@ -423,6 +423,16 @@ sub _set_package_variables {
   $self->{_verbose_bak} = Bio::EnsEMBL::Utils::Exception::verbose();
   Bio::EnsEMBL::Utils::Exception::verbose(1999);
 
+  # HGVS shifting
+  # Variable used when DB connection
+  $self->{_shift_hgvs_db_bak} = $Bio::EnsEMBL::Variation::DBSQL::DBAdaptor::DEFAULT_SHIFT_HGVS_VARIANTS_3PRIME;
+  # Variable used when offline
+  $self->{_shift_hgvs_bak} = $Bio::EnsEMBL::Variation::DBSQL::TranscriptVariationAdaptor::DEFAULT_SHIFT_HGVS_VARIANTS_3PRIME;
+  if (defined($self->param('shift_hgvs')) && $self->param('shift_hgvs') =~ /(0|1)/ ) {
+    $Bio::EnsEMBL::Variation::DBSQL::DBAdaptor::DEFAULT_SHIFT_HGVS_VARIANTS_3PRIME = $self->param('shift_hgvs');
+    $Bio::EnsEMBL::Variation::DBSQL::TranscriptVariationAdaptor::DEFAULT_SHIFT_HGVS_VARIANTS_3PRIME = $self->param('shift_hgvs');
+  }
+
   # up/downstream distance
   if(my $distances = $self->param('distance')) {
     my ($u, $d) = @$distances;
@@ -439,7 +449,7 @@ sub _set_package_variables {
 
 =head2 _reset_package_variables
 
-  Example    : $runner->_set_package_variables();
+  Example    : $runner->_reset_package_variables();
   Description: Re-sets package variables altered by _set_package_variables
   Returntype : none
   Exceptions : none
@@ -456,6 +466,9 @@ sub _reset_package_variables {
   $Bio::EnsEMBL::Variation::TranscriptVariationAllele::NO_TRANSFER = $self->{_no_transfer_bak};
 
   Bio::EnsEMBL::Utils::Exception::verbose($self->{_verbose_bak});
+
+  $Bio::EnsEMBL::Variation::DBSQL::TranscriptVariationAdaptor::DEFAULT_SHIFT_HGVS_VARIANTS_3PRIME = $self->{_shift_hgvs_bak} if defined($self->{_shift_hgvs_bak});
+  $Bio::EnsEMBL::Variation::DBSQL::DBAdaptor::DEFAULT_SHIFT_HGVS_VARIANTS_3PRIME = $self->{_shift_hgvs_db_bak} if defined($self->{_shift_hgvs_db_bak});
 
   $Bio::EnsEMBL::Variation::Utils::VariationEffect::UPSTREAM_DISTANCE = $self->{_upstream_bak} if defined($self->{_upstream_bak});
   $Bio::EnsEMBL::Variation::Utils::VariationEffect::DOWNSTREAM_DISTANCE = $self->{_downstream_bak} if defined($self->{_downstream_bak});
