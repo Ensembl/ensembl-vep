@@ -1916,7 +1916,7 @@ $ib = get_annotated_buffer({
   shift_hgvs => 1
 },1);
 
-my $vfoa = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[0];
+$vfoa = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[0];
 is_deeply(
   $of->VariationFeatureOverlapAllele_to_output_hash($vfoa, {}, $ib->buffer->[0]),
   {
