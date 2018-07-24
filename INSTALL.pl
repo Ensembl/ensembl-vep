@@ -1694,7 +1694,7 @@ sub download_to_file {
 
   if($CAN_USE_CURL) {
     my $response = `curl -s -o $file -w '%{http_code}' --location "$url" `;
-    if ( $response != 200) {
+    if ( $response != 200 && $response != 226) {
       print "curl failed ($response), trying to fetch using LWP::Simple\n" unless $QUIET;
       $CAN_USE_CURL = 0;
       download_to_file($url, $file);

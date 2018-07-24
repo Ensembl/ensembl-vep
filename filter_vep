@@ -245,6 +245,8 @@ sub main {
             map {parse_line($_, \@headers, '\|', $main_data)}
             @chunks;
         }
+        # Rare case where no CSQ stuff found
+        push @data, $main_data if (!@data);
 
         $filter_set->limit_synonym_search(1);
       }
