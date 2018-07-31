@@ -18,7 +18,7 @@ use warnings;
 use Test::More;
 use Test::Exception;
 use FindBin qw($Bin);
-
+use Data::Dumper;
 use lib $Bin;
 use VEPTestingConfig;
 my $test_cfg = VEPTestingConfig->new();
@@ -111,6 +111,7 @@ is_deeply(
       1
     ],
     'CLIN_SIG' => [
+      'uncertain_significance',
       'not_provided',
       'pathogenic'
     ],
@@ -226,7 +227,7 @@ $ib = get_annotated_buffer({
   input_file => $test_cfg->create_input_file([
     ['##fileformat=VCFv4.1'],
     [qw(#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT dave barry jeff)],
-    [qw(21 25587759 indtest A G . . . GT 0|1 1/1 0/0)],
+    [qw(21 25607429 indtest A G . . . GT 0|1 1/1 0/0)],
   ]),
   individual => 'dave',
 });
@@ -237,7 +238,7 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'indtest',
-    'Location' => '21:25587759',
+    'Location' => '21:25607429',
     'IND' => 'dave',
     'ZYG' => 'HET',
   },
@@ -255,7 +256,7 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'indtest',
-    'Location' => '21:25587759',
+    'Location' => '21:25607429',
     'IND' => 'dave',
     'ZYG' => 'HET',
     'custom1' => ['foo'],
@@ -270,7 +271,7 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'indtest',
-    'Location' => '21:25587759',
+    'Location' => '21:25607429',
     'IND' => 'dave',
     'ZYG' => 'HET',
     'NEAREST' => ['foo', 'bar'],
@@ -284,7 +285,7 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'indtest',
-    'Location' => '21:25587759',
+    'Location' => '21:25607429',
     'AMBIGUITY' => 'R',
     'IND' => 'dave',
     'ZYG' => 'HET',
@@ -351,14 +352,14 @@ $of->{pick_order} = $orig_order;
 
 is_deeply(
   [sort map {$_->feature->stable_id} @{$of->pick_VariationFeatureOverlapAllele_per_gene(\@vfoas)}],
-  ['ENSR00001963192', 'ENST00000307301', 'ENST00000567517'],
+  ['ENST00000307301', 'ENST00000567517'],
   'pick_VariationFeatureOverlapAllele_per_gene'
 );
 
 $of->{pick_order} = ['rank'];
 is_deeply(
   [sort map {$_->feature->stable_id} @{$of->pick_VariationFeatureOverlapAllele_per_gene(\@vfoas)}],
-  ['ENSR00001963192', 'ENST00000352957', 'ENST00000567517'],
+  ['ENST00000352957', 'ENST00000567517'],
   'pick_VariationFeatureOverlapAllele_per_gene - change pick_order'
 );
 $of->{pick_order} = $orig_order;
@@ -382,7 +383,7 @@ $of->{pick} = 0;
 $of->{per_gene} = 1;
 is_deeply(
   [sort map {$_->feature->stable_id} @{$of->filter_VariationFeatureOverlapAlleles(\@vfoas)}],
-  ['ENSR00001963192', 'ENST00000307301', 'ENST00000567517'],
+  ['ENST00000307301', 'ENST00000567517'],
   'filter_VariationFeatureOverlapAlleles - per_gene'
 );
 $of->{per_gene} = 0;
@@ -452,8 +453,8 @@ is_deeply(
     @{$of->filter_VariationFeatureOverlapAlleles(\@vfoas)}
   ],
   [
-    'G:ENSR00001963192', 'G:ENST00000307301', 'G:ENST00000567517',
-    'T:ENSR00001963192', 'T:ENST00000307301', 'T:ENST00000567517'
+    'G:ENST00000307301', 'G:ENST00000567517',
+    'T:ENST00000307301', 'T:ENST00000567517'
   ],
   'filter_VariationFeatureOverlapAlleles - pick_allele_gene'
 );
@@ -473,8 +474,8 @@ is_deeply(
     @{$of->filter_VariationFeatureOverlapAlleles(\@vfoas)}
   ],
   [
-    'G:ENSR00001963192', 'G:ENST00000307301', 'G:ENST00000567517',
-    'T:ENSR00001963192', 'T:ENST00000307301', 'T:ENST00000567517'
+    'G:ENST00000307301', 'G:ENST00000567517',
+    'T:ENST00000307301', 'T:ENST00000567517'
   ],
   'filter_VariationFeatureOverlapAlleles - flag_pick_allele_gene check'
 );
@@ -971,6 +972,7 @@ $of->{symbol} = 0;
 
 $of->{gene_phenotype} = 1;
 ($vf) = grep {$_->{variation_name} eq 'rs145277462'} @{$ib->buffer};
+
 ($vfoa) = grep {$_->feature->stable_id eq 'ENST00000346798'} @{$of->get_all_VariationFeatureOverlapAlleles($vf)};
 is(
   $of->BaseTranscriptVariationAllele_to_output_hash($vfoa)->{GENE_PHENO},
@@ -986,11 +988,9 @@ my @flags = (
   [qw(canonical   CANONICAL YES)],
   [qw(biotype     BIOTYPE   protein_coding)],
   [qw(tsl         TSL       5)],
-  [qw(appris      APPRIS    A2)],
 );
 my $method = 'BaseTranscriptVariationAllele_to_output_hash';
 $vfoa = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[0];
-
 foreach my $flag(@flags) {
   $of->{$flag->[0]} = 1;
   is($of->$method($vfoa)->{$flag->[1]}, $flag->[2], $method.' - '.$flag->[0]);
@@ -1011,7 +1011,6 @@ foreach my $flag(@flags) {
   is_deeply($of->$method($vfoa)->{$flag->[1]}, [$flag->[2]], $method.' - '.$flag->[0]);
   $of->{$flag->[0]} = 0;
 }
-
 
 # test miRNA
 $of->{mirna} = 1;
@@ -1208,8 +1207,8 @@ is_deeply(
   [qw(sift     s SIFT     0.17)],
   [qw(sift     b SIFT     tolerated_low_confidence\(0.17\))],
   [qw(polyphen p PolyPhen benign)],
-  [qw(polyphen s PolyPhen 0.021)],
-  [qw(polyphen b PolyPhen benign\(0.021\))],
+  [qw(polyphen s PolyPhen 0.001)],
+  [qw(polyphen b PolyPhen benign\(0.001\))],
 );
 $method = 'TranscriptVariationAllele_to_output_hash';
 ($vf) = grep {$_->{variation_name} eq 'rs142513484'} @{$ib->buffer};
@@ -1242,7 +1241,7 @@ is_deeply(
     ],
     'Feature_type' => 'RegulatoryFeature',
     'BIOTYPE' => 'promoter',
-    'Feature' => 'ENSR00001963212',
+    'Feature' => 'ENSR00000140763',
     'Allele' => 'T'
   },
   'RegulatoryFeatureVariationAllele_to_output_hash'
@@ -1251,7 +1250,7 @@ is_deeply(
 $of->{cell_type} = ['HUVEC'];
 is_deeply(
   $of->RegulatoryFeatureVariationAllele_to_output_hash($vfoa)->{CELL_TYPE},
-  ['HUVEC:Promoter'],
+  ['HUVEC:ACTIVE'],
   'RegulatoryFeatureVariationAllele_to_output_hash - cell_type'
 );
 $of->{cell_type} = undef;
@@ -1277,24 +1276,24 @@ is_deeply(
     'Consequence' => [
       'TF_binding_site_variant'
     ],
-    'MOTIF_POS' => 7,
+    'MOTIF_POS' => 5,
     'Feature_type' => 'MotifFeature',
-    'MOTIF_NAME' => 'Name/Accession_association_Egr1:MA0162.2',
+    'MOTIF_NAME' => 'ENSM00000003250',
     'Allele' => 'T',
-    'Feature' => 'MA0162.2',
+    'Feature' => 'ENSM00000003250',
     'HIGH_INF_POS' => 'Y',
-    'MOTIF_SCORE_CHANGE' => '-0.097'
+    'MOTIF_SCORE_CHANGE' => '-0.058'
   },
   'MotifFeatureVariationAllele_to_output_hash'
 );
 
-
-$of->{cell_type} = ['MultiCell'];
-is_deeply(
-  $of->MotifFeatureVariationAllele_to_output_hash($vfoa)->{CELL_TYPE},
-  ['MultiCell:Promoter'],
-  'MotifFeatureVariationAllele_to_output_hash - cell_type'
-);
+# link to cell types for new motif_feature schema has not been added yet
+#$of->{cell_type} = ['MultiCell'];
+#is_deeply(
+#  $of->MotifFeatureVariationAllele_to_output_hash($vfoa)->{CELL_TYPE},
+#  ['MultiCell:Promoter'],
+#  'MotifFeatureVariationAllele_to_output_hash - cell_type'
+#);
 $of->{cell_type} = undef;
 
 
@@ -1331,7 +1330,7 @@ is_deeply(
 ##############################
 
 $ib = get_annotated_buffer({
-  input_file => $test_cfg->create_input_file([qw(21 25585733 sv_dup T . . . SVTYPE=DUP;END=25585735)]),
+  input_file => $test_cfg->create_input_file([qw(21 25606614 sv_dup T . . . SVTYPE=DUP;END=25606616)]),
   regulatory => 1,
 });
 
@@ -1339,7 +1338,7 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'sv_dup',
-    'Location' => '21:25585734-25585735'
+    'Location' => '21:25606615-25606616'
   },
   'SV - VariationFeature_to_output_hash'
 );
@@ -1356,7 +1355,7 @@ is(
 
 is_deeply(
   [sort map {$_->feature->stable_id} @{$of->pick_VariationFeatureOverlapAllele_per_gene(\@vfoas)}],
-  ['ENSR00001963192', 'ENST00000307301', 'ENST00000567517'],
+  ['ENSR00000140751', 'ENST00000307301'],
   'SV - pick_VariationFeatureOverlapAllele_per_gene'
 );
 
@@ -1437,7 +1436,7 @@ is_deeply(
     @{$of->filter_StructuralVariationOverlapAlleles(\@vfoas)}
   ],
   [
-    'ENSR00001963192', 'ENST00000307301', 'ENST00000567517'
+    'ENSR00000140751', 'ENST00000307301',
   ],
   'SV - filter_StructuralVariationOverlapAlleles - flag_pick_allele_gene check'
 );
@@ -1456,7 +1455,7 @@ is(
 $of->{coding_only} = 1;
 is(
   scalar @{$of->get_all_StructuralVariationOverlapAlleles($ib->buffer->[0])},
-  1,
+  3,
   'SV - get_all_StructuralVariationOverlapAlleles - coding_only'
 );
 $of->{coding_only} = 0;
@@ -1598,7 +1597,7 @@ is_deeply(
     'OverlapPC' => '7.14',
     'Feature_type' => 'MotifFeature',
     'OverlapBP' => 1,
-    'Feature' => 'MA0162.2',
+    'Feature' => 'EGR1_Y_TCTCTT20NGA_NMCGCCCMCGCANN_m2_c2_Cell2013',
     'Allele' => 'duplication'
   },
   'SV - StructuralVariationOverlapAllele_to_output_hash - MotifFeature'
@@ -1613,10 +1612,10 @@ is_deeply(
     'Consequence' => [
       'regulatory_region_variant'
     ],
-    'OverlapPC' => '0.02',
+    'OverlapPC' => '0.03',
     'Feature_type' => 'RegulatoryFeature',
     'OverlapBP' => 1,
-    'Feature' => 'ENSR00001963212',
+    'Feature' => 'ENSR00000140763',
     'Allele' => 'duplication'
   },
   'SV - StructuralVariationOverlapAllele_to_output_hash - RegulatoryFeature'
@@ -1625,7 +1624,7 @@ is_deeply(
 $of->{cell_type} = ['HUVEC'];
 is_deeply(
   $of->StructuralVariationOverlapAllele_to_output_hash($vfoa)->{CELL_TYPE},
-  ['HUVEC:Promoter'],
+  ['HUVEC:ACTIVE'],
   'SV - StructuralVariationOverlapAllele_to_output_hash - RegulatoryFeature cell_type'
 );
 $of->{cell_type} = undef;
