@@ -18,7 +18,6 @@ use warnings;
 use Test::More;
 use Test::Exception;
 use FindBin qw($Bin);
-use Data::Dumper;
 use lib $Bin;
 use VEPTestingConfig;
 my $test_cfg = VEPTestingConfig->new();
