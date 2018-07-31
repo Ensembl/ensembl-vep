@@ -136,9 +136,10 @@ sub clean_regfeat {
   if(defined($rf->{binding_matrix})) {
     $rf->{_variation_effect_feature_cache}->{seq} = $rf->seq;
 
-    foreach my $key(qw(adaptor feature_type analysis dbID)) {
+    foreach my $key(qw(adaptor feature_type analysis dbID associated_transcription_factor_complexes)) {
       delete $rf->{binding_matrix}->{$key};
     }
+    $rf->{binding_matrix}->{associated_transcription_factor_complexes} = [];
   }
 
   $rf->{feature_type} = $rf->{feature_type}->{so_name} if $rf->{feature_type};
