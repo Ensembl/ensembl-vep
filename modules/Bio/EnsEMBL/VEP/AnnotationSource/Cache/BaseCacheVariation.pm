@@ -393,12 +393,21 @@ sub _add_check_freq_data_to_vf {
   foreach my $alt(@$alts) {
     my $pass = 0;
 
-    # set freq to 0 if it hasn't been observed
-    # this I think is a fair assumption if the position has been fully typed
-    my $f = $freq_data->{$alt} || 0;
+    # set freq to 'NA' if the alternate allele hasn't been observed, or
+    # the reference allele is the minor allele and the overlapping variant
+    # is multiallelic (more than 1 alternative allele), e.g.:
+    # Input: 17:7676154 => G/C
+    # Minor allele: G (0.4571)
+    # Overlapping variant: rs1042522 (G/C/T)
+    my $f = $freq_data->{$alt} || 'NA';
 
-    $pass = 1 if $f >= $freq_freq and $freq_gt_lt eq 'gt';
-    $pass = 1 if $f <= $freq_freq and $freq_gt_lt eq 'lt';
+    if ($f eq 'NA') {
+      $pass = 0;
+    }
+    else {
+      $pass = 1 if $f >= $freq_freq and $freq_gt_lt eq 'gt';
+      $pass = 1 if $f <= $freq_freq and $freq_gt_lt eq 'lt';
+    }
     $used_freqs{$alt} = $f;
 
     $pass_count += $pass;
