@@ -213,13 +213,6 @@ our @OPTION_SETS = (
       check_frequency => 1,
     },
   },
-
-  {
-    flags => ['check_frequency'],
-    set => {
-      no_check_alleles => 1,
-    }
-  },
   
   {
     flags => [qw(check_frequency af af_1kg af_esp af_exac af_gnomad max_af pubmed)],
