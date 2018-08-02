@@ -966,7 +966,7 @@ sub add_colocated_variant_info {
     foreach my $p(keys %{$vf->{_freq_check_freqs}}) {
       foreach my $a(keys %{$vf->{_freq_check_freqs}->{$p}}) {
         push @freqs, sprintf(
-          '%s:%s:%g',
+          '%s:%s:%s',
           $p,
           $a,
           $vf->{_freq_check_freqs}->{$p}->{$a}
