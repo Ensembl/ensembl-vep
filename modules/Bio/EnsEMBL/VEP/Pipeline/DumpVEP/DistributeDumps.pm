@@ -54,28 +54,12 @@ sub run {
   }
   else {
     $dir = $self->required_param('pipeline_dir').'/dumps';
-    $self->DistributeRest($dir,$version);
     $self->DistributeProduction($dir);
     $self->DistributeWeb($dir);
   }
 }
 
 
-#Distribute the REST dumps, only for human
-sub DistributeRest{
-  my ($self,$dir,$version) = @_;
-  make_path("$dir/rest") if (!-d "$dir/rest");
-  foreach my $assembly (qw/GRCh37 GRCh38/) {
-    foreach my $suffix('', qw(_refseq _merged)) {
-      my $file = "homo_sapiens$suffix\_vep_$version\_$assembly\_tabixconverted.tar.gz";
-      if (-e "$dir/$file") {
-        $self->link_file("$dir/$file", "$dir/rest/$file");
-      } else {
-        $self->warning("$file doesn't exist");
-      }
-    }
-  }
-}
 
 #Distribute the Production dumps for the FTP site
 sub DistributeProduction {
@@ -111,6 +95,9 @@ sub DistributeProduction {
 # VEP installer does include an attempt to install Bio::DB::HTS which allows use of the converted dumps but it doesnt have a 100% success rate. We are experiencing issues with OSX ATM, for example
 sub DistributeWeb{
   my ($self,$dir) = @_;
+
+  my %copied; ## save list of tabix'ed tar balls copied
+
   make_path("$dir/web") if (!-d "$dir/web");
   opendir (my $dh, $dir) or die $!;
   while (my $content = readdir($dh)) {
@@ -119,23 +106,26 @@ sub DistributeWeb{
       make_path("$dir/web/$content") if (!-d "$dir/web/$content");
       opendir (my $dh_collection, "$dir/$content") or die $!;
       while (my $file_collection = readdir($dh_collection)) {
-        if ($file_collection =~ /gz$/ && $file_collection !~ /tabix/) {
+        ## only copy non- tabixed set if tabixed set not already copied
+        if ($file_collection =~ /gz$/ && $file_collection !~ /tabix/ && ! $copied{$file_collection}) {
           $self->link_file("$dir/$content/$file_collection", "$dir/web/$content/$file_collection");
         }
         elsif ($file_collection =~ /tabix/) {
           my $file_collection_no_tabix = $file_collection;
           $file_collection_no_tabix =~ s/\_tabixconverted//;
+          $copied{$file_collection_no_tabix} = 1;
           $self->link_file("$dir/$content/$file_collection", "$dir/web/$content/$file_collection_no_tabix");
         }
       }
       $dh_collection->close();
     }
-    elsif ($content =~ /gz$/ && $content !~ /tabix/) {
+    elsif ($content =~ /gz$/ && $content !~ /tabix/ && ! $copied{$content}) {
       $self->link_file("$dir/$content", "$dir/web/$content");
     }
     elsif ($content =~ /tabix/) {
       my $file_no_tabix = $content;
       $file_no_tabix =~ s/\_tabixconverted//;
+      $copied{$file_no_tabix} = 1;
       $self->link_file("$dir/$content", "$dir/web/$file_no_tabix");
     }
   }
