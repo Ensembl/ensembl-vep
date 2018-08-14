@@ -215,6 +215,8 @@ sub get_features_by_regions_uncached {
               map {[$_->get_Epigenome->display_label, $_->activity]}
               map {@{$_->regulatory_activity}}
               @{$rfa->fetch_all_by_attribute_feature($rf)};
+            $rf->binding_matrix->_elements;
+            $rf->binding_matrix->_min_max_sequence_similarity_score;
           }
 
           $rf->{cell_types} = \%cl;
