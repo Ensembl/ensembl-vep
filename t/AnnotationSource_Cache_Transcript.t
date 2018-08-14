@@ -136,7 +136,7 @@ my $features = $c->deserialized_obj_to_features($obj);
 is(ref($features), 'ARRAY', 'deserialized_object_to_features ref 1');
 is(ref($features->[0]), 'Bio::EnsEMBL::Transcript', 'deserialized_object_to_features ref 2');
 is(ref($features->[-1]), 'Bio::EnsEMBL::Transcript', 'deserialized_object_to_features ref 3');
-is(scalar @$features, 70, 'deserialized_object_to_features count');
+is(scalar @$features, 68, 'deserialized_object_to_features count');
 
 # filter_transcript
 is($c->filter_transcript($features->[0]), 1, 'filter_transcript pass');
@@ -154,10 +154,10 @@ $c->{source_type} = 'ensembl';
 
 # check filter works on deserialized_obj_to_features
 $c->{gencode_basic} = 1;
-is(scalar @{$c->deserialized_obj_to_features($obj)}, 47, 'deserialized_object_to_features filtered count');
+is(scalar @{$c->deserialized_obj_to_features($obj)}, 45, 'deserialized_object_to_features filtered count');
 $c->{gencode_basic} = undef;
 
-is(scalar @{$c->merge_features([@$features, @$features])}, 70, 'merge_features count');
+is(scalar @{$c->merge_features([@$features, @$features])}, 68, 'merge_features count');
 
 # merge_features does some hacky data restoration
 # probably only required for use with old buggy cache files
@@ -199,7 +199,7 @@ $tmp[-2]->{dbID} -= 2;
 is(scalar @tmp, 5, 'merge_features refseq count before merge (source same)');
 @tmp = @{$c->merge_features(\@tmp)};
 is(scalar @tmp, 3, 'merge_features refseq removes duplicates (source same)');
-is($tmp[-1]->{dbID}, 11214669, 'merge features refseq leaves lowest dbID');
+is($tmp[-1]->{dbID}, 822983, 'merge features refseq leaves lowest dbID');
 
 $c->{source_type} = 'ensembl';
 
@@ -324,7 +324,7 @@ SKIP: {
   ok($timestamp eq (stat(TREE))[9], 'tree_file - timestamp same after rerun');
 
   # read data to check
-  is(md5_hex(join("", <TREE>)), '4c0a59f7101414b8f14f27d7b4ac2e38', 'md5_hex of tree_file content');
+  is(md5_hex(join("", <TREE>)), '51a863caf2567f482779713fa4d91f05', 'md5_hex of tree_file content');
   close TREE;
 
   # fetch the tree itself

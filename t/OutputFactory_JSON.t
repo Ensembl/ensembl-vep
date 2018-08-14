@@ -242,6 +242,20 @@ SKIP: {
   @lines = @{$of->get_all_lines_by_InputBuffer($ib)};
 
   is_deeply(
+    $json->decode($lines[28])->{'regulatory_feature_consequences'},
+    [{
+      'consequence_terms' => [
+        'regulatory_region_variant'
+      ],
+      'variant_allele' => 'G',
+      'regulatory_feature_id' => 'ENSR00000140751',
+      'impact' => 'MODIFIER',
+      'biotype' => 'promoter'
+    }],
+    'get_all_lines_by_InputBuffer - regulatory information'
+  );
+
+  is_deeply(
     $json->decode($lines[0]),
     {
       'input' => "21\t25585733\trs142513484\tC\tT\t.\t.\t.\tGT\t0|0",
@@ -296,7 +310,6 @@ SKIP: {
           'transcript_id' => 'ENST00000307301',
           'gene_id' => 'ENSG00000154719',
           'canonical' => 1,
-          'appris' => 'A2',
           'protein_id' => 'ENSP00000305682',
           'uniparc' => [
             'UPI00001AEAC0'
@@ -314,7 +327,7 @@ SKIP: {
           'hgvsp' => 'ENSP00000284967.6:p.Ala331Thr',
           'variant_allele' => 'T',
           'cdna_end' => 1033,
-          'polyphen_score' => '0.021',
+          'polyphen_score' => '0.001',
           'codons' => 'Gca/Aca',
           'swissprot' => [
             'Q9NYK5'
@@ -330,7 +343,7 @@ SKIP: {
           'cdna_start' => 1033,
           'gene_id' => 'ENSG00000154719',
           'cds_start' => 991,
-          'appris' => 'P3',
+          'appris' => 'P1',
           'sift_prediction' => 'tolerated_low_confidence',
           'protein_id' => 'ENSP00000284967',
           'polyphen_prediction' => 'benign',
@@ -355,29 +368,18 @@ SKIP: {
           'distance' => 2407,
           'variant_allele' => 'T',
           'biotype' => 'antisense',
-          'gene_symbol_source' => 'Clone_based_vega_gene',
+          'gene_symbol_source' => 'Clone_based_ensembl_gene',
           'consequence_terms' => [
             'upstream_gene_variant'
           ],
           'strand' => -1,
-          'gene_symbol' => 'AP000223.42',
+          'gene_symbol' => 'AP000223.1',
           'transcript_id' => 'ENST00000567517',
           'impact' => 'MODIFIER'
         }
       ],
       'strand' => 1,
       'id' => 'rs142513484',
-      'regulatory_feature_consequences' => [
-        {
-          'consequence_terms' => [
-            'regulatory_region_variant'
-          ],
-          'variant_allele' => 'T',
-          'regulatory_feature_id' => 'ENSR00001963192',
-          'impact' => 'MODIFIER',
-          'biotype' => 'TF_binding_site'
-        }
-      ],
       'allele_string' => 'C/T',
       'most_severe_consequence' => 'missense_variant',
       'start' => 25585733

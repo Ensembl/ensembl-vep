@@ -261,7 +261,7 @@ is(ref($features), 'ARRAY', 'get_all_features_by_InputBuffer ref 1');
 is(ref($features->[0]), 'HASH', 'get_all_features_by_InputBuffer ref 2');
 is($features->[0]->{variation_name}, 'rs142513484', 'get_all_features_by_InputBuffer variation_name 1');
 is($features->[-1]->{variation_name}, 'COSM5057537', 'get_all_features_by_InputBuffer variation_name 2');
-is(scalar @$features, 24257, 'get_all_features_by_InputBuffer count');
+is(scalar @$features, 50848, 'get_all_features_by_InputBuffer count');
 
 # do it again to get them from memory
 $features = $c->get_all_features_by_InputBuffer($ib);
@@ -355,7 +355,7 @@ is_deeply(
       'gnomAD_OTH' => 'T:0.0001823',
       'gnomAD_EAS' => 'T:0',
       'EUR' => 'T:0',
-      'clin_sig' => 'not_provided,pathogenic',
+      'clin_sig' => 'uncertain_significance,not_provided,pathogenic',
       'EAS' => 'T:0',
       'end' => 25891796,
       'gnomAD_NFE' => 'T:2.687e-05',
@@ -363,7 +363,7 @@ is_deeply(
       'minor_allele' => 'T',
       'EA' => '',
       'start' => 25891796,
-      'pubmed' => '',
+      'pubmed' => '1303275,15365148',
       'matched_alleles' => [
         {
           'a_index' => 0,
