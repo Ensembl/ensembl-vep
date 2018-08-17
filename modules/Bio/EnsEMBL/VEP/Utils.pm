@@ -215,7 +215,7 @@ sub numberify {
   if(ref($ref) eq 'HASH') {
     foreach my $k(keys %$ref) {
       if(ref($ref->{$k}) =~ /HASH|ARRAY/) {
-        numberify($ref->{$k});
+        numberify($ref->{$k}, $exempt);
       }
       else {
         $ref->{$k} = $ref->{$k} + 0 if defined($ref->{$k}) && !$exempt->{$k} && looks_like_number($ref->{$k});
@@ -225,7 +225,7 @@ sub numberify {
   elsif(ref($ref) eq 'ARRAY') {
     foreach my $i(0..((scalar @$ref) - 1)) {
       if(ref($ref->[$i]) =~ /HASH|ARRAY/) {
-        numberify($ref->[$i]);
+        numberify($ref->[$i], $exempt);
       }
       else {
         $ref->[$i] = $ref->[$i] + 0 if defined($ref->[$i]) && looks_like_number($ref->[$i]);
