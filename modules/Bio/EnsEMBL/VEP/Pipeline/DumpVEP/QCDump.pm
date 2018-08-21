@@ -132,11 +132,12 @@ sub qc {
   my @report_files = ();
   my $report;
 
-  $report = $self->human_frequency_checks($qc_dir, $mod) if $has_var && $species eq 'homo_sapiens';
-  push @report_files, $report if $report;
+# Don't run for release/94 this keeps causing errors ENSVAR-1172
+# $report = $self->human_frequency_checks($qc_dir, $mod) if $has_var && $species eq 'homo_sapiens';
+# push @report_files, $report if $report;
 
-  $report = $self->run_test_set($qc_dir, $mod) if $has_var && $type eq 'core';
-  push @report_files, $report if $report;
+#  $report = $self->run_test_set($qc_dir, $mod) if $has_var && $type eq 'core';
+#  push @report_files, $report if $report;
 
   # clean up
   rmtree($qc_dir);

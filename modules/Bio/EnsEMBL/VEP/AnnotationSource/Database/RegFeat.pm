@@ -181,8 +181,9 @@ sub get_features_by_regions_uncached {
     
     $sub_slice->{coord_system}->{adaptor} ||= $self->get_adaptor('core', 'coordsystem');
     $sub_slice->{adaptor} ||= $self->get_adaptor('core', 'slice');
-
-    foreach my $type(qw(RegulatoryFeature MotifFeature)) {
+# Don't dump MotifFeature for release/94
+#    foreach my $type(qw(RegulatoryFeature MotifFeature)) {
+    foreach my $type(qw(RegulatoryFeature)) {
       my $features = $self->get_adaptor('funcgen', $type)->fetch_all_by_Slice($sub_slice);
       next unless defined($features);
 
