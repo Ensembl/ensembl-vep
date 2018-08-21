@@ -142,6 +142,8 @@ sub new {
     $format = lc($format);
     throw("ERROR: Unknown or unsupported format $format\n") unless $FORMAT_MAP{$format};
 
+    $self->warning_msg("No input file format specified - detected $format format") if $self->param('verbose');
+
     $self->param('format', $format);
 
     my $class = 'Bio::EnsEMBL::VEP::Parser::'.$FORMAT_MAP{$format};
