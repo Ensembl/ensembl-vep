@@ -788,8 +788,8 @@ END
   chdir $htslib_install_dir;
   my $actualdir = getcwd;
   my $htslib_github_url = "https://github.com/samtools/htslib/";
-  my $htslib_zip_github_url = "$htslib_github_url/releases/download/$HTSLIB_VERSION/htslib-$HTSLIB_VERSION.tar.bz2";
-  my $htslib_zip_download_file = $htslib_install_dir.'/htslib.tar.bz2';
+  my $htslib_zip_github_url = "$htslib_github_url/archive/$HTSLIB_VERSION.tar.gz";
+  my $htslib_zip_download_file = $htslib_install_dir.'/htslib.tar.gz';
 
   # STEP 2: Download htslib
   print(" - checking out HTSLib\n");
