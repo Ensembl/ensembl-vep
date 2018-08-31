@@ -44,8 +44,8 @@ GetOptions(
   'registry=s',              # registry file
   'host=s',                  # database host
   'port=s',                  # database port
-  'user|u=s',                  # database user name
-  'password=s',              # database password
+  'user|u=s',                # database user name
+  'password|pass=s',         # database password
   'db_version=i',            # Ensembl database version to use e.g. 62
   'assembly|a=s',            # assembly version to use
   'genomes',                 # automatically sets DB params for e!Genomes
@@ -63,12 +63,12 @@ GetOptions(
   
   # verbosity options
   'verbose|v',               # print out a bit more info while running
-  'quiet',                   # print nothing to STDOUT (unless using -o stdout)
+  'quiet|q',                 # print nothing to STDOUT (unless using -o stdout)
   
   # output options
   'output_file|o=s',         # output file name
   'warning_file=s',          # file to write warnings to
-  'force_overwrite',         # force overwrite of output file if already exists
+  'force_overwrite|force',   # force overwrite of output file if already exists
   'json',                    # create JSON output
   'dont_export=s',           # list of JSON keys to exclude
   

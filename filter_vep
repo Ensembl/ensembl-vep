@@ -94,7 +94,7 @@ sub configure {
     'registry=s',
     
     'start|s=i',               # skip first N results
-    'limit|l=i',               # return max N results
+    'limit=i',                 # return max N results
     
     'filter|f=s@',             # filter
   ) or throw("ERROR: Failed to parse command-line flags\n");
