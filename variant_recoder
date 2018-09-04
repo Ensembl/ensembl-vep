@@ -51,7 +51,7 @@ GetOptions(
   'host=s',                  # database host
   'port=s',                  # database port
   'user|u=s',                # database user name
-  'password=s',              # database password
+  'password|pass=s',         # database password
   'db_version=i',            # Ensembl database version to use e.g. 62
   'assembly|a=s',            # assembly version to use
   'grch37',                  # set for using GRCh37
