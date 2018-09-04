@@ -43,7 +43,7 @@ GetOptions(
   'host=s',                  # database host
   'port=s',                  # database port
   'user|u=s',                # database user name
-  'password=s',              # database password
+  'password|pass=s',         # database password
   'db_version=i',            # Ensembl database version to use e.g. 62
   'assembly|a=s',            # assembly version to use
   'grch37',                  # set for using GRCh37
@@ -108,7 +108,7 @@ GetOptions(
   
   # verbosity options
   'verbose|v',               # print out a bit more info while running
-  'quiet',                   # print nothing to STDOUT (unless using -o stdout)
+  'quiet|q',                 # print nothing to STDOUT (unless using -o stdout)
   'no_progress',             # don't display progress bars
   
   # output options
@@ -122,7 +122,7 @@ GetOptions(
   'stats_html',              # write stats as html
   'no_stats',                # don't write stats file
   'warning_file=s',          # file to write warnings to
-  'force_overwrite',         # force overwrite of output file if already exists
+  'force_overwrite|force',   # force overwrite of output file if already exists
   'terms|t=s',               # consequence terms to use e.g. NCBI, SO
   'coding_only',             # only return results for consequences in coding regions
   'canonical',               # indicates if transcript is canonical
