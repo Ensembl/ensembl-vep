@@ -6,9 +6,9 @@ export PERL5LIB=$DEPS/bioperl-live-release-1-6-924:$PWD/ensembl-test/modules:$PW
 
 # export HTSLIB_DIR=$DEPS/htslib
 
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$DEPS/htslib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$DEPS/htslib-1.9
 
-export PATH=$PATH:$DEPS/htslib
+export PATH=$PATH:$DEPS/htslib-1.9
 
 echo "Running test suite"
 echo "Using $PERL5LIB"
