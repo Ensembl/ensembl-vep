@@ -7,9 +7,10 @@ if [ ! -f release-1-6-924.zip ]; then
 fi
 
 echo 'Getting HTSlib'
-if [ ! -d htslib-1.9 ]; then
+if [ ! -d htslib ]; then
   wget https://github.com/samtools/htslib/releases/download/1.9/htslib-1.9.tar.bz2
   tar xvjf htslib-1.9.tar.bz2
+  mv htslib-1.9 htslib
 fi
 
 echo 'Getting Bio::DB::HTS'
