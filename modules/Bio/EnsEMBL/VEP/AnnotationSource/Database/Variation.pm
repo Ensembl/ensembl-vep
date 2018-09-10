@@ -184,6 +184,11 @@ sub get_features_by_regions_uncached {
     while($sth->fetch) {
       my %v_copy = %v;
       $v_copy{allele_string} =~ s/\s+/\_/g;
+
+      ## fix for e!94 alleles
+      $v_copy{allele_string} =~ s/\/$//g;
+      $v_copy{allele_string} =~ s/\/\//\//;
+
       push @vars, \%v_copy if $self->filter_variation(\%v_copy);
     }
 
