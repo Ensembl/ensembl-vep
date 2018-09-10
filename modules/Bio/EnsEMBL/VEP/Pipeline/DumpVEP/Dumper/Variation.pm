@@ -289,18 +289,22 @@ sub freqs_from_vcf {
         foreach my $v(@{$by_pos{$start}}) {
           $DB::single = 1 if $v->{variation_name} eq 'TMP_ESP_1_179086420_179086420';
 
-          my $matches = get_matched_variant_alleles(
-            {
-              allele_string => $v->{allele_string},
-              pos           => $v->{start},
-              strand        => $v->{strand},
-            },
-            {
-              ref  => $vcf_ref,
-              alts => \@vcf_alts,
-              pos  => $vcf_pos,
-            }
-          );
+          my $matches = [];
+          eval{
+            $matches = get_matched_variant_alleles(
+              {
+                allele_string => $v->{allele_string},
+                pos           => $v->{start},
+                strand        => $v->{strand},
+              },
+              {
+                ref  => $vcf_ref,
+                alts => \@vcf_alts,
+                pos  => $vcf_pos,
+              }
+            );
+          };
+          die "Failed to get vf matches for " .$v->{variation_name} ."\n" unless $@ eq '';  
 
           if(@$matches) {
 
