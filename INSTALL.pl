@@ -93,8 +93,8 @@ our (
 ## VERSIONS OF INSTALLED SOFTWARE
 ## MAY BE UPDATED IF SUCCESSFULLY TESTED
 ########################################
-our $HTSLIB_VERSION  = '1.3.2';           # frozen due to introduced dependency on lzma, bz2
-our $BIOHTS_VERSION  = '2.9';             # latest as of release/91
+our $HTSLIB_VERSION  = '1.9';           # frozen due to introduced dependency on lzma, bz2
+our $BIOHTS_VERSION  = '2.11';             # latest as of release/91
 our $BIOPERL_VERSION = 'release-1-6-924'; # frozen, no pressing need to update
 
 
@@ -787,19 +787,25 @@ END
   my $curdir = getcwd;
   chdir $htslib_install_dir;
   my $actualdir = getcwd;
+  my $htslib_github_url = "https://github.com/samtools/htslib/";
+  my $htslib_zip_github_url = "$htslib_github_url/archive/$HTSLIB_VERSION.tar.gz";
+  my $htslib_zip_download_file = $htslib_install_dir.'/htslib.tar.gz';
 
-  # STEP 2: Check out HTSLIB / or make this a download?
-  print(" - checking out HTSLib\n");
-  system "git clone -b $HTSLIB_VERSION https://github.com/samtools/htslib.git";
-  -d './htslib' or die "git clone seems to have failed. Could not find $htslib_install_dir/htslib directory";
+  # STEP 2: Download htslib
+  print(" - downloading HTSLib\n");
+  download_to_file($htslib_zip_github_url, $htslib_zip_download_file);
+  print "htslib_zip_github_url $htslib_zip_github_url   htslib_zip_download_file $htslib_zip_download_file\n";
+  print " - unpacking $htslib_zip_download_file\n" unless $QUIET;
+  unpack_arch($htslib_zip_download_file, "$htslib_install_dir");
+  rename "htslib-$HTSLIB_VERSION",'htslib' or die "Couldn't rename htslib-$HTSLIB_VERSION to htslib: $!";
+  -d './htslib' or die "Download of htslib failed. Could not find $htslib_install_dir/htslib directory";
   chdir './htslib';
-
   # Step 3: Build libhts.a
   print(" - building HTSLIB in $htslib_install_dir/htslib\n");
   print( "In ".getcwd."\n" );
   # patch makefile
   rename 'Makefile','Makefile.orig' or die "Couldn't rename Makefile to Makefile.orig: $!";
-  open my $in, '<','Makefile.orig'     or die "Couldn't open Makefile for reading: $!";
+  open my $in, '<','Makefile.orig' or die "Couldn't open Makefile for reading: $!";
   open my $out,'>','Makefile.new' or die "Couldn't open Makefile.new for writing: $!";
 
   while (<$in>) {
