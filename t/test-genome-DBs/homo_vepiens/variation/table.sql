@@ -676,3 +676,12 @@ CREATE TABLE `variation_synonym` (
   KEY `source_idx` (`source_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
+CREATE TABLE allele_synonym (
+  allele_synonym_id int(10) unsigned NOT NULL AUTO_INCREMENT,
+  variation_id      int(10) unsigned NOT NULL,
+  hgvs_genomic      varchar(600) NOT NULL,
+  name              varchar(255) NOT NULL,
+  PRIMARY KEY (allele_synonym_id),
+  UNIQUE KEY variation_name_idx (variation_id, name),
+  KEY name_idx (name)
+) ENGINE = MyISAM;
