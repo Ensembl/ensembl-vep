@@ -155,7 +155,7 @@ sub create_VariationFeatures {
   # remove whitespace
   $hgvs =~ s/\s+//g;
 
-  if ((index($hgvs, '[') != -1) || (index($hgvs, ']') != -1)) {
+  if ($hgvs =~ /(\[|\])/ ){
     $self->warning_msg("WARNING: Unable to parse HGVS notation \'$hgvs\'\n");
     return $self->create_VariationFeatures 
   }
