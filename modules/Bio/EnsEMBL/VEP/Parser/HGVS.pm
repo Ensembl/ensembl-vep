@@ -154,6 +154,11 @@ sub create_VariationFeatures {
 
   # remove whitespace
   $hgvs =~ s/\s+//g;
+  
+  if ((index($hgvs, '[') != -1) || (index($hgvs, ']') != -1)) {
+    $self->warning_msg("WARNING: Unable to parse HGVS notation \'$hgvs\'\n");
+    return $self->create_VariationFeatures;
+  }
 
   my $param_core_group = $self->param('core_type');
   my @core_groups = sort {($b eq $param_core_group) cmp ($a eq $param_core_group)} qw(core otherfeatures);
