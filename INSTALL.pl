@@ -1064,11 +1064,11 @@ sub cache() {
 
     @files = (
       "bos_taurus_vep_".$DATA_VERSION."_UMD3.1.tar.gz",
-      "danio_rerio_vep_".$DATA_VERSION."_GRCz11.tar.gz",
+      "danio_rerio_vep_".$DATA_VERSION."_Zv9.tar.gz",
       "homo_sapiens_vep_".$DATA_VERSION."_GRCh37.tar.gz",
       "homo_sapiens_vep_".$DATA_VERSION."_GRCh38.tar.gz",
       "mus_musculus_vep_".$DATA_VERSION."_GRCm38.tar.gz",
-      "rattus_norvegicus_vep_".$DATA_VERSION."_Rnor_6.0.tar.gz",
+      "rattus_norvegicus_vep_".$DATA_VERSION."_Rnor_5.0.tar.gz",
     );
   }
   else {
