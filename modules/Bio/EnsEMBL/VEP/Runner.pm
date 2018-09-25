@@ -198,10 +198,14 @@ sub run {
   unless($self->param('no_headers')) {
     print $fh "$_\n" for @{$self->get_OutputFactory->headers};
   }
-
-  while(my $line = $self->next_output_line) {
-    print $fh "$line\n";
-  }
+  
+  my $input_buffer = $self->get_InputBuffer;
+  
+  do {
+    while(my $line = $self->next_output_line) {
+      print $fh "$line\n";
+    }
+  } while(scalar(@{$input_buffer->{pre_buffer}}));
 
   close $fh;
 
