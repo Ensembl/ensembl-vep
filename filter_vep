@@ -174,7 +174,9 @@ sub main {
   
   my (@raw_headers, @headers, $line_number);
   my $count = 0;
+  my $missing_vcf_info_field = 0;
   my $filter_set = $config->{filter_set};
+  my $vcf_info_field = $config->{vcf_info_field};
   
   while(<$in_fh>) {
     chomp;
@@ -219,8 +221,6 @@ sub main {
       throw("ERROR: --only_matched is compatible only with VCF files\n") if $config->{format} ne 'vcf' && $config->{only_matched};
       
       my (@data, @chunks);
-
-      my $vcf_info_field = $config->{vcf_info_field};
       
       if($config->{format} eq 'tab') {
         push @data, parse_line($line, \@headers, "\t");
@@ -246,7 +246,10 @@ sub main {
             @chunks;
         }
         # Rare case where no CSQ stuff found
-        push @data, $main_data if (!@data);
+        if (!@data) {
+          push @data, $main_data;
+          $missing_vcf_info_field++;
+        }
 
         $filter_set->limit_synonym_search(1);
       }
@@ -285,6 +288,11 @@ sub main {
   }
   
   print $out_fh "$count\n" if defined($config->{count});
+
+  # If the VEP annotations INFO field (default value: CSQ) hasn't been found (or recognised) in at least 1 VCF input line.
+  if ($missing_vcf_info_field) {
+    warning("The script 'filter_vep' couldn't find the VEP annotations INFO field $vcf_info_field in $missing_vcf_info_field lines of the input file");
+  }
 }
 
 sub parse_headers {
