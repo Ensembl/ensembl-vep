@@ -67,6 +67,7 @@ our @FLAG_FIELDS = (
   # general
   { flag => 'individual',      fields => ['IND','ZYG'] },
   { flag => 'allele_number',   fields => ['ALLELE_NUM'] },
+  { flag => 'show_allele_ref', fields => ['ALLELE_REF'] },
   { flag => 'user',            fields => ['IMPACT','DISTANCE','STRAND','FLAGS'] },
   { flag => 'flag_pick',       fields => ['PICK'] },
   { flag => 'flag_pick_allele',fields => ['PICK'] },
@@ -212,6 +213,7 @@ our %FIELD_DESCRIPTIONS = (
   'SOMATIC'            => 'Somatic status of existing variant',
   'REFSEQ_MATCH'       => 'RefSeq transcript match status',
   'BAM_EDIT'           => 'Indicates success or failure of edit using BAM file',
+  'ALLELE_REF'         => 'Reference allele',
   'GIVEN_REF'          => 'Reference allele from input',
   'USED_REF'           => 'Reference allele as used to get consequences',
   'VARIANT_CLASS'      => 'SO variant class',

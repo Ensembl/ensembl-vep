@@ -166,6 +166,7 @@ GetOptions(
   'numbers',                 # include exon and intron numbers
   'total_length',            # give total length alongside positions e.g. 14/203
   'allele_number',           # indicate allele by number to avoid confusion with VCF conversions
+  'show_allele_ref',         # indicate reference allele
   'no_escape',               # don't percent-escape HGVS strings
   'ambiguity',               # Add allele ambiguity code
   
