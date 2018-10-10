@@ -300,7 +300,7 @@ sub parse_headers {
     if($hash_count == 2) {
       my $vcf_info_field = $config->{vcf_info_field};
 
-      if($raw_header =~ /INFO\=\<ID\=($vcf_info_field)/) {
+      if($raw_header =~ /INFO\=\<ID\=($vcf_info_field)\,/) {
         $raw_header =~ m/Format\: (.+?)\"/;
         $config->{headers} = [split '\|', $1];
       }
