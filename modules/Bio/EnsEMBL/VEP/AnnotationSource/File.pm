@@ -282,6 +282,10 @@ sub annotate_InputBuffer {
 
   my $parser = $self->parser();
 
+  # (Big)BED and (Big)Wig have the method 'get_raw_chrom' in ensembl-io
+  # VCF and GXF (GFF and GTF) have the method 'get_raw_seqname' in ensembl-io
+  my $get_raw_seqname = $parser->can('get_raw_seqname') ? 'get_raw_seqname' : 'get_raw_chrom';
+
   foreach my $chr(keys %by_chr) {
     foreach my $vf(@{$by_chr{$chr}}) {
       my ($vf_start, $vf_end) = ($vf->{start}, $vf->{end});
@@ -289,8 +293,14 @@ sub annotate_InputBuffer {
         $parser->next();
       }
 
+      # Different checks before annotating the VF:
+      # - Check a record exist
+      # - Check that the chromosomes names match between the input VF entry and the custom annotation file.
+      #   There is a special case for the custom annotation file with chromosome names like 'chr1',
+      #   as they are not present in the cache (chr_synonym.txt): we also check the 'raw' seqname with the source_chr_name.
+      # - Check that the start of the custom annotation record is lower that the end of the input VF entry
       while($parser->{record} &&
-            ($parser->get_seqname eq $self->get_source_chr_name($chr) || 'chr'.$parser->get_seqname eq $self->get_source_chr_name($chr)) &&
+            ($parser->get_seqname eq $self->get_source_chr_name($chr) || $parser->${get_raw_seqname} eq $self->get_source_chr_name($chr)) &&
             $parser->get_start <= $vf_end + 1) {
         $self->annotate_VariationFeature($vf);
         $parser->next();
