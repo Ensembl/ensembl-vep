@@ -289,7 +289,9 @@ sub annotate_InputBuffer {
         $parser->next();
       }
 
-      while($parser->{record} && $parser->get_seqname eq $self->get_source_chr_name($chr) && $parser->get_start <= $vf_end + 1) {
+      while($parser->{record} &&
+            ($parser->get_seqname eq $self->get_source_chr_name($chr) || 'chr'.$parser->get_seqname eq $self->get_source_chr_name($chr)) &&
+            $parser->get_start <= $vf_end + 1) {
         $self->annotate_VariationFeature($vf);
         $parser->next();
       }
