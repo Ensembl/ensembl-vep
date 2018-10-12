@@ -198,7 +198,7 @@ sub _record_get_id {
     $record->{_id} = $attributes->{ID} || $attributes->{Name} || $attributes->{id} || $attributes->{name};
   }
   # Use MD5 as ID if it's missing in the record
-  $record->{_id} = $record->{md5} if(!exists($record->{_id}) || $record->{_id} !~ /\w+/);
+  $record->{_id} = $record->{md5} if(!$record->{_id} || $record->{_id} !~ /\w+/);
 
   return $record->{_id};
 }
