@@ -150,6 +150,7 @@ sub new {
     no_escape
     pick_order
     allele_number
+    show_allele_ref
     use_transcript_ref
 
     most_severe
@@ -1157,6 +1158,9 @@ sub VariationFeatureOverlapAllele_to_output_hash {
 
   # allele number
   $hash->{ALLELE_NUM} = $vfoa->allele_number if $self->{allele_number};
+
+  # allele reference
+  $hash->{ALLELE_REF} = $vf->ref_allele_string if $self->{show_allele_ref};
 
   # picked?
   $hash->{PICK} = 1 if defined($vfoa->{PICK});
