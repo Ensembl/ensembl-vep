@@ -148,7 +148,12 @@ is(
   'output_hash_to_line - test extra 2'
 );
 
-my $ib = get_annotated_buffer({input_file => $test_cfg->{test_vcf}});
+# Include reference allele in output
+my $ib = get_annotated_buffer({
+  input_file => $test_cfg->{test_vcf},
+  show_ref_allele => 1
+});
+$of = Bio::EnsEMBL::VEP::OutputFactory::VEP_output->new({config => $ib->config});
 
 my @lines = @{$of->get_all_lines_by_InputBuffer($ib)};
 
@@ -166,7 +171,7 @@ is(
     3_prime_UTR_variant
     1122
     - - - - -
-    IMPACT=MODIFIER;STRAND=-1
+    ALLELE_REF=C;IMPACT=MODIFIER;STRAND=-1
   )),
   'get_all_lines_by_InputBuffer - check first'
 );
@@ -187,7 +192,7 @@ is(
     V/I
     Gtt/Att
     -
-    IMPACT=MODERATE;STRAND=-1;FLAGS=cds_start_NF
+    ALLELE_REF=C;IMPACT=MODERATE;STRAND=-1;FLAGS=cds_start_NF
   )),
   'get_all_lines_by_InputBuffer - check last'
 );
