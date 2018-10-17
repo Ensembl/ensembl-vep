@@ -171,7 +171,7 @@ is(
     3_prime_UTR_variant
     1122
     - - - - -
-    ALLELE_REF=C;IMPACT=MODIFIER;STRAND=-1
+    REF_ALLELE=C;IMPACT=MODIFIER;STRAND=-1
   )),
   'get_all_lines_by_InputBuffer - check first'
 );
@@ -192,7 +192,7 @@ is(
     V/I
     Gtt/Att
     -
-    ALLELE_REF=C;IMPACT=MODERATE;STRAND=-1;FLAGS=cds_start_NF
+    REF_ALLELE=C;IMPACT=MODERATE;STRAND=-1;FLAGS=cds_start_NF
   )),
   'get_all_lines_by_InputBuffer - check last'
 );
