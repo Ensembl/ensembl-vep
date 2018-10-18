@@ -1,16 +1,27 @@
-#### docker container to build ensembl-vep - first stage ####
-FROM alpine:3.8 as builder
+###################################################
+# Stage 1 - docker container to build ensembl-vep #
+###################################################
+FROM ubuntu:16.04 as builder
 
-# Add missing library to build first stage
-RUN apk --no-cache add \
-    perl \
-    bash \
+# update aptitude and install some required packages
+# a lot of them are required for Bio::DB::BigFile
+RUN apt-get update && apt-get -y install \
+    build-essential \
     git \
+    libpng-dev \
+    perl \
+    perl-base \
     unzip \
-    wget
+    wget && \
+    rm -rf /var/lib/apt/lists/*
+
+# Setup VEP environment
+ENV OPT /opt/vep
+ENV OPT_SRC $OPT/src
+ENV HTSLIB_DIR $OPT_SRC/htslib
 
 # Working directory
-WORKDIR /opt/vep/src
+WORKDIR $OPT_SRC
 
 # Clone ensembl git repository and extract useful ensemb core file
 RUN git clone --depth 1 https://github.com/Ensembl/ensembl.git && \
@@ -20,13 +31,20 @@ RUN git clone --depth 1 https://github.com/Ensembl/ensembl.git && \
 # Clone ensembl-vep git repository
 RUN git clone --depth 1 https://github.com/Ensembl/ensembl-vep.git && chmod u+x ensembl-vep/*.pl
 
+# Clone ensembl-variation git repository
+RUN git clone --depth 1 https://github.com/Ensembl/ensembl-variation.git && \
+    mkdir var_c_code && \
+    cp ensembl-variation/C_code/*.c ensembl-variation/C_code/Makefile var_c_code/ && \
+    rm -rf ensembl-variation && \
+    chmod u+x var_c_code/*
+
 # Download bioperl-ext
 RUN git clone --depth 1 https://github.com/bioperl/bioperl-ext.git
 WORKDIR bioperl-ext/Bio/Ext/Align/
 RUN perl -pi -e"s|(cd libs.+)CFLAGS=\\\'|\$1CFLAGS=\\\'-fPIC |" Makefile.PL
 
 # Download ensembl-xs
-WORKDIR /opt/vep/src
+WORKDIR $OPT_SRC
 RUN wget https://github.com/Ensembl/ensembl-xs/archive/2.3.2.zip -O ensembl-xs.zip && \
     unzip -q ensembl-xs.zip && mv ensembl-xs-2.3.2 ensembl-xs && rm -rf ensembl-xs.zip
 
@@ -41,12 +59,27 @@ RUN rm -rf Bio-HTS/.git Bio-HTS/Changes Bio-HTS/DISCLAIMER Bio-HTS/README Bio-HT
            bioperl-live/maintenance bioperl-live/scripts bioperl-live/t bioperl-live/travis_scripts \
            ensembl-vep/.git ensembl-vep/docker \
            ensembl-xs/.git ensembl-xs/Changes ensembl-xs/INSTALL ensembl-xs/README ensembl-xs/t ensembl-xs/travisci \
-           htslib/.git htslib/INSTALL htslib/NEWS htslib/README* htslib/test \
-           kent-335_base/README kent-335_base/python kent-335_base/java
+           htslib/.git htslib/INSTALL htslib/NEWS htslib/README* htslib/test
+
+# Only keep needed kent-335_base libraries for VEP
+RUN mv kent-335_base kent-335_base_bak && mkdir -p kent-335_base/src && \
+    cp -R kent-335_base_bak/build kent-335_base_bak/confs kent-335_base/ && \
+    cp -R kent-335_base_bak/src/lib kent-335_base_bak/src/inc kent-335_base_bak/src/jkOwnLib kent-335_base/src/ && \
+    cp kent-335_base_bak/src/*.sh kent-335_base/src/ && \
+    rm -rf kent-335_base_bak
+
+# install htslib binaries (need bgzip, tabix)
+WORKDIR $HTSLIB_DIR
+RUN make install
+
+# compile Variation LD C scripts
+WORKDIR $OPT_SRC/var_c_code
+RUN make && rm -f Makefile *.c
 
 
-
-#### docker container to run ensembl-vep  - second stage ####
+###################################################
+# Stage 2 - docker container to build ensembl-vep #
+###################################################
 FROM ubuntu:16.04
 
 # update aptitude and install some required packages
@@ -69,45 +102,38 @@ RUN apt-get update && apt-get -y install \
     vim && \
     rm -rf /var/lib/apt/lists/*
 
-# create vep user
+# Setup VEP environment
 ENV OPT /opt/vep
 ENV OPT_SRC $OPT/src
+ENV PERL5LIB $PERL5LIB:$OPT_SRC/bioperl-live
+ENV HTSLIB_DIR $OPT_SRC/htslib
+ENV DEPS $OPT_SRC
+ENV PATH $OPT_SRC/ensembl-vep:$OPT_SRC/var_c_code:$PATH
+
+# create vep user
 RUN useradd -r -m -U -d $OPT -s /bin/bash -c "VEP User" -p '' vep && usermod -a -G sudo vep && mkdir -p $OPT_SRC
 USER vep
 
-# Copy downloaded libraries (first stage) to this image (second stage)
+# Copy downloaded libraries (stage 1) to this image (stage 2)
 COPY --chown=vep:vep --from=builder $OPT_SRC $OPT_SRC
+#############################################################
 
-# Setup VEP environment
-WORKDIR $OPT_SRC
-ENV PERL5LIB $PERL5LIB:$OPT_SRC/bioperl-live
-ENV KENT_SRC $OPT_SRC/kent-335_base/src
-ENV HTSLIB_DIR $OPT_SRC/htslib
-ENV MACHTYPE x86_64
-ENV CFLAGS "-fPIC"
-ENV DEPS $OPT/src
-ENV PATH $OPT_SRC/ensembl-vep:$PATH
-
-# update bash profile
 RUN echo >> $OPT/.profile && \
-    echo PATH=$OPT_SRC/ensembl-vep:\$PATH >> $OPT/.profile && \
+    echo PATH=$PATH:\$PATH >> $OPT/.profile && \
     echo export PATH >> $OPT/.profile
 
 # run the complilation/install as root
 USER root
+WORKDIR $OPT_SRC
 RUN ensembl-vep/travisci/build_c.sh
-
-# install htslib binaries (need bgzip, tabix)
-WORKDIR $HTSLIB_DIR
-RUN make install
 
 # install bioperl-ext, faster alignments for haplo
 WORKDIR $OPT_SRC/bioperl-ext/Bio/Ext/Align/
-RUN perl Makefile.PL && make && make install
+RUN perl Makefile.PL && make && make install && rm -f Makefile.PL
 
 # install ensembl-xs, faster run using re-implementation in C of some of the Perl subroutines
 WORKDIR $OPT_SRC/ensembl-xs
-RUN perl Makefile.PL && make && make install
+RUN perl Makefile.PL && make && make install && rm -f Makefile.PL
 
 # install ensembl perl dependencies
 WORKDIR $OPT_SRC
