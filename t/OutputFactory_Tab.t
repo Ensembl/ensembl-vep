@@ -114,11 +114,12 @@ my $runner = get_annotated_buffer_runner({
   plugin => ['TestPlugin'],
   tab => 1,
   quiet => 1,
+  show_ref_allele => 1 # Include reference allele in output (and header)
 });
 is(
   $runner->get_OutputFactory->headers->[-2].$runner->get_OutputFactory->headers->[-1],
   "## test : header".
-  "#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tExisting_variation\tIMPACT\tDISTANCE\tSTRAND\tFLAGS\ttest",
+  "#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tExisting_variation\tREF_ALLELE\tIMPACT\tDISTANCE\tSTRAND\tFLAGS\ttest",
   'headers - plugin'
 );
 
@@ -136,7 +137,11 @@ is(
   'output_hash_to_line - test 0'
 );
 
-my $ib = get_annotated_buffer({input_file => $test_cfg->{test_vcf}});
+# Include reference allele in output
+my $ib = get_annotated_buffer({
+  input_file => $test_cfg->{test_vcf},
+  'show_ref_allele' => 1
+});
 $of = Bio::EnsEMBL::VEP::OutputFactory::Tab->new({config => $ib->config});
 
 my @lines = @{$of->get_all_lines_by_InputBuffer($ib)};
@@ -155,6 +160,7 @@ is(
     3_prime_UTR_variant
     1122
     - - - - -
+    C
     MODIFIER
     -
     -1
@@ -179,6 +185,7 @@ is(
     V/I
     Gtt/Att
     -
+    C
     MODERATE
     -
     -1
