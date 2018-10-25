@@ -67,6 +67,7 @@ our @FLAG_FIELDS = (
   # general
   { flag => 'individual',      fields => ['IND','ZYG'] },
   { flag => 'allele_number',   fields => ['ALLELE_NUM'] },
+  { flag => 'show_ref_allele', fields => ['REF_ALLELE'] },
   { flag => 'user',            fields => ['IMPACT','DISTANCE','STRAND','FLAGS'] },
   { flag => 'flag_pick',       fields => ['PICK'] },
   { flag => 'flag_pick_allele',fields => ['PICK'] },
@@ -207,6 +208,7 @@ our %FIELD_DESCRIPTIONS = (
   'BIOTYPE'            => 'Biotype of transcript or regulatory feature',
   'PUBMED'             => 'Pubmed ID(s) of publications that cite existing variant',
   'ALLELE_NUM'         => 'Allele number from input; 0 is reference, 1 is first alternate etc',
+  'REF_ALLELE'         => 'Reference allele',
   'STRAND'             => 'Strand of the feature (1/-1)',
   'PICK'               => 'Indicates if this consequence has been picked as the most severe',
   'SOMATIC'            => 'Somatic status of existing variant',
