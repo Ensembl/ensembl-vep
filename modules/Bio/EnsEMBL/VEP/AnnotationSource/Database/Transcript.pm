@@ -60,6 +60,7 @@ package Bio::EnsEMBL::VEP::AnnotationSource::Database::Transcript;
 use Scalar::Util qw(weaken);
 use Digest::MD5 qw(md5_hex);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
+
 use base qw(
   Bio::EnsEMBL::VEP::AnnotationSource::Database
   Bio::EnsEMBL::VEP::AnnotationType::Transcript
@@ -200,6 +201,7 @@ sub get_features_by_regions_uncached {
   my $pfa = $self->get_adaptor('variation', 'PhenotypeFeature');
 
   my $cache_region_size = $self->{cache_region_size};
+  
   foreach my $region(@{$regions}) {
     my ($c, $region_start) = @$region;
 
@@ -240,6 +242,7 @@ sub get_features_by_regions_uncached {
         my $pfs = $pfa->fetch_all_by_Gene($gene);
         $gene_has_phenotype = $pfs && scalar @$pfs;
       }
+      
       foreach my $tr(@{$gene->get_all_Transcripts}) {
         next unless $self->filter_transcript($tr);
         next if $tr->analysis() && $tr->analysis()->logic_name() eq 'estgene';
@@ -539,7 +542,6 @@ sub prefetch_gene_ids {
     {
       my $xref_obj = $tr->{_gene}->display_xref;
       $tr->get_Gene()->stable_id($entries[0]->{primary_id});
-      
       $tr->{_gene_symbol}  = $xref_obj ? $xref_obj->display_id : $entries[0]->{display_id};
       $tr->{_gene_symbol_source} = $entries[0]->{dbname};
       $tr->{_gene_symbol_id} = $entries[0]->{primary_id};
