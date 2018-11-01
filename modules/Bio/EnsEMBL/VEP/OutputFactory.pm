@@ -350,6 +350,7 @@ sub get_all_VariationFeatureOverlapAllele_output_hashes {
 
     # we have a method defined for each sub-class of VariationFeatureOverlapAllele
     my $method = (split('::', ref($vfoa)))[-1].'_to_output_hash';
+    $DB::single = 1;
     my $output = $self->$method($vfoa, \%copy, $vf);
 
     # run plugins
@@ -855,7 +856,6 @@ sub add_colocated_variant_info {
   my $self = shift;
   my $vf = shift;
   my $hash = shift;
-  
   return unless $vf->{existing} && scalar @{$vf->{existing}};
 
   my $this_allele = $hash->{Allele};
@@ -963,9 +963,10 @@ sub add_colocated_frequency_data {
   my @keys = keys %FREQUENCY_KEYS;
   @keys = grep {$self->{$_}} @keys unless $self->{max_af};
   
-  my $this_allele = $hash->{Allele} if exists($hash->{Allele});
+  my $this_allele = $hash->{Allele} ||= '-'; #if exists($hash->{Allele});
   my $this_allele_shifted = $vf->{shifted_allele_string} if $vf->{shifted_flag};
   $this_allele_shifted ||= "";
+  
   my ($matched_allele) = grep {$_->{a_allele} eq $this_allele || $_->{a_allele} eq $this_allele_shifted} @{$ex->{matched_alleles} || []};
 
   return $hash unless $matched_allele || (grep {$_ eq 'af'} @keys);
@@ -1110,9 +1111,12 @@ sub VariationFeatureOverlapAllele_to_output_hash {
   $hash->{IMPACT} = $ocs[0]->impact() if @ocs;
 
   # allele
+  
   $hash->{Allele} = $vfoa->variation_feature_seq unless $vf->{shifted_flag};
-  $hash->{Allele} = $vf->{variant_allele} if $vf->{shifted_flag};
-
+  if(defined($vfoa->{shift_object}))
+  {
+    $hash->{Allele} = $vfoa->{shift_object}->{shifted_allele_string};
+  }
   # allele number
   $hash->{ALLELE_NUM} = $vfoa->allele_number if $self->{allele_number};
 
@@ -1371,11 +1375,14 @@ sub TranscriptVariationAllele_to_output_hash {
   my $self = shift;
   my ($vfoa, $hash) = @_;
 
+  my $vf = $vfoa->variation_feature;
   # run "super" methods
   $hash = $self->VariationFeatureOverlapAllele_to_output_hash(@_);
   $hash = $self->BaseTranscriptVariationAllele_to_output_hash(@_);
+  $DB::single = 1;
+  my $shift_length = defined($vfoa->{shift_object}) ? $vfoa->{shift_object}->{shift_length} : 0;
+  $hash->{Location} = ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start} + $shift_length, $vf->{end} + $shift_length);
   return undef unless $hash;
-
   my $tv = $vfoa->base_variation_feature_overlap;
   my $tr = $tv->transcript;
   my $vep_cache = $tr->{_variation_effect_feature_cache};
@@ -1389,11 +1396,12 @@ sub TranscriptVariationAllele_to_output_hash {
       my $shifting_offset = 0;
       if($tr->strand() > 0)
       {
-        $shifting_offset = defined($vfoa->base_variation_feature->{shift_length}) ? $vfoa->base_variation_feature->{shift_length} : 0;
+        #$shifting_offset = defined($vfoa->base_variation_feature->{shift_length}) ? $vfoa->base_variation_feature->{shift_length} : 0;
+        $shifting_offset = defined($vfoa->{shift_object}) ? $vfoa->{shift_object}->{shift_length} : 0;
       }
       elsif($tr->strand < 0)
       {
-        $shifting_offset = defined($vfoa->base_variation_feature->{shift_length}) ? 0 - $vfoa->base_variation_feature->{shift_length} : 0;
+        $shifting_offset = defined($vfoa->{shift_object}) ? 0 - $vfoa->{shift_object}->{shift_length} : 0;
       }
       
       if(defined($tv->cdna_start) && defined($tv->cdna_end))
@@ -1406,7 +1414,7 @@ sub TranscriptVariationAllele_to_output_hash {
       $hash->{cDNA_position} .= '/'.$tr->length if $self->{total_length};
       # coding only
       if($pre->{coding}) {
-
+        
         $hash->{Amino_acids} = $vfoa->pep_allele_string;
         $hash->{Codons}      = $vfoa->display_codon_allele_string;
         $shifting_offset = 0 if defined($tv->{_boundary_shift}) && $tv->{_boundary_shift} == 1;
@@ -1433,14 +1441,14 @@ sub TranscriptVariationAllele_to_output_hash {
         $self->add_sift_polyphen($vfoa, $hash);
       }
     }
-
+    my $strand = $tr->strand() > 0 ? 1 : -1;
     # HGVS
     if($self->{hgvsc}) {
       my $hgvs_t = $vfoa->hgvs_transcript(undef, $self->param('no_shift'));
-      my $offset = $vfoa->hgvs_offset;
+      my $offset = defined($vfoa->{shift_object}) ? $vfoa->{shift_object}->{_hgvs_offset} : 0;
 
       $hash->{HGVSc} = $hgvs_t if $hgvs_t;
-      $hash->{HGVS_OFFSET} = $offset if $offset;
+      $hash->{HGVS_OFFSET} = $offset * $strand if $offset;
     }
 
     if($self->{hgvsp}) {
@@ -1451,7 +1459,7 @@ sub TranscriptVariationAllele_to_output_hash {
       $hgvs_p =~ s/\=/\%3D/g if $hgvs_p && !$self->{no_escape};
 
       $hash->{HGVSp} = $hgvs_p if $hgvs_p;
-      $hash->{HGVS_OFFSET} = $offset if $offset;
+      $hash->{HGVS_OFFSET} = $offset * $strand if $offset;
     }
   }
 
