@@ -85,8 +85,10 @@ sub annotate_InputBuffer {
       grep {ref($_) ne 'Bio::EnsEMBL::Variation::StructuralVariationFeature'}
       @{$buffer->get_overlapping_vfs($existing_vf->{start}, $existing_vf->{end})}
     ) {
+      
       my $matched = $self->compare_existing($vf, $existing_vf);
-      push @{$vf->{existing}}, $matched if $matched;
+      #$DB::single = 1;
+      push @{$vf->{existing}}, $matched if ($matched && !(grep($_->{variation_name} eq $matched->{variation_name},@{$vf->{existing}})));
     }
   }
 

@@ -386,6 +386,7 @@ our %INCOMPATIBLE = (
   tab         => [qw(vcf json)],
   individual  => [qw(minimal)],
   check_ref   => [qw(lookup_ref)],
+  no_shift    => [qw(shift_hgvs)],
 );
 
 # deprecated/replaced flags
