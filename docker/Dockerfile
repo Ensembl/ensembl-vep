@@ -127,7 +127,9 @@ RUN ensembl-vep/travisci/build_c.sh && \
     cpanm --installdeps --with-recommends --notest --cpanfile ensembl-vep/cpanfile . && \
     # Configure "locale", see https://github.com/rocker-org/rocker/issues/19
     echo "$LANG UTF-8" >> /etc/locale.gen && locale-gen en_US.utf8 && \
-    /usr/sbin/update-locale LANG=$LANG
+    /usr/sbin/update-locale LANG=$LANG && \
+    # Copy htslib executables
+    cp $HTSLIB_DIR/bgzip $HTSLIB_DIR/tabix $HTSLIB_DIR/htsfile /usr/local/bin/
 
 # Install bioperl-ext, faster alignments for haplo
 WORKDIR $OPT_SRC/bioperl-ext/Bio/Ext/Align/
