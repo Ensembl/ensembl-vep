@@ -1277,6 +1277,7 @@ sub BaseTranscriptVariationAllele_to_output_hash {
     $tr->{_protein} ne '-';
 
   # uniprot
+  $DB::single = 1;
   if($self->{uniprot}) {
     for my $db(qw(swissprot trembl uniparc)) {
       my $id = $tr->{'_'.$db};
@@ -1448,9 +1449,9 @@ sub TranscriptVariationAllele_to_output_hash {
       my $offset = defined($vfoa->{shift_object}) ? $vfoa->{shift_object}->{_hgvs_offset} : 0;
 
       $hash->{HGVSc} = $hgvs_t if $hgvs_t;
-      $hash->{HGVS_OFFSET} = $offset * $strand if $offset;
+      $hash->{HGVS_OFFSET} = $offset * $strand if $offset && $hgvs_t;
     }
-
+    $DB::single = 1;
     if($self->{hgvsp}) {
       my $hgvs_p = $vfoa->hgvs_protein;
       my $offset = $vfoa->hgvs_offset;
@@ -1459,7 +1460,7 @@ sub TranscriptVariationAllele_to_output_hash {
       $hgvs_p =~ s/\=/\%3D/g if $hgvs_p && !$self->{no_escape};
 
       $hash->{HGVSp} = $hgvs_p if $hgvs_p;
-      $hash->{HGVS_OFFSET} = $offset * $strand if $offset;
+      $hash->{HGVS_OFFSET} = $offset * $strand if $offset && $hgvs_p;
     }
   }
 
