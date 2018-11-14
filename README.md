@@ -21,7 +21,12 @@
 <a name="install"></a>
 
 ### Installation and requirements
-The VEP package requires Perl (>=5.10 recommended, tested on 5.10, 5.14, 5.18, 5.22) and the [DBI](http://search.cpan.org/~timb/DBI/DBI.pm) package installed.
+The VEP package requires:
+
+  * **gcc**, **g++** and **make**
+  * **Perl** (>=5.10 recommended, tested on 5.10, 5.14, 5.18, 5.22, 5.26)
+  * Perl libraries [Archive::Zip](https://metacpan.org/pod/Archive::Zip) and [DBI](https://metacpan.org/pod/DBI)
+
 The remaining dependencies can be installed using the included [INSTALL.pl](http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html#installer) script. Basic instructions:
 ```bash
 git clone https://github.com/Ensembl/ensembl-vep.git
@@ -34,6 +39,7 @@ See [documentation](http://www.ensembl.org/info/docs/tools/vep/script/vep_downlo
 
 #### Additional CPAN modules
 The following modules are optional but most users will benefit from installing them. We recommend using [cpanminus](http://search.cpan.org/~miyagawa/Menlo-1.9003/script/cpanm-menlo) to install.
+
   * [DBD::mysql](http://search.cpan.org/~michielb/DBD-mysql/lib/DBD/mysql.pm) - required for database access (`--database` or `--cache` without `--offline`)
   * [Set::IntervalTree](http://search.cpan.org/~benbooth/Set-IntervalTree/lib/Set/IntervalTree.pm) - required for Haplosaurus, also confers speed updates to VEP
   * [JSON](http://search.cpan.org/dist/JSON/) - required for writing JSON output
