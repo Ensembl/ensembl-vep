@@ -36,7 +36,6 @@ use Scalar::Util qw(weaken);
 use Bio::EnsEMBL::VEP::Config;
 use Bio::EnsEMBL::VEP::AnnotationSource::Database::RegFeat;
 use Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat;
-use Data::Dumper;
 use base qw(Bio::EnsEMBL::VEP::Pipeline::DumpVEP::Dumper);
 
 sub run {
