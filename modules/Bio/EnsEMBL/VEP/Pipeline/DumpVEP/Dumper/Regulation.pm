@@ -36,7 +36,6 @@ use Scalar::Util qw(weaken);
 use Bio::EnsEMBL::VEP::Config;
 use Bio::EnsEMBL::VEP::AnnotationSource::Database::RegFeat;
 use Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat;
-
 use base qw(Bio::EnsEMBL::VEP::Pipeline::DumpVEP::Dumper);
 
 sub run {
@@ -131,15 +130,26 @@ sub clean_regfeat {
     set
     _regulatory_activity
     _regulatory_build
+    overlapping_Peaks
   );
 
   if(defined($rf->{binding_matrix})) {
     $rf->{_variation_effect_feature_cache}->{seq} = $rf->seq;
-
-    foreach my $key(qw(adaptor feature_type analysis dbID associated_transcription_factor_complexes)) {
+    foreach my $key(qw(adaptor feature_type analysis dbID)) {
       delete $rf->{binding_matrix}->{$key};
     }
-    $rf->{binding_matrix}->{associated_transcription_factor_complexes} = [];
+    if (defined($rf->{binding_matrix}->{associated_transcription_factor_complexes})) {
+      foreach my $tfc (@{$rf->{binding_matrix}->{associated_transcription_factor_complexes}}) {
+        foreach my $key(qw(adaptor dbID feature_type)) {
+          delete $tfc->{$key};
+        }
+        foreach my $component (@{$tfc->{components}}) {
+          foreach my $key(qw(adaptor dbID feature_type)) {
+            delete $component->{$key};
+          }
+        }
+      }
+    }
   }
 
   $rf->{feature_type} = $rf->{feature_type}->{so_name} if $rf->{feature_type};

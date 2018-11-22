@@ -181,57 +181,53 @@ sub get_features_by_regions_uncached {
     
     $sub_slice->{coord_system}->{adaptor} ||= $self->get_adaptor('core', 'coordsystem');
     $sub_slice->{adaptor} ||= $self->get_adaptor('core', 'slice');
-# Don't dump MotifFeature for release/94
-#    foreach my $type(qw(RegulatoryFeature MotifFeature)) {
-    foreach my $type(qw(RegulatoryFeature)) {
-      my $features = $self->get_adaptor('funcgen', $type)->fetch_all_by_Slice($sub_slice);
-      next unless defined($features);
+    my $type = 'RegulatoryFeature'; 
+    my $features = $self->get_adaptor('funcgen', $type)->fetch_all_by_Slice($sub_slice);
+    next unless defined($features);
 
-      foreach my $rf(@$features) {        
-
-        # weaken a circular ref
-        foreach my $a(@{$rf->{_regulatory_activity} || []}) {
-          weaken($a->{_regulatory_feature}) unless isweak($a->{_regulatory_feature});
-        }
-
-        # cell types
-        if($self->{cell_type} && scalar(@{$self->{cell_type}})) {
-
-          my %cl;
-
-          # get cell type using regulatory_activity objects
-          if($type eq 'RegulatoryFeature') {
-            %cl =
-              map {$_->[0] => $_->[1]}
-              map {$_->[0] =~ s/ /\_/g; $_}
-              map {[$_->get_Epigenome->display_label, $_->activity]}
-              @{$rf->regulatory_activity};
-          }
-
-          # get cell type by fetching regfeats that contain this MotifFeature
-          elsif($type eq 'MotifFeature') {
-            %cl =
-              map {$_->[0] => $_->[1]}
-              map {$_->[0] =~ s/ /\_/g; $_}
-              map {[$_->get_Epigenome->display_label, $_->activity]}
-              map {@{$_->regulatory_activity}}
-              @{$rfa->fetch_all_by_attribute_feature($rf)};
-            $rf->binding_matrix->_elements;
-            $rf->binding_matrix->_min_max_sequence_similarity_score;
-          }
-
-          $rf->{cell_types} = \%cl;
-        }
+    foreach my $rf(@$features) { 
+      # weaken a circular ref
+      foreach my $a(@{$rf->{_regulatory_activity} || []}) {
+        weaken($a->{_regulatory_feature}) unless isweak($a->{_regulatory_feature});
       }
 
-      push @region_features,
-        map { $_->{_vep_feature_type} ||= $type; $_ }
-        map { $_->transfer($sr_slice) }
-        @{$features};
+      # cell types
+      if($self->{cell_type} && scalar(@{$self->{cell_type}})) {
+        my %cl =
+          map {$_->[0] => $_->[1]}
+          map {$_->[0] =~ s/ /\_/g; $_}
+          map {[$_->get_Epigenome->display_label, $_->activity]}
+          @{$rf->regulatory_activity};
+        $rf->{cell_types} = \%cl;
+      }
     }
+    push @region_features,
+      map { $_->{_vep_feature_type} ||= $type; $_ }
+      map { $_->transfer($sr_slice) }
+      @{$features};
+
+    $type = 'MotifFeature';
+    my @motif_features = ();
+    foreach my $rf (@$features) {
+      push @motif_features, @{$rf->fetch_all_MotifFeatures_with_matching_Peak()};
+    } 
+
+    foreach my $mf(@motif_features) {
+      $mf->binding_matrix->summary_as_hash();
+      if($self->{cell_type} && scalar(@{$self->{cell_type}})) {
+        my %cl =  
+          map {$_->[0] => $_->[1]}
+          map {$_->[0] =~ s/ /\_/g; $_}
+          map { [$_->fetch_PeakCalling->fetch_Epigenome->name, 1] } @{$mf->fetch_all_overlapping_Peaks};
+        $mf->{cell_types} = \%cl;
+      }
+    }
+    push @region_features,
+      map { $_->{_vep_feature_type} ||= $type; $_ }
+      map { $_->transfer($sr_slice) }
+      @motif_features;
 
     $cache->{$c}->{$region_start} = \@region_features;
-
     push @return, @region_features;
   }
 
