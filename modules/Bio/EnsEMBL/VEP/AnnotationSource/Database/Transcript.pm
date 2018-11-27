@@ -542,7 +542,7 @@ sub prefetch_gene_ids {
     {
       my $xref_obj = $tr->{_gene}->display_xref;
       $tr->get_Gene()->stable_id($entries[0]->{primary_id});
-      $tr->{_gene_symbol}  = $xref_obj ? $xref_obj->display_id : $entries[0]->{primary_id};
+      $tr->{_gene_symbol}  = $xref_obj ? $xref_obj->display_id : $entries[0]->{display_id};
       $tr->{_gene_symbol_source} = $entries[0]->{dbname};
       $tr->{_gene_symbol_id} = $entries[0]->{primary_id};
       $tr->{_gene_hgnc_id} = $entries[0]->{primary_id} if $entries[0]->{dbname} eq 'HGNC';
