@@ -27,37 +27,30 @@ limitations under the License.
 
 =cut
 
-# EnsEMBL module for Bio::EnsEMBL::VEP::Parser::HGVS
+# EnsEMBL module for Bio::EnsEMBL::VEP::Parser::SPDI
 #
 #
 
 =head1 NAME
 
-Bio::EnsEMBL::VEP::Parser::HGVS - HGVS list input parser
+Bio::EnsEMBL::VEP::Parser::SPDI - SPDI list input parser
 
 =head1 SYNOPSIS
 
-my $parser = Bio::EnsEMBL::VEP::Parser::HGVS->new({
+my $parser = Bio::EnsEMBL::VEP::Parser::SPDI->new({
   config => $config,
-  file   => 'hgvs.txt',
+  file   => 'spdi.txt',
 });
 
 my $vf = $parser->next();
 
 =head1 DESCRIPTION
 
-HGVS format parser.
+SPDI format parser.
 
-See http://varnomen.hgvs.org/ for spec.
+See https://www.ncbi.nlm.nih.gov/variation/notation/ for spec.
 
-Variants can be g. (genomic), c. (coding transcript),
-n. (non-coding transcript) or p. (protein), though
-since variants are transformed to genomic coordinates some p.
-descriptions may fail to parse if they do not unambiguously resolve
-to a genomic postion and ref/alt.
-
-Requires a database connection to look up reference feature
-locations, so not available in --offline mode.
+Variants can be genomic.
 
 =head1 METHODS
 
@@ -166,25 +159,13 @@ sub create_VariationFeatures {
     my $sa  = $self->get_adaptor($core_group, 'Slice');
     my $ta  = $self->get_adaptor($core_group, 'Transcript');
     
-    # not all spdi notations are supported yet, so we have to wrap it in an eval
-    eval {
-      # if($self->{ambiguous_spdi}) {
-      #   print " *** CHECK *** INSIDE SPDI IT IS AMBIGUOUS\n";  
-      #   $vfs = $vfa->fetch_all_possible_by_hgvs_notation(
-      #     -spdi               => $spdi,
-      #     -slice_adaptor      => $sa,
-      #     -transcript_adaptor => $ta,
-      #     -replace_ref        => $self->{lookup_ref} || 0,
-      #   );
-      # } 
-      # else {    
+    eval {  
         push @$vfs, $vfa->fetch_by_spdi_notation(
           -spdi               => $spdi,
           -slice_adaptor      => $sa,
           -transcript_adaptor => $ta,
           -replace_ref        => $self->{lookup_ref} || 0,
         );
-      # }
     };
 
     # only log unique errors
@@ -201,19 +182,6 @@ sub create_VariationFeatures {
     
     $self->warning_msg("WARNING: Unable to parse SPDI notation \'$spdi\'\n".join("\n", @error_message));
     return $self->create_VariationFeatures;
-  }
-
-  # warn if this looks like a gene
-  if($spdi =~ /\:[cnp]\./ && $spdi !~ /^(ENS|[NX][CGMRP]\_|LRG\_)/) {
-    my $gene_name = (split(':', $spdi))[0];
-    $self->warning_msg(
-      "WARNING: Possible invalid use of gene name '$gene_name' as SPDI reference; ".
-      (
-        $self->{ambiguous_spdi} ?
-        "$spdi may resolve to multiple genomic locations" :
-        "most likely transcript will be selected"
-      )
-    );
   }
 
   foreach my $vf(@$vfs) {
