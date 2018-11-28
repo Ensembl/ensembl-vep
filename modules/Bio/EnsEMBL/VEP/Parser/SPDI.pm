@@ -89,7 +89,7 @@ use Bio::EnsEMBL::IO::ListBasedParser;
 sub new {
   my $caller = shift;
   my $class = ref($caller) || $caller;
-  
+
   my $self = $class->SUPER::new(@_);
 
   # requires db connection
@@ -122,7 +122,7 @@ sub parser {
 
   Example    : $vfs = $parser->create_VariationFeatures();
   Description: Create a VariationFeature object from the current line
-               of input. 
+               of input.
   Returntype : arrayref of Bio::EnsEMBL::VariationFeature
   Exceptions : warns if unable to parse SPDI string
   Caller     : next()
@@ -133,9 +133,9 @@ sub parser {
 sub create_VariationFeatures {
   my $self = shift;
 
-  my $parser = $self->parser;   
+  my $parser = $self->parser;
   $parser->next();
-   
+
   $self->skip_empty_lines();
 
   return [] unless $parser->{record};
@@ -147,10 +147,10 @@ sub create_VariationFeatures {
   # remove whitespace
   $spdi =~ s/\s+//g;
 
-  my $param_core_group = $self->param('core_type'); 
+  my $param_core_group = $self->param('core_type');
 
   my @core_groups = sort {($b eq $param_core_group) cmp ($a eq $param_core_group)} qw(core otherfeatures);
-  
+
   my $vfa = $self->get_adaptor('variation', 'VariationFeature');
   my $vfs = [];
   my @errors;
@@ -158,8 +158,8 @@ sub create_VariationFeatures {
   foreach my $core_group(@core_groups) {
     my $sa  = $self->get_adaptor($core_group, 'Slice');
     my $ta  = $self->get_adaptor($core_group, 'Transcript');
-    
-    eval {  
+
+    eval {
         push @$vfs, $vfa->fetch_by_spdi_notation(
           -spdi               => $spdi,
           -slice_adaptor      => $sa,
@@ -176,12 +176,18 @@ sub create_VariationFeatures {
 
   unless(@$vfs || scalar(@errors) == 0) {
     my %known_messages_hash = ('MSG: Region requested must be smaller than 5kb' => 0);
-    
+
     my @grep_names = grep(/^MSG:/, split(/\n/, $errors[0]));
     my @error_message = exists( $known_messages_hash{$grep_names[0]}) ? @grep_names : @errors;
-    
+
     $self->warning_msg("WARNING: Unable to parse SPDI notation \'$spdi\'\n".join("\n", @error_message));
     return $self->create_VariationFeatures;
+  }
+
+  # throws error if reference sequence is not genomic
+  if($spdi !~ /^(NC\_|CHR|([0-9]{1,2}\:|X\:|Y\:))/i) {
+    my $gene_name = (split(':', $spdi))[0];
+    throw("Invalid reference sequence '$gene_name' as SPDI reference");
   }
 
   foreach my $vf(@$vfs) {
