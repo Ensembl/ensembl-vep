@@ -174,8 +174,16 @@ sub headers {
   # and one line of column headers starting with #
   my (@headers, $col_heading);
   
+  my $vcf_fileformat = '##fileformat=VCFv4.1';
+
   # input was VCF
   if($info->{input_headers} && scalar @{$info->{input_headers}}) {
+
+    # If the VCF file format header was missing in the input VCF file
+    if (!grep { $_ =~ /^##fileformat=VCFv4/i } @{$info->{input_headers}}) {
+      @headers = ($vcf_fileformat);
+    }
+
     if ($self->{keep_csq}) {
       push @headers, @{$info->{input_headers}};
     }
@@ -190,7 +198,7 @@ sub headers {
 
   # input wasn't VCF
   else {
-    @headers = ('##fileformat=VCFv4.1');
+    @headers = ($vcf_fileformat);
     $col_heading = '#'.join("\t", qw(CHROM POS ID REF ALT QUAL FILTER INFO));
   }
 
