@@ -294,6 +294,7 @@ sub get_overlapping_vfs {
 sub interval_tree {
   
   my $self = shift;
+
   if(!exists($self->{temp}->{interval_tree})) {
 
     return $self->{temp}->{interval_tree} = undef unless $CAN_USE_INTERVAL_TREE;
@@ -341,7 +342,7 @@ sub hash_tree {
 
     my $hash_tree = {};
     my $hash_tree_id = 1;
-    
+
     foreach my $vf(@{$self->buffer}) {
       my ($vf_s, $vf_e) = ($vf->{start}, $vf->{end});
       ($vf_s, $vf_e) = ($vf_e, $vf_s) if $vf_s > $vf_e;

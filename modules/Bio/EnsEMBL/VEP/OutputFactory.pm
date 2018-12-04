@@ -905,7 +905,7 @@ sub add_colocated_variant_info {
   my $self = shift;
   my $vf = shift;
   my $hash = shift;
-  
+
   return unless $vf->{existing} && scalar @{$vf->{existing}};
 
   my $this_allele = $hash->{Allele};
@@ -1433,7 +1433,7 @@ sub BaseTranscriptVariationAllele_to_output_hash {
 sub TranscriptVariationAllele_to_output_hash {
   my $self = shift;
   my ($vfoa, $hash) = @_;
-#$DB::single = 1;
+
   my $vf = $vfoa->variation_feature;
   # run "super" methods
   $hash = $self->VariationFeatureOverlapAllele_to_output_hash(@_);
