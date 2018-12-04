@@ -103,6 +103,7 @@ sub annotate_InputBuffer {
     my $fs = $tr->{start} - ($tr_strand == 1 ? $up_size : $down_size);
     my $fe = $tr->{end} + ($tr_strand == 1 ? $down_size : $up_size);
     my $slice;
+    
     # get overlapping VFs
     my $vfs = $buffer->get_overlapping_vfs($fs, $fe);
     next unless @$vfs;
