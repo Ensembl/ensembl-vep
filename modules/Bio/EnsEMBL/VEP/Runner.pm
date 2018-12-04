@@ -397,6 +397,7 @@ sub _buffer_to_output {
   return [] unless $vfs && scalar @$vfs;
 
   my $output_factory = $self->get_OutputFactory;
+
   foreach my $as(@{$self->get_all_AnnotationSources}) {
     $as->annotate_InputBuffer($input_buffer);
   }
@@ -810,6 +811,7 @@ sub get_Parser {
 
 sub get_InputBuffer {
   my $self = shift;
+
   if(!exists($self->{input_buffer})) {
     $self->{input_buffer} = Bio::EnsEMBL::VEP::InputBuffer->new({
       config => $self->config,

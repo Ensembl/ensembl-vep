@@ -79,15 +79,13 @@ use Bio::EnsEMBL::Variation::Utils::Sequence qw(get_matched_variant_alleles);
 sub annotate_InputBuffer {
   my $self = shift;
   my $buffer = shift;
-  
+
   foreach my $existing_vf(@{$self->get_all_features_by_InputBuffer($buffer)}) {
     foreach my $vf(
       grep {ref($_) ne 'Bio::EnsEMBL::Variation::StructuralVariationFeature'}
       @{$buffer->get_overlapping_vfs($existing_vf->{start}, $existing_vf->{end})}
-    ) {
-      
+    ) {      
       my $matched = $self->compare_existing($vf, $existing_vf);
-      #$DB::single = 1;
       push @{$vf->{existing}}, $matched if ($matched && !(grep($_->{variation_name} eq $matched->{variation_name},@{$vf->{existing}})));
     }
   }
@@ -176,6 +174,7 @@ sub compare_existing {
       strand => $existing_var->{strand}
     }
   );
+
   if(defined($input_var->{unshifted_allele_string}))
   {
     my $matched_alleles_unshifted = get_matched_variant_alleles(

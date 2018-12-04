@@ -352,12 +352,11 @@ sub get_all_VariationFeatureOverlapAllele_output_hashes {
 
     # we have a method defined for each sub-class of VariationFeatureOverlapAllele
     my $method = (split('::', ref($vfoa)))[-1].'_to_output_hash';
-    #$DB::single = 1;
     my $output = $self->$method($vfoa, \%copy, $vf);
 
     # run plugins
     $output = $self->run_plugins($vfoa, $output, $vf);
-    
+
     # log stats
     $self->stats->log_VariationFeatureOverlapAllele($vfoa, $output) unless $self->{no_stats};
 
@@ -906,6 +905,7 @@ sub add_colocated_variant_info {
   my $self = shift;
   my $vf = shift;
   my $hash = shift;
+  
   return unless $vf->{existing} && scalar @{$vf->{existing}};
 
   my $this_allele = $hash->{Allele};
@@ -936,7 +936,6 @@ sub add_colocated_variant_info {
   ) {
 
     # check allele match
-    $DB::single = !defined($this_allele);
     if(my $matched = $ex->{matched_alleles}) {
       next unless (grep {$_->{a_allele} eq $this_allele} @$matched) || (grep {$_->{a_allele} eq $shifted_allele} @$matched) ;
     }
@@ -1008,7 +1007,6 @@ sub add_colocated_frequency_data {
   my @ex_alleles = split('/', $ex->{allele_string});
 
   # gmaf stored a bit differently, but we can get it in the same format
-  #$DB::single = 1;
   $ex->{AF} = $ex->{minor_allele}.':'.$ex->{minor_allele_freq} if $ex->{minor_allele};
 
   my @keys = keys %FREQUENCY_KEYS;
@@ -1151,7 +1149,7 @@ sub _add_custom_annotations_to_hash {
 sub VariationFeatureOverlapAllele_to_output_hash {
   my $self = shift;
   my ($vfoa, $hash, $vf) = @_;
-  
+
   my @ocs = sort {$a->rank <=> $b->rank} @{$vfoa->get_all_OverlapConsequences};
 
   # consequence type(s)
@@ -1162,11 +1160,9 @@ sub VariationFeatureOverlapAllele_to_output_hash {
   $hash->{IMPACT} = $ocs[0]->impact() if @ocs;
 
   # allele
-  $DB::single = 1;
   $hash->{Allele} = $vfoa->variation_feature_seq unless defined($vfoa->{shift_object});
   if(defined($vfoa->{shift_object}))
   {
-    #$hash->{Allele} = $vfoa->{shift_object}->{shifted_allele_string};
     $hash->{Allele} = $vfoa->{shift_object}->{hgvs_allele_string};
   }
   # allele number
@@ -1180,7 +1176,6 @@ sub VariationFeatureOverlapAllele_to_output_hash {
 
   # hgvs g.
   if($self->{hgvsg}) {
-    $DB::single = 1;
     $vf->{_hgvs_genomic} ||= $vf->hgvs_genomic($vf->slice, $self->{hgvsg_use_accession} ? undef : $vf->{chr});
     
     if(my $hgvsg = $vf->{_hgvs_genomic}->{$hash->{Allele}}) {
@@ -1341,7 +1336,6 @@ sub BaseTranscriptVariationAllele_to_output_hash {
     $tr->{_protein} ne '-';
 
   # uniprot
-  #$DB::single = 1;
   if($self->{uniprot}) {
     for my $db(qw(swissprot trembl uniparc)) {
       my $id = $tr->{'_'.$db};
@@ -1444,10 +1438,11 @@ sub TranscriptVariationAllele_to_output_hash {
   # run "super" methods
   $hash = $self->VariationFeatureOverlapAllele_to_output_hash(@_);
   $hash = $self->BaseTranscriptVariationAllele_to_output_hash(@_);
-  #$DB::single = 1;
+
   my $shift_length = defined($vfoa->{shift_object}) ? $vfoa->{shift_object}->{shift_length} : 0;
   $hash->{Location} = ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start} + $shift_length, $vf->{end} + $shift_length);
   return undef unless $hash;
+  
   my $tv = $vfoa->base_variation_feature_overlap;
   my $tr = $tv->transcript;
   my $vep_cache = $tr->{_variation_effect_feature_cache};
@@ -1477,9 +1472,10 @@ sub TranscriptVariationAllele_to_output_hash {
         $hash->{cDNA_position}  = format_coords($tv->cdna_start, $tv->cdna_end);  
       }
       $hash->{cDNA_position} .= '/'.$tr->length if $self->{total_length};
+
       # coding only
       if($pre->{coding}) {
-        
+
         $hash->{Amino_acids} = $vfoa->pep_allele_string;
         $hash->{Codons}      = $vfoa->display_codon_allele_string;
         $shifting_offset = 0 if defined($tv->{_boundary_shift}) && $tv->{_boundary_shift} == 1;
@@ -1515,7 +1511,7 @@ sub TranscriptVariationAllele_to_output_hash {
       $hash->{HGVSc} = $hgvs_t if $hgvs_t;
       $hash->{HGVS_OFFSET} = $offset * $strand if $offset && $hgvs_t;
     }
-    #$DB::single = 1;
+
     if($self->{hgvsp}) {
       my $hgvs_p = $vfoa->hgvs_protein;
       my $offset = $vfoa->hgvs_offset;
