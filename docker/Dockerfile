@@ -41,7 +41,7 @@ RUN git clone --depth 1 https://github.com/Ensembl/ensembl.git && \
     # Download ensembl-xs
     wget https://github.com/Ensembl/ensembl-xs/archive/2.3.2.zip -O ensembl-xs.zip && \
     unzip -q ensembl-xs.zip && mv ensembl-xs-2.3.2 ensembl-xs && rm -rf ensembl-xs.zip && \
-    # Clone/Download other repositories:  bioperl-live is needed so the cpanm dependencies installation from the ensembl-vep/cpanfile file takes less disk space
+    # Clone/Download other repositories: bioperl-live is needed so the cpanm dependencies installation from the ensembl-vep/cpanfile file takes less disk space
     ensembl-vep/travisci/get_dependencies.sh && mv bioperl-live-release-1-6-924 bioperl-live
 
 # A lot of cleanup on the imported libraries, in order to reduce the docker image
@@ -101,11 +101,12 @@ RUN apt-get update && apt-get -y install \
 ENV OPT /opt/vep
 ENV OPT_SRC $OPT/src
 ENV PERL5LIB $PERL5LIB:$OPT_SRC/bioperl-live
+ENV KENT_SRC $OPT/src/kent-335_base/src
 ENV HTSLIB_DIR $OPT_SRC/htslib
+ENV MACHTYPE x86_64
 ENV DEPS $OPT_SRC
 ENV PATH $OPT_SRC/ensembl-vep:$OPT_SRC/var_c_code:$PATH
-ENV LC_ALL en_US.UTF-8
-ENV LANG en_US.UTF-8
+ENV LANG_VAR en_US.UTF-8
 
 # Create vep user
 RUN useradd -r -m -U -d $OPT -s /bin/bash -c "VEP User" -p '' vep && usermod -a -G sudo vep && mkdir -p $OPT_SRC
@@ -118,6 +119,13 @@ COPY --chown=vep:vep --from=builder $OPT_SRC $OPT_SRC
 # Change user to root for the following complilations/installations
 USER root
 
+# Install bioperl-ext, faster alignments for haplo (XS-based BioPerl extensions to C libraries)
+WORKDIR $OPT_SRC/bioperl-ext/Bio/Ext/Align/
+RUN perl Makefile.PL && make && make install && rm -f Makefile.PL
+
+# Install ensembl-xs, faster run using re-implementation in C of some of the Perl subroutines
+WORKDIR $OPT_SRC/ensembl-xs
+RUN perl Makefile.PL && make && make install && rm -f Makefile.PL
 
 WORKDIR $OPT_SRC
 # Install/compile some C libraries
@@ -126,18 +134,13 @@ RUN ensembl-vep/travisci/build_c.sh && \
     cpanm --installdeps --with-recommends --notest --cpanfile ensembl_cpanfile . && \
     cpanm --installdeps --with-recommends --notest --cpanfile ensembl-vep/cpanfile . && \
     # Configure "locale", see https://github.com/rocker-org/rocker/issues/19
-    echo "$LANG UTF-8" >> /etc/locale.gen && locale-gen en_US.utf8 && \
-    /usr/sbin/update-locale LANG=$LANG && \
+    echo "$LANG_VAR UTF-8" >> /etc/locale.gen && locale-gen en_US.utf8 && \
+    /usr/sbin/update-locale LANG=$LANG_VAR && \
     # Copy htslib executables
     cp $HTSLIB_DIR/bgzip $HTSLIB_DIR/tabix $HTSLIB_DIR/htsfile /usr/local/bin/
 
-# Install bioperl-ext, faster alignments for haplo
-WORKDIR $OPT_SRC/bioperl-ext/Bio/Ext/Align/
-RUN perl Makefile.PL && make && make install && rm -f Makefile.PL
-
-# Install ensembl-xs, faster run using re-implementation in C of some of the Perl subroutines
-WORKDIR $OPT_SRC/ensembl-xs
-RUN perl Makefile.PL && make && make install && rm -f Makefile.PL
+ENV LC_ALL $LANG_VAR
+ENV LANG $LANG_VAR
 
 # Switch back to vep user
 USER vep
