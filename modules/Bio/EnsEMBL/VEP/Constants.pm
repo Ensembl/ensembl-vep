@@ -120,7 +120,7 @@ our @FLAG_FIELDS = (
   { flag => 'check_svs',       fields => ['SV'] },
 
   # regulatory
-  { flag => 'regulatory',      fields => ['MOTIF_NAME','MOTIF_POS','HIGH_INF_POS','MOTIF_SCORE_CHANGE'] },
+  { flag => 'regulatory',      fields => ['BIOTYPE','MOTIF_NAME','MOTIF_POS','HIGH_INF_POS','MOTIF_SCORE_CHANGE'] },
   { flag => 'cell_type',       fields => ['CELL_TYPE'] },
 );
 
