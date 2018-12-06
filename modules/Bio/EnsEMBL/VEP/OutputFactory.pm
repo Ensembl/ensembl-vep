@@ -1000,7 +1000,7 @@ sub add_colocated_variant_info {
 
 sub add_colocated_frequency_data {
   my $self = shift;
-  my ($vf, $hash, $ex) = @_;
+  my ($vf, $hash, $ex, $shift_object) = @_;
 
   return $hash unless grep {$self->{$_}} keys %FREQUENCY_KEYS or $self->{max_af};
 
@@ -1013,7 +1013,7 @@ sub add_colocated_frequency_data {
   @keys = grep {$self->{$_}} @keys unless $self->{max_af};
   
   my $this_allele = $hash->{Allele} ||= '-'; #if exists($hash->{Allele});
-  my $this_allele_shifted = $vf->{shifted_allele_string} if $vf->{shifted_flag};
+  my $this_allele_shifted = $shift_object->{shifted_allele_string} if defined($shift_object);
   $this_allele_shifted ||= "";
   
   my ($matched_allele) = grep {$_->{a_allele} eq $this_allele || $_->{a_allele} eq $this_allele_shifted} @{$ex->{matched_alleles} || []};
@@ -1208,7 +1208,7 @@ sub VariationFeatureOverlapAllele_to_output_hash {
 
   # frequency data
   foreach my $ex(@{$vf->{existing} || []}) {
-    $self->add_colocated_frequency_data($vf, $hash, $ex);
+    $self->add_colocated_frequency_data($vf, $hash, $ex, $vfoa->{shift_object});
   }
 
   return $hash;
