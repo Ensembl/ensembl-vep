@@ -13,9 +13,9 @@
   * [Usage](#haplousage)
   * [Output](#haplooutput)
   * [Flags](#haploflags)
-  * [Frequency data](#haplofreq)
 * [Variant Recoder](#recoder)
-  * [Usage](#vepusage)
+  * [Usage](#recoderusage)
+  * [Output](#recoderoutput) 
 
 ---
 <a name="install"></a>
@@ -62,7 +62,7 @@ See [documentation](http://www.ensembl.org/info/docs/tools/vep/script/vep_downlo
 ```bash
 ./vep -i input.vcf -o out.txt -offline
 ```
-See [documentation](http://www.ensembl.org/info/docs/tools/vep/script/index.html) for full command line instructions.
+See [documentation](http://www.ensembl.org/info/docs/tools/vep/script/vep_options.html#basic) for full command line instructions.
 
 > Please report any bugs or issues by [contacting Ensembl](http://www.ensembl.org/info/about/contact/index.html) or creating a [GitHub issue](https://github.com/Ensembl/ensembl-vep/issues)
 
@@ -121,7 +121,7 @@ The default output format is a simple tab-delimited file reporting all observed 
 3. Comma-separated list of [flags](#haploflags) for CDS haplotype
 4. Protein haplotype name
 5. Comma-separated list of [flags](#haploflags) for protein haplotype
-6. Comma-separated list of [frequency data](#haplofreq) for protein haplotype
+6. Comma-separated list of frequency data for protein haplotype
 7. Comma-separated list of contributing variants
 8. Comma-separated list of sample:count that exhibit this haplotype
 
@@ -142,15 +142,6 @@ Haplotypes may be flagged with one or more of the following:
 * **resolved_frameshift:** haplotype contains two or more indels whose combined effect restores the reading frame of the transcript.
 * **stop_changed:** indicates either a STOP codon is gained (protein truncating variant, PTV) or the existing reference STOP codon is lost.
 * **deleterious_sift_or_polyphen:** haplotype contains at least one single amino acid substitution event flagged as deleterious (SIFT) or probably damaging (PolyPhen2).
-
-<a name="haplofreq"></a>
-### Frequency data
-Haplotype frequencies may be loaded and assigned to observed haplotypes using `--haplotype_frequencies [file]`. The following files may be used:
-
-* 1000 genomes frequencies (GRCh37): [protein_haplotype_freqs_1KG_e85_GRCh37.txt.gz](https://dl.dropboxusercontent.com/u/12936195/protein_haplotype_freqs_1KG_e85_GRCh37.txt.gz)
-* 1000 genomes frequencies (GRCh38): [protein_haplotype_freqs_1KG_e85_GRCh38.txt.gz](https://dl.dropboxusercontent.com/u/12936195/protein_haplotype_freqs_1KG_e85_GRCh38.txt.gz)
-
-> Note these files are temporarily hosted on 3rd party servers and may be subject to change or removal while the software remains in the development phase.
 
 <a name="bioperl-ext"></a>
 ### bioperl-ext
