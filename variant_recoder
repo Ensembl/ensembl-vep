@@ -138,6 +138,10 @@ Basic options
 --species [species]    Species to use [default: "human"]
 --pretty               Print prettified JSON
 
+
+For full option documentation see:
+https://www.ensembl.org/info/docs/tools/vep/recoder/index.html#vr_options
+
 END
 
   print $usage;
