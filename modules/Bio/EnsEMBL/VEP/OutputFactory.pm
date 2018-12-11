@@ -831,7 +831,6 @@ sub pick_VariationFeatureOverlapAllele_per_gene {
 sub VariationFeature_to_output_hash {
   my $self = shift;
   my $vf = shift;
-
   my $hash = {
     Uploaded_variation  => $vf->variation_name ne '.' ? $vf->variation_name : ($vf->{original_chr} || $vf->{chr}).'_'.$vf->{start}.'_'.($vf->{allele_string} || $vf->{class_SO_term}),
     Location            => ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start}, $vf->{end}),
@@ -1013,10 +1012,10 @@ sub add_colocated_frequency_data {
   @keys = grep {$self->{$_}} @keys unless $self->{max_af};
   
   my $this_allele = $hash->{Allele} ||= '-'; #if exists($hash->{Allele});
-  my $this_allele_shifted = $shift_object->{shifted_allele_string} if defined($shift_object);
-  $this_allele_shifted ||= "";
+  my $this_allele_unshifted = $shift_object->{alt_orig_allele_string} if defined($shift_object);
+  $this_allele_unshifted ||= "";
   
-  my ($matched_allele) = grep {$_->{a_allele} eq $this_allele || $_->{a_allele} eq $this_allele_shifted} @{$ex->{matched_alleles} || []};
+  my ($matched_allele) = grep {$_->{a_allele} eq $this_allele || $_->{a_allele} eq $this_allele_unshifted} @{$ex->{matched_alleles} || []};
 
   return $hash unless $matched_allele || (grep {$_ eq 'af'} @keys);
 
@@ -1438,13 +1437,14 @@ sub TranscriptVariationAllele_to_output_hash {
   # run "super" methods
   $hash = $self->VariationFeatureOverlapAllele_to_output_hash(@_);
   $hash = $self->BaseTranscriptVariationAllele_to_output_hash(@_);
-
+  
   my $shift_length = defined($vfoa->{shift_object}) ? $vfoa->{shift_object}->{shift_length} : 0;
-  $hash->{Location} = ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start} + $shift_length, $vf->{end} + $shift_length);
+  
   return undef unless $hash;
   
   my $tv = $vfoa->base_variation_feature_overlap;
   my $tr = $tv->transcript;
+  $hash->{Location} = ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start} + $shift_length, $vf->{end} + $shift_length);
   my $vep_cache = $tr->{_variation_effect_feature_cache};
 
   my $pre = $vfoa->_pre_consequence_predicates();
