@@ -76,7 +76,9 @@ sub default_options {
     # this creates an extra tar.gz file for each of these species
     # the web interface and REST API use these in preference to the non-converted ones
     convert => 1,
-    
+   
+    # Update since release 95 run the vep pipeline with the `-division vertebrates` flag. If you only want to run the pipeline for human, you will need these two flags `-species homo_sapiens` and `-division vertebrates`
+ 
     # include or exclude the following species from the dumps, run for a division or all the species on the server
     species => [],
     # Excluding mouse strains

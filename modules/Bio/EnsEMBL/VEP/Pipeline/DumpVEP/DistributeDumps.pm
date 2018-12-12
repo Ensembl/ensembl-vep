@@ -53,9 +53,7 @@ sub run {
     }
   }
   else {
-    $dir = $self->required_param('pipeline_dir').'/dumps';
-    $self->DistributeProduction($dir);
-    $self->DistributeWeb($dir);
+    die "No division found, cannot distribute dumps";
   }
 }
 
