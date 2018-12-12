@@ -195,6 +195,7 @@ sub new {
     hgvsp
     hgvsg
     hgvsg_use_accession
+    spdi
     sift
     polyphen
     polyphen_analysis
