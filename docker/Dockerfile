@@ -80,7 +80,6 @@ FROM ubuntu:16.04
 # Update aptitude and install some required packages
 # a lot of them are required for Bio::DB::BigFile
 RUN apt-get update && apt-get -y install \
-    apache2 \
     build-essential \
     cpanminus \
     curl \
