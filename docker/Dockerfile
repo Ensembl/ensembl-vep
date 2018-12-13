@@ -102,5 +102,5 @@ ENV PATH $OPT/src/ensembl-vep:$PATH
 
 # run INSTALL.pl
 WORKDIR $OPT/src/ensembl-vep
-RUN chmod u+x *.pl
+RUN chmod -R a+rwx .
 RUN ./INSTALL.pl -a a -l
