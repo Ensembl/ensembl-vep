@@ -101,7 +101,7 @@ sub fetch_input {
     $species_hash{pipeline_dump_dir} = $pipeline_dump_dir;
   }
   else {
-    $species_hash{pipeline_dump_dir} = $self->param('pipeline_dir');
+    die "Can't find division for database ".$species_hash{dbname};
   }
 
   #Processing Collections
