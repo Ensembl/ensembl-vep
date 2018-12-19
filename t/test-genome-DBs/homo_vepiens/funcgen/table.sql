@@ -1,7 +1,7 @@
 CREATE TABLE `alignment` (
   `alignment_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `analysis_id` smallint(5) unsigned NOT NULL,
-  `name` varchar(100) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
   `bam_file_id` int(11) DEFAULT NULL,
   `bigwig_file_id` int(11) DEFAULT NULL,
   `experiment_id` int(15) unsigned DEFAULT NULL,
@@ -200,20 +200,21 @@ CREATE TABLE `epigenome` (
   `production_name` varchar(120) DEFAULT NULL,
   `gender` enum('male','female','hermaphrodite','mixed','unknown') DEFAULT 'unknown',
   PRIMARY KEY (`epigenome_id`),
-  UNIQUE KEY `name_idx` (`name`)
+  UNIQUE KEY `name_idx` (`name`),
+  UNIQUE KEY `display_label_idx` (`display_label`)
 ) ENGINE=MyISAM  ;
 
 CREATE TABLE `execution_plan` (
   `execution_plan_id` int(18) unsigned NOT NULL AUTO_INCREMENT,
   `time` bigint(20) DEFAULT NULL,
   `experiment_id` int(16) unsigned NOT NULL,
-  `execution_plan` text,
+  `execution_plan` longtext NOT NULL,
   PRIMARY KEY (`execution_plan_id`)
 ) ENGINE=InnoDB ;
 
 CREATE TABLE `experiment` (
   `experiment_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
   `experimental_group_id` smallint(6) unsigned DEFAULT NULL,
   `control_id` int(10) unsigned DEFAULT NULL,
   `is_control` tinyint(3) unsigned DEFAULT '0',
@@ -230,8 +231,7 @@ CREATE TABLE `experiment` (
 CREATE TABLE `experimental_group` (
   `experimental_group_id` smallint(6) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(40) NOT NULL,
-  `location` varchar(120) DEFAULT NULL,
-  `contact` varchar(40) DEFAULT NULL,
+  `production_name` varchar(255) NOT NULL,
   `description` varchar(255) DEFAULT NULL,
   `url` varchar(255) DEFAULT NULL,
   `is_project` tinyint(1) DEFAULT '0',
@@ -498,10 +498,11 @@ CREATE TABLE `peak_calling` (
 
 CREATE TABLE `peak_calling_statistic` (
   `peak_calling_statistic_id` int(28) unsigned NOT NULL AUTO_INCREMENT,
-  `peak_calling_id` int(18) NOT NULL DEFAULT '0',
-  `total_length` int(15) DEFAULT NULL,
-  `num_peaks` bigint(14) DEFAULT NULL,
-  `average_length` int(17) DEFAULT NULL,
+  `peak_calling_id` int(18) unsigned DEFAULT NULL,
+  `epigenome_id` int(15) unsigned DEFAULT NULL,
+  `feature_type_id` int(18) unsigned DEFAULT NULL,
+  `statistic` varchar(255) NOT NULL,
+  `value` float unsigned DEFAULT NULL,
   PRIMARY KEY (`peak_calling_statistic_id`)
 ) ENGINE=InnoDB ;
 
@@ -692,11 +693,11 @@ CREATE TABLE `regulatory_build_epigenome` (
 ) ENGINE=MyISAM  ;
 
 CREATE TABLE `regulatory_build_statistic` (
-  `regulatory_build_statistics_id` int(30) unsigned NOT NULL AUTO_INCREMENT,
+  `regulatory_build_statistic_id` int(30) unsigned NOT NULL AUTO_INCREMENT,
   `regulatory_build_id` int(22) unsigned DEFAULT NULL,
   `statistic` varchar(255) DEFAULT NULL,
-  `value` double unsigned DEFAULT NULL,
-  PRIMARY KEY (`regulatory_build_statistics_id`),
+  `value` bigint(11) unsigned DEFAULT NULL,
+  PRIMARY KEY (`regulatory_build_statistic_id`),
   UNIQUE KEY `stats_uniq` (`statistic`,`regulatory_build_id`)
 ) ENGINE=InnoDB ;
 
@@ -726,18 +727,23 @@ CREATE TABLE `regulatory_feature` (
   KEY `stable_id_idx` (`stable_id`)
 ) ENGINE=MyISAM  ;
 
-CREATE TABLE `segmentation_cell_table_ctcf` (
-  `epigenome` varchar(120) DEFAULT NULL,
-  `feature_type` varchar(40) NOT NULL,
-  `signal_bam_path` varchar(255) NOT NULL,
-  `control_bam_path` varchar(255) NOT NULL
-) ENGINE=MyISAM ;
+CREATE TABLE `segmentation` (
+  `segmentation_id` int(18) unsigned NOT NULL AUTO_INCREMENT,
+  `regulatory_build_id` int(22) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `superclass` varchar(255) NOT NULL,
+  `class` varchar(255) NOT NULL,
+  PRIMARY KEY (`segmentation_id`)
+) ENGINE=InnoDB ;
 
-CREATE TABLE `segmentation_cell_table_without_ctcf` (
-  `epigenome` varchar(120) DEFAULT NULL,
-  `feature_type` varchar(40) NOT NULL,
-  `signal_bam_path` varchar(255) NOT NULL,
-  `control_bam_path` varchar(255) NOT NULL
+CREATE TABLE `segmentation_cell_tables` (
+  `superclass` varchar(255) NOT NULL,
+  `class` varchar(255) NOT NULL,
+  `segmentation_id` int(18) unsigned NOT NULL,
+  `epigenome_id` int(16) unsigned NOT NULL,
+  `feature_type_id` int(18) unsigned NOT NULL,
+  `signal_alignment_id` int(23) unsigned NOT NULL,
+  `control_alignment_id` int(23) unsigned NOT NULL
 ) ENGINE=MyISAM ;
 
 CREATE TABLE `segmentation_file` (
@@ -746,6 +752,7 @@ CREATE TABLE `segmentation_file` (
   `name` varchar(100) DEFAULT NULL,
   `analysis_id` smallint(5) unsigned NOT NULL,
   `epigenome_id` int(10) unsigned DEFAULT NULL,
+  `segmentation_id` int(18) unsigned DEFAULT NULL,
   PRIMARY KEY (`segmentation_file_id`),
   UNIQUE KEY `name_idx` (`name`),
   KEY `epigenome_idx` (`epigenome_id`),
@@ -757,7 +764,8 @@ CREATE TABLE `segmentation_state_assignment` (
   `state` int(8) NOT NULL,
   `segmentation` varchar(255) NOT NULL,
   `assignment` varchar(255) NOT NULL,
-  PRIMARY KEY (`segmentation_state_assignment_id`)
+  PRIMARY KEY (`segmentation_state_assignment_id`),
+  UNIQUE KEY `state` (`state`,`segmentation`)
 ) ENGINE=InnoDB ;
 
 CREATE TABLE `segmentation_state_emission` (
@@ -774,7 +782,20 @@ CREATE TABLE `segmentation_state_emission` (
   `H3K4me3` double DEFAULT NULL,
   `H3K9ac` double DEFAULT NULL,
   `H3K9me3` double DEFAULT NULL,
-  PRIMARY KEY (`segmentation_state_emission_id`)
+  PRIMARY KEY (`segmentation_state_emission_id`),
+  UNIQUE KEY `state` (`state`,`segmentation`)
+) ENGINE=InnoDB ;
+
+CREATE TABLE `segmentation_statistic` (
+  `segmentation_statistic_id` int(30) unsigned NOT NULL AUTO_INCREMENT,
+  `segmentation_id` int(18) unsigned DEFAULT NULL,
+  `state` int(8) unsigned DEFAULT NULL,
+  `epigenome_id` int(22) unsigned DEFAULT NULL,
+  `label` varchar(255) DEFAULT NULL,
+  `statistic` varchar(255) NOT NULL,
+  `value` float unsigned DEFAULT NULL,
+  PRIMARY KEY (`segmentation_statistic_id`),
+  UNIQUE KEY `stats_uniq` (`statistic`,`segmentation_id`,`epigenome_id`,`label`)
 ) ENGINE=InnoDB ;
 
 CREATE TABLE `transcription_factor` (

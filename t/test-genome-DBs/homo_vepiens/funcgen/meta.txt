@@ -291,3 +291,16 @@
 735	\N	patch	patch_93_94_l.sql|Modify binding_matrix_table
 736	\N	patch	patch_93_94_m.sql|Create binding_matrix_frequencies table
 737	\N	patch	patch_94_95_a.sql|schema_version
+738	\N	patch	patch_94_95_b.sql|update to segmentation state tables
+739	\N	patch	patch_94_95_c.sql|Update to alignment table
+740	\N	patch	patch_94_95_d.sql|Update to execution_plan table
+741	\N	patch	patch_94_95_e.sql|Update to regulatory_build_statistic table
+742	\N	patch	patch_94_95_f.sql|Update to experimental_group table
+743	\N	patch	patch_94_95_g.sql|segmentation table
+744	\N	patch	patch_94_95_h.sql|segmentation_cell_tables
+745	\N	patch	patch_94_95_i.sql|segmentation_statistic table
+746	\N	patch	patch_94_95_j.sql|segmentation_file table
+747	\N	patch	patch_94_95_k.sql|peak calling statistic table
+748	\N	patch	patch_94_95_l.sql|Modify length for column name from epigenome table
+749	\N	patch	patch_94_95_m.sql|drop obsolete tables
+750	\N	patch	patch_94_95_n.sql|add unique constrain on display_label column for epigenome table
