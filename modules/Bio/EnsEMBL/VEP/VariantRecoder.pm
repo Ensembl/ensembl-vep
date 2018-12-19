@@ -104,13 +104,14 @@ sub new {
     buffer_size
   );
 
-  $config->{fields} ||= 'id,hgvsg,hgvsc,hgvsp';
+  $config->{fields} ||= 'id,hgvsg,hgvsc,hgvsp,spdi';
 
   my %set_fields = map {$_ => 1} ref($config->{fields}) eq 'ARRAY' ? @{$config->{fields}} : split(',', $config->{fields});
 
   # do some trickery to make sure we're not running unnecessary code
   # this first one only switches on the HGVS options for the requested fields  
   $config->{$_} = 1 for grep {$_ =~ /^hgvs/} keys %set_fields;
+  $config->{$_} = 1 for grep {$_ =~ /^spdi/} keys %set_fields;
 
   # and this one switches on check_existing if the user wants variant IDs
   my %opt_map = ('id' => 'check_existing');

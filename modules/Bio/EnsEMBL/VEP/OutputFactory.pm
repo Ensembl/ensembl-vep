@@ -195,6 +195,7 @@ sub new {
     hgvsp
     hgvsg
     hgvsg_use_accession
+    spdi
     sift
     polyphen
     polyphen_analysis
@@ -1168,9 +1169,17 @@ sub VariationFeatureOverlapAllele_to_output_hash {
   # hgvs g.
   if($self->{hgvsg}) {
     $vf->{_hgvs_genomic} ||= $vf->hgvs_genomic($vf->slice, $self->{hgvsg_use_accession} ? undef : $vf->{chr});
-
+    
     if(my $hgvsg = $vf->{_hgvs_genomic}->{$hash->{Allele}}) {
-      $hash->{HGVSg} = $hgvsg;
+      $hash->{HGVSg} = $hgvsg; 
+    }
+  }
+  # spdi
+  if($self->{spdi}) { 
+    $vf->{_spdi_genomic} = $vf->spdi_genomic(); 
+      
+    if(my $spdi = $vf->{_spdi_genomic}->{$hash->{Allele}}){
+      $hash->{spdi} = $spdi;  
     }
   }
 
