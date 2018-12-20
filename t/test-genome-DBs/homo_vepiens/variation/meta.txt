@@ -49,7 +49,7 @@
 57	\N	patch	patch_77_78_c.sql|Drop the table study_variation
 58	\N	patch	patch_77_78_d.sql|Extend the index type_val_idx in the table attrib
 59	\N	patch	patch_77_78_e.sql|add indexes on father_ and mother_individual_id and population name
-2	\N	schema_version	95
+2	\N	schema_version	96
 60	\N	patch	patch_78_79_a.sql|schema version
 61	\N	patch	patch_78_79_b.sql|change the column attrib_type_id by attrib_id in the variation_attrib table
 62	\N	patch	patch_78_79_c.sql|Store more detailed Sift information
@@ -103,3 +103,8 @@
 134	\N	patch	patch_93_94_a.sql|schema version
 135	\N	patch	patch_94_95_a.sql|schema version
 136	\N	patch	patch_94_95_b.sql|create table to store allele synonyms
+137	\N	patch	patch_95_96_a.sql|schema version
+138	\N	patch	patch_95_96_b.sql|modify index on variation_synonym
+139	\N	patch	patch_95_96_c.sql|add new entries to the failed_description table
+140	\N	patch	patch_95_96_d.sql|create table to store failed variation features
+141	\N	patch	patch_95_96_e.sql|Rename motif_name to binding_matrix_stable_id.
