@@ -1528,6 +1528,7 @@ sub TranscriptVariationAllele_to_output_hash {
   if($self->{use_transcript_ref}) {
     my $ref_tva = $tv->get_reference_TranscriptVariationAllele;
     $hash->{USED_REF} = $ref_tva->variation_feature_seq;
+    $hash->{USED_REF} = $ref_tva->{shift_object}->{ref_orig_allele_string} if $self->param('no_shift') && defined($ref_tva->{shift_object});
     $hash->{GIVEN_REF} = $ref_tva->{given_ref};
   }
 
