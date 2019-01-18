@@ -164,6 +164,49 @@ SKIP: {
     'add_colocated_variant_info_JSON'
   );
 
+  $of->{json_frequencies_array} = 1;
+  is_deeply(
+    $of->add_colocated_variant_info_JSON({}, [$frequency_hash], $ex),
+    {
+      'colocated_variants' => [
+        {
+          'frequencies' => [
+            {
+              'allele' => 'T',
+              'amr' => '0.0014',
+              'gnomad_sas' => '0',
+              'gnomad' => '0.0003478',
+              'ea' => '0',
+              'gnomad_oth' => '0',
+              'gnomad_asj' => '0',
+              'gnomad_nfe' => '1.886e-05',
+              'aa' => '0.004998',
+              'gnomad_afr' => '0.004643',
+              'afr' => '0.003',
+              'gnomad_amr' => '0.0003236',
+              'gnomad_fin' => '0',
+              'sas' => '0',
+              'gnomad_eas' => '0',
+              'eur' => '0',
+              'eas' => '0'
+            }
+          ],
+          'id' => 'rs142513484',
+          'minor_allele_freq' => '0.0010',
+          'minor_allele' => 'T',
+          'end' => 25585733,
+          'start' => 25585733,
+          'strand' => 1,
+          'allele_string' => 'C/T',
+          'pubmed' => [10, 20, 30],
+          'clin_sig' => ["pathogenic", "benign"],
+        }
+      ]
+    },
+    'add_colocated_variant_info_JSON - json_frequencies_array'
+  );
+
+
   $ib = get_annotated_buffer({input_file => $test_cfg->{test_vcf}});
   $of = Bio::EnsEMBL::VEP::OutputFactory::JSON->new({config => $ib->config});
 

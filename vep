@@ -156,6 +156,7 @@ GetOptions(
   'vcf',                     # produce vcf output
   'solr',                    # produce XML output for Solr
   'json',                    # produce JSON document output
+  'json_frequencies_array',  # format co-located frequencies as a list instead of a hash in JSON output
   'tab',                     # produce tabulated output
   'vcf_info_field=s',        # allow user to change VCF info field name
   'keep_csq',                # don't nuke existing CSQ fields in VCF

@@ -155,6 +155,7 @@ sub new {
     assembly
     cache_assembly
     delimiter
+    json_frequencies_array
   )]);
 
   $self->{delimiter} = " " if $self->{delimiter} =~ /\+/;
@@ -400,7 +401,21 @@ sub add_colocated_variant_info_JSON {
     }
   }
  
-  $ex->{frequencies} = $frequencies if (keys %$frequencies);
+  if (keys %$frequencies) {
+    if($self->{json_frequencies_array}) {
+      my @arr;
+      foreach my $a(keys %$frequencies) {
+        $frequencies->{$a}->{allele} = $a;
+        push @arr, $frequencies->{$a};
+      }
+
+      $ex->{frequencies} = \@arr;
+    }
+    else {
+      $ex->{frequencies} = $frequencies;
+    }
+  }
+  
   # remove empty
   foreach my $key(keys %$ex) {
     delete $ex->{$key} if !defined($ex->{$key}) || $ex->{$key} eq '' || ($key !~ /af/ && $ex->{$key} eq 0);
