@@ -430,6 +430,19 @@ SKIP: {
     'get_all_lines_by_InputBuffer - everything'
   );
 
+  # flag_pick, flag_pick_allele and flag_pick_allele_gene trigger picked_consequence key to be written
+  # NB this may be different from most_severe_consequence!!!
+  for my $flag(qw(flag_pick flag_pick_allele flag_pick_allele_gene)) {
+    $ib = get_annotated_buffer({
+      input_file => $test_cfg->{test_vcf},
+      $flag => 1,
+      dir => $test_cfg->{cache_root_dir},
+    });
+    $of = Bio::EnsEMBL::VEP::OutputFactory::JSON->new({config => $ib->config});
+    @lines = @{$of->get_all_lines_by_InputBuffer($ib)};
+    is($json->decode($lines[0])->{picked_consequence}, '3_prime_UTR_variant', $flag.' enables picked_consequence');
+  }
+
   # check rejoin on minimal
   no warnings 'qw';
   $ib = get_annotated_buffer({

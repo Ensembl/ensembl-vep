@@ -160,6 +160,8 @@ sub new {
 
   $self->{delimiter} = " " if $self->{delimiter} =~ /\+/;
 
+  $self->{using_pick} = 1 if $self->param('flag_pick') or $self->param('flag_pick_allele') or $self->param('flag_pick_allele_gene');
+
   return $self;
 }
 
@@ -282,7 +284,7 @@ sub add_VariationFeatureOverlapAllele_info {
   my $hash = shift;
 
   # record all cons terms so we can get the most severe
-  my @con_terms;
+  my (@con_terms, @picked_terms);
 
   # add consequence stuff
   foreach my $vfoa_hash(@{$self->get_all_VariationFeatureOverlapAllele_output_hashes($vf, {})}) {
@@ -340,6 +342,7 @@ sub add_VariationFeatureOverlapAllele_info {
 
     # log observed consequence terms
     push @con_terms, @{$vfoa_hash->{consequence}};
+    push @picked_terms, @{$vfoa_hash->{consequence}} if $vfoa_hash->{pick};
 
     # rename
     my %rename = %RENAME_KEYS;
@@ -355,6 +358,10 @@ sub add_VariationFeatureOverlapAllele_info {
 
   my %all_cons = %Bio::EnsEMBL::Variation::Utils::Constants::OVERLAP_CONSEQUENCES;
   $hash->{most_severe_consequence} = (sort {$all_cons{$a}->rank <=> $all_cons{$b}->rank} grep {$_ ne '?'} @con_terms)[0] || '?';
+
+  if($self->{using_pick}) {
+    $hash->{picked_consequence} = (sort {$all_cons{$a}->rank <=> $all_cons{$b}->rank} grep {$_ ne '?'} @picked_terms)[0] || '?';
+  }
 
   return $hash;
 }
