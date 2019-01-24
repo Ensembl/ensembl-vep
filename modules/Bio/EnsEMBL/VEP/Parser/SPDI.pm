@@ -185,7 +185,7 @@ sub create_VariationFeatures {
   }
 
   # throws error if reference sequence is not genomic
-  if($spdi !~ /^(NC\_|CHR|MT|([0-9]{1,2}\:|X\:|Y\:))/i) {
+  if($spdi !~ /^(NC_|CHR|([0-9]{1,2}|X|Y|MT):)/i) {
     my $ref_seq = (split(':', $spdi))[0];
     throw("Invalid reference sequence '$ref_seq' as SPDI reference");
   }
