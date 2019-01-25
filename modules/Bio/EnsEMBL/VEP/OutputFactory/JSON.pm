@@ -231,8 +231,6 @@ sub get_all_output_hashes_by_InputBuffer {
 
     $self->add_VariationFeatureOverlapAllele_info($vf, $hash);
 
-    numberify($hash, \%NUMBERIFY_EXEMPT);
-
     # rename
     my %rename = %RENAME_KEYS;
     foreach my $key(grep {defined($hash->{$_})} keys %rename) {
@@ -254,6 +252,9 @@ sub get_all_output_hashes_by_InputBuffer {
       }
       $self->add_colocated_variant_info_JSON($hash, \@allele_frequency_hashes, $ex_orig);
     }
+
+    numberify($hash, \%NUMBERIFY_EXEMPT);
+
     push @return, $hash;
   }
 
