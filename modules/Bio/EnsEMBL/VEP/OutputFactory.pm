@@ -1444,6 +1444,7 @@ sub TranscriptVariationAllele_to_output_hash {
   
   my $tv = $vfoa->base_variation_feature_overlap;
   my $tr = $tv->transcript;
+
   $hash->{Location} = ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start} + $shift_length, $vf->{end} + $shift_length);
   my $vep_cache = $tr->{_variation_effect_feature_cache};
 
@@ -1481,7 +1482,7 @@ sub TranscriptVariationAllele_to_output_hash {
         $shifting_offset = 0 if defined($tv->{_boundary_shift}) && $tv->{_boundary_shift} == 1;
         if(defined($tv->cds_start) && defined($tv->cds_end))
         {
-          $hash->{CDS_position}  = format_coords($tv->cds_start + $shifting_offset, $tv->cds_end + $shifting_offset);
+          $hash->{CDS_position}  = format_coords($tv->cds_start, $tv->cds_end);
         }
         else{
           $hash->{CDS_position}  = format_coords($tv->cds_start, $tv->cds_end); 
@@ -1527,6 +1528,7 @@ sub TranscriptVariationAllele_to_output_hash {
 
   if($self->{use_transcript_ref}) {
     my $ref_tva = $tv->get_reference_TranscriptVariationAllele;
+    
     $hash->{USED_REF} = $ref_tva->variation_feature_seq;
     $hash->{USED_REF} = $ref_tva->{shift_object}->{ref_orig_allele_string} if $self->param('no_shift') && defined($ref_tva->{shift_object});
     $hash->{GIVEN_REF} = $ref_tva->{given_ref};
