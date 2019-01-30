@@ -201,6 +201,7 @@ sub new {
     polyphen_analysis
 
     cell_type
+    no_shift
   )]);
 
   my $hashref = $_[0];
@@ -275,12 +276,35 @@ sub get_all_output_hashes_by_InputBuffer {
   # rejoin variants that have been split
   # this can happen when using --minimal
   $self->rejoin_variants_in_InputBuffer($buffer) if $buffer->rejoin_required;
-
+  
+  
+  map {@{$self->update_shifted_positions($_)}}
+    @{$buffer->buffer};
+  
   return [
     map {@{$self->get_all_output_hashes_by_VariationFeature($_)}}
     @{$buffer->buffer}
   ];
 }
+
+sub update_shifted_positions {
+  my $self = shift;
+  my $vf = shift;
+  
+  my @tvs = $vf->get_all_TranscriptVariations();
+  foreach my $tv (@{$tvs[0]})
+  {
+      map { bless $_, 'Bio::EnsEMBL::Variation::TranscriptVariationAllele' } 
+          @{ $tv->get_all_BaseVariationFeatureOverlapAlleles };
+        
+      map { $_->clear_shifting_variables} 
+          @{ $tv->get_all_BaseVariationFeatureOverlapAlleles };
+  }
+
+  
+  return \@tvs;
+}
+
 
 
 =head2 get_all_output_hashes_by_VariationFeature
@@ -1148,7 +1172,7 @@ sub _add_custom_annotations_to_hash {
 sub VariationFeatureOverlapAllele_to_output_hash {
   my $self = shift;
   my ($vfoa, $hash, $vf) = @_;
-
+  
   my @ocs = sort {$a->rank <=> $b->rank} @{$vfoa->get_all_OverlapConsequences};
 
   # consequence type(s)
@@ -1454,24 +1478,9 @@ sub TranscriptVariationAllele_to_output_hash {
 
     # exonic only
     if($pre->{exon}) {
-      my $shifting_offset = 0;
-      if($tr->strand() > 0)
-      {
-        #$shifting_offset = defined($vfoa->base_variation_feature->{shift_length}) ? $vfoa->base_variation_feature->{shift_length} : 0;
-        $shifting_offset = defined($vfoa->{shift_object}) ? $vfoa->{shift_object}->{shift_length} : 0;
-      }
-      elsif($tr->strand < 0)
-      {
-        $shifting_offset = defined($vfoa->{shift_object}) ? 0 - $vfoa->{shift_object}->{shift_length} : 0;
-      }
-      
-      if(defined($tv->cdna_start) && defined($tv->cdna_end))
-      {
-        $hash->{cDNA_position}  = format_coords($tv->cdna_start + $shifting_offset, $tv->cdna_end + $shifting_offset);  
-      }
-      else{
-        $hash->{cDNA_position}  = format_coords($tv->cdna_start, $tv->cdna_end);  
-      }
+      my $shifting_offset = defined($vfoa->{shift_object}) ? $vfoa->{shift_object}->{shift_length} * $tr->strand : 0;
+      $hash->{cDNA_position}  = format_coords($tv->cdna_start(undef,$shifting_offset), $tv->cdna_end(undef,$shifting_offset));  
+
       $hash->{cDNA_position} .= '/'.$tr->length if $self->{total_length};
 
       # coding only
@@ -1480,19 +1489,14 @@ sub TranscriptVariationAllele_to_output_hash {
         $hash->{Amino_acids} = $vfoa->pep_allele_string;
         $hash->{Codons}      = $vfoa->display_codon_allele_string;
         $shifting_offset = 0 if defined($tv->{_boundary_shift}) && $tv->{_boundary_shift} == 1;
-        if(defined($tv->cds_start) && defined($tv->cds_end))
-        {
-          $hash->{CDS_position}  = format_coords($tv->cds_start, $tv->cds_end);
-        }
-        else{
-          $hash->{CDS_position}  = format_coords($tv->cds_start, $tv->cds_end); 
-        }
+        $hash->{CDS_position}  = format_coords($tv->cds_start, $tv->cds_end);
+
         $hash->{CDS_position} .= '/'.length($vep_cache->{translateable_seq})
           if $self->{total_length} && $vep_cache->{translateable_seq};
 
-        delete($tv->{translation_start});
-        delete($tv->{translation_end});
-        delete($tv->{_translation_coords});
+        #delete($tv->{translation_start});
+        #delete($tv->{translation_end});
+        #delete($tv->{_translation_coords});
 
         $hash->{Protein_position}  = format_coords($tv->translation_start(undef, $shifting_offset), $tv->translation_end(undef, $shifting_offset));
 
@@ -1725,7 +1729,17 @@ sub get_cell_types {
 
 sub IntergenicVariationAllele_to_output_hash {
   my $self = shift;
-  return $self->VariationFeatureOverlapAllele_to_output_hash(@_);
+  my $iva = shift;
+  my $hash = shift;
+    
+  unless($self->{no_shift})
+  {
+    $iva->genomic_shift;
+    my $vf = $iva->variation_feature;
+    $hash->{Location} = ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start} + $iva->{shift_object}->{shift_length}, $vf->{end} + $iva->{shift_object}->{shift_length}),
+  }
+  
+  return $self->VariationFeatureOverlapAllele_to_output_hash($iva, $hash, @_);
 }
 
 
