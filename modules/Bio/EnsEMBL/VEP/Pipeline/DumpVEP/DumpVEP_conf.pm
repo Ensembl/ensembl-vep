@@ -101,7 +101,7 @@ sub default_options {
         # assembly-specific stuff
         assembly_specific => {
           GRCh37 => {
-            bam => $self->o('data_dir').'/interim_GRCh37.p13_knownrefseq_alignments_2017-01-13.bam',
+            bam => $self->o('data_dir').'/interim_GRCh38.p12_knownrefseq_alignments_2019-01-25.bam',
             freq_vcf => [
               {
                 file => $self->o('data_dir').'/1KG.phase3.GRCh37.vcf.gz',
