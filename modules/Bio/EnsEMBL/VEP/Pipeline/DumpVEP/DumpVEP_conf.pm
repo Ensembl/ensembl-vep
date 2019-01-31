@@ -131,7 +131,7 @@ sub default_options {
             ],
           },
           GRCh38 => {
-            bam => $self->o('data_dir').'/GRCh38.p12_knownrefseq_alignments.bam',
+            bam => $self->o('data_dir').'/interim_GRCh38.p12_knownrefseq_alignments_2019-01-25.bam',
             freq_vcf => [
               {
                 file => $self->o('data_dir').'/1KG.phase3.GRCh38_2018_02_26.vcf.gz',
