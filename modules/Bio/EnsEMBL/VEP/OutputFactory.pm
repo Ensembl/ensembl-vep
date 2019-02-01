@@ -1172,7 +1172,7 @@ sub _add_custom_annotations_to_hash {
 sub VariationFeatureOverlapAllele_to_output_hash {
   my $self = shift;
   my ($vfoa, $hash, $vf) = @_;
-  
+
   my @ocs = sort {$a->rank <=> $b->rank} @{$vfoa->get_all_OverlapConsequences};
 
   # consequence type(s)
@@ -1183,8 +1183,8 @@ sub VariationFeatureOverlapAllele_to_output_hash {
   $hash->{IMPACT} = $ocs[0]->impact() if @ocs;
 
   # allele
-  $hash->{Allele} = $vfoa->variation_feature_seq unless defined($vfoa->{shift_object});
-  if(defined($vfoa->{shift_object}))
+  $hash->{Allele} = $vfoa->variation_feature_seq unless defined($vfoa->{shift_object}) && defined($vfoa->{shift_object}->{hgvs_allele_string});
+  if(defined($vfoa->{shift_object})&& defined($vfoa->{shift_object}->{hgvs_allele_string}))
   {
     $hash->{Allele} = $vfoa->{shift_object}->{hgvs_allele_string};
   }
@@ -1736,7 +1736,7 @@ sub IntergenicVariationAllele_to_output_hash {
   {
     $iva->genomic_shift;
     my $vf = $iva->variation_feature;
-    $hash->{Location} = ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start} + $iva->{shift_object}->{shift_length}, $vf->{end} + $iva->{shift_object}->{shift_length}),
+    $hash->{Location} = ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start} + $iva->{shift_object}->{shift_length}, $vf->{end} + $iva->{shift_object}->{shift_length}) if defined($iva->{shift_object}->{shift_length});
   }
   
   return $self->VariationFeatureOverlapAllele_to_output_hash($iva, $hash, @_);
