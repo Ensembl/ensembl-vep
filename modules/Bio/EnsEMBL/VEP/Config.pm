@@ -277,13 +277,6 @@ our @OPTION_SETS = (
   },
   
   {
-    flags => ['gvf'],
-    set   => {
-      output_format => 'gvf',
-    }
-  },
-  
-  {
     flags => ['tab'],
     set   => {
       output_format => 'tab',
@@ -382,15 +375,14 @@ our %REQUIRES = (
 
 # incompatible options
 our %INCOMPATIBLE = (
-  most_severe => [qw(no_intergenic protein symbol sift polyphen coding_only ccds canonical xref_refseq numbers domains tsl appris uniprot summary pick flag_pick pick_allele flag_pick_allele)],
-  summary     => [qw(no_intergenic protein symbol sift polyphen coding_only ccds canonical xref_refseq numbers domains tsl appris uniprot most_severe pick flag_pick pick_allele flag_pick_allele)],
+  most_severe => [qw(biotype no_intergenic protein symbol sift polyphen coding_only ccds canonical xref_refseq numbers domains tsl appris uniprot summary pick flag_pick pick_allele flag_pick_allele)],
+  summary     => [qw(biotype no_intergenic protein symbol sift polyphen coding_only ccds canonical xref_refseq numbers domains tsl appris uniprot most_severe pick flag_pick pick_allele flag_pick_allele)],
   database    => [qw(af_1kg af_esp af_exac af_gnomad max_af pubmed offline cache)],
   quiet       => [qw(verbose)],
   refseq      => [qw(gencode_basic merged)],
-  json        => [qw(vcf gvf tab)],
-  vcf         => [qw(json gvf tab show_ref_allele)],
-  gvf         => [qw(vcf json tab)],
-  tab         => [qw(vcf gvf json)],
+  json        => [qw(vcf tab)],
+  vcf         => [qw(json tab)],
+  tab         => [qw(vcf json)],
   individual  => [qw(minimal)],
   check_ref   => [qw(lookup_ref)],
 );
@@ -401,9 +393,6 @@ our %DEPRECATED = (
   'maf_1kg'  => 'af_1kg',
   'maf_esp'  => 'af_1kg',
   'maf_exac' => 'af_exac',
-  'check_alleles' => undef,
-  'html'     => undef,
-  'gvf'      => undef,
   'convert'  => undef,
 );
 
