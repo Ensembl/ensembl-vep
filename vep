@@ -79,10 +79,6 @@ GetOptions(
   'no_check_alleles',        # attribute co-located regardless of alleles
   'exclude_null_alleles',    # exclude variants with null alleles from co-located check (e.g COSMIC)
   'check_frequency',         # enable frequency checking
-  'gmaf',                    # DEPRECATED: USE af
-  'maf_1kg',                 # DEPRECATED: USE af_1kg
-  'maf_esp',                 # DEPRECATED: USE af_esp
-  'maf_exac',                # DEPRECATED: USE af_exac
   'af',                      # add global AF of existing var
   'af_1kg',                  # add 1KG AFs of existing vars
   'af_esp',                  # add ESP AFs of existing vars

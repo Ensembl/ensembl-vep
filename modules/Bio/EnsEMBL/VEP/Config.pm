@@ -388,12 +388,9 @@ our %INCOMPATIBLE = (
 );
 
 # deprecated/replaced flags
+# e.g. 'gmaf' => 'af'
 our %DEPRECATED = (
-  'gmaf'     => 'af',
-  'maf_1kg'  => 'af_1kg',
-  'maf_esp'  => 'af_1kg',
-  'maf_exac' => 'af_exac',
-  'convert'  => undef,
+  'convert' => undef,
 );
 
 
