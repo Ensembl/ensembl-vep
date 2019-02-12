@@ -320,6 +320,11 @@ sub update() {
 
   my $current_branch = $CURRENT_VERSION_DATA->{'ensembl-vep'}->{release};
 
+  # Check if the $API_VERSION hasn't be set by the --VERSION flag
+  my $api_branch  = $API_VERSION;
+     $api_branch  =~ s/release\///;
+  return if ($api_branch != $current_branch);
+
   my $message;
 
   # don't have latest
@@ -708,7 +713,7 @@ sub get_vep_sub_version {
   my $release = shift || $API_VERSION;
 
   my $sub_file = "$RealBin/$$\.$VEP_MODULE_NAME.sub";
-  my $release_url_string = looks_like_number($API_VERSION) ? 'release/'.$API_VERSION : $API_VERSION;
+  my $release_url_string = looks_like_number($release) ? 'release/'.$release : $release;
 
   download_to_file(
     sprintf(
