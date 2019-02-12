@@ -1432,10 +1432,6 @@ sub TranscriptVariationAllele_to_output_hash {
         $hash->{CDS_position} .= '/'.length($vep_cache->{translateable_seq})
           if $self->{total_length} && $vep_cache->{translateable_seq};
 
-        #delete($tv->{translation_start});
-        #delete($tv->{translation_end});
-        #delete($tv->{_translation_coords});
-
         $hash->{Protein_position}  = format_coords($tv->translation_start(undef, $shifting_offset), $tv->translation_end(undef, $shifting_offset));
 
         $hash->{Protein_position} .= '/'.length($vep_cache->{peptide})
