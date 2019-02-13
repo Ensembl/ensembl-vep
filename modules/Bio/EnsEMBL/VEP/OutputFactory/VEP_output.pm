@@ -106,7 +106,7 @@ sub output_hash_to_line {
   # add additional fields to "Extra" col at the end
   my %extra =
     map {$_ => $hash->{$_}}
-    grep {!$OUTPUT_COLS_HASH{$_}}
+    grep {!$OUTPUT_COLS_HASH{$_} && $_ ne 'Extra'}
     keys %$hash;
 
   my $field_order = $self->field_order;
