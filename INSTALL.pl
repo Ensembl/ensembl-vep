@@ -320,10 +320,18 @@ sub update() {
 
   my $current_branch = $CURRENT_VERSION_DATA->{'ensembl-vep'}->{release};
 
+  # Check if the $API_VERSION has been set by the "--VERSION" flag
+  my $api_branch  = $API_VERSION;
+     $api_branch  =~ s/release\///;
+
   my $message;
 
+  # branch provided by the "--VERSION" flag
+  if ($api_branch != $current_branch) {
+    $message = "The 'VERSION' installation flag is going to be deprecated in release 96 (Spring 2019).\n";
+  }
   # don't have latest
-  if($current_branch < $default_branch_number) {
+  elsif($current_branch < $default_branch_number) {
     $message = 
       "Version check reports a newer release of $module is available ".
       "(installed: $current_branch, available: $default_branch_number)\n";
@@ -347,12 +355,19 @@ sub update() {
 
     # user has git, suggest they use that instead
     if(`which git` && -d $RealBin.'/.git') {
-      print "You may use git to update $module by exiting this installer and running:\n\n";
+      my $branch;
+      if ($api_branch != $current_branch) {
+        $branch = looks_like_number($API_VERSION) ? 'release/'.$API_VERSION : $API_VERSION;
+      }
+      elsif ($current_branch ne $default_branch_number) {
+       $branch = $default_branch;
+      }
+      print "We recommend using git to update '$module', by exiting this installer and running:\n\n";
       print "git pull\n";
-      print "git checkout $default_branch\n" if $current_branch ne $default_branch_number;
+      print "git checkout $branch\n" if $branch;
     }
     else {
-      print "You should exit this installer and re-download $module if you wish to update\n";
+      print "You should exit this installer and re-download '$module' if you wish to update\n";
     }
 
     print "\nDo you wish to exit so you can get updates (y) or continue (n): ";
@@ -708,7 +723,7 @@ sub get_vep_sub_version {
   my $release = shift || $API_VERSION;
 
   my $sub_file = "$RealBin/$$\.$VEP_MODULE_NAME.sub";
-  my $release_url_string = looks_like_number($API_VERSION) ? 'release/'.$API_VERSION : $API_VERSION;
+  my $release_url_string = looks_like_number($release) ? 'release/'.$release : $release;
 
   download_to_file(
     sprintf(
