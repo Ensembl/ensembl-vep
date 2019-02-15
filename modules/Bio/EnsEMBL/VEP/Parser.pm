@@ -625,6 +625,18 @@ sub validate_vf {
     return 0;
   }
 
+  if (length($ref_allele) > 50) {
+    $self->warning_msg("WARNING: Reference allele length is greater than 50bp on line " . $self->line_number . " and cannot be used for consequence calculation. Please use alternative allele descriptions for structural variants as described in the VCF documentation.");
+    return 0;
+  }
+
+  foreach my $alt_allele (@alleles) {
+    if (length($alt_allele) > 50) {
+    $self->warning_msg("WARNING: Alternate allele length is greater than 50bp on line " . $self->line_number . " and cannot be used for consequence calculation. Please use alternative allele descriptions for structural variants as described in the VCF documentation.");
+    return 0;
+    }
+  }
+
   # check reference allele if requested
   if($self->{check_ref}) {
     my $ok = 0;
