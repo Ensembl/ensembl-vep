@@ -326,7 +326,7 @@ sub update() {
 
   # branch provided by the "--VERSION" flag
   if ($api_branch != $current_branch) {
-    print "The 'VERSION' installation flag is deprecated.\n\n";
+    print "The 'VERSION' installation flag has been deprecated.\n\n";
     my $branch = looks_like_number($API_VERSION) ? 'release/'.$API_VERSION : $API_VERSION;
     if(`which git` && -d $RealBin.'/.git') {
       print "Please, use git to update '$module' using the commands:\n\n";
