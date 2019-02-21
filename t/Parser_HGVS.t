@@ -185,7 +185,7 @@ SKIP: {
     [25706002, 25706002, 25709954, 25712347],
     'gene - multiple'
   );
-  ok($tmp =~ /invalid use of gene name/, 'using gene name warns');
+  ok($tmp =~ /invalid use of gene or protein identifier/, 'using gene/protein identifier warns');
 
   $vf = Bio::EnsEMBL::VEP::Parser::HGVS->new({
     config => $cfg,
