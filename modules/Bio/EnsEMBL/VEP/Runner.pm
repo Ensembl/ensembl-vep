@@ -759,6 +759,11 @@ sub post_setup_checks {
   unless($self->param('stats_html') || $self->param('stats_text')) {
     $self->param('stats_html', 1);
   }
+  
+  if(defined($self->param('shift_hgvs')) && $self->param('shift_hgvs') eq 0) {
+    $self->status_msg("INFO: --shift_hgvs has been set to zero, enabling --no_shift\n");
+    $self->param('no_shift', 1);
+  }
 
   return 1;
 }
