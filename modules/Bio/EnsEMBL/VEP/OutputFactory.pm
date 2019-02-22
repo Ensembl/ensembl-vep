@@ -1407,7 +1407,7 @@ sub TranscriptVariationAllele_to_output_hash {
   my $tv = $vfoa->base_variation_feature_overlap;
   my $tr = $tv->transcript;
 
-  $hash->{Location} = ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start} + $shift_length, $vf->{end} + $shift_length);
+  $hash->{Location} = ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start} + ($shift_length * $tr->strand), $vf->{end} + ($shift_length * $tr->strand));
   my $vep_cache = $tr->{_variation_effect_feature_cache};
 
   my $pre = $vfoa->_pre_consequence_predicates();
