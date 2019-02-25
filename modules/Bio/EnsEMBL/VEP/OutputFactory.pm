@@ -1200,7 +1200,6 @@ sub VariationFeatureOverlapAllele_to_output_hash {
   # hgvs g.
   if($self->{hgvsg}) {
     $vf->{_hgvs_genomic} ||= $vf->hgvs_genomic($vf->slice, $self->{hgvsg_use_accession} ? undef : $vf->{chr});
-    
     if(my $hgvsg = $vf->{_hgvs_genomic}->{$hash->{Allele}}) {
       $hash->{HGVSg} = $hgvsg; 
     }
