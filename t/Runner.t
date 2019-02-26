@@ -1052,6 +1052,7 @@ SKIP: {
               '3_prime_UTR_variant'
             ],
             'strand' => -1,
+            'location' => '21:25585733',
             'transcript_id' => 'ENST00000307301',
             'cdna_start' => 1122,
             'impact' => 'MODIFIER'
@@ -1070,6 +1071,7 @@ SKIP: {
             'protein_end' => 331,
             'amino_acids' => 'A/T',
             'strand' => -1,
+            'location' => '21:25585733',
             'transcript_id' => 'ENST00000352957',
             'cdna_start' => 1033,
             'impact' => 'MODERATE'
@@ -1083,6 +1085,7 @@ SKIP: {
             ],
             'strand' => -1,
             'transcript_id' => 'ENST00000567517',
+            'location' => '21:25585733',
             'impact' => 'MODIFIER'
           }
         ],
