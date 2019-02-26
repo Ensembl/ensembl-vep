@@ -215,6 +215,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'cell_type' => undef,
   'mirna' => undef,
   'ambiguity' => undef,
+  'no_shift' => 0,
 }, 'Bio::EnsEMBL::VEP::OutputFactory::VEP_output' ), 'get_OutputFactory');
 
 
@@ -1031,8 +1032,8 @@ SKIP: {
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
   skip 'JSON module not available', 1 unless $Bio::EnsEMBL::VEP::OutputFactory::CAN_USE_JSON;
-
   $runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, format => 'vcf', delimiter => ' '});
+  $DB::single = 1;
   is_deeply(
     $runner->run_rest('21 25585733 rs142513484 C T . . .'),
     [
