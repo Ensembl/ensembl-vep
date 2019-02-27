@@ -290,7 +290,7 @@ sub get_all_output_hashes_by_InputBuffer {
 sub update_shifted_positions {
   my $self = shift;
   my $vf = shift;
-  
+  return [] if ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature';
   my @tvs = $vf->get_all_TranscriptVariations();
   foreach my $tv (@{$tvs[0]})
   {
