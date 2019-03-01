@@ -267,6 +267,7 @@ sub freqs_from_vcf {
   # iterate over each VCF file in the config
   foreach my $vcf_conf(@{$self->{freq_vcf}}) {
     my $file = $vcf_conf->{file};
+    $file =~ s/\+\+\+CHR\+\+\+/$chr/;
     next unless -e $file;
 
     my $prefix = $vcf_conf->{prefix} || '';
@@ -287,6 +288,10 @@ sub freqs_from_vcf {
       for my $start(grep {$by_pos{$_}} ($vcf_pos..($vcf_pos + length($vcf_ref)))) {
 
         foreach my $v(@{$by_pos{$start}}) {
+          if ($v->{allele_string} eq '/-' || $v->{allele_string} eq '/C') {
+            $self->warning('Could not be added to cache ' . $v->{variation_name} . ' ' . $v->{allele_string});
+            next;
+          }
           $DB::single = 1 if $v->{variation_name} eq 'TMP_ESP_1_179086420_179086420';
 
           my $matches = [];
@@ -304,7 +309,7 @@ sub freqs_from_vcf {
               }
             );
           };
-          die "Failed to get vf matches for " .$v->{variation_name} ."\n" unless $@ eq '';  
+          die "$file Failed to get vf matches for " .$v->{variation_name} ."\n" unless $@ eq '';  
 
           if(@$matches) {
 
