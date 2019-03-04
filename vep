@@ -163,7 +163,7 @@ GetOptions(
   'no_escape',               # don't percent-escape HGVS strings
   'ambiguity',               # Add allele ambiguity code
   'no_shift',                # disables shifting of all variants to 3prime
-  
+  'shift_genomic',           # adds genomic shifting to output, and prevents shifting of intergenic variants
   # cache stuff
   'database',                # must specify this to use DB now
   'cache',                   # use cache
