@@ -1024,7 +1024,7 @@ sub add_colocated_variant_info {
 
 sub add_colocated_frequency_data {
   my $self = shift;
-  my ($vf, $hash, $ex, $shift_object) = @_;
+  my ($vf, $hash, $ex, $shift_hash) = @_;
 
   return $hash unless grep {$self->{$_}} keys %FREQUENCY_KEYS or $self->{max_af};
 
@@ -1037,7 +1037,7 @@ sub add_colocated_frequency_data {
   @keys = grep {$self->{$_}} @keys unless $self->{max_af};
   
   my $this_allele = $hash->{Allele} ||= '-'; #if exists($hash->{Allele});
-  my $this_allele_unshifted = $shift_object->{alt_orig_allele_string} if defined($shift_object);
+  my $this_allele_unshifted = $shift_hash->{alt_orig_allele_string} if defined($shift_hash);
   $this_allele_unshifted ||= "";
   
   my ($matched_allele) = grep {$_->{a_allele} eq $this_allele || $_->{a_allele} eq $this_allele_unshifted} @{$ex->{matched_alleles} || []};
@@ -1184,10 +1184,10 @@ sub VariationFeatureOverlapAllele_to_output_hash {
   $hash->{IMPACT} = $ocs[0]->impact() if @ocs;
 
   # allele
-  $hash->{Allele} = $vfoa->variation_feature_seq;  #unless defined($vfoa->{shift_object}) && defined($vfoa->{shift_object}->{hgvs_allele_string});
-  if(defined($vfoa->{shift_object})&& defined($vfoa->{shift_object}->{hgvs_allele_string}) && $self->param('shift_genomic'))
+  $hash->{Allele} = $vfoa->variation_feature_seq;  #unless defined($vfoa->{shift_hash}) && defined($vfoa->{shift_hash}->{hgvs_allele_string});
+  if(defined($vfoa->{shift_hash})&& defined($vfoa->{shift_hash}->{hgvs_allele_string}) && $self->param('shift_genomic'))
   {
-    $hash->{Allele} = $vfoa->{shift_object}->{hgvs_allele_string};
+    $hash->{Allele} = $vfoa->{shift_hash}->{hgvs_allele_string};
   }
   # allele number
   $hash->{ALLELE_NUM} = $vfoa->allele_number if $self->{allele_number};
@@ -1232,7 +1232,7 @@ sub VariationFeatureOverlapAllele_to_output_hash {
 
   # frequency data
   foreach my $ex(@{$vf->{existing} || []}) {
-    $self->add_colocated_frequency_data($vf, $hash, $ex, $vfoa->{shift_object});
+    $self->add_colocated_frequency_data($vf, $hash, $ex, $vfoa->{shift_hash});
   }
 
   return $hash;
@@ -1463,7 +1463,7 @@ sub TranscriptVariationAllele_to_output_hash {
   $hash = $self->VariationFeatureOverlapAllele_to_output_hash(@_);
   $hash = $self->BaseTranscriptVariationAllele_to_output_hash(@_);
   
-  my $shift_length = (defined($vfoa->{shift_object}) ? $vfoa->{shift_object}->{shift_length} : 0);
+  my $shift_length = (defined($vfoa->{shift_hash}) ? $vfoa->{shift_hash}->{shift_length} : 0);
   $shift_length ||= 0;
   
   return undef unless $hash;
@@ -1510,7 +1510,7 @@ sub TranscriptVariationAllele_to_output_hash {
     # HGVS
     if($self->{hgvsc}) {
       my $hgvs_t = $vfoa->hgvs_transcript(undef, $self->param('no_shift'));
-      my $offset = defined($vfoa->{shift_object}) ? $vfoa->{shift_object}->{_hgvs_offset} : 0;
+      my $offset = defined($vfoa->{shift_hash}) ? $vfoa->{shift_hash}->{_hgvs_offset} : 0;
 
       $hash->{HGVSc} = $hgvs_t if $hgvs_t;
       $hash->{HGVS_OFFSET} = $offset * $strand if $offset && $hgvs_t;
@@ -1534,7 +1534,7 @@ sub TranscriptVariationAllele_to_output_hash {
     my $ref_tva = $tv->get_reference_TranscriptVariationAllele;
     
     $hash->{USED_REF} = $ref_tva->variation_feature_seq;
-    $hash->{USED_REF} = $ref_tva->{shift_object}->{ref_orig_allele_string} if $self->param('no_shift') && defined($ref_tva->{shift_object});
+    $hash->{USED_REF} = $ref_tva->{shift_hash}->{ref_orig_allele_string} if $self->param('no_shift') && defined($ref_tva->{shift_hash});
     $hash->{GIVEN_REF} = $ref_tva->{given_ref};
   }
 
@@ -1736,7 +1736,7 @@ sub IntergenicVariationAllele_to_output_hash {
   {
     $iva->genomic_shift;
     my $vf = $iva->variation_feature;
-    $hash->{Location} = ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start} + $iva->{shift_object}->{shift_length}, $vf->{end} + $iva->{shift_object}->{shift_length}) if (defined($iva->{shift_object}->{shift_length}) && $self->param('shift_genomic'));
+    $hash->{Location} = ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start} + $iva->{shift_hash}->{shift_length}, $vf->{end} + $iva->{shift_hash}->{shift_length}) if (defined($iva->{shift_hash}->{shift_length}) && $self->param('shift_genomic'));
   }
   
   return $self->VariationFeatureOverlapAllele_to_output_hash($iva, $hash, @_);
