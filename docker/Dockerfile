@@ -19,19 +19,20 @@ RUN apt-get update && apt-get -y install \
 ENV OPT /opt/vep
 ENV OPT_SRC $OPT/src
 ENV HTSLIB_DIR $OPT_SRC/htslib
+ENV BRANCH release/96
 
 # Working directory
 WORKDIR $OPT_SRC
 
 # Clone/download repositories/libraries
 # Clone ensembl git repository and extract useful ensemb core file
-RUN git clone --depth 1 https://github.com/Ensembl/ensembl.git && \
+RUN git clone --branch $BRANCH --depth 1 https://github.com/Ensembl/ensembl.git && \
     cp ensembl/cpanfile ensembl_cpanfile && \
     rm -rf ensembl && \
     # Clone ensembl-vep git repository
-    git clone --depth 1 https://github.com/Ensembl/ensembl-vep.git && chmod u+x ensembl-vep/*.pl && \
+    git clone --branch $BRANCH --depth 1 https://github.com/Ensembl/ensembl-vep.git && chmod u+x ensembl-vep/*.pl && \
     # Clone ensembl-variation git repository and compile C code
-    git clone --depth 1 https://github.com/Ensembl/ensembl-variation.git && \
+    git clone --branch $BRANCH --depth 1 https://github.com/Ensembl/ensembl-variation.git && \
     mkdir var_c_code && \
     cp ensembl-variation/C_code/*.c ensembl-variation/C_code/Makefile var_c_code/ && \
     rm -rf ensembl-variation && \
@@ -43,8 +44,8 @@ RUN git clone --depth 1 https://github.com/Ensembl/ensembl.git && \
     unzip -q ensembl-xs.zip && mv ensembl-xs-2.3.2 ensembl-xs && rm -rf ensembl-xs.zip && \
     # Clone/Download other repositories: bioperl-live is needed so the cpanm dependencies installation from the ensembl-vep/cpanfile file takes less disk space
     ensembl-vep/travisci/get_dependencies.sh && \
-    # Only keep the Bio library
-    mkdir bioperl-live && mv bioperl-live-release-1-6-924/Bio bioperl-live/ && rm -rf bioperl-live-release-1-6-924 && \
+    # Only keep the bioperl-live "Bio" library
+    mv bioperl-live bioperl-live_bak && mkdir bioperl-live && mv bioperl-live_bak/Bio bioperl-live/ && rm -rf bioperl-live_bak && \
     ## A lot of cleanup on the imported libraries, in order to reduce the docker image ##
     rm -rf Bio-HTS/.??* Bio-HTS/Changes Bio-HTS/DISCLAIMER Bio-HTS/MANIFEST* Bio-HTS/README Bio-HTS/scripts Bio-HTS/t Bio-HTS/travisci \
            bioperl-ext/.??* bioperl-ext/Bio/SeqIO bioperl-ext/Bio/Tools bioperl-ext/Makefile.PL bioperl-ext/README* bioperl-ext/t bioperl-ext/examples \
@@ -91,7 +92,8 @@ RUN apt-get update && apt-get -y install \
     perl-base \
     unzip \
     vim && \
-    apt-get -y purge libpython3.6-stdlib libpython3.6 libpython3.6-minimal manpages-dev && \
+    apt-get -y purge manpages-dev && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Setup VEP environment
