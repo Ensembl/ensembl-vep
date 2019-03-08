@@ -108,7 +108,7 @@ my %FREQUENCY_KEYS = (
   af_1kg    => [qw(AFR AMR ASN EAS EUR SAS)],
   af_esp    => [qw(AA EA)],
   af_exac   => [('ExAC', map {'ExAC_'.$_} qw(Adj AFR AMR EAS FIN NFE OTH SAS))],
-  af_gnomad => [('gnomAD', map {'gnomAD_'.$_} qw(AFR AMR ASJ EAS FIN NFE OTH SAS afr amr asj eas fin nfe oth sas))],
+  af_gnomad => [('gnomAD', map {'gnomAD_'.$_} qw(AFR AMR ASJ EAS FIN NFE OTH SAS))],
 );
 
 
