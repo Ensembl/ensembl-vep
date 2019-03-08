@@ -184,16 +184,6 @@ sub get_features_by_regions_uncached {
     my $type = 'RegulatoryFeature'; 
     my $features = $self->get_adaptor('funcgen', $type)->fetch_all_by_Slice($sub_slice);
 
-    # Don't use regulatory features from chr X which have only been projected to chr Y by the core API
-    #if ($sub_slice->seq_region_name eq 'Y' ) {
-    #  my @true_Y_features = ();
-    #  foreach my $feature (@$features) {
-    #    my $rf = $rfa->fetch_by_stable_id($feature->stable_id);
-    #    push @true_Y_features, $rf if ($rf->seq_region_name eq 'Y');
-    #  }
-    #  $features = \@true_Y_features;
-    #}
-
     next unless defined($features);
 
     foreach my $rf(@$features) { 
