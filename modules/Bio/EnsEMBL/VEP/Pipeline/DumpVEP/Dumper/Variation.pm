@@ -169,9 +169,17 @@ sub _generic_dump_info {
   # var cache cols
   my @cols = (
     @{$as->get_cache_columns()},
-    'pubmed',
-    map {@{$_->{prefixed_pops} || $_->{pops}}} @{$self->{freq_vcf} || []}
+    'pubmed'
   );
+  foreach my $pop(map {@{$_->{prefixed_pops} || $_->{pops}}} @{$self->{freq_vcf} || []}) {
+    if ($pop =~ /^gnomAD_/) {
+      my $ucpop = uc $pop;
+      $ucpop =~ s/GNOMAD_/gnomAD_/;
+      $pop = $ucpop;
+    }
+    push @cols, $pop;
+  }
+
   unshift @cols, 'chr' if $converted;
   
   print $fh "variation_cols\t".join(",", @cols)."\n";
@@ -228,10 +236,14 @@ sub dump_obj {
 
     if($self->{freq_vcf}) {
       foreach my $pop(map {@{$_->{prefixed_pops} || $_->{pops}}} @{$self->{freq_vcf}}) {
+        if ($pop =~ /^gnomAD_/) {
+          my $ucpop = uc $pop;
+          $ucpop =~ s/GNOMAD_/gnomAD_/;
+          $pop = $ucpop;
+        }
         push @tmp, $v->{$pop} || '';
       }
     }
-
     print DUMP join(" ", @tmp);
     print DUMP "\n";
 
@@ -371,8 +383,11 @@ sub freqs_from_vcf {
 
               if(defined($tmp_f) && $tmp_f ne '') {
                 my $store_name = $prefix.$pop;
+                if ($vcf_conf->{name} eq 'gnomAD' && $pop) {
+                  my $ucpop = uc $pop;
+                  $store_name = $prefix.$ucpop;
+                }
                 $store_name =~ s/\_$//;
-                
                 $v->{$store_name} = $v->{$store_name} ? $v->{$store_name}.','.$tmp_f : $tmp_f;
               }
             }
