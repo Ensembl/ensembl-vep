@@ -185,14 +185,14 @@ sub get_features_by_regions_uncached {
     my $features = $self->get_adaptor('funcgen', $type)->fetch_all_by_Slice($sub_slice);
 
     # Don't use regulatory features from chr X which have only been projected to chr Y by the core API
-    if ($sub_slice->seq_region_name eq 'Y' ) {
-      my @true_Y_features = ();
-      foreach my $feature (@$features) {
-        my $rf = $rfa->fetch_by_stable_id($feature->stable_id);
-        push @true_Y_features, $rf if ($rf->seq_region_name eq 'Y');
-      }
-      $features = \@true_Y_features;
-    }
+    #if ($sub_slice->seq_region_name eq 'Y' ) {
+    #  my @true_Y_features = ();
+    #  foreach my $feature (@$features) {
+    #    my $rf = $rfa->fetch_by_stable_id($feature->stable_id);
+    #    push @true_Y_features, $rf if ($rf->seq_region_name eq 'Y');
+    #  }
+    #  $features = \@true_Y_features;
+    #}
 
     next unless defined($features);
 
@@ -220,7 +220,9 @@ sub get_features_by_regions_uncached {
     $type = 'MotifFeature';
     my @motif_features = ();
     foreach my $rf (@$features) {
-      push @motif_features, @{$rf->fetch_all_MotifFeatures_with_matching_Peak()};
+      my $rf_seq_region = $rf->seq_region_name;
+      my @experimentally_verified_MotifFeatures = grep {$_->seq_region_name eq "$rf_seq_region"} @{$rf->get_all_experimentally_verified_MotifFeatures()};  
+      push @motif_features, @experimentally_verified_MotifFeatures;
     } 
 
     foreach my $mf(@motif_features) {
