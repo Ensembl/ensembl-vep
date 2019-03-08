@@ -221,7 +221,7 @@ sub deserialized_obj_to_features {
         }
 
         $f->{_vep_feature_type} ||= $type;
-
+        next unless (defined $f->{start});
         push @features, $f;
       }
     }
