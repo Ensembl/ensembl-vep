@@ -684,7 +684,7 @@ sub pick_worst_VariationFeatureOverlapAllele {
       my $tr = $vfoa->feature;
 
       # 0 is "best"
-      $info->{mane} = $tr->is_mane ? 0 : 1;
+      $info->{mane} = scalar(grep {$_->code eq 'MANE_Select'}  @{$tr->get_all_Attributes()}) ? 0 : 1;
       $info->{canonical} = $tr->is_canonical ? 0 : 1;
       $info->{biotype} = $tr->biotype eq 'protein_coding' ? 0 : 1;
       $info->{ccds} = $tr->{_ccds} && $tr->{_ccds} ne '-' ? 0 : 1;
@@ -1341,8 +1341,7 @@ sub BaseTranscriptVariationAllele_to_output_hash {
 
   # gene phenotype
   $hash->{GENE_PHENO} = 1 if $self->{gene_phenotype} && $tr->{_gene_phenotype};
-
-  if($self->{mane} && (my ($mane) = grep {$_->code eq 'mane'} @attribs)) {
+  if($self->{mane} && (my ($mane) = grep {$_->code eq 'MANE_Select'} @attribs)) {
     if(my $mane_value = $mane->value) {
       $mane_value =~ s/mane/P/; #This will need to be changed 
       $hash->{MANE} = $mane_value;
