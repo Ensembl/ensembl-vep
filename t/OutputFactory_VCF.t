@@ -323,7 +323,7 @@ is(
   $lines[0],
   "21\t25585733\trs142513484\tC\tT\t.\t.\t".
   'CSQ=T|3_prime_UTR_variant|MODIFIER|MRPL39|ENSG00000154719|Transcript|ENST00000307301|protein_coding|'.
-  '11/11||ENST00000307301.11:c.*18G>A||1122|||||rs142513484||-1||SNV|HGNC|HGNC:14027|YES|5||CCDS33522.1|'.
+  '11/11||ENST00000307301.11:c.*18G>A||1122|||||rs142513484||-1||SNV|HGNC|HGNC:14027|YES||5||CCDS33522.1|'.
   'ENSP00000305682|Q9NYK5||UPI00001AEAC0|||||||0.0010|0.003|0.0014|0|0|0|0.004998|0|0.0003478|0.004643|'.
   '0.0003236|0|0|0|1.886e-05|0|0|0.004998|AA||||||||,'.
   'T|missense_variant|MODERATE|MRPL39|ENSG00000154719|Transcript|ENST00000352957|protein_coding|'.
@@ -331,7 +331,7 @@ is(
   '|-1||SNV|HGNC|HGNC:14027||1|P1|CCDS13573.1|ENSP00000284967|Q9NYK5||UPI00001AEE66||tolerated_low_confidence(0.17)|'.
   'benign(0.001)||||0.0010|0.003|0.0014|0|0|0|0.004998|0|0.0003478|0.004643|0.0003236|0|0|0|1.886e-05|0|0|0.004998|AA||||||||,'.
   'T|upstream_gene_variant|MODIFIER|AP000223.1|ENSG00000260583|Transcript|ENST00000567517|antisense||||||||||'.
-  'rs142513484|2407|-1||SNV|Clone_based_ensembl_gene||YES|||||||||||||||0.0010|0.003|0.0014|0|0|0|0.004998|0|'.
+  'rs142513484|2407|-1||SNV|Clone_based_ensembl_gene||YES||||||||||||||0.0010|0.003|0.0014|0|0|0|0.004998|0|'.
   '0.0003478|0.004643|0.0003236|0|0|0|1.886e-05|0|0|0.004998|AA||||||||'.
   "\tGT\t0|0",
   'get_all_lines_by_InputBuffer - everything'
