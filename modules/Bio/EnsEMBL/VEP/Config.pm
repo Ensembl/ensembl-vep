@@ -154,6 +154,7 @@ our @OPTION_SETS = (
       max_af         => 1,
       pubmed         => 1,
       uniprot        => 1,
+      mane           => 1,
       tsl            => 1,
       appris         => 1,
       variant_class  => 1,
@@ -382,8 +383,8 @@ our %REQUIRES = (
 
 # incompatible options
 our %INCOMPATIBLE = (
-  most_severe => [qw(no_intergenic protein symbol sift polyphen coding_only ccds canonical xref_refseq numbers domains tsl appris uniprot summary pick flag_pick pick_allele flag_pick_allele)],
-  summary     => [qw(no_intergenic protein symbol sift polyphen coding_only ccds canonical xref_refseq numbers domains tsl appris uniprot most_severe pick flag_pick pick_allele flag_pick_allele)],
+  most_severe => [qw(no_intergenic protein symbol sift polyphen coding_only ccds mane canonical xref_refseq numbers domains tsl appris uniprot summary pick flag_pick pick_allele flag_pick_allele)],
+  summary     => [qw(no_intergenic protein symbol sift polyphen coding_only ccds mane canonical xref_refseq numbers domains tsl appris uniprot most_severe pick flag_pick pick_allele flag_pick_allele)],
   database    => [qw(af_1kg af_esp af_exac af_gnomad max_af pubmed offline cache)],
   quiet       => [qw(verbose)],
   refseq      => [qw(gencode_basic merged)],
