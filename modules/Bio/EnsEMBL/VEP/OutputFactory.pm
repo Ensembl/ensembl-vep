@@ -720,7 +720,6 @@ sub pick_worst_VariationFeatureOverlapAllele {
 
     push @vfoa_info, $info;
   }
-
   if(scalar @vfoa_info) {
     my @order = @{$self->{pick_order}};
     my $picked;
@@ -1343,7 +1342,6 @@ sub BaseTranscriptVariationAllele_to_output_hash {
   $hash->{GENE_PHENO} = 1 if $self->{gene_phenotype} && $tr->{_gene_phenotype};
   if($self->{mane} && (my ($mane) = grep {$_->code eq 'MANE_Select'} @attribs)) {
     if(my $mane_value = $mane->value) {
-      $mane_value =~ s/mane/P/; #This will need to be changed 
       $hash->{MANE} = $mane_value;
     }
   }
