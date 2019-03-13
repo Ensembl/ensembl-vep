@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2018] EMBL-European Bioinformatics Institute
+Copyright [2016-2019] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -76,7 +76,9 @@ sub default_options {
     # this creates an extra tar.gz file for each of these species
     # the web interface and REST API use these in preference to the non-converted ones
     convert => 1,
-    
+   
+    # Update since release 95 run the vep pipeline with the `-division vertebrates` flag. If you only want to run the pipeline for human, you will need these two flags `-species homo_sapiens` and `-division vertebrates`
+ 
     # include or exclude the following species from the dumps, run for a division or all the species on the server
     species => [],
     # Excluding mouse strains
@@ -129,7 +131,7 @@ sub default_options {
             ],
           },
           GRCh38 => {
-            bam => $self->o('data_dir').'/GRCh38.p12_knownrefseq_alignments.bam',
+            bam => $self->o('data_dir').'/interim_GRCh38.p12_knownrefseq_alignments_2019-01-25.bam',
             freq_vcf => [
               {
                 file => $self->o('data_dir').'/1KG.phase3.GRCh38_2018_02_26.vcf.gz',

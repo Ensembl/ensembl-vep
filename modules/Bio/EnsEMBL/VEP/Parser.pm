@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2018] EMBL-European Bioinformatics Institute
+Copyright [2016-2019] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -73,6 +73,7 @@ use Bio::EnsEMBL::VEP::Parser::VEP_input;
 use Bio::EnsEMBL::VEP::Parser::ID;
 use Bio::EnsEMBL::VEP::Parser::HGVS;
 use Bio::EnsEMBL::VEP::Parser::Region;
+use Bio::EnsEMBL::VEP::Parser::SPDI;
 
 use Scalar::Util qw(openhandle looks_like_number);
 use FileHandle;
@@ -82,7 +83,8 @@ my %FORMAT_MAP = (
   'ensembl' => 'VEP_input',
   'id'      => 'ID',
   'hgvs'    => 'HGVS',
-  'region'  => 'Region'
+  'region'  => 'Region',
+  'spdi'    => 'SPDI'
 );
 
 
@@ -103,7 +105,7 @@ my %FORMAT_MAP = (
   Exceptions : throws if:
                 - no file given
                 - invalid format specified
-                - unable to detect format 
+                - unable to detect format
   Caller     : Runner
   Status     : Stable
 
@@ -112,7 +114,7 @@ my %FORMAT_MAP = (
 sub new {
   my $caller = shift;
   my $class = ref($caller) || $caller;
-  
+
   my $self = $class->SUPER::new(@_);
 
   $self->add_shortcuts([qw(dont_skip check_ref chr lrg minimal delimiter lookup_ref)]);
@@ -176,7 +178,7 @@ sub next {
 
   my $vf = shift @$cache;
   return $vf unless $vf;
-  
+
   unless($self->validate_vf($vf) || $self->{dont_skip}) {
     return $self->next();
   }
@@ -235,7 +237,7 @@ sub file {
 
     $self->{file} = $file;
   }
-  
+
   return $self->{file};
 }
 
@@ -285,7 +287,7 @@ sub skip_empty_lines {
 
 
 =head2 line_number
-  
+
   Arg 1      : (optional) int $line_number
   Example    : $ln = $parser->line_number();
   Description: Getter/setter for the current line number.
@@ -304,7 +306,7 @@ sub line_number {
 
 
 =head2 valid_chromosomes
-  
+
   Arg 1      : (optional) arrayref $valid_chromosomes
   Example    : $valids = $parser->valid_chromosomes();
   Description: Getter/setter for the list of valid chromosomes as found
@@ -324,7 +326,7 @@ sub valid_chromosomes {
 
 
 =head2 delimiter
-  
+
   Arg 1      : (optional) string $delimiter
   Example    : $delim = $parser->delimiter();
   Description: Getter/setter for the delimiter used to separate fields
@@ -344,7 +346,7 @@ sub delimiter {
 
 
 =head2 detect_format
-  
+
   Example    : $format = $parser->detect_format();
   Description: Attempts to detect the format of the input by analysing
                the first line. Not 100% successful, and will not work
@@ -387,7 +389,7 @@ sub detect_format {
     }
     else {
       s/\r|(?>\v|\x0D\x0A).+//;
-    }    
+    }
 
     # try to detect delimiter
     if(!/$delimiter/) {
@@ -414,6 +416,14 @@ sub detect_format {
       $data[0] =~ /^[^\:]+\:\d+\-\d+(\:[\-\+]?1)?[\/\:](ins|dup|del|[ACGTN-]+)$/i
     ) {
       $format = 'region';
+    }
+
+    # SPDI: NC_000016.10:68684738:G:A
+    elsif (
+      scalar @data == 1 &&
+      $data[0] =~ /^(.*?\:){2}([^\:]+|)$/i
+    ) {
+      $format = 'spdi';
     }
 
     # HGVS: ENST00000285667.3:c.1047_1048insC
@@ -486,7 +496,7 @@ sub detect_format {
 
 
 =head2 validate_vf
-  
+
   Arg 1      : Bio::EnsEMBL::Variation::BaseVariationFeature
   Example    : $is_valid = $parser->validate_vf($vf);
   Description: Performs various (configurable) checks on a VariationFeature
@@ -672,7 +682,7 @@ sub validate_vf {
 
 
 =head2 _get_ref_allele
-  
+
   Example    : $ref_allele = $parser->_get_ref_allele($vf);
   Description: Looks up the reference sequence covered by the given
                VariationFeature. Uses a slice that will fetch from
@@ -698,7 +708,7 @@ sub _get_ref_allele {
 
 
 =head2 _have_chr
-  
+
   Example    : $have_chr = $parser->_have_chr();
   Description: Checks if the chromosome name assigned in the VariationFeature
                is valid given the list provided by valid_chromosomes(); also
@@ -746,7 +756,7 @@ sub _have_chr {
 
 
 =head2 validate_svf
-  
+
   Arg 1      : Bio::EnsEMBL::Variation::StructuralVariationFeature
   Example    : $is_valid = $parser->validate_svf($svf);
   Description: Stub, not currently implemented
@@ -763,7 +773,7 @@ sub validate_svf {
 
 
 =head2 post_process_vfs
-  
+
   Arg 1      : arrayref of Bio::EnsEMBL::Variation::BaseVariationFeature
   Example    : $vfs = $parser->post_process_vfs($svf);
   Description: Applies some optional post-processing to VariationFeatures:
@@ -798,7 +808,7 @@ sub post_process_vfs {
 
 
 =head2 map_to_lrg
-  
+
   Arg 1      : arrayref of Bio::EnsEMBL::Variation::BaseVariationFeature
   Example    : $vfs = $parser->map_to_lrg($svf);
   Description: Maps variants to LRGs, appending any successfully mapped
@@ -857,7 +867,7 @@ sub map_to_lrg {
 
 
 =head2 minimise_alleles
-  
+
   Arg 1      : arrayref of Bio::EnsEMBL::Variation::BaseVariationFeature
   Example    : $vfs = $parser->minimise_alleles($svf);
   Description: Modifies VariationFeatures by reducing REF/ALT to their
@@ -913,7 +923,7 @@ sub minimise_alleles {
         $new_vf->{original_start}         = $vf->{start};
         $new_vf->{original_end}           = $vf->{end};
         $new_vf->{minimised}              = 1;
-        
+
         push @return, $new_vf;
       }
     }

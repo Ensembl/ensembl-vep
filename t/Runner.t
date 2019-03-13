@@ -1,4 +1,4 @@
-# Copyright [2016-2018] EMBL-European Bioinformatics Institute
+# Copyright [2016-2019] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -198,6 +198,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'hgvsp' => undef,
   'hgvsg' => undef,
   'hgvsg_use_accession' => undef,
+  'spdi' => undef,
   'merged' => undef,
   'af_1kg' => undef,
   'tsl' => undef,

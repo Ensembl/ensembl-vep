@@ -27,37 +27,30 @@ limitations under the License.
 
 =cut
 
-# EnsEMBL module for Bio::EnsEMBL::VEP::Parser::HGVS
+# EnsEMBL module for Bio::EnsEMBL::VEP::Parser::SPDI
 #
 #
 
 =head1 NAME
 
-Bio::EnsEMBL::VEP::Parser::HGVS - HGVS list input parser
+Bio::EnsEMBL::VEP::Parser::SPDI - SPDI list input parser
 
 =head1 SYNOPSIS
 
-my $parser = Bio::EnsEMBL::VEP::Parser::HGVS->new({
+my $parser = Bio::EnsEMBL::VEP::Parser::SPDI->new({
   config => $config,
-  file   => 'hgvs.txt',
+  file   => 'spdi.txt',
 });
 
 my $vf = $parser->next();
 
 =head1 DESCRIPTION
 
-HGVS format parser.
+SPDI format parser.
 
-See http://varnomen.hgvs.org/ for spec.
+See https://www.ncbi.nlm.nih.gov/variation/notation/ for spec.
 
-Variants can be g. (genomic), c. (coding transcript),
-n. (non-coding transcript) or p. (protein), though
-since variants are transformed to genomic coordinates some p.
-descriptions may fail to parse if they do not unambiguously resolve
-to a genomic postion and ref/alt.
-
-Requires a database connection to look up reference feature
-locations, so not available in --offline mode.
+Variants can be genomic.
 
 =head1 METHODS
 
@@ -68,7 +61,7 @@ use strict;
 use warnings;
 no warnings 'recursion';
 
-package Bio::EnsEMBL::VEP::Parser::HGVS;
+package Bio::EnsEMBL::VEP::Parser::SPDI;
 
 use base qw(Bio::EnsEMBL::VEP::Parser);
 
@@ -77,7 +70,6 @@ use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::IO::ListBasedParser;
 
-
 =head2 new
 
   Arg 1      : hashref $args
@@ -85,9 +77,9 @@ use Bio::EnsEMBL::IO::ListBasedParser;
                  config    => Bio::EnsEMBL::VEP::Config,
                  file      => string or filehandle,
                }
-  Example    : $parser = Bio::EnsEMBL::VEP::Parser::HGVS->new($args);
-  Description: Create a new Bio::EnsEMBL::VEP::Parser::HGVS object.
-  Returntype : Bio::EnsEMBL::VEP::Parser::HGVS
+  Example    : $parser = Bio::EnsEMBL::VEP::Parser::SPDI->new($args);
+  Description: Create a new Bio::EnsEMBL::VEP::Parser::SPDI object.
+  Returntype : Bio::EnsEMBL::VEP::Parser::SPDI
   Exceptions : throws if offline mode (--offline) enabled
   Caller     : Runner
   Status     : Stable
@@ -97,13 +89,13 @@ use Bio::EnsEMBL::IO::ListBasedParser;
 sub new {
   my $caller = shift;
   my $class = ref($caller) || $caller;
-  
+
   my $self = $class->SUPER::new(@_);
 
   # requires db connection
-  throw("ERROR: Cannot use HGVS format in offline mode") if $self->param('offline');
+  throw("ERROR: Cannot use SPDI format in offline mode") if $self->param('offline');
 
-  $self->add_shortcuts(['ambiguous_hgvs']);
+  $self->add_shortcuts(['ambiguous_spdi']);
 
   return $self;
 }
@@ -130,9 +122,9 @@ sub parser {
 
   Example    : $vfs = $parser->create_VariationFeatures();
   Description: Create a VariationFeature object from the current line
-               of input. 
+               of input.
   Returntype : arrayref of Bio::EnsEMBL::VariationFeature
-  Exceptions : warns if unable to parse HGVS string
+  Exceptions : warns if unable to parse SPDI string
   Caller     : next()
   Status     : Stable
 
@@ -150,19 +142,15 @@ sub create_VariationFeatures {
 
   $self->line_number($self->line_number + 1);
 
-  my $hgvs = $parser->get_value;
+  my $spdi = $parser->get_value;
 
   # remove whitespace
-  $hgvs =~ s/\s+//g;
-
-  if ($hgvs =~ /(\[|\])/ ){
-    $self->warning_msg("WARNING: Unable to parse HGVS notation \'$hgvs\'\n");
-    return $self->create_VariationFeatures 
-  }
+  $spdi =~ s/\s+//g;
 
   my $param_core_group = $self->param('core_type');
+
   my @core_groups = sort {($b eq $param_core_group) cmp ($a eq $param_core_group)} qw(core otherfeatures);
-  
+
   my $vfa = $self->get_adaptor('variation', 'VariationFeature');
   my $vfs = [];
   my @errors;
@@ -171,24 +159,13 @@ sub create_VariationFeatures {
     my $sa  = $self->get_adaptor($core_group, 'Slice');
     my $ta  = $self->get_adaptor($core_group, 'Transcript');
 
-    # not all hgvs notations are supported yet, so we have to wrap it in an eval
     eval {
-      if($self->{ambiguous_hgvs}) {
-        $vfs = $vfa->fetch_all_possible_by_hgvs_notation(
-          -hgvs               => $hgvs,
+        push @$vfs, $vfa->fetch_by_spdi_notation(
+          -spdi               => $spdi,
           -slice_adaptor      => $sa,
           -transcript_adaptor => $ta,
           -replace_ref        => $self->{lookup_ref} || 0,
         );
-      }
-      else {
-        push @$vfs, $vfa->fetch_by_hgvs_notation(
-          -hgvs               => $hgvs,
-          -slice_adaptor      => $sa,
-          -transcript_adaptor => $ta,
-          -replace_ref        => $self->{lookup_ref} || 0,
-        );
-      }
     };
 
     # only log unique errors
@@ -199,25 +176,18 @@ sub create_VariationFeatures {
 
   unless(@$vfs || scalar(@errors) == 0) {
     my %known_messages_hash = ('MSG: Region requested must be smaller than 5kb' => 0);
-    
+
     my @grep_names = grep(/^MSG:/, split(/\n/, $errors[0]));
     my @error_message = exists( $known_messages_hash{$grep_names[0]}) ? @grep_names : @errors;
-    
-    $self->warning_msg("WARNING: Unable to parse HGVS notation \'$hgvs\'\n".join("\n", @error_message));
+
+    $self->warning_msg("WARNING: Unable to parse SPDI notation \'$spdi\'\n".join("\n", @error_message));
     return $self->create_VariationFeatures;
   }
 
-  # warn if this looks like a gene
-  if($hgvs =~ /\:[cnp]\./ && $hgvs !~ /^(ENS|[NX][CGMRP]\_|LRG\_)/) {
-    my $hgvs_ref = (split(':', $hgvs))[0];
-    $self->warning_msg(
-      "WARNING: Possible invalid use of gene or protein identifier '$hgvs_ref' as HGVS reference; ".
-      (
-        $self->{ambiguous_hgvs} ?
-        "$hgvs may resolve to multiple genomic locations" :
-        "most likely transcript will be selected"
-      )
-    );
+  # throws error if reference sequence is not genomic
+  if($spdi !~ /^(NC_|CHR|([0-9]{1,2}|X|Y|MT):)/i) {
+    my $ref_seq = (split(':', $spdi))[0];
+    throw("Invalid reference sequence '$ref_seq' as SPDI reference");
   }
 
   foreach my $vf(@$vfs) {
@@ -225,13 +195,13 @@ sub create_VariationFeatures {
     # transfer to whole chromosome slice
     $vf = $vf->transfer($vf->slice->seq_region_Slice);
 
-    # name it after the HGVS
-    $vf->{variation_name} = $hgvs;
+    # name it after the SPDI
+    $vf->{variation_name} = $spdi;
 
     # add chr attrib
     $vf->{chr} = $vf->slice->seq_region_name;
 
-    $vf->{_line} = [$hgvs];
+    $vf->{_line} = [$spdi];
   }
 
   # post_process_vfs will do lookup_ref again, we've already done it

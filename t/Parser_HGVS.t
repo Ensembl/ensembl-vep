@@ -1,4 +1,4 @@
-# Copyright [2016-2018] EMBL-European Bioinformatics Institute
+# Copyright [2016-2019] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -185,7 +185,7 @@ SKIP: {
     [25706002, 25706002, 25709954, 25712347],
     'gene - multiple'
   );
-  ok($tmp =~ /invalid use of gene name/, 'using gene name warns');
+  ok($tmp =~ /invalid use of gene or protein identifier/, 'using gene/protein identifier warns');
 
   $vf = Bio::EnsEMBL::VEP::Parser::HGVS->new({
     config => $cfg,

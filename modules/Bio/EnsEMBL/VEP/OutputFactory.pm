@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2018] EMBL-European Bioinformatics Institute
+Copyright [2016-2019] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -196,6 +196,7 @@ sub new {
     hgvsp
     hgvsg
     hgvsg_use_accession
+    spdi
     sift
     polyphen
     polyphen_analysis
@@ -1170,9 +1171,17 @@ sub VariationFeatureOverlapAllele_to_output_hash {
   # hgvs g.
   if($self->{hgvsg}) {
     $vf->{_hgvs_genomic} ||= $vf->hgvs_genomic($vf->slice, $self->{hgvsg_use_accession} ? undef : $vf->{chr});
-
+    
     if(my $hgvsg = $vf->{_hgvs_genomic}->{$hash->{Allele}}) {
-      $hash->{HGVSg} = $hgvsg;
+      $hash->{HGVSg} = $hgvsg; 
+    }
+  }
+  # spdi
+  if($self->{spdi}) { 
+    $vf->{_spdi_genomic} = $vf->spdi_genomic(); 
+      
+    if(my $spdi = $vf->{_spdi_genomic}->{$hash->{Allele}}){
+      $hash->{spdi} = $spdi;  
     }
   }
 

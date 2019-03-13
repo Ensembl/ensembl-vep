@@ -1,4 +1,4 @@
-# Copyright [2016-2018] EMBL-European Bioinformatics Institute
+# Copyright [2016-2019] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -75,6 +75,7 @@ SKIP: {
     NM_017446.3:c.991G>A
     ENSP00000284967.6:p.Ala331Thr
     NP_059142.2:p.Ala331Thr
+    21:25585732:C:T
   )) {
     is_deeply(
       $vr->recode($input),
@@ -98,6 +99,9 @@ SKIP: {
           ],
           "hgvsg" => [
              "21:g.25585733C>T"
+          ],
+          "spdi" => [
+             "21:25585732:C:T"
           ]
         }
       ],

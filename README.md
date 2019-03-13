@@ -1,5 +1,9 @@
-[![Coverage Status](https://coveralls.io/repos/github/Ensembl/ensembl-vep/badge.svg?branch=master)](https://coveralls.io/github/Ensembl/ensembl-vep?branch=master)
 # ensembl-vep
+
+[![Coverage Status](https://coveralls.io/repos/github/Ensembl/ensembl-vep/badge.svg?branch=master)](https://coveralls.io/github/Ensembl/ensembl-vep?branch=master)
+[![Docker Build Status](https://img.shields.io/docker/build/ensemblorg/ensembl-vep.svg)](https://hub.docker.com/r/ensemblorg/ensembl-vep)
+[![Docker Hub Pulls](https://img.shields.io/docker/pulls/ensemblorg/ensembl-vep.svg)](https://hub.docker.com/r/ensemblorg/ensembl-vep)
+
 * **VEP** (Variant Effect Predictor) predicts the functional effects of genomic variants.
 * **Haplosaurus** uses phased genotype data to predict whole-transcript haplotype sequences.
 * **Variant Recoder** translates between different variant encodings.
@@ -8,14 +12,13 @@
 * [Installation and requirements](#install)
 * [VEP](#vep)
   * [Usage](#vepusage)
-  * [Differences to ensembl-tools version](#vepdiffs)
 * [Haplosaurus](#haplo)
   * [Usage](#haplousage)
   * [Output](#haplooutput)
   * [Flags](#haploflags)
-  * [Frequency data](#haplofreq)
 * [Variant Recoder](#recoder)
-  * [Usage](#vepusage)
+  * [Usage](#recoderusage)
+  * [Output](#recoderoutput) 
 
 ---
 <a name="install"></a>
@@ -62,36 +65,9 @@ See [documentation](http://www.ensembl.org/info/docs/tools/vep/script/vep_downlo
 ```bash
 ./vep -i input.vcf -o out.txt -offline
 ```
-See [documentation](http://www.ensembl.org/info/docs/tools/vep/script/index.html) for full command line instructions.
+See [documentation](http://www.ensembl.org/info/docs/tools/vep/script/vep_options.html#basic) for full command line instructions.
 
 > Please report any bugs or issues by [contacting Ensembl](http://www.ensembl.org/info/about/contact/index.html) or creating a [GitHub issue](https://github.com/Ensembl/ensembl-vep/issues)
-
-<a name="vepdiffs"></a>
-
-### Differences to ensembl-tools VEP
-This ensembl-vep repo is a complete rewrite of the VEP code intended to make the software faster, more robust and more easily extensible. Almost all functionality of the ensembl-tools version has been replicated, with the command line flags remaining largely unchanged. A summary of changes follows:
-
-* **Tool name:** For brevity and to distinguish the two versions, the new command line tool is named `vep`, with the version in ensembl-tools named `variant_effect_predictor.pl`.
-* **Speed:** A typical individual human genome of 4 million variants can now be processed in around 30 minutes on a quad-core machine using under 1GB of RAM.
-* **Known/existing variants:** The alleles of your input variant are now compared to any known variants when using `--check_existing`. Previously this would require you to enable this functionality manually with `--check_alleles`. The old functionality can be restored using `--no_check_alleles`.
-* **Allele frequencies:** Allele frequencies are now reported for the input allele only e.g. as `0.023` instead of `A:0.023,G:0.0005`. To reflect this change, the allele frequency fields are now named e.g. `AFR_AF` instead of `AFR_MAF`. The command line flags reflect this also, so `--gmaf` is now `--af` and `--maf_1kg` is now `--af_1kg`. Using the old flags will produce a deprecation message.
-* **GFF and GTF files:** GFF and GTF files may now be used directly as a source of transcript annotation in place of, or even alongside, a cache or database source. Previously this involved [building a cache using gtf2vep](http://e87.ensembl.org/info/docs/tools/vep/script/vep_cache.html#gtf), which is now redundant. The files must first be bgzipped and tabix-indexed, and a FASTA file containing genomic sequence is required:
-```bash
-grep -v "#" data.gff | sort -k1,1 -k4,4n -k5,5n -t$'\t' | bgzip -c > data.gff.gz
-tabix -p gff data.gff.gz
-./vep -i input.vcf -gff data.gff.gz -fasta genome.fa.gz
-```
-* **VCF custom annotations:** [VCF files used as a source of custom annotation](http://www.ensembl.org/info/docs/tools/vep/script/vep_custom.html) will now have allele-specific data added from INFO fields; previously the whole content of each requested KEY=VALUE pair was reported.
-* **New pick flags:** New flags added to aid [selecting amongst consequence output](http://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick): `--pick_allele_gene`, `--flag_pick_allele_gene`
-* **Runtime status:** `vep` produces no runtime progress messages.
-* **Deprecated:**
-  * GVF output: `--gvf`
-  * HTML output: `--html`
-  * format conversion: `--convert`
-  * pileup input: `--format pileup`
-  * MAF flags (replaced by AF flags): `--gmaf` (`--af`), `--maf_1kg` (`--af_1kg`), `--maf_esp` (`--af_esp`), `--maf_exac` (`--af_exac`)
-  * known variant allele checking (on by default, use `--no_check_alleles` to restore old behaviour):  `--check_alleles` 
-  * cache building flags (replaced by internal Ensembl pipeline): `--build`, `--write_cache`
 
 ---
 <a name="haplo"></a>
@@ -121,7 +97,7 @@ The default output format is a simple tab-delimited file reporting all observed 
 3. Comma-separated list of [flags](#haploflags) for CDS haplotype
 4. Protein haplotype name
 5. Comma-separated list of [flags](#haploflags) for protein haplotype
-6. Comma-separated list of [frequency data](#haplofreq) for protein haplotype
+6. Comma-separated list of frequency data for protein haplotype
 7. Comma-separated list of contributing variants
 8. Comma-separated list of sample:count that exhibit this haplotype
 
@@ -142,15 +118,6 @@ Haplotypes may be flagged with one or more of the following:
 * **resolved_frameshift:** haplotype contains two or more indels whose combined effect restores the reading frame of the transcript.
 * **stop_changed:** indicates either a STOP codon is gained (protein truncating variant, PTV) or the existing reference STOP codon is lost.
 * **deleterious_sift_or_polyphen:** haplotype contains at least one single amino acid substitution event flagged as deleterious (SIFT) or probably damaging (PolyPhen2).
-
-<a name="haplofreq"></a>
-### Frequency data
-Haplotype frequencies may be loaded and assigned to observed haplotypes using `--haplotype_frequencies [file]`. The following files may be used:
-
-* 1000 genomes frequencies (GRCh37): [protein_haplotype_freqs_1KG_e85_GRCh37.txt.gz](https://dl.dropboxusercontent.com/u/12936195/protein_haplotype_freqs_1KG_e85_GRCh37.txt.gz)
-* 1000 genomes frequencies (GRCh38): [protein_haplotype_freqs_1KG_e85_GRCh38.txt.gz](https://dl.dropboxusercontent.com/u/12936195/protein_haplotype_freqs_1KG_e85_GRCh38.txt.gz)
-
-> Note these files are temporarily hosted on 3rd party servers and may be subject to change or removal while the software remains in the development phase.
 
 <a name="bioperl-ext"></a>
 ### bioperl-ext
