@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2018] EMBL-European Bioinformatics Institute
+Copyright [2016-2019] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ use warnings;
 
 use base qw(Exporter);
 
-our $VEP_VERSION     = 95;
+our $VEP_VERSION     = 96;
 our $VEP_SUB_VERSION = 0;
 
 our @EXPORT_OK = qw(
@@ -121,7 +121,7 @@ our @FLAG_FIELDS = (
   { flag => 'check_svs',       fields => ['SV'] },
 
   # regulatory
-  { flag => 'regulatory',      fields => ['MOTIF_NAME','MOTIF_POS','HIGH_INF_POS','MOTIF_SCORE_CHANGE'] },
+  { flag => 'regulatory',      fields => ['BIOTYPE','MOTIF_NAME','MOTIF_POS','HIGH_INF_POS','MOTIF_SCORE_CHANGE'] },
   { flag => 'cell_type',       fields => ['CELL_TYPE'] },
 );
 

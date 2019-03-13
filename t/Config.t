@@ -1,4 +1,4 @@
-# Copyright [2016-2018] EMBL-European Bioinformatics Institute
+# Copyright [2016-2019] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -115,8 +115,8 @@ $cfg = Bio::EnsEMBL::VEP::Config->new({individual => 'dave,barry,keith'});
 is_deeply($cfg->param('individual'), [qw(dave barry keith)], 'list conversion');
 
 # deprecated
-throws_ok { Bio::EnsEMBL::VEP::Config->new({html => 1}) } qr/deprecated/, 'deprecated no replacement';
-throws_ok { Bio::EnsEMBL::VEP::Config->new({gmaf => 1}) } qr/deprecated.+\-\-af/, 'deprecated with replacement';
+throws_ok { Bio::EnsEMBL::VEP::Config->new({convert => 1}) } qr/deprecated/, 'deprecated no replacement';
+#throws_ok { Bio::EnsEMBL::VEP::Config->new({gmaf => 1}) } qr/deprecated.+\-\-af/, 'deprecated with replacement';
 
 # invalid value
 throws_ok { Bio::EnsEMBL::VEP::Config->new({format => 'gobbledegook'}) } qr/not a valid value/, 'invalid value for key';

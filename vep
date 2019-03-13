@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Copyright [2016-2018] EMBL-European Bioinformatics Institute
+# Copyright [2016-2019] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -78,12 +78,7 @@ GetOptions(
   'check_svs',               # find overlapping structural variations
   'no_check_alleles',        # attribute co-located regardless of alleles
   'exclude_null_alleles',    # exclude variants with null alleles from co-located check (e.g COSMIC)
-  'check_alleles',           # DEPRECATED
   'check_frequency',         # enable frequency checking
-  'gmaf',                    # DEPRECATED: USE af
-  'maf_1kg',                 # DEPRECATED: USE af_1kg
-  'maf_esp',                 # DEPRECATED: USE af_esp
-  'maf_exac',                # DEPRECATED: USE af_exac
   'af',                      # add global AF of existing var
   'af_1kg',                  # add 1KG AFs of existing vars
   'af_esp',                  # add ESP AFs of existing vars
@@ -116,7 +111,6 @@ GetOptions(
   'output_file|o=s',         # output file name
   'compress_output=s',       # compress output with e.g. bgzip, gzip
   'no_headers',              # don't print headers
-  'html',                    # DEPRECATED: generate an HTML version of output
   'stats_file|sf=s',         # stats file name
   'stats_text',              # write stats as text
   'stats_html',              # write stats as html
@@ -153,7 +147,6 @@ GetOptions(
   'cell_type=s',             # filter cell types for regfeats
   'convert=s',               # DEPRECATED: convert input to another format (doesn't run VEP)
   'no_intergenic',           # don't print out INTERGENIC consequences
-  'gvf',                     # DEPRECATED: produce gvf output
   'vcf',                     # produce vcf output
   'solr',                    # produce XML output for Solr
   'json',                    # produce JSON document output

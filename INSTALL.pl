@@ -3,7 +3,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2018] EMBL-European Bioinformatics Institute
+Copyright [2016-2019] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -132,10 +132,10 @@ $| = 1;
 
 # other global data
 my @API_MODULES = (
-  { name => 'ensembl',           path => '',          test_pm => 'Bio::EnsEMBL::Registry' },
+  { name => 'ensembl',           path => ' ',         test_pm => 'Bio::EnsEMBL::Registry' },
   { name => 'ensembl-variation', path => 'Variation', test_pm => 'Bio::EnsEMBL::Variation::Variation' },
   { name => 'ensembl-funcgen',   path => 'Funcgen',   test_pm => 'Bio::EnsEMBL::Funcgen::RegulatoryFeature' },
-  { name => 'ensembl-io',        path => 'IO',        test_pm => 'Bio::EnsEMBL::IO::Parser' },
+  { name => 'ensembl-io',        path => 'IO,Utils',  test_pm => 'Bio::EnsEMBL::IO::Parser' },
 );
 my $ensembl_url_tail = '/archive/';
 my $archive_type = '.zip';
@@ -146,7 +146,7 @@ our (@store_species, @indexes, @files, $ftp, $dirname);
 
 GetOptions(
   'DESTDIR|d=s'        => \$DEST_DIR,
-  'VERSION|v=i'        => \$API_VERSION,
+  'VERSION|v=i'        => \$API_VERSION, # Deprecated
   'CACHE_VERSION|e=i'  => \$DATA_VERSION,
   'ASSEMBLY|y=s'       => \$ASSEMBLY,
   'BIOPERL|b=s'        => \$BIOPERL_URL,
@@ -311,7 +311,7 @@ sub update() {
   unlink($repo_file);
 
   unless($default_branch) {
-    print "WARNING: Unable to carry out version check for $module\n" unless $QUIET;
+    print "WARNING: Unable to carry out version check for '$module'\n" unless $QUIET;
     return;
   }
 
@@ -320,12 +320,32 @@ sub update() {
 
   my $current_branch = $CURRENT_VERSION_DATA->{'ensembl-vep'}->{release};
 
+  # Check if the $API_VERSION has been set by the deprecated "--VERSION" flag
+  my $api_branch  = $API_VERSION;
+     $api_branch  =~ s/release\///;
+
+  # branch provided by the "--VERSION" flag
+  if ($api_branch != $current_branch) {
+    print "The 'VERSION' installation flag has been deprecated.\n\n";
+    my $branch = looks_like_number($API_VERSION) ? 'release/'.$API_VERSION : $API_VERSION;
+    if(`which git` && -d $RealBin.'/.git') {
+      print "Please, use git to update '$module' using the commands:\n\n";
+      print "\tgit pull\n";
+      print "\tgit checkout $branch\n\n";
+    }
+    else {
+      print "Please, re-download '$module' with the desired version.\n\n";
+    }
+    print "Exit VEP install script\n";
+    exit(0);
+  }
+
   my $message;
 
   # don't have latest
   if($current_branch < $default_branch_number) {
     $message = 
-      "Version check reports a newer release of $module is available ".
+      "Version check reports a newer release of '$module' is available ".
       "(installed: $current_branch, available: $default_branch_number)\n";
   }
 
@@ -347,12 +367,12 @@ sub update() {
 
     # user has git, suggest they use that instead
     if(`which git` && -d $RealBin.'/.git') {
-      print "You may use git to update $module by exiting this installer and running:\n\n";
-      print "git pull\n";
-      print "git checkout $default_branch\n" if $current_branch ne $default_branch_number;
+      print "We recommend using git to update '$module', by exiting this installer and running:\n\n";
+      print "\tgit pull\n";
+      print "\tgit checkout $default_branch\n" if $current_branch ne $default_branch_number;
     }
     else {
-      print "You should exit this installer and re-download $module if you wish to update\n";
+      print "You should exit this installer and re-download '$module' if you wish to update\n";
     }
 
     print "\nDo you wish to exit so you can get updates (y) or continue (n): ";
@@ -523,7 +543,7 @@ sub check_api() {
 
         if(scalar keys %$updates) {
           $message =
-            "There are updates avaiable for these modules:\n  ".
+            "There are updates available for these modules:\n  ".
             join(
               "\n  ",
               map {
@@ -643,7 +663,6 @@ sub install_api() {
 
   foreach my $module_hash(@API_MODULES) {
     my $module = $module_hash->{name};
-    my $module_dir_suffix = $module_hash->{path} ? '/'.$module_hash->{path} : '';
 
     # do we need to update this?
     my $have_sub = $CURRENT_VERSION_DATA->{$module} ? ($CURRENT_VERSION_DATA->{$module}->{sub} || '') : '';
@@ -659,11 +678,26 @@ sub install_api() {
     unpack_arch("$DEST_DIR/tmp/$module$archive_type", "$DEST_DIR/tmp/");
 
     print " - moving files\n" unless $QUIET;
+    foreach my $module_path (split(',',$module_hash->{path})) {
+      my $module_dir_suffix = $module_path eq ' ' ? '' : '/'.$module_path;
+      my $module_dir_from   = "$DEST_DIR/tmp/$module\-$release_path_string/modules/Bio/EnsEMBL$module_dir_suffix";
+      my $module_dir_to     = "$DEST_DIR/EnsEMBL$module_dir_suffix";
 
-    move(
-      "$DEST_DIR/tmp/$module\-$release_path_string/modules/Bio/EnsEMBL$module_dir_suffix",
-      "$DEST_DIR/EnsEMBL$module_dir_suffix"
-    ) or die "ERROR: Could not move directory\n".$!;
+      # If the target directory already exist, we can't overwrite it.
+      if (-d $module_dir_to) {
+        # One solution is to move the content of the directory instead.
+        # However we need to loop over the files/directories within the module directory because the 'move()' method doesn't allow wildcards.
+        opendir DH, $module_dir_from;
+        while(my $file_or_dir = readdir DH) {
+          next if ($file_or_dir =~ /^\.+$/);
+          move("$module_dir_from/$file_or_dir", "$module_dir_to/$file_or_dir") or die "ERROR: Could not move '$module_dir_from/$file_or_dir'\n".$!;
+        }
+        closedir DH;
+      }
+      else {
+        move($module_dir_from, $module_dir_to) or die "ERROR: Could not move the directory '$module_dir_from'\n".$!;
+      }
+    }
 
     # now get latest commit from github API
     print " - getting version information\n" unless $QUIET;
@@ -708,7 +742,7 @@ sub get_vep_sub_version {
   my $release = shift || $API_VERSION;
 
   my $sub_file = "$RealBin/$$\.$VEP_MODULE_NAME.sub";
-  my $release_url_string = looks_like_number($API_VERSION) ? 'release/'.$API_VERSION : $API_VERSION;
+  my $release_url_string = looks_like_number($release) ? 'release/'.$release : $release;
 
   download_to_file(
     sprintf(
@@ -1798,7 +1832,6 @@ Options
 -h | --help        Display this message and quit
 
 -d | --DESTDIR     Set destination directory for API install (default = './')
--v | --VERSION     Set API and data (cache, FASTA) version to install (default = $VERSION)
 --CACHE_VERSION    Set data (cache, FASTA) version to install if different from --VERSION (default = $VERSION)
 -c | --CACHEDIR    Set destination directory for cache files (default = '$ENV{HOME}/.vep/')
 

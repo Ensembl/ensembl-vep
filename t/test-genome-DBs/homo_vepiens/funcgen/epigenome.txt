@@ -72,7 +72,7 @@
 76	NHBE	NHBE	Normal Human Bronchial Epithelial Cells	NHBE	unknown
 77	NHDF-neo	NHDF-neo	Neonatal Human Dermal Fibroblasts	NHDF_neo	unknown
 78	NHLF	NHLF	Normal Human Long Fibroblasts	NHLF	unknown
-79	NT2-D1	NTERA-2 cl.D1	Malignant Pluripotent Testicular Embryonal Carcinoma	NT2_D1	male
+79	NT2-D1	NT2-D1	Malignant Pluripotent Testicular Embryonal Carcinoma	NT2_D1	male
 80	Panc1	Panc1	Pancreatic Carcinoma	Panc1	unknown
 81	PanIslets	PanIslets	Human Pancreatic Islets	PanIslets	male
 82	PFSK1	PFSK1	Neurectodermal cell line	PFSK1	male
@@ -92,38 +92,38 @@
 96	Fibrobl	Fibrobl	Child Fibroblast	Fibrobl	female
 97	GM12878-XiMat	GM12878-XiMat	Lymphoblastoid, Epstein-Barr Virus, Cloned for maternal X inactivation	GM12878_XiMat	female
 98	BJ	BJ	Foreskin fibroblast	BJ	male
-102	NHDF-AD	NHDF-Ad	adult dermal fibroblasts	NHDF_AD	female
+102	NHDF-AD	NHDF-AD	adult dermal fibroblasts	NHDF_AD	female
 103	Monocytes-CD14+	Monocytes-CD14+	CD14-positive cells human leukapheresis production	Monocytes_CD14	female
 240	DND-41	DND-41	Human leukemic T-cell line with p53 (Notch) mutation	DND_41	male
-241	M1Macrophage:VenousBlood:hist	M1 macrophage (VB)	M1 macrophage from Venous Blood	M1Macrophage_VenousBlood_hist	mixed
-242	CD4+abTcell:CordBlood:hist	CD4+ ab T cell (CB)	CD4+ ab T cell from Cord Blood	CD4abTcell_CordBlood_hist	mixed
-243	erythroblast:CordBlood:hist	erythroblast (CB)	erythroblast from Cord Blood	erythroblast_CordBlood_hist	mixed
-244	M1Macrophage:CordBlood:hist	M1 macrophage (CB)	M1 macrophage from Cord Blood	M1Macrophage_CordBlood_hist	mixed
-245	eosinophil:VenousBlood:hist	eosinophil (VB)	eosinophil from Venous Blood	eosinophil_VenousBlood_hist	mixed
-246	M0Macrophage:CordBlood:hist	M0 macrophage (CB)	M0 macrophage from Cord Blood	M0Macrophage_CordBlood_hist	mixed
-247	CD14+CD16-Monocyte:VenousBlood:dnase	CD14+CD16- monocyte (VB)	CD14+ CD16- monocyte from Venous Blood	CD14CD16_Monocyte_VenousBlood_dnase	mixed
-248	CD14+CD16-Monocyte:VenousBlood:hist	CD14+CD16- monocyte (VB)	CD14+ CD16- monocyte from Venous Blood	CD14CD16_Monocyte_VenousBlood_hist	mixed
-249	CD8+abTcell:CordBlood:hist	CD8+ ab T cell (CB)	CD8+ ab T cell from Cord Blood	CD8abTcell_CordBlood_hist	mixed
-250	CD8+abTcell:VenousBlood:hist	CD8+ ab T cell (VB)	CD8+ ab T cell from Venous Blood	CD8abTcell_VenousBlood_hist	mixed
-251	CD38-naiveBcell:VenousBlood:hist	CD38- naive B cell (VB)	CD38- naive B cell from Venous Blood	CD38_naiveBcell_VenousBlood_hist	mixed
-252	naiveBcell:VenousBlood:hist	naive B cell (VB)	naive B cell from Venous Blood	naiveBcell_VenousBlood_hist	mixed
-253	HUVECprol:CordBlood:hist	HUVEC prol (CB)	HUVEC prol from Cord Blood	HUVECprol_CordBlood_hist	mixed
-254	CMCD4+abTcell:VenousBlood:hist	CM CD4+ ab T cell (VB)	CM CD4+ ab T cell from Venous Blood	CMCD4abTcell_VenousBlood_hist	mixed
-255	CD38-naiveBcell:CordBlood:hist	CD38- naive B cell (CB)	CD38- naive B cell from Cord Blood	CD38_naiveBcell_CordBlood_hist	mixed
-256	M0Macrophage:VenousBlood:hist	M0 macrophage (VB)	M0 macrophage from Venous Blood	M0Macrophage_VenousBlood_hist	mixed
-257	MSC:VenousBlood:hist	MSC (VB)	MSC from Venous Blood	MSC_VenousBlood_hist	mixed
-258	neutrophil:CordBlood:hist	neutrophil (CB)	neutrophil from Cord Blood	neutrophil_CordBlood_hist	mixed
-259	EPC:VenousBlood:hist	EPC (VB)	EPC from Venous Blood	EPC_VenousBlood_hist	mixed
-260	naiveBcell:Tonsil:hist	naive B cell (To)	naive B cell from Tonsil	naiveBcell_Tonsil_hist	mixed
-261	EMCD8+abTcell:VenousBlood:hist	CM CD4+ ab T cell (VB)	EM CD8+ ab T cell from Venous Blood	EMCD8abTcell_VenousBlood_hist	mixed
-262	M2Macrophage:VenousBlood:hist	M2 macrophage (VB)	M2 macrophage from Venous Blood	M2Macrophage_VenousBlood_hist	mixed
-263	M1Macrophage:VenousBlood:dnase	M1 macrophage (VB)	M1 macrophage from Venous Blood	M1Macrophage_VenousBlood_dnase	mixed
-264	CD14+CD16-Monocyte:CordBlood:hist	CD14+CD16- monocyte (CB)	CD14+ CD16- monocyte from Cord Blood	CD14CD16_Monocyte_CordBlood_hist	mixed
-265	neutrophil:VenousBlood:hist	neutrophil (VB)	neutrophil from Venous Blood	neutrophil_VenousBlood_hist	mixed
-266	neutroMyelocyte:BoneMarrow:hist	neutro myelocyte (BM)	neutro myelocyte from Bone Marrow	neutroMyelocyte_BoneMarrow_hist	mixed
-267	M2Macrophage:CordBlood:hist	M2 macrophage (CB)	M2 macrophage from Cord Blood	M2Macrophage_CordBlood_hist	mixed
-268	M0Macrophage:VenousBlood:dnase	M0 macrophage (VB)	M0 macrophage from Venous Blood	M0Macrophage_VenousBlood_dnase	mixed
-269	M2Macrophage:VenousBlood:dnase	M2 macrophage (VB)	M2 macrophage from Venous Blood	M2Macrophage_VenousBlood_dnase	mixed
-270	CD14+CD16-Monocyte:CordBlood:dnase	CD14+CD16- monocyte (CB)	CD14+ CD16- monocyte from Cord Blood	CD14CD16_Monocyte_CordBlood_dnase	mixed
-271	CD4+abTcell:VenousBlood:hist	CD4+ ab T cell (VB)	CD4+ ab T cell from Venous Blood	CD4abTcell_VenousBlood_hist	mixed
-272	CD8+abTcell:CordBlood:dnase	CD8+ ab T cell (CB)	CD8+ ab T cell from Cord Blood	CD8abTcell_CordBlood_dnase	mixed
+241	M1Macrophage:VenousBlood:hist	M1Macrophage:VenousBlood:hist	M1 macrophage from Venous Blood	M1Macrophage_VenousBlood_hist	mixed
+242	CD4+abTcell:CordBlood:hist	CD4+abTcell:CordBlood:hist	CD4+ ab T cell from Cord Blood	CD4abTcell_CordBlood_hist	mixed
+243	erythroblast:CordBlood:hist	erythroblast:CordBlood:hist	erythroblast from Cord Blood	erythroblast_CordBlood_hist	mixed
+244	M1Macrophage:CordBlood:hist	M1Macrophage:CordBlood:hist	M1 macrophage from Cord Blood	M1Macrophage_CordBlood_hist	mixed
+245	eosinophil:VenousBlood:hist	eosinophil:VenousBlood:hist	eosinophil from Venous Blood	eosinophil_VenousBlood_hist	mixed
+246	M0Macrophage:CordBlood:hist	M0Macrophage:CordBlood:hist	M0 macrophage from Cord Blood	M0Macrophage_CordBlood_hist	mixed
+247	CD14+CD16-Monocyte:VenousBlood:dnase	CD14+CD16-Monocyte:VenousBlood:dnase	CD14+ CD16- monocyte from Venous Blood	CD14CD16_Monocyte_VenousBlood_dnase	mixed
+248	CD14+CD16-Monocyte:VenousBlood:hist	CD14+CD16-Monocyte:VenousBlood:hist	CD14+ CD16- monocyte from Venous Blood	CD14CD16_Monocyte_VenousBlood_hist	mixed
+249	CD8+abTcell:CordBlood:hist	CD8+abTcell:CordBlood:hist	CD8+ ab T cell from Cord Blood	CD8abTcell_CordBlood_hist	mixed
+250	CD8+abTcell:VenousBlood:hist	CD8+abTcell:VenousBlood:hist	CD8+ ab T cell from Venous Blood	CD8abTcell_VenousBlood_hist	mixed
+251	CD38-naiveBcell:VenousBlood:hist	CD38-naiveBcell:VenousBlood:hist	CD38- naive B cell from Venous Blood	CD38_naiveBcell_VenousBlood_hist	mixed
+252	naiveBcell:VenousBlood:hist	naiveBcell:VenousBlood:hist	naive B cell from Venous Blood	naiveBcell_VenousBlood_hist	mixed
+253	HUVECprol:CordBlood:hist	HUVECprol:CordBlood:hist	HUVEC prol from Cord Blood	HUVECprol_CordBlood_hist	mixed
+254	CMCD4+abTcell:VenousBlood:hist	CMCD4+abTcell:VenousBlood:hist	CM CD4+ ab T cell from Venous Blood	CMCD4abTcell_VenousBlood_hist	mixed
+255	CD38-naiveBcell:CordBlood:hist	CD38-naiveBcell:CordBlood:hist	CD38- naive B cell from Cord Blood	CD38_naiveBcell_CordBlood_hist	mixed
+256	M0Macrophage:VenousBlood:hist	M0Macrophage:VenousBlood:hist	M0 macrophage from Venous Blood	M0Macrophage_VenousBlood_hist	mixed
+257	MSC:VenousBlood:hist	MSC:VenousBlood:hist	MSC from Venous Blood	MSC_VenousBlood_hist	mixed
+258	neutrophil:CordBlood:hist	neutrophil:CordBlood:hist	neutrophil from Cord Blood	neutrophil_CordBlood_hist	mixed
+259	EPC:VenousBlood:hist	EPC:VenousBlood:hist	EPC from Venous Blood	EPC_VenousBlood_hist	mixed
+260	naiveBcell:Tonsil:hist	naiveBcell:Tonsil:hist	naive B cell from Tonsil	naiveBcell_Tonsil_hist	mixed
+261	EMCD8+abTcell:VenousBlood:hist	EMCD8+abTcell:VenousBlood:hist	EM CD8+ ab T cell from Venous Blood	EMCD8abTcell_VenousBlood_hist	mixed
+262	M2Macrophage:VenousBlood:hist	M2Macrophage:VenousBlood:hist	M2 macrophage from Venous Blood	M2Macrophage_VenousBlood_hist	mixed
+263	M1Macrophage:VenousBlood:dnase	M1Macrophage:VenousBlood:dnase	M1 macrophage from Venous Blood	M1Macrophage_VenousBlood_dnase	mixed
+264	CD14+CD16-Monocyte:CordBlood:hist	CD14+CD16-Monocyte:CordBlood:hist	CD14+ CD16- monocyte from Cord Blood	CD14CD16_Monocyte_CordBlood_hist	mixed
+265	neutrophil:VenousBlood:hist	neutrophil:VenousBlood:hist	neutrophil from Venous Blood	neutrophil_VenousBlood_hist	mixed
+266	neutroMyelocyte:BoneMarrow:hist	neutroMyelocyte:BoneMarrow:hist	neutro myelocyte from Bone Marrow	neutroMyelocyte_BoneMarrow_hist	mixed
+267	M2Macrophage:CordBlood:hist	M2Macrophage:CordBlood:hist	M2 macrophage from Cord Blood	M2Macrophage_CordBlood_hist	mixed
+268	M0Macrophage:VenousBlood:dnase	M0Macrophage:VenousBlood:dnase	M0 macrophage from Venous Blood	M0Macrophage_VenousBlood_dnase	mixed
+269	M2Macrophage:VenousBlood:dnase	M2Macrophage:VenousBlood:dnase	M2 macrophage from Venous Blood	M2Macrophage_VenousBlood_dnase	mixed
+270	CD14+CD16-Monocyte:CordBlood:dnase	CD14+CD16-Monocyte:CordBlood:dnase	CD14+ CD16- monocyte from Cord Blood	CD14CD16_Monocyte_CordBlood_dnase	mixed
+271	CD4+abTcell:VenousBlood:hist	CD4+abTcell:VenousBlood:hist	CD4+ ab T cell from Venous Blood	CD4abTcell_VenousBlood_hist	mixed
+272	CD8+abTcell:CordBlood:dnase	CD8+abTcell:CordBlood:dnase	CD8+ ab T cell from Cord Blood	CD8abTcell_CordBlood_dnase	mixed

@@ -17,3 +17,5 @@
 18	Supporting evidence can not be re-mapped to the current assembly
 19	Variant maps to more than one genomic location
 20	Variant at first base in sequence
+21	Reference allele does not match the bases at this genome location
+22	Alleles cannot be resolved

@@ -1,4 +1,4 @@
-534	\N	schema_version	95
+534	\N	schema_version	96
 80	\N	patch	patch_50_51_b.sql|multispecies
 83	\N	patch	patch_50_51_c.sql|associated_feature_type
 82	\N	patch	patch_50_51_a.sql|cell_type_description
@@ -291,3 +291,21 @@
 735	\N	patch	patch_93_94_l.sql|Modify binding_matrix_table
 736	\N	patch	patch_93_94_m.sql|Create binding_matrix_frequencies table
 737	\N	patch	patch_94_95_a.sql|schema_version
+738	\N	patch	patch_94_95_b.sql|update to segmentation state tables
+739	\N	patch	patch_94_95_c.sql|Update to alignment table
+740	\N	patch	patch_94_95_d.sql|Update to execution_plan table
+741	\N	patch	patch_94_95_e.sql|Update to regulatory_build_statistic table
+742	\N	patch	patch_94_95_f.sql|Update to experimental_group table
+743	\N	patch	patch_94_95_g.sql|segmentation table
+744	\N	patch	patch_94_95_h.sql|segmentation_cell_tables
+745	\N	patch	patch_94_95_i.sql|segmentation_statistic table
+746	\N	patch	patch_94_95_j.sql|segmentation_file table
+747	\N	patch	patch_94_95_k.sql|peak calling statistic table
+748	\N	patch	patch_94_95_l.sql|Modify length for column name from epigenome table
+749	\N	patch	patch_94_95_m.sql|drop obsolete tables
+750	\N	patch	patch_94_95_n.sql|add unique constrain on display_label column for epigenome table
+751	\N	patch	patch_95_96_a.sql|schema_version
+752	\N	patch	patch_95_96_b.sql|changed data type for regulatory build statistics
+753	\N	patch	patch_95_96_c.sql|make unique probe_id column from probe table
+754	\N	patch	patch_95_96_d.sql|add ReadFile to the enum of the ensembl_object_type
+755	\N	patch	patch_95_96_e.sql|Add description and release_version columns to regulatory_build table

@@ -1,9 +1,8 @@
 #!/bin/bash
 
 echo 'Getting BioPerl'
-if [ ! -f release-1-6-924.zip ]; then
-  wget https://github.com/bioperl/bioperl-live/archive/release-1-6-924.zip
-  unzip -q release-1-6-924.zip && rm release-1-6-924.zip
+if [ ! -d bioperl-live ]; then
+  git clone --branch release-1-6-924 --depth 1 https://github.com/bioperl/bioperl-live.git
 fi
 
 echo 'Getting HTSlib'

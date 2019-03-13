@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2018] EMBL-European Bioinformatics Institute
+Copyright [2016-2019] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -113,7 +113,9 @@ my %RENAME_KEYS = (
 my %NUMBERIFY_EXEMPT = (
   'seq_region_name' => 1,
   'id' => 1,
+  'gene_id' => 1,
   'gene_symbol' => 1,
+  'transcript_id' => 1,
 );
 
 my @LIST_FIELDS = qw(
@@ -229,8 +231,6 @@ sub get_all_output_hashes_by_InputBuffer {
 
     $self->add_VariationFeatureOverlapAllele_info($vf, $hash);
 
-    numberify($hash, \%NUMBERIFY_EXEMPT);
-
     # rename
     my %rename = %RENAME_KEYS;
     foreach my $key(grep {defined($hash->{$_})} keys %rename) {
@@ -252,6 +252,9 @@ sub get_all_output_hashes_by_InputBuffer {
       }
       $self->add_colocated_variant_info_JSON($hash, \@allele_frequency_hashes, $ex_orig);
     }
+
+    numberify($hash, \%NUMBERIFY_EXEMPT);
+
     push @return, $hash;
   }
 
