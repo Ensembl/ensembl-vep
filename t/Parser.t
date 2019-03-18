@@ -287,9 +287,6 @@ is($p->detect_format, 'region', 'detect_format - region -ve strand');
 $p->file($test_cfg->create_input_file('21:25587759-25587759:1:A'));
 is($p->detect_format, 'region', 'detect_format - region : separator');
 
-$p->file($test_cfg->create_input_file([qw(chr1 60 T A)]));
-is($p->detect_format, 'pileup', 'detect_format - pileup');
-
 $p->file($test_cfg->create_input_file('21 25587759 25587769'));
 is($p->detect_format, undef, 'detect_format - incomplete');
 
