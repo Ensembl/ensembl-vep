@@ -53,6 +53,8 @@ BEGIN {
 
 use base qw(Bio::EnsEMBL::VEP::Pipeline::DumpVEP::Dumper);
 
+my $gnomad_prefix = 'gnomAD_';
+
 sub run {
   my $self = shift;
 
@@ -172,7 +174,7 @@ sub _generic_dump_info {
     'pubmed'
   );
   foreach my $pop(map {@{$_->{prefixed_pops} || $_->{pops}}} @{$self->{freq_vcf} || []}) {
-    $pop = uc_gnomad_pop($pop) if ($pop =~ /^gnomAD_/);
+    $pop = uc_gnomad_pop($pop) if ($pop =~ /^$gnomad_prefix/);
     push @cols, $pop;
   }
 
@@ -232,7 +234,7 @@ sub dump_obj {
 
     if($self->{freq_vcf}) {
       foreach my $pop(map {@{$_->{prefixed_pops} || $_->{pops}}} @{$self->{freq_vcf}}) {
-        $pop = uc_gnomad_pop($pop) if ($pop =~ /^gnomAD_/);
+        $pop = uc_gnomad_pop($pop) if ($pop =~ /^$gnomad_prefix/);
         push @tmp, $v->{$pop} || '';
       }
     }
@@ -393,7 +395,7 @@ sub freqs_from_vcf {
 sub uc_gnomad_pop {
   my $pop = shift;
   my $ucpop = uc $pop;
-  $ucpop =~ s/GNOMAD_/gnomAD_/;
+  $ucpop =~ s/GNOMAD_/$gnomad_prefix/;
   return $ucpop; 
 }
 
