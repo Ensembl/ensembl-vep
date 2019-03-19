@@ -172,11 +172,7 @@ sub _generic_dump_info {
     'pubmed'
   );
   foreach my $pop(map {@{$_->{prefixed_pops} || $_->{pops}}} @{$self->{freq_vcf} || []}) {
-    if ($pop =~ /^gnomAD_/) {
-      my $ucpop = uc $pop;
-      $ucpop =~ s/GNOMAD_/gnomAD_/;
-      $pop = $ucpop;
-    }
+    $pop = uc_gnomad_pop($pop) if ($pop =~ /^gnomAD_/);
     push @cols, $pop;
   }
 
@@ -236,11 +232,7 @@ sub dump_obj {
 
     if($self->{freq_vcf}) {
       foreach my $pop(map {@{$_->{prefixed_pops} || $_->{pops}}} @{$self->{freq_vcf}}) {
-        if ($pop =~ /^gnomAD_/) {
-          my $ucpop = uc $pop;
-          $ucpop =~ s/GNOMAD_/gnomAD_/;
-          $pop = $ucpop;
-        }
+        $pop = uc_gnomad_pop($pop) if ($pop =~ /^gnomAD_/);
         push @tmp, $v->{$pop} || '';
       }
     }
@@ -300,7 +292,7 @@ sub freqs_from_vcf {
       for my $start(grep {$by_pos{$_}} ($vcf_pos..($vcf_pos + length($vcf_ref)))) {
 
         foreach my $v(@{$by_pos{$start}}) {
-          if ($v->{allele_string} eq '/-' || $v->{allele_string} eq '/C') {
+          if ($v->{allele_string} =~ /^\/.+$/) {
             $self->warning('Could not be added to cache ' . $v->{variation_name} . ' ' . $v->{allele_string});
             next;
           }
@@ -382,11 +374,8 @@ sub freqs_from_vcf {
               }              
 
               if(defined($tmp_f) && $tmp_f ne '') {
-                my $store_name = $prefix.$pop;
-                if ($vcf_conf->{name} eq 'gnomAD' && $pop) {
-                  my $ucpop = uc $pop;
-                  $store_name = $prefix.$ucpop;
-                }
+                my $store_name = $prefix;
+                $store_name .= ($vcf_conf->{name} eq 'gnomAD' && $pop) ? uc($pop) : $pop;
                 $store_name =~ s/\_$//;
                 $v->{$store_name} = $v->{$store_name} ? $v->{$store_name}.','.$tmp_f : $tmp_f;
               }
@@ -396,6 +385,16 @@ sub freqs_from_vcf {
       }
     }
   }
+}
+
+# r2.1 of gnomad has changed the population names from upper to lower case.
+# In order to keep the gnomad allele frequency key the same we need to convert
+# to upper case population names 
+sub uc_gnomad_pop {
+  my $pop = shift;
+  my $ucpop = uc $pop;
+  $ucpop =~ s/GNOMAD_/gnomAD_/;
+  return $ucpop; 
 }
 
 # we want pubmed IDs by rsID
