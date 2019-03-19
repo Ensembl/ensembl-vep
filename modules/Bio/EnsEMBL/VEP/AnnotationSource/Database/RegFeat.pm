@@ -178,11 +178,12 @@ sub get_features_by_regions_uncached {
     my @region_features;
 
     my $rfa = $self->get_adaptor('funcgen', 'RegulatoryFeature');
-    
+
     $sub_slice->{coord_system}->{adaptor} ||= $self->get_adaptor('core', 'coordsystem');
     $sub_slice->{adaptor} ||= $self->get_adaptor('core', 'slice');
     my $type = 'RegulatoryFeature'; 
     my $features = $self->get_adaptor('funcgen', $type)->fetch_all_by_Slice($sub_slice);
+
     next unless defined($features);
 
     foreach my $rf(@$features) { 
@@ -209,7 +210,9 @@ sub get_features_by_regions_uncached {
     $type = 'MotifFeature';
     my @motif_features = ();
     foreach my $rf (@$features) {
-      push @motif_features, @{$rf->fetch_all_MotifFeatures_with_matching_Peak()};
+      my $rf_seq_region = $rf->seq_region_name;
+      my @experimentally_verified_MotifFeatures = grep {$_->seq_region_name eq "$rf_seq_region"} @{$rf->get_all_experimentally_verified_MotifFeatures()};  
+      push @motif_features, @experimentally_verified_MotifFeatures;
     } 
 
     foreach my $mf(@motif_features) {

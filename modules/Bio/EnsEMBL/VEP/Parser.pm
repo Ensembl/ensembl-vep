@@ -459,16 +459,6 @@ sub detect_format {
       $format = 'vcf' if $ok;
     }
 
-    # pileup: chr1  60  T  A
-    elsif (
-      $data[0] =~ /(chr)?\w+/ &&
-      $data[1] =~ /^\d+$/ &&
-      $data[2] && $data[2] =~ /^[\*ACGTN-]+$/i &&
-      $data[3] && $data[3] =~ /^[\*ACGTNRYSWKM\+\/-]+$/i
-    ) {
-      $format = 'pileup';
-    }
-
     # ensembl: 20  14370  14370  A/G  +
     elsif (
       $data[0] =~ /\w+/ &&

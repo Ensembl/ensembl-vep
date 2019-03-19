@@ -53,7 +53,11 @@ sub default_options {
 
     %{ $self->SUPER::default_options()
       },    # inherit other stuff from the base class
-    
+    hive_force_init => 1,
+    hive_use_param_stack => 0,
+    hive_use_triggers => 0,
+    hive_auto_rebalance_semaphores => 0, 
+    hive_no_init => 0,
     # a name for your pipeline (will also be used in the name of the hive database)    
     pipeline_name           => 'dump_vep',
 
@@ -62,8 +66,9 @@ sub default_options {
     pipeline_dir            => '/hps/nobackup/production/ensembl/'.$ENV{'USER'}.'/'.$self->o('pipeline_name').'/'.$self->o('ensembl_release'),
 
     # contains frequency data
-    data_dir                => '/nfs/production/panda/ensembl/variation/data/dump_vep/',
-    
+    data_dir                => '/nfs/production/panda/ensembl/variation/data/',
+    dump_vep_data_dir       => $self->o('data_dir') . '/dump_vep',
+        
     # dump databases of this version number
     ensembl_release => undef,
     eg_version => undef,
@@ -101,16 +106,16 @@ sub default_options {
         # assembly-specific stuff
         assembly_specific => {
           GRCh37 => {
-            bam => $self->o('data_dir').'/interim_GRCh37.p13_knownrefseq_alignments_2017-01-13.bam',
+            bam => $self->o('dump_vep_data_dir').'/interim_GRCh37.p13_knownrefseq_alignments_2017-01-13.bam',
             freq_vcf => [
               {
-                file => $self->o('data_dir').'/1KG.phase3.GRCh37.vcf.gz',
+                file => $self->o('dump_vep_data_dir').'/1KG.phase3.GRCh37.vcf.gz',
                 pops => [qw(AFR AMR EAS EUR SAS)],
                 name => '1000genomes',
                 version => 'phase3'
               },
               {
-                file => $self->o('data_dir').'/ESP6500SI-V2-SSA137.vcf.gz',
+                file => $self->o('dump_vep_data_dir').'/ESP6500SI-V2-SSA137.vcf.gz',
                 pops => [qw(AA EA)],
                 name => 'ESP',
               },
@@ -122,25 +127,25 @@ sub default_options {
               #   version => 0.3,
               # },
               {
-                file => $self->o('data_dir').'/gnomad.exomes.r2.0.1.sites.noVEP.vcf.gz',
-                pops => ['', qw(AFR AMR ASJ EAS FIN NFE OTH SAS)],
+                file => $self->o('data_dir').'/gnomAD/v2.1/grch37/exomes/gnomad.exomes.r2.1.sites.chr+++CHR+++_noVEP.vcf.gz',
+                pops => ['', qw(afr amr asj eas fin nfe oth sas)],
                 name => 'gnomAD',
                 prefix => 'gnomAD',
-                version => '170228',
+                version => 'r2.1',
               },
             ],
           },
           GRCh38 => {
-            bam => $self->o('data_dir').'/interim_GRCh38.p12_knownrefseq_alignments_2019-01-25.bam',
+            bam => $self->o('dump_vep_data_dir').'/interim_GRCh38.p12_knownrefseq_alignments_2019-01-25.bam',
             freq_vcf => [
               {
-                file => $self->o('data_dir').'/1KG.phase3.GRCh38_2018_02_26.vcf.gz',
+                file => $self->o('dump_vep_data_dir').'/1KG.phase3.GRCh38_2018_02_26.vcf.gz',
                 pops => [qw(AFR AMR EAS EUR SAS)],
                 name => '1000genomes',
                 version => 'phase3'
               },
               {
-                file => $self->o('data_dir').'/ESP6500SI-V2-SSA137_GRCh38.vcf.gz',
+                file => $self->o('dump_vep_data_dir').'/ESP6500SI-V2-SSA137_GRCh38.vcf.gz',
                 pops => [qw(AA EA)],
                 name => 'ESP',
                 version => 'V2-SSA137',
@@ -153,11 +158,11 @@ sub default_options {
               #   version => 0.3,
               # },
               {
-                file => $self->o('data_dir').'/gnomad.exomes.r2.0.1.sites.GRCh38.noVEP.vcf.gz',
-                pops => ['', qw(AFR AMR ASJ EAS FIN NFE OTH SAS)],
+                file => $self->o('data_dir').'/gnomAD/v2.1/grch38/exomes/gnomad.exomes.r2.1.sites.grch38.chr+++CHR+++_noVEP.vcf.gz',
+                pops => ['', qw(afr amr asj eas fin nfe oth sas)],
                 name => 'gnomAD',
                 prefix => 'gnomAD',
-                version => '170228',
+                version => 'r2.1',
               },
             ],
           },
