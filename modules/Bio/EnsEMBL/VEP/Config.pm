@@ -357,7 +357,7 @@ our @OPTION_SETS = (
 
 # valid values for certain flags
 our %VALID = (
-  format          => [qw(ensembl vcf hgvs id pileup region guess)],
+  format          => [qw(ensembl vcf hgvs id spdi region guess)],
   terms           => [qw(SO display NCBI)],
   sift            => [qw(s p b)],
   polyphen        => [qw(s p b)],
