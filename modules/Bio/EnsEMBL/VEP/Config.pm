@@ -95,7 +95,7 @@ our %DEFAULTS = (
   failed            => 0,
   core_type         => 'core',
   polyphen_analysis => 'humvar',
-  pick_order        => [qw(canonical appris tsl biotype ccds rank length ensembl refseq)],
+  pick_order        => [qw(canonical appris tsl biotype ccds rank length ensembl refseq mane)],
   terminal_width    => 48,
   vcf_info_field    => 'CSQ',
   ucsc_data_root    => 'http://hgdownload.cse.ucsc.edu/goldenpath/',
@@ -154,6 +154,7 @@ our @OPTION_SETS = (
       max_af         => 1,
       pubmed         => 1,
       uniprot        => 1,
+      mane           => 1,
       tsl            => 1,
       appris         => 1,
       variant_class  => 1,
@@ -361,7 +362,7 @@ our %VALID = (
   terms           => [qw(SO display NCBI)],
   sift            => [qw(s p b)],
   polyphen        => [qw(s p b)],
-  pick_order      => [qw(canonical appris tsl biotype ccds rank length ensembl refseq)],
+  pick_order      => [qw(mane canonical appris tsl biotype ccds rank length ensembl refseq)],
   nearest         => [qw(transcript gene symbol)],
   compress_output => [qw(gzip bgzip)],
 );
@@ -375,8 +376,8 @@ our %REQUIRES = (
 
 # incompatible options
 our %INCOMPATIBLE = (
-  most_severe => [qw(biotype no_intergenic protein symbol sift polyphen coding_only ccds canonical xref_refseq numbers domains tsl appris uniprot summary pick flag_pick pick_allele flag_pick_allele)],
-  summary     => [qw(biotype no_intergenic protein symbol sift polyphen coding_only ccds canonical xref_refseq numbers domains tsl appris uniprot most_severe pick flag_pick pick_allele flag_pick_allele)],
+  most_severe => [qw(biotype no_intergenic protein symbol sift polyphen coding_only ccds mane canonical xref_refseq numbers domains tsl appris uniprot summary pick flag_pick pick_allele flag_pick_allele)],
+  summary     => [qw(biotype no_intergenic protein symbol sift polyphen coding_only ccds mane canonical xref_refseq numbers domains tsl appris uniprot most_severe pick flag_pick pick_allele flag_pick_allele)],
   database    => [qw(af_1kg af_esp af_exac af_gnomad max_af pubmed offline cache)],
   quiet       => [qw(verbose)],
   refseq      => [qw(gencode_basic merged)],
