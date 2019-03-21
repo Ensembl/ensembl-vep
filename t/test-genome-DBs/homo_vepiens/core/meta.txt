@@ -172,3 +172,6 @@
 920	\N	patch	patch_95_96_a.sql|schema_version
 921	\N	patch	patch_96_97_a.sql|schema_version
 922	\N	patch	patch_96_97_b.sql|biotype_so_term
+923	\N	patch	patch_96_97_c.sql|rnaproduct_tables
+924	\N	patch	patch_96_97_d.sql|add_object_type_rnaproduct
+925	\N	patch	patch_96_97_e.sql|add_stable_id_event_type_rnaproduct

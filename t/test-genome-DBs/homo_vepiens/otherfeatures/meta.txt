@@ -155,3 +155,6 @@
 865	\N	patch	patch_95_96_a.sql|schema_version
 866	\N	patch	patch_96_97_a.sql|schema_version
 867	\N	patch	patch_96_97_b.sql|biotype_so_term
+868	\N	patch	patch_96_97_c.sql|rnaproduct_tables
+869	\N	patch	patch_96_97_d.sql|add_object_type_rnaproduct
+870	\N	patch	patch_96_97_e.sql|add_stable_id_event_type_rnaproduct

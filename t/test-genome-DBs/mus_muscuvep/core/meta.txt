@@ -184,3 +184,6 @@
 1862	\N	patch	patch_95_96_a.sql|schema_version
 1863	\N	patch	patch_96_97_a.sql|schema_version
 1864	\N	patch	patch_96_97_b.sql|biotype_so_term
+1865	\N	patch	patch_96_97_c.sql|rnaproduct_tables
+1866	\N	patch	patch_96_97_d.sql|add_object_type_rnaproduct
+1867	\N	patch	patch_96_97_e.sql|add_stable_id_event_type_rnaproduct
