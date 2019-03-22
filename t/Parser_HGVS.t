@@ -426,6 +426,7 @@ SKIP: {
       '_variation_id' => undef,
       'class_SO_term' => undef,
       'allele_string' => 'C/T',
+      'ancestral_allele' => undef,
       'map_weight' => 1,
       'chr' => '21',
       '_source_id' => undef,
