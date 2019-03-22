@@ -88,6 +88,7 @@ SKIP: {
     'strand' => '1',
     'class_SO_term' => 'SNV',
     'allele_string' => 'C/T',
+    'ancestral_allele' => 'C',
     'map_weight' => '1',
     'chr' => '21',
     '_source_id' => '1',
