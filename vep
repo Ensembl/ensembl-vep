@@ -120,6 +120,7 @@ GetOptions(
   'terms|t=s',               # consequence terms to use e.g. NCBI, SO
   'coding_only',             # only return results for consequences in coding regions
   'canonical',               # indicates if transcript is canonical
+  'mane',                    # output mane transcript status
   'tsl',                     # output transcript support level
   'appris',                  # output APPRIS transcript annotation
   'ccds',                    # output CCDS identifer

@@ -183,6 +183,7 @@ sub new {
     uniprot
     canonical
     biotype
+    mane
     tsl
     appris
     transcript_version
@@ -669,6 +670,7 @@ sub pick_worst_VariationFeatureOverlapAllele {
 
       # these will only be used by transcript types, default to 1 for others
       # to avoid writing an else clause below
+      mane => 1,
       canonical => 1,
       ccds => 1,
       length => 0,
@@ -683,6 +685,7 @@ sub pick_worst_VariationFeatureOverlapAllele {
       my $tr = $vfoa->feature;
 
       # 0 is "best"
+      $info->{mane} = scalar(grep {$_->code eq 'MANE_Select'}  @{$tr->get_all_Attributes()}) ? 0 : 1;
       $info->{canonical} = $tr->is_canonical ? 0 : 1;
       $info->{biotype} = $tr->biotype eq 'protein_coding' ? 0 : 1;
       $info->{ccds} = $tr->{_ccds} && $tr->{_ccds} ne '-' ? 0 : 1;
@@ -718,7 +721,6 @@ sub pick_worst_VariationFeatureOverlapAllele {
 
     push @vfoa_info, $info;
   }
-
   if(scalar @vfoa_info) {
     my @order = @{$self->{pick_order}};
     my $picked;
@@ -1347,7 +1349,12 @@ sub BaseTranscriptVariationAllele_to_output_hash {
 
   # gene phenotype
   $hash->{GENE_PHENO} = 1 if $self->{gene_phenotype} && $tr->{_gene_phenotype};
-
+  if($self->{mane} && (my ($mane) = grep {$_->code eq 'MANE_Select'} @attribs)) {
+    if(my $mane_value = $mane->value) {
+      $hash->{MANE} = $mane_value;
+    }
+  }
+  
   # transcript support level
   if($self->{tsl} && (my ($tsl) = grep {$_->code eq 'TSL'} @attribs)) {
     if($tsl->value =~ m/tsl(\d+)/) {
