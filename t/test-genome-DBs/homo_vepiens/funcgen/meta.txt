@@ -315,3 +315,4 @@
 759	\N	patch	patch_96_97_d.sql|Fix foreign key data type inconsistencies
 760	\N	patch	patch_96_97_e.sql|Update mirna_target_feature
 761	\N	patch	patch_96_97_g.sql|Modify column in regulatory_activity
+762	\N	patch	patch_96_97_f.sql|Add search_terms and full_name columns to epigenome table, rename display_label column to short_name and change description to TEXT

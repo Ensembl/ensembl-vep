@@ -195,13 +195,15 @@ CREATE TABLE `data_file` (
 CREATE TABLE `epigenome` (
   `epigenome_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(120) NOT NULL,
-  `display_label` varchar(120) DEFAULT NULL,
-  `description` varchar(80) DEFAULT NULL,
+  `short_name` varchar(120) NOT NULL,
+  `description` mediumtext,
   `production_name` varchar(120) DEFAULT NULL,
   `gender` enum('male','female','hermaphrodite','mixed','unknown') DEFAULT 'unknown',
+  `search_terms` mediumtext,
+  `full_name` mediumtext,
   PRIMARY KEY (`epigenome_id`),
   UNIQUE KEY `name_idx` (`name`),
-  UNIQUE KEY `display_label_idx` (`display_label`)
+  UNIQUE KEY `short_name_idx` (`short_name`)
 ) ENGINE=MyISAM  ;
 
 CREATE TABLE `execution_plan` (
