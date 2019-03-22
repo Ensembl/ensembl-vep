@@ -314,7 +314,7 @@ is(ref($p), 'Bio::EnsEMBL::VEP::Parser::VCF', 'new with explicit format');
 # new with invalid format
 throws_ok {
   Bio::EnsEMBL::VEP::Parser->new({config => $cfg, file => $test_cfg->{test_vcf}, format => 'foo'})
-} qr/Unknown or unsupported format/, 'new with unknown format';
+} qr/Unknown or unsupported input format/, 'new with unknown format';
 
 # new with format detection
 $p = Bio::EnsEMBL::VEP::Parser->new({config => $cfg, file => $test_cfg->{test_vcf}, format => 'guess'});
