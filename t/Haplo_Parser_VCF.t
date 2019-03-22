@@ -32,7 +32,7 @@ use_ok('Bio::EnsEMBL::VEP::Haplo::Parser::VCF');
 ok(my $p = Bio::EnsEMBL::VEP::Haplo::Parser::VCF->new({file => $test_cfg->{test_vcf}}), 'new');
 is(ref($p), 'Bio::EnsEMBL::VEP::Haplo::Parser::VCF', 'ref');
 
-throws_ok {Bio::EnsEMBL::VEP::Haplo::Parser::VCF->new} qr/No file/, 'no file';
+throws_ok {Bio::EnsEMBL::VEP::Haplo::Parser::VCF->new} qr/No input file/, 'no file';
 
 is_deeply(
   $p->samples,
