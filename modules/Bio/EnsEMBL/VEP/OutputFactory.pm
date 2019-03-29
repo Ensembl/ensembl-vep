@@ -1458,7 +1458,6 @@ sub TranscriptVariationAllele_to_output_hash {
   my $self = shift;
   my ($vfoa, $hash) = @_;
 
-  my $vf = $vfoa->variation_feature;
   # run "super" methods
   $hash = $self->VariationFeatureOverlapAllele_to_output_hash(@_);
   $hash = $self->BaseTranscriptVariationAllele_to_output_hash(@_);
@@ -1473,7 +1472,12 @@ sub TranscriptVariationAllele_to_output_hash {
   
   my $strand = defined($tr->strand) ? $tr->strand : 1;
 
-  $hash->{Location} = ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start} + ($shift_length * $strand), $vf->{end} + ($shift_length * $strand)) if $self->param('shift_genomic');
+  if($self->{shift_genomic})
+  {
+    my $vf = $vfoa->variation_feature;
+    $hash->{Location} = ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start} + ($shift_length * $strand), $vf->{end} + ($shift_length * $strand));
+  }
+
   my $vep_cache = $tr->{_variation_effect_feature_cache};
 
   my $pre = $vfoa->_pre_consequence_predicates();
@@ -1528,13 +1532,11 @@ sub TranscriptVariationAllele_to_output_hash {
     }
   }
 
-
-
   if($self->{use_transcript_ref}) {
     my $ref_tva = $tv->get_reference_TranscriptVariationAllele;
     
     $hash->{USED_REF} = $ref_tva->variation_feature_seq;
-    $hash->{USED_REF} = $ref_tva->{shift_hash}->{ref_orig_allele_string} if $self->param('no_shift') && defined($ref_tva->{shift_hash});
+    $hash->{USED_REF} = $ref_tva->{shift_hash}->{ref_orig_allele_string} if $self->{no_shift} && defined($ref_tva->{shift_hash});
     $hash->{GIVEN_REF} = $ref_tva->{given_ref};
   }
 
