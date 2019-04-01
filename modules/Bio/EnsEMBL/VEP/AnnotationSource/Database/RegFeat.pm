@@ -118,7 +118,7 @@ sub get_available_cell_types {
     $self->{available_cell_types} = [
       sort
       map {s/ /\_/g; $_}
-      map {$_->display_label}
+      map {$_->short_name}
       @{$regulatory_build->get_all_Epigenomes}
     ];
   }
@@ -197,7 +197,7 @@ sub get_features_by_regions_uncached {
         my %cl =
           map {$_->[0] => $_->[1]}
           map {$_->[0] =~ s/ /\_/g; $_}
-          map {[$_->get_Epigenome->display_label, $_->activity]}
+          map {[$_->get_Epigenome->short_name, $_->activity]}
           @{$rf->regulatory_activity};
         $rf->{cell_types} = \%cl;
       }
