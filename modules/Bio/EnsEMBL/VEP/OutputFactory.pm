@@ -1530,6 +1530,7 @@ sub TranscriptVariationAllele_to_output_hash {
       $hash->{HGVSp} = $hgvs_p if $hgvs_p;
       $hash->{HGVS_OFFSET} = $offset * $strand if $offset && $hgvs_p;
     }
+    $hash->{REFSEQ_OFFSET} = $vfoa->{refseq_misalignment_offset} if defined($vfoa->{refseq_misalignment_offset}) && $vfoa->{refseq_misalignment_offset} != 0;
   }
 
   if($self->{use_transcript_ref}) {
