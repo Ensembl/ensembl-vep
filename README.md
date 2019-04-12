@@ -124,11 +124,11 @@ returns arrays of protein_haplotypes and cds_haplotypes for a given transcript. 
 * **diffs**: differences between the reference and this haplotype
 * **hex**: the md5 hex of this haplotype sequence
 * **other_hexes**: the md5 hex of other related haplotype sequences (
-        CDSHaplotypes that translate to this ProteinHaplotype OR
+        CDSHaplotypes that translate to this ProteinHaplotype or
         ProteinHaplotype representing the translation of this CDSHaplotype)
 * **has_indel**: does the haplotype contain insertions or deletions
 * **type**: the type of haplotype - cds, protein
-* **name**": a human readable name for the haplotype (sequence id + REF or a change description)
+* **name**: a human readable name for the haplotype (sequence id + REF or a change description)
 * **flags**: [flags](#haploflags) for the haplotype
 * **frequency**: haplotype frequency in full sample set
 * **count**: haplotype count in full sample set
