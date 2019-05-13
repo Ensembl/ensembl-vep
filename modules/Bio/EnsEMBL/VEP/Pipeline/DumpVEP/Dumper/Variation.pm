@@ -57,7 +57,7 @@ my $gnomad_prefix = 'gnomAD_';
 
 sub run {
   my $self = shift;
-
+  $DB::single = 1;
   my $vep_params = $self->get_vep_params();
 
   # make sure to include failed variants!
@@ -212,6 +212,8 @@ sub dump_obj {
 
   # get freqs from VCFs?
   $self->freqs_from_vcf($obj, $chr) if $self->{freq_vcf};
+  
+  $self->get_allele_specific_clin_sigs($obj, $chr) if $self->{allele_specific_clin_sigs};
 
   my $pubmed = $self->pubmed;
 
@@ -389,6 +391,141 @@ sub freqs_from_vcf {
   }
 }
 
+sub get_allele_specific_clin_sigs {
+  my $self = shift;
+  my $obj = shift;
+  my $chr = shift;
+
+  #die("ERROR: Cannot use freqs_from_vcf without Bio::EnsEMBL::IO::Parser::VCF4Tabix module\n") unless $CAN_USE_TABIX_PM;
+  # put into a hash so we can lookup by pos
+  my %by_pos;
+  for(@$obj) {
+    push @{$by_pos{$_->{start}}}, $_;
+  }
+  
+  #my $adaptor = $as->get_adaptor
+  
+  # iterate over each VCF file in the config
+  foreach my $vcf_conf(@{$self->{freq_vcf}}) {
+    my $file = $vcf_conf->{file};
+    $file =~ s/\+\+\+CHR\+\+\+/$chr/;
+    next unless -e $file;
+
+    my $prefix = $vcf_conf->{prefix} || '';
+    $prefix .= '_' if $prefix && $prefix !~ /\_$/;
+
+    my $parser = $self->{_vcf_parsers}->{$file} ||= Bio::EnsEMBL::IO::Parser::VCF4Tabix->open($file);
+    next unless $parser;
+
+    $parser->seek($chr, @$obj[0]->{start} - 1, @$obj[-1]->{end} + 1);
+
+    while($parser->next) {
+
+      my $vcf_ref  = $parser->get_reference;
+      my $vcf_pos  = $parser->get_raw_start;
+      my @vcf_alts = @{$parser->get_alternatives};
+
+      # scan from from pos to inferred end
+      for my $start(grep {$by_pos{$_}} ($vcf_pos..($vcf_pos + length($vcf_ref)))) {
+
+        foreach my $v(@{$by_pos{$start}}) {
+          if ($v->{allele_string} =~ /^\/.+$/) {
+            $self->warning('Could not be added to cache ' . $v->{variation_name} . ' ' . $v->{allele_string});
+            next;
+          }
+          $DB::single = 1 if $v->{variation_name} eq 'TMP_ESP_1_179086420_179086420';
+
+          my $matches = [];
+          eval{
+            $matches = get_matched_variant_alleles(
+              {
+                allele_string => $v->{allele_string},
+                pos           => $v->{start},
+                strand        => $v->{strand},
+              },
+              {
+                ref  => $vcf_ref,
+                alts => \@vcf_alts,
+                pos  => $vcf_pos,
+              }
+            );
+          };
+          die "$file Failed to get vf matches for " .$v->{variation_name} ."\n" unless $@ eq '';  
+
+          if(@$matches) {
+
+            my %allele_map = map {$_->{b_index} => $_->{a_allele}} @$matches;
+
+            # get INFO field data from VCF
+            my $info = $parser->get_info;
+
+            foreach my $pop(@{$vcf_conf->{pops}}) {
+
+              my $info_prefix = '';
+              my $info_suffix = '';
+
+              # have to process ExAC differently from 1KG and ESP
+              if($prefix =~ /exac|gnomad/i && $pop) {
+                $info_suffix = '_'.$pop if $pop;
+              }
+              elsif($pop) {
+                $info_prefix = $pop.'_';
+              }
+
+              my $tmp_f;
+
+              if(exists($info->{$info_prefix.'AF'.$info_suffix})) {
+                my $f = $info->{$info_prefix.'AF'.$info_suffix};
+                my @split = split(',', $f);
+
+                # there will be one item in @split for each of the original alts
+                # since we may not be dealing with all the alts here
+                # we have to use the indexes and alts we logged in %allele_map
+                $tmp_f = join(',',
+                  map {$allele_map{$_}.':'.($split[$_] == 0 ? 0 : sprintf('%.4g', $split[$_]))}
+                  grep {$allele_map{$_}}
+                  grep {looks_like_number($split[$_])}
+                  0..$#split
+                );
+              }
+              elsif(exists($info->{$info_prefix.'AC'.$info_suffix})) {
+                my $c = $info->{$info_prefix.'AC'.$info_suffix};
+                my $n = $info->{$info_prefix.'AN'.$info_suffix};
+                my @split = split(',', $c);
+
+                unless($n) {
+                  $n += $_ for @split;
+                }
+                
+                next unless $n;
+
+                # ESP VCFs include REF as last allele, just to annoy everyone
+                pop @split if scalar @split > scalar @vcf_alts;
+
+                $tmp_f = join(',',
+                  map {$allele_map{$_}.':'.($split[$_] ? sprintf('%.4g', $split[$_] / $n) : 0)}
+                  grep {$allele_map{$_}}
+                  grep {looks_like_number($split[$_])}
+                  0..$#split
+                );
+              }              
+
+              if(defined($tmp_f) && $tmp_f ne '') {
+                my $store_name = $prefix;
+                $store_name .= ($vcf_conf->{name} eq 'gnomAD' && $pop) ? uc($pop) : $pop;
+                $store_name =~ s/\_$//;
+                $v->{$store_name} = $v->{$store_name} ? $v->{$store_name}.','.$tmp_f : $tmp_f;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+
 # r2.1 of gnomad has changed the population names from upper to lower case.
 # In order to keep the gnomad allele frequency key the same we need to convert
 # to upper case population names 
@@ -396,6 +533,7 @@ sub uc_gnomad_pop {
   my $pop = shift;
   my $ucpop = uc $pop;
   $ucpop =~ s/GNOMAD_/$gnomad_prefix/;
+  $DB::single = 1;
   return $ucpop; 
 }
 
