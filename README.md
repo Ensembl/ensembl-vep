@@ -40,6 +40,11 @@ The installer may also be used to check for updates to this and co-dependent pac
 
 See [documentation](http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html) for full installation instructions.
 
+Arch linux users may need to install the following package prior to installation:
+
+ - perl-module-build
+ - perl-try-tiny
+
 #### Additional CPAN modules
 The following modules are optional but most users will benefit from installing them. We recommend using [cpanminus](http://search.cpan.org/~miyagawa/Menlo-1.9003/script/cpanm-menlo) to install.
 
