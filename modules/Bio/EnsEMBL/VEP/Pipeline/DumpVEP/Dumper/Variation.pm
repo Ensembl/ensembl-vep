@@ -485,7 +485,6 @@ sub uc_gnomad_pop {
   my $pop = shift;
   my $ucpop = uc $pop;
   $ucpop =~ s/GNOMAD_/$gnomad_prefix/;
-  $DB::single = 1;
   return $ucpop; 
 }
 
