@@ -401,7 +401,7 @@ sub get_pf_features_by_location {
   my $region_end = ceil($end / $region_size) * $region_size;
 
 
-  if(!defined($self->{pf_cache}->{$sr . ':' . $region_start . '-' . $region_end})){
+  if(!defined($self->{pfa_cache}->{$sr . ':' . $region_start . '-' . $region_end})){
     my $vep_params = $self->get_vep_params();
 
     # make sure to include failed variants!
@@ -413,15 +413,12 @@ sub get_pf_features_by_location {
       cache_region_size => $region_size,
     });
 
-    my $pfs = $as->get_adaptor('variation', 'variation')->db->get_PhenotypeFeatureAdaptor()->get_PhenotypeFeatures_by_location($sr, $region_start, $region_end) if defined($as->get_adaptor('variation', 'variation')->db);
- 
     my $pfas = $as->get_adaptor('variation', 'variation')->db->get_PhenotypeFeatureAdaptor()->get_PhenotypeFeatureAttribs_by_location($sr, $region_start, $region_end) if defined($as->get_adaptor('variation', 'variation')->db);
 
-    $self->{pf_cache}->{$sr . ':' . $region_start . '-' . $region_end} = $pfs;
     $self->{pfa_cache}->{$sr . ':' . $region_start . '-' . $region_end} = $pfas;;
   }
   
-  return (grep {($_->start == $start) && $_->end == $end} @{$self->{pf_cache}->{$sr . ':' . $region_start . '-' . $region_end}});
+  return $self->{pfa_cache}->{$sr . ':' . $region_start . '-' . $region_end}->{$sr . ':'. $start . '-' . $end};
 }
 
 
@@ -445,26 +442,10 @@ sub get_allele_specific_clin_sigs {
   my $hive_dbc = $self->dbc;
   $hive_dbc->disconnect_if_idle() if defined $hive_dbc;
 
-  my $region_start = floor($start / $region_size) * $region_size;
-  my $region_end = ceil($end / $region_size) * $region_size;
-  
-  my @pfs = $self->get_pf_features_by_location($sr, $start, $end);
-
-  my @pfas_by_allele;
+  my $attrib = $self->get_pf_features_by_location($sr, $start, $end);
 
   my $per_allele_hash;
-  my $attrib;
-  foreach my $pf(@pfs)
-  {
-    if(defined($self->{pfa_cache}->{$sr . ':' . $region_start . '-' . $region_end}))
-    {
-      $attrib = $self->{pfa_cache}->{$sr . ':' . $region_start . '-' . $region_end}->{$pf->dbID};
-    }
-    else{
-      $attrib = $pf->get_all_attributes();
-    }
-    $per_allele_hash->{$attrib->{risk_allele}}->{$attrib->{clinvar_clin_sig}} = 1 if defined($attrib->{risk_allele}) ;
-  }
+  $per_allele_hash->{$attrib->{risk_allele}}->{$attrib->{clinvar_clin_sig}} = 1 if defined($attrib->{risk_allele}) ;
 
   my @array = keys(%$per_allele_hash);
   my $output_string = '';
