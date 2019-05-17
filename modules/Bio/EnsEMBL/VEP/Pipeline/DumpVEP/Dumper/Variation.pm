@@ -39,7 +39,7 @@ use Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation;
 use Bio::EnsEMBL::VEP::AnnotationSource::Cache::Variation;
 use Bio::EnsEMBL::Variation::Utils::Sequence qw(trim_sequences get_matched_variant_alleles);
 use Scalar::Util qw(looks_like_number);
-
+use POSIX;
 our $CAN_USE_TABIX_PM;
 
 BEGIN {
@@ -57,7 +57,6 @@ my $gnomad_prefix = 'gnomAD_';
 
 sub run {
   my $self = shift;
-  $DB::single = 1;
   my $vep_params = $self->get_vep_params();
 
   # make sure to include failed variants!
@@ -171,7 +170,8 @@ sub _generic_dump_info {
   # var cache cols
   my @cols = (
     @{$as->get_cache_columns()},
-    'pubmed'
+    'pubmed',
+    'clin_sig_allele'
   );
   foreach my $pop(map {@{$_->{prefixed_pops} || $_->{pops}}} @{$self->{freq_vcf} || []}) {
     $pop = uc_gnomad_pop($pop) if ($pop =~ /^$gnomad_prefix/);
@@ -196,7 +196,7 @@ sub get_dumpable_object {
 }
 
 sub dump_obj {
-  my ($self, $obj, $file, $chr) = @_;
+  my ($self, $obj, $file, $chr, $sr) = @_;
 
   open DUMP, "| gzip -9 -c > ".$file or die "ERROR: Could not write to dump file $file\n";
 
@@ -213,8 +213,6 @@ sub dump_obj {
   # get freqs from VCFs?
   $self->freqs_from_vcf($obj, $chr) if $self->{freq_vcf};
   
-  $self->get_allele_specific_clin_sigs($obj, $chr) if $self->{allele_specific_clin_sigs};
-
   my $pubmed = $self->pubmed;
 
   foreach my $v(@$obj) {
@@ -230,9 +228,10 @@ sub dump_obj {
       defined($v->{minor_allele_freq}) && $v->{minor_allele_freq} =~ /^[0-9\.]+$/ ? sprintf("%.4f", $v->{minor_allele_freq}) : '',
       $v->{clin_sig} || '',
       $v->{phenotype_or_disease} == 0 ? '' : $v->{phenotype_or_disease},
+      $self->get_allele_specific_clin_sigs($sr, $v->{start}, $v->{end}) || '',
     );
-
-    push @tmp, $pubmed->{$v->{variation_name}} || '';
+  
+  push @tmp, $pubmed->{$v->{variation_name}} || '';
 
     if($self->{freq_vcf}) {
       foreach my $pop(map {@{$_->{prefixed_pops} || $_->{pops}}} @{$self->{freq_vcf}}) {
@@ -390,140 +389,93 @@ sub freqs_from_vcf {
     }
   }
 }
+sub get_pf_features_by_location {
+  my $self = shift;
+  my $sr = shift;
+  my $start = shift;
+  my $end = shift;
+ 
+  my $region_size = $self->param('region_size');
+
+  my $region_start = floor($start / $region_size) * $region_size;
+  my $region_end = ceil($end / $region_size) * $region_size;
+
+
+  if(!defined($self->{pf_cache}->{$sr . ':' . $region_start . '-' . $region_end})){
+    my $vep_params = $self->get_vep_params();
+
+    # make sure to include failed variants!
+    $vep_params->{failed} = 1;
+  
+    my $config = Bio::EnsEMBL::VEP::Config->new($vep_params);  
+    my $as = Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation->new({
+      config => $config,
+      cache_region_size => $region_size,
+    });
+
+    my $pfs = $as->get_adaptor('variation', 'variation')->db->get_PhenotypeFeatureAdaptor()->get_PhenotypeFeatures_by_location($sr, $region_start, $region_end) if defined($as->get_adaptor('variation', 'variation')->db);
+ 
+    my $pfas = $as->get_adaptor('variation', 'variation')->db->get_PhenotypeFeatureAdaptor()->get_PhenotypeFeatureAttribs_by_location($sr, $region_start, $region_end) if defined($as->get_adaptor('variation', 'variation')->db);
+
+    $self->{pf_cache}->{$sr . ':' . $region_start . '-' . $region_end} = $pfs;
+    $self->{pfa_cache}->{$sr . ':' . $region_start . '-' . $region_end} = $pfas;;
+  }
+  
+  return (grep {($_->start == $start) && $_->end == $end} @{$self->{pf_cache}->{$sr . ':' . $region_start . '-' . $region_end}});
+}
+
+
+
 
 sub get_allele_specific_clin_sigs {
   my $self = shift;
-  my $obj = shift;
-  my $chr = shift;
+  my $sr = shift;
+  my $start = shift;
+  my $end = shift;
 
-  #die("ERROR: Cannot use freqs_from_vcf without Bio::EnsEMBL::IO::Parser::VCF4Tabix module\n") unless $CAN_USE_TABIX_PM;
   # put into a hash so we can lookup by pos
-  my %by_pos;
-  for(@$obj) {
-    push @{$by_pos{$_->{start}}}, $_;
-  }
+  my $vep_params = $self->get_vep_params();
+
+  # make sure to include failed variants!
+  $vep_params->{failed} = 1;
   
-  #my $adaptor = $as->get_adaptor
+  my $config = Bio::EnsEMBL::VEP::Config->new($vep_params);
   
-  # iterate over each VCF file in the config
-  foreach my $vcf_conf(@{$self->{freq_vcf}}) {
-    my $file = $vcf_conf->{file};
-    $file =~ s/\+\+\+CHR\+\+\+/$chr/;
-    next unless -e $file;
+  my $region_size = $self->param('region_size');
+  my $hive_dbc = $self->dbc;
+  $hive_dbc->disconnect_if_idle() if defined $hive_dbc;
 
-    my $prefix = $vcf_conf->{prefix} || '';
-    $prefix .= '_' if $prefix && $prefix !~ /\_$/;
+  my $region_start = floor($start / $region_size) * $region_size;
+  my $region_end = ceil($end / $region_size) * $region_size;
+  
+  my @pfs = $self->get_pf_features_by_location($sr, $start, $end);
 
-    my $parser = $self->{_vcf_parsers}->{$file} ||= Bio::EnsEMBL::IO::Parser::VCF4Tabix->open($file);
-    next unless $parser;
+  my @pfas_by_allele;
 
-    $parser->seek($chr, @$obj[0]->{start} - 1, @$obj[-1]->{end} + 1);
-
-    while($parser->next) {
-
-      my $vcf_ref  = $parser->get_reference;
-      my $vcf_pos  = $parser->get_raw_start;
-      my @vcf_alts = @{$parser->get_alternatives};
-
-      # scan from from pos to inferred end
-      for my $start(grep {$by_pos{$_}} ($vcf_pos..($vcf_pos + length($vcf_ref)))) {
-
-        foreach my $v(@{$by_pos{$start}}) {
-          if ($v->{allele_string} =~ /^\/.+$/) {
-            $self->warning('Could not be added to cache ' . $v->{variation_name} . ' ' . $v->{allele_string});
-            next;
-          }
-          $DB::single = 1 if $v->{variation_name} eq 'TMP_ESP_1_179086420_179086420';
-
-          my $matches = [];
-          eval{
-            $matches = get_matched_variant_alleles(
-              {
-                allele_string => $v->{allele_string},
-                pos           => $v->{start},
-                strand        => $v->{strand},
-              },
-              {
-                ref  => $vcf_ref,
-                alts => \@vcf_alts,
-                pos  => $vcf_pos,
-              }
-            );
-          };
-          die "$file Failed to get vf matches for " .$v->{variation_name} ."\n" unless $@ eq '';  
-
-          if(@$matches) {
-
-            my %allele_map = map {$_->{b_index} => $_->{a_allele}} @$matches;
-
-            # get INFO field data from VCF
-            my $info = $parser->get_info;
-
-            foreach my $pop(@{$vcf_conf->{pops}}) {
-
-              my $info_prefix = '';
-              my $info_suffix = '';
-
-              # have to process ExAC differently from 1KG and ESP
-              if($prefix =~ /exac|gnomad/i && $pop) {
-                $info_suffix = '_'.$pop if $pop;
-              }
-              elsif($pop) {
-                $info_prefix = $pop.'_';
-              }
-
-              my $tmp_f;
-
-              if(exists($info->{$info_prefix.'AF'.$info_suffix})) {
-                my $f = $info->{$info_prefix.'AF'.$info_suffix};
-                my @split = split(',', $f);
-
-                # there will be one item in @split for each of the original alts
-                # since we may not be dealing with all the alts here
-                # we have to use the indexes and alts we logged in %allele_map
-                $tmp_f = join(',',
-                  map {$allele_map{$_}.':'.($split[$_] == 0 ? 0 : sprintf('%.4g', $split[$_]))}
-                  grep {$allele_map{$_}}
-                  grep {looks_like_number($split[$_])}
-                  0..$#split
-                );
-              }
-              elsif(exists($info->{$info_prefix.'AC'.$info_suffix})) {
-                my $c = $info->{$info_prefix.'AC'.$info_suffix};
-                my $n = $info->{$info_prefix.'AN'.$info_suffix};
-                my @split = split(',', $c);
-
-                unless($n) {
-                  $n += $_ for @split;
-                }
-                
-                next unless $n;
-
-                # ESP VCFs include REF as last allele, just to annoy everyone
-                pop @split if scalar @split > scalar @vcf_alts;
-
-                $tmp_f = join(',',
-                  map {$allele_map{$_}.':'.($split[$_] ? sprintf('%.4g', $split[$_] / $n) : 0)}
-                  grep {$allele_map{$_}}
-                  grep {looks_like_number($split[$_])}
-                  0..$#split
-                );
-              }              
-
-              if(defined($tmp_f) && $tmp_f ne '') {
-                my $store_name = $prefix;
-                $store_name .= ($vcf_conf->{name} eq 'gnomAD' && $pop) ? uc($pop) : $pop;
-                $store_name =~ s/\_$//;
-                $v->{$store_name} = $v->{$store_name} ? $v->{$store_name}.','.$tmp_f : $tmp_f;
-              }
-            }
-          }
-        }
-      }
+  my $per_allele_hash;
+  my $attrib;
+  foreach my $pf(@pfs)
+  {
+    if(defined($self->{pfa_cache}->{$sr . ':' . $region_start . '-' . $region_end}))
+    {
+      $attrib = $self->{pfa_cache}->{$sr . ':' . $region_start . '-' . $region_end}->{$pf->dbID};
     }
+    else{
+      $attrib = $pf->get_all_attributes();
+    }
+    $per_allele_hash->{$attrib->{risk_allele}}->{$attrib->{clinvar_clin_sig}} = 1 if defined($attrib->{risk_allele}) ;
   }
-}
 
+  my @array = keys(%$per_allele_hash);
+  my $output_string = '';
+  foreach my $allele(@array)
+  {
+    my @clinsigarray = keys(%{$per_allele_hash->{$allele}});
+    $output_string .= $allele.':' . (join ',', @clinsigarray) . ';' if scalar(@clinsigarray);
+  }
+  $output_string =~s/ /_/g;
+  return $output_string;
+}
 
 
 # r2.1 of gnomad has changed the population names from upper to lower case.

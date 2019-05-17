@@ -907,13 +907,14 @@ sub add_colocated_variant_info {
   my $self = shift;
   my $vf = shift;
   my $hash = shift;
-
+  
   return unless $vf->{existing} && scalar @{$vf->{existing}};
 
   my $this_allele = $hash->{Allele};
 
   my $tmp = {};
-
+  
+  my $clin_sig_allele_exists = 0;
   # use these to sort variants
   my %prefix_ranks = (
     'rs' => 1, # dbSNP
@@ -925,6 +926,7 @@ sub add_colocated_variant_info {
     'co' => 3, # COSMIC
   );
     my %clin_sigs;
+  
   foreach my $ex(
     sort {
       ($a->{somatic} || 0) <=> ($b->{somatic} || 0) ||
@@ -944,48 +946,41 @@ sub add_colocated_variant_info {
     # ID
     push @{$hash->{Existing_variation}}, $ex->{variation_name} if $ex->{variation_name};
 
-    # clin sig and pubmed?
-        #my $clin_sig_string;
-    #foreach my $clin_sig (keys %clin_sigs) {
-    #  $clin_sig_string .= ($clin_sig . ',');
-    #}
-    #chop $clin_sig_string;
-    
-    #push @{$tmp->{CLIN_SIG}}, split(',', $ex->{clin_sig}) if $ex->{clin_sig} && not defined($clin_sig_string);
-
-    #push @{$tmp->{CLIN_SIG}}, $clin_sig_string if defined($clin_sig_string);
-    push @{$tmp->{PUBMED}}, split(',', $ex->{pubmed}) if $self->{pubmed} && $ex->{pubmed};
-    #clin_sig_string = "";
     # somatic?
     push @{$tmp->{SOMATIC}}, $ex->{somatic} ? 1 : 0;
 
     # phenotype or disease
     push @{$tmp->{PHENO}}, $ex->{phenotype_or_disease} ? 1 : 0;
+    
+    if(defined($ex->{clin_sig_allele}))
+    {
+      push @{$tmp->{CLIN_SIG}}, $ex->{clin_sig_allele};
+      $clin_sig_allele_exists = 1;
+    }
   }
+  unless($clin_sig_allele_exists){
+    my $pfs = $vf->adaptor->db->get_PhenotypeFeatureAdaptor()->get_PhenotypeFeatures_by_location($vf->slice->get_seq_region_id, $vf->start, $vf->end) if defined($vf->adaptor->db);
+    my @pfas_by_allele;
 
-my $pfs = $vf->adaptor->db->get_PhenotypeFeatureAdaptor()->get_PhenotypeFeatures_by_location($vf->slice->get_seq_region_id, $vf->start, $vf->end) if defined($vf->adaptor->db);
-my @pfas_by_allele;
+    foreach my $pf(@$pfs)
+    {
+      my $attrib = $pf->get_all_attributes();
+      push @pfas_by_allele, $attrib if defined($attrib->{risk_allele}) && $hash->{Allele} eq $attrib->{risk_allele};
+    }
+    foreach my $pfa(@pfas_by_allele)
+    {
+      $pfa->{clinvar_clin_sig}=~s/ /_/g;
+      $clin_sigs{$pfa->{clinvar_clin_sig}} = 1;
+    }
 
-
-foreach my $pf(@$pfs)
-{
-  my $attrib = $pf->get_all_attributes();
-  push @pfas_by_allele, $attrib if defined($attrib->{risk_allele}) && $hash->{Allele} eq $attrib->{risk_allele};
-}
-
-foreach my $pfa(@pfas_by_allele)
-{
-  $pfa->{clinvar_clin_sig}=~s/ /_/g;
-  $clin_sigs{$pfa->{clinvar_clin_sig}} = 1;
-}
-
-
-my @array = keys(%clin_sigs);
-  # post-process to remove all-0, e.g. SOMATIC
-  foreach my $key(keys %$tmp) {
-    delete $tmp->{$key} unless grep {$_} @{$tmp->{$key}};
+    my @array = keys(%clin_sigs);
+    # post-process to remove all-0, e.g. SOMATIC
+    foreach my $key(keys %$tmp) {
+      delete $tmp->{$key} unless grep {$_} @{$tmp->{$key}};
+    }
+    $tmp->{CLIN_SIG} =  join ',', @array if scalar(@array);
   }
-  $tmp->{CLIN_SIG} =  join ',', @array if scalar(@array);
+  
   # copy to hash
   $hash->{$_} = $tmp->{$_} for keys %$tmp;
   # frequencies used to filter will appear here
@@ -1028,7 +1023,6 @@ my @array = keys(%clin_sigs);
 sub add_colocated_frequency_data {
   my $self = shift;
   my ($vf, $hash, $ex) = @_;
-  $DB::single = 1;
   return $hash unless grep {$self->{$_}} keys %FREQUENCY_KEYS or $self->{max_af};
 
   my @ex_alleles = split('/', $ex->{allele_string});
@@ -1228,7 +1222,6 @@ sub VariationFeatureOverlapAllele_to_output_hash {
 
   # frequency data
   foreach my $ex(@{$vf->{existing} || []}) {
-    $DB::single = 1;
     $self->add_colocated_frequency_data($vf, $hash, $ex);
   }
 
