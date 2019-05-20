@@ -443,9 +443,10 @@ sub get_allele_specific_clin_sigs {
   $hive_dbc->disconnect_if_idle() if defined $hive_dbc;
 
   my $attrib = $self->get_pf_features_by_location($sr, $start, $end);
-
   my $per_allele_hash;
-  $per_allele_hash->{$attrib->{risk_allele}}->{$attrib->{clinvar_clin_sig}} = 1 if defined($attrib->{risk_allele}) ;
+  foreach my $attr(@{$attrib}){
+    $per_allele_hash->{$attr->{risk_allele}}->{$attr->{clinvar_clin_sig}} = 1 if defined($attr->{risk_allele}) ;
+  }
 
   my @array = keys(%$per_allele_hash);
   my $output_string = '';
