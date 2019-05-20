@@ -954,7 +954,9 @@ sub add_colocated_variant_info {
     
     if(defined($ex->{clin_sig_allele}))
     {
-      push @{$tmp->{CLIN_SIG}}, $ex->{clin_sig_allele};
+      my %hash = split /[;:]/, $ex->{clin_sig_allele};
+      my $hash_ref = \%hash;
+      push @{$tmp->{CLIN_SIG}}, $hash_ref->{$this_allele} if defined($hash_ref->{$this_allele});    
       $clin_sig_allele_exists = 1;
     }
   }
