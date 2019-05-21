@@ -389,7 +389,7 @@ sub freqs_from_vcf {
     }
   }
 }
-sub get_pf_features_by_location {
+sub get_phenotype_feature_attribs_by_location {
   my $self = shift;
   my $sr = shift;
   my $start = shift;
@@ -415,7 +415,7 @@ sub get_pf_features_by_location {
 
     my $pfas = $as->get_adaptor('variation', 'variation')->db->get_PhenotypeFeatureAdaptor()->get_PhenotypeFeatureAttribs_by_location($sr, $region_start, $region_end) if defined($as->get_adaptor('variation', 'variation')->db);
 
-    $self->{pfa_cache}->{$sr . ':' . $region_start . '-' . $region_end} = $pfas;;
+    $self->{pfa_cache}->{$sr . ':' . $region_start . '-' . $region_end} = $pfas;
   }
   
   return $self->{pfa_cache}->{$sr . ':' . $region_start . '-' . $region_end}->{$sr . ':'. $start . '-' . $end};
@@ -430,19 +430,7 @@ sub get_allele_specific_clin_sigs {
   my $start = shift;
   my $end = shift;
 
-  # put into a hash so we can lookup by pos
-  my $vep_params = $self->get_vep_params();
-
-  # make sure to include failed variants!
-  $vep_params->{failed} = 1;
-  
-  my $config = Bio::EnsEMBL::VEP::Config->new($vep_params);
-  
-  my $region_size = $self->param('region_size');
-  my $hive_dbc = $self->dbc;
-  $hive_dbc->disconnect_if_idle() if defined $hive_dbc;
-
-  my $attrib = $self->get_pf_features_by_location($sr, $start, $end);
+  my $attrib = $self->get_phenotype_feature_attribs_by_location($sr, $start, $end);
   my $per_allele_hash;
   foreach my $attr(@{$attrib}){
     $per_allele_hash->{$attr->{risk_allele}}->{$attr->{clinvar_clin_sig}} = 1 if defined($attr->{risk_allele}) ;
@@ -456,6 +444,7 @@ sub get_allele_specific_clin_sigs {
     $output_string .= $allele.':' . (join ',', @clinsigarray) . ';' if scalar(@clinsigarray);
   }
   $output_string =~s/ /_/g;
+  $output_string = substr($output_string, 0, -1);
   return $output_string;
 }
 
