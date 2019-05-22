@@ -123,6 +123,7 @@ sub next {
 
   my $pre_buffer = $self->pre_buffer();
   my $buffer = $self->buffer();
+  my %maxs;
 
   if(my $parser = $self->parser) {
 
@@ -131,11 +132,12 @@ sub next {
 
     while(!$max && ($vf = @$pre_buffer ? shift @$pre_buffer : $parser->next)) {
       $max = $self->get_max_from_tree($vf->{chr}, $vf->{start}, $vf->{end});
+      $maxs{$vf->{chr}} = $max;
     }
 
     return $buffer unless $max;
 
-    while($vf && $vf->{start} <= $max) {
+    while($vf && $maxs{$vf->{chr}} && $vf->{start} <= $maxs{$vf->{chr}}) {
       push @$buffer, $vf;
       $vf = $parser->next;
     }
