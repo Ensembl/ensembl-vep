@@ -535,6 +535,25 @@ ok(
 );
 
 
+## test feature overlaps available in output
+my $len_config = $ib->config;
+$len_config->{_params}->{overlaps} = 1;
+$ib = get_runner({
+ input_file => $test_cfg->create_input_file([qw(21 25585733 25585735 DEL 1)]),
+   dir => $test_cfg->{cache_root_dir},
+     fasta => $test_cfg->{fasta},
+     })->get_InputBuffer;
+     $of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({config => $len_config});
+     $ib->buffer->[0]->{transcript_variations} = {};
+
+ok(
+  $of->get_all_lines_by_InputBuffer($ib)->[0] =~ /3\|0.01,deletion/,
+  "SV overlap percent and length available"
+);
+
+
+
+
 ## test getting stuff from input
 ################################
 

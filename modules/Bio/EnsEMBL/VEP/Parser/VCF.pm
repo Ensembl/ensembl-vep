@@ -102,7 +102,7 @@ sub new {
   my $self = $class->SUPER::new(@_);
 
   # add shortcuts to these params
-  $self->add_shortcuts([qw(allow_non_variant gp individual process_ref_homs phased)]);
+  $self->add_shortcuts([qw(allow_non_variant gp individual process_ref_homs phased max_sv_size)]);
 
   return $self;
 }
@@ -402,6 +402,23 @@ sub create_StructuralVariationFeatures {
     $parser->get_IDs,
   );
 
+  ## long and complex SVs cannot be handle
+  ## we have to return something here else we stop reading input, so flag it as not to be processed
+  my $skip ;
+
+  ## we cannot currently handle some SV
+  if($info->{SVTYPE} && $info->{SVTYPE} =~/CPX/ ){
+    my $line =join("\t", @$record);
+    $self->warning_msg("WARNING: variant " . $info->{SVTYPE}. " is of a non-supported type, skipping:\n$line\n");
+    $skip = 1;
+  }
+  ## check against size upperlimit to avoid memory problems
+  my $len = $end - $start;
+  if( $len > $self->{max_sv_size} ){
+    $self->warning_msg("WARNING: variant $ids->[0] on line ".$self->line_number." is too long to annotate: ($len)\n");
+    $skip = 1;
+  }
+
   my $alt = join(",", @$alts);
 
   # work out the end coord
@@ -467,6 +484,8 @@ sub create_StructuralVariationFeatures {
     class_SO_term  => $so_term,
     _line          => $record,
   });
+
+  $svf->{vep_skip} = $skip if defined $skip;;
 
   return $self->post_process_vfs([$svf]);
 }
