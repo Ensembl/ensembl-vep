@@ -152,6 +152,7 @@ sub new {
     allele_number
     show_ref_allele
     use_transcript_ref
+    vcf_string
 
     most_severe
     summary
@@ -305,7 +306,7 @@ sub get_all_output_hashes_by_VariationFeature {
 
   # get the basic initial hash; this basically contains the location and ID
   my $hash = $self->VariationFeature_to_output_hash($vf);
-
+  
   return $self->get_all_VariationFeatureOverlapAllele_output_hashes($vf, $hash);
 }
 
@@ -838,6 +839,25 @@ sub VariationFeature_to_output_hash {
     Uploaded_variation  => $vf->variation_name ne '.' ? $vf->variation_name : ($vf->{original_chr} || $vf->{chr}).'_'.$vf->{start}.'_'.($vf->{allele_string} || $vf->{class_SO_term}),
     Location            => ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start}, $vf->{end}),
   };
+ 
+  my $converted_to_vcf = $vf->to_VCF_record;
+
+  my $alt_allele_vcf = ${$converted_to_vcf}[4];
+
+  # if($self->{vcf_string}){
+  if($alt_allele_vcf =~ /,/){
+    my @list_vcfs;
+    my @alt_splited_list = split(q(,), $alt_allele_vcf);
+
+    foreach my $alt_splited (@alt_splited_list){
+      push(@list_vcfs, $vf->{chr}.'-'.${$converted_to_vcf}[1].'-'.${$converted_to_vcf}[3].'-'.$alt_splited);
+    }
+    $hash->{vcf_string} = \@list_vcfs;
+  }
+  else{
+    $hash->{vcf_string} = $vf->{chr}.'-'.${$converted_to_vcf}[1].'-'.${$converted_to_vcf}[3].'-'.${$converted_to_vcf}[4];
+  }
+  # }
 
   # overlapping SVs
   if($vf->{overlapping_svs}) {
@@ -1146,7 +1166,7 @@ sub _add_custom_annotations_to_hash {
 sub VariationFeatureOverlapAllele_to_output_hash {
   my $self = shift;
   my ($vfoa, $hash, $vf) = @_;
-
+  
   my @ocs = sort {$a->rank <=> $b->rank} @{$vfoa->get_all_OverlapConsequences};
 
   # consequence type(s)
