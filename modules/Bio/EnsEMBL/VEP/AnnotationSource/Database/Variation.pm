@@ -179,11 +179,31 @@ sub get_features_by_regions_uncached {
     $sth->bind_col(1, \$var_id);
     $sth->bind_col($_+2, \$v{$VAR_CACHE_COLS[$_]}) for (0..$#VAR_CACHE_COLS);
 
-    my @vars;
+    my $pfs = $self->get_adaptor('variation', 'phenotypefeature')->get_PhenotypeFeatures_by_location($chr_is_seq_region ? $chr : $sr_cache->{$chr}, $s, $e) if defined($self->get_adaptor('variation', 'phenotypefeature'));
+  
 
+    my @vars;
     while($sth->fetch) {
       my %v_copy = %v;
       $v_copy{allele_string} =~ s/\s+/\_/g;
+      my @pf_matched = grep {$_->{_object_id} eq $v_copy{variation_name}} @{$pfs};
+      my @pfas_by_allele;
+      my %clin_sigs;
+      foreach my $pf(@pf_matched)
+      {
+        my $attrib = $pf->get_all_attributes();
+        push @pfas_by_allele, $attrib if defined($attrib->{risk_allele});
+      }
+      foreach my $pfa(@pfas_by_allele)
+      {
+        if(defined($pfa->{clinvar_clin_sig})){
+          $pfa->{clinvar_clin_sig}=~s/ /_/g;
+          $clin_sigs{$pfa->{risk_allele} . ':' .$pfa->{clinvar_clin_sig}} = 1;
+        }
+      }
+
+      my @array = keys(%clin_sigs);
+      $v_copy{clin_sig_allele} = join ';', @array if scalar(@array);
 
       ## fix for e!94 alleles
       $v_copy{allele_string} =~ s/\/$//g;
