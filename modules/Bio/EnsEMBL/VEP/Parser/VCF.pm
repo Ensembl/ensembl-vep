@@ -485,7 +485,7 @@ sub create_StructuralVariationFeatures {
     _line          => $record,
   });
 
-  $svf->{vep_skip} = $skip if defined $skip;;
+  $svf->{vep_skip} = $skip if defined $skip;
 
   return $self->post_process_vfs([$svf]);
 }
