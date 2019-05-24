@@ -907,13 +907,13 @@ sub add_colocated_variant_info {
   my $self = shift;
   my $vf = shift;
   my $hash = shift;
-
+  
   return unless $vf->{existing} && scalar @{$vf->{existing}};
 
   my $this_allele = $hash->{Allele};
 
   my $tmp = {};
-
+  my $clin_sig_allele_exists = 0;
   # use these to sort variants
   my %prefix_ranks = (
     'rs' => 1, # dbSNP
@@ -944,8 +944,27 @@ sub add_colocated_variant_info {
     # ID
     push @{$hash->{Existing_variation}}, $ex->{variation_name} if $ex->{variation_name};
 
+    # Find allele specific clin_sig data if it exists
+    if(defined($ex->{clin_sig_allele}))
+    {
+      my %cs_hash;
+      my @clin_sig_array = split(';', $ex->{clin_sig_allele});       
+      foreach my $cs(@clin_sig_array){
+        my @cs_split = split(':', $cs);
+        $cs_hash{$cs_split[0]} = '' if !defined($cs_hash{$cs_split[0]});
+        $cs_hash{$cs_split[0]} .= ',' if $cs_hash{$cs_split[0]} ne ''; 
+        $cs_hash{$cs_split[0]} .= $cs_split[1];
+      }
+
+      my $hash_ref = \%cs_hash;
+      push @{$tmp->{CLIN_SIG}}, $hash_ref->{$this_allele} if defined($hash_ref->{$this_allele});    
+      $clin_sig_allele_exists = 1;
+    }
+
+
+
     # clin sig and pubmed?
-    push @{$tmp->{CLIN_SIG}}, split(',', $ex->{clin_sig}) if $ex->{clin_sig};
+    push @{$tmp->{CLIN_SIG}}, split(',', $ex->{clin_sig}) if $ex->{clin_sig} && !$clin_sig_allele_exists;
     push @{$tmp->{PUBMED}}, split(',', $ex->{pubmed}) if $self->{pubmed} && $ex->{pubmed};
 
     # somatic?
