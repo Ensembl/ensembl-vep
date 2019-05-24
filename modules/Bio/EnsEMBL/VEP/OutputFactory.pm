@@ -907,7 +907,7 @@ sub add_colocated_variant_info {
   my $self = shift;
   my $vf = shift;
   my $hash = shift;
-  
+
   return unless $vf->{existing} && scalar @{$vf->{existing}};
 
   my $this_allele = $hash->{Allele};
@@ -925,7 +925,8 @@ sub add_colocated_variant_info {
 
     'co' => 3, # COSMIC
   );
-    my %clin_sigs;
+
+  my %clin_sigs;
   
   foreach my $ex(
     sort {
@@ -969,15 +970,19 @@ sub add_colocated_variant_info {
     push @{$tmp->{CLIN_SIG}}, split(',', $ex->{clin_sig}) if $ex->{clin_sig} && !$clin_sig_allele_exists;
     push @{$tmp->{PUBMED}}, split(',', $ex->{pubmed}) if $self->{pubmed} && $ex->{pubmed};
 
-
     # somatic?
     push @{$tmp->{SOMATIC}}, $ex->{somatic} ? 1 : 0;
 
     # phenotype or disease
-    push @{$tmp->{PHENO}}, $ex->{phenotype_or_disease} ? 1 : 0;
-    
+    push @{$tmp->{PHENO}}, $ex->{phenotype_or_disease} ? 1 : 0;   
   }
-  
+ 
+  # post-process to remove all-0, e.g. SOMATIC
+  foreach my $key(keys %$tmp) {
+    delete $tmp->{$key} unless grep {$_} @{$tmp->{$key}};
+  }
+
+ 
   # copy to hash
   $hash->{$_} = $tmp->{$_} for keys %$tmp;
   # frequencies used to filter will appear here
