@@ -976,35 +976,6 @@ sub add_colocated_variant_info {
     # phenotype or disease
     push @{$tmp->{PHENO}}, $ex->{phenotype_or_disease} ? 1 : 0;
     
-    if(defined($ex->{clin_sig_allele}))
-    {
-      my %hash = split /[;:]/, $ex->{clin_sig_allele};
-      my $hash_ref = \%hash;
-      push @{$tmp->{CLIN_SIG}}, $hash_ref->{$this_allele} if defined($hash_ref->{$this_allele});    
-      $clin_sig_allele_exists = 1;
-    }
-  }
-  unless($clin_sig_allele_exists){
-    my $pfs = $vf->adaptor->db->get_PhenotypeFeatureAdaptor()->get_PhenotypeFeatures_by_location($vf->slice->get_seq_region_id, $vf->start, $vf->end) if defined($vf->adaptor->db);
-    my @pfas_by_allele;
-
-    foreach my $pf(@$pfs)
-    {
-      my $attrib = $pf->get_all_attributes();
-      push @pfas_by_allele, $attrib if defined($attrib->{risk_allele}) && $hash->{Allele} eq $attrib->{risk_allele};
-    }
-    foreach my $pfa(@pfas_by_allele)
-    {
-      $pfa->{clinvar_clin_sig}=~s/ /_/g;
-      $clin_sigs{$pfa->{clinvar_clin_sig}} = 1;
-    }
-
-    my @array = keys(%clin_sigs);
-    # post-process to remove all-0, e.g. SOMATIC
-    foreach my $key(keys %$tmp) {
-      delete $tmp->{$key} unless grep {$_} @{$tmp->{$key}};
-    }
-    $tmp->{CLIN_SIG} =  join ',', @array if scalar(@array);
   }
   
   # copy to hash
