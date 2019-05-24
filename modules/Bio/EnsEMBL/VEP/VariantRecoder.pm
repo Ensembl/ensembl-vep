@@ -67,7 +67,6 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::Runner;
 use Bio::EnsEMBL::VEP::Utils qw(find_in_ref merge_arrays);
 
-
 =head2 new
 
   Arg 1      : hashref $config
@@ -104,7 +103,7 @@ sub new {
     buffer_size
   );
 
-  $config->{fields} ||= 'id,hgvsg,hgvsc,hgvsp,spdi,vcf_string';
+  $config->{fields} ||= 'id,hgvsg,hgvsc,hgvsp,spdi';
 
   my %set_fields = map {$_ => 1} ref($config->{fields}) eq 'ARRAY' ? @{$config->{fields}} : split(',', $config->{fields});
 
@@ -119,7 +118,11 @@ sub new {
 
   # set up/down distance to 0, we only want overlaps
   $config->{distance} = 0;
-  
+ 
+  if($config->{vcf_string}){
+    $config->{fields} = $config->{fields} . ',vcf_string';
+  }
+ 
   my $self = $class->SUPER::new($config);
 
   return $self;

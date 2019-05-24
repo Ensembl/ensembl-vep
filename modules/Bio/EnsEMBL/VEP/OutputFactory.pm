@@ -844,20 +844,21 @@ sub VariationFeature_to_output_hash {
 
   my $alt_allele_vcf = ${$converted_to_vcf}[4];
 
-  # if($self->{vcf_string}){
-  if($alt_allele_vcf =~ /,/){
-    my @list_vcfs;
-    my @alt_splited_list = split(q(,), $alt_allele_vcf);
+  ## gets vcf format if vcf_string flag is on
+  if($self->{vcf_string} || grep(/vcf_string/, @{$self->{_config}->{_params}->{fields}})){
+    if($alt_allele_vcf =~ /,/){
+      my @list_vcfs;
+      my @alt_splited_list = split(q(,), $alt_allele_vcf);
 
-    foreach my $alt_splited (@alt_splited_list){
-      push(@list_vcfs, $vf->{chr}.'-'.${$converted_to_vcf}[1].'-'.${$converted_to_vcf}[3].'-'.$alt_splited);
+      foreach my $alt_splited (@alt_splited_list){
+        push(@list_vcfs, $vf->{chr}.'-'.${$converted_to_vcf}[1].'-'.${$converted_to_vcf}[3].'-'.$alt_splited);
+      }
+      $hash->{vcf_string} = \@list_vcfs;
     }
-    $hash->{vcf_string} = \@list_vcfs;
+    else{
+      $hash->{vcf_string} = $vf->{chr}.'-'.${$converted_to_vcf}[1].'-'.${$converted_to_vcf}[3].'-'.${$converted_to_vcf}[4];
+    }
   }
-  else{
-    $hash->{vcf_string} = $vf->{chr}.'-'.${$converted_to_vcf}[1].'-'.${$converted_to_vcf}[3].'-'.${$converted_to_vcf}[4];
-  }
-  # }
 
   # overlapping SVs
   if($vf->{overlapping_svs}) {
