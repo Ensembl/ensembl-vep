@@ -39,7 +39,7 @@ use Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation;
 use Bio::EnsEMBL::VEP::AnnotationSource::Cache::Variation;
 use Bio::EnsEMBL::Variation::Utils::Sequence qw(trim_sequences get_matched_variant_alleles);
 use Scalar::Util qw(looks_like_number);
-
+use POSIX;
 our $CAN_USE_TABIX_PM;
 
 BEGIN {
@@ -57,7 +57,6 @@ my $gnomad_prefix = 'gnomAD_';
 
 sub run {
   my $self = shift;
-
   my $vep_params = $self->get_vep_params();
 
   # make sure to include failed variants!
@@ -171,7 +170,8 @@ sub _generic_dump_info {
   # var cache cols
   my @cols = (
     @{$as->get_cache_columns()},
-    'pubmed'
+    'pubmed',
+    'clin_sig_allele'
   );
   foreach my $pop(map {@{$_->{prefixed_pops} || $_->{pops}}} @{$self->{freq_vcf} || []}) {
     $pop = uc_gnomad_pop($pop) if ($pop =~ /^$gnomad_prefix/);
@@ -196,7 +196,7 @@ sub get_dumpable_object {
 }
 
 sub dump_obj {
-  my ($self, $obj, $file, $chr) = @_;
+  my ($self, $obj, $file, $chr, $sr) = @_;
 
   open DUMP, "| gzip -9 -c > ".$file or die "ERROR: Could not write to dump file $file\n";
 
@@ -212,7 +212,7 @@ sub dump_obj {
 
   # get freqs from VCFs?
   $self->freqs_from_vcf($obj, $chr) if $self->{freq_vcf};
-
+  
   my $pubmed = $self->pubmed;
 
   foreach my $v(@$obj) {
@@ -228,9 +228,10 @@ sub dump_obj {
       defined($v->{minor_allele_freq}) && $v->{minor_allele_freq} =~ /^[0-9\.]+$/ ? sprintf("%.4f", $v->{minor_allele_freq}) : '',
       $v->{clin_sig} || '',
       $v->{phenotype_or_disease} == 0 ? '' : $v->{phenotype_or_disease},
+      $self->get_allele_specific_clin_sigs($sr, $v->{start}, $v->{end}) || '',
     );
-
-    push @tmp, $pubmed->{$v->{variation_name}} || '';
+  
+  push @tmp, $pubmed->{$v->{variation_name}} || '';
 
     if($self->{freq_vcf}) {
       foreach my $pop(map {@{$_->{prefixed_pops} || $_->{pops}}} @{$self->{freq_vcf}}) {
@@ -388,6 +389,65 @@ sub freqs_from_vcf {
     }
   }
 }
+sub get_phenotype_feature_attribs_by_location {
+  my $self = shift;
+  my $sr = shift;
+  my $start = shift;
+  my $end = shift;
+ 
+  my $region_size = $self->param('region_size');
+
+  my $region_start = floor($start / $region_size) * $region_size;
+  my $region_end = ceil($end / $region_size) * $region_size;
+
+
+  if(!defined($self->{pfa_cache}->{$sr . ':' . $region_start . '-' . $region_end})){
+    my $vep_params = $self->get_vep_params();
+
+    # make sure to include failed variants!
+    $vep_params->{failed} = 1;
+  
+    my $config = Bio::EnsEMBL::VEP::Config->new($vep_params);  
+    my $as = Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation->new({
+      config => $config,
+      cache_region_size => $region_size,
+    });
+
+    my $pfas = $as->get_adaptor('variation', 'variation')->db->get_PhenotypeFeatureAdaptor()->get_PhenotypeFeatureAttribs_by_location($sr, $region_start, $region_end) if defined($as->get_adaptor('variation', 'variation')->db);
+
+    $self->{pfa_cache}->{$sr . ':' . $region_start . '-' . $region_end} = $pfas;
+  }
+  
+  return $self->{pfa_cache}->{$sr . ':' . $region_start . '-' . $region_end}->{$sr . ':'. $start . '-' . $end};
+}
+
+
+
+
+sub get_allele_specific_clin_sigs {
+  my $self = shift;
+  my $sr = shift;
+  my $start = shift;
+  my $end = shift;
+
+  my $attrib = $self->get_phenotype_feature_attribs_by_location($sr, $start, $end);
+  my $per_allele_hash;
+  foreach my $attr(@{$attrib}){
+    $per_allele_hash->{$attr->{risk_allele}}->{$attr->{clinvar_clin_sig}} = 1 if defined($attr->{risk_allele}) ;
+  }
+
+  my @array = keys(%$per_allele_hash);
+  my $output_string = '';
+  foreach my $allele(@array)
+  {
+    my @clinsigarray = keys(%{$per_allele_hash->{$allele}});
+    $output_string .= $allele.':' . (join ',', @clinsigarray) . ';' if scalar(@clinsigarray);
+  }
+  $output_string =~s/ /_/g;
+  $output_string = substr($output_string, 0, -1);
+  return $output_string;
+}
+
 
 # r2.1 of gnomad has changed the population names from upper to lower case.
 # In order to keep the gnomad allele frequency key the same we need to convert

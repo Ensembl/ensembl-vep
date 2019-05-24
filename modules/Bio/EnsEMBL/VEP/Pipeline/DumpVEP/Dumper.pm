@@ -129,7 +129,7 @@ sub dump_chrs {
       $region->{start},
       $region->{end}
     );
-
+    
     my $slice = $sa->fetch_by_seq_region_id($sr);
 
     my $s = int($slice_start / $region_size);
@@ -148,7 +148,7 @@ sub dump_chrs {
         $first = 0;
       }
 
-      $self->dump_obj($obj, $file, $chr);
+      $self->dump_obj($obj, $file, $chr, $sr);
 
       $self->post_dump($obj, $db_as, $chr);
 

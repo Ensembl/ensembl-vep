@@ -913,6 +913,7 @@ sub add_colocated_variant_info {
   my $this_allele = $hash->{Allele};
 
   my $tmp = {};
+
   my $clin_sig_allele_exists = 0;
   # use these to sort variants
   my %prefix_ranks = (
@@ -924,7 +925,8 @@ sub add_colocated_variant_info {
 
     'co' => 3, # COSMIC
   );
-
+    my %clin_sigs;
+  
   foreach my $ex(
     sort {
       ($a->{somatic} || 0) <=> ($b->{somatic} || 0) ||
@@ -967,21 +969,46 @@ sub add_colocated_variant_info {
     push @{$tmp->{CLIN_SIG}}, split(',', $ex->{clin_sig}) if $ex->{clin_sig} && !$clin_sig_allele_exists;
     push @{$tmp->{PUBMED}}, split(',', $ex->{pubmed}) if $self->{pubmed} && $ex->{pubmed};
 
+
     # somatic?
     push @{$tmp->{SOMATIC}}, $ex->{somatic} ? 1 : 0;
 
     # phenotype or disease
     push @{$tmp->{PHENO}}, $ex->{phenotype_or_disease} ? 1 : 0;
+    
+    if(defined($ex->{clin_sig_allele}))
+    {
+      my %hash = split /[;:]/, $ex->{clin_sig_allele};
+      my $hash_ref = \%hash;
+      push @{$tmp->{CLIN_SIG}}, $hash_ref->{$this_allele} if defined($hash_ref->{$this_allele});    
+      $clin_sig_allele_exists = 1;
+    }
   }
+  unless($clin_sig_allele_exists){
+    my $pfs = $vf->adaptor->db->get_PhenotypeFeatureAdaptor()->get_PhenotypeFeatures_by_location($vf->slice->get_seq_region_id, $vf->start, $vf->end) if defined($vf->adaptor->db);
+    my @pfas_by_allele;
 
-  # post-process to remove all-0, e.g. SOMATIC
-  foreach my $key(keys %$tmp) {
-    delete $tmp->{$key} unless grep {$_} @{$tmp->{$key}};
+    foreach my $pf(@$pfs)
+    {
+      my $attrib = $pf->get_all_attributes();
+      push @pfas_by_allele, $attrib if defined($attrib->{risk_allele}) && $hash->{Allele} eq $attrib->{risk_allele};
+    }
+    foreach my $pfa(@pfas_by_allele)
+    {
+      $pfa->{clinvar_clin_sig}=~s/ /_/g;
+      $clin_sigs{$pfa->{clinvar_clin_sig}} = 1;
+    }
+
+    my @array = keys(%clin_sigs);
+    # post-process to remove all-0, e.g. SOMATIC
+    foreach my $key(keys %$tmp) {
+      delete $tmp->{$key} unless grep {$_} @{$tmp->{$key}};
+    }
+    $tmp->{CLIN_SIG} =  join ',', @array if scalar(@array);
   }
-
+  
   # copy to hash
   $hash->{$_} = $tmp->{$_} for keys %$tmp;
-
   # frequencies used to filter will appear here
   if($vf->{_freq_check_freqs}) {
     my @freqs;
@@ -1004,6 +1031,7 @@ sub add_colocated_variant_info {
 }
 
 
+
 =head2 add_colocated_frequency_data
 
   Arg 1      : Bio::EnsEMBL::Variation::VariationFeature $vf
@@ -1021,7 +1049,6 @@ sub add_colocated_variant_info {
 sub add_colocated_frequency_data {
   my $self = shift;
   my ($vf, $hash, $ex) = @_;
-
   return $hash unless grep {$self->{$_}} keys %FREQUENCY_KEYS or $self->{max_af};
 
   my @ex_alleles = split('/', $ex->{allele_string});
