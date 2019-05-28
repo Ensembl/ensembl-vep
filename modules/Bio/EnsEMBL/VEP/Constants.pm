@@ -119,6 +119,7 @@ our @FLAG_FIELDS = (
   { flag => 'check_existing',  fields => ['CLIN_SIG','SOMATIC','PHENO'] },
   { flag => 'pubmed',          fields => ['PUBMED'] },
   { flag => 'check_svs',       fields => ['SV'] },
+  { flag => 'dont_skip',       fields => ['CHECK_REF'] },
 
   # regulatory
   { flag => 'regulatory',      fields => ['BIOTYPE','MOTIF_NAME','MOTIF_POS','HIGH_INF_POS','MOTIF_SCORE_CHANGE'] },
@@ -225,7 +226,8 @@ our %FIELD_DESCRIPTIONS = (
   'HGVS_OFFSET'        => 'Indicates by how many bases the HGVS notations for this variant have been shifted',
   'AMBIGUITY'          => 'Allele ambiguity code',
   'OverlapBP'          => 'Number of base pairs overlapping with the corresponding structural variation feature',
-  'OverlapPC'          => 'Percentage of corresponding structural variation feature overlapped by the given input'
+  'OverlapPC'          => 'Percentage of corresponding structural variation feature overlapped by the given input',
+  'CHECK_REF'	       => 'Reports variants where the input reference does not match the expected reference'
 );
 
 our @DEFAULT_OUTPUT_COLS = qw(
