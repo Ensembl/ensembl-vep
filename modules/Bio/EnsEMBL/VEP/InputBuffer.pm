@@ -197,6 +197,9 @@ sub next {
   if(my $parser = $self->parser) {
     while(@$buffer < $buffer_size && (my $vf = $parser->next)) {
 
+      # skip long and unsupported types of SV; doing this here to avoid stopping looping
+      next if $vf->{vep_skip};
+
       # new chromosome
       if($prev_chr && $vf->{chr} ne $prev_chr) {
 

@@ -114,6 +114,7 @@ SKIP: {
     'gp' => undef,
     'individual' => undef,
     'phased' => undef,
+     'max_sv_size' => 10000000,
   }, 'Bio::EnsEMBL::VEP::Haplo::Parser::VCF' ), 'get_Parser');
 
   my $t = $runner->get_TranscriptTree;
