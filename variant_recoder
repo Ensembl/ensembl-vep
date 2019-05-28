@@ -21,7 +21,6 @@ use lib $RealBin;
 use lib $RealBin.'/modules';
 use Bio::EnsEMBL::VEP::VariantRecoder;
 use Bio::EnsEMBL::VEP::Utils qw(get_version_string);
-use Data::Dumper;
 
 BEGIN {
   unless(eval q{require JSON;}) {
