@@ -483,6 +483,64 @@ ok($tmp =~ /VCF line.+looks incomplete/, 'StructuralVariationFeature del without
 
 open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
+## test max SV length
+my $lvf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1, max_sv_size => 1000, warning_file => 'STDERR'}),
+  file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DUP> . . SVLEN=10001;CIPOS=-3,2;CIEND=-4,5)]),
+  valid_chromosomes => [21]
+})->next();
+delete($lvf->{adaptor}); delete($lvf->{_line});
+
+is_deeply($lvf, bless( {
+  'outer_end' => 25597764,
+  'chr' => '21',
+  'inner_end' => 25597755,
+  'outer_start' => 25587756,
+  'end' => 25597759,
+  'vep_skip' => 1,
+  'seq_region_end' => 25597759,
+  'inner_start' => 25587761,
+  'strand' => 1,
+  'class_SO_term' => 'duplication',
+  'variation_name' => 'sv_dup',
+  'start' => 25587759,
+  'seq_region_start' => 25587759,
+}, 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature - longer than specified maximum');
+
+## test complex SV
+no warnings 'once';
+open(SAVE, ">&STDERR") or die "Can't save STDERR\n";
+close STDERR;
+open STDERR, '>', \$tmp;
+
+my $cvf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1, max_sv_size => 1000, warning_file => 'STDERR'}),
+  file => $test_cfg->create_input_file([qw(1 774569 gnomAD_v2_CPX_1_1 N	<CPX> 1 PASS END=828435;SVTYPE=CPX;CHR2=1;SVLEN=53959)]),
+  valid_chromosomes => [1]
+})->next();
+delete($cvf->{adaptor}); delete($cvf->{_line});
+
+is_deeply($cvf, bless( {
+                 'outer_end' => '828435',
+                 'chr' => '1',
+                 'inner_end' => '828435',
+                 'outer_start' => '774570',
+                 'end' => 828435,
+                 'vep_skip' => 1,
+                 'seq_region_start' => 774570,
+                 'inner_start' => '774570',
+                 'strand' => 1,
+                 'seq_region_end' => 828435,
+                 'class_SO_term' => 'CPX',
+                 'variation_name' => 'gnomAD_v2_CPX_1_1',
+                 'start' => 774570
+               },
+                'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature - CPX skipped');
+
+
+ok($tmp =~ /variant CPX is of a non-supported type/, 'StructuralVariationFeature - skip CPX warning');
+
+open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
 
 ## OTHER TESTS
