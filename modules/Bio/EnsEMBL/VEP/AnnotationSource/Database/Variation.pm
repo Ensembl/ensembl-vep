@@ -187,18 +187,10 @@ sub get_features_by_regions_uncached {
     while($sth->fetch) {
       my %v_copy = %v;
       $v_copy{allele_string} =~ s/\s+/\_/g;
-      my @pf_matched = grep {$_->{_object_id} eq $v_copy{variation_name}} @{$pfs};
+      my $test = $attribs->{$sr_cache->{$chr} . ':' . $v_copy{start} . '-' . $v_copy{end}};
       my @pfas_by_allele;
       my %clin_sigs;
-      foreach my $pf(@pf_matched)
-      {
-        my $attrib = $attribs->{$sr_cache->{$chr} . ':' . $v{start} . '-' . $v{end}}; 
- 	foreach my $attr(@{$attrib})
-	{
-	  push @pfas_by_allele, $attr if (defined($attr->{risk_allele}) && ($attr->{pf_id} eq $pf->{dbID}));
-	}
-      }
-      foreach my $pfa(@pfas_by_allele)
+      foreach my $pfa(@{$test})
       {
 	if(defined($pfa->{clinvar_clin_sig}))
 	{
@@ -206,7 +198,6 @@ sub get_features_by_regions_uncached {
           $clin_sigs{$pfa->{risk_allele} . ':' .$pfa->{clinvar_clin_sig}} = 1;
         }
       }
-
       my @array = keys(%clin_sigs);
       $v_copy{clin_sig_allele} = join ';', @array if scalar(@array);
 

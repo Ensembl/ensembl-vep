@@ -960,11 +960,9 @@ sub add_colocated_variant_info {
       }
 
       my $hash_ref = \%cs_hash;
-      push @{$tmp->{CLIN_SIG}}, $hash_ref->{$this_allele} if defined($hash_ref->{$this_allele});    
+      $clin_sigs{$hash_ref->{$this_allele}} = 1 if defined($hash_ref->{$this_allele});
       $clin_sig_allele_exists = 1;
     }
-
-
 
     # clin sig and pubmed?
     push @{$tmp->{CLIN_SIG}}, split(',', $ex->{clin_sig}) if $ex->{clin_sig} && !$clin_sig_allele_exists;
@@ -976,12 +974,14 @@ sub add_colocated_variant_info {
     # phenotype or disease
     push @{$tmp->{PHENO}}, $ex->{phenotype_or_disease} ? 1 : 0;   
   }
- 
+
   # post-process to remove all-0, e.g. SOMATIC
   foreach my $key(keys %$tmp) {
     delete $tmp->{$key} unless grep {$_} @{$tmp->{$key}};
   }
-
+  
+  my @keys = keys(%clin_sigs);
+  $tmp->{CLIN_SIG} = join(';', @keys) if scalar(@keys);
  
   # copy to hash
   $hash->{$_} = $tmp->{$_} for keys %$tmp;
