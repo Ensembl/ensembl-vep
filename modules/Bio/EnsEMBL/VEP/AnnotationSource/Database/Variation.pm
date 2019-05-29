@@ -178,9 +178,10 @@ sub get_features_by_regions_uncached {
     my ($var_id, %vars_by_id);
     $sth->bind_col(1, \$var_id);
     $sth->bind_col($_+2, \$v{$VAR_CACHE_COLS[$_]}) for (0..$#VAR_CACHE_COLS);
-
-    my $pfs = $self->get_adaptor('variation', 'phenotypefeature')->get_PhenotypeFeatures_by_location($chr_is_seq_region ? $chr : $sr_cache->{$chr}, $s, $e) if defined($self->get_adaptor('variation', 'phenotypefeature'));
-  
+    
+    my $adaptor = $self->get_adaptor('variation', 'phenotypefeature');
+    my $pfs = $adaptor->get_PhenotypeFeatures_by_location($chr_is_seq_region ? $chr : $sr_cache->{$chr}, $s, $e, 32) if defined($adaptor); # 32 is the sourceID for Clinvar PFs
+    my $attribs = $adaptor->get_PhenotypeFeatureAttribs_by_location($sr_cache->{$chr}, $s, $e) if defined($adaptor);
 
     my @vars;
     while($sth->fetch) {
@@ -191,12 +192,16 @@ sub get_features_by_regions_uncached {
       my %clin_sigs;
       foreach my $pf(@pf_matched)
       {
-        my $attrib = $pf->get_all_attributes();
-        push @pfas_by_allele, $attrib if defined($attrib->{risk_allele});
+        my $attrib = $attribs->{$sr_cache->{$chr} . ':' . $v{start} . '-' . $v{end}}; 
+ 	foreach my $attr(@{$attrib})
+	{
+	  push @pfas_by_allele, $attr if (defined($attr->{risk_allele}) && ($attr->{pf_id} eq $pf->{dbID}));
+	}
       }
       foreach my $pfa(@pfas_by_allele)
       {
-        if(defined($pfa->{clinvar_clin_sig})){
+	if(defined($pfa->{clinvar_clin_sig}))
+	{
           $pfa->{clinvar_clin_sig}=~s/ /_/g;
           $clin_sigs{$pfa->{risk_allele} . ':' .$pfa->{clinvar_clin_sig}} = 1;
         }
