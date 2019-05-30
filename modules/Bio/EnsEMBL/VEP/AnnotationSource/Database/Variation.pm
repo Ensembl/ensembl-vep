@@ -191,7 +191,7 @@ sub get_features_by_regions_uncached {
       my %clin_sigs;
       foreach my $pfa(@{$v_clinsigs})
       {
-	if(defined($pfa->{clinvar_clin_sig}))
+	if(defined($pfa->{clinvar_clin_sig}) && $v_copy{variation_name} eq $pfa->{id})
 	{
           $pfa->{clinvar_clin_sig}=~s/ /_/g;
           $clin_sigs{$pfa->{risk_allele} . ':' .$pfa->{clinvar_clin_sig}} = 1;
