@@ -126,18 +126,19 @@ sub next {
 
   if(my $parser = $self->parser) {
     my $max = 0;
-    my $max_chr;
+    my $current_chr;
     my $vf;
 
+    # Setup new buffer max
     while(!$max && ($vf = @$pre_buffer ? shift @$pre_buffer : $parser->next)) {
       $max = $self->get_max_from_tree($vf->{chr}, $vf->{start}, $vf->{end});
-      $max_chr = $vf->{chr};
+      $current_chr = $vf->{chr};
     }
 
     return $buffer unless $max;
 
     # Continue to add VF to buffer until VF start > max or VF on different chromosome
-    while($vf && $vf->{start} <= $max && $vf->{chr} == $max_chr) {
+    while($vf && $vf->{start} <= $max && $vf->{chr} == $current_chr) {
       push @$buffer, $vf;
       $vf = $parser->next;
     }
@@ -208,3 +209,4 @@ sub transcript_tree {
 }
 
 1;
+
