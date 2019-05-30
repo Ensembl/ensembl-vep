@@ -196,7 +196,7 @@ sub get_dumpable_object {
 }
 
 sub dump_obj {
-  my ($self, $obj, $file, $chr, $sr) = @_;
+  my ($self, $obj, $file, $chr) = @_;
 
   open DUMP, "| gzip -9 -c > ".$file or die "ERROR: Could not write to dump file $file\n";
 
