@@ -59,6 +59,7 @@ our @EXPORT_OK = qw(
   @FLAG_FIELDS
   %FIELD_DESCRIPTIONS
   @DEFAULT_OUTPUT_COLS
+  $MAX_NOT_ORDERED_VARIANTS
 );
 
 # contains an ordered map between command line flags and output columns
@@ -308,5 +309,7 @@ our %COLOUR_KEYS = (
     'regulatory_region_amplification'   => 'brown',
   },
 );
+
+our $MAX_NOT_ORDERED_VARIANTS = 100;
 
 1;

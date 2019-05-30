@@ -36,6 +36,7 @@ GetOptions(
   'format=s',                # input file format
   'output_format=s',         # output file format
   'delimiter=s',             # delimiter between fields in input
+  'no_check_variants_order', # skip check about the variants ordering within a region
   
   # DB options
   'species|s=s',             # species e.g. human, homo_sapiens
