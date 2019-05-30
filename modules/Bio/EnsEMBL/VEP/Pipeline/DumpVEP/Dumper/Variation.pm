@@ -422,33 +422,6 @@ sub get_phenotype_feature_attribs_by_location {
 }
 
 
-
-
-sub get_allele_specific_clin_sigs {
-  my $self = shift;
-  my $sr = shift;
-  my $start = shift;
-  my $end = shift;
-
-  my $attrib = $self->get_phenotype_feature_attribs_by_location($sr, $start, $end);
-  my $per_allele_hash;
-  foreach my $attr(@{$attrib}){
-    $per_allele_hash->{$attr->{risk_allele}}->{$attr->{clinvar_clin_sig}} = 1 if defined($attr->{risk_allele}) ;
-  }
-
-  my @array = keys(%$per_allele_hash);
-  my $output_string = '';
-  foreach my $allele(@array)
-  {
-    my @clinsigarray = keys(%{$per_allele_hash->{$allele}});
-    $output_string .= $allele.':' . (join ',', @clinsigarray) . ';' if scalar(@clinsigarray);
-  }
-  $output_string =~s/ /_/g;
-  $output_string = substr($output_string, 0, -1);
-  return $output_string;
-}
-
-
 # r2.1 of gnomad has changed the population names from upper to lower case.
 # In order to keep the gnomad allele frequency key the same we need to convert
 # to upper case population names 
