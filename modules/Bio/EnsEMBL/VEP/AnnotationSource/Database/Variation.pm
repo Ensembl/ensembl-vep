@@ -180,13 +180,13 @@ sub get_features_by_regions_uncached {
     $sth->bind_col($_+2, \$v{$VAR_CACHE_COLS[$_]}) for (0..$#VAR_CACHE_COLS);
     
     my $adaptor = $self->get_adaptor('variation', 'phenotypefeature');
-    my $attribs = $adaptor->get_clinsig_alleles_by_location($sr_cache->{$chr}, $s, $e) if defined($adaptor);
+    my $attribs = $adaptor->get_clinsig_alleles_by_location($chr_is_seq_region ? $chr : $sr_cache->{$chr}, $s, $e) if defined($adaptor);
 
     my @vars;
     while($sth->fetch) {
       my %v_copy = %v;
       $v_copy{allele_string} =~ s/\s+/\_/g;
-      my $v_clinsigs = $attribs->{$sr_cache->{$chr} . ':' . $v_copy{start} . '-' . $v_copy{end}};
+      my $v_clinsigs = $attribs->{($chr_is_seq_region ? $chr : $sr_cache->{$chr}) . ':' . $v_copy{start} . '-' . $v_copy{end}};
       my @pfas_by_allele;
       my %clin_sigs;
       foreach my $pfa(@{$v_clinsigs})

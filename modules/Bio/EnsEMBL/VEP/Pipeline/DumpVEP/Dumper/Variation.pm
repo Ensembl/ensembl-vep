@@ -228,10 +228,10 @@ sub dump_obj {
       defined($v->{minor_allele_freq}) && $v->{minor_allele_freq} =~ /^[0-9\.]+$/ ? sprintf("%.4f", $v->{minor_allele_freq}) : '',
       $v->{clin_sig} || '',
       $v->{phenotype_or_disease} == 0 ? '' : $v->{phenotype_or_disease},
-      $self->get_allele_specific_clin_sigs($sr, $v->{start}, $v->{end}) || '',
+      $v->{clin_sig_allele} || '',
     );
   
-  push @tmp, $pubmed->{$v->{variation_name}} || '';
+    push @tmp, $pubmed->{$v->{variation_name}} || '';
 
     if($self->{freq_vcf}) {
       foreach my $pop(map {@{$_->{prefixed_pops} || $_->{pops}}} @{$self->{freq_vcf}}) {
@@ -413,7 +413,7 @@ sub get_phenotype_feature_attribs_by_location {
       cache_region_size => $region_size,
     });
 
-    my $pfas = $as->get_adaptor('variation', 'variation')->db->get_PhenotypeFeatureAdaptor()->get_PhenotypeFeatureAttribs_by_location($sr, $region_start, $region_end) if defined($as->get_adaptor('variation', 'variation')->db);
+    my $pfas = $as->get_adaptor('variation', 'phenotypefeature')->get_clinsig_alleles_by_location($sr, $region_start, $region_end) if defined($as->get_adaptor('variation', 'variation')->db);
 
     $self->{pfa_cache}->{$sr . ':' . $region_start . '-' . $region_end} = $pfas;
   }
