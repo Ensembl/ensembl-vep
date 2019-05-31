@@ -389,38 +389,6 @@ sub freqs_from_vcf {
     }
   }
 }
-sub get_phenotype_feature_attribs_by_location {
-  my $self = shift;
-  my $sr = shift;
-  my $start = shift;
-  my $end = shift;
- 
-  my $region_size = $self->param('region_size');
-
-  my $region_start = floor($start / $region_size) * $region_size;
-  my $region_end = ceil($end / $region_size) * $region_size;
-
-
-  if(!defined($self->{pfa_cache}->{$sr . ':' . $region_start . '-' . $region_end})){
-    my $vep_params = $self->get_vep_params();
-
-    # make sure to include failed variants!
-    $vep_params->{failed} = 1;
-  
-    my $config = Bio::EnsEMBL::VEP::Config->new($vep_params);  
-    my $as = Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation->new({
-      config => $config,
-      cache_region_size => $region_size,
-    });
-
-    my $pfas = $as->get_adaptor('variation', 'phenotypefeature')->get_clinsig_alleles_by_location($sr, $region_start, $region_end) if defined($as->get_adaptor('variation', 'variation')->db);
-
-    $self->{pfa_cache}->{$sr . ':' . $region_start . '-' . $region_end} = $pfas;
-  }
-  
-  return $self->{pfa_cache}->{$sr . ':' . $region_start . '-' . $region_end}->{$sr . ':'. $start . '-' . $end};
-}
-
 
 # r2.1 of gnomad has changed the population names from upper to lower case.
 # In order to keep the gnomad allele frequency key the same we need to convert

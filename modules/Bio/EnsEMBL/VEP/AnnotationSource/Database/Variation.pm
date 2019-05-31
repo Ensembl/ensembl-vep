@@ -180,7 +180,8 @@ sub get_features_by_regions_uncached {
     $sth->bind_col($_+2, \$v{$VAR_CACHE_COLS[$_]}) for (0..$#VAR_CACHE_COLS);
     
     my $adaptor = $self->get_adaptor('variation', 'phenotypefeature');
-    my $attribs = $adaptor->get_clinsig_alleles_by_location($chr_is_seq_region ? $chr : $sr_cache->{$chr}, $s, $e) if defined($adaptor);
+    my $source_id = $self->clinvar_source_id_cache;
+    my $attribs = $adaptor->get_clinsig_alleles_by_location($chr_is_seq_region ? $chr : $sr_cache->{$chr}, $s, $e, $source_id) if defined($adaptor);
 
     my @vars;
     while($sth->fetch) {
@@ -250,6 +251,42 @@ sub seq_region_cache {
 
   return $self->{seq_region_cache};
 }
+
+=head2 clinvar_source_id_cache
+
+  Example    : $id = $as->clinvar_source_id_cache()
+  Description: Gets the id for the database's
+               internal source_id.
+  Returntype : scalar
+  Exceptions : none
+  Caller     : get_features_by_regions_uncached()
+  Status     : Stable
+
+=cut
+
+sub clinvar_source_id_cache {
+  my $self = shift;
+
+  if(!exists($self->{clinvar_source_id_cache})) {
+    my ($id);
+
+    my $sth = $self->var_dbc->prepare(qq{
+      select source_id from source where name = 'ClinVar'
+    });
+
+    $sth->execute();
+    $sth->bind_columns(\$id);
+    $self->{clinvar_source_id_cache} = $id  while $sth->fetch();
+    $sth->finish;
+
+  }
+
+  return $self->{clinvar_source_id_cache};
+}
+
+
+
+
 
 
 =head2 have_pubmed

@@ -171,6 +171,7 @@ sub new {
     af_gnomad
     max_af
     pubmed
+    clin_sig_allele
 
     numbers
     domains
@@ -948,7 +949,7 @@ sub add_colocated_variant_info {
     push @{$hash->{Existing_variation}}, $ex->{variation_name} if $ex->{variation_name};
 
     # Find allele specific clin_sig data if it exists
-    if(defined($ex->{clin_sig_allele}))
+    if(defined($ex->{clin_sig_allele}) && $self->{clin_sig_allele} )
     {
       my %cs_hash;
       my @clin_sig_array = split(';', $ex->{clin_sig_allele});       
@@ -981,7 +982,7 @@ sub add_colocated_variant_info {
   }
   
   my @keys = keys(%clin_sigs);
-  $tmp->{CLIN_SIG} = join(';', @keys) if scalar(@keys);
+  $tmp->{CLIN_SIG} = join(';', @keys) if scalar(@keys) && $self->{clin_sig_allele};
  
   # copy to hash
   $hash->{$_} = $tmp->{$_} for keys %$tmp;
