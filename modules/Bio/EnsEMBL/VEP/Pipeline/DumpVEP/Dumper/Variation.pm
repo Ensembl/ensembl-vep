@@ -39,7 +39,6 @@ use Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation;
 use Bio::EnsEMBL::VEP::AnnotationSource::Cache::Variation;
 use Bio::EnsEMBL::Variation::Utils::Sequence qw(trim_sequences get_matched_variant_alleles);
 use Scalar::Util qw(looks_like_number);
-use POSIX;
 our $CAN_USE_TABIX_PM;
 
 BEGIN {
