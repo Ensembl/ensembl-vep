@@ -178,12 +178,28 @@ sub get_features_by_regions_uncached {
     my ($var_id, %vars_by_id);
     $sth->bind_col(1, \$var_id);
     $sth->bind_col($_+2, \$v{$VAR_CACHE_COLS[$_]}) for (0..$#VAR_CACHE_COLS);
+    
+    my $adaptor = $self->get_adaptor('variation', 'phenotypefeature');
+    my $source_id = $self->clinvar_source_id_cache;
+    my $attribs = $adaptor->get_clinsig_alleles_by_location($chr_is_seq_region ? $chr : $sr_cache->{$chr}, $s, $e, $source_id) if defined($adaptor) && defined($source_id);
 
     my @vars;
-
     while($sth->fetch) {
       my %v_copy = %v;
       $v_copy{allele_string} =~ s/\s+/\_/g;
+      my $v_clinsigs = $attribs->{($chr_is_seq_region ? $chr : $sr_cache->{$chr}) . ':' . $v_copy{start} . '-' . $v_copy{end}};
+      my @pfas_by_allele;
+      my %clin_sigs;
+      foreach my $pfa(@{$v_clinsigs})
+      {
+	if(defined($pfa->{clinvar_clin_sig}) && $v_copy{variation_name} eq $pfa->{id})
+	{
+          $pfa->{clinvar_clin_sig}=~s/ /_/g;
+          $clin_sigs{$pfa->{risk_allele} . ':' .$pfa->{clinvar_clin_sig}} = 1;
+        }
+      }
+      my @array = keys(%clin_sigs);
+      $v_copy{clin_sig_allele} = join ';', @array if scalar(@array);
 
       ## fix for e!94 alleles
       $v_copy{allele_string} =~ s/\/$//g;
@@ -235,6 +251,42 @@ sub seq_region_cache {
 
   return $self->{seq_region_cache};
 }
+
+=head2 clinvar_source_id_cache
+
+  Example    : $id = $as->clinvar_source_id_cache()
+  Description: Gets the id for the database's
+               internal source_id.
+  Returntype : scalar
+  Exceptions : none
+  Caller     : get_features_by_regions_uncached()
+  Status     : Stable
+
+=cut
+
+sub clinvar_source_id_cache {
+  my $self = shift;
+
+  if(!exists($self->{clinvar_source_id_cache})) {
+    my ($id);
+
+    my $sth = $self->var_dbc->prepare(qq{
+      select source_id from source where name = 'ClinVar'
+    });
+
+    $sth->execute();
+    $sth->bind_columns(\$id);
+    $self->{clinvar_source_id_cache} = $id  while $sth->fetch();
+    $sth->finish;
+
+  }
+
+  return $self->{clinvar_source_id_cache};
+}
+
+
+
+
 
 
 =head2 have_pubmed
