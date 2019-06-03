@@ -845,7 +845,7 @@ sub VariationFeature_to_output_hash {
   my $alt_allele_vcf = ${$converted_to_vcf}[4];
 
   ## gets vcf format if vcf_string flag is on
-  if($self->{vcf_string} || grep(/vcf_string/, @{$self->{_config}->{_params}->{fields}})){
+  if($self->{vcf_string} || (defined($self->{_config}->{_params}->{fields}) && grep(/vcf_string/, @{$self->{_config}->{_params}->{fields}}))){
     if($alt_allele_vcf =~ /,/){
       my @list_vcfs;
       my @alt_splited_list = split(q(,), $alt_allele_vcf);
@@ -2173,7 +2173,7 @@ sub get_custom_headers {
 
 sub flag_fields {
   my $self = shift;
-  
+ 
   # get all fields
   my @tmp = (
     map {@{$_->{fields}}}
