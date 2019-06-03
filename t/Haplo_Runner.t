@@ -134,6 +134,7 @@ SKIP: {
     'parser' => $runner->get_Parser,
     'buffer_size' => $runner->param('buffer_size'),
     'minimal' => undef,
+    'max_not_ordered_variants' => 100,
     'transcript_tree' => $runner->get_TranscriptTree,
   }, 'Bio::EnsEMBL::Haplo::VEP::InputBuffer' ), 'get_InputBuffer');
 
