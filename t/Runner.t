@@ -216,11 +216,8 @@ is_deeply($runner->get_OutputFactory, bless( {
   'cell_type' => undef,
   'mirna' => undef,
   'ambiguity' => undef,
-<<<<<<< HEAD
   'vcf_string' => undef,
-=======
   'clin_sig_allele' => undef,
->>>>>>> 8a2954317bd1732192bdb20106d5d57f9d51661c
 }, 'Bio::EnsEMBL::VEP::OutputFactory::VEP_output' ), 'get_OutputFactory');
 
 
