@@ -128,6 +128,7 @@ is_deeply($runner->get_InputBuffer, bless({
   }, 'Bio::EnsEMBL::VEP::Parser::VEP_input' ),
   'buffer_size' => $runner->param('buffer_size'),
   'minimal' => undef,
+  'max_not_ordered_variants' => 100
 }, 'Bio::EnsEMBL::VEP::InputBuffer' ), 'get_InputBuffer');
 
 my $info = $runner->get_output_header_info;
@@ -216,6 +217,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'cell_type' => undef,
   'mirna' => undef,
   'ambiguity' => undef,
+  'clin_sig_allele' => undef,
 }, 'Bio::EnsEMBL::VEP::OutputFactory::VEP_output' ), 'get_OutputFactory');
 
 

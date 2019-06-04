@@ -36,6 +36,7 @@ GetOptions(
   'format=s',                # input file format
   'output_format=s',         # output file format
   'delimiter=s',             # delimiter between fields in input
+  'no_check_variants_order', # skip check about the variants ordering within a region
   
   # DB options
   'species|s=s',             # species e.g. human, homo_sapiens
@@ -100,7 +101,10 @@ GetOptions(
   'dont_skip',               # don't skip vars that fail validation
   'nearest=s',               # get nearest transcript, gene or symbol (for gene)
   'distance=s',              # set up/downstream distance
-  
+  'clin_sig_allele',         # use allele specific clinical significance data where it exists
+  'overlaps',                # report length and percent of a transcript or regulatory feature overlaped with a SV
+  'max_sv_size=i',             # modify the size of structural variant to be handled (limited by default to reduce memory requirements)
+
   # verbosity options
   'verbose|v',               # print out a bit more info while running
   'quiet|q',                 # print nothing to STDOUT (unless using -o stdout)
@@ -163,7 +167,7 @@ GetOptions(
   'show_ref_allele',         # indicate reference allele
   'no_escape',               # don't percent-escape HGVS strings
   'ambiguity',               # Add allele ambiguity code
-  
+
   # cache stuff
   'database',                # must specify this to use DB now
   'cache',                   # use cache

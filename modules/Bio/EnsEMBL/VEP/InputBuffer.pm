@@ -72,6 +72,7 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
 use Bio::EnsEMBL::Variation::Utils::Sequence qw(trim_sequences);
 
+
 our $HASH_TREE_SIZE = 1e4;
 our $CAN_USE_INTERVAL_TREE;
 
@@ -118,7 +119,12 @@ sub new {
       my $buffer = $self->pre_buffer;
       push @$buffer, @{$hashref->{variation_features}};
     }
+    # Possibility to change the default value of the "max_not_ordered_variants"
+    # Could also implement a way to change it from the Runner object by fetching 
+    # a "$self->param('max_not_ordered_variants')" - for future developments
+    $self->{max_not_ordered_variants} = $hashref->{max_not_ordered_variants} if $hashref->{max_not_ordered_variants};
   }
+  $self->{max_not_ordered_variants} = $Bio::EnsEMBL::VEP::Constants::MAX_NOT_ORDERED_VARIANTS if (!$self->{max_not_ordered_variants});
 
   return $self;
 }
@@ -177,10 +183,11 @@ sub next {
   # from more than one chromosome, so we "shortcut" out
   # filling the buffer before it hits $buffer_size.
   my $prev_chr;
+  my $prev_start = 0;
 
   while(@$pre_buffer && @$buffer < $buffer_size) {
     my $vf = $pre_buffer->[0];
-    
+
     # new chromosome
     if($prev_chr && $vf->{chr} ne $prev_chr) {
       $self->split_variants() if $self->{minimal};
@@ -197,6 +204,17 @@ sub next {
   if(my $parser = $self->parser) {
     while(@$buffer < $buffer_size && (my $vf = $parser->next)) {
 
+      # skip long and unsupported types of SV; doing this here to avoid stopping looping
+      next if $vf->{vep_skip};
+
+      # exit the program if the maximum number of variants not ordered in the input file is reached
+      if (!$self->param('no_check_variants_order') &&
+          $self->{count_not_ordered_variants} &&
+          $self->{count_not_ordered_variants} > $self->{max_not_ordered_variants}
+      ) {
+        die("Exiting the program. The input file appears to be unsorted. Please sort and re-submit.\n");
+      }
+
       # new chromosome
       if($prev_chr && $vf->{chr} ne $prev_chr) {
 
@@ -205,6 +223,7 @@ sub next {
         push @$pre_buffer, $vf;
         
         $self->split_variants() if $self->{minimal};
+        $prev_start = 0;
         return $buffer;
       }
 
@@ -212,8 +231,20 @@ sub next {
       else {
         push @$buffer, $vf;
         $prev_chr = $vf->{chr};
+        if ($prev_start > $vf->{start} && !$self->param('no_check_variants_order')) {
+          $self->{count_not_ordered_variants} ++;
+        }
+        $prev_start = $vf->{start};
       }
     }
+  }
+
+  # exit the program if the maximum number of variants not ordered in the input file is reached (second point of exit)
+  if (!$self->param('no_check_variants_order') &&
+      $self->{count_not_ordered_variants} &&
+      $self->{count_not_ordered_variants} > $self->{max_not_ordered_variants}
+  ) {
+    die("Exiting the program. The input file appears to be unsorted. Please sort and re-submit.\n");
   }
 
   $self->split_variants() if $self->{minimal};
