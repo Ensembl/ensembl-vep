@@ -4,3 +4,4 @@
 3	LSDB	0	Variants dbSNP annotates as being from LSDBs	http://www.ncbi.nlm.nih.gov/projects/SNP/	lsdb	\N	variation_synonym
 11	DGVa	201310	Database of Genomic Variants Archive	http://www.ebi.ac.uk/dgva/			structural_variation,study
 23	Affy GenomeWideSNP_6 CNV	0	\N	http://www.affymetrix.com/	chip	\N	structural_variation
+32	ClinVar	23	ClinVar Data	http://ensembl.org	test	\N	variation
