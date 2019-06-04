@@ -114,6 +114,21 @@ SKIP: {
     [],
     'next again 3 empty'
   );
+
+
+  # Test that the input buffer checks the vf chromosome
+  my $runner2 = Bio::EnsEMBL::VEP::Haplo::Runner->new({%{$test_cfg->base_testing_cfg}, input_file => $test_cfg->{test_vcf3}});
+
+  $ib = $runner2->get_InputBuffer;
+
+  # Chr 21
+  $vfs = $ib->next;
+  ok(scalar(@$vfs) == 3 && $vfs->[0]->{chr} == 21, 'The 3 entries from chr21 are in the same buffer');
+
+  # Chr 22
+  $vfs = $ib->next;
+  ok(scalar(@$vfs) == 1 && $vfs->[0]->{chr} == 22, 'The entry from chr22 is in a different buffer');
+
 }
 
 done_testing();
