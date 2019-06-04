@@ -302,7 +302,7 @@ SKIP: {
     dir => $dir,
     source_type => 'ensembl',
     cache_region_size => 1000000,
-    valid_chromosomes => [21],
+    valid_chromosomes => [21, 22],
   });
   $c->param('quiet', 1);
 
@@ -324,13 +324,13 @@ SKIP: {
   ok($timestamp eq (stat(TREE))[9], 'tree_file - timestamp same after rerun');
 
   # read data to check
-  is(md5_hex(join("", <TREE>)), '51a863caf2567f482779713fa4d91f05', 'md5_hex of tree_file content');
+  is(md5_hex(join("", <TREE>)), '271bab11eab4624937c69817abc6588d', 'md5_hex of tree_file content');
   close TREE;
 
   # fetch the tree itself
   my $tree = $c->transcript_tree();
   is(ref($tree), 'Bio::EnsEMBL::VEP::TranscriptTree', 'transcript_tree - ref');
-  is_deeply($tree->valid_chromosomes, [21], 'transcript_tree - valid_chromosomes');
+  is_deeply($tree->valid_chromosomes, [21, 22], 'transcript_tree - valid_chromosomes');
 
   throws_ok {$c->get_nearest({chr => 21, start => 1, end => 1})} qr/No type/, 'get_nearest - no type';
   throws_ok {$c->get_nearest({chr => 21, start => 1, end => 1}, 'foo')} qr/Invalid type/, 'get_nearest - invalid type';
@@ -339,7 +339,7 @@ SKIP: {
   is_deeply($c->get_nearest({chr => 21, start => 1, end => 1}, 'gene'), ['ENSG00000154719'], 'get_nearest - gene');
   is_deeply($c->get_nearest({chr => 21, start => 1, end => 1}, 'symbol'), ['MRPL39'], 'get_nearest - symbol');
 
-  is_deeply($c->get_nearest({chr => 22, start => 1, end => 1}, 'transcript'), [], 'get_nearest - no hits');
+  is_deeply($c->get_nearest({chr => 20, start => 1, end => 1}, 'transcript'), [], 'get_nearest - no hits');
 
   is_deeply($c->get_nearest({chr => 21, start => 25607517, end => 25607517}, 'transcript'), ['ENST00000352957'], 'get_nearest - overlap 1');
   is_deeply($c->get_nearest({chr => 21, start => 25607514, end => 25607519}, 'transcript'), ['ENST00000352957'], 'get_nearest - overlap 2');
