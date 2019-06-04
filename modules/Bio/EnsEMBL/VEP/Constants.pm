@@ -59,6 +59,7 @@ our @EXPORT_OK = qw(
   @FLAG_FIELDS
   %FIELD_DESCRIPTIONS
   @DEFAULT_OUTPUT_COLS
+  $MAX_NOT_ORDERED_VARIANTS
 );
 
 # contains an ordered map between command line flags and output columns
@@ -119,6 +120,7 @@ our @FLAG_FIELDS = (
   { flag => 'check_existing',  fields => ['CLIN_SIG','SOMATIC','PHENO'] },
   { flag => 'pubmed',          fields => ['PUBMED'] },
   { flag => 'check_svs',       fields => ['SV'] },
+  { flag => 'overlaps',        fields => ['OverlapBP', 'OverlapPC']},
 
   # regulatory
   { flag => 'regulatory',      fields => ['BIOTYPE','MOTIF_NAME','MOTIF_POS','HIGH_INF_POS','MOTIF_SCORE_CHANGE'] },
@@ -307,5 +309,7 @@ our %COLOUR_KEYS = (
     'regulatory_region_amplification'   => 'brown',
   },
 );
+
+our $MAX_NOT_ORDERED_VARIANTS = 100;
 
 1;

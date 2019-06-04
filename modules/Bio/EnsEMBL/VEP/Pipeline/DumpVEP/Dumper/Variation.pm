@@ -39,7 +39,6 @@ use Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation;
 use Bio::EnsEMBL::VEP::AnnotationSource::Cache::Variation;
 use Bio::EnsEMBL::Variation::Utils::Sequence qw(trim_sequences get_matched_variant_alleles);
 use Scalar::Util qw(looks_like_number);
-
 our $CAN_USE_TABIX_PM;
 
 BEGIN {
@@ -57,7 +56,6 @@ my $gnomad_prefix = 'gnomAD_';
 
 sub run {
   my $self = shift;
-
   my $vep_params = $self->get_vep_params();
 
   # make sure to include failed variants!
@@ -171,7 +169,8 @@ sub _generic_dump_info {
   # var cache cols
   my @cols = (
     @{$as->get_cache_columns()},
-    'pubmed'
+    'pubmed',
+    'clin_sig_allele'
   );
   foreach my $pop(map {@{$_->{prefixed_pops} || $_->{pops}}} @{$self->{freq_vcf} || []}) {
     $pop = uc_gnomad_pop($pop) if ($pop =~ /^$gnomad_prefix/);
@@ -212,7 +211,7 @@ sub dump_obj {
 
   # get freqs from VCFs?
   $self->freqs_from_vcf($obj, $chr) if $self->{freq_vcf};
-
+  
   my $pubmed = $self->pubmed;
 
   foreach my $v(@$obj) {
@@ -228,8 +227,9 @@ sub dump_obj {
       defined($v->{minor_allele_freq}) && $v->{minor_allele_freq} =~ /^[0-9\.]+$/ ? sprintf("%.4f", $v->{minor_allele_freq}) : '',
       $v->{clin_sig} || '',
       $v->{phenotype_or_disease} == 0 ? '' : $v->{phenotype_or_disease},
+      $v->{clin_sig_allele} || '',
     );
-
+  
     push @tmp, $pubmed->{$v->{variation_name}} || '';
 
     if($self->{freq_vcf}) {

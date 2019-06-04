@@ -114,6 +114,7 @@ SKIP: {
     'gp' => undef,
     'individual' => undef,
     'phased' => undef,
+     'max_sv_size' => 10000000,
   }, 'Bio::EnsEMBL::VEP::Haplo::Parser::VCF' ), 'get_Parser');
 
   my $t = $runner->get_TranscriptTree;
@@ -133,6 +134,7 @@ SKIP: {
     'parser' => $runner->get_Parser,
     'buffer_size' => $runner->param('buffer_size'),
     'minimal' => undef,
+    'max_not_ordered_variants' => 100,
     'transcript_tree' => $runner->get_TranscriptTree,
   }, 'Bio::EnsEMBL::Haplo::VEP::InputBuffer' ), 'get_InputBuffer');
 
