@@ -176,10 +176,10 @@ sub default_options {
     # reflect their usage, but you may want to change the details (memory
     # requirements, queue parameters etc.) to suit your own data
         
-    default_lsf_options => '-q production-rh7 -R"select[mem>4000] rusage[mem=4000]" -M4000',
-    urgent_lsf_options  => '-q production-rh7 -R"select[mem>2000] rusage[mem=2000]" -M2000',
-    highmem_lsf_options => '-q production-rh7 -R"select[mem>15000] rusage[mem=15000]" -M15000', # this is Sanger LSF speak for "give me 15GB of memory"
-    long_lsf_options    => '-q production-rh7 -R"select[mem>2000] rusage[mem=2000]" -M2000',
+    default_lsf_options => '-q production-rh74 -R"select[mem>4000] rusage[mem=4000]" -M4000',
+    urgent_lsf_options  => '-q production-rh74 -R"select[mem>2000] rusage[mem=2000]" -M2000',
+    highmem_lsf_options => '-q production-rh74 -R"select[mem>15000] rusage[mem=15000]" -M15000', # this is Sanger LSF speak for "give me 15GB of memory"
+    long_lsf_options    => '-q production-rh74 -R"select[mem>2000] rusage[mem=2000]" -M2000',
     
     debug => 0,
     qc => 1,
