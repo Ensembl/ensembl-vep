@@ -387,6 +387,7 @@ our %INCOMPATIBLE = (
   tab         => [qw(vcf json)],
   individual  => [qw(minimal)],
   check_ref   => [qw(lookup_ref)],
+  check_svs   => [qw(offline)],
 );
 
 # deprecated/replaced flags
@@ -642,7 +643,7 @@ sub check_config {
   unless($config->{safe}) {
     foreach my $flag(grep {$self->_is_flag_active($config, $_)} keys %INCOMPATIBLE) {
       foreach my $invalid(grep {$self->_is_flag_active($config, $_)} @{$INCOMPATIBLE{$flag}}) {
-        throw sprintf("ERROR: Can't use --%s and --%s together\n", $flag, $invalid);
+        die sprintf("ERROR: Can't use --%s and --%s together\n", $flag, $invalid);
       }
     }
   }
@@ -650,7 +651,7 @@ sub check_config {
   # check required flags
   foreach my $flag(grep {$self->_is_flag_active($config, $_)} keys %REQUIRES) {
     foreach my $required(@{$REQUIRES{$flag}}) {
-      throw sprintf("ERROR: You must set --%s to use --%s\n", $required, $flag) unless $self->_is_flag_active($config, $required);
+      die sprintf("ERROR: You must set --%s to use --%s\n", $required, $flag) unless $self->_is_flag_active($config, $required);
     }
   }
 
@@ -662,7 +663,7 @@ sub check_config {
       $msg .= " - please use --$new instead";
     }
 
-    throw("$msg\n");
+    die "$msg\n";
   }
 
   ## HACK FIX FOR UNEXPLAINED WEB BUG
