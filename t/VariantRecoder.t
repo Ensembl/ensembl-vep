@@ -145,7 +145,7 @@ SKIP: {
   );
 
   # Test output VCF format
-  my $vr_2 = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', fields => 'vcf_string'});
+  my $vr_2 = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', fields => 'spdi,vcf_string'});
   is_deeply(
     $vr_2->recode("rs142513484"),
     [
@@ -153,6 +153,9 @@ SKIP: {
         "input" => "rs142513484",
         "vcf_string" => [
            "21-25585733-C-T"
+        ],
+        "spdi" => [
+           "21:25585732:C:T"
         ]
       }
     ],
