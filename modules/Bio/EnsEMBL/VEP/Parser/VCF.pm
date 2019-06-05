@@ -457,7 +457,8 @@ sub create_StructuralVariationFeatures {
     $type = $info->{SVTYPE};
   }
 
-  my $so_term;
+  # set a default which we do not expect to see
+  my $so_term = 'sequence_variant';
 
   if(defined($type)) {
     # convert to SO term
@@ -466,7 +467,7 @@ sub create_StructuralVariationFeatures {
       DEL  => 'deletion',
       TDUP => 'tandem_duplication',
       DUP  => 'duplication',
-      CNV  =>'copy_number_variation'
+      CNV  => 'copy_number_variation'
     );
 
     $so_term = defined $terms{$type} ? $terms{$type} : $type;
