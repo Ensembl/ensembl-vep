@@ -46,7 +46,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg && !$@;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 18 unless $can_use_db;
+  skip 'No local database configured', 19 unless $can_use_db;
 
   my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens') if $can_use_db;
   
@@ -143,6 +143,22 @@ SKIP: {
     ['21:g.25585733C>T', '21:g.25587701T>C', '21:g.25587758G>A'],
     'recode_all'
   );
+
+  # Test output VCF format
+  my $vr_2 = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', fields => 'vcf_string'});
+  is_deeply(
+    $vr_2->recode("rs142513484"),
+    [
+      {
+        "input" => "rs142513484",
+        "vcf_string" => [
+           "21-25585733-C-T"
+        ]
+      }
+    ],
+    'recode - output vcf_string' 
+  );
+
 };
 
 done_testing();
