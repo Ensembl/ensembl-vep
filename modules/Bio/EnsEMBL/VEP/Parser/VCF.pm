@@ -440,7 +440,9 @@ sub create_StructuralVariationFeatures {
   # get type
   my $type;
 
-  if($alt =~ /\<|\[|\]|\>/) {
+  ## avoid deriving type from alt for CNVs more precisely described by SVTYPE
+  ## ALT: "<CN0>", "<CN0>,<CN2>,<CN3>" "<CN2>" => SVTYPE: DEL, CNV, DUP
+  if($alt =~ /\<|\[|\]|\>/ && $alt !~ /CN/) {
     $type = $alt;
     $type =~ s/\<|\>//g;
     $type =~ s/\:.+//g;
@@ -450,7 +452,6 @@ sub create_StructuralVariationFeatures {
       $self->warning_msg("WARNING: VCF line on line ".$self->line_number." looks incomplete, skipping:\n$line\n");
       return [];
     }
-
   }
   else {
     $type = $info->{SVTYPE};
@@ -464,7 +465,8 @@ sub create_StructuralVariationFeatures {
       INS  => 'insertion',
       DEL  => 'deletion',
       TDUP => 'tandem_duplication',
-      DUP  => 'duplication'
+      DUP  => 'duplication',
+      CNV  =>'copy_number_variation'
     );
 
     $so_term = defined $terms{$type} ? $terms{$type} : $type;
