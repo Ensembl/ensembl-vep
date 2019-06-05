@@ -271,8 +271,8 @@ sub check_frequency_filter {
   throw("ERROR: Invalid population ".$self->{freq_pop}." specified")
     unless $freq_pop_full eq '1KG_ALL' ||
     $valid{$freq_pop_full} ||
-    ($freq_group eq '1KG' && $valid{$freq_pop || ''}) ||
-    ($freq_group eq 'ESP' && $valid{$freq_pop || ''});
+    ($freq_group eq '1KG' && $valid{$freq_pop}) ||
+    ($freq_group eq 'ESP' && $valid{$freq_pop});
 }
 
 
