@@ -123,11 +123,11 @@ SKIP: {
 
   # Chr 21
   $vfs = $ib->next;
-  ok(scalar(@$vfs) == 3 && $vfs->[0]->{chr} == 21, 'The 3 entries from chr21 are in the same buffer');
+  ok(scalar(@$vfs) == 3 && $vfs->[0]->{chr} eq '21', 'The 3 entries from chromosome 21 are in the same buffer');
 
   # Chr 22
   $vfs = $ib->next;
-  ok(scalar(@$vfs) == 1 && $vfs->[0]->{chr} == 22, 'The entry from chr22 is in a different buffer');
+  ok(scalar(@$vfs) == 1 && $vfs->[0]->{chr} eq 'chr22', 'The entry from chr22 is in a different buffer');
 
 }
 
