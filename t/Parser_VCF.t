@@ -543,6 +543,54 @@ ok($tmp =~ /variant CPX is of a non-supported type/, 'StructuralVariationFeature
 open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
 
+
+my $cnv_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1,  warning_file => 'STDERR'}),
+  file => $test_cfg->create_input_file([qw(1 774569 gnomAD_v2_DEL_1_1 N <CN0> 1 PASS END=828435;SVTYPE=DUP;CHR2=1;SVLEN=53959)]),
+  valid_chromosomes => [1]
+})->next();
+delete($cnv_vf->{adaptor}); delete($cnv_vf->{_line});
+
+is_deeply($cnv_vf, bless( {
+                 'outer_end' => '828435',
+                 'chr' => '1',
+                 'inner_end' => '828435',
+                 'outer_start' => '774570',
+                 'end' => 828435,
+                 'seq_region_start' => 774570,
+                 'inner_start' => '774570',
+                 'strand' => 1,
+                 'seq_region_end' => 828435,
+                 'class_SO_term' => 'duplication',
+                 'variation_name' => 'gnomAD_v2_DEL_1_1',
+                 'start' => 774570
+               },
+                'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature - CNV with only duplication allele');
+
+my $cnv_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1,  warning_file => 'STDERR'}),
+  file => $test_cfg->create_input_file([qw(1 774569 gnomAD_v2_DEL_1_1 N <CN0>,<CN2> 1 PASS END=828435;SVTYPE=CNV;CHR2=1;SVLEN=53959)]),
+  valid_chromosomes => [1]
+})->next();
+delete($cnv_vf->{adaptor}); delete($cnv_vf->{_line});
+
+is_deeply($cnv_vf, bless( {
+                 'outer_end' => '828435',
+                 'chr' => '1',
+                 'inner_end' => '828435',
+                 'outer_start' => '774570',
+                 'end' => 828435,
+                 'seq_region_start' => 774570,
+                 'inner_start' => '774570',
+                 'strand' => 1,
+                 'seq_region_end' => 828435,
+                 'class_SO_term' => 'copy_number_variation',
+                 'variation_name' => 'gnomAD_v2_DEL_1_1',
+                 'start' => 774570
+               },
+                'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature - CNV with multiple alleles');
+
+
 ## OTHER TESTS
 ##############
 
