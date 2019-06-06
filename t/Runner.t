@@ -216,6 +216,8 @@ is_deeply($runner->get_OutputFactory, bless( {
   'mirna' => undef,
   'ambiguity' => undef,
   'no_shift' => 0,
+  'clin_sig_allele' => undef,
+  'shift_genomic' => undef,
 }, 'Bio::EnsEMBL::VEP::OutputFactory::VEP_output' ), 'get_OutputFactory');
 
 
@@ -1052,7 +1054,6 @@ SKIP: {
               '3_prime_UTR_variant'
             ],
             'strand' => -1,
-            'location' => '21:25585733',
             'transcript_id' => 'ENST00000307301',
             'cdna_start' => 1122,
             'impact' => 'MODIFIER'
@@ -1071,7 +1072,6 @@ SKIP: {
             'protein_end' => 331,
             'amino_acids' => 'A/T',
             'strand' => -1,
-            'location' => '21:25585733',
             'transcript_id' => 'ENST00000352957',
             'cdna_start' => 1033,
             'impact' => 'MODERATE'
@@ -1085,7 +1085,6 @@ SKIP: {
             ],
             'strand' => -1,
             'transcript_id' => 'ENST00000567517',
-            'location' => '21:25585733',
             'impact' => 'MODIFIER'
           }
         ],
