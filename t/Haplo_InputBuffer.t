@@ -123,9 +123,22 @@ SKIP: {
 
   # Chr 21
   $vfs = $ib->next;
-  ok(scalar(@$vfs) == 3 && $vfs->[0]->{chr} eq '21', 'The 3 entries from chromosome 21 are in the same buffer');
+  ok(scalar(@$vfs) == 3 && $vfs->[0]->{chr} == 21, 'The 3 entries from chromosome 21 are in the same buffer');
 
   # Chr 22
+  $vfs = $ib->next;
+  ok(scalar(@$vfs) == 1 && $vfs->[0]->{chr} == 22, 'The entry from chromosome 22 is in a different buffer');
+
+  # Test non numeric chromosomes 
+  my $runner3 = Bio::EnsEMBL::VEP::Haplo::Runner->new({%{$test_cfg->base_testing_cfg}, input_file => $test_cfg->{test_vcf4}});
+  
+  $ib = $runner3->get_InputBuffer;
+
+  # chr21
+  $vfs = $ib->next;
+  ok(scalar(@$vfs) == 3 && $vfs->[0]->{chr} eq 'chr21', 'The 3 entries from chr21 are in the same buffer');
+
+  # chr22
   $vfs = $ib->next;
   ok(scalar(@$vfs) == 1 && $vfs->[0]->{chr} eq 'chr22', 'The entry from chr22 is in a different buffer');
 
