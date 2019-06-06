@@ -52,13 +52,14 @@ use warnings;
 
 use base qw(Exporter);
 
-our $VEP_VERSION     = 96;
+our $VEP_VERSION     = 97;
 our $VEP_SUB_VERSION = 0;
 
 our @EXPORT_OK = qw(
   @FLAG_FIELDS
   %FIELD_DESCRIPTIONS
   @DEFAULT_OUTPUT_COLS
+  $MAX_NOT_ORDERED_VARIANTS
 );
 
 # contains an ordered map between command line flags and output columns
@@ -79,6 +80,7 @@ our @FLAG_FIELDS = (
   { flag => 'symbol',          fields => ['SYMBOL','SYMBOL_SOURCE','HGNC_ID'] },
   { flag => 'biotype',         fields => ['BIOTYPE'] },
   { flag => 'canonical',       fields => ['CANONICAL'] },
+  { flag => 'mane',            fields => ['MANE']},
   { flag => 'tsl',             fields => ['TSL']},
   { flag => 'appris',          fields => ['APPRIS']},
   { flag => 'ccds',            fields => ['CCDS'] },
@@ -118,6 +120,7 @@ our @FLAG_FIELDS = (
   { flag => 'check_existing',  fields => ['CLIN_SIG','SOMATIC','PHENO'] },
   { flag => 'pubmed',          fields => ['PUBMED'] },
   { flag => 'check_svs',       fields => ['SV'] },
+  { flag => 'overlaps',        fields => ['OverlapBP', 'OverlapPC']},
 
   # regulatory
   { flag => 'regulatory',      fields => ['BIOTYPE','MOTIF_NAME','MOTIF_POS','HIGH_INF_POS','MOTIF_SCORE_CHANGE'] },
@@ -143,6 +146,7 @@ our %FIELD_DESCRIPTIONS = (
   'Existing_variation' => 'Identifier(s) of co-located known variants',
   'IMPACT'             => 'Subjective impact classification of consequence type',
   'CANONICAL'          => 'Indicates if transcript is canonical for this gene',
+  'MANE'               => 'MANE (Matched Annotation by NCBI and EMBL-EBI) Transcript',
   'TSL'                => 'Transcript support level',
   'APPRIS'             => 'Annotates alternatively spliced transcripts as primary or alternate based on a range of computational methods',
   'CCDS'               => 'Indicates if transcript is a CCDS transcript',
@@ -306,5 +310,7 @@ our %COLOUR_KEYS = (
     'regulatory_region_amplification'   => 'brown',
   },
 );
+
+our $MAX_NOT_ORDERED_VARIANTS = 100;
 
 1;

@@ -171,6 +171,7 @@ sub new {
     af_gnomad
     max_af
     pubmed
+    clin_sig_allele
 
     numbers
     domains
@@ -183,6 +184,7 @@ sub new {
     uniprot
     canonical
     biotype
+    mane
     tsl
     appris
     transcript_version
@@ -694,6 +696,7 @@ sub pick_worst_VariationFeatureOverlapAllele {
 
       # these will only be used by transcript types, default to 1 for others
       # to avoid writing an else clause below
+      mane => 1,
       canonical => 1,
       ccds => 1,
       length => 0,
@@ -708,6 +711,7 @@ sub pick_worst_VariationFeatureOverlapAllele {
       my $tr = $vfoa->feature;
 
       # 0 is "best"
+      $info->{mane} = scalar(grep {$_->code eq 'MANE_Select'}  @{$tr->get_all_Attributes()}) ? 0 : 1;
       $info->{canonical} = $tr->is_canonical ? 0 : 1;
       $info->{biotype} = $tr->biotype eq 'protein_coding' ? 0 : 1;
       $info->{ccds} = $tr->{_ccds} && $tr->{_ccds} ne '-' ? 0 : 1;
@@ -743,7 +747,6 @@ sub pick_worst_VariationFeatureOverlapAllele {
 
     push @vfoa_info, $info;
   }
-
   if(scalar @vfoa_info) {
     my @order = @{$self->{pick_order}};
     my $picked;
@@ -937,6 +940,7 @@ sub add_colocated_variant_info {
   $shifted_allele ||= "";
   my $tmp = {};
 
+  my $clin_sig_allele_exists = 0;
   # use these to sort variants
   my %prefix_ranks = (
     'rs' => 1, # dbSNP
@@ -948,6 +952,8 @@ sub add_colocated_variant_info {
     'co' => 3, # COSMIC
   );
 
+  my %clin_sigs;
+  
   foreach my $ex(
     sort {
       ($a->{somatic} || 0) <=> ($b->{somatic} || 0) ||
@@ -967,25 +973,44 @@ sub add_colocated_variant_info {
     # ID
     push @{$hash->{Existing_variation}}, $ex->{variation_name} if $ex->{variation_name};
 
+    # Find allele specific clin_sig data if it exists
+    if(defined($ex->{clin_sig_allele}) && $self->{clin_sig_allele} )
+    {
+      my %cs_hash;
+      my @clin_sig_array = split(';', $ex->{clin_sig_allele});       
+      foreach my $cs(@clin_sig_array){
+        my @cs_split = split(':', $cs);
+        $cs_hash{$cs_split[0]} = '' if !defined($cs_hash{$cs_split[0]});
+        $cs_hash{$cs_split[0]} .= ',' if $cs_hash{$cs_split[0]} ne ''; 
+        $cs_hash{$cs_split[0]} .= $cs_split[1];
+      }
+
+      my $hash_ref = \%cs_hash;
+      $clin_sigs{$hash_ref->{$this_allele}} = 1 if defined($hash_ref->{$this_allele});
+      $clin_sig_allele_exists = 1;
+    }
+
     # clin sig and pubmed?
-    push @{$tmp->{CLIN_SIG}}, split(',', $ex->{clin_sig}) if $ex->{clin_sig};
+    push @{$tmp->{CLIN_SIG}}, split(',', $ex->{clin_sig}) if $ex->{clin_sig} && !$clin_sig_allele_exists;
     push @{$tmp->{PUBMED}}, split(',', $ex->{pubmed}) if $self->{pubmed} && $ex->{pubmed};
 
     # somatic?
     push @{$tmp->{SOMATIC}}, $ex->{somatic} ? 1 : 0;
 
     # phenotype or disease
-    push @{$tmp->{PHENO}}, $ex->{phenotype_or_disease} ? 1 : 0;
+    push @{$tmp->{PHENO}}, $ex->{phenotype_or_disease} ? 1 : 0;   
   }
 
   # post-process to remove all-0, e.g. SOMATIC
   foreach my $key(keys %$tmp) {
     delete $tmp->{$key} unless grep {$_} @{$tmp->{$key}};
   }
-
+  
+  my @keys = keys(%clin_sigs);
+  $tmp->{CLIN_SIG} = join(';', @keys) if scalar(@keys) && $self->{clin_sig_allele};
+ 
   # copy to hash
   $hash->{$_} = $tmp->{$_} for keys %$tmp;
-
   # frequencies used to filter will appear here
   if($vf->{_freq_check_freqs}) {
     my @freqs;
@@ -1008,6 +1033,7 @@ sub add_colocated_variant_info {
 }
 
 
+
 =head2 add_colocated_frequency_data
 
   Arg 1      : Bio::EnsEMBL::Variation::VariationFeature $vf
@@ -1024,6 +1050,7 @@ sub add_colocated_variant_info {
 
 sub add_colocated_frequency_data {
   my $self = shift;
+
   my ($vf, $hash, $ex, $shift_hash) = @_;
 
   return $hash unless grep {$self->{$_}} keys %FREQUENCY_KEYS or $self->{max_af};
@@ -1379,7 +1406,12 @@ sub BaseTranscriptVariationAllele_to_output_hash {
 
   # gene phenotype
   $hash->{GENE_PHENO} = 1 if $self->{gene_phenotype} && $tr->{_gene_phenotype};
-
+  if($self->{mane} && (my ($mane) = grep {$_->code eq 'MANE_Select'} @attribs)) {
+    if(my $mane_value = $mane->value) {
+      $hash->{MANE} = $mane_value;
+    }
+  }
+  
   # transcript support level
   if($self->{tsl} && (my ($tsl) = grep {$_->code eq 'TSL'} @attribs)) {
     if($tsl->value =~ m/tsl(\d+)/) {
@@ -1672,7 +1704,7 @@ sub MotifFeatureVariationAllele_to_output_hash {
 
   # check that the motif has a binding matrix, if not there's not
   # much we can do so don't return anything
-  return undef unless defined $mf->binding_matrix;
+  return undef unless defined $mf->get_BindingMatrix;
   my $matrix = $mf->stable_id;
 
   $hash->{Feature_type} = 'MotifFeature';
@@ -1825,7 +1857,7 @@ sub StructuralVariationOverlapAllele_to_output_hash {
   my $feature_type = (split '::', ref($feature))[-1];
 
   $hash->{Feature_type} = $feature_type;
-  $hash->{Feature}      = $feature_type eq 'MotifFeature' ? $feature->binding_matrix->name : $feature->stable_id;
+  $hash->{Feature}      = $feature_type eq 'MotifFeature' ? $feature->get_BindingMatrix->name : $feature->stable_id;
 
   # work out overlap amounts
   my $overlap_start  = (sort {$a <=> $b} ($svf->start, $feature->start))[-1];

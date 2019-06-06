@@ -288,7 +288,7 @@ sub tree_file {
     open TR, ">$tmpfile" or throw("ERROR: Could not write to transcript coords file: $!");
 
     opendir DIR, $as_dir;
-    foreach my $c(grep {!/^\./ && -d $as_dir.'/'.$_} readdir DIR) {
+    foreach my $c(sort { $a cmp $b } grep {!/^\./ && -d $as_dir.'/'.$_} readdir DIR) {
       
       opendir CHR, $as_dir.'/'.$c;
 

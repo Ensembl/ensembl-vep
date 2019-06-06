@@ -55,7 +55,7 @@ SKIP: {
   ## METHOD TESTS
   ###############
 
-  is_deeply($t->valid_chromosomes, [21, 'LRG_485'], 'valid_chromosomes - get');
+  is_deeply($t->valid_chromosomes, [21, 22, 'LRG_485'], 'valid_chromosomes - get');
   is_deeply($t->valid_chromosomes([21]), [21], 'valid_chromosomes - set');
 
   is(ref($t->get_chr_tree('foo')), 'Set::IntervalTree', 'get_chr_tree - ref');

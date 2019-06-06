@@ -118,7 +118,7 @@ sub get_available_cell_types {
     $self->{available_cell_types} = [
       sort
       map {s/ /\_/g; $_}
-      map {$_->display_label}
+      map {$_->short_name}
       @{$regulatory_build->get_all_Epigenomes}
     ];
   }
@@ -178,11 +178,12 @@ sub get_features_by_regions_uncached {
     my @region_features;
 
     my $rfa = $self->get_adaptor('funcgen', 'RegulatoryFeature');
-    
+
     $sub_slice->{coord_system}->{adaptor} ||= $self->get_adaptor('core', 'coordsystem');
     $sub_slice->{adaptor} ||= $self->get_adaptor('core', 'slice');
     my $type = 'RegulatoryFeature'; 
     my $features = $self->get_adaptor('funcgen', $type)->fetch_all_by_Slice($sub_slice);
+
     next unless defined($features);
 
     foreach my $rf(@$features) { 
@@ -196,7 +197,7 @@ sub get_features_by_regions_uncached {
         my %cl =
           map {$_->[0] => $_->[1]}
           map {$_->[0] =~ s/ /\_/g; $_}
-          map {[$_->get_Epigenome->display_label, $_->activity]}
+          map {[$_->get_Epigenome->short_name, $_->activity]}
           @{$rf->regulatory_activity};
         $rf->{cell_types} = \%cl;
       }
@@ -209,7 +210,9 @@ sub get_features_by_regions_uncached {
     $type = 'MotifFeature';
     my @motif_features = ();
     foreach my $rf (@$features) {
-      push @motif_features, @{$rf->fetch_all_MotifFeatures_with_matching_Peak()};
+      my $rf_seq_region = $rf->seq_region_name;
+      my @experimentally_verified_MotifFeatures = grep {$_->seq_region_name eq "$rf_seq_region"} @{$rf->get_all_experimentally_verified_MotifFeatures()};  
+      push @motif_features, @experimentally_verified_MotifFeatures;
     } 
 
     foreach my $mf(@motif_features) {

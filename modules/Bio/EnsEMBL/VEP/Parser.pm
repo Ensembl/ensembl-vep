@@ -121,7 +121,7 @@ sub new {
 
   my $hashref = $_[0];
 
-  throw("ERROR: No file given\n") unless $hashref->{file};
+  die("ERROR: No input file given\n") unless $hashref->{file};
   $self->file($hashref->{file});
 
   $self->delimiter($hashref->{delimiter}) if $hashref->{delimiter};
@@ -139,10 +139,10 @@ sub new {
       $format = $self->detect_format();
     }
 
-    throw("ERROR: Can't detect format\n") unless $format;
+    die("ERROR: Can't detect input format\n") unless $format;
 
     $format = lc($format);
-    throw("ERROR: Unknown or unsupported format $format\n") unless $FORMAT_MAP{$format};
+    die("ERROR: Unknown or unsupported input format '$format'\n") unless $FORMAT_MAP{$format};
 
     $self->warning_msg("No input file format specified - detected $format format") if $self->param('verbose');
 
@@ -367,7 +367,7 @@ sub detect_format {
   my $file_was_fh = 0;
 
   if(openhandle($file)) {
-    throw("Cannot detect format from STDIN - specify format with --format [format]") if $file =~ /STDIN$/;
+    die("Cannot detect format from STDIN - specify format with --format [format]") if $file =~ /STDIN$/;
     $fh = $file;
     $file_was_fh = 1;
   }
@@ -457,16 +457,6 @@ sub detect_format {
       }
 
       $format = 'vcf' if $ok;
-    }
-
-    # pileup: chr1  60  T  A
-    elsif (
-      $data[0] =~ /(chr)?\w+/ &&
-      $data[1] =~ /^\d+$/ &&
-      $data[2] && $data[2] =~ /^[\*ACGTN-]+$/i &&
-      $data[3] && $data[3] =~ /^[\*ACGTNRYSWKM\+\/-]+$/i
-    ) {
-      $format = 'pileup';
     }
 
     # ensembl: 20  14370  14370  A/G  +

@@ -132,10 +132,10 @@ $| = 1;
 
 # other global data
 my @API_MODULES = (
-  { name => 'ensembl',           path => '',          test_pm => 'Bio::EnsEMBL::Registry' },
+  { name => 'ensembl',           path => ' ',         test_pm => 'Bio::EnsEMBL::Registry' },
   { name => 'ensembl-variation', path => 'Variation', test_pm => 'Bio::EnsEMBL::Variation::Variation' },
   { name => 'ensembl-funcgen',   path => 'Funcgen',   test_pm => 'Bio::EnsEMBL::Funcgen::RegulatoryFeature' },
-  { name => 'ensembl-io',        path => 'IO',        test_pm => 'Bio::EnsEMBL::IO::Parser' },
+  { name => 'ensembl-io',        path => 'IO,Utils',  test_pm => 'Bio::EnsEMBL::IO::Parser' },
 );
 my $ensembl_url_tail = '/archive/';
 my $archive_type = '.zip';
@@ -206,7 +206,7 @@ $DATA_VERSION ||= $API_VERSION;
 $CACHE_DIR    ||= $ENV{HOME} ? $ENV{HOME}.'/.vep' : 'cache';
 $FTP_USER     ||= 'anonymous';
 
-$CACHE_URL  ||= "ftp://ftp.ensembl.org/pub/release-$DATA_VERSION/variation/VEP";
+$CACHE_URL  ||= "ftp://ftp.ensembl.org/pub/release-$DATA_VERSION/variation/vep";
 $FASTA_URL  ||= "ftp://ftp.ensembl.org/pub/release-$DATA_VERSION/fasta/";
 $PLUGIN_URL ||= 'https://raw.githubusercontent.com/Ensembl/VEP_plugins';
 
@@ -663,7 +663,6 @@ sub install_api() {
 
   foreach my $module_hash(@API_MODULES) {
     my $module = $module_hash->{name};
-    my $module_dir_suffix = $module_hash->{path} ? '/'.$module_hash->{path} : '';
 
     # do we need to update this?
     my $have_sub = $CURRENT_VERSION_DATA->{$module} ? ($CURRENT_VERSION_DATA->{$module}->{sub} || '') : '';
@@ -679,11 +678,26 @@ sub install_api() {
     unpack_arch("$DEST_DIR/tmp/$module$archive_type", "$DEST_DIR/tmp/");
 
     print " - moving files\n" unless $QUIET;
+    foreach my $module_path (split(',',$module_hash->{path})) {
+      my $module_dir_suffix = $module_path eq ' ' ? '' : '/'.$module_path;
+      my $module_dir_from   = "$DEST_DIR/tmp/$module\-$release_path_string/modules/Bio/EnsEMBL$module_dir_suffix";
+      my $module_dir_to     = "$DEST_DIR/EnsEMBL$module_dir_suffix";
 
-    move(
-      "$DEST_DIR/tmp/$module\-$release_path_string/modules/Bio/EnsEMBL$module_dir_suffix",
-      "$DEST_DIR/EnsEMBL$module_dir_suffix"
-    ) or die "ERROR: Could not move directory\n".$!;
+      # If the target directory already exist, we can't overwrite it.
+      if (-d $module_dir_to) {
+        # One solution is to move the content of the directory instead.
+        # However we need to loop over the files/directories within the module directory because the 'move()' method doesn't allow wildcards.
+        opendir DH, $module_dir_from;
+        while(my $file_or_dir = readdir DH) {
+          next if ($file_or_dir =~ /^\.+$/);
+          move("$module_dir_from/$file_or_dir", "$module_dir_to/$file_or_dir") or die "ERROR: Could not move '$module_dir_from/$file_or_dir'\n".$!;
+        }
+        closedir DH;
+      }
+      else {
+        move($module_dir_from, $module_dir_to) or die "ERROR: Could not move the directory '$module_dir_from'\n".$!;
+      }
+    }
 
     # now get latest commit from github API
     print " - getting version information\n" unless $QUIET;

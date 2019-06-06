@@ -91,14 +91,16 @@ SKIP: {
     $as->info,
     {
       'COSMIC' => '67',
-      'dbSNP' => '138'
+      'dbSNP' => '138',
+      'ClinVar' => '23', 
     },
     'info'
   );
 
   is($as->have_pubmed, 0, 'have_pubmed');
   is($as->phenotype_attrib_id, '418', 'phenotype_attrib_id');
-
+  is($as->clinvar_source_id_cache, '32', 'clinvar_source_id_cache');
+  
   ## TESTS WITH AN INPUT BUFFER
   #############################
 

@@ -53,6 +53,9 @@ our %DEFAULTS = (
 
   test_vcf       => $Bin.'/testdata/input/test.vcf',
   test_vcf2      => $Bin.'/testdata/input/test2.vcf',
+  test_vcf3      => $Bin.'/testdata/input/test3.vcf',
+  test_vcf4      => $Bin.'/testdata/input/test4.vcf',
+  not_ord_vcf    => $Bin.'/testdata/input/test_not_ordered.vcf',
   vr_vcf         => $Bin.'/testdata/input/idt_test.vcf',
   windows_vcf    => $Bin.'/testdata/input/windows.vcf',
   test_gzvcf     => $Bin.'/testdata/input/test.vcf.gz',

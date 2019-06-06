@@ -81,7 +81,7 @@ is_deeply(
         'ClinVar' => '201704',
         'assembly' => 'GRCh38.p5'
       },
-      'valid_chromosomes' => [21, 'LRG_485'],
+      'valid_chromosomes' => [21, 22, 'LRG_485'],
       'bam' => undef,
       'use_transcript_ref' => undef,
       'nearest' => undef,
@@ -93,7 +93,7 @@ is_deeply(
 # setup_db_connection should return silently in offline mode
 ok(!$runner->setup_db_connection(), 'setup_db_connection');
 
-is_deeply($runner->valid_chromosomes, [21, 'LRG_485'], 'valid_chromosomes');
+is_deeply($runner->valid_chromosomes, [21, 22, 'LRG_485'], 'valid_chromosomes');
 
 is_deeply($runner->get_Parser, bless({
   '_config' => $runner->config,
@@ -104,7 +104,7 @@ is_deeply($runner->get_Parser, bless({
   'lookup_ref' => undef,
   'chr' => undef,
   'dont_skip' => undef,
-  'valid_chromosomes' => {21 => 1, LRG_485 => 1 },
+  'valid_chromosomes' => {21 => 1, 22 => 1, LRG_485 => 1 },
   'minimal' => undef,
   'lrg' => undef,
   'delimiter' => ' ',
@@ -121,13 +121,14 @@ is_deeply($runner->get_InputBuffer, bless({
     'lookup_ref' => undef,
     'chr' => undef,
     'dont_skip' => undef,
-    'valid_chromosomes' => {21 => 1, LRG_485 => 1 },
+    'valid_chromosomes' => {21 => 1, 22 => 1, LRG_485 => 1 },
     'minimal' => undef,
     'lrg' => undef,
     'delimiter' => ' ',
   }, 'Bio::EnsEMBL::VEP::Parser::VEP_input' ),
   'buffer_size' => $runner->param('buffer_size'),
   'minimal' => undef,
+  'max_not_ordered_variants' => 100
 }, 'Bio::EnsEMBL::VEP::InputBuffer' ), 'get_InputBuffer');
 
 my $info = $runner->get_output_header_info;
@@ -203,6 +204,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'af_1kg' => undef,
   'tsl' => undef,
   'pubmed' => undef,
+  'mane' => undef,
   'header_info' => $info,
   'plugins' => [],
   'no_stats' => 1,
@@ -218,6 +220,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'no_shift' => 0,
   'clin_sig_allele' => undef,
   'shift_genomic' => undef,
+
 }, 'Bio::EnsEMBL::VEP::OutputFactory::VEP_output' ), 'get_OutputFactory');
 
 
