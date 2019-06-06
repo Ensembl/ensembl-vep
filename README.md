@@ -81,7 +81,7 @@ This approach offers an advantage over VEP's analysis, which treats each input v
 
 <a name="haplousage"></a>
 ### Usage
-Input data must be a [VCF](http://samtools.github.io/hts-specs/VCFv4.3.pdf) containing phased genotype data for at least one individual; no other formats are currently supported.
+Input data must be a [VCF](http://samtools.github.io/hts-specs/VCFv4.3.pdf) containing phased genotype data for at least one individual and file must be sorted by chromosome and genomic position; no other formats are currently supported.
 
 When using a VEP cache as the source of transcript annotation, the first time you run `haplo` with a particular cache it will spend some time scanning transcript locations in the cache.
 
