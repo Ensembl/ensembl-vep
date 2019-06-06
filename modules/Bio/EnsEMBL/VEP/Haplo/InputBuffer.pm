@@ -138,7 +138,7 @@ sub next {
     return $buffer unless $max;
 
     # Continue to add VF to buffer until VF start > max or VF on different chromosome
-    while($vf && $vf->{start} <= $max && $vf->{chr} == $current_chr) {
+    while($vf && $vf->{start} <= $max && $vf->{chr} eq $current_chr) {
       push @$buffer, $vf;
       $vf = $parser->next;
     }

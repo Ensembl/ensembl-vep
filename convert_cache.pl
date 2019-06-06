@@ -390,7 +390,7 @@ sub process_chr_type {
   my @files_to_remove;
   
   # check if files exist
-  foreach my $file($outfilepath.'.gz', $outfilepath.'.gz.tbi') {
+  foreach my $file($outfilepath.'.gz', $outfilepath.'.gz.tbi', $outfilepath.'.gz.csi') {
     if(-e $file) {
       if(defined($config->{force_overwrite})) {
         unlink($file) or die("ERROR: Failed to delete file $file\n");
@@ -426,7 +426,7 @@ sub process_chr_type {
     
     # tabix
     my ($b, $e) = ($config->{pos_col} + 2, $config->{pos_col} + 2);
-    my $tabixout = `$tabix -s 1 -b $b -e $e $outfilepath\.gz 2>&1`;
+    my $tabixout = `$tabix -C -s 1 -b $b -e $e $outfilepath\.gz 2>&1`;
     die("ERROR: tabix failed\n$tabixout") if $tabixout;
   }
   
