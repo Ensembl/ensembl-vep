@@ -193,10 +193,10 @@ sub create_VariationFeatures {
   }];
 }
 
-=head2 validade_chr
+=head2 validate_chr
 
   Arg 1      : hash
-  Example    : my $vf_hashes = $parser->validade_chr($vf);
+  Example    : my $vf_hashes = $parser->validate_chr($vf);
   Description: Validates chromosome and genomic positions
   Returntype : bool
   Exceptions : none
