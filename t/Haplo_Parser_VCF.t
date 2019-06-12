@@ -90,4 +90,18 @@ is_deeply(
 
 is($p->next->{ids}->[0], 'rs187353664', 'next again');
 
+# warning_msg prints to STDERR 
+no warnings 'once';
+open(SAVE, ">&STDERR") or die "Can't save STDERR\n"; 
+
+close STDERR;
+my $tmp;
+open STDERR, '>', \$tmp;
+
+is($p->validate_chr({'alleles' => 'C,T', 'chr' => '211', 'end' => 25585733, 'start' => '25585733'}), 0, 'validate chr - chromosome not in valid list'); 
+ok($tmp =~ /Chromosome 211 not found in annotation sources/, 'validate chr message - chromosome not in valid list');
+
+is($p->validate_chr({'alleles' => 'C,T', 'chr' => '21', 'end' => 25585733, 'start' => 'x'}), 0, 'validate chr - genomic position not valid');
+ok($tmp =~ /WARNING: Start x or end 25585733 coordinate invalid/, 'validate chr message - genomic position invalid');
+
 done_testing();
