@@ -646,6 +646,7 @@ sub validate_vf {
     }
 
     if(!$ok) {
+      $vf->{check_ref_failed} = 1;
       $self->warning_msg(
         "WARNING: Specified reference allele $ref_allele ".
         "does not match Ensembl reference allele".

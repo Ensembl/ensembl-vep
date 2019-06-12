@@ -885,6 +885,9 @@ sub VariationFeature_to_output_hash {
   # nearest
   $hash->{NEAREST} = $vf->{nearest} if $vf->{nearest};
 
+  # check_ref tests
+  $hash->{CHECK_REF} = 'failed' if defined($vf->{check_ref_failed});
+
   $self->stats->log_VariationFeature($vf, $hash) unless $self->{no_stats};
 
   return $hash;
