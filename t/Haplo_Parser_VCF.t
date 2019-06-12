@@ -22,12 +22,18 @@ use FindBin qw($Bin);
 use lib $Bin;
 use VEPTestingConfig;
 my $test_cfg = VEPTestingConfig->new();
+my $base_testing_cfg = $test_cfg->base_testing_cfg;
 
 ## BASIC TESTS
 ##############
 
 # use test
 use_ok('Bio::EnsEMBL::VEP::Haplo::Parser::VCF');
+
+use_ok('Bio::EnsEMBL::VEP::Config');
+
+my $cfg = Bio::EnsEMBL::VEP::Config->new($base_testing_cfg);
+ok($cfg, 'get new config object');
 
 ok(my $p = Bio::EnsEMBL::VEP::Haplo::Parser::VCF->new({file => $test_cfg->{test_vcf}}), 'new');
 is(ref($p), 'Bio::EnsEMBL::VEP::Haplo::Parser::VCF', 'ref');
@@ -61,7 +67,8 @@ throws_ok {
   })->samples
 } qr/no sample/, 'no samples';
 
-$p = Bio::EnsEMBL::VEP::Haplo::Parser::VCF->new({file => $test_cfg->{test_vcf}, delimiter => "\t"});
+no warnings 'qw';
+$p = Bio::EnsEMBL::VEP::Haplo::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}, valid_chromosomes => [21], delimiter => "\t"});
 is(ref($p->parser), 'Bio::EnsEMBL::IO::Parser::VCF4', 'parser ref');
 
 is_deeply(
