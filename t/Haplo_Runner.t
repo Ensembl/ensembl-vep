@@ -17,6 +17,7 @@ use warnings;
 
 use Test::More;
 use Test::Exception;
+use Test::Warnings qw(warning :no_end_test);
 use FindBin qw($Bin);
 
 use lib $Bin;
@@ -35,7 +36,7 @@ SKIP: {
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
   no warnings 'once';
-  skip 'Set::IntervalTree not installed', 22 unless $Bio::EnsEMBL::VEP::AnnotationType::Transcript::CAN_USE_INTERVAL_TREE;
+  skip 'Set::IntervalTree not installed', 26 unless $Bio::EnsEMBL::VEP::AnnotationType::Transcript::CAN_USE_INTERVAL_TREE;
 
   # use test
   use_ok('Bio::EnsEMBL::VEP::Haplo::Runner');
@@ -479,7 +480,21 @@ SKIP: {
     },
     'JSON output'
   );
+
+  # Test empty output (when none of the variants overlap a transcript)
+  open IN, $test_cfg->{no_trans_vcf} ;
+  my @new_lines = <IN>;
+  $runner = Bio::EnsEMBL::VEP::Haplo::Runner->new({
+    %{$test_cfg->base_testing_cfg},
+    input_data => join("", @new_lines),
+    output_file => 'STDOUT'
+  });
+  # Catch and evaluate the warning message
+  my $warning = warning { $runner->run() };
+  like($warning, qr/Haplosaurus can't find transcripts/, 'warning message because of empty output');
 }
+
+
 
 
 done_testing();
