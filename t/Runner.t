@@ -14,7 +14,6 @@
 
 use strict;
 use warnings;
-use Data::Dumper;
 use Test::More;
 use Test::Exception;
 use FindBin qw($Bin);
