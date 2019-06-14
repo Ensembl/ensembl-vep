@@ -22,12 +22,18 @@ use FindBin qw($Bin);
 use lib $Bin;
 use VEPTestingConfig;
 my $test_cfg = VEPTestingConfig->new();
+my $base_testing_cfg = $test_cfg->base_testing_cfg;
 
 ## BASIC TESTS
 ##############
 
 # use test
 use_ok('Bio::EnsEMBL::VEP::Haplo::Parser::VCF');
+
+use_ok('Bio::EnsEMBL::VEP::Config');
+
+my $cfg = Bio::EnsEMBL::VEP::Config->new($base_testing_cfg);
+ok($cfg, 'get new config object');
 
 ok(my $p = Bio::EnsEMBL::VEP::Haplo::Parser::VCF->new({file => $test_cfg->{test_vcf}}), 'new');
 is(ref($p), 'Bio::EnsEMBL::VEP::Haplo::Parser::VCF', 'ref');
@@ -61,7 +67,8 @@ throws_ok {
   })->samples
 } qr/no sample/, 'no samples';
 
-$p = Bio::EnsEMBL::VEP::Haplo::Parser::VCF->new({file => $test_cfg->{test_vcf}, delimiter => "\t"});
+no warnings 'qw';
+$p = Bio::EnsEMBL::VEP::Haplo::Parser::VCF->new({config => $cfg, file => $test_cfg->{test_vcf}, valid_chromosomes => [21], delimiter => "\t"});
 is(ref($p->parser), 'Bio::EnsEMBL::IO::Parser::VCF4', 'parser ref');
 
 is_deeply(
@@ -82,5 +89,19 @@ is_deeply(
 );
 
 is($p->next->{ids}->[0], 'rs187353664', 'next again');
+
+# warning_msg prints to STDERR 
+no warnings 'once';
+open(SAVE, ">&STDERR") or die "Can't save STDERR\n"; 
+
+close STDERR;
+my $tmp;
+open STDERR, '>', \$tmp;
+
+is($p->validate_chr({'alleles' => 'C,T', 'chr' => '211', 'end' => 25585733, 'start' => '25585733'}), 0, 'validate chr - chromosome not in valid list'); 
+ok($tmp =~ /Chromosome 211 not found in annotation sources/, 'validate chr message - chromosome not in valid list');
+
+is($p->validate_chr({'alleles' => 'C,T', 'chr' => '21', 'end' => 25585733, 'start' => 'x'}), 0, 'validate chr - genomic position not valid');
+ok($tmp =~ /WARNING: Start x or end 25585733 coordinate invalid/, 'validate chr message - genomic position invalid');
 
 done_testing();
