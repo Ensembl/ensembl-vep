@@ -1039,6 +1039,8 @@ close IN;
 
 is(scalar (grep {/^var5_chr22/} @tmp_lines), 5, 'run - individual all');
 
+unlink($test_cfg->{user_file}.'.out');
+
 ## run_rest
 ###########
 
