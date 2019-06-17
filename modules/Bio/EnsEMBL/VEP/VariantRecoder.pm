@@ -120,6 +120,10 @@ sub new {
   # set up/down distance to 0, we only want overlaps
   $config->{distance} = 0;
   
+  if($config->{vcf_string}){
+    $config->{fields} = $config->{fields} . ',vcf_string';
+  }
+
   my $self = $class->SUPER::new($config);
 
   return $self;

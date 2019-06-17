@@ -80,6 +80,7 @@ GetOptions(
   'lrg',                     # enable LRG-based features
   'fields=s',                # define your own output fields
   'synonyms=s',              # file of chromosome synonyms
+  'vcf_string',              # returns the vcf format in a string
 
   # these flags are for use with RefSeq caches
   'bam=s',                   # bam file used to modify transcripts
