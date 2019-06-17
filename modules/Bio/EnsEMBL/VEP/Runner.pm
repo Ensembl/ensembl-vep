@@ -415,6 +415,8 @@ sub _buffer_to_output {
   else {
     push @output, @{$output_factory->get_all_lines_by_InputBuffer($input_buffer)};
   }
+  # if output is empty here rerun because there could still be VFs left coming from the parser 
+  return $self->_buffer_to_output($input_buffer, $output_as_hash) unless scalar @output  || $self->param('fork');
 
   return \@output;
 }
