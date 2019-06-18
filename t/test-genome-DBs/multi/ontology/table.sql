@@ -139,7 +139,7 @@ CREATE TABLE `meta` (
   `species_id` int(1) unsigned DEFAULT NULL,
   PRIMARY KEY (`meta_id`),
   UNIQUE KEY `key_value_idx` (`meta_key`,`meta_value`)
-) ENGINE=MyISAM AUTO_INCREMENT=44 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=46 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `ontology` (
   `ontology_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -172,7 +172,7 @@ CREATE TABLE `relation_type` (
 CREATE TABLE `subset` (
   `subset_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(64) NOT NULL,
-  `definition` varchar(128) NOT NULL,
+  `definition` varchar(1023) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`subset_id`),
   UNIQUE KEY `name_idx` (`name`)
 ) ENGINE=MyISAM AUTO_INCREMENT=18 DEFAULT CHARSET=latin1;
