@@ -19,8 +19,8 @@ RUN apt-get update && apt-get -y install \
 ENV OPT /opt/vep
 ENV OPT_SRC $OPT/src
 ENV HTSLIB_DIR $OPT_SRC/htslib
-# Branch to clone, e.g. "-b release/96"
-ENV BRANCH ""
+# Branch to clone, e.g. "-b release/98"
+ENV BRANCH "-b release/98"
 
 # Working directory
 WORKDIR $OPT_SRC
