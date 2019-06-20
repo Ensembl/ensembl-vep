@@ -137,14 +137,13 @@ sub new {
     # detect format
     if(lc($format) eq 'guess' || lc($format) eq 'detect' || lc($format) eq 'auto') {
       $format = $self->detect_format();
+      $self->warning_msg("No input file format specified - detected $format format") if $self->param('verbose') && defined $format;
     }
 
     die("ERROR: Can't detect input format\n") unless $format;
 
     $format = lc($format);
     die("ERROR: Unknown or unsupported input format '$format'\n") unless $FORMAT_MAP{$format};
-
-    $self->warning_msg("No input file format specified - detected $format format") if $self->param('verbose');
 
     $self->param('format', $format);
 
@@ -646,6 +645,7 @@ sub validate_vf {
     }
 
     if(!$ok) {
+      $vf->{check_ref_failed} = 1;
       $self->warning_msg(
         "WARNING: Specified reference allele $ref_allele ".
         "does not match Ensembl reference allele".

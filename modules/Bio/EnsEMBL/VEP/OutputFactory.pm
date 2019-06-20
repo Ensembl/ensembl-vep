@@ -152,6 +152,7 @@ sub new {
     allele_number
     show_ref_allele
     use_transcript_ref
+    vcf_string
 
     most_severe
     summary
@@ -864,6 +865,25 @@ sub VariationFeature_to_output_hash {
     Location            => ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start}, $vf->{end}),
   };
 
+  my $converted_to_vcf = $vf->to_VCF_record;
+
+  my $alt_allele_vcf = ${$converted_to_vcf}[4];
+
+  if($self->{vcf_string} || (defined($self->{_config}->{_params}->{fields}) && grep(/vcf_string/, @{$self->{_config}->{_params}->{fields}}))){
+    if($alt_allele_vcf =~ /,/){
+      my @list_vcfs;
+      my @alt_splited_list = split(q(,), $alt_allele_vcf);
+
+      foreach my $alt_splited (@alt_splited_list){
+        push(@list_vcfs, $vf->{chr}.'-'.${$converted_to_vcf}[1].'-'.${$converted_to_vcf}[3].'-'.$alt_splited);
+      }
+      $hash->{vcf_string} = \@list_vcfs;
+    }
+    else{
+      $hash->{vcf_string} = $vf->{chr}.'-'.${$converted_to_vcf}[1].'-'.${$converted_to_vcf}[3].'-'.${$converted_to_vcf}[4];
+    }
+  }
+
   # overlapping SVs
   if($vf->{overlapping_svs}) {
     $hash->{SV} = [sort keys %{$vf->{overlapping_svs}}];
@@ -908,6 +928,9 @@ sub VariationFeature_to_output_hash {
 
   # nearest
   $hash->{NEAREST} = $vf->{nearest} if $vf->{nearest};
+
+  # check_ref tests
+  $hash->{CHECK_REF} = 'failed' if defined($vf->{check_ref_failed});
 
   $self->stats->log_VariationFeature($vf, $hash) unless $self->{no_stats};
 

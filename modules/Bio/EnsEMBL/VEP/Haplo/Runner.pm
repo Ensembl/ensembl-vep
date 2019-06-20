@@ -198,8 +198,6 @@ sub run {
   my $input_buffer = $self->get_InputBuffer;
   my $as = $self->get_AnnotationSource;
 
-  my $count;
-
   $self->_set_package_variables();
 
   my $vfs = $input_buffer->next();
@@ -211,7 +209,10 @@ sub run {
 
   $self->_reset_package_variables();
 
-  # $self->dump_stats;
+  # Send a warning message if the output is empty (i.e. no TranscriptHaplotypeContainer)
+  if (!$self->{_output_lines_count} || $self->{_output_lines_count} == 0) {
+    warning("Haplosaurus can't find transcripts overlapping your variant(s). The output is empty.");
+  }
 
   return 1;
 }
@@ -243,7 +244,9 @@ sub dump_TranscriptHaplotypeContainer {
 
     print $fh $json->encode($thc);
     print $fh "\n";
-    
+
+    $self->{_output_lines_count} ++;
+
     return;
   }
 
@@ -297,6 +300,8 @@ sub dump_TranscriptHaplotypeContainer {
     );
 
     print $fh join("\t", @out)."\n";
+
+    $self->{_output_lines_count} ++;
   }
 }
 

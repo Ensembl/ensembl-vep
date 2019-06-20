@@ -71,6 +71,7 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Variation::Sample;
 use Bio::EnsEMBL::Variation::Individual;
 
+use Scalar::Util qw(looks_like_number);
 
 =head2 parser
 
@@ -159,6 +160,7 @@ sub next {
     }
     last unless $parser->{record};
     ($vf) = @{$self->create_VariationFeatures()};
+    $self->validate_chr($vf);
   }
 
   return $vf;
@@ -189,6 +191,37 @@ sub create_VariationFeatures {
     record => \@{$parser->{record}},
     alleles => $parser->get_reference.','.$parser->get_raw_alternatives,
   }];
+}
+
+=head2 validate_chr
+
+  Arg 1      : hash
+  Example    : my $vf_hashes = $parser->validate_chr($vf);
+  Description: Validates chromosome and genomic positions
+  Returntype : bool
+  Exceptions : none
+  Status     : Stable
+
+=cut
+
+sub validate_chr {
+  my $self = shift; 
+  my $vf   = shift;
+
+  my $vf_chr = $vf->{chr}; 
+
+  # sanity checks
+  unless(looks_like_number($vf->{start}) && looks_like_number($vf->{end})) {
+    $self->warning_msg("WARNING: Start ".$vf->{start}." or end ".$vf->{end}." coordinate invalid on line ".$self->line_number);
+    return 0;
+  } 
+
+  unless($self->_have_chr($vf)){
+    $self->warning_msg("Chromosome ".$vf->{chr}." not found in annotation sources on line ".$self->line_number);
+    return 0;
+  } 
+
+  return 1;
 }
 
 1;

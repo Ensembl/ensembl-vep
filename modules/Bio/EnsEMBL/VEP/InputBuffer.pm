@@ -184,6 +184,7 @@ sub next {
   # filling the buffer before it hits $buffer_size.
   my $prev_chr;
   my $prev_start = 0;
+  my $error_msg = "Exiting the program. The input file appears to be unsorted. Please sort by chromosome and by location and re-submit.\n";
 
   while(@$pre_buffer && @$buffer < $buffer_size) {
     my $vf = $pre_buffer->[0];
@@ -212,7 +213,7 @@ sub next {
           $self->{count_not_ordered_variants} &&
           $self->{count_not_ordered_variants} > $self->{max_not_ordered_variants}
       ) {
-        die("Exiting the program. The input file appears to be unsorted. Please sort and re-submit.\n");
+        die($error_msg);
       }
 
       # new chromosome
@@ -244,7 +245,7 @@ sub next {
       $self->{count_not_ordered_variants} &&
       $self->{count_not_ordered_variants} > $self->{max_not_ordered_variants}
   ) {
-    die("Exiting the program. The input file appears to be unsorted. Please sort and re-submit.\n");
+    die($error_msg);
   }
 
   $self->split_variants() if $self->{minimal};
