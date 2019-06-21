@@ -115,7 +115,7 @@ sub run {
 
       $self->run_system_command(
         sprintf(
-          "cat %s/%s/all_vars | sort -S3G -k%i,%in | bgzip -c > %s/%s/all_vars.gz",
+          "cat %s/%s/all_vars | sort -S3G -T=/hps/nobackup2/production/ensembl/variation/tmpdump -k%i,%in | bgzip -c > %s/%s/all_vars.gz",
           $root, $chr, $start_i, $start_i, $root, $chr
         )
       );
