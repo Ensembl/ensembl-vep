@@ -162,6 +162,8 @@ Output is a JSON array of objects, one per input variant, with the following key
 * **hgvsg**: HGVS genomic nomenclature
 * **hgvsc**: HGVS transcript nomenclature
 * **hgvsp**: HGVS protein nomenclature
+* **spdi**: Genomic SPDI notation
+* **vcf_string**: VCF format (optional)
 * **warnings**: Warnings generated e.g. for invalid HGVS
 
 Use `--pretty` to pre-format and indent JSON output.
@@ -187,6 +189,9 @@ Example output:
          "ENSP00000355627.4:p.Met268Thr",
          "NP_000020.1:p.Met268Thr"
       ],
+      "spdi" : [
+         "NC_000001.11:230710047:A:G"
+      ],
       "warnings" : [
          "Possible invalid use of gene name 'AGT' as HGVS reference; AGT:p.Met268Thr may resolve to multiple genomic locations"
       ]
@@ -204,6 +209,6 @@ Example output:
 * `--grch37`: use GRCh37 assembly instead of GRCh38.
 * `--genomes`: set database parameters for [Ensembl Genomes](http://ensemblgenomes.org/) species.
 * `--pretty`: write pre-formatted indented JSON.
-* `--fields [field1,field2]`: limit output fields. Comma-separated list, one or more of: `id`, `hgvsg`, `hgvsc`, `hgvsp`.
+* `--fields [field1,field2]`: limit output fields. Comma-separated list, one or more of: `id`, `hgvsg`, `hgvsc`, `hgvsp`, `spdi`, `vcf_string`.
 * `--host [db_host]`: change database host from default `ensembldb.ensembl.org` (UK); geographic mirrors are `useastdb.ensembl.org` (US East Coast) and `asiadb.ensembl.org` (Asia). `--user`, `--port` and `--pass` may also be set.
 * `--pick`, `--per_gene`, `--pick_allele`, `--pick_allele_gene`, `--pick_order`: set and customise transcript selection process, see [VEP documentation](http://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick)
