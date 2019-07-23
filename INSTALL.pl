@@ -823,7 +823,7 @@ END
       apt-get install liblzma-dev
 END
 
-    -e '/usr/include/bz2.h' or die <<END;
+    -e '/usr/include/bzlib.h' or die <<END;
       bz2.h library header not found in /usr/include. Please install it and try again.
       (or to skip Bio::DB::HTS/htslib install re-run with --NO_HTSLIB)
 
