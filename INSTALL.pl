@@ -93,8 +93,8 @@ our (
 ## VERSIONS OF INSTALLED SOFTWARE
 ## MAY BE UPDATED IF SUCCESSFULLY TESTED
 ########################################
-our $HTSLIB_VERSION  = '1.3.2';           # frozen due to introduced dependency on lzma, bz2
-our $BIOHTS_VERSION  = '2.9';             # latest as of release/91
+our $HTSLIB_VERSION  = '1.9';           # frozen due to introduced dependency on lzma, bz2
+our $BIOHTS_VERSION  = '2.11';             # latest as of release/91
 our $BIOPERL_VERSION = 'release-1-6-924'; # frozen, no pressing need to update
 
 
@@ -812,6 +812,24 @@ END
       On Debian/Ubuntu systems you can do this with the command:
 
       apt-get install zlib1g-dev
+END
+
+    -e '/usr/include/lzma.h' or die <<END;
+      lzma.h library header not found in /usr/include. Please install it and try again.
+      (or to skip Bio::DB::HTS/htslib install re-run with --NO_HTSLIB)
+
+      On Debian/Ubuntu systems you can do this with the command:
+
+      apt-get install liblzma-dev
+END
+
+    -e '/usr/include/bz2.h' or die <<END;
+      bz2.h library header not found in /usr/include. Please install it and try again.
+      (or to skip Bio::DB::HTS/htslib install re-run with --NO_HTSLIB)
+
+      On Debian/Ubuntu systems you can do this with the command:
+
+      apt-get install libbz2-dev
 END
  ;
   }
