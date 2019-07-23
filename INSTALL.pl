@@ -824,7 +824,7 @@ END
 END
 
     -e '/usr/include/bzlib.h' or die <<END;
-      bz2.h library header not found in /usr/include. Please install it and try again.
+      bzlib.h library header not found in /usr/include. Please install it and try again.
       (or to skip Bio::DB::HTS/htslib install re-run with --NO_HTSLIB)
 
       On Debian/Ubuntu systems you can do this with the command:
