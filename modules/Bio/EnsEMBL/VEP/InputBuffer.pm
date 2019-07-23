@@ -234,7 +234,7 @@ sub next {
       else {
         push @$buffer, $vf;
         $prev_chr = $vf->{chr};
-        if (!$self->param('no_check_variants_order')) {
+        if (!$self->param('no_check_variants_order') && $self->param('format') ne 'id') {
           # Use a default distance to check if the variant is still in the same region
           # even if it's not ordered with the previous variant location: we use the VF start and not the VCF start
           # (they can be different when the variant is a deletion for instance and/or when the alleles can be minimised)
