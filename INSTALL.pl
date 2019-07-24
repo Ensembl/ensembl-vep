@@ -93,8 +93,8 @@ our (
 ## VERSIONS OF INSTALLED SOFTWARE
 ## MAY BE UPDATED IF SUCCESSFULLY TESTED
 ########################################
-our $HTSLIB_VERSION  = '1.9';           # frozen due to introduced dependency on lzma, bz2
-our $BIOHTS_VERSION  = '2.11';             # latest as of release/91
+our $HTSLIB_VERSION  = '1.9';             # latest release as of release/98
+our $BIOHTS_VERSION  = '2.11';            # latest 2.X release as of release/98
 our $BIOPERL_VERSION = 'release-1-6-924'; # frozen, no pressing need to update
 
 
