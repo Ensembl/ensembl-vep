@@ -185,7 +185,7 @@ sub _create_records {
       my $metadata = $parser->{metadata} || {};
       my $is_source_clinvar = defined($metadata->{source}) ? $metadata->{source} eq 'ClinVar' : 0;	
       
-      if(!($self->param('custom_multi_allelic') || $is_source_clinvar) && $value =~ /\,/) {
+      if(!($self->{'custom_multi_allelic'} || $is_source_clinvar) && $value =~ /\,/) {
         my @split = split(',', $value);
 
         # some VCFs have data for REF included
