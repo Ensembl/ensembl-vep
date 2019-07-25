@@ -373,6 +373,7 @@ our %REQUIRES = (
   original  => [qw(filters)],
   phyloP    => [qw(ucsc_assembly)],
   phastCons => [qw(ucsc_assembly)],
+  custom_multi_allelic => [qw(custom)],
 );
 
 # incompatible options

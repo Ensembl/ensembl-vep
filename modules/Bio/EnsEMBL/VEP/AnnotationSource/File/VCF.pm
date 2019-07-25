@@ -103,6 +103,8 @@ sub new {
 
   my $hashref = $_[0];
 
+  $self->add_shortcuts(['custom_multi_allelic']);
+
   $self->fields($hashref->{fields}) if $hashref->{fields};      ## report INFO & FILTER fields
 
   return $self;
@@ -181,7 +183,7 @@ sub _create_records {
 
       my @return;
 
-      if($value =~ /\,/) {
+      if($self->param('custom_multi_allelic') && $value =~ /\,/) {
         my @split = split(',', $value);
 
         # some VCFs have data for REF included
