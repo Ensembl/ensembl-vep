@@ -203,6 +203,13 @@ sub next {
       $prev_chr = $vf->{chr};
     }
   }
+  
+  my %unsorted_formats = (
+    "id"  => "1",
+    "hgvs" => "1",
+    "spdi" => "1",
+    "region" => "1",
+  );
 
   if(my $parser = $self->parser) {
     while(@$buffer < $buffer_size && (my $vf = $parser->next)) {
@@ -234,7 +241,7 @@ sub next {
       else {
         push @$buffer, $vf;
         $prev_chr = $vf->{chr};
-        if (!$self->param('no_check_variants_order') && $self->param('format') ne 'id') {
+        if (!$self->param('no_check_variants_order') && !$unsorted_formats{$self->param('format')}) {
           # Use a default distance to check if the variant is still in the same region
           # even if it's not ordered with the previous variant location: we use the VF start and not the VCF start
           # (they can be different when the variant is a deletion for instance and/or when the alleles can be minimised)
