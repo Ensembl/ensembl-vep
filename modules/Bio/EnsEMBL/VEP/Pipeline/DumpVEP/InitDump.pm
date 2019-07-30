@@ -54,7 +54,7 @@ sub run {
   my $dba = Bio::EnsEMBL::Registry->get_DBAdaptor($species, $group);
   my $dbc = $dba->dbc();
   my $current_db_name = $dbc->dbname();
-  
+    
   #Special case for otherfeatures
   if ($current_db_name =~ /otherfeatures/) {
     if ($self->has_refseq($dbc, $current_db_name) <= 0) {
@@ -62,6 +62,21 @@ sub run {
       return;
     }
   }
+  
+  #Special case for variation
+  if ($current_db_name =~ /variation/) {
+    my $vep_params = $self->get_vep_params();
+    $vep_params->{failed} = 1;
+    my $config = Bio::EnsEMBL::VEP::Config->new($vep_params);
+    my $region_size = $self->param('region_size');
+    my $as = Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation->new({
+      config => $config,
+      cache_region_size => $region_size,
+    });
+    Bio::EnsEMBL::VEP::Pipeline::DumpVEP::Dumper::Variation->pubmed($as);
+    
+  }
+  
   $self->param(
     'species_jobs',
     [
@@ -73,6 +88,86 @@ sub run {
   $self->dataflow_output_id($self->param('species_jobs'), 2);
   return;
 }
+
+# we want pubmed IDs by rsID
+# this routine gets them from the DB in the first instance
+# then caches this fetch to disk so future processes can read it
+# as the query takes a little while to run
+=comment
+sub pubmed {
+  my $self = shift;
+  my $as = shift;
+
+  if(!exists($self->{_pubmed})) {
+
+    my %pm;
+    my $file = sprintf(
+      '%s/pubmed_%s_%s_%s.txt',
+      $self->required_param('pipeline_dump_dir'),
+      $self->required_param('species'),
+      $self->required_param('ensembl_release'),
+      $self->required_param('assembly')
+    );
+    my $lock = $file.'.lock';
+
+    my $sleep_count = 0;
+    if(-e $lock) {
+      while(-e $lock) {
+        sleep 1;
+        die("I've been waiting for $lock to be removed for $sleep_count seconds, something may have gone wrong\n") if ++$sleep_count > 900;
+      }
+    }
+
+    if(-e $file) {
+      open IN, $file;
+      while(<IN>) {
+        chomp;
+        my @split = split;
+        $pm{$split[0]} = $split[1];
+      }
+      close IN;
+    }
+
+    elsif($as) {
+      open OUT, ">$lock";
+      print OUT "$$\n";
+      close OUT;
+      $self->{_lock_file} = $lock;
+
+      my $sth = $as->get_adaptor('variation', 'variation')->dbc->prepare(qq{
+        SELECT v.name, GROUP_CONCAT(p.pmid)
+        FROM variation v, variation_citation c, publication p
+        WHERE v.variation_id = c.variation_id
+        AND c.publication_id = p.publication_id
+        AND p.pmid IS NOT NULL
+        GROUP BY v.variation_id
+      });
+      $sth->execute;
+
+      my ($v, $p);
+      $sth->bind_columns(\$v, \$p);
+
+      open OUT, ">$file";
+
+      while($sth->fetch()) {
+        $pm{$v} = $p;
+        print OUT "$v\t$p\n";
+      }
+
+      close OUT;
+
+      unlink($lock);
+
+      $sth->finish();
+    }
+
+    $self->{_pubmed} = \%pm;
+  }
+
+  return $self->{_pubmed};
+}
+=cut
+
 
 sub generate_species_jobs {
   my ($self, $species, $group, $dba, $dbc, $current_db_name) = @_;
