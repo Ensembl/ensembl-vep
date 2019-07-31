@@ -210,6 +210,8 @@ sub generate_species_jobs {
   if($var_db_name) {
     my $has_sift_poly = $self->has_sift_poly($dbc, $var_db_name, $species_id);
     $species_hash{$_} = $has_sift_poly->{$_} for keys %$has_sift_poly;
+    
+    my $pubmed = $self->pubmed($dbc, $var_db_name, $species_id);
   }
 
   push @return, \%species_hash;
@@ -222,6 +224,77 @@ sub generate_species_jobs {
 
   return \@return;
 }
+
+sub pubmed {
+  my ($self, $dbc, $var_db_name, $species_id) = @_;
+  $species_id ||= 0;
+
+  $self->warning('in pubmed');
+  my %pm;
+      my $file = sprintf(
+        '%s/pubmed_%s_%s_%s.txt',
+        $self->required_param('pipeline_dump_dir'),
+        $self->required_param('species'),
+        $self->required_param('ensembl_release'),
+        $self->required_param('assembly')
+      );
+      
+      $self->warning('filename: ' . $file);
+      my $lock = $file.'.lock';
+
+      my $sleep_count = 0;
+      if(-e $lock) {
+        while(-e $lock) {
+          sleep 1;
+          die("I've been waiting for $lock to be removed for $sleep_count seconds, something may have gone wrong\n") if ++$sleep_count > 900;
+        }
+      }
+
+      if(-e $file) {
+        open IN, $file;
+        while(<IN>) {
+          chomp;
+          my @split = split;
+          $pm{$split[0]} = $split[1];
+        }
+        close IN;
+      }
+
+      elsif($as) {
+        open OUT, ">$lock";
+        print OUT "$$\n";
+        close OUT;
+        $self->{_lock_file} = $lock;
+
+        my $sth = $dbc->prepare(qq{
+          SELECT v.name, GROUP_CONCAT(p.pmid)
+          FROM variation v, variation_citation c, publication p
+          WHERE v.variation_id = c.variation_id
+          AND c.publication_id = p.publication_id
+          AND p.pmid IS NOT NULL
+          GROUP BY v.variation_id
+        });
+        $sth->execute();
+
+        my ($v, $p);
+        $sth->bind_columns(\$v, \$p);
+
+        open OUT, ">$file";
+
+        while($sth->fetch()) {
+          $pm{$v} = $p;
+          print OUT "$v\t$p\n";
+        }
+
+        close OUT;
+
+        unlink($lock);
+
+        $sth->finish();
+
+  return \%pm;
+}
+
 
 sub get_species_id {
   my ($self, $dbc, $current_db_name, $species) = @_;
