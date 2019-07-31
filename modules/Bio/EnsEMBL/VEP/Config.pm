@@ -397,10 +397,10 @@ our %DEPRECATED = (
 );
 
 our %UNSORTABLE = (
-  "id"  => "1",
-  "hgvs" => "1",
-  "spdi" => "1",
-  "region" => "1",
+  id     => 1,
+  hgvs   => 1,
+  spdi   => 1,
+  region => 1,
 );
 
 ####################################
