@@ -396,6 +396,12 @@ our %DEPRECATED = (
   'convert' => undef,
 );
 
+our %UNSORTABLE = (
+  id     => 1,
+  hgvs   => 1,
+  spdi   => 1,
+  region => 1,
+);
 
 ####################################
 ####################################
@@ -469,6 +475,8 @@ sub new {
   foreach my $flag(grep {defined($config->{$_}) && ref($config->{$_}) ne 'ARRAY'} @LIST_FLAGS) {
     $config->{$flag} = [split(',', $config->{$flag})];
   }
+
+  $config->{unsorted_formats} = \%UNSORTABLE;
 
   $self->apply_option_sets($config);
   
