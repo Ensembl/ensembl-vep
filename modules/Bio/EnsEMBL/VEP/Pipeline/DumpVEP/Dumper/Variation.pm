@@ -93,7 +93,7 @@ sub run {
   }
 
   # precache pubmed data
-  $self->pubmed($as);
+  #$self->pubmed($as);
 
   $self->dump_chrs($as, $cache);
 
@@ -193,7 +193,7 @@ sub get_dumpable_object {
   my ($self, $as, $sr, $chr, $s) = @_;
   return $as->get_features_by_regions_uncached([[$sr, $s]], 1);
 }
-
+use Data::Dumper;
 sub dump_obj {
   my ($self, $obj, $file, $chr) = @_;
 
@@ -213,7 +213,7 @@ sub dump_obj {
   $self->freqs_from_vcf($obj, $chr) if $self->{freq_vcf};
   
   my $pubmed = $self->pubmed;
-
+$self->warning('pubmed: ' . Dumper($pubmed));
   foreach my $v(@$obj) {
     my @tmp = (
       $v->{variation_name},
@@ -418,7 +418,7 @@ sub pubmed {
       $self->required_param('assembly')
     );
     my $lock = $file.'.lock';
-
+$self->warning($file . '');
     my $sleep_count = 0;
     if(-e $lock) {
       while(-e $lock) {
@@ -426,8 +426,9 @@ sub pubmed {
         die("I've been waiting for $lock to be removed for $sleep_count seconds, something may have gone wrong\n") if ++$sleep_count > 900;
       }
     }
-
+$self->warning($file);
     if(-e $file) {
+     $self->warning('file exists');
       open IN, $file;
       while(<IN>) {
         chomp;
@@ -438,6 +439,7 @@ sub pubmed {
     }
 
     elsif($as) {
+     $self->warning('file doesnt exist');
       open OUT, ">$lock";
       print OUT "$$\n";
       close OUT;
