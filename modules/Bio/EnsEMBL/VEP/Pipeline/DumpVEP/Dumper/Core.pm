@@ -193,7 +193,7 @@ sub clean_transcript {
       rseq_ens_no_match
       enst_refseq_compare
       _rna_edit
-      mane
+      MANE_Select
     );
 
     foreach my $att(@{$tr->{attributes}}) {
