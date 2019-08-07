@@ -122,6 +122,7 @@ SKIP: {
         'report_coords' => 0,
         'file' => $test_cfg->{custom_vcf},
         'type' => 'exact',
+        'custom_multi_allelic' => undef,
         'info' => {
           'custom_info' => {
             'short_name' => 'test',
@@ -145,6 +146,7 @@ SKIP: {
         'report_coords' => 0,
         'file' => $test_cfg->{custom_vcf},
         'type' => 'overlap',
+        'custom_multi_allelic' => undef,
         'info' => {
           'custom_info' => {
             'short_name' => 'test',
@@ -168,6 +170,7 @@ SKIP: {
         'report_coords' => 1,
         'file' => $test_cfg->{custom_vcf},
         'type' => 'overlap',
+        'custom_multi_allelic' => undef,
         'info' => {
           'custom_info' => {
             'short_name' => 'test',
@@ -192,6 +195,7 @@ SKIP: {
         'fields' => ['FOO', 'BAR'],
         'file' => $test_cfg->{custom_vcf},
         'type' => 'overlap',
+        'custom_multi_allelic' => undef,
         'info' => {
           'custom_info' => {
             'short_name' => 'test',
