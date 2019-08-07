@@ -802,36 +802,46 @@ END
 
   apt-get install build-essential
 END
-
+  my $msg = '';
   my $this_os =  $^O;
   if( $this_os ne 'darwin' ) {
-    -e '/usr/include/zlib.h' or die <<END;
-      zlib.h library header not found in /usr/include. Please install it and try again.
+    unless(-e '/usr/include2/zlib.h'){
+    
+      $msg += 'zlib.h library header not found in /usr/include. Please install it and try again.
       (or to skip Bio::DB::HTS/htslib install re-run with --NO_HTSLIB)
 
       On Debian/Ubuntu systems you can do this with the command:
 
       apt-get install zlib1g-dev
-END
-
-    -e '/usr/include/lzma.h' or die <<END;
-      lzma.h library header not found in /usr/include. Please install it and try again.
+      
+      ';
+    }
+    
+    unless(-e '/usr/include2/lzma.h'){
+      $msg += 'lzma.h library header not found in /usr/include. Please install it and try again.
       (or to skip Bio::DB::HTS/htslib install re-run with --NO_HTSLIB)
 
       On Debian/Ubuntu systems you can do this with the command:
 
       apt-get install liblzma-dev
-END
+      
+      ';
+    }
 
-    -e '/usr/include/bzlib.h' or die <<END;
-      bzlib.h library header not found in /usr/include. Please install it and try again.
+    unless(-e '/usr/include2/bzlib.h'){
+      $msg +='bzlib.h library header not found in /usr/include. Please install it and try again.
       (or to skip Bio::DB::HTS/htslib install re-run with --NO_HTSLIB)
 
       On Debian/Ubuntu systems you can do this with the command:
 
-      apt-get install libbz2-dev
-END
- ;
+      apt-get install libbz2-dev';
+    }
+    
+    if($msg ne '')
+    {
+      die($msg);
+    }
+    
   }
 
   # STEP 1: Create a clean directory for building
