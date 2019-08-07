@@ -802,48 +802,39 @@ END
 
   apt-get install build-essential
 END
+  
+  # List the required libraries with their packages
+  my %libs = ( 
+    'zlib.h' =>  'zlib1g-dev', 
+    'lzma.h' =>  'liblzma-dev', 
+    'bzlib.h' => 'libbz2-dev'
+  );
+
   my $msg = '';
   my $this_os =  $^O;
-  if( $this_os ne 'darwin' ) {
-    unless(-e '/usr/include2/zlib.h'){
-    
-      $msg += 'zlib.h library header not found in /usr/include. Please install it and try again.
-      (or to skip Bio::DB::HTS/htslib install re-run with --NO_HTSLIB)
 
-      On Debian/Ubuntu systems you can do this with the command:
+  if ($this_os ne 'darwin' ) {
+ 
+    my $default_msg = qq{%s library header(s) not found in /usr/include. Please install it and try again.
+(or to skip Bio::DB::HTS/htslib install re-run with --NO_HTSLIB)
 
-      apt-get install zlib1g-dev
-      
-      ';
+On Debian/Ubuntu systems you can do this with the command:
+
+apt-get install %s};
+    my @missing_header = ();
+    my @missing_library = (); 
+    # Loop over the required libraries
+    foreach my $lib (sort(keys(%libs))) {
+      unless(-e '/usr/include/'.$lib){
+        push(@missing_header, $lib);
+	push(@missing_library, $libs{$lib});
+      }
     }
-    
-    unless(-e '/usr/include2/lzma.h'){
-      $msg += 'lzma.h library header not found in /usr/include. Please install it and try again.
-      (or to skip Bio::DB::HTS/htslib install re-run with --NO_HTSLIB)
-
-      On Debian/Ubuntu systems you can do this with the command:
-
-      apt-get install liblzma-dev
-      
-      ';
-    }
-
-    unless(-e '/usr/include2/bzlib.h'){
-      $msg +='bzlib.h library header not found in /usr/include. Please install it and try again.
-      (or to skip Bio::DB::HTS/htslib install re-run with --NO_HTSLIB)
-
-      On Debian/Ubuntu systems you can do this with the command:
-
-      apt-get install libbz2-dev';
-    }
-    
-    if($msg ne '')
-    {
-      die($msg);
-    }
-    
+    my $header_string = join( ', ', @missing_header);
+    my $install_string = join( ' ', @missing_library);
+    die(sprintf($default_msg, $header_string, $install_string). "\n\n") if($header_string ne '');
   }
-
+    
   # STEP 1: Create a clean directory for building
   my $htslib_install_dir = $LIB_DIR;
   my $curdir = getcwd;
