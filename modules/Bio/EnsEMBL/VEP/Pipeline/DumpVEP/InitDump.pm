@@ -140,10 +140,8 @@ sub pubmed {
   my ($self, $dbc, $current_db_name, $species_id) = @_;
   $species_id ||= 0;
 
-  $self->warning('in pubmed');
   my %pm;
-my $pipeline_dump_dir = $self->param('pipeline_dir');
-$self->warning('filename: ' . $pipeline_dump_dir);  
+  my $pipeline_dump_dir = $self->param('pipeline_dir');
 
     my $file = sprintf(
         '%s/pubmed_%s_%s_%s.txt',
@@ -153,10 +151,9 @@ $self->warning('filename: ' . $pipeline_dump_dir);
 $self->get_assembly($dbc, $current_db_name, $species_id)
       );
       
-      $self->warning('filename: ' . $file);
       my $lock = $file.'.lock';
-unlink($file);
-unlink($lock);
+      unlink($file) if -e $file;
+      unlink($lock) if -e $lock;
       my $sleep_count = 0;
       if(-e $lock) {
         while(-e $lock) {
@@ -164,7 +161,6 @@ unlink($lock);
           die("I've been waiting for $lock to be removed for $sleep_count seconds, something may have gone wrong\n") if ++$sleep_count > 900;
         }
       }
-
       if(-e $file) {
         open IN, $file;
         while(<IN>) {
@@ -195,7 +191,6 @@ unlink($lock);
         $sth->bind_columns(\$v, \$p);
 
         open OUT, ">$file";
- $self->warning("writing to ". $file);
         while($sth->fetch()) {
           $pm{$v} = $p;
           print OUT "$v\t$p\n";

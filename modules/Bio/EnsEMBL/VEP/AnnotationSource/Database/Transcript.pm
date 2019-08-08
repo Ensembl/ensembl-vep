@@ -230,7 +230,7 @@ sub get_features_by_regions_uncached {
     $sub_slice->seq;
 
     my @features;
-$DB::single = 1;
+
     foreach my $gene(map {$_->transfer($sr_slice)} @{$sub_slice->get_all_Genes(undef, undef, 1)}) {
       my $gene_stable_id = $gene->stable_id;
       my $canonical_tr_id = $gene->{canonical_transcript_id};

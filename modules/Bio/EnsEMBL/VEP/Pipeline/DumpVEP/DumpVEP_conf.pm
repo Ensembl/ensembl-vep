@@ -63,7 +63,7 @@ sub default_options {
 
     # a directory to keep hive output files and your registry file, you should
     # create this if it doesn't exist
-    pipeline_dir            => '/hps/nobackup2/production/ensembl/'.$ENV{'USER'}.'/'.$self->o('pipeline_name').'/'.$self->o('ensembl_release'),
+    pipeline_dir            => '/hps/nobackup/production/ensembl/'.$ENV{'USER'}.'/'.$self->o('pipeline_name').'/'.$self->o('ensembl_release'),
 
     # contains frequency data
     data_dir                => '/nfs/production/panda/ensembl/variation/data/',
