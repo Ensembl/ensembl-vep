@@ -432,39 +432,6 @@ sub pubmed {
       close IN;
     }
 
-    elsif($as) {
-      open OUT, ">$lock";
-      print OUT "$$\n";
-      close OUT;
-      $self->{_lock_file} = $lock;
-
-      my $sth = $as->get_adaptor('variation', 'variation')->dbc->prepare(qq{
-        SELECT v.name, GROUP_CONCAT(p.pmid)
-        FROM variation v, variation_citation c, publication p
-        WHERE v.variation_id = c.variation_id
-        AND c.publication_id = p.publication_id
-        AND p.pmid IS NOT NULL
-        GROUP BY v.variation_id
-      });
-      $sth->execute;
-
-      my ($v, $p);
-      $sth->bind_columns(\$v, \$p);
-
-      open OUT, ">$file";
-
-      while($sth->fetch()) {
-        $pm{$v} = $p;
-        print OUT "$v\t$p\n";
-      }
-
-      close OUT;
-
-      unlink($lock);
-
-      $sth->finish();
-    }
-
     $self->{_pubmed} = \%pm;
   }
 

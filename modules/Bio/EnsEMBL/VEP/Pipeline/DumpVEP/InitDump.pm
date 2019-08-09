@@ -37,6 +37,7 @@ use Bio::EnsEMBL::Registry;
 use base qw(Bio::EnsEMBL::Variation::Pipeline::BaseVariationProcess);
 
 use DBI;
+use File::Path qw(mkpath);
 
 my $DEBUG = 0;
 
@@ -68,6 +69,8 @@ sub run {
     }
   }
   
+  mkpath($self->param('pipeline_dir')) unless -d $self->param('pipeline_dir');
+
   $self->param(
     'species_jobs',
     [
