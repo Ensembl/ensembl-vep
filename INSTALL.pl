@@ -93,8 +93,8 @@ our (
 ## VERSIONS OF INSTALLED SOFTWARE
 ## MAY BE UPDATED IF SUCCESSFULLY TESTED
 ########################################
-our $HTSLIB_VERSION  = '1.3.2';           # frozen due to introduced dependency on lzma, bz2
-our $BIOHTS_VERSION  = '2.9';             # latest as of release/91
+our $HTSLIB_VERSION  = '1.9';             # latest release as of release/98
+our $BIOHTS_VERSION  = '2.11';            # latest 2.X release as of release/98
 our $BIOPERL_VERSION = 'release-1-6-924'; # frozen, no pressing need to update
 
 
@@ -802,20 +802,39 @@ END
 
   apt-get install build-essential
 END
+  
+  # List the required libraries with their packages
+  my %libs = ( 
+    'zlib.h' =>  'zlib1g-dev', 
+    'lzma.h' =>  'liblzma-dev', 
+    'bzlib.h' => 'libbz2-dev'
+  );
 
+  my $msg = '';
   my $this_os =  $^O;
-  if( $this_os ne 'darwin' ) {
-    -e '/usr/include/zlib.h' or die <<END;
-      zlib.h library header not found in /usr/include. Please install it and try again.
-      (or to skip Bio::DB::HTS/htslib install re-run with --NO_HTSLIB)
 
-      On Debian/Ubuntu systems you can do this with the command:
+  if ($this_os ne 'darwin' ) {
+ 
+    my $default_msg = qq{%s library header(s) not found in /usr/include. Please install it and try again.
+(or to skip Bio::DB::HTS/htslib install re-run with --NO_HTSLIB)
 
-      apt-get install zlib1g-dev
-END
- ;
+On Debian/Ubuntu systems you can do this with the command:
+
+apt-get install %s};
+    my @missing_header = ();
+    my @missing_library = (); 
+    # Loop over the required libraries
+    foreach my $lib (sort(keys(%libs))) {
+      unless(-e '/usr/include/'.$lib){
+        push(@missing_header, $lib);
+	push(@missing_library, $libs{$lib});
+      }
+    }
+    my $header_string = join( ', ', @missing_header);
+    my $install_string = join( ' ', @missing_library);
+    die(sprintf($default_msg, $header_string, $install_string). "\n\n") if($header_string ne '');
   }
-
+    
   # STEP 1: Create a clean directory for building
   my $htslib_install_dir = $LIB_DIR;
   my $curdir = getcwd;
