@@ -108,15 +108,19 @@ sub run {
 
     # add 2, 1 to correct for 0->1 indexing, 1 because we've added a chr column
     my $start_i = $indexes{start} + 2;
-
+    
+    my $tmp_dir = '/hps/nobackup2/production/ensembl/variation/tmpdump';
+    
+    mkdir($tmp_dir) unless -e $tmp_dir;
+    
     foreach my $chr(keys %{{map {$_->{chr} => 1} @{$self->param('regions')}}}) {
 
       next unless -e "$root/$chr/all_vars";
 
       $self->run_system_command(
         sprintf(
-          "cat %s/%s/all_vars | sort -S3G -T=/hps/nobackup2/production/ensembl/variation/tmpdump -k%i,%in | bgzip -c > %s/%s/all_vars.gz",
-          $root, $chr, $start_i, $start_i, $root, $chr
+          "cat %s/%s/all_vars | sort -S3G -T=%s -k%i,%in | bgzip -c > %s/%s/all_vars.gz",
+          $root, $chr, $tmp_dir, $start_i, $start_i, $root, $chr
         )
       );
 
@@ -124,6 +128,8 @@ sub run {
 
       unlink("$root/$chr/all_vars");
     }
+    
+    unlink($tmp_dir);
   }
 
   $self->dump_info($as, $self->get_cache_dir($vep_params));
