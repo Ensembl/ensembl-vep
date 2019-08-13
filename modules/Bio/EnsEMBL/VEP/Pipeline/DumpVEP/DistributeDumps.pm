@@ -154,6 +154,7 @@ sub compute_checksums {
 sub checksum {
   my $path = shift;
   my $checksum = `sum $path`;
+  die('sum ' . $path . ' failed: ' . $?) if $?;
   $checksum =~ s/\s* $path//xms;
   chomp($checksum);
   return $checksum;
