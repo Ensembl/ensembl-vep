@@ -9,6 +9,9 @@ RUN apt-get update && apt-get -y install \
     build-essential \
     git \
     libpng-dev \
+    zlib1g-dev \
+    libbz2-dev \
+    liblzma-dev \
     perl \
     perl-base \
     unzip \
@@ -64,7 +67,8 @@ RUN if [ "$BRANCH" = "master" ]; \
 WORKDIR bioperl-ext/Bio/Ext/Align/
 RUN perl -pi -e"s|(cd libs.+)CFLAGS=\\\'|\$1CFLAGS=\\\'-fPIC |" Makefile.PL
 
-# Install htslib binaries (need bgzip, tabix)
+# Install htslib binaries (for 'bgzip' and 'tabix')
+# htslib requires the packages 'zlib1g-dev', 'libbz2-dev' and 'liblzma-dev'
 WORKDIR $HTSLIB_DIR
 RUN make install && rm -f Makefile *.c
 
@@ -87,6 +91,9 @@ RUN apt-get update && apt-get -y install \
     libmysqlclient-dev \
     libpng-dev \
     libssl-dev \
+    zlib1g-dev \
+    libbz2-dev \
+    liblzma-dev \
     locales \
     openssl \
     perl \
@@ -136,12 +143,12 @@ RUN ensembl-vep/travisci/build_c.sh && \
     # Install ensembl perl dependencies (cpanm)
     cpanm --installdeps --with-recommends --notest --cpanfile ensembl_cpanfile . && \
     cpanm --installdeps --with-recommends --notest --cpanfile ensembl-vep/cpanfile . && \
-    # Delete bioperl after the cpanm installs as it will be reinstalled by the INSTALL.pl script
-    rm -rf bioperl-live && \
+    # Delete bioperl and cpanfiles after the cpanm installs as bioperl will be reinstalled by the INSTALL.pl script
+    rm -rf bioperl-live ensembl_cpanfile ensembl-vep/cpanfile && \
     # Configure "locale", see https://github.com/rocker-org/rocker/issues/19
     echo "$LANG_VAR UTF-8" >> /etc/locale.gen && locale-gen en_US.utf8 && \
     /usr/sbin/update-locale LANG=$LANG_VAR && \
-    # Copy htslib executables
+    # Copy htslib executables. It also requires the packages 'zlib1g-dev', 'libbz2-dev' and 'liblzma-dev'
     cp $HTSLIB_DIR/bgzip $HTSLIB_DIR/tabix $HTSLIB_DIR/htsfile /usr/local/bin/
 
 ENV LC_ALL $LANG_VAR
@@ -158,5 +165,4 @@ RUN echo >> $OPT/.profile && \
     echo PATH=$PATH:\$PATH >> $OPT/.profile && \
     echo export PATH >> $OPT/.profile && \
     # Run INSTALL.pl and remove the ensemb-vep tests and travis
-    ./INSTALL.pl -a a -l && rm -rf t travisci .travis.yml
-
+    ./INSTALL.pl -a a -l -n && rm -rf t travisci .travis.yml
