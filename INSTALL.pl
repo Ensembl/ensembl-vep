@@ -59,6 +59,7 @@ our (
   $CACHE_DIR,
   $PLUGINS,
   $PLUGIN_URL,
+  $PLUGINS_DIR,
   $FASTA_URL,
   $FTP_USER,
   $HELP,
@@ -157,6 +158,7 @@ GetOptions(
   'NO_UPDATE|n'        => \$NO_UPDATE,
   'SPECIES|s=s'        => \$SPECIES,
   'PLUGINS|g=s'        => \$PLUGINS,
+  'PLUGINSDIR|r=s'     => \$PLUGINS_DIR,
   'PLUGINURL=s'        => \$PLUGIN_URL,
   'AUTO|a=s'           => \$AUTO,
   'QUIET|q'            => \$QUIET,
@@ -204,6 +206,7 @@ $BIOPERL_URL  ||= "https://github.com/bioperl/bioperl-live/archive/$BIOPERL_VERS
 $API_VERSION  ||= $CURRENT_VERSION_DATA->{$VEP_MODULE_NAME}->{release};
 $DATA_VERSION ||= $API_VERSION;
 $CACHE_DIR    ||= $ENV{HOME} ? $ENV{HOME}.'/.vep' : 'cache';
+$PLUGINS_DIR  ||= $CACHE_DIR.'/Plugins';
 $FTP_USER     ||= 'anonymous';
 
 $CACHE_URL  ||= "ftp://ftp.ensembl.org/pub/release-$DATA_VERSION/variation/vep";
@@ -1544,7 +1547,7 @@ sub plugins() {
   }
   else {
     print "\nThe VEP can use plugins to add functionality and data.\n" unless $QUIET;
-    print "Plugins will be installed in $CACHE_DIR\/Plugins\n" unless $QUIET;
+    print "Plugins will be installed in $PLUGINS_DIR\n" unless $QUIET;
 
     print "Do you want to install any plugins (y/n)? ";
 
@@ -1557,9 +1560,9 @@ sub plugins() {
   }
 
   # check plugin installation dir exists
-  if(!(-e $CACHE_DIR)) {
+  if(!(-e $PLUGINS_DIR)) {
     if(!$AUTO) {
-      print "Cache directory $CACHE_DIR does not exists - do you want to create it (y/n)? ";
+      print "Plugins directory $PLUGINS_DIR does not exists - do you want to create it (y/n)? ";
 
       my $ok = <>;
 
@@ -1569,14 +1572,14 @@ sub plugins() {
       }
     }
 
-    mkdir($CACHE_DIR) or die "ERROR: Could not create directory $CACHE_DIR\n";
+    mkpath($PLUGINS_DIR) or die "ERROR: Could not create directory $PLUGINS_DIR\n";
   }
-  mkdir($CACHE_DIR.'/Plugins') unless -e $CACHE_DIR.'/Plugins';
+  mkpath($PLUGINS_DIR) unless -e $PLUGINS_DIR;
 
   my $plugin_url_root = $PLUGIN_URL.'/release/'.$API_VERSION;
 
   # download and eval plugin config file
-  my $plugin_config_file = $CACHE_DIR.'/Plugins/plugin_config.txt';
+  my $plugin_config_file = $PLUGINS_DIR.'/plugin_config.txt';
   download_to_file($plugin_url_root.'/plugin_config.txt', $plugin_config_file);
 
   die("ERROR: Could not access plugin config file $plugin_config_file\n") unless($plugin_config_file && -e $plugin_config_file);
@@ -1687,7 +1690,7 @@ sub plugins() {
   foreach my $pl(@selected_plugins) {
     printf("\n - installing \"%s\"\n", $pl->{key});
 
-    my $local_file = $CACHE_DIR.'/Plugins/'.$pl->{key}.'.pm';
+    my $local_file = $PLUGINS_DIR.'/'.$pl->{key}.'.pm';
 
     # overwrite?
     if(-e $local_file) {
@@ -1861,6 +1864,7 @@ Options
 -s | --SPECIES     Comma-separated list of species to install when using --AUTO
 -y | --ASSEMBLY    Assembly name to use if more than one during --AUTO
 -g | --PLUGINS     Comma-separated list of plugins to install when using --AUTO
+-r | --PLUGINSDIR  Set destination directory for VEP plugins files (default = '$ENV{HOME}/.vep/Plugins/')
 -q | --QUIET       Don't write any status output when using --AUTO
 -p | --PREFER_BIN  Use this if the installer fails with out of memory errors
 -l | --NO_HTSLIB   Don't attempt to install Faidx/htslib
