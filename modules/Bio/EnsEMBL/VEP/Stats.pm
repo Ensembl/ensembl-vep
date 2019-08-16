@@ -576,7 +576,7 @@ sub generate_chart_data {
     options => '{legend: {position: "none"}}',
   } if $stats->{chr_totals};
   
-  foreach my $chr(sort {($a !~ /^\d+$/ || $b !~ /^\d+/) ? $a cmp $b : $a <=> $b} keys %{$stats->{chr}}) {
+  foreach my $chr(sort {($a !~ /^\d+$/ || $b !~ /^\d+/ || $a =~ /^\d\w/ || $b =~ /^\d\w/ ) ? $a cmp $b : $a <=> $b} keys %{$stats->{chr}}) {
     my $chr_id = $chr;
     $chr_id =~ s/\./\_/g;
     
@@ -742,7 +742,7 @@ sub sort_keys {
   # sort data
   if(defined($sort)) {
     if($sort eq 'chr') {
-      @keys = sort {($a !~ /^\d+$/ || $b !~ /^\d+/) ? $a cmp $b : $a <=> $b} keys %{$data};
+      @keys = sort {($a !~ /^\d+$/ || $b !~ /^\d+/ || $a =~ /^\d\w/ || $b =~ /^\d\w/ ) ? $a cmp $b : $a <=> $b} keys %{$data};
     }
     elsif($sort eq 'value') {
       @keys = sort {$data->{$a} <=> $data->{$b}} keys %{$data};
