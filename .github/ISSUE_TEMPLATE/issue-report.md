@@ -10,10 +10,10 @@ assignees: ''
 A clear and concise description of what the bug is.
 
 ## Additional information
-Please, fill in the following sections: this will helps us to find the source of your issue quickly with all this information. 
+Please fill in the following sections to help us find the source of your issue as quickly as possible.
 
-### System (please complete the following information):**
-- VEP version: [e.g. 98] 
+### System
+- VEP version: [e.g. 98 or 98.1] 
 - VEP Cache version: [e.g. 98]
 - Perl version: [e.g. 5.26]
 - OS: [e.g. MacOS, Ubuntu, CentOS]
