@@ -412,15 +412,6 @@ sub pubmed {
       $self->required_param('ensembl_release'),
       $self->required_param('assembly')
     );
-    my $lock = $file.'.lock';
-
-    my $sleep_count = 0;
-    if(-e $lock) {
-      while(-e $lock) {
-        sleep 1;
-        die("I've been waiting for $lock to be removed for $sleep_count seconds, something may have gone wrong\n") if ++$sleep_count > 900;
-      }
-    }
     
     if(-e $file) {
       open IN, $file;
@@ -430,6 +421,9 @@ sub pubmed {
         $pm{$split[0]} = $split[1];
       }
       close IN;
+    }
+    else{
+      $self->warning('Unable to find PUBMED file');
     }
 
     $self->{_pubmed} = \%pm;

@@ -125,7 +125,7 @@ sub generate_species_jobs {
     my $has_sift_poly = $self->has_sift_poly($dbc, $var_db_name, $species_id);
     $species_hash{$_} = $has_sift_poly->{$_} for keys %$has_sift_poly;
     
-    my $pubmed = $self->pubmed($dbc_var, $current_db_name, $species_id);
+    $self->pubmed($dbc_var, $current_db_name, $species_id);
   }
 
   push @return, \%species_hash;
@@ -146,65 +146,59 @@ sub pubmed {
   my %pm;
   my $pipeline_dump_dir = $self->param('pipeline_dir');
 
-    my $file = sprintf(
-        '%s/pubmed_%s_%s_%s.txt',
-        $pipeline_dump_dir,
-        $self->required_param('species'),
-        $self->required_param('ensembl_release'),
-$self->get_assembly($dbc, $current_db_name, $species_id)
+  my $file = sprintf(
+      '%s/pubmed_%s_%s_%s.txt',
+      $pipeline_dump_dir,
+      $self->required_param('species'),
+      $self->required_param('ensembl_release'),
+      $self->get_assembly($dbc, $current_db_name, $species_id)
       );
       
-      my $lock = $file.'.lock';
-      unlink($file) if -e $file;
-      unlink($lock) if -e $lock;
-      my $sleep_count = 0;
-      if(-e $lock) {
-        while(-e $lock) {
-          sleep 1;
-          die("I've been waiting for $lock to be removed for $sleep_count seconds, something may have gone wrong\n") if ++$sleep_count > 900;
-        }
-      }
-      if(-e $file) {
-        open IN, $file;
-        while(<IN>) {
-          chomp;
-          my @split = split;
-          $pm{$split[0]} = $split[1];
-        }
-        close IN;
-      }
+  my $lock = $file.'.lock';
+  unlink($file) if -e $file;
+  unlink($lock) if -e $lock;
+  my $sleep_count = 0;
+  if(-e $lock) {
+    while(-e $lock) {
+      sleep 1;
+      die("I've been waiting for $lock to be removed for $sleep_count seconds, something may have gone wrong\n") if ++$sleep_count > 900;
+    }
+  }
+  if(-e $file) {
+    unlink($file);
+  }
+    
+  if($dbc) {
+    open OUT, ">$lock";
+    print OUT "$$\n";
+    close OUT;
+    $self->{_lock_file} = $lock;
 
-      elsif($dbc) {
-        open OUT, ">$lock";
-        print OUT "$$\n";
-        close OUT;
-        $self->{_lock_file} = $lock;
+    my $sth = $dbc->prepare(qq{
+      SELECT v.name, GROUP_CONCAT(p.pmid)
+      FROM variation v, variation_citation c, publication p
+      WHERE v.variation_id = c.variation_id
+      AND c.publication_id = p.publication_id
+      AND p.pmid IS NOT NULL
+      GROUP BY v.variation_id
+    });
+    $sth->execute();
 
-        my $sth = $dbc->prepare(qq{
-          SELECT v.name, GROUP_CONCAT(p.pmid)
-          FROM variation v, variation_citation c, publication p
-          WHERE v.variation_id = c.variation_id
-          AND c.publication_id = p.publication_id
-          AND p.pmid IS NOT NULL
-          GROUP BY v.variation_id
-        });
-        $sth->execute();
+    my ($v, $p);
+    $sth->bind_columns(\$v, \$p);
 
-        my ($v, $p);
-        $sth->bind_columns(\$v, \$p);
+    open OUT, ">$file";
+    while($sth->fetch()) {
+      $pm{$v} = $p;
+      print OUT "$v\t$p\n";
+    }
 
-        open OUT, ">$file";
-        while($sth->fetch()) {
-          $pm{$v} = $p;
-          print OUT "$v\t$p\n";
-        }
+    close OUT;
 
-        close OUT;
+    unlink($lock);
 
-        unlink($lock);
-
-        $sth->finish();
-     } 
+    $sth->finish();
+  } 
   return \%pm;
 }
 
