@@ -81,6 +81,9 @@ sub core {
 
   # copy synonyms file
   $self->copy_synonyms($target_dir);
+  
+  # Generate MD5s
+  $self->generate_md5s;
 
   # create tar
   $self->tar(
@@ -263,6 +266,14 @@ sub copy_synonyms {
     ),
     $target_dir.'/chr_synonyms.txt'
   );
+}
+
+sub generate_md5s {
+  my $self = shift;
+  my $data_dir = $self->data_dir;
+  my $command = 'find ' . $data_dir . ' -type f -exec md5sum \"{}\" + > ' . $data_dir . '/MD5SUMS';
+  $self->warning($command);
+  $self->run_system_command($command);
 }
 
 1;
