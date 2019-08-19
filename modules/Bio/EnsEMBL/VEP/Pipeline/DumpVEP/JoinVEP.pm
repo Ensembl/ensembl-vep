@@ -271,8 +271,9 @@ sub copy_synonyms {
 sub generate_md5s {
   my $self = shift;
   my $data_dir = $self->data_dir;
-  my $command = 'find ' . $data_dir . ' -type f -exec md5sum \"{}\" + > ' . $data_dir . '/MD5SUMS';
-  $self->warning($command);
+  my $data_dir_sed  = $data_dir;
+  $data_dir_sed =~ s/\//\\\//g;
+  my $command = 'find ' . $data_dir . ' -type f -exec md5sum "{}" + | sed \'s/' . $data_dir_sed . '\///\' > ' . $data_dir . '/MD5SUMS';
   $self->run_system_command($command);
 }
 
