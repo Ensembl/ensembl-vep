@@ -576,7 +576,7 @@ sub generate_chart_data {
     options => '{legend: {position: "none"}}',
   } if $stats->{chr_totals};
   
-  foreach my $chr(sort {($a !~ /^\d+$/ || $b !~ /^\d+/) ? $a cmp $b : $a <=> $b} keys %{$stats->{chr}}) {
+  foreach my $chr(sort {($a !~ /^\d+$/ || $b !~ /^\d+$/) ? $a cmp $b : $a <=> $b} keys %{$stats->{chr}}) {
     my $chr_id = $chr;
     $chr_id =~ s/\./\_/g;
     
