@@ -742,7 +742,7 @@ sub sort_keys {
   # sort data
   if(defined($sort)) {
     if($sort eq 'chr') {
-      @keys = sort {($a !~ /^\d+$/ || $b !~ /^\d+/) ? $a cmp $b : $a <=> $b} keys %{$data};
+      @keys = sort {($a !~ /^\d+$/ || $b !~ /^\d+$/) ? $a cmp $b : $a <=> $b} keys %{$data};
     }
     elsif($sort eq 'value') {
       @keys = sort {$data->{$a} <=> $data->{$b}} keys %{$data};
