@@ -55,11 +55,14 @@ sub run {
   my $dba = Bio::EnsEMBL::Registry->get_DBAdaptor($species, $group);
   my $dbc = $dba->dbc();
   my $current_db_name = $dbc->dbname();
-  
-  my $dba_var = Bio::EnsEMBL::Registry->get_DBAdaptor($species, 'variation');
-  my $dbc_var = $dba_var->dbc();
-  my $current_db_name_var = $dbc_var->dbname();
-  $self->warning($current_db_name_var);
+ 
+  my $var_db_name = $self->has_var_db($dbc, $current_db_name);
+  my $dbc_var;
+
+  if($var_db_name){
+    my $dba_var = Bio::EnsEMBL::Registry->get_DBAdaptor($species, 'variation');
+    $dbc_var = $dba_var->dbc();
+  }
 
   #Special case for otherfeatures
   if ($current_db_name =~ /otherfeatures/) {
