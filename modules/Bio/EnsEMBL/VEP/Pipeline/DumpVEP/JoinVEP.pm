@@ -83,7 +83,7 @@ sub core {
   $self->copy_synonyms($target_dir);
   
   # Generate MD5s
-  $self->generate_md5s;
+  #$self->generate_md5s;
 
   # create tar
   $self->tar(
