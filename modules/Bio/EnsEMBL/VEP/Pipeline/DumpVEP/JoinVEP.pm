@@ -83,7 +83,7 @@ sub core {
   $self->copy_synonyms($target_dir);
   
   # Generate MD5s
-  #$self->generate_md5s;
+  $self->generate_md5s if ($self->param('species') eq 'homo_sapiens');
 
   # create tar
   $self->tar(
