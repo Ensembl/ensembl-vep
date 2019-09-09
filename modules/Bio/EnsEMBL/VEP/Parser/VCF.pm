@@ -412,6 +412,7 @@ sub create_StructuralVariationFeatures {
     $self->warning_msg("WARNING: variant " . $info->{SVTYPE}. " is of a non-supported type, skipping:\n$line\n");
     $skip = 1;
   }
+
   ## check against size upperlimit to avoid memory problems
   my $len = $end - $start;
   if( $len > $self->{max_sv_size} ){
@@ -428,6 +429,13 @@ sub create_StructuralVariationFeatures {
   elsif(defined($info->{SVLEN})) {
     $end = $start + abs($info->{SVLEN}) - 1;
   }
+
+  if($info->{SVTYPE} && $info->{SVTYPE} =~/BND/ ){
+    ## break ends are not currently annotated as fusions between different regions/chromosomes
+    ## each end is annotated separately
+    $end = $start;
+  }
+
 
   # check for imprecise breakpoints
   my ($min_start, $max_start, $min_end, $max_end) = (
