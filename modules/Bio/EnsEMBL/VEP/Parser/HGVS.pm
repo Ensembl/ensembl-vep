@@ -77,7 +77,6 @@ use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::IO::ListBasedParser;
 
-
 =head2 new
 
   Arg 1      : hashref $args
@@ -168,6 +167,10 @@ sub create_VariationFeatures {
   my @errors;
 
   foreach my $core_group(@core_groups) {
+ 
+    # Doesn't look up transcripts 'ENST' in otherfeatures 
+    next if ($hgvs =~ /ENST/ && $core_group eq 'otherfeatures');
+
     my $sa  = $self->get_adaptor($core_group, 'Slice');
     my $ta  = $self->get_adaptor($core_group, 'Transcript');
 
