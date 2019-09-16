@@ -571,11 +571,13 @@ sub get_input {
 
     my ($text, $num) = ($1, $2);
     
-    if($value && $value =~ /^[\-\d\.e]+$/) {
-      $input = $text =~ /^\-?\d+\.?\d*(e\-?\d+)?$/ ? $text : $num;
-    }
-    else {
-      $input = $text;
+    if($num ne '') {
+      if($value && $value =~ /^[\-\d\.e]+$/) {
+        $input = $text =~ /^\-?\d+\.?\d*(e\-?\d+)?$/ ? $text : $num;
+      }
+      else {
+        $input = $text;
+      }
     }
   }
 
