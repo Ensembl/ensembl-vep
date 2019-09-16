@@ -591,6 +591,24 @@ is_deeply($cnv_vf, bless( {
                 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature - CNV with multiple alleles');
 
 
+## Currently regard fusions across different chromosomes as single breakpoint
+my $bnd_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1,  warning_file => 'STDERR'}),
+  file => $test_cfg->create_input_file([qw(2	68914092	BND00001121	A	]1:37938377]A	.	PASS	SVTYPE=BND;CHR2=1;END=37938377   )]),
+  valid_chromosomes => [1,2]
+})->next();
+ok($bnd_vf->end() == 68914093, 'StructuralVariationFeature - cross-chromosome BND');
+
+my $bnd2_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1,  warning_file => 'STDERR'}),
+  file => $test_cfg->create_input_file([qw(2    68914092        BND00001121     A       ]2:68920000]A	.	PASS   SVTYPE=BND;CHR2=2;END=68920000   )]),
+  valid_chromosomes => [1,2]
+})->next();
+ok($bnd2_vf->end() == 68920000, 'StructuralVariationFeature - within-chromosome BND');
+
+
+
+
 ## OTHER TESTS
 ##############
 
