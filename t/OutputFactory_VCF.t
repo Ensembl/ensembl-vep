@@ -244,6 +244,22 @@ is(
   'output_hash_to_vcf_info_chunk - whitespace converted'
 );
 
+$of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({fields => 'Allele,SIFT'})
+});
+
+is(
+  $of->output_hash_to_vcf_info_chunk({Allele => 'A', SIFT => '0'}),
+  'A|0',
+  "output_hash_to_vcf_info_chunk - '0' kept"
+);
+
+is(
+  $of->output_hash_to_vcf_info_chunk({Allele => 'A', SIFT => 0}),
+  'A|0',
+  "output_hash_to_vcf_info_chunk - 0 kept"
+);
+
 
 ## get_all_lines_by_InputBuffer
 ###############################
