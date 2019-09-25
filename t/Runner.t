@@ -215,6 +215,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'cell_type' => undef,
   'mirna' => undef,
   'ambiguity' => undef,
+  'shift_genomic' => undef,
   'no_shift' => 0,
 }, 'Bio::EnsEMBL::VEP::OutputFactory::VEP_output' ), 'get_OutputFactory');
 
