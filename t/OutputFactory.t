@@ -1121,6 +1121,7 @@ $ib = get_annotated_buffer({
 });
 
 $vfoa = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[1];
+
 is_deeply(
   $of->TranscriptVariationAllele_to_output_hash($vfoa, {}),
   {
@@ -1137,7 +1138,7 @@ is_deeply(
     'Protein_position' => 331,
     'Amino_acids' => 'A/T',
     'Feature' => 'ENST00000352957',
-    'Codons' => 'Gca/Aca',
+    'Codons' => 'Gca/Aca'
   },
   'TranscriptVariationAllele_to_output_hash'
 );
@@ -1159,7 +1160,7 @@ is_deeply(
     'Protein_position' => '331/338',
     'Amino_acids' => 'A/T',
     'Feature' => 'ENST00000352957',
-    'Codons' => 'Gca/Aca',
+    'Codons' => 'Gca/Aca'
   },
   'TranscriptVariationAllele_to_output_hash - total_length'
 );
@@ -1194,7 +1195,7 @@ is_deeply(
     'Allele' => 'T',
     'Gene' => 'ENSG00000154719',
     'cDNA_position' => 1122,
-    'Feature' => 'ENST00000307301',
+    'Feature' => 'ENST00000307301'
   },
   'TranscriptVariationAllele_to_output_hash - non-coding'
 );
@@ -1914,7 +1915,6 @@ $ib = get_annotated_buffer({
 },1);
 
 $vfoa = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[0];
-$DB::single = 1;
 is_deeply(
   $of->VariationFeatureOverlapAllele_to_output_hash($vfoa, {}, $ib->buffer->[0]),
   {

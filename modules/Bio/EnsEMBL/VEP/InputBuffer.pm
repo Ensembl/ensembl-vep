@@ -272,16 +272,19 @@ sub get_overlapping_vfs {
   my $self = shift;
   my $start = shift;
   my $end = shift;
-  my @to_search_over;
+
+  my @all_vfs;
   ($start, $end) = ($end, $start) if $start > $end;
   
-  if(my $tree = $self->interval_tree)
-  {
-    @to_search_over = @{$tree->fetch($start - 1, $end)};
+  ## vfs obtained from trees are added to a separate array to allow for checking of overlaps
+  ## from both shifted and unshifted positions
+  
+  if(my $tree = $self->interval_tree) {
+    @all_vfs = @{$tree->fetch($start - 1, $end)};
   }
   else{
     $tree = $self->hash_tree unless($tree);  
-    @to_search_over = values %{{
+    @all_vfs = values %{{
       map {$_->{_hash_tree_id} => $_}   # use _hash_tree_id to uniquify
       map {@{$tree->{$_} || []}} # tree might be empty
       (
@@ -293,7 +296,7 @@ sub get_overlapping_vfs {
   }      
   
   my @vfs;
-  foreach my $vf (@to_search_over)
+  foreach my $vf (@all_vfs)
   {
     if (overlap($vf->{start}, $vf->{end}, $start, $end))
     {
@@ -324,7 +327,6 @@ sub get_overlapping_vfs {
 =cut
 
 sub interval_tree {
-  
   my $self = shift;
 
   if(!exists($self->{temp}->{interval_tree})) {

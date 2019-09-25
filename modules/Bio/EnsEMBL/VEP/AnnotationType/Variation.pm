@@ -84,8 +84,10 @@ sub annotate_InputBuffer {
     foreach my $vf(
       grep {ref($_) ne 'Bio::EnsEMBL::Variation::StructuralVariationFeature'}
       @{$buffer->get_overlapping_vfs($existing_vf->{start}, $existing_vf->{end})}
-    ) {      
+    ) {
       my $matched = $self->compare_existing($vf, $existing_vf);
+      
+      ## Duplicate colocated variants are given when searching over 
       push @{$vf->{existing}}, $matched if ($matched && !(grep($_->{variation_name} eq $matched->{variation_name},@{$vf->{existing}})));
     }
   }
@@ -175,8 +177,8 @@ sub compare_existing {
     }
   );
 
-  if(defined($input_var->{unshifted_allele_string}))
-  {
+  ## Obtain existing alleles for the input position as well as the shifted position
+  if(defined($input_var->{unshifted_allele_string})) {
     my $matched_alleles_unshifted = get_matched_variant_alleles(
       {
         allele_string => $input_var->{unshifted_allele_string},
