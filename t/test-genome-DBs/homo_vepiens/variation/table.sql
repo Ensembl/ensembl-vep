@@ -186,7 +186,7 @@ CREATE TABLE `meta` (
   PRIMARY KEY (`meta_id`),
   UNIQUE KEY `species_key_value_idx` (`species_id`,`meta_key`,`meta_value`),
   KEY `species_value_idx` (`species_id`,`meta_value`)
-) ENGINE=MyISAM AUTO_INCREMENT=142 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=146 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `meta_coord` (
   `table_name` varchar(40) NOT NULL,
@@ -418,8 +418,9 @@ CREATE TABLE `source` (
   `type` enum('chip','lsdb') DEFAULT NULL,
   `somatic_status` enum('germline','somatic','mixed') DEFAULT 'germline',
   `data_types` set('variation','variation_synonym','structural_variation','phenotype_feature','study') DEFAULT NULL,
-  PRIMARY KEY (`source_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=27 DEFAULT CHARSET=latin1;
+  PRIMARY KEY (`source_id`),
+  UNIQUE KEY `name_idx` (`name`)
+) ENGINE=MyISAM AUTO_INCREMENT=33 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `structural_variation` (
   `structural_variation_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -580,7 +581,6 @@ CREATE TABLE `variation` (
   `variation_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `source_id` int(10) unsigned NOT NULL,
   `name` varchar(255) DEFAULT NULL,
-  `ancestral_allele` varchar(255) DEFAULT NULL,
   `flipped` tinyint(1) unsigned DEFAULT NULL,
   `class_attrib_id` int(10) unsigned DEFAULT '0',
   `somatic` tinyint(1) NOT NULL DEFAULT '0',
@@ -617,6 +617,7 @@ CREATE TABLE `variation_feature` (
   `seq_region_strand` tinyint(4) NOT NULL,
   `variation_id` int(10) unsigned NOT NULL,
   `allele_string` varchar(50000) DEFAULT NULL,
+  `ancestral_allele` varchar(50) DEFAULT NULL,
   `variation_name` varchar(255) DEFAULT NULL,
   `map_weight` int(11) NOT NULL,
   `flags` set('genotyped') DEFAULT NULL,

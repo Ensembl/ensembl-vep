@@ -96,10 +96,11 @@ our %DEFAULTS = (
   no_shift          => 0,
   core_type         => 'core',
   polyphen_analysis => 'humvar',
-  pick_order        => [qw(canonical appris tsl biotype ccds rank length ensembl refseq)],
+  pick_order        => [qw(canonical appris tsl biotype ccds rank length ensembl refseq mane)],
   terminal_width    => 48,
   vcf_info_field    => 'CSQ',
   ucsc_data_root    => 'http://hgdownload.cse.ucsc.edu/goldenpath/',
+  max_sv_size       => 10000000,
   
   # frequency filtering
   freq_freq         => 0.01,
@@ -155,6 +156,7 @@ our @OPTION_SETS = (
       max_af         => 1,
       pubmed         => 1,
       uniprot        => 1,
+      mane           => 1,
       tsl            => 1,
       appris         => 1,
       variant_class  => 1,
@@ -358,11 +360,11 @@ our @OPTION_SETS = (
 
 # valid values for certain flags
 our %VALID = (
-  format          => [qw(ensembl vcf hgvs id pileup region guess)],
+  format          => [qw(ensembl vcf hgvs id spdi region guess)],
   terms           => [qw(SO display NCBI)],
   sift            => [qw(s p b)],
   polyphen        => [qw(s p b)],
-  pick_order      => [qw(canonical appris tsl biotype ccds rank length ensembl refseq)],
+  pick_order      => [qw(mane canonical appris tsl biotype ccds rank length ensembl refseq)],
   nearest         => [qw(transcript gene symbol)],
   compress_output => [qw(gzip bgzip)],
 );
@@ -376,8 +378,8 @@ our %REQUIRES = (
 
 # incompatible options
 our %INCOMPATIBLE = (
-  most_severe => [qw(biotype no_intergenic protein symbol sift polyphen coding_only ccds canonical xref_refseq numbers domains tsl appris uniprot summary pick flag_pick pick_allele flag_pick_allele)],
-  summary     => [qw(biotype no_intergenic protein symbol sift polyphen coding_only ccds canonical xref_refseq numbers domains tsl appris uniprot most_severe pick flag_pick pick_allele flag_pick_allele)],
+  most_severe => [qw(biotype no_intergenic protein symbol sift polyphen coding_only ccds mane canonical xref_refseq numbers domains tsl appris uniprot summary pick flag_pick pick_allele flag_pick_allele)],
+  summary     => [qw(biotype no_intergenic protein symbol sift polyphen coding_only ccds mane canonical xref_refseq numbers domains tsl appris uniprot most_severe pick flag_pick pick_allele flag_pick_allele)],
   database    => [qw(af_1kg af_esp af_exac af_gnomad max_af pubmed offline cache)],
   quiet       => [qw(verbose)],
   refseq      => [qw(gencode_basic merged)],
@@ -387,6 +389,7 @@ our %INCOMPATIBLE = (
   individual  => [qw(minimal)],
   check_ref   => [qw(lookup_ref)],
   no_shift    => [qw(shift_hgvs)],
+  check_svs   => [qw(offline)],
 );
 
 # deprecated/replaced flags
@@ -642,7 +645,7 @@ sub check_config {
   unless($config->{safe}) {
     foreach my $flag(grep {$self->_is_flag_active($config, $_)} keys %INCOMPATIBLE) {
       foreach my $invalid(grep {$self->_is_flag_active($config, $_)} @{$INCOMPATIBLE{$flag}}) {
-        throw sprintf("ERROR: Can't use --%s and --%s together\n", $flag, $invalid);
+        die sprintf("ERROR: Can't use --%s and --%s together\n", $flag, $invalid);
       }
     }
   }
@@ -650,7 +653,7 @@ sub check_config {
   # check required flags
   foreach my $flag(grep {$self->_is_flag_active($config, $_)} keys %REQUIRES) {
     foreach my $required(@{$REQUIRES{$flag}}) {
-      throw sprintf("ERROR: You must set --%s to use --%s\n", $required, $flag) unless $self->_is_flag_active($config, $required);
+      die sprintf("ERROR: You must set --%s to use --%s\n", $required, $flag) unless $self->_is_flag_active($config, $required);
     }
   }
 
@@ -662,7 +665,7 @@ sub check_config {
       $msg .= " - please use --$new instead";
     }
 
-    throw("$msg\n");
+    die "$msg\n";
   }
 
   ## HACK FIX FOR UNEXPLAINED WEB BUG

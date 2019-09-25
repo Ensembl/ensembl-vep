@@ -114,6 +114,7 @@ CREATE TABLE `biotype` (
   `description` text,
   `biotype_group` enum('coding','pseudogene','snoncoding','lnoncoding','mnoncoding','LRG','undefined','no_group') DEFAULT NULL,
   `so_acc` varchar(64) DEFAULT NULL,
+  `so_term` varchar(1023) DEFAULT NULL,
   PRIMARY KEY (`biotype_id`),
   UNIQUE KEY `name_type_idx` (`name`,`object_type`)
 ) ENGINE=MyISAM AUTO_INCREMENT=88 DEFAULT CHARSET=latin1;
@@ -375,7 +376,7 @@ CREATE TABLE `identity_xref` (
 
 CREATE TABLE `interpro` (
   `interpro_ac` varchar(40) NOT NULL,
-  `id` varchar(40) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
+  `id` varchar(40) NOT NULL,
   UNIQUE KEY `accession_idx` (`interpro_ac`,`id`),
   KEY `id_idx` (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
@@ -489,7 +490,7 @@ CREATE TABLE `meta` (
   PRIMARY KEY (`meta_id`),
   UNIQUE KEY `species_key_value_idx` (`species_id`,`meta_key`,`meta_value`),
   KEY `species_value_idx` (`species_id`,`meta_value`)
-) ENGINE=MyISAM AUTO_INCREMENT=866 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=872 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `meta_coord` (
   `table_name` varchar(40) NOT NULL,
@@ -538,7 +539,7 @@ CREATE TABLE `misc_set` (
 CREATE TABLE `object_xref` (
   `object_xref_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `ensembl_id` int(10) unsigned NOT NULL,
-  `ensembl_object_type` enum('RawContig','Transcript','Gene','Translation','Operon','OperonTranscript','Marker') NOT NULL,
+  `ensembl_object_type` enum('RawContig','Transcript','Gene','Translation','Operon','OperonTranscript','Marker','RNAProduct') NOT NULL,
   `xref_id` int(10) unsigned NOT NULL,
   `linkage_annotation` varchar(255) DEFAULT NULL,
   `analysis_id` smallint(5) unsigned DEFAULT NULL,
@@ -715,6 +716,42 @@ CREATE TABLE `repeat_feature` (
   KEY `analysis_idx` (`analysis_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 MAX_ROWS=100000000 AVG_ROW_LENGTH=80;
 
+CREATE TABLE `rnaproduct` (
+  `rnaproduct_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `rnaproduct_type_id` smallint(5) unsigned NOT NULL,
+  `transcript_id` int(10) unsigned NOT NULL,
+  `seq_start` int(10) NOT NULL,
+  `start_exon_id` int(10) unsigned DEFAULT NULL,
+  `seq_end` int(10) NOT NULL,
+  `end_exon_id` int(10) unsigned DEFAULT NULL,
+  `stable_id` varchar(128) DEFAULT NULL,
+  `version` smallint(5) unsigned DEFAULT NULL,
+  `created_date` datetime DEFAULT NULL,
+  `modified_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`rnaproduct_id`),
+  KEY `transcript_idx` (`transcript_id`),
+  KEY `stable_id_idx` (`stable_id`,`version`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+CREATE TABLE `rnaproduct_attrib` (
+  `rnaproduct_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `attrib_type_id` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `value` text NOT NULL,
+  UNIQUE KEY `rnaproduct_attribx` (`rnaproduct_id`,`attrib_type_id`,`value`(500)),
+  KEY `type_val_idx` (`attrib_type_id`,`value`(40)),
+  KEY `val_only_idx` (`value`(40)),
+  KEY `rnaproduct_idx` (`rnaproduct_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+CREATE TABLE `rnaproduct_type` (
+  `rnaproduct_type_id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+  `code` varchar(20) NOT NULL DEFAULT '',
+  `name` varchar(255) NOT NULL DEFAULT '',
+  `description` text,
+  PRIMARY KEY (`rnaproduct_type_id`),
+  UNIQUE KEY `code_idx` (`code`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
 CREATE TABLE `seq_region` (
   `seq_region_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
@@ -773,7 +810,7 @@ CREATE TABLE `stable_id_event` (
   `new_stable_id` varchar(128) DEFAULT NULL,
   `new_version` smallint(6) DEFAULT NULL,
   `mapping_session_id` int(10) unsigned NOT NULL DEFAULT '0',
-  `type` enum('gene','transcript','translation') NOT NULL,
+  `type` enum('gene','transcript','translation','rnaproduct') NOT NULL,
   `score` float NOT NULL DEFAULT '0',
   UNIQUE KEY `uni_idx` (`mapping_session_id`,`old_stable_id`,`new_stable_id`,`type`),
   KEY `new_idx` (`new_stable_id`),

@@ -168,6 +168,7 @@ is_deeply(
     'REFSEQ_MATCH',
     'REFSEQ_OFFSET',
     'SOURCE',
+    'REFSEQ_OFFSET',
   ],
   'fields - --merged and --custom dont duplicate SOURCE'
 );
@@ -324,15 +325,15 @@ is(
   $lines[0],
   "21\t25585733\trs142513484\tC\tT\t.\t.\t".
   'CSQ=T|3_prime_UTR_variant|MODIFIER|MRPL39|ENSG00000154719|Transcript|ENST00000307301|protein_coding|'.
-  '11/11||ENST00000307301.11:c.*18G>A||1122|||||rs142513484||-1||SNV|HGNC|HGNC:14027|YES|5||CCDS33522.1|'.
+  '11/11||ENST00000307301.11:c.*18G>A||1122|||||rs142513484||-1||SNV|HGNC|HGNC:14027|YES||5||CCDS33522.1|'.
   'ENSP00000305682|Q9NYK5||UPI00001AEAC0|||||||0.0010|0.003|0.0014|0|0|0|0.004998|0|0.0003478|0.004643|'.
   '0.0003236|0|0|0|1.886e-05|0|0|0.004998|AA||||||||,'.
   'T|missense_variant|MODERATE|MRPL39|ENSG00000154719|Transcript|ENST00000352957|protein_coding|'.
   '10/10||ENST00000352957.8:c.991G>A|ENSP00000284967.6:p.Ala331Thr|1033|991|331|A/T|Gca/Aca|rs142513484|'.
-  '|-1||SNV|HGNC|HGNC:14027||1|P1|CCDS13573.1|ENSP00000284967|Q9NYK5||UPI00001AEE66||tolerated_low_confidence(0.17)|'.
+  '|-1||SNV|HGNC|HGNC:14027|||1|P1|CCDS13573.1|ENSP00000284967|Q9NYK5||UPI00001AEE66||tolerated_low_confidence(0.17)|'.
   'benign(0.001)||||0.0010|0.003|0.0014|0|0|0|0.004998|0|0.0003478|0.004643|0.0003236|0|0|0|1.886e-05|0|0|0.004998|AA||||||||,'.
   'T|upstream_gene_variant|MODIFIER|AP000223.1|ENSG00000260583|Transcript|ENST00000567517|antisense||||||||||'.
-  'rs142513484|2407|-1||SNV|Clone_based_ensembl_gene||YES||||||||||||||0.0010|0.003|0.0014|0|0|0|0.004998|0|'.
+  'rs142513484|2407|-1||SNV|Clone_based_ensembl_gene||YES|||||||||||||||0.0010|0.003|0.0014|0|0|0|0.004998|0|'.
   '0.0003478|0.004643|0.0003236|0|0|0|1.886e-05|0|0|0.004998|AA||||||||'.
   "\tGT\t0|0",
   'get_all_lines_by_InputBuffer - everything'
@@ -536,6 +537,25 @@ ok(
 );
 
 
+## test feature overlaps available in output
+my $len_config = $ib->config;
+$len_config->{_params}->{overlaps} = 1;
+$ib = get_runner({
+ input_file => $test_cfg->create_input_file([qw(21 25585733 25585735 DEL 1)]),
+   dir => $test_cfg->{cache_root_dir},
+     fasta => $test_cfg->{fasta},
+     })->get_InputBuffer;
+     $of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({config => $len_config});
+     $ib->buffer->[0]->{transcript_variations} = {};
+
+ok(
+  $of->get_all_lines_by_InputBuffer($ib)->[0] =~ /3\|0.01,deletion/,
+  "SV overlap percent and length available"
+);
+
+
+
+
 ## test getting stuff from input
 ################################
 
@@ -629,21 +649,21 @@ $of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({config => $ib->config});
 is(
   $of->get_all_lines_by_InputBuffer($ib)->[0],
   'MT	12848	rs267606899	C	T	.	.	CSQ='.
-'T|downstream_gene_variant|MODIFIER||4508|Transcript|4508||||||||||||3641|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|downstream_gene_variant|MODIFIER||4509|Transcript|4509||||||||||||4276|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|downstream_gene_variant|MODIFIER||4513|Transcript|4513||||||||||||4579|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|downstream_gene_variant|MODIFIER||4514|Transcript|4514||||||||||||2858|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|upstream_gene_variant|MODIFIER||4519|Transcript|4519||||||||||||1899|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|downstream_gene_variant|MODIFIER||4537|Transcript|4537||||||||||||2444|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|downstream_gene_variant|MODIFIER||4538|Transcript|4538||||||||||||711|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|downstream_gene_variant|MODIFIER||4539|Transcript|4539||||||||||||2082|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|missense_variant|MODERATE||4540|Transcript|4540||||||512|512|171|A/V|gCa/gTa|||1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|downstream_gene_variant|MODIFIER||4541|Transcript|4541||||||||||||1301|-1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|downstream_gene_variant|MODIFIER||4556|Transcript|4556||||||||||||1826|-1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|downstream_gene_variant|MODIFIER||4563|Transcript|4563||||||||||||2790|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|downstream_gene_variant|MODIFIER||4564|Transcript|4564||||||||||||642|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|downstream_gene_variant|MODIFIER||4566|Transcript|4566||||||||||||4484|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|downstream_gene_variant|MODIFIER||4568|Transcript|4568||||||||||||512|1||rseq_mrna_nonmatch&rseq_no_comparison,T|downstream_gene_variant|MODIFIER||4571|Transcript|4571||||||||||||3108|-1||rseq_mrna_nonmatch&rseq_no_comparison,T|downstream_gene_variant|MODIFIER||4573|Transcript|4573||||||||||||2379|1||rseq_mrna_nonmatch&rseq_no_comparison,T|downstream_gene_variant|MODIFIER||4575|Transcript|4575||||||||||||583|1||rseq_mrna_nonmatch&rseq_no_comparison,T|upstream_gene_variant|MODIFIER||4576|Transcript|4576||||||||||||3040|1||rseq_mrna_nonmatch&rseq_no_comparison',
+'T|downstream_gene_variant|MODIFIER||4508|Transcript|4508||||||||||||3641|1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|downstream_gene_variant|MODIFIER||4509|Transcript|4509||||||||||||4276|1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|downstream_gene_variant|MODIFIER||4513|Transcript|4513||||||||||||4579|1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|downstream_gene_variant|MODIFIER||4514|Transcript|4514||||||||||||2858|1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|upstream_gene_variant|MODIFIER||4519|Transcript|4519||||||||||||1899|1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|downstream_gene_variant|MODIFIER||4537|Transcript|4537||||||||||||2444|1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|downstream_gene_variant|MODIFIER||4538|Transcript|4538||||||||||||711|1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|downstream_gene_variant|MODIFIER||4539|Transcript|4539||||||||||||2082|1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|missense_variant|MODERATE||4540|Transcript|4540||||||512|512|171|A/V|gCa/gTa|||1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|downstream_gene_variant|MODIFIER||4541|Transcript|4541||||||||||||1301|-1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|downstream_gene_variant|MODIFIER||4556|Transcript|4556||||||||||||1826|-1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|downstream_gene_variant|MODIFIER||4563|Transcript|4563||||||||||||2790|1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|downstream_gene_variant|MODIFIER||4564|Transcript|4564||||||||||||642|1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|downstream_gene_variant|MODIFIER||4566|Transcript|4566||||||||||||4484|1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|downstream_gene_variant|MODIFIER||4568|Transcript|4568||||||||||||512|1||rseq_mrna_nonmatch&rseq_no_comparison|,T|downstream_gene_variant|MODIFIER||4571|Transcript|4571||||||||||||3108|-1||rseq_mrna_nonmatch&rseq_no_comparison|,T|downstream_gene_variant|MODIFIER||4573|Transcript|4573||||||||||||2379|1||rseq_mrna_nonmatch&rseq_no_comparison|,T|downstream_gene_variant|MODIFIER||4575|Transcript|4575||||||||||||583|1||rseq_mrna_nonmatch&rseq_no_comparison|,T|upstream_gene_variant|MODIFIER||4576|Transcript|4576||||||||||||3040|1||rseq_mrna_nonmatch&rseq_no_comparison|',
   "RefSeq MT transcripts are returned"
 );
 

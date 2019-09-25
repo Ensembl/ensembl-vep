@@ -1121,7 +1121,6 @@ $ib = get_annotated_buffer({
 });
 
 $vfoa = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[1];
-
 is_deeply(
   $of->TranscriptVariationAllele_to_output_hash($vfoa, {}),
   {
@@ -1139,7 +1138,6 @@ is_deeply(
     'Amino_acids' => 'A/T',
     'Feature' => 'ENST00000352957',
     'Codons' => 'Gca/Aca',
-    'Location' => '21:25585733',
   },
   'TranscriptVariationAllele_to_output_hash'
 );
@@ -1162,7 +1160,6 @@ is_deeply(
     'Amino_acids' => 'A/T',
     'Feature' => 'ENST00000352957',
     'Codons' => 'Gca/Aca',
-    'Location' => '21:25585733',
   },
   'TranscriptVariationAllele_to_output_hash - total_length'
 );
@@ -1198,7 +1195,6 @@ is_deeply(
     'Gene' => 'ENSG00000154719',
     'cDNA_position' => 1122,
     'Feature' => 'ENST00000307301',
-    'Location' => '21:25585733',
   },
   'TranscriptVariationAllele_to_output_hash - non-coding'
 );
@@ -1927,7 +1923,7 @@ is_deeply(
       "intron_variant"
     ],
     "HGVSg" => "21:g.25592986_25592989dup",
-    "Allele" => "AAAT"
+    "Allele" => "TAAA"
   },
   'HGVS 3prime shifting - ON'
 );

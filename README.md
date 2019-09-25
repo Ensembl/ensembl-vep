@@ -1,5 +1,6 @@
 # ensembl-vep
 
+[![GitHub](https://img.shields.io/github/license/Ensembl/ensembl-vep.svg)](https://github.com/Ensembl/ensembl-vep/blob/master/LICENSE)
 [![Coverage Status](https://coveralls.io/repos/github/Ensembl/ensembl-vep/badge.svg?branch=master)](https://coveralls.io/github/Ensembl/ensembl-vep?branch=master)
 [![Docker Build Status](https://img.shields.io/docker/build/ensemblorg/ensembl-vep.svg)](https://hub.docker.com/r/ensemblorg/ensembl-vep)
 [![Docker Hub Pulls](https://img.shields.io/docker/pulls/ensemblorg/ensembl-vep.svg)](https://hub.docker.com/r/ensemblorg/ensembl-vep)
@@ -15,6 +16,7 @@
 * [Haplosaurus](#haplo)
   * [Usage](#haplousage)
   * [Output](#haplooutput)
+  * [REST](#haploREST)
   * [Flags](#haploflags)
 * [Variant Recoder](#recoder)
   * [Usage](#recoderusage)
@@ -80,7 +82,7 @@ This approach offers an advantage over VEP's analysis, which treats each input v
 
 <a name="haplousage"></a>
 ### Usage
-Input data must be a [VCF](http://samtools.github.io/hts-specs/VCFv4.3.pdf) containing phased genotype data for at least one individual; no other formats are currently supported.
+Input data must be a [VCF](http://samtools.github.io/hts-specs/VCFv4.3.pdf) containing phased genotype data for at least one individual and file must be sorted by chromosome and genomic position; no other formats are currently supported.
 
 When using a VEP cache as the source of transcript annotation, the first time you run `haplo` with a particular cache it will spend some time scanning transcript locations in the cache.
 
@@ -104,11 +106,38 @@ The default output format is a simple tab-delimited file reporting all observed 
 The altered haplotype sequences can be obtained by switching to JSON output using `--json` which will display them by default.
 Each transcript analysed is summarised as a JSON object written to one line of the output file.
 
-The JSON output structure matches the format of the [transcript haplotype REST endpoint](https://rest.ensembl.org/documentation/info/transcript_haplotypes_get).
+The [JSON output](#haploREST) structure matches the format of the [transcript haplotype REST endpoint](https://rest.ensembl.org/documentation/info/transcript_haplotypes_get).
 
 You may exclude fields in the JSON from being exported with `--dont_export field1,field2`. This may be used, for example, to exclude the full haplotype sequence and aligned sequences from the output with `--dont_export seq,aligned_sequences`.
 
 > Note JSON output does not currently include side-loaded frequency data.
+
+
+
+<a name="haploREST"></a>
+### REST service
+The [transcript haplotype REST endpoint](https://rest.ensembl.org/documentation/info/transcript_haplotypes_get).
+returns arrays of protein_haplotypes and cds_haplotypes for a given transcript. The default haplotype record includes:
+
+* **population_counts**: the number of times the haplotype is seen in each population
+* **population_frequencies**: the frequency of the haplotype  in each population
+* **contributing_variants**:  variants contributing to the haplotype
+* **diffs**: differences between the reference and this haplotype
+* **hex**: the md5 hex of this haplotype sequence
+* **other_hexes**: the md5 hex of other related haplotype sequences (
+        CDSHaplotypes that translate to this ProteinHaplotype or
+        ProteinHaplotype representing the translation of this CDSHaplotype)
+* **has_indel**: does the haplotype contain insertions or deletions
+* **type**: the type of haplotype - cds, protein
+* **name**: a human readable name for the haplotype (sequence id + REF or a change description)
+* **flags**: [flags](#haploflags) for the haplotype
+* **frequency**: haplotype frequency in full sample set
+* **count**: haplotype count in full sample set
+
+The REST service does not return raw sequences, sample-haplotype assignments and the aligned sequences used to generate
+differences by default.
+
+
 
 <a name="haploflags"></a>
 ### Flags

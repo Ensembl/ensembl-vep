@@ -39,7 +39,6 @@ use Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation;
 use Bio::EnsEMBL::VEP::AnnotationSource::Cache::Variation;
 use Bio::EnsEMBL::Variation::Utils::Sequence qw(trim_sequences get_matched_variant_alleles);
 use Scalar::Util qw(looks_like_number);
-
 our $CAN_USE_TABIX_PM;
 
 BEGIN {
@@ -53,9 +52,10 @@ BEGIN {
 
 use base qw(Bio::EnsEMBL::VEP::Pipeline::DumpVEP::Dumper);
 
+my $gnomad_prefix = 'gnomAD_';
+
 sub run {
   my $self = shift;
-
   my $vep_params = $self->get_vep_params();
 
   # make sure to include failed variants!
@@ -170,8 +170,13 @@ sub _generic_dump_info {
   my @cols = (
     @{$as->get_cache_columns()},
     'pubmed',
-    map {@{$_->{prefixed_pops} || $_->{pops}}} @{$self->{freq_vcf} || []}
+    'clin_sig_allele'
   );
+  foreach my $pop(map {@{$_->{prefixed_pops} || $_->{pops}}} @{$self->{freq_vcf} || []}) {
+    $pop = uc_gnomad_pop($pop) if ($pop =~ /^$gnomad_prefix/);
+    push @cols, $pop;
+  }
+
   unshift @cols, 'chr' if $converted;
   
   print $fh "variation_cols\t".join(",", @cols)."\n";
@@ -206,7 +211,7 @@ sub dump_obj {
 
   # get freqs from VCFs?
   $self->freqs_from_vcf($obj, $chr) if $self->{freq_vcf};
-
+  
   my $pubmed = $self->pubmed;
 
   foreach my $v(@$obj) {
@@ -222,16 +227,17 @@ sub dump_obj {
       defined($v->{minor_allele_freq}) && $v->{minor_allele_freq} =~ /^[0-9\.]+$/ ? sprintf("%.4f", $v->{minor_allele_freq}) : '',
       $v->{clin_sig} || '',
       $v->{phenotype_or_disease} == 0 ? '' : $v->{phenotype_or_disease},
+      $v->{clin_sig_allele} || '',
     );
-
+  
     push @tmp, $pubmed->{$v->{variation_name}} || '';
 
     if($self->{freq_vcf}) {
       foreach my $pop(map {@{$_->{prefixed_pops} || $_->{pops}}} @{$self->{freq_vcf}}) {
+        $pop = uc_gnomad_pop($pop) if ($pop =~ /^$gnomad_prefix/);
         push @tmp, $v->{$pop} || '';
       }
     }
-
     print DUMP join(" ", @tmp);
     print DUMP "\n";
 
@@ -267,6 +273,7 @@ sub freqs_from_vcf {
   # iterate over each VCF file in the config
   foreach my $vcf_conf(@{$self->{freq_vcf}}) {
     my $file = $vcf_conf->{file};
+    $file =~ s/\+\+\+CHR\+\+\+/$chr/;
     next unless -e $file;
 
     my $prefix = $vcf_conf->{prefix} || '';
@@ -287,6 +294,10 @@ sub freqs_from_vcf {
       for my $start(grep {$by_pos{$_}} ($vcf_pos..($vcf_pos + length($vcf_ref)))) {
 
         foreach my $v(@{$by_pos{$start}}) {
+          if ($v->{allele_string} =~ /^\/.+$/) {
+            $self->warning('Could not be added to cache ' . $v->{variation_name} . ' ' . $v->{allele_string});
+            next;
+          }
           $DB::single = 1 if $v->{variation_name} eq 'TMP_ESP_1_179086420_179086420';
 
           my $matches = [];
@@ -304,7 +315,7 @@ sub freqs_from_vcf {
               }
             );
           };
-          die "Failed to get vf matches for " .$v->{variation_name} ."\n" unless $@ eq '';  
+          die "$file Failed to get vf matches for " .$v->{variation_name} ."\n" unless $@ eq '';  
 
           if(@$matches) {
 
@@ -365,9 +376,9 @@ sub freqs_from_vcf {
               }              
 
               if(defined($tmp_f) && $tmp_f ne '') {
-                my $store_name = $prefix.$pop;
+                my $store_name = $prefix;
+                $store_name .= ($vcf_conf->{name} eq 'gnomAD' && $pop) ? uc($pop) : $pop;
                 $store_name =~ s/\_$//;
-                
                 $v->{$store_name} = $v->{$store_name} ? $v->{$store_name}.','.$tmp_f : $tmp_f;
               }
             }
@@ -376,6 +387,16 @@ sub freqs_from_vcf {
       }
     }
   }
+}
+
+# r2.1 of gnomad has changed the population names from upper to lower case.
+# In order to keep the gnomad allele frequency key the same we need to convert
+# to upper case population names 
+sub uc_gnomad_pop {
+  my $pop = shift;
+  my $ucpop = uc $pop;
+  $ucpop =~ s/GNOMAD_/$gnomad_prefix/;
+  return $ucpop; 
 }
 
 # we want pubmed IDs by rsID

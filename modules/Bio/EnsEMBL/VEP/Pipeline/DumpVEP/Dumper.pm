@@ -71,7 +71,7 @@ sub get_vep_params {
   # add synonyms file, needed by BAM
   $params->{synonyms} = sprintf(
     '%s/synonyms/%s_%s_chr_synonyms.txt',
-    $self->param('pipeline_dir'),
+    $self->param('pipeline_dump_dir'),
     $self->param('species'),
     $self->param('assembly')
   );

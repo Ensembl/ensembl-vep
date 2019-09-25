@@ -17,6 +17,7 @@ use warnings;
 
 use Test::More;
 use Test::Exception;
+use Test::Warnings qw(warning :no_end_test);
 use FindBin qw($Bin);
 
 use lib $Bin;
@@ -35,7 +36,7 @@ SKIP: {
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
   no warnings 'once';
-  skip 'Set::IntervalTree not installed', 22 unless $Bio::EnsEMBL::VEP::AnnotationType::Transcript::CAN_USE_INTERVAL_TREE;
+  skip 'Set::IntervalTree not installed', 26 unless $Bio::EnsEMBL::VEP::AnnotationType::Transcript::CAN_USE_INTERVAL_TREE;
 
   # use test
   use_ok('Bio::EnsEMBL::VEP::Haplo::Runner');
@@ -82,7 +83,7 @@ SKIP: {
           'ClinVar' => '201704',
           'assembly' => 'GRCh38.p5'
         },
-        'valid_chromosomes' => [21, 'LRG_485'],
+        'valid_chromosomes' => [21, 22, 'LRG_485'],
         'bam' => undef,
         'use_transcript_ref' => undef,
         'nearest' => undef,
@@ -94,7 +95,7 @@ SKIP: {
   # setup_db_connection should return silently in offline mode
   ok(!$runner->setup_db_connection(), 'setup_db_connection');
 
-  is_deeply($runner->valid_chromosomes, [21, 'LRG_485'], 'valid_chromosomes');
+  is_deeply($runner->valid_chromosomes, [21, 22, 'LRG_485'], 'valid_chromosomes');
 
   is_deeply($runner->get_Parser, bless({
     '_config' => $runner->config,
@@ -105,7 +106,7 @@ SKIP: {
     'lookup_ref' => undef,
     'chr' => undef,
     'dont_skip' => undef,
-    'valid_chromosomes' => {21 => 1, LRG_485 => 1},
+    'valid_chromosomes' => {21 => 1, 22 => 1, LRG_485 => 1},
     'minimal' => undef,
     'lrg' => undef,
     'delimiter' => "\t",
@@ -114,6 +115,7 @@ SKIP: {
     'gp' => undef,
     'individual' => undef,
     'phased' => undef,
+     'max_sv_size' => 10000000,
   }, 'Bio::EnsEMBL::VEP::Haplo::Parser::VCF' ), 'get_Parser');
 
   my $t = $runner->get_TranscriptTree;
@@ -123,7 +125,7 @@ SKIP: {
     $runner->get_TranscriptTree,
     bless( {
       '_config' => $runner->config,
-      'valid_chromosomes' => [21, 'LRG_485'],
+      'valid_chromosomes' => [21, 22, 'LRG_485'],
     }, 'Bio::EnsEMBL::VEP::TranscriptTree' ),
     'get_TranscriptTree'
   );
@@ -133,6 +135,7 @@ SKIP: {
     'parser' => $runner->get_Parser,
     'buffer_size' => $runner->param('buffer_size'),
     'minimal' => undef,
+    'max_not_ordered_variants' => 100,
     'transcript_tree' => $runner->get_TranscriptTree,
   }, 'Bio::EnsEMBL::Haplo::VEP::InputBuffer' ), 'get_InputBuffer');
 
@@ -477,7 +480,21 @@ SKIP: {
     },
     'JSON output'
   );
+
+  # Test empty output (when none of the variants overlap a transcript)
+  open IN, $test_cfg->{no_trans_vcf} ;
+  my @new_lines = <IN>;
+  $runner = Bio::EnsEMBL::VEP::Haplo::Runner->new({
+    %{$test_cfg->base_testing_cfg},
+    input_data => join("", @new_lines),
+    output_file => 'STDOUT'
+  });
+  # Catch and evaluate the warning message
+  my $warning = warning { $runner->run() };
+  like($warning, qr/Haplosaurus can't find transcripts/, 'warning message because of empty output');
 }
+
+
 
 
 done_testing();

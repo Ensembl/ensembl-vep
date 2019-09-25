@@ -76,7 +76,6 @@ SKIP: {
           'strand' => -1,
           'transcript_id' => 'ENST00000307301',
           'cdna_start' => '1122',
-          'location' => '21:25585733',
           'impact' => 'MODIFIER'
         },
         {
@@ -95,7 +94,6 @@ SKIP: {
           'strand' => -1,
           'transcript_id' => 'ENST00000352957',
           'cdna_start' => '1033',
-          'location' => '21:25585733',
           'impact' => 'MODERATE'
         },
         {
@@ -107,7 +105,6 @@ SKIP: {
           ],
           'strand' => -1,
           'transcript_id' => 'ENST00000567517',
-          'location' => '21:25585733',
           'impact' => 'MODIFIER'
         }
       ],
@@ -196,7 +193,6 @@ SKIP: {
           'cdna_end' => 1122,
           'cdna_start' => 1122,
           'transcript_id' => 'ENST00000307301',
-          'location' => '21:25585733',
           'impact' => 'MODIFIER'
         },
         {
@@ -206,7 +202,6 @@ SKIP: {
           'cdna_end' => 1033,
           'protein_start' => 331,
           'codons' => 'Gca/Aca',
-          'location' => '21:25585733',
           'cds_end' => 991,
           'consequence_terms' => [
             'missense_variant'
@@ -224,7 +219,6 @@ SKIP: {
             'upstream_gene_variant'
           ],
           'distance' => 2407,
-          'location' => '21:25585733',
           'variant_allele' => 'T',
           'strand' => -1,
           'transcript_id' => 'ENST00000567517',
@@ -314,7 +308,6 @@ SKIP: {
           'exon' => '11/11',
           'cdna_start' => 1122,
           'transcript_id' => 'ENST00000307301',
-          'location' => '21:25585733',
           'gene_id' => 'ENSG00000154719',
           'canonical' => 1,
           'protein_id' => 'ENSP00000305682',
@@ -345,7 +338,6 @@ SKIP: {
           'amino_acids' => 'A/T',
           'hgnc_id' => 'HGNC:14027',
           'gene_symbol' => 'MRPL39',
-          'location' => '21:25585733',
           'exon' => '10/10',
           'transcript_id' => 'ENST00000352957',
           'cdna_start' => 1033,
@@ -375,7 +367,6 @@ SKIP: {
           'canonical' => 1,
           'distance' => 2407,
           'variant_allele' => 'T',
-          'location' => '21:25585733',
           'biotype' => 'antisense',
           'gene_symbol_source' => 'Clone_based_ensembl_gene',
           'consequence_terms' => [
@@ -423,7 +414,6 @@ SKIP: {
         'cdna_end' => 603,
         'protein_start' => 23,
         'codons' => 'aAGAAGAAAGgc/agc',
-        'location' => '21:25741665-25741674',
         'cds_end' => 76,
         'consequence_terms' => [
           'inframe_deletion',
@@ -440,7 +430,6 @@ SKIP: {
       'T' => {
         'cds_start' => 67,
         'gene_id' => 'ENSG00000154727',
-        'location' => '21:25741665-25741674',
         'variant_allele' => 'T',
         'cdna_end' => 594,
         'protein_start' => 23,
