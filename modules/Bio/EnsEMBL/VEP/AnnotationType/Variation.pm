@@ -87,7 +87,8 @@ sub annotate_InputBuffer {
     ) {
       my $matched = $self->compare_existing($vf, $existing_vf);
       
-      ## Duplicate colocated variants are given when searching over 
+      ## Duplicate colocated variants are given when searching over both
+      ## shifted and unshifted positions
       push @{$vf->{existing}}, $matched if ($matched && !(grep($_->{variation_name} eq $matched->{variation_name},@{$vf->{existing}})));
     }
   }

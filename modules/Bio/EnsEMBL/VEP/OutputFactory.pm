@@ -280,8 +280,7 @@ sub get_all_output_hashes_by_InputBuffer {
   # rejoin variants that have been split
   # this can happen when using --minimal
   $self->rejoin_variants_in_InputBuffer($buffer) if $buffer->rejoin_required;
-  
-  
+
   map {@{$self->update_shifted_positions($_)}}
     @{$buffer->buffer};
   
@@ -301,11 +300,12 @@ sub update_shifted_positions {
       map { bless $_, 'Bio::EnsEMBL::Variation::TranscriptVariationAllele' } 
           @{ $tv->get_all_BaseVariationFeatureOverlapAlleles };
         
+      ## Obtains all relevant $tva objects and removes shifted positions from 
+      ## CDS CDNA and Protein positions   
       map { $_->clear_shifting_variables} 
           @{ $tv->get_all_BaseVariationFeatureOverlapAlleles };
   }
 
-  
   return \@tvs;
 }
 
@@ -860,6 +860,7 @@ sub pick_VariationFeatureOverlapAllele_per_gene {
 sub VariationFeature_to_output_hash {
   my $self = shift;
   my $vf = shift;
+
   my $hash = {
     Uploaded_variation  => $vf->variation_name ne '.' ? $vf->variation_name : ($vf->{original_chr} || $vf->{chr}).'_'.$vf->{start}.'_'.($vf->{allele_string} || $vf->{class_SO_term}),
     Location            => ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start}, $vf->{end}),
@@ -959,6 +960,7 @@ sub add_colocated_variant_info {
   return unless $vf->{existing} && scalar @{$vf->{existing}};
 
   my $this_allele = $hash->{Allele};
+
   my $shifted_allele = $vf->{shifted_allele_string};
   $shifted_allele ||= "";
   my $tmp = {};
@@ -1073,7 +1075,6 @@ sub add_colocated_variant_info {
 
 sub add_colocated_frequency_data {
   my $self = shift;
-
   my ($vf, $hash, $ex, $shift_hash) = @_;
 
   return $hash unless grep {$self->{$_}} keys %FREQUENCY_KEYS or $self->{max_af};
@@ -1234,7 +1235,8 @@ sub VariationFeatureOverlapAllele_to_output_hash {
   $hash->{IMPACT} = $ocs[0]->impact() if @ocs;
 
   # allele
-  $hash->{Allele} = $vfoa->variation_feature_seq;  #unless defined($vfoa->{shift_hash}) && defined($vfoa->{shift_hash}->{hgvs_allele_string});
+  $hash->{Allele} = $vfoa->variation_feature_seq; 
+
   if(defined($vfoa->{shift_hash})&& defined($vfoa->{shift_hash}->{hgvs_allele_string}) && $self->param('shift_genomic'))
   {
     $hash->{Allele} = $vfoa->{shift_hash}->{hgvs_allele_string};
@@ -1251,7 +1253,7 @@ sub VariationFeatureOverlapAllele_to_output_hash {
   # hgvs g.
   if($self->{hgvsg}) {
     $vf->{_hgvs_genomic} ||= $vf->hgvs_genomic($vf->slice, $self->{hgvsg_use_accession} ? undef : $vf->{chr});
-    #if(my $hgvsg = $vf->{_hgvs_genomic}->{$hash->{Allele}}) {
+
     if(my $hgvsg = $vf->{_hgvs_genomic}->{$vfoa->variation_feature_seq}) {
       $hash->{HGVSg} = $hgvsg; 
     }
@@ -1521,7 +1523,7 @@ sub TranscriptVariationAllele_to_output_hash {
   $shift_length ||= 0;
   
   return undef unless $hash;
-  
+
   my $tv = $vfoa->base_variation_feature_overlap;
   my $tr = $tv->transcript;
   
@@ -1552,13 +1554,12 @@ sub TranscriptVariationAllele_to_output_hash {
         $hash->{Amino_acids} = $vfoa->pep_allele_string;
         $hash->{Codons}      = $vfoa->display_codon_allele_string;
         $shifting_offset = 0 if defined($tv->{_boundary_shift}) && $tv->{_boundary_shift} == 1;
-        $hash->{CDS_position}  = format_coords($tv->cds_start, $tv->cds_end);
 
+        $hash->{CDS_position}  = format_coords($tv->cds_start, $tv->cds_end);
         $hash->{CDS_position} .= '/'.length($vep_cache->{translateable_seq})
           if $self->{total_length} && $vep_cache->{translateable_seq};
 
         $hash->{Protein_position}  = format_coords($tv->translation_start(undef, $shifting_offset), $tv->translation_end(undef, $shifting_offset));
-
         $hash->{Protein_position} .= '/'.length($vep_cache->{peptide})
           if $self->{total_length} && $vep_cache->{peptide};
 
@@ -1588,9 +1589,10 @@ sub TranscriptVariationAllele_to_output_hash {
     $hash->{REFSEQ_OFFSET} = $vfoa->{refseq_misalignment_offset} if defined($vfoa->{refseq_misalignment_offset}) && $vfoa->{refseq_misalignment_offset} != 0;
   }
 
+
+
   if($self->{use_transcript_ref}) {
     my $ref_tva = $tv->get_reference_TranscriptVariationAllele;
-    
     $hash->{USED_REF} = $ref_tva->variation_feature_seq;
     $hash->{USED_REF} = $ref_tva->{shift_hash}->{ref_orig_allele_string} if $self->{no_shift} && defined($ref_tva->{shift_hash});
     $hash->{GIVEN_REF} = $ref_tva->{given_ref};
