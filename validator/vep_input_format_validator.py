@@ -18,9 +18,9 @@ import sys, os, re
 
 def check_line(line):
     """ Check the VEP input line format. Return error message if the format is not as expected """
-    global previous_line
+    global col_sep, previous_line
 
-    line_parts = line.split(' ')
+    line_parts = re.split(col_sep, line)
 
     # Check column numbers
     if (len(line_parts) < 4):
@@ -82,13 +82,13 @@ def check_alleles(allele,start,end):
 def compare_with_previous_line(chr,start,end):
     """ Compare the current line with the previous line to check the variants ordering (chromosome and position).
         Return error message if the variants are not ordered. """
-    global previous_line, chrs_seen
+    global col_sep, previous_line, chrs_seen
 
     if (previous_line != ''):
 
         min_coord = start > end and end or start
 
-        previous_line_parts = previous_line.split(' ')
+        previous_line_parts = re.split(col_sep, previous_line)
         previous_chr = previous_line_parts[0]
         previous_start = previous_line_parts[1] > previous_line_parts[2] and previous_line_parts[2] or previous_line_parts[1]
         if (chr == previous_chr and int(previous_start) > min_coord):
@@ -154,6 +154,8 @@ VEP input format definition can be found here: https://www.ensembl.org/info/docs
 '''
 
 chrs_seen = {}
+
+col_sep = '\s+'
 
 previous_line = ''
 
