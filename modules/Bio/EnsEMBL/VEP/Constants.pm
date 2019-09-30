@@ -53,7 +53,8 @@ use warnings;
 use base qw(Exporter);
 
 our $VEP_VERSION     = 98;
-our $VEP_SUB_VERSION = 1;
+our $VEP_SUB_VERSION = 2;
+
 
 our @EXPORT_OK = qw(
   @FLAG_FIELDS
