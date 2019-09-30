@@ -56,6 +56,7 @@ our (
   $ENS_GIT_ROOT,
   $BIOPERL_URL,
   $CACHE_URL,
+  $CACHE_URL_INDEXED,
   $CACHE_DIR,
   $PLUGINS,
   $PLUGIN_URL,
@@ -210,6 +211,7 @@ $PLUGINS_DIR  ||= $CACHE_DIR.'/Plugins';
 $FTP_USER     ||= 'anonymous';
 
 $CACHE_URL  ||= "ftp://ftp.ensembl.org/pub/release-$DATA_VERSION/variation/vep";
+$CACHE_URL_INDEXED  ||= "ftp://ftp.ensembl.org/pub/release-$DATA_VERSION/variation/indexed_vep_cache";
 $FASTA_URL  ||= "ftp://ftp.ensembl.org/pub/release-$DATA_VERSION/fasta/";
 $PLUGIN_URL ||= 'https://raw.githubusercontent.com/Ensembl/VEP_plugins';
 
@@ -1092,11 +1094,16 @@ sub cache() {
   # get list of species
   print " - getting list of available cache files\n" unless $QUIET;
 
+  my $tabix = `which tabix`;
+  chomp($tabix);
+  $tabix ||= "$HTSLIB_DIR/tabix";
+  
   my $num = 1;
   my $species_list;
+  my $URL_TO_USE = (-e $tabix) ? $CACHE_URL_INDEXED : $CACHE_URL;
 
-  if($CACHE_URL =~ /^ftp/i) {
-    $CACHE_URL =~ m/(ftp:\/\/)?(.+?)\/(.+)/;
+  if($URL_TO_USE =~ /^ftp/i) {
+    $URL_TO_USE =~ m/(ftp:\/\/)?(.+?)\/(.+)/;
     $ftp = Net::FTP->new($2, Passive => 1) or die "ERROR: Could not connect to FTP host $2\n$@\n";
     $ftp->login($FTP_USER) or die "ERROR: Could not login as $FTP_USER\n$@\n";
     $ftp->binary();
@@ -1108,7 +1115,7 @@ sub cache() {
     push @files, grep {$_ =~ /tar.gz/} $ftp->ls;
   }
   else {
-    opendir DIR, $CACHE_URL;
+    opendir DIR, $URL_TO_USE;
     @files = grep {$_ =~ /tar.gz/} readdir DIR;
     closedir DIR;
   }
@@ -1243,14 +1250,14 @@ sub cache() {
     }
 
     my $target_file = "$CACHE_DIR/tmp/$file_name";
-    if($CACHE_URL =~ /^ftp/) {
-      print " - downloading $CACHE_URL/$file_path\n" unless $QUIET;
+    if($URL_TO_USE =~ /^ftp/) {
+      print " - downloading $URL_TO_USE/$file_path\n" unless $QUIET;
       if(!$TEST) {
-        $ftp->get($file_name, $target_file) or download_to_file("$CACHE_URL/$file_path", $target_file);
+        $ftp->get($file_name, $target_file) or download_to_file("$URL_TO_USE/$file_path", $target_file);
 
         my $checksums = "CHECKSUMS";
         my $checksums_target_file = "$CACHE_DIR/tmp/$checksums";
-        $ftp->get($checksums, $checksums_target_file) or download_to_file("$CACHE_URL/$checksums", $checksums_target_file);
+        $ftp->get($checksums, $checksums_target_file) or download_to_file("$URL_TO_USE/$checksums", $checksums_target_file);
         if (-e $checksums_target_file) {
           my $sum_download = `sum $target_file`;
           $sum_download =~ m/([0-9]+)(\s+)([0-9]+)/;
@@ -1265,8 +1272,8 @@ sub cache() {
       }
     }
     else {
-      print " - copying $CACHE_URL/$file_path\n" unless $QUIET;
-      copy("$CACHE_URL/$file_path", $target_file) unless $TEST;
+      print " - copying $URL_TO_USE/$file_path\n" unless $QUIET;
+      copy("$URL_TO_USE/$file_path", $target_file) unless $TEST;
     }
 
     print " - unpacking $file_name\n" unless $QUIET;
@@ -1284,23 +1291,6 @@ sub cache() {
       opendir CACHEDIR, "$CACHE_DIR/tmp/$species/";
       move("$CACHE_DIR/tmp/$species/$_", "$CACHE_DIR/$species/$_") for readdir CACHEDIR;
       closedir CACHEDIR;
-    }
-
-    # convert?
-    my $bgzip = `which bgzip`;
-    chomp($bgzip);
-    $bgzip ||= "$HTSLIB_DIR/bgzip";
-
-    my $tabix = `which tabix`;
-    chomp($tabix);
-    $tabix ||= "$HTSLIB_DIR/tabix";
-
-    if(((-e $bgzip && -e $tabix) || $CONVERT) && !$TEST) {
-      unless($QUIET) {
-        print " - converting cache, this may take some time but will allow VEP to look up variants and frequency data much faster\n";
-        print " - use CTRL-C to cancel if you do not wish to convert this cache now (you may run convert_cache.pl later)\n";
-      }
-      system("perl $dirname/convert_cache.pl --dir $CACHE_DIR --species $species --version $DATA_VERSION\_$assembly --bgzip $bgzip --tabix $tabix") == 0 or print STDERR "WARNING: Failed to run convert script\n";
     }
   }
 }
