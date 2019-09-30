@@ -55,6 +55,7 @@ use base qw(Exporter);
 our $VEP_VERSION     = 98;
 our $VEP_SUB_VERSION = 2;
 
+
 our @EXPORT_OK = qw(
   @FLAG_FIELDS
   %FIELD_DESCRIPTIONS
@@ -313,5 +314,6 @@ our %COLOUR_KEYS = (
 );
 
 our $MAX_NOT_ORDERED_VARIANTS = 100;
+our $MAX_NOT_ORDERED_VARIANTS_DISTANCE = 100;
 
 1;
