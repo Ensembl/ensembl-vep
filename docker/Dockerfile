@@ -86,6 +86,7 @@ FROM ubuntu:18.04
 # a lot of them are required for Bio::DB::BigFile
 RUN apt-get update && apt-get -y install \
     build-essential \
+    git \
     cpanminus \
     curl \
     libmysqlclient-dev \
