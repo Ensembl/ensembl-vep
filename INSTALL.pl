@@ -209,6 +209,9 @@ $CACHE_DIR    ||= $ENV{HOME} ? $ENV{HOME}.'/.vep' : 'cache';
 $PLUGINS_DIR  ||= $CACHE_DIR.'/Plugins';
 $FTP_USER     ||= 'anonymous';
 
+## Set the indexed cache url if it's been overwritten by the user
+$CACHE_URL_INDEXED = $CACHE_URL;
+
 $CACHE_URL  ||= "ftp://ftp.ensembl.org/pub/release-$DATA_VERSION/variation/vep";
 $FASTA_URL  ||= "ftp://ftp.ensembl.org/pub/release-$DATA_VERSION/fasta/";
 $PLUGIN_URL ||= 'https://raw.githubusercontent.com/Ensembl/VEP_plugins';
