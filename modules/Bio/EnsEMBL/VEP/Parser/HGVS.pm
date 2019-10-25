@@ -168,8 +168,8 @@ sub create_VariationFeatures {
 
   foreach my $core_group(@core_groups) {
  
-    # Doesn't look up transcripts 'ENST' in otherfeatures 
-    next if ($hgvs =~ /ENST/ && $core_group eq 'otherfeatures');
+    # Doesn't look up transcripts 'ENST' in otherfeatures and 'NM' in core
+    next if (($hgvs =~ /ENST/ && $core_group ne 'core') || ($hgvs =~ /NM/ && $core_group ne 'otherfeatures'));
 
     my $sa  = $self->get_adaptor($core_group, 'Slice');
     my $ta  = $self->get_adaptor($core_group, 'Transcript');
