@@ -567,7 +567,7 @@ is_deeply($cnv_vf, bless( {
                },
                 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature - CNV with only duplication allele');
 
-my $cnv_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+$cnv_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1,  warning_file => 'STDERR'}),
   file => $test_cfg->create_input_file([qw(1 774569 gnomAD_v2_DEL_1_1 N <CN0>,<CN2> 1 PASS END=828435;SVTYPE=CNV;CHR2=1;SVLEN=53959)]),
   valid_chromosomes => [1]
