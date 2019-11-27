@@ -235,6 +235,9 @@ sub main {
         # get info fields
         foreach my $info_field(split /\;/, (split /\s+/, $line)[7]) {
           my ($field, $value) = split /\=/, $info_field;
+          # CSQ field is not necessary in main_data
+          # CSQ is used separately
+          next if $field eq 'CSQ';
           $main_data->{$field} = $value;
         }
         
@@ -340,7 +343,10 @@ sub parse_line {
   my @split = split($delimiter, $line, -1);
   
   $data{$headers->[$_]} = $split[$_] for 0..$#split;
-  
+
+  # Extracts the 'main' data which doesn't include INFO
+  $data{'INFO'} = undef;
+
   if(defined($data{Extra})) {
     foreach my $chunk(split /\;/, $data{Extra}) {
       my ($key, $value) = split /\=/, $chunk;
