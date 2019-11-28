@@ -291,6 +291,7 @@ sub main {
   }
 
   # Write header lines for empty files
+  # If filter only prints count or lists available headers then does not need to print header
   if (!$line_number && !defined($config->{count}) && !defined($config->{list})) {
     print $out_fh join("\n", @raw_headers);
     print $out_fh "\n";
