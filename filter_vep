@@ -297,6 +297,16 @@ sub main {
     print $out_fh "\n";
   }
 
+  # Print list of available headers for empty files
+  if (!$line_number && defined($config->{list})) {
+    parse_headers($config, \@raw_headers);
+    $config->{allowed_fields}->{$_} = 1 for (@{$config->{headers}}, @{$config->{col_headers}});
+
+    print "Available fields:\n\n";
+    print "$_\n" for sort keys %{$config->{allowed_fields}};
+    exit(0);
+  }
+
   print $out_fh "$count\n" if defined($config->{count});
 
   # If the VEP annotations INFO field (default value: CSQ) hasn't been found (or recognised) in at least 1 VCF input line.
