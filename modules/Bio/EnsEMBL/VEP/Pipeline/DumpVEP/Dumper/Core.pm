@@ -117,14 +117,17 @@ sub get_dumpable_object {
     ])
   };
 
-  if(my $tr = $obj->{$chr}->[0]) {
-    delete $tr->{slice}->{adaptor};
-    delete $tr->{slice}->{coord_system}->{adaptor};
+  for (my $i = 0; $i < scalar(@{$obj->{$chr}}); $i++)
+  {
+    if(my $tr = $obj->{$chr}->[$i]) {
+      delete $tr->{slice}->{adaptor};
+      delete $tr->{slice}->{coord_system}->{adaptor};
 
-    # clean introns, they may have a rev-strand slice attached
-    if(my ($intron) = @{$tr->{_variation_effect_feature_cache}->{introns}}) {
-      delete $intron->{slice}->{adaptor};
-      delete $intron->{slice}->{coord_system}->{adaptor};
+      # clean introns, they may have a rev-strand slice attached
+      if(my ($intron) = @{$tr->{_variation_effect_feature_cache}->{introns}}) {
+        delete $intron->{slice}->{adaptor};
+        delete $intron->{slice}->{coord_system}->{adaptor};
+      }
     }
   }
 
