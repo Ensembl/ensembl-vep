@@ -117,8 +117,7 @@ sub get_dumpable_object {
     ])
   };
 
-  for (my $i = 0; $i < scalar(@{$obj->{$chr}}); $i++)
-  {
+  for (my $i = 0; $i < scalar(@{$obj->{$chr}}); $i++) {
     if(my $tr = $obj->{$chr}->[$i]) {
       delete $tr->{slice}->{adaptor};
       delete $tr->{slice}->{coord_system}->{adaptor};
