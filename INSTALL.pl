@@ -1097,6 +1097,10 @@ sub cache() {
   # get list of species
   print " - getting list of available cache files\n" unless $QUIET;
 
+  my $bgzip = `which bgzip`;
+  chomp($bgzip);
+  $bgzip ||= "$HTSLIB_DIR/bgzip";
+
   my $tabix = `which tabix`;
   chomp($tabix);
   $tabix ||= "$HTSLIB_DIR/tabix";
