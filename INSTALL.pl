@@ -1097,6 +1097,10 @@ sub cache() {
   # get list of species
   print " - getting list of available cache files\n" unless $QUIET;
 
+  my $bgzip = `which bgzip`;
+  chomp($bgzip);
+  $bgzip ||= "$HTSLIB_DIR/bgzip";
+
   my $tabix = `which tabix`;
   chomp($tabix);
   $tabix ||= "$HTSLIB_DIR/tabix";
@@ -1294,6 +1298,14 @@ sub cache() {
       opendir CACHEDIR, "$CACHE_DIR/tmp/$species/";
       move("$CACHE_DIR/tmp/$species/$_", "$CACHE_DIR/$species/$_") for readdir CACHEDIR;
       closedir CACHEDIR;
+    }
+    
+    if(((-e $bgzip && -e $tabix) || $CONVERT) && !$TEST) {
+      unless($QUIET) {
+        print " - converting cache, this may take some time but will allow VEP to look up variants and frequency data much faster\n";
+        print " - use CTRL-C to cancel if you do not wish to convert this cache now (you may run convert_cache.pl later)\n";
+      }
+      system("perl $dirname/convert_cache.pl --dir $CACHE_DIR --species $species --version $DATA_VERSION\_$assembly --bgzip $bgzip --tabix $tabix") == 0 or print STDERR "WARNING: Failed to run convert script\n";
     }
   }
 }
