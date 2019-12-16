@@ -296,16 +296,12 @@ sub get_overlapping_vfs {
   }      
   
   my @vfs;
-  foreach my $vf (@all_vfs)
-  {
-    if (overlap($vf->{start}, $vf->{end}, $start, $end))
-    {
+  foreach my $vf (@all_vfs)  {
+    if (overlap($vf->{start}, $vf->{end}, $start, $end)){
       push(@vfs, $vf);
     }
-    if((defined($vf->{unshifted_end}) && (defined($vf->{unshifted_start}))))
-    {
-      if (overlap($vf->{unshifted_start}, $vf->{unshifted_end}, $start, $end)) 
-      {
+    if((defined($vf->{unshifted_end}) && (defined($vf->{unshifted_start})))) {
+      if (overlap($vf->{unshifted_start}, $vf->{unshifted_end}, $start, $end)) {
         push(@vfs, $vf);
       }
     }

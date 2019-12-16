@@ -1792,11 +1792,14 @@ sub IntergenicVariationAllele_to_output_hash {
   my $iva = shift;
   my $hash = shift;
     
-  unless($self->{no_shift} || !$self->param('shift_genomic'))
-  {
+  ## By default, shifting in the 3' direction will not update the 'location' field unless '--shift_genomic' is supplied
+  unless($self->{no_shift} || !$self->param('shift_genomic')) { #if shifting without shift genomic, we still want to run $iva->genomic_shift
     $iva->genomic_shift;
-    my $vf = $iva->variation_feature;
-    $hash->{Location} = ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start} + $iva->{shift_hash}->{shift_length}, $vf->{end} + $iva->{shift_hash}->{shift_length}) if (defined($iva->{shift_hash}->{shift_length}) && $self->param('shift_genomic'));
+    if (defined($iva->{shift_hash}->{shift_length}) && $self->param('shift_genomic')) {
+      my $vf = $iva->variation_feature;
+      $hash->{Location} = ($vf->{chr} || $vf->seq_region_name).':'.
+        format_coords($vf->{start} + $iva->{shift_hash}->{shift_length}, $vf->{end} + $iva->{shift_hash}->{shift_length});
+    }
   }
   
   return $self->VariationFeatureOverlapAllele_to_output_hash($iva, $hash, @_);
