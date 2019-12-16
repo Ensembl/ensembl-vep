@@ -200,13 +200,22 @@ sub get_chr_jobs {
     # and there may not be a direct link between A <-> C in the DB
     # so let's allow for one level of indirection
     my $tree = {};
-    foreach my $syn(@{$srsa->fetch_all}) {
+    
+    my @all_syns = @{$srsa->fetch_all};
+
+    # To prevent memory errors, species with many seq_regions will not search for indirect synonyms
+    # With 4GB memory supplied, errors seem to start with species with ~50k seq regions, so 
+    # we've chosen 40k as the limit for calculating indirect synonyms 
+    my $syn_threshold = 40000; 
+    foreach my $syn(@all_syns) {
       my $syn_slice = $sa->fetch_by_seq_region_id($syn->seq_region_id);
       next unless $syn_slice;
       my ($a, $b) = sort ($syn_slice->seq_region_name, $syn->name);
       $tree->{$a}->{$b} = 1;
-      $tree->{$_}->{$b} = 1 for keys %{$tree->{$a} || {}};
-      $tree->{$_}->{$a} = 1 for keys %{$tree->{$b} || {}};
+      unless(scalar(@all_syns) > $syn_threshold){ 
+        $tree->{$_}->{$b} = 1 for keys %{$tree->{$a} || {}};
+        $tree->{$_}->{$a} = 1 for keys %{$tree->{$b} || {}};
+      }
     }
 
     # now create uniq A <-> B / B <-> A pairs

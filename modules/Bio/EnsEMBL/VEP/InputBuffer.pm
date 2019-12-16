@@ -123,8 +123,10 @@ sub new {
     # Could also implement a way to change it from the Runner object by fetching 
     # a "$self->param('max_not_ordered_variants')" - for future developments
     $self->{max_not_ordered_variants} = $hashref->{max_not_ordered_variants} if $hashref->{max_not_ordered_variants};
+    $self->{max_not_ordered_variants_distance} = $hashref->{max_not_ordered_variants_distance} if $hashref->{max_not_ordered_variants_distance};
   }
   $self->{max_not_ordered_variants} = $Bio::EnsEMBL::VEP::Constants::MAX_NOT_ORDERED_VARIANTS if (!$self->{max_not_ordered_variants});
+  $self->{max_not_ordered_variants_distance} = $Bio::EnsEMBL::VEP::Constants::MAX_NOT_ORDERED_VARIANTS_DISTANCE if (!$self->{max_not_ordered_variants_distance});
 
   return $self;
 }
@@ -201,7 +203,9 @@ sub next {
       $prev_chr = $vf->{chr};
     }
   }
-
+  
+  my $unsorted_formats = $self->config->{_params}->{unsorted_formats};
+  
   if(my $parser = $self->parser) {
     while(@$buffer < $buffer_size && (my $vf = $parser->next)) {
 
@@ -232,8 +236,15 @@ sub next {
       else {
         push @$buffer, $vf;
         $prev_chr = $vf->{chr};
-        if ($prev_start > $vf->{start} && !$self->param('no_check_variants_order')) {
-          $self->{count_not_ordered_variants} ++;
+        if (!$self->param('no_check_variants_order') && !$unsorted_formats->{$self->param('format')}) {
+          # Use a default distance to check if the variant is still in the same region
+          # even if it's not ordered with the previous variant location: we use the VF start and not the VCF start
+          # (they can be different when the variant is a deletion for instance and/or when the alleles can be minimised)
+          my $prev_start_with_range = $prev_start - $self->{max_not_ordered_variants_distance};
+             $prev_start_with_range = 1 if ($prev_start_with_range < 0);
+          if ($prev_start_with_range > $vf->{start}) {
+            $self->{count_not_ordered_variants} ++;
+          }
         }
         $prev_start = $vf->{start};
       }

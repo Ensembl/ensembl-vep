@@ -92,9 +92,6 @@ sub run {
     $self->{freq_vcf} = $vep_params->{freq_vcf};
   }
 
-  # precache pubmed data
-  $self->pubmed($as);
-
   $self->dump_chrs($as, $cache);
 
   # bgzip and tabix-index all_vars files
@@ -108,22 +105,33 @@ sub run {
 
     # add 2, 1 to correct for 0->1 indexing, 1 because we've added a chr column
     my $start_i = $indexes{start} + 2;
-
+    
+    my $tmp_dir = '/hps/nobackup2/production/ensembl/variation/tmpdump';
+    
+    mkdir($tmp_dir) unless -e $tmp_dir;
+   
     foreach my $chr(keys %{{map {$_->{chr} => 1} @{$self->param('regions')}}}) {
 
       next unless -e "$root/$chr/all_vars";
+      
+      my $all_vars_sorted_file = "$root/$chr/all_vars_sorted";    
+
+      $self->run_system_command(sprintf("sort -S50M -T%s -k%i,%in %s/%s/all_vars > %s", $tmp_dir, $start_i, $start_i, $root, $chr, $all_vars_sorted_file));
 
       $self->run_system_command(
         sprintf(
-          "cat %s/%s/all_vars | sort -k%i,%in | bgzip -c > %s/%s/all_vars.gz",
-          $root, $chr, $start_i, $start_i, $root, $chr
+          "bgzip -c %s > %s/%s/all_vars.gz",
+          $all_vars_sorted_file, $root, $chr
         )
       );
 
       $self->run_system_command("tabix -C -s 1 -b $start_i -e $start_i $root/$chr/all_vars.gz");
 
       unlink("$root/$chr/all_vars");
+      unlink("$root/$chr/all_vars_sorted");
     }
+
+    unlink($tmp_dir);
   }
 
   $self->dump_info($as, $self->get_cache_dir($vep_params));
@@ -169,8 +177,8 @@ sub _generic_dump_info {
   # var cache cols
   my @cols = (
     @{$as->get_cache_columns()},
-    'pubmed',
-    'clin_sig_allele'
+    'clin_sig_allele',
+    'pubmed'
   );
   foreach my $pop(map {@{$_->{prefixed_pops} || $_->{pops}}} @{$self->{freq_vcf} || []}) {
     $pop = uc_gnomad_pop($pop) if ($pop =~ /^$gnomad_prefix/);
@@ -193,7 +201,6 @@ sub get_dumpable_object {
   my ($self, $as, $sr, $chr, $s) = @_;
   return $as->get_features_by_regions_uncached([[$sr, $s]], 1);
 }
-
 sub dump_obj {
   my ($self, $obj, $file, $chr) = @_;
 
@@ -213,7 +220,6 @@ sub dump_obj {
   $self->freqs_from_vcf($obj, $chr) if $self->{freq_vcf};
   
   my $pubmed = $self->pubmed;
-
   foreach my $v(@$obj) {
     my @tmp = (
       $v->{variation_name},
@@ -412,21 +418,12 @@ sub pubmed {
     my %pm;
     my $file = sprintf(
       '%s/pubmed_%s_%s_%s.txt',
-      $self->required_param('pipeline_dump_dir'),
+      $self->required_param('pipeline_dir'),
       $self->required_param('species'),
       $self->required_param('ensembl_release'),
       $self->required_param('assembly')
     );
-    my $lock = $file.'.lock';
-
-    my $sleep_count = 0;
-    if(-e $lock) {
-      while(-e $lock) {
-        sleep 1;
-        die("I've been waiting for $lock to be removed for $sleep_count seconds, something may have gone wrong\n") if ++$sleep_count > 900;
-      }
-    }
-
+    
     if(-e $file) {
       open IN, $file;
       while(<IN>) {
@@ -436,38 +433,8 @@ sub pubmed {
       }
       close IN;
     }
-
-    elsif($as) {
-      open OUT, ">$lock";
-      print OUT "$$\n";
-      close OUT;
-      $self->{_lock_file} = $lock;
-
-      my $sth = $as->get_adaptor('variation', 'variation')->dbc->prepare(qq{
-        SELECT v.name, GROUP_CONCAT(p.pmid)
-        FROM variation v, variation_citation c, publication p
-        WHERE v.variation_id = c.variation_id
-        AND c.publication_id = p.publication_id
-        AND p.pmid IS NOT NULL
-        GROUP BY v.variation_id
-      });
-      $sth->execute;
-
-      my ($v, $p);
-      $sth->bind_columns(\$v, \$p);
-
-      open OUT, ">$file";
-
-      while($sth->fetch()) {
-        $pm{$v} = $p;
-        print OUT "$v\t$p\n";
-      }
-
-      close OUT;
-
-      unlink($lock);
-
-      $sth->finish();
+    else{
+      $self->warning('Unable to find PUBMED file: ' . $file);
     }
 
     $self->{_pubmed} = \%pm;
