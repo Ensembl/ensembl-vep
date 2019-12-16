@@ -73,7 +73,7 @@ is_deeply(
 $headers = get_runner({refseq => 1, fasta => $test_cfg->{fasta}, quiet => 1, input_file => $test_cfg->{test_vcf}, vcf => 1})->get_OutputFactory->headers;
 is(
   $headers->[-2],
-  '##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|SYMBOL_SOURCE|HGNC_ID|REFSEQ_MATCH|REFSEQ_OFFSET|GIVEN_REF|USED_REF|BAM_EDIT">',
+  '##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|SYMBOL_SOURCE|HGNC_ID|REFSEQ_MATCH|GIVEN_REF|USED_REF|BAM_EDIT">',
   'headers - BAM_EDIT'
 );
 
@@ -166,9 +166,7 @@ is_deeply(
     'STRAND',
     'FLAGS',
     'REFSEQ_MATCH',
-    'REFSEQ_OFFSET',
     'SOURCE',
-    'REFSEQ_OFFSET',
   ],
   'fields - --merged and --custom dont duplicate SOURCE'
 );
