@@ -204,7 +204,7 @@ sub new {
     polyphen_analysis
 
     cell_type
-    no_shift
+    shift_3prime
     shift_genomic
   )]);
 
@@ -1569,7 +1569,7 @@ sub TranscriptVariationAllele_to_output_hash {
     my $strand = $tr->strand() > 0 ? 1 : -1;
     # HGVS
     if($self->{hgvsc}) {
-      my $hgvs_t = $vfoa->hgvs_transcript(undef, $self->param('no_shift'));
+      my $hgvs_t = $vfoa->hgvs_transcript(undef, !$self->param('shift_3prime'));
       my $offset = defined($vfoa->{shift_hash}) ? $vfoa->{shift_hash}->{_hgvs_offset} : 0;
 
       $hash->{HGVSc} = $hgvs_t if $hgvs_t;
@@ -1594,7 +1594,7 @@ sub TranscriptVariationAllele_to_output_hash {
   if($self->{use_transcript_ref}) {
     my $ref_tva = $tv->get_reference_TranscriptVariationAllele;
     $hash->{USED_REF} = $ref_tva->variation_feature_seq;
-    $hash->{USED_REF} = $ref_tva->{shift_hash}->{ref_orig_allele_string} if $self->{no_shift} && defined($ref_tva->{shift_hash});
+    $hash->{USED_REF} = $ref_tva->{shift_hash}->{ref_orig_allele_string} if !$self->{shift_3prime} && defined($ref_tva->{shift_hash});
     $hash->{GIVEN_REF} = $ref_tva->{given_ref};
   }
 
@@ -1793,7 +1793,7 @@ sub IntergenicVariationAllele_to_output_hash {
   my $hash = shift;
     
   ## By default, shifting in the 3' direction will not update the 'location' field unless '--shift_genomic' is supplied
-  unless($self->{no_shift} || !$self->param('shift_genomic')) { #if shifting without shift genomic, we still want to run $iva->genomic_shift
+  unless(!$self->{shift_3prime} || !$self->param('shift_genomic')) { #if shifting without shift genomic, we still want to run $iva->genomic_shift
     $iva->genomic_shift;
     if (defined($iva->{shift_hash}->{shift_length}) && $self->param('shift_genomic')) {
       my $vf = $iva->variation_feature;

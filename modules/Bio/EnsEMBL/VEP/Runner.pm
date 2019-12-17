@@ -763,8 +763,8 @@ sub post_setup_checks {
   }
   
   if(defined($self->param('shift_hgvs')) && $self->param('shift_hgvs') eq 0) {
-    $self->status_msg("INFO: --shift_hgvs has been set to zero, enabling --no_shift\n");
-    $self->param('no_shift', 1);
+    $self->status_msg("INFO: --shift_hgvs has been set to zero, setting shift_3prime to 0\n");
+    $self->param('shift_3prime', 0);
   }
 
   return 1;
