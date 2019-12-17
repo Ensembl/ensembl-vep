@@ -439,7 +439,7 @@ sub apply_edits {
   my $mapping_strand = $al->strand;
 
   # we need to look at these op types
-  my %edit_ops = map {$_ => 1} qw(X D I);
+  my %edit_ops = map {$_ => 1} qw(X D I S);
 
   ## COMMENTED OUT FOR NOW, TRUST SEQ COMPARISON INSTEAD
   ## check for edit ops
@@ -502,8 +502,13 @@ sub apply_edits {
       my $q_s = $current_q_pos;
 
       my ($t_s, $t_e);
-
-      if($op eq 'I') {
+      
+      my %insertion_types = (
+        'I' => 1,
+        'S' => 1,
+      );
+      
+      if($insertion_types{$op}) {
         if($mapping_strand > 0) {
           $t_s = $current_t_pos;
           $t_e = $current_t_pos - 1;

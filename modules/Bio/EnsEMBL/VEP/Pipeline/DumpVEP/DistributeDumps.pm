@@ -140,6 +140,7 @@ sub compute_checksums {
     next if $file =~ /^\./;
     next if $file =~ /^CHECKSUM/;
     my $path = File::Spec->catfile($dir, $file);
+    next if (-d $path);
     my $checksum = checksum($path);
     push(@checksums, [$checksum, $file]);
   }
@@ -154,6 +155,7 @@ sub compute_checksums {
 sub checksum {
   my $path = shift;
   my $checksum = `sum $path`;
+  die('sum ' . $path . ' failed: ' . $?) if $?;
   $checksum =~ s/\s* $path//xms;
   chomp($checksum);
   return $checksum;

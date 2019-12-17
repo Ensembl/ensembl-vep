@@ -7,12 +7,12 @@ fi
 
 echo 'Getting HTSlib'
 if [ ! -d htslib ]; then
-  git clone --branch 1.3.2 --depth 1 https://github.com/samtools/htslib.git
+  git clone --branch 1.9 --depth 1 https://github.com/samtools/htslib.git
 fi
 
 echo 'Getting Bio::DB::HTS'
 if [ ! -d Bio-HTS ]; then
-  git clone --branch 2.9 --depth 1 https://github.com/Ensembl/Bio-HTS.git
+  git clone --branch release/v2.11 --depth 1 https://github.com/Ensembl/Bio-HTS.git
 fi
 
 echo 'Getting jksrc'

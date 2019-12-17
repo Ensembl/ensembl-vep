@@ -37,6 +37,7 @@ use Bio::EnsEMBL::Registry;
 use base qw(Bio::EnsEMBL::Variation::Pipeline::BaseVariationProcess);
 
 use DBI;
+use File::Path qw(mkpath);
 
 my $DEBUG = 0;
 
@@ -54,7 +55,15 @@ sub run {
   my $dba = Bio::EnsEMBL::Registry->get_DBAdaptor($species, $group);
   my $dbc = $dba->dbc();
   my $current_db_name = $dbc->dbname();
-  
+ 
+  my $var_db_name = $self->has_var_db($dbc, $current_db_name);
+  my $dbc_var;
+
+  if($var_db_name){
+    my $dba_var = Bio::EnsEMBL::Registry->get_DBAdaptor($species, 'variation');
+    $dbc_var = $dba_var->dbc();
+  }
+
   #Special case for otherfeatures
   if ($current_db_name =~ /otherfeatures/) {
     if ($self->has_refseq($dbc, $current_db_name) <= 0) {
@@ -62,10 +71,13 @@ sub run {
       return;
     }
   }
+  
+  mkpath($self->param('pipeline_dir')) unless -d $self->param('pipeline_dir');
+
   $self->param(
     'species_jobs',
     [
-      map {@{$self->generate_species_jobs($_,$group,$dba,$dbc,$current_db_name)}}
+      map {@{$self->generate_species_jobs($_,$group,$dba,$dbc,$dbc_var,$current_db_name)}}
       $species,
     ]
   );
@@ -75,7 +87,7 @@ sub run {
 }
 
 sub generate_species_jobs {
-  my ($self, $species, $group, $dba, $dbc, $current_db_name) = @_;
+  my ($self, $species, $group, $dba, $dbc, $dbc_var, $current_db_name) = @_;
 
   my @return;
   
@@ -115,6 +127,8 @@ sub generate_species_jobs {
   if($var_db_name) {
     my $has_sift_poly = $self->has_sift_poly($dbc, $var_db_name, $species_id);
     $species_hash{$_} = $has_sift_poly->{$_} for keys %$has_sift_poly;
+    
+    $self->pubmed($dbc_var, $current_db_name, $species_id);
   }
 
   push @return, \%species_hash;
@@ -127,6 +141,70 @@ sub generate_species_jobs {
 
   return \@return;
 }
+
+sub pubmed {
+  my ($self, $dbc, $current_db_name, $species_id) = @_;
+  $species_id ||= 0;
+
+  my %pm;
+  my $pipeline_dump_dir = $self->param('pipeline_dir');
+
+  my $file = sprintf(
+      '%s/pubmed_%s_%s_%s.txt',
+      $pipeline_dump_dir,
+      $self->required_param('species'),
+      $self->required_param('ensembl_release'),
+      $self->get_assembly($dbc, $current_db_name, $species_id)
+      );
+      
+  my $lock = $file.'.lock';
+  unlink($file) if -e $file;
+  unlink($lock) if -e $lock;
+  my $sleep_count = 0;
+  if(-e $lock) {
+    while(-e $lock) {
+      sleep 1;
+      die("I've been waiting for $lock to be removed for $sleep_count seconds, something may have gone wrong\n") if ++$sleep_count > 900;
+    }
+  }
+  if(-e $file) {
+    unlink($file);
+  }
+    
+  if($dbc) {
+    open OUT, ">$lock";
+    print OUT "$$\n";
+    close OUT;
+    $self->{_lock_file} = $lock;
+
+    my $sth = $dbc->prepare(qq{
+      SELECT v.name, GROUP_CONCAT(p.pmid)
+      FROM variation v, variation_citation c, publication p
+      WHERE v.variation_id = c.variation_id
+      AND c.publication_id = p.publication_id
+      AND p.pmid IS NOT NULL
+      GROUP BY v.variation_id
+    });
+    $sth->execute();
+
+    my ($v, $p);
+    $sth->bind_columns(\$v, \$p);
+
+    open OUT, ">$file";
+    while($sth->fetch()) {
+      $pm{$v} = $p;
+      print OUT "$v\t$p\n";
+    }
+
+    close OUT;
+
+    unlink($lock);
+
+    $sth->finish();
+  } 
+  return \%pm;
+}
+
 
 sub get_species_id {
   my ($self, $dbc, $current_db_name, $species) = @_;

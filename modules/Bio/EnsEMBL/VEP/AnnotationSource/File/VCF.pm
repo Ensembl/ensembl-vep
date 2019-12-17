@@ -103,6 +103,8 @@ sub new {
 
   my $hashref = $_[0];
 
+  $self->add_shortcuts(['custom_multi_allelic']);
+
   $self->fields($hashref->{fields}) if $hashref->{fields};      ## report INFO & FILTER fields
 
   return $self;
@@ -178,10 +180,12 @@ sub _create_records {
       # substitute in a value of 1 for absent; some keys in VCF do not have a value
       # but VEP needs something to write out
       $value = 1 if !defined($value);
-
+      
       my @return;
-
-      if($value =~ /\,/) {
+      my $metadata = $parser->{metadata} || {};
+      my $is_source_clinvar = defined($metadata->{source}) ? $metadata->{source} eq 'ClinVar' : 0;	
+      
+      if(!($self->{'custom_multi_allelic'} || $is_source_clinvar) && $value =~ /\,/) {
         my @split = split(',', $value);
 
         # some VCFs have data for REF included

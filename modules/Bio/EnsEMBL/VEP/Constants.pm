@@ -52,7 +52,7 @@ use warnings;
 
 use base qw(Exporter);
 
-our $VEP_VERSION     = 97;
+our $VEP_VERSION     = 99;
 our $VEP_SUB_VERSION = 0;
 
 our @EXPORT_OK = qw(
@@ -314,5 +314,6 @@ our %COLOUR_KEYS = (
 );
 
 our $MAX_NOT_ORDERED_VARIANTS = 100;
+our $MAX_NOT_ORDERED_VARIANTS_DISTANCE = 100;
 
 1;

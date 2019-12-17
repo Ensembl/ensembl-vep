@@ -9,6 +9,9 @@ RUN apt-get update && apt-get -y install \
     build-essential \
     git \
     libpng-dev \
+    zlib1g-dev \
+    libbz2-dev \
+    liblzma-dev \
     perl \
     perl-base \
     unzip \
@@ -19,28 +22,29 @@ RUN apt-get update && apt-get -y install \
 ENV OPT /opt/vep
 ENV OPT_SRC $OPT/src
 ENV HTSLIB_DIR $OPT_SRC/htslib
-# Branch to clone, e.g. "-b release/96"
-ENV BRANCH ""
+ENV BRANCH master
 
 # Working directory
 WORKDIR $OPT_SRC
 
 # Clone/download repositories/libraries
-# Clone ensembl git repository and extract useful ensemb core file
-RUN git clone $BRANCH --depth 1 https://github.com/Ensembl/ensembl.git && \
-    cp ensembl/cpanfile ensembl_cpanfile && \
-    rm -rf ensembl && \
+RUN if [ "$BRANCH" = "master" ]; \
+    then export BRANCH_OPT=""; \
+    else export BRANCH_OPT="-b $BRANCH"; \
+    fi && \
+    # Get ensembl cpanfile in order to get the list of the required Perl libraries
+    wget -q "https://raw.githubusercontent.com/Ensembl/ensembl/$BRANCH/cpanfile" -O "ensembl_cpanfile" && \
     # Clone ensembl-vep git repository
-    git clone $BRANCH --depth 1 https://github.com/Ensembl/ensembl-vep.git && chmod u+x ensembl-vep/*.pl && \
+    git clone $BRANCH_OPT --depth 1 https://github.com/Ensembl/ensembl-vep.git && chmod u+x ensembl-vep/*.pl && \
     # Clone ensembl-variation git repository and compile C code
-    git clone $BRANCH --depth 1 https://github.com/Ensembl/ensembl-variation.git && \
+    git clone $BRANCH_OPT --depth 1 https://github.com/Ensembl/ensembl-variation.git && \
     mkdir var_c_code && \
     cp ensembl-variation/C_code/*.c ensembl-variation/C_code/Makefile var_c_code/ && \
     rm -rf ensembl-variation && \
     chmod u+x var_c_code/* && \
-    # Clone bioperl-ext git repository
+    # Clone bioperl-ext git repository - used by Haplosaurus
     git clone --depth 1 https://github.com/bioperl/bioperl-ext.git && \
-    # Download ensembl-xs
+    # Download ensembl-xs - it contains compiled versions of certain key subroutines used in VEP
     wget https://github.com/Ensembl/ensembl-xs/archive/2.3.2.zip -O ensembl-xs.zip && \
     unzip -q ensembl-xs.zip && mv ensembl-xs-2.3.2 ensembl-xs && rm -rf ensembl-xs.zip && \
     # Clone/Download other repositories: bioperl-live is needed so the cpanm dependencies installation from the ensembl-vep/cpanfile file takes less disk space
@@ -51,11 +55,10 @@ RUN git clone $BRANCH --depth 1 https://github.com/Ensembl/ensembl.git && \
     rm -rf Bio-HTS/.??* Bio-HTS/Changes Bio-HTS/DISCLAIMER Bio-HTS/MANIFEST* Bio-HTS/README Bio-HTS/scripts Bio-HTS/t Bio-HTS/travisci \
            bioperl-ext/.??* bioperl-ext/Bio/SeqIO bioperl-ext/Bio/Tools bioperl-ext/Makefile.PL bioperl-ext/README* bioperl-ext/t bioperl-ext/examples \
            ensembl-vep/.??* ensembl-vep/docker \
-           ensembl-xs/.??* ensembl-xs/Changes ensembl-xs/INSTALL ensembl-xs/MANIFEST ensembl-xs/README ensembl-xs/t ensembl-xs/travisci \
+           ensembl-xs/.??* ensembl-xs/TODO ensembl-xs/Changes ensembl-xs/INSTALL ensembl-xs/MANIFEST ensembl-xs/README ensembl-xs/t ensembl-xs/travisci \
            htslib/.??* htslib/INSTALL htslib/NEWS htslib/README* htslib/test && \
-    # Only keep needed kent-335_base libraries for VEP
+    # Only keep needed kent-335_base libraries for VEP - used by Bio::DB::BigFile (bigWig parsing)
     mv kent-335_base kent-335_base_bak && mkdir -p kent-335_base/src && \
-    cp -R kent-335_base_bak/confs kent-335_base/ && \
     cp -R kent-335_base_bak/src/lib kent-335_base_bak/src/inc kent-335_base_bak/src/jkOwnLib kent-335_base/src/ && \
     cp kent-335_base_bak/src/*.sh kent-335_base/src/ && \
     rm -rf kent-335_base_bak
@@ -64,9 +67,10 @@ RUN git clone $BRANCH --depth 1 https://github.com/Ensembl/ensembl.git && \
 WORKDIR bioperl-ext/Bio/Ext/Align/
 RUN perl -pi -e"s|(cd libs.+)CFLAGS=\\\'|\$1CFLAGS=\\\'-fPIC |" Makefile.PL
 
-# Install htslib binaries (need bgzip, tabix)
+# Install htslib binaries (for 'bgzip' and 'tabix')
+# htslib requires the packages 'zlib1g-dev', 'libbz2-dev' and 'liblzma-dev'
 WORKDIR $HTSLIB_DIR
-RUN make install && rm -f Makefile *.c cram/*.c
+RUN make install && rm -f Makefile *.c
 
 # Compile Variation LD C scripts
 WORKDIR $OPT_SRC/var_c_code
@@ -87,6 +91,9 @@ RUN apt-get update && apt-get -y install \
     libmysqlclient-dev \
     libpng-dev \
     libssl-dev \
+    zlib1g-dev \
+    libbz2-dev \
+    liblzma-dev \
     locales \
     openssl \
     perl \
@@ -126,20 +133,22 @@ RUN perl Makefile.PL && make && make install && rm -f Makefile*
 
 # Install ensembl-xs, faster run using re-implementation in C of some of the Perl subroutines
 WORKDIR $OPT_SRC/ensembl-xs
-RUN perl Makefile.PL && make && make install && rm -f Makefile*
+RUN perl Makefile.PL && make && make install && rm -f Makefile* cpanfile
 
 WORKDIR $OPT_SRC
 # Install/compile more libraries
 RUN ensembl-vep/travisci/build_c.sh && \
+    # Remove unused Bio-DB-HTS files
+    rm -rf Bio-HTS/cpanfile Bio-HTS/Build.PL Bio-HTS/Build Bio-HTS/_build Bio-HTS/INSTALL.pl && \
     # Install ensembl perl dependencies (cpanm)
     cpanm --installdeps --with-recommends --notest --cpanfile ensembl_cpanfile . && \
     cpanm --installdeps --with-recommends --notest --cpanfile ensembl-vep/cpanfile . && \
-    # Delete bioperl after the cpanm installs as it will be reinstalled by the INSTALL.pl script
-    rm -rf bioperl-live && \
+    # Delete bioperl and cpanfiles after the cpanm installs as bioperl will be reinstalled by the INSTALL.pl script
+    rm -rf bioperl-live ensembl_cpanfile ensembl-vep/cpanfile && \
     # Configure "locale", see https://github.com/rocker-org/rocker/issues/19
     echo "$LANG_VAR UTF-8" >> /etc/locale.gen && locale-gen en_US.utf8 && \
     /usr/sbin/update-locale LANG=$LANG_VAR && \
-    # Copy htslib executables
+    # Copy htslib executables. It also requires the packages 'zlib1g-dev', 'libbz2-dev' and 'liblzma-dev'
     cp $HTSLIB_DIR/bgzip $HTSLIB_DIR/tabix $HTSLIB_DIR/htsfile /usr/local/bin/
 
 ENV LC_ALL $LANG_VAR
@@ -156,5 +165,4 @@ RUN echo >> $OPT/.profile && \
     echo PATH=$PATH:\$PATH >> $OPT/.profile && \
     echo export PATH >> $OPT/.profile && \
     # Run INSTALL.pl and remove the ensemb-vep tests and travis
-    ./INSTALL.pl -a a -l && rm -rf t travisci .travis.yml
-
+    ./INSTALL.pl -a a -l -n && rm -rf t travisci .travis.yml

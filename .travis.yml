@@ -36,6 +36,7 @@ before_install:
   - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-io.git
   - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-funcgen.git
   - git clone --branch feature/3prime-shifting-master --depth 1 https://github.com/aparton/ensembl-variation.git
+
   - export CWD=$PWD
   - export DEPS=$HOME/dependencies
   - mkdir -p $DEPS

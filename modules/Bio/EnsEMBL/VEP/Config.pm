@@ -101,6 +101,7 @@ our %DEFAULTS = (
   vcf_info_field    => 'CSQ',
   ucsc_data_root    => 'http://hgdownload.cse.ucsc.edu/goldenpath/',
   max_sv_size       => 10000000,
+  clin_sig_allele   => 1,
   
   # frequency filtering
   freq_freq         => 0.01,
@@ -374,6 +375,7 @@ our %REQUIRES = (
   original  => [qw(filters)],
   phyloP    => [qw(ucsc_assembly)],
   phastCons => [qw(ucsc_assembly)],
+  custom_multi_allelic => [qw(custom)],
 );
 
 # incompatible options
@@ -398,6 +400,12 @@ our %DEPRECATED = (
   'convert' => undef,
 );
 
+our %UNSORTABLE = (
+  id     => 1,
+  hgvs   => 1,
+  spdi   => 1,
+  region => 1,
+);
 
 ####################################
 ####################################
@@ -471,6 +479,8 @@ sub new {
   foreach my $flag(grep {defined($config->{$_}) && ref($config->{$_}) ne 'ARRAY'} @LIST_FLAGS) {
     $config->{$flag} = [split(',', $config->{$flag})];
   }
+
+  $config->{unsorted_formats} = \%UNSORTABLE;
 
   $self->apply_option_sets($config);
   

@@ -120,7 +120,7 @@ SKIP: {
   );
 
   is($trs[0]->{_bam_edit_status}, 'ok', 'apply_edits - _bam_edit_status');
-
+  
   my ($tr) = grep {$_->stable_id eq 'NM_001286476.1'} @trs;
   ok($tr, 'NM_001286476.1 - get');
   ok($as->apply_edits($tr), 'NM_001286476.1 - apply_edits');
@@ -159,6 +159,29 @@ SKIP: {
   $as->apply_edits($_) for @trs;
   is((scalar grep {$_->{_bam_edit_status} eq 'ok'} @trs), 35, 'apply_edits - check all');
 
+  ## Tests for edits with S in cigar string
+  my ($tr) = grep {$_->stable_id eq 'NM_032195.2'} @trs;
+  ok($tr, 'NM_032195.2 - get');
+  ok($as->apply_edits($tr), 'NM_032195.2 - apply_edits');
+
+  is_deeply(
+    $tr->get_all_Attributes,
+    [
+      bless( {
+        'value' => '3660 3660 T',
+        'name' => 'RNA Edit',
+        'description' => 'Edit from bam_edit.bam, op=X len=1 mapped to 3660-3660',
+        'code' => '_rna_edit'
+      }, 'Bio::EnsEMBL::Attribute' ),
+      bless( {
+        'value' => '7504 7503 AAAAAAAAAAAAAAAA',
+        'name' => 'RNA Edit',
+        'description' => 'Edit from bam_edit.bam, op=S len=16 mapped to 7504-7503',
+        'code' => '_rna_edit'
+      }, 'Bio::EnsEMBL::Attribute' ),
+    ],
+    'NM_032195.2 - apply edits - edit attribs - include S'
+  );
 
   # test skip edit with rseq_mrna_match attrib
   delete $trs[0]->{_bam_edit_status};

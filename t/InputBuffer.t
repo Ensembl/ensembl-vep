@@ -355,7 +355,8 @@ is_deeply($ib, bless( {
   'pre_buffer' => [],
   'temp' => {},
   'minimal' => undef,
-  'max_not_ordered_variants' => 100
+  'max_not_ordered_variants' => 100,
+  'max_not_ordered_variants_distance' => 100
 }, 'Bio::EnsEMBL::VEP::InputBuffer' ), 'finished buffer empty after reset_buffer');
 
 
@@ -479,20 +480,20 @@ is_deeply(
 
 # Check non ordered variants
 my $max_non_ordered_variants = 5;
+my $max_not_ordered_variants_distance = 5;
 $cfg = Bio::EnsEMBL::VEP::Config->new({%{$test_cfg->base_testing_cfg}, buffer_size => 100});
 $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{not_ord_vcf}, valid_chromosomes => [1,21,22]});
-$ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p, max_not_ordered_variants => $max_non_ordered_variants});
+$ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p, max_not_ordered_variants => $max_non_ordered_variants, max_not_ordered_variants_distance => $max_not_ordered_variants_distance});
 
 $ib->next();
 $ib->next();
 dies_ok {$ib->next()} "die - Exiting the program as the maximun number of unsorted variants as been reached ($max_non_ordered_variants).";
 
 
-
 # Skip check for non ordered variants
 $cfg = Bio::EnsEMBL::VEP::Config->new({%{$test_cfg->base_testing_cfg}, buffer_size => 100, no_check_variants_order => 1});
 $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{not_ord_vcf}, valid_chromosomes => [1,21,22]});
-$ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p});
+$ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p, max_not_ordered_variants => $max_non_ordered_variants, max_not_ordered_variants_distance => $max_not_ordered_variants_distance});
 
 $ib->next();
 $ib->next();
@@ -500,6 +501,33 @@ eval {
   $ib->next();
 };
 ok(!$@, "Skip the count for non ordered variants with the flag 'no_check_variants_order'");
+
+# Skip check for hgvs variants
+# To workaround the offline check for HGVS input, the parser being given to the InputBuffer is in VCF format. The sorting is correctly prevented by the InputBuffer, compared to the previous 2 tests.
+$cfg = Bio::EnsEMBL::VEP::Config->new({%{$test_cfg->base_testing_cfg}, buffer_size => 100, format => 'hgvs'});
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{not_ord_vcf}, valid_chromosomes => [1,21,22]});
+$ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p, max_not_ordered_variants => $max_non_ordered_variants, max_not_ordered_variants_distance => $max_not_ordered_variants_distance});
+
+$ib->next();
+$ib->next();
+eval {
+  $ib->next();
+};
+ok(!$@, "Skip the count for non ordered variants with the flag 'hgvs'");
+
+
+# Check for non ordered variants with larger position difference (default settings)
+$max_not_ordered_variants_distance = 100;
+$cfg = Bio::EnsEMBL::VEP::Config->new({%{$test_cfg->base_testing_cfg}, buffer_size => 100});
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->{not_ord_vcf}, valid_chromosomes => [1,21,22]});
+$ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, parser => $p, max_not_ordered_variants => $max_non_ordered_variants, max_not_ordered_variants_distance => $max_not_ordered_variants_distance});
+
+$ib->next();
+$ib->next();
+eval {
+  $ib->next();
+};
+ok(!$@, "Pass non ordered variants with location differences larger ($max_not_ordered_variants_distance"."nt)");
 
 # done
 done_testing();

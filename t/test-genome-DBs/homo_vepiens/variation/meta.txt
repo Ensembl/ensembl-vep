@@ -49,7 +49,7 @@
 57	\N	patch	patch_77_78_c.sql|Drop the table study_variation
 58	\N	patch	patch_77_78_d.sql|Extend the index type_val_idx in the table attrib
 59	\N	patch	patch_77_78_e.sql|add indexes on father_ and mother_individual_id and population name
-2	\N	schema_version	98
+2	\N	schema_version	99
 60	\N	patch	patch_78_79_a.sql|schema version
 61	\N	patch	patch_78_79_b.sql|change the column attrib_type_id by attrib_id in the variation_attrib table
 62	\N	patch	patch_78_79_c.sql|Store more detailed Sift information
@@ -112,3 +112,6 @@
 143	\N	patch	patch_96_97_b.sql|move ancestral allele column to variation_feature
 144	\N	patch	patch_96_97_c.sql|add an unique index on the name column
 145	\N	patch	patch_97_98_a.sql|schema version
+146	\N	patch	patch_98_99_a.sql|schema version
+147	\N	patch	patch_98_99_b.sql|Add the column data_source_attrib in the table variation_citation
+148	\N	patch	patch_98_99_c.sql|Increase the size of the title and doi columns in the publication table

@@ -412,6 +412,7 @@ sub create_StructuralVariationFeatures {
     $self->warning_msg("WARNING: variant " . $info->{SVTYPE}. " is of a non-supported type, skipping:\n$line\n");
     $skip = 1;
   }
+
   ## check against size upperlimit to avoid memory problems
   my $len = $end - $start;
   if( $len > $self->{max_sv_size} ){
@@ -437,12 +438,23 @@ sub create_StructuralVariationFeatures {
     $parser->get_outer_end,
   );
 
+  if($info->{SVTYPE} && $info->{SVTYPE} =~/BND/ ){
+    ## break ends are not currently annotated as fusions between different regions/chromosomes
+    ## only report 'reference' breakpoint if multiple chromosomes are involved
+    unless (defined $info->{CHR2} &&  $info->{CHR2} == $chr){
+      $end     = $start;
+      $min_end = $min_start;
+      $max_end = $max_start;
+    }
+  }
+
+
   # get type
   my $type;
 
   ## avoid deriving type from alt for CNVs more precisely described by SVTYPE
   ## ALT: "<CN0>", "<CN0>,<CN2>,<CN3>" "<CN2>" => SVTYPE: DEL, CNV, DUP
-  if($alt =~ /\<|\[|\]|\>/ && $alt !~ /CN/) {
+  if($alt =~ /^\<|^\[|\]$|\>$/ && $alt !~ /CN/) {
     $type = $alt;
     $type =~ s/\<|\>//g;
     $type =~ s/\:.+//g;

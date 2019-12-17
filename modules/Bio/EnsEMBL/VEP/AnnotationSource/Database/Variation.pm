@@ -151,6 +151,10 @@ sub get_features_by_regions_uncached {
       ($region_start + 1) * $cache_region_size
     );
 
+    my $adaptor = $self->get_adaptor('variation', 'phenotypefeature');
+    my $source_id = $self->clinvar_source_id_cache;
+    my $attribs = $adaptor->get_clinsig_alleles_by_location($chr_is_seq_region ? $chr : $sr_cache->{$chr}, $s, $e, $source_id) if defined($adaptor) && defined($source_id);
+
     # no seq_region_id?
     next unless $sr_cache->{$chr} || $chr_is_seq_region;
 
@@ -178,10 +182,6 @@ sub get_features_by_regions_uncached {
     my ($var_id, %vars_by_id);
     $sth->bind_col(1, \$var_id);
     $sth->bind_col($_+2, \$v{$VAR_CACHE_COLS[$_]}) for (0..$#VAR_CACHE_COLS);
-    
-    my $adaptor = $self->get_adaptor('variation', 'phenotypefeature');
-    my $source_id = $self->clinvar_source_id_cache;
-    my $attribs = $adaptor->get_clinsig_alleles_by_location($chr_is_seq_region ? $chr : $sr_cache->{$chr}, $s, $e, $source_id) if defined($adaptor) && defined($source_id);
 
     my @vars;
     while($sth->fetch) {

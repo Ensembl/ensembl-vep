@@ -56,9 +56,11 @@ our (
   $ENS_GIT_ROOT,
   $BIOPERL_URL,
   $CACHE_URL,
+  $CACHE_URL_INDEXED,
   $CACHE_DIR,
   $PLUGINS,
   $PLUGIN_URL,
+  $PLUGINS_DIR,
   $FASTA_URL,
   $FTP_USER,
   $HELP,
@@ -93,8 +95,8 @@ our (
 ## VERSIONS OF INSTALLED SOFTWARE
 ## MAY BE UPDATED IF SUCCESSFULLY TESTED
 ########################################
-our $HTSLIB_VERSION  = '1.3.2';           # frozen due to introduced dependency on lzma, bz2
-our $BIOHTS_VERSION  = '2.9';             # latest as of release/91
+our $HTSLIB_VERSION  = '1.9';             # latest release as of release/98
+our $BIOHTS_VERSION  = '2.11';            # latest 2.X release as of release/98
 our $BIOPERL_VERSION = 'release-1-6-924'; # frozen, no pressing need to update
 
 
@@ -157,6 +159,7 @@ GetOptions(
   'NO_UPDATE|n'        => \$NO_UPDATE,
   'SPECIES|s=s'        => \$SPECIES,
   'PLUGINS|g=s'        => \$PLUGINS,
+  'PLUGINSDIR|r=s'     => \$PLUGINS_DIR,
   'PLUGINURL=s'        => \$PLUGIN_URL,
   'AUTO|a=s'           => \$AUTO,
   'QUIET|q'            => \$QUIET,
@@ -204,9 +207,14 @@ $BIOPERL_URL  ||= "https://github.com/bioperl/bioperl-live/archive/$BIOPERL_VERS
 $API_VERSION  ||= $CURRENT_VERSION_DATA->{$VEP_MODULE_NAME}->{release};
 $DATA_VERSION ||= $API_VERSION;
 $CACHE_DIR    ||= $ENV{HOME} ? $ENV{HOME}.'/.vep' : 'cache';
+$PLUGINS_DIR  ||= $CACHE_DIR.'/Plugins';
 $FTP_USER     ||= 'anonymous';
 
+## Set the indexed cache url if it's been overwritten by the user
+$CACHE_URL_INDEXED = $CACHE_URL;
+
 $CACHE_URL  ||= "ftp://ftp.ensembl.org/pub/release-$DATA_VERSION/variation/vep";
+$CACHE_URL_INDEXED  ||= "ftp://ftp.ensembl.org/pub/release-$DATA_VERSION/variation/indexed_vep_cache";
 $FASTA_URL  ||= "ftp://ftp.ensembl.org/pub/release-$DATA_VERSION/fasta/";
 $PLUGIN_URL ||= 'https://raw.githubusercontent.com/Ensembl/VEP_plugins';
 
@@ -802,20 +810,39 @@ END
 
   apt-get install build-essential
 END
+  
+  # List the required libraries with their packages
+  my %libs = ( 
+    'zlib.h' =>  'zlib1g-dev', 
+    'lzma.h' =>  'liblzma-dev', 
+    'bzlib.h' => 'libbz2-dev'
+  );
 
+  my $msg = '';
   my $this_os =  $^O;
-  if( $this_os ne 'darwin' ) {
-    -e '/usr/include/zlib.h' or die <<END;
-      zlib.h library header not found in /usr/include. Please install it and try again.
-      (or to skip Bio::DB::HTS/htslib install re-run with --NO_HTSLIB)
 
-      On Debian/Ubuntu systems you can do this with the command:
+  if ($this_os ne 'darwin' ) {
+ 
+    my $default_msg = qq{%s library header(s) not found in /usr/include. Please install it and try again.
+(or to skip Bio::DB::HTS/htslib install re-run with --NO_HTSLIB)
 
-      apt-get install zlib1g-dev
-END
- ;
+On Debian/Ubuntu systems you can do this with the command:
+
+apt-get install %s};
+    my @missing_header = ();
+    my @missing_library = (); 
+    # Loop over the required libraries
+    foreach my $lib (sort(keys(%libs))) {
+      unless(-e '/usr/include/'.$lib){
+        push(@missing_header, $lib);
+	push(@missing_library, $libs{$lib});
+      }
+    }
+    my $header_string = join( ', ', @missing_header);
+    my $install_string = join( ' ', @missing_library);
+    die(sprintf($default_msg, $header_string, $install_string). "\n\n") if($header_string ne '');
   }
-
+    
   # STEP 1: Create a clean directory for building
   my $htslib_install_dir = $LIB_DIR;
   my $curdir = getcwd;
@@ -1070,11 +1097,20 @@ sub cache() {
   # get list of species
   print " - getting list of available cache files\n" unless $QUIET;
 
+  my $bgzip = `which bgzip`;
+  chomp($bgzip);
+  $bgzip ||= "$HTSLIB_DIR/bgzip";
+
+  my $tabix = `which tabix`;
+  chomp($tabix);
+  $tabix ||= "$HTSLIB_DIR/tabix";
+  
   my $num = 1;
   my $species_list;
+  my $URL_TO_USE = (-e $tabix) ? $CACHE_URL_INDEXED : $CACHE_URL;
 
-  if($CACHE_URL =~ /^ftp/i) {
-    $CACHE_URL =~ m/(ftp:\/\/)?(.+?)\/(.+)/;
+  if($URL_TO_USE =~ /^ftp/i) {
+    $URL_TO_USE =~ m/(ftp:\/\/)?(.+?)\/(.+)/;
     $ftp = Net::FTP->new($2, Passive => 1) or die "ERROR: Could not connect to FTP host $2\n$@\n";
     $ftp->login($FTP_USER) or die "ERROR: Could not login as $FTP_USER\n$@\n";
     $ftp->binary();
@@ -1086,7 +1122,7 @@ sub cache() {
     push @files, grep {$_ =~ /tar.gz/} $ftp->ls;
   }
   else {
-    opendir DIR, $CACHE_URL;
+    opendir DIR, $URL_TO_USE;
     @files = grep {$_ =~ /tar.gz/} readdir DIR;
     closedir DIR;
   }
@@ -1221,14 +1257,14 @@ sub cache() {
     }
 
     my $target_file = "$CACHE_DIR/tmp/$file_name";
-    if($CACHE_URL =~ /^ftp/) {
-      print " - downloading $CACHE_URL/$file_path\n" unless $QUIET;
+    if($URL_TO_USE =~ /^ftp/) {
+      print " - downloading $URL_TO_USE/$file_path\n" unless $QUIET;
       if(!$TEST) {
-        $ftp->get($file_name, $target_file) or download_to_file("$CACHE_URL/$file_path", $target_file);
+        $ftp->get($file_name, $target_file) or download_to_file("$URL_TO_USE/$file_path", $target_file);
 
         my $checksums = "CHECKSUMS";
         my $checksums_target_file = "$CACHE_DIR/tmp/$checksums";
-        $ftp->get($checksums, $checksums_target_file) or download_to_file("$CACHE_URL/$checksums", $checksums_target_file);
+        $ftp->get($checksums, $checksums_target_file) or download_to_file("$URL_TO_USE/$checksums", $checksums_target_file);
         if (-e $checksums_target_file) {
           my $sum_download = `sum $target_file`;
           $sum_download =~ m/([0-9]+)(\s+)([0-9]+)/;
@@ -1243,8 +1279,8 @@ sub cache() {
       }
     }
     else {
-      print " - copying $CACHE_URL/$file_path\n" unless $QUIET;
-      copy("$CACHE_URL/$file_path", $target_file) unless $TEST;
+      print " - copying $URL_TO_USE/$file_path\n" unless $QUIET;
+      copy("$URL_TO_USE/$file_path", $target_file) unless $TEST;
     }
 
     print " - unpacking $file_name\n" unless $QUIET;
@@ -1263,16 +1299,7 @@ sub cache() {
       move("$CACHE_DIR/tmp/$species/$_", "$CACHE_DIR/$species/$_") for readdir CACHEDIR;
       closedir CACHEDIR;
     }
-
-    # convert?
-    my $bgzip = `which bgzip`;
-    chomp($bgzip);
-    $bgzip ||= "$HTSLIB_DIR/bgzip";
-
-    my $tabix = `which tabix`;
-    chomp($tabix);
-    $tabix ||= "$HTSLIB_DIR/tabix";
-
+    
     if(((-e $bgzip && -e $tabix) || $CONVERT) && !$TEST) {
       unless($QUIET) {
         print " - converting cache, this may take some time but will allow VEP to look up variants and frequency data much faster\n";
@@ -1525,7 +1552,7 @@ sub plugins() {
   }
   else {
     print "\nThe VEP can use plugins to add functionality and data.\n" unless $QUIET;
-    print "Plugins will be installed in $CACHE_DIR\/Plugins\n" unless $QUIET;
+    print "Plugins will be installed in $PLUGINS_DIR\n" unless $QUIET;
 
     print "Do you want to install any plugins (y/n)? ";
 
@@ -1538,9 +1565,9 @@ sub plugins() {
   }
 
   # check plugin installation dir exists
-  if(!(-e $CACHE_DIR)) {
+  if(!(-e $PLUGINS_DIR)) {
     if(!$AUTO) {
-      print "Cache directory $CACHE_DIR does not exists - do you want to create it (y/n)? ";
+      print "Plugins directory $PLUGINS_DIR does not exists - do you want to create it (y/n)? ";
 
       my $ok = <>;
 
@@ -1550,14 +1577,14 @@ sub plugins() {
       }
     }
 
-    mkdir($CACHE_DIR) or die "ERROR: Could not create directory $CACHE_DIR\n";
+    mkpath($PLUGINS_DIR) or die "ERROR: Could not create directory $PLUGINS_DIR\n";
   }
-  mkdir($CACHE_DIR.'/Plugins') unless -e $CACHE_DIR.'/Plugins';
+  mkpath($PLUGINS_DIR) unless -e $PLUGINS_DIR;
 
   my $plugin_url_root = $PLUGIN_URL.'/release/'.$API_VERSION;
 
   # download and eval plugin config file
-  my $plugin_config_file = $CACHE_DIR.'/Plugins/plugin_config.txt';
+  my $plugin_config_file = $PLUGINS_DIR.'/plugin_config.txt';
   download_to_file($plugin_url_root.'/plugin_config.txt', $plugin_config_file);
 
   die("ERROR: Could not access plugin config file $plugin_config_file\n") unless($plugin_config_file && -e $plugin_config_file);
@@ -1668,7 +1695,7 @@ sub plugins() {
   foreach my $pl(@selected_plugins) {
     printf("\n - installing \"%s\"\n", $pl->{key});
 
-    my $local_file = $CACHE_DIR.'/Plugins/'.$pl->{key}.'.pm';
+    my $local_file = $PLUGINS_DIR.'/'.$pl->{key}.'.pm';
 
     # overwrite?
     if(-e $local_file) {
@@ -1842,6 +1869,7 @@ Options
 -s | --SPECIES     Comma-separated list of species to install when using --AUTO
 -y | --ASSEMBLY    Assembly name to use if more than one during --AUTO
 -g | --PLUGINS     Comma-separated list of plugins to install when using --AUTO
+-r | --PLUGINSDIR  Set destination directory for VEP plugins files (default = '$ENV{HOME}/.vep/Plugins/')
 -q | --QUIET       Don't write any status output when using --AUTO
 -p | --PREFER_BIN  Use this if the installer fails with out of memory errors
 -l | --NO_HTSLIB   Don't attempt to install Faidx/htslib
