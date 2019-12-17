@@ -1951,6 +1951,15 @@ is_deeply(
 $of->{hgvs}  = 0;
 $of->{hgvsg} = 0;
 
+## Check reset_shifted_positions
+
+$vfoa->_return_3prime;
+$vfoa->transcript_variation->cds_start(20);
+my $new_cds_start = $vfoa->transcript_variation->{cds_start};
+$of->reset_shifted_positions($vfoa->variation_feature);
+ok(defined($new_cds_start) && !defined($vfoa->transcript_variation->{cds_start}), 'reset_shifted_positions');
+
+
 
 # done
 done_testing();

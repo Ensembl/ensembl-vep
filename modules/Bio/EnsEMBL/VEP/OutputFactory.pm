@@ -281,7 +281,7 @@ sub get_all_output_hashes_by_InputBuffer {
   # this can happen when using --minimal
   $self->rejoin_variants_in_InputBuffer($buffer) if $buffer->rejoin_required;
 
-  map {@{$self->update_shifted_positions($_)}}
+  map {@{$self->reset_shifted_positions($_)}}
     @{$buffer->buffer};
   
   return [
@@ -290,7 +290,7 @@ sub get_all_output_hashes_by_InputBuffer {
   ];
 }
 
-sub update_shifted_positions {
+sub reset_shifted_positions {
   my $self = shift;
   my $vf = shift;
   return [] if ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature';
