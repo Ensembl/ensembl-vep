@@ -73,7 +73,7 @@ is_deeply(
 $headers = get_runner({refseq => 1, fasta => $test_cfg->{fasta}, quiet => 1, input_file => $test_cfg->{test_vcf}, vcf => 1})->get_OutputFactory->headers;
 is(
   $headers->[-2],
-  '##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|SYMBOL_SOURCE|HGNC_ID|REFSEQ_MATCH|GIVEN_REF|USED_REF|BAM_EDIT">',
+  '##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|SYMBOL_SOURCE|HGNC_ID|REFSEQ_MATCH|REFSEQ_OFFSET|GIVEN_REF|USED_REF|BAM_EDIT">',
   'headers - BAM_EDIT'
 );
 
@@ -167,6 +167,7 @@ is_deeply(
     'FLAGS',
     'REFSEQ_MATCH',
     'SOURCE',
+    'REFSEQ_OFFSET',
   ],
   'fields - --merged and --custom dont duplicate SOURCE'
 );
@@ -663,21 +664,21 @@ $of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({config => $ib->config});
 is(
   $of->get_all_lines_by_InputBuffer($ib)->[0],
   'MT	12848	rs267606899	C	T	.	.	CSQ='.
-'T|downstream_gene_variant|MODIFIER||4508|Transcript|4508||||||||||||3641|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|downstream_gene_variant|MODIFIER||4509|Transcript|4509||||||||||||4276|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|downstream_gene_variant|MODIFIER||4513|Transcript|4513||||||||||||4579|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|downstream_gene_variant|MODIFIER||4514|Transcript|4514||||||||||||2858|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|upstream_gene_variant|MODIFIER||4519|Transcript|4519||||||||||||1899|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|downstream_gene_variant|MODIFIER||4537|Transcript|4537||||||||||||2444|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|downstream_gene_variant|MODIFIER||4538|Transcript|4538||||||||||||711|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|downstream_gene_variant|MODIFIER||4539|Transcript|4539||||||||||||2082|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|missense_variant|MODERATE||4540|Transcript|4540||||||512|512|171|A/V|gCa/gTa|||1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|downstream_gene_variant|MODIFIER||4541|Transcript|4541||||||||||||1301|-1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|downstream_gene_variant|MODIFIER||4556|Transcript|4556||||||||||||1826|-1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|downstream_gene_variant|MODIFIER||4563|Transcript|4563||||||||||||2790|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|downstream_gene_variant|MODIFIER||4564|Transcript|4564||||||||||||642|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|downstream_gene_variant|MODIFIER||4566|Transcript|4566||||||||||||4484|1||rseq_mrna_nonmatch&rseq_no_comparison,'.
-'T|downstream_gene_variant|MODIFIER||4568|Transcript|4568||||||||||||512|1||rseq_mrna_nonmatch&rseq_no_comparison,T|downstream_gene_variant|MODIFIER||4571|Transcript|4571||||||||||||3108|-1||rseq_mrna_nonmatch&rseq_no_comparison,T|downstream_gene_variant|MODIFIER||4573|Transcript|4573||||||||||||2379|1||rseq_mrna_nonmatch&rseq_no_comparison,T|downstream_gene_variant|MODIFIER||4575|Transcript|4575||||||||||||583|1||rseq_mrna_nonmatch&rseq_no_comparison,T|upstream_gene_variant|MODIFIER||4576|Transcript|4576||||||||||||3040|1||rseq_mrna_nonmatch&rseq_no_comparison',
+'T|downstream_gene_variant|MODIFIER||4508|Transcript|4508||||||||||||3641|1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|downstream_gene_variant|MODIFIER||4509|Transcript|4509||||||||||||4276|1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|downstream_gene_variant|MODIFIER||4513|Transcript|4513||||||||||||4579|1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|downstream_gene_variant|MODIFIER||4514|Transcript|4514||||||||||||2858|1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|upstream_gene_variant|MODIFIER||4519|Transcript|4519||||||||||||1899|1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|downstream_gene_variant|MODIFIER||4537|Transcript|4537||||||||||||2444|1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|downstream_gene_variant|MODIFIER||4538|Transcript|4538||||||||||||711|1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|downstream_gene_variant|MODIFIER||4539|Transcript|4539||||||||||||2082|1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|missense_variant|MODERATE||4540|Transcript|4540||||||512|512|171|A/V|gCa/gTa|||1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|downstream_gene_variant|MODIFIER||4541|Transcript|4541||||||||||||1301|-1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|downstream_gene_variant|MODIFIER||4556|Transcript|4556||||||||||||1826|-1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|downstream_gene_variant|MODIFIER||4563|Transcript|4563||||||||||||2790|1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|downstream_gene_variant|MODIFIER||4564|Transcript|4564||||||||||||642|1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|downstream_gene_variant|MODIFIER||4566|Transcript|4566||||||||||||4484|1||rseq_mrna_nonmatch&rseq_no_comparison|,'.
+'T|downstream_gene_variant|MODIFIER||4568|Transcript|4568||||||||||||512|1||rseq_mrna_nonmatch&rseq_no_comparison|,T|downstream_gene_variant|MODIFIER||4571|Transcript|4571||||||||||||3108|-1||rseq_mrna_nonmatch&rseq_no_comparison|,T|downstream_gene_variant|MODIFIER||4573|Transcript|4573||||||||||||2379|1||rseq_mrna_nonmatch&rseq_no_comparison|,T|downstream_gene_variant|MODIFIER||4575|Transcript|4575||||||||||||583|1||rseq_mrna_nonmatch&rseq_no_comparison|,T|upstream_gene_variant|MODIFIER||4576|Transcript|4576||||||||||||3040|1||rseq_mrna_nonmatch&rseq_no_comparison|',
   "RefSeq MT transcripts are returned"
 );
 

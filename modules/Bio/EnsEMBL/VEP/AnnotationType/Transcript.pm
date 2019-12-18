@@ -139,6 +139,7 @@ sub annotate_InputBuffer {
           -no_ref_check      => 1,
           -no_transfer       => 1,
           -use_feature_ref   => $use_feature_ref,
+          -no_shift          => !$self->param('shift_3prime')
         );
 
         $vf->add_TranscriptVariation($tv);

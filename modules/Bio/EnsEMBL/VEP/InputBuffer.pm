@@ -284,30 +284,40 @@ sub get_overlapping_vfs {
   my $start = shift;
   my $end = shift;
 
+  my @all_vfs;
   ($start, $end) = ($end, $start) if $start > $end;
-
+  
+  ## vfs obtained from trees are added to a separate array to allow for checking of overlaps
+  ## from both shifted and unshifted positions
+  
   if(my $tree = $self->interval_tree) {
-    return [
-      grep { overlap($_->{start}, $_->{end}, $start, $end) }
-      @{$tree->fetch($start - 1, $end)}
-    ];
+    @all_vfs = @{$tree->fetch($start - 1, $end)};
   }
-  else {
-    my $hash_tree = $self->hash_tree;
-
-    return [
-      grep { overlap($_->{start}, $_->{end}, $start, $end) }
-      values %{{
-        map {$_->{_hash_tree_id} => $_}                  # use _hash_tree_id to uniquify
-        map {@{$hash_tree->{$_} || []}}                  # tree might be empty
-        (
-          int($start / $HASH_TREE_SIZE)      # start of range
-          ..
-          (int($end / $HASH_TREE_SIZE) + 1)  # end of range
-        )
-      }}
-    ];
+  else{
+    $tree = $self->hash_tree unless($tree);  
+    @all_vfs = values %{{
+      map {$_->{_hash_tree_id} => $_}   # use _hash_tree_id to uniquify
+      map {@{$tree->{$_} || []}} # tree might be empty
+      (
+        int($start / $HASH_TREE_SIZE) # start of range
+        ..
+        (int($end / $HASH_TREE_SIZE) + 1) # end of range
+      )
+    }};
+  }      
+  
+  my @vfs;
+  foreach my $vf (@all_vfs)  {
+    if (overlap($vf->{start}, $vf->{end}, $start, $end)){
+      push(@vfs, $vf);
+    }
+    if((defined($vf->{unshifted_end}) && (defined($vf->{unshifted_start})))) {
+      if (overlap($vf->{unshifted_start}, $vf->{unshifted_end}, $start, $end)) {
+        push(@vfs, $vf);
+      }
+    }
   }
+  return [@vfs];
 }
 
 

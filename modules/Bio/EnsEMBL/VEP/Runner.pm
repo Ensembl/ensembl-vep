@@ -761,6 +761,11 @@ sub post_setup_checks {
   unless($self->param('stats_html') || $self->param('stats_text')) {
     $self->param('stats_html', 1);
   }
+  
+  if(defined($self->param('shift_hgvs')) && $self->param('shift_hgvs') eq 0) {
+    $self->status_msg("INFO: --shift_hgvs has been set to zero, setting shift_3prime to 0\n");
+    $self->param('shift_3prime', 0);
+  }
 
   return 1;
 }

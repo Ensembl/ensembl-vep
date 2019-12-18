@@ -167,6 +167,8 @@ GetOptions(
   'show_ref_allele',         # indicate reference allele
   'no_escape',               # don't percent-escape HGVS strings
   'ambiguity',               # Add allele ambiguity code
+  'shift_3prime=i',          # enables shifting of all variants to 3prime
+  'shift_genomic',           # adds genomic shifting to output, and prevents shifting of intergenic variants
 
   # cache stuff
   'database',                # must specify this to use DB now
