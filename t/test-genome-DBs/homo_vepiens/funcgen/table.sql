@@ -334,7 +334,7 @@ CREATE TABLE `feature_type` (
   `analysis_id` smallint(5) unsigned DEFAULT NULL,
   `description` varchar(255) DEFAULT NULL,
   `so_accession` varchar(64) DEFAULT NULL,
-  `so_name` varchar(255) DEFAULT NULL,
+  `so_term` varchar(255) DEFAULT NULL,
   `production_name` varchar(120) DEFAULT NULL,
   PRIMARY KEY (`feature_type_id`),
   UNIQUE KEY `name_class_analysis_idx` (`name`,`class`,`analysis_id`),
@@ -381,7 +381,7 @@ CREATE TABLE `meta` (
   PRIMARY KEY (`meta_id`),
   UNIQUE KEY `species_key_value_idx` (`species_id`,`meta_key`,`meta_value`),
   KEY `species_value_idx` (`species_id`,`meta_value`)
-) ENGINE=MyISAM AUTO_INCREMENT=767 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=772 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `meta_coord` (
   `table_name` varchar(40) NOT NULL,
@@ -450,7 +450,7 @@ CREATE TABLE `object_xref` (
   `ensembl_object_type` enum('Epigenome','Experiment','RegulatoryFeature','ExternalFeature','AnnotatedFeature','FeatureType','MirnaTargetFeature','ProbeSet','Probe','ProbeFeature','ReadFile') NOT NULL,
   `xref_id` int(10) unsigned NOT NULL,
   `linkage_annotation` varchar(255) DEFAULT NULL,
-  `analysis_id` smallint(5) unsigned NOT NULL,
+  `analysis_id` smallint(5) unsigned DEFAULT NULL,
   PRIMARY KEY (`object_xref_id`),
   UNIQUE KEY `xref_idx` (`xref_id`,`ensembl_object_type`,`ensembl_id`,`analysis_id`),
   KEY `analysis_idx` (`analysis_id`),
@@ -748,7 +748,7 @@ CREATE TABLE `segmentation_cell_tables` (
   `epigenome_id` int(16) unsigned NOT NULL,
   `feature_type_id` int(18) unsigned NOT NULL,
   `signal_alignment_id` int(23) unsigned NOT NULL,
-  `control_alignment_id` int(23) unsigned NOT NULL
+  `control_alignment_id` int(23) unsigned DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `segmentation_file` (

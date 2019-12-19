@@ -284,7 +284,7 @@ CREATE TABLE `external_db` (
   `status` enum('KNOWNXREF','KNOWN','XREF','PRED','ORTH','PSEUDO') NOT NULL,
   `priority` int(11) NOT NULL,
   `db_display_name` varchar(255) DEFAULT NULL,
-  `type` enum('ARRAY','ALT_TRANS','ALT_GENE','MISC','LIT','PRIMARY_DB_SYNONYM','ENSEMBL') DEFAULT NULL,
+  `type` enum('ARRAY','ALT_TRANS','ALT_GENE','MISC','LIT','PRIMARY_DB_SYNONYM','ENSEMBL') NOT NULL,
   `secondary_db_name` varchar(255) DEFAULT NULL,
   `secondary_db_table` varchar(255) DEFAULT NULL,
   `description` text,
@@ -420,8 +420,8 @@ CREATE TABLE `mapping_session` (
   `new_db_name` varchar(80) NOT NULL DEFAULT '',
   `old_release` varchar(5) NOT NULL DEFAULT '',
   `new_release` varchar(5) NOT NULL DEFAULT '',
-  `old_assembly` varchar(20) NOT NULL DEFAULT '',
-  `new_assembly` varchar(20) NOT NULL DEFAULT '',
+  `old_assembly` varchar(80) NOT NULL DEFAULT '',
+  `new_assembly` varchar(80) NOT NULL DEFAULT '',
   `created` datetime NOT NULL,
   PRIMARY KEY (`mapping_session_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
@@ -490,7 +490,7 @@ CREATE TABLE `meta` (
   PRIMARY KEY (`meta_id`),
   UNIQUE KEY `species_key_value_idx` (`species_id`,`meta_key`,`meta_value`),
   KEY `species_value_idx` (`species_id`,`meta_value`)
-) ENGINE=MyISAM AUTO_INCREMENT=1870 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=1873 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `meta_coord` (
   `table_name` varchar(40) NOT NULL,
