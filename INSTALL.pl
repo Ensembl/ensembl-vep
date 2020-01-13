@@ -914,29 +914,6 @@ sub install_biodbhts() {
   print( " - making Bio::DB:HTS\n" );
   # patch makefile
   chdir $BIODBHTS_DIR;
-  rename 'Build.PL','Build.PL.orig' or die "Couldn't rename Build to Build.orig: $!";
-  open my $in, '<','Build.PL.orig'     or die "Couldn't open Build.PL.orig for reading: $!";
-  open my $out,'>','Build.PL.new' or die "Couldn't open Build.PL.new for writing: $!";
-
-  while (<$in>) {
-    chomp;
-    if (/LIBS/) {
-      s/#.+//;  # get rid of comments
-      $_ = "LIBS              => ['-L../htslib/ -lhts  -lz'],";
-    }
-
-    if (/INC/) {
-      s/#.+//;  # get rid of comments
-      $_ = "INC               => '-I. -I../htslib', ";
-    }
-  }
-  continue {
-    print $out $_,"\n";
-  }
-
-  close $in;
-  close $out;
-  rename 'Build.PL.new','Build.PL' or die "Couldn't rename Build.new to Build: $!";
   system "perl Build.PL --htslib $htslib_location";
   system "./Build";
   chdir ".";
