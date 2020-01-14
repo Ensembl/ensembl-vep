@@ -895,7 +895,7 @@ sub install_biodbhts() {
   rmtree( $DEST_DIR.'/tmp' );
 
   #Now install Bio::DB::HTS proper
-  my $biodbhts_github_url = "https://github.com/Ensembl/Bio-HTS";
+  my $biodbhts_github_url = "https://github.com/Ensembl/Bio-DB-HTS";
   my $biodbhts_zip_github_url = "$biodbhts_github_url/archive/$BIOHTS_VERSION.zip";
   my $biodbhts_zip_download_file = $DEST_DIR.'/tmp/biodbhts.zip';
 
