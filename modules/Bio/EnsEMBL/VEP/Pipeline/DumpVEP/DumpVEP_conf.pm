@@ -106,7 +106,7 @@ sub default_options {
         # assembly-specific stuff
         assembly_specific => {
           GRCh37 => {
-            bam => $self->o('dump_vep_data_dir').'/interim_GRCh37.p13_knownrefseq_alignments_2017-01-13.bam',
+            bam => $self->o('dump_vep_data_dir').'/GCF_000001405.25_GRCh37.p13_knownrefseq_alns.bam',
             freq_vcf => [
               {
                 file => $self->o('dump_vep_data_dir').'/1KG.phase3.GRCh37.vcf.gz',
@@ -136,7 +136,7 @@ sub default_options {
             ],
           },
           GRCh38 => {
-            bam => $self->o('dump_vep_data_dir').'/interim_GRCh38.p12_knownrefseq_alignments_2019-01-25.bam',
+            bam => $self->o('dump_vep_data_dir').'/GCF_000001405.39_GRCh38.p13_knownrefseq_alns.bam',
             freq_vcf => [
               {
                 file => $self->o('dump_vep_data_dir').'/1KG.phase3.GRCh38_2018_02_26.vcf.gz',
