@@ -485,23 +485,16 @@ sub evaluate {
 
       # Filter multiple values
       if(defined($input) && $input =~ /[0-9](\,|\&)/) {
-        my $delimiter;
-        if($input =~ /\,/) {
-          $delimiter = ',';
-        }
-        else {
-          $delimiter = '&';
-        }
-
-        my $f = 0;
-        my @input_splited = split /$delimiter/, $input;
-        foreach my $value_i (@input_splited) {
+        my $delimiter = $1;
+        my $found = 0;
+        my @split_input = split /$delimiter/, $input;
+        foreach my $value_i (@split_input) {
           my $predicted = &$predicate($value_i, $value, $self);
           if($predicted) {
-            $f = 1;
+            $found = 1;
           }
         }
-        $result = $f;
+        $result = $found;
       }
       else {
         $result = &$predicate($input, $value, $self);
