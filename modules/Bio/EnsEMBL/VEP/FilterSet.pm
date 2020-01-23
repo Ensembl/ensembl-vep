@@ -482,7 +482,9 @@ sub evaluate {
       $return = 0;
     }
     else {
-      if($input =~ /,/) {
+
+      # Filter multiple values
+      if(defined($input) && $input =~ /[0-9],/) {
         my $f = 0;
         my @input_splited = split /,/, $input;
         foreach my $value_i (@input_splited) {
