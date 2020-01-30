@@ -168,6 +168,7 @@ sub create_VariationFeatures {
   my @errors;
 
   foreach my $core_group(@core_groups) {
+    next if (($hgvs =~ /NM_/ || $hgvs =~ /XM_/) && $core_group eq 'core');
     my $sa  = $self->get_adaptor($core_group, 'Slice');
     my $ta  = $self->get_adaptor($core_group, 'Transcript');
 
