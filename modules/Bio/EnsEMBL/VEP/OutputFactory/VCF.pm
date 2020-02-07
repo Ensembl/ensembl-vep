@@ -370,7 +370,7 @@ sub output_hash_to_vcf_info_chunk {
       push @chunk, $data;
     }
     # keep 0 values
-    elsif (defined $hash->{$col}
+    elsif (defined $hash->{$col} && $hash->{$col} ne '' 
            && ($hash->{$col} == 0)) {
       push @chunk, $hash->{$col};
     }
