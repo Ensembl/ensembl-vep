@@ -260,6 +260,13 @@ is(
   "output_hash_to_vcf_info_chunk - 0 kept"
 );
 
+is(
+  $of->output_hash_to_vcf_info_chunk({Allele => '', SIFT => 0}),
+  '|0',
+  "output_hash_to_vcf_info_chunk - empty string provided"
+);
+
+
 
 ## get_all_lines_by_InputBuffer
 ###############################
