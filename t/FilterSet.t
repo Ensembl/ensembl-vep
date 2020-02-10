@@ -353,7 +353,8 @@ is($fs->evaluate({foo => 0.1}),   0, 'evaluate - gt - fail decimal');
 is($fs->evaluate({foo => 5.1}),   1, 'evaluate - gt - pass decimal');
 is($fs->evaluate({bar => 1}),     0, 'evaluate - gt - fail missing');
 is($fs->evaluate({foo => undef}), 0, 'evaluate - gt - fail undef');
-is($fs->evaluate({foo => 10&15}), 1, 'evaluate - gt - pass multiple values');
+is($fs->evaluate({foo => '10&15'}), 1, 'evaluate - gt - pass multiple values');
+is($fs->evaluate({foo => '1&4'}), 0, 'evaluate - gt - fail multiple values');
 
 # evaluate - gte
 $fs = Bio::EnsEMBL::VEP::FilterSet->new('foo gte 5');
