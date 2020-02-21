@@ -352,7 +352,22 @@ SKIP: {
 
   $p = Bio::EnsEMBL::VEP::Parser->new({config => $cfg, file => $test_cfg->{test_vcf}});
 
-  my $vf = get_vf({allele_string => 'A/C', chr => 'AP000235.3'});
+  # Since core has intrduced updates to the mapper code we cannot transform insertions from e.g.
+  # contig to toplevel
+  my $vf =  get_vf({allele_string => '-/C', chr => 'AP000235.3', start => 100, end => 99}); 
+  # after a fix this should run successfully again:
+  #is($p->validate_vf($vf), 1, 'DB - validate_vf - successful transform 0');
+  # for now we need to prevent vep from failing and only report a warning message
+  no warnings 'once';
+  open(SAVE, ">&STDERR") or die "Can't save STDERR\n"; 
+  close STDERR;
+  my $tmp;
+  open STDERR, '>', \$tmp;
+  is($p->validate_vf($vf), 0, 'DB - validate_vf - could not transform insertion to toplevel transform 0');
+  ok($tmp =~ /Failed to transform vf/, 'DB - validate_vf - Failed to transform vf to toplevel');
+  open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
+
+  $vf = get_vf({allele_string => 'A/C', chr => 'AP000235.3'});
   is($p->validate_vf($vf), 1, 'DB - validate_vf - successful transform 1');
   is($vf->{chr}, 21, 'DB - validate_vf - successful transform 2');
   is($vf->{start}, 25043669, 'DB - validate_vf - successful transform 3');
