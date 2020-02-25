@@ -352,7 +352,7 @@ SKIP: {
 
   $p = Bio::EnsEMBL::VEP::Parser->new({config => $cfg, file => $test_cfg->{test_vcf}});
 
-  # Since core has intrduced updates to the mapper code we cannot transform insertions from e.g.
+  # Since core has introduced updates to the mapper code we cannot transform insertions from e.g.
   # contig to toplevel
   my $vf =  get_vf({allele_string => '-/C', chr => 'AP000235.3', start => 100, end => 99}); 
   # after a fix this should run successfully again:
