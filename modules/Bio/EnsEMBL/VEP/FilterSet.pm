@@ -461,6 +461,8 @@ sub evaluate {
   }
 
   else {
+    my $result;
+
     my $predicate_name = 'filter_'.$filter->{operator};
     my $predicate = \&$predicate_name;
 
@@ -480,7 +482,25 @@ sub evaluate {
       $return = 0;
     }
     else {
-      $return = &$predicate($input, $value, $self);
+
+      # Filter multiple values
+      if(defined($input) && $input =~ /[0-9](\,|\&)/) {
+        my $delimiter = $1;
+        my $found = 0;
+        my @split_input = split /$delimiter/, $input;
+        foreach my $value_i (@split_input) {
+          my $predicted = &$predicate($value_i, $value, $self);
+          if($predicted) {
+            $found = 1;
+          }
+        }
+        $result = $found;
+      }
+      else {
+        $result = &$predicate($input, $value, $self);
+      }
+
+      $return = $result;
     }
   }
 
