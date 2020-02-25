@@ -545,8 +545,15 @@ sub validate_vf {
       $vf->{slice} ||= $self->get_slice($vf->{chr});
 
       if($vf->{slice}) {
-        my $transformed = $vf->transform('toplevel');
-
+        my $transformed;
+        eval {
+          $transformed = $vf->transform('toplevel');
+        };
+        if($@) {
+          my $msg = "Failed to transform vf chr=$vf->{chr}, start=$vf->{start}, end=$vf->{end} to toplevel: $@\n";
+          $self->warning_msg($msg);
+          return 0;
+        }
         # copy to VF
         if($transformed) {
           $vf->{$_} = $transformed->{$_} for keys %$transformed;
