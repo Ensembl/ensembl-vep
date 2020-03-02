@@ -1730,11 +1730,21 @@ sub MotifFeatureVariationAllele_to_output_hash {
   # check that the motif has a binding matrix, if not there's not
   # much we can do so don't return anything
   return undef unless defined $mf->get_BindingMatrix;
-  my $matrix = $mf->stable_id;
+  my $matrix = $mf->get_BindingMatrix;
+  my $matrix_id = $matrix->stable_id;
+
+  my $mf_stable_id = $mf->stable_id;
 
   $hash->{Feature_type} = 'MotifFeature';
-  $hash->{Feature}      = $mf->stable_id;
-  $hash->{MOTIF_NAME}   = $matrix;
+  $hash->{Feature}      = $mf_stable_id;
+  $hash->{MOTIF_NAME}   = $mf_stable_id;
+  $hash->{BINDING_MATRIX} = $matrix_id;
+  my @transcription_factors = ();
+  my $associated_transcription_factor_complexes = $matrix->{associated_transcription_factor_complexes};
+  foreach my $tfc (@{$associated_transcription_factor_complexes}) {
+    push @transcription_factors, $tfc->{display_name};
+  }
+  $hash->{TRANSCRIPTION_FACTORS} = join(',', sort @transcription_factors);
   $hash->{STRAND}       = $mf->strand + 0;
   $hash->{CELL_TYPE}    = $self->get_cell_types($mf) if $self->{cell_type};
   $hash->{MOTIF_POS}    = $vfoa->motif_start if defined $vfoa->motif_start;
