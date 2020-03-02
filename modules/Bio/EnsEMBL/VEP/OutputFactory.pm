@@ -1734,7 +1734,6 @@ sub MotifFeatureVariationAllele_to_output_hash {
   my $matrix_id = $matrix->stable_id;
 
   my $mf_stable_id = $mf->stable_id;
-
   $hash->{Feature_type} = 'MotifFeature';
   $hash->{Feature}      = $mf_stable_id;
   $hash->{MOTIF_NAME}   = $mf_stable_id;
@@ -1895,7 +1894,7 @@ sub StructuralVariationOverlapAllele_to_output_hash {
   my $feature_type = (split '::', ref($feature))[-1];
 
   $hash->{Feature_type} = $feature_type;
-  $hash->{Feature}      = $feature_type eq 'MotifFeature' ? $feature->get_BindingMatrix->name : $feature->stable_id;
+  $hash->{Feature}      = $feature->stable_id;
 
   # work out overlap amounts
   my $overlap_start  = (sort {$a <=> $b} ($svf->start, $feature->start))[-1];
