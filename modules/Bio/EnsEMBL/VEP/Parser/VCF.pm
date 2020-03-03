@@ -462,7 +462,7 @@ sub create_StructuralVariationFeatures {
     if($start >= $end && $type =~ /del/i) {
       my $line = join("\t", @$record);
       $self->warning_msg("WARNING: VCF line on line ".$self->line_number." looks incomplete, skipping:\n$line\n");
-      return [];
+      $skip = 1;
     }
   }
   else {
