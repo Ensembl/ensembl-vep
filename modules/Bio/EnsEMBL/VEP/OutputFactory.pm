@@ -1743,7 +1743,7 @@ sub MotifFeatureVariationAllele_to_output_hash {
   foreach my $tfc (@{$associated_transcription_factor_complexes}) {
     push @transcription_factors, $tfc->{display_name};
   }
-  $hash->{TRANSCRIPTION_FACTORS} = join(',', sort @transcription_factors);
+  $hash->{TRANSCRIPTION_FACTORS} = \@transcription_factors;
   $hash->{STRAND}       = $mf->strand + 0;
   $hash->{CELL_TYPE}    = $self->get_cell_types($mf) if $self->{cell_type};
   $hash->{MOTIF_POS}    = $vfoa->motif_start if defined $vfoa->motif_start;
