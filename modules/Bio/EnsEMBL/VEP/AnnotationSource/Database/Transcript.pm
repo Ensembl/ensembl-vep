@@ -249,8 +249,8 @@ sub get_features_by_regions_uncached {
         # in human and mouse otherfeatures DB, there may be duplicate genes
         # skip those from analysis refseq_human_import and refseq_mouse_import
         next if $self->{core_type} eq 'otherfeatures' && $self->assembly !~ /GRCh37/i && $tr->analysis && $tr->analysis->logic_name =~ /^refseq_[a-z]+_import$/;
-
-        if($self->{core_type} eq 'otherfeatures' && defined($tr->display_xref)){
+	next if $self->{core_type} eq 'otherfeatures' && $self->assembly =~ /GRCh37/i && $tr->analysis && $tr->analysis->logic_name =~ /^refseq.+import$/;
+	if($self->{core_type} eq 'otherfeatures' && defined($tr->display_xref)){
 	         $tr->{stable_id} = $tr->display_xref->{display_id};
         }
         
