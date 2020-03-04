@@ -221,7 +221,7 @@ sub get_features_by_regions_uncached {
         my %cl =  
           map {$_->[0] => $_->[1]}
           map {$_->[0] =~ s/ /\_/g; $_}
-          map { [$_->get_PeakCalling->fetch_Epigenome->name, 1] } @{$mf->get_all_overlapping_Peaks};
+          map { [$_->get_PeakCalling->get_Epigenome->name, 1] } @{$mf->get_all_overlapping_Peaks};
         $mf->{cell_types} = \%cl;
       }
     }
