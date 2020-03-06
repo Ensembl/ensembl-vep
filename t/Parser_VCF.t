@@ -514,6 +514,22 @@ is_deeply($sv, bless( {
   'seq_region_start' => 25587759,
 }, 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature - skipping incomplete variant');
 
+my $snv = $vf_del->next();
+delete($snv->{adaptor});
+delete($snv->{_line});
+
+is_deeply($snv, bless( {
+  'chr' => '21',
+  'strand' => 1,
+  'variation_name' => 'test',
+  'map_weight' => 1,
+  'allele_string' => 'A/C',
+  'end' => 25587759,
+  'start' => 25587759,
+  'seq_region_end' => 25587759,
+  'seq_region_start' => 25587759
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'VariationFeature - variant not skipped');
+
 ## test max SV length
 my $lvf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1, max_sv_size => 1000, warning_file => 'STDERR'}),
