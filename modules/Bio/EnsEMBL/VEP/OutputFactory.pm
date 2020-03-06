@@ -1736,8 +1736,7 @@ sub MotifFeatureVariationAllele_to_output_hash {
   my $mf_stable_id = $mf->stable_id;
   $hash->{Feature_type} = 'MotifFeature';
   $hash->{Feature}      = $mf_stable_id;
-  $hash->{MOTIF_NAME}   = $mf_stable_id;
-  $hash->{BINDING_MATRIX} = $matrix_id;
+  $hash->{MOTIF_NAME}   = $matrix_id;
   my @transcription_factors = ();
   my $associated_transcription_factor_complexes = $matrix->{associated_transcription_factor_complexes};
   foreach my $tfc (@{$associated_transcription_factor_complexes}) {
