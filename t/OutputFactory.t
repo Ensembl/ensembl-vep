@@ -1277,10 +1277,9 @@ is_deeply(
     ],
     'MOTIF_POS' => 7,
     'Feature_type' => 'MotifFeature',
-    'MOTIF_NAME' => 'ENSM00191005622',
+    'MOTIF_NAME' => 'ENSPFM0042',
     'Allele' => 'T',
     'TRANSCRIPTION_FACTORS' => ['CTCF'],
-    'BINDING_MATRIX' => 'ENSPFM0042',
     'Feature' => 'ENSM00191005622',
     'HIGH_INF_POS' => 'N',
     'MOTIF_SCORE_CHANGE' => '-0.026'
