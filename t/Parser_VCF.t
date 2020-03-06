@@ -483,16 +483,36 @@ ok($tmp =~ /VCF line.+looks incomplete/, 'StructuralVariationFeature del without
 
 open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
-# 2 variants: DEL and SNV
+# Test if incomplete variant (DEL) is skipped
 my $vf_del = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
   file => $test_cfg->create_input_file([
-    [qw(21 25587758 sv_dup T <DEL> . . .)],
+    [qw(21 25587758 sv_del T <DEL> . . .)],
     [qw(21 25587759 test A C . . .)]
     ]),
   valid_chromosomes => [21]
 });
 ok($tmp =~ /VCF line.+looks incomplete/, 'StructuralVariationFeature del without end or length (2 variants)');
+
+my $sv = $vf_del->next();
+delete($sv->{adaptor});
+delete($sv->{_line});
+
+is_deeply($sv, bless( {
+  'outer_end' => 25587759,
+  'chr' => '21',
+  'inner_end' => 25587759,
+  'outer_start' => 25587759,
+  'end' => 25587759,
+  'vep_skip' => 1,
+  'seq_region_end' => 25587759,
+  'inner_start' => 25587759,
+  'strand' => 1,
+  'class_SO_term' => 'deletion',
+  'variation_name' => 'sv_del',
+  'start' => 25587759,
+  'seq_region_start' => 25587759,
+}, 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature - skipping incomplete variant');
 
 ## test max SV length
 my $lvf = Bio::EnsEMBL::VEP::Parser::VCF->new({
