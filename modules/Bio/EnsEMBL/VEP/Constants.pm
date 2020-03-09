@@ -124,7 +124,7 @@ our @FLAG_FIELDS = (
   { flag => 'overlaps',        fields => ['OverlapBP', 'OverlapPC']},
 
   # regulatory
-  { flag => 'regulatory',      fields => ['BIOTYPE','MOTIF_NAME','MOTIF_POS','HIGH_INF_POS','MOTIF_SCORE_CHANGE'] },
+  { flag => 'regulatory',      fields => ['BIOTYPE','MOTIF_NAME','MOTIF_POS','HIGH_INF_POS','MOTIF_SCORE_CHANGE', 'TRANSCRIPTION_FACTORS'] },
   { flag => 'cell_type',       fields => ['CELL_TYPE'] },
 );
 
@@ -170,10 +170,11 @@ our %FIELD_DESCRIPTIONS = (
   'EXON'               => 'Exon number(s) / total',
   'INTRON'             => 'Intron number(s) / total',
   'DOMAINS'            => 'The source and identifer of any overlapping protein domains',
-  'MOTIF_NAME'         => 'The source and identifier of a transcription factor binding profile (TFBP) aligned at this position',
+  'MOTIF_NAME'         => 'The stable identifier of a transcription factor binding profile (TFBP) aligned at this position',
   'MOTIF_POS'          => 'The relative position of the variation in the aligned TFBP',
   'HIGH_INF_POS'       => 'A flag indicating if the variant falls in a high information position of the TFBP',
   'MOTIF_SCORE_CHANGE' => 'The difference in motif score of the reference and variant sequences for the TFBP',
+  'TRANSCRIPTION_FACTORS' => 'List of transcription factors which bind to the transcription factor binding profile',
   'CELL_TYPE'          => 'List of cell types and classifications for regulatory feature',
   'IND'                => 'Individual name',
   'ZYG'                => 'Zygosity of individual genotype at this locus',

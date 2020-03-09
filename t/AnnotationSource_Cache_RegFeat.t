@@ -99,22 +99,22 @@ my $features = $c->deserialized_obj_to_features($obj);
 is(ref($features), 'ARRAY', 'deserialized_object_to_features ref 1');
 is(ref($features->[0]), 'Bio::EnsEMBL::Funcgen::RegulatoryFeature', 'deserialized_object_to_features ref 2');
 is(ref($features->[-1]), 'Bio::EnsEMBL::Funcgen::MotifFeature', 'deserialized_object_to_features ref 3');
-is(scalar @$features, 323, 'deserialized_object_to_features count');
+is(scalar @$features, 1771, 'deserialized_object_to_features count');
 
-is(scalar @{$c->merge_features([@$features, @$features])}, 323, 'merge_features count');
+is(scalar @{$c->merge_features([@$features, @$features])}, 1605, 'merge_features count');
 
 $features = $c->get_features_by_regions_uncached([[$test_cfg->{cache_chr}, $test_cfg->{cache_s}]]);
 
 is(ref($features), 'ARRAY', 'get_features_by_regions_from_disk ref 1');
 is(ref($features->[0]), 'Bio::EnsEMBL::Funcgen::RegulatoryFeature', 'get_features_by_regions_from_disk ref 2');
-is($features->[0]->stable_id, 'ENSR00000140711', 'get_features_by_regions_from_disk stable_id');
+is($features->[0]->stable_id, 'ENSR00000660046', 'get_features_by_regions_from_disk stable_id');
 
 
 # now we should be able to retrieve the same from memory
 $features = $c->get_features_by_regions_cached([[$test_cfg->{cache_chr}, $test_cfg->{cache_s}]]);
 is(ref($features), 'ARRAY', 'get_features_by_regions_from_memory ref 1');
 is(ref($features->[0]), 'Bio::EnsEMBL::Funcgen::RegulatoryFeature', 'get_features_by_regions_from_memory ref 2');
-is($features->[0]->stable_id, 'ENSR00000140711', 'get_features_by_regions_from_memory stable_id');
+is($features->[0]->stable_id, 'ENSR00000660046', 'get_features_by_regions_from_memory stable_id');
 
 $c->clean_cache();
 is_deeply($c->cache, {}, 'clean_cache');
@@ -142,11 +142,11 @@ $features = $c->get_all_features_by_InputBuffer($ib);
 is(ref($features), 'ARRAY', 'get_all_features_by_InputBuffer ref 1');
 is(ref($features->[0]), 'Bio::EnsEMBL::Funcgen::RegulatoryFeature', 'get_all_features_by_InputBuffer ref 2');
 is(ref($features->[-1]), 'Bio::EnsEMBL::Funcgen::MotifFeature', 'get_all_features_by_InputBuffer ref 3');
-is($features->[0]->stable_id, 'ENSR00000140751', 'get_all_features_by_InputBuffer stable_id');
-is(scalar @$features, 160, 'get_all_features_by_InputBuffer count');
+is($features->[0]->stable_id, 'ENSR00001054995', 'get_all_features_by_InputBuffer stable_id');
+is(scalar @$features, 532, 'get_all_features_by_InputBuffer count');
 
 $features = $c->get_all_features_by_InputBuffer($ib);
-is($features->[0]->stable_id, 'ENSR00000140751', 'get_all_features_by_InputBuffer again');
+is($features->[0]->stable_id, 'ENSR00001054995', 'get_all_features_by_InputBuffer again');
 
 $ib->next();
 is_deeply($c->get_all_features_by_InputBuffer($ib), [], 'get_all_features_by_InputBuffer on empty buffer');
