@@ -124,7 +124,7 @@ our @FLAG_FIELDS = (
   { flag => 'overlaps',        fields => ['OverlapBP', 'OverlapPC']},
 
   # regulatory
-  { flag => 'regulatory',      fields => ['BIOTYPE','MOTIF_NAME','MOTIF_POS','HIGH_INF_POS','MOTIF_SCORE_CHANGE'] },
+  { flag => 'regulatory',      fields => ['BIOTYPE','MOTIF_NAME','MOTIF_POS','HIGH_INF_POS','MOTIF_SCORE_CHANGE', 'TRANSCRIPTION_FACTORS'] },
   { flag => 'cell_type',       fields => ['CELL_TYPE'] },
 );
 
