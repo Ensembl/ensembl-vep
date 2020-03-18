@@ -52,7 +52,7 @@ use warnings;
 
 use base qw(Exporter);
 
-our $VEP_VERSION     = 100;
+our $VEP_VERSION     = 101;
 our $VEP_SUB_VERSION = 0;
 
 our @EXPORT_OK = qw(
