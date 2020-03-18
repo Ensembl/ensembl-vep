@@ -162,4 +162,4 @@
 872	\N	patch	patch_98_99_a.sql|schema_version
 873	\N	patch	patch_99_100_a.sql|schema_version
 874	\N	patch	patch_99_100_b.sql|alter_externaldb_type_notnull
-876	\N	patch	patch_100_101_a.sql|schema_version
+875	\N	patch	patch_100_101_a.sql|schema_version
