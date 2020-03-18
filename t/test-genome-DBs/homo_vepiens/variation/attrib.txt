@@ -349,3 +349,6 @@
 431	470	complex_substitution
 432	469	SO:1000005
 433	471	Complex substitution
+434	508	non_specified
+435	508	trait
+436	508	tumour
