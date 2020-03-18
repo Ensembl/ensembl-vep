@@ -42,7 +42,7 @@ CREATE TABLE `attrib` (
   `value` text NOT NULL,
   PRIMARY KEY (`attrib_id`),
   UNIQUE KEY `type_val_idx` (`attrib_type_id`,`value`(40))
-) ENGINE=MyISAM AUTO_INCREMENT=434 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=437 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `attrib_set` (
   `attrib_set_id` int(11) unsigned NOT NULL DEFAULT '0',

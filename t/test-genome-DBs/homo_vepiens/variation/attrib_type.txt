@@ -272,3 +272,4 @@
 505	genebuild_msu7_tes	TE-related Gene (MSU)	Number of TE-related genes predicted by <a href="http://rice.plantbiology.msu.edu">MSU</a> through a process of automatic and manual curation
 506	ibsc_low_confidence	PGSB low-confidence	Number of low-confidence genes annotated by the <A HREF="http://pgsb.helmholtz-muenchen.de/plant/barley/index.jsp">International Barley Sequencing Consortium</A>
 507	pubmed_id	PubMed ID	PubMed identifier
+508	phenotype_type	Phenotype type	Type of the phenotype information
