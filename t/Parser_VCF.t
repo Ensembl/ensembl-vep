@@ -536,6 +536,11 @@ is_deeply($snv, bless( {
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'VariationFeature - variant not skipped');
 
 ## test max SV length
+no warnings 'once';
+open(SAVE, ">&STDERR") or die "Can't save STDERR\n";
+close STDERR;
+open STDERR, '>', \$tmp;
+
 my $lvf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1, max_sv_size => 1000, warning_file => 'STDERR'}),
   file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DUP> . . SVLEN=10001;CIPOS=-3,2;CIEND=-4,5)]),
@@ -558,6 +563,8 @@ is_deeply($lvf, bless( {
   'start' => 25587759,
   'seq_region_start' => 25587759,
 }, 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature - longer than specified maximum');
+
+open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
 ## test complex SV
 no warnings 'once';
