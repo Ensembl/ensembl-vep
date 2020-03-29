@@ -317,8 +317,10 @@ SKIP: {
   1;
 };
 
+# Remove created index file
+my $fasta_index = $test_cfg->{fasta_dir} . '/Homo_sapiens.GRCh38.toplevel.test.fa.fai';
+unlink $fasta_index if (-e $fasta_index);
 
 ## DONE
 #######
 done_testing();
-
