@@ -45,7 +45,7 @@ our %DEFAULTS = (
   sereal_dir     => $Bin.'/testdata/cache/sereal/homo_sapiens/84_GRCh38',
   exac_root_dir  => $Bin.'/testdata/cache/exac/',
 
-  fasta          => $Bin.'/testdata/cache/homo_sapiens/84_GRCh38/test.fa',
+  fasta          => $Bin.'/testdata/cache/homo_sapiens/84_GRCh38/test.fa.gz',
   fasta_dir      => $Bin.'/testdata/fasta',
 
   test_ini_file  => $Bin.'/testdata/vep.ini',
@@ -228,5 +228,28 @@ sub DESTROY {
 
   for my $file_key(qw(user_file user_registry_file)) {
     unlink($self->{$file_key}) if $self->{$file_key};
+  }
+
+  # Remove fasta index files
+  for my $index (qw(fai gzi)) {
+    my $index_file = join('.', $self->{'fasta'}, $index);
+    if (-e $index_file) {
+      unlink($index_file);
+    }
+  }
+
+  # Remove unpacked fasta file and index
+  my $unpacked_fasta = $self->{cache_dir} . '/test.fa';
+  if (-e $unpacked_fasta) {
+    unlink $unpacked_fasta;
+  }
+  my $unpacked_fasta_index = $unpacked_fasta . '.fai';
+  if (-e $unpacked_fasta_index) {
+    unlink $unpacked_fasta_index;
+  }
+  
+  # Remove transcript coords file
+  if (-e $self->{cache_dir}.'/transcript_coords.txt') {
+    unlink($self->{cache_dir} . '/transcript_coords.txt');
   }
 }
