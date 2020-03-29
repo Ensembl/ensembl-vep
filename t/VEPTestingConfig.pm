@@ -252,4 +252,9 @@ sub DESTROY {
   if (-e $self->{cache_dir}.'/transcript_coords.txt') {
     unlink($self->{cache_dir} . '/transcript_coords.txt');
   }
+
+  # Remove warnings file
+  if (-e $Bin . '/variant_effect_output.txt_warnings.txt') {
+    unlink($Bin . '/variant_effect_output.txt_warnings.txt');
+  }
 }
