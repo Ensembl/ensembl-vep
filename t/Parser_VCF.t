@@ -475,7 +475,7 @@ close STDERR;
 open STDERR, '>', \$tmp;
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
-  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1, warning_file => 'STDERR'}),
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, warning_file => 'STDERR'}),
   file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DEL> . . .)]),
   valid_chromosomes => [21]
 })->next();
@@ -484,17 +484,22 @@ ok($tmp =~ /VCF line.+looks incomplete/, 'StructuralVariationFeature del without
 open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
 # Test if incomplete variant (DEL) is skipped
+open(SAVE, ">&STDERR") or die "Can't save STDERR\n";
+close STDERR;
+open STDERR, '>', \$tmp;
 my $vf_del = Bio::EnsEMBL::VEP::Parser::VCF->new({
-  config => $cfg,
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, warning_file => 'STDERR'}),
   file => $test_cfg->create_input_file([
     [qw(21 25587758 sv_del T <DEL> . . .)],
     [qw(21 25587759 test A C . . .)]
     ]),
   valid_chromosomes => [21]
 });
-ok($tmp =~ /VCF line.+looks incomplete/, 'StructuralVariationFeature del without end or length (2 variants)');
 
 my $sv = $vf_del->next();
+ok($tmp =~ /VCF line.+looks incomplete/, 'StructuralVariationFeature del without end or length (2 variants)');
+open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
+
 delete($sv->{adaptor});
 delete($sv->{_line});
 
@@ -531,6 +536,11 @@ is_deeply($snv, bless( {
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'VariationFeature - variant not skipped');
 
 ## test max SV length
+no warnings 'once';
+open(SAVE, ">&STDERR") or die "Can't save STDERR\n";
+close STDERR;
+open STDERR, '>', \$tmp;
+
 my $lvf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1, max_sv_size => 1000, warning_file => 'STDERR'}),
   file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DUP> . . SVLEN=10001;CIPOS=-3,2;CIEND=-4,5)]),
@@ -553,6 +563,8 @@ is_deeply($lvf, bless( {
   'start' => 25587759,
   'seq_region_start' => 25587759,
 }, 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature - longer than specified maximum');
+
+open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
 ## test complex SV
 no warnings 'once';

@@ -160,7 +160,7 @@ SKIP: {
   is((scalar grep {$_->{_bam_edit_status} eq 'ok'} @trs), 35, 'apply_edits - check all');
 
   ## Tests for edits with S in cigar string
-  my ($tr) = grep {$_->stable_id eq 'NM_032195.2'} @trs;
+  ($tr) = grep {$_->stable_id eq 'NM_032195.2'} @trs;
   ok($tr, 'NM_032195.2 - get');
   ok($as->apply_edits($tr), 'NM_032195.2 - apply_edits');
 
