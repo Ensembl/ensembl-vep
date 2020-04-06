@@ -766,6 +766,13 @@ sub post_setup_checks {
     $self->status_msg("INFO: --shift_hgvs has been set to zero, setting shift_3prime to 0\n");
     $self->param('shift_3prime', 0);
   }
+  
+  if(defined($self->param('shift_genomic')) && $self->param('shift_genomic') eq 1 ) {
+    if(defined($self->param('shift_3prime')) && $self->param('shift_3prime') eq 0 ) {
+      $self->status_msg("INFO: --shift_genomic has been set to 1, setting shift_3prime to 1\n");
+    }
+    $self->param('shift_3prime', 1);
+  }
 
   return 1;
 }
