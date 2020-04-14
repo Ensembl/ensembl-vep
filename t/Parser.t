@@ -352,7 +352,13 @@ SKIP: {
 
   $p = Bio::EnsEMBL::VEP::Parser->new({config => $cfg, file => $test_cfg->{test_vcf}});
 
-  my $vf = get_vf({allele_string => 'A/C', chr => 'AP000235.3'});
+  # contig to toplevel
+  my $vf =  get_vf({allele_string => '-/C', chr => 'AP000235.3', start => 100, end => 99});
+  is($p->validate_vf($vf), 1, 'DB - validate_vf - successful transform insertion 1');
+  is($vf->{chr}, 21, 'DB - validate_vf - successful transform insertion 2');
+  is($vf->{start}, 25043768, 'DB - validate_vf - successful transform insertion 3');
+
+  $vf = get_vf({allele_string => 'A/C', chr => 'AP000235.3'});
   is($p->validate_vf($vf), 1, 'DB - validate_vf - successful transform 1');
   is($vf->{chr}, 21, 'DB - validate_vf - successful transform 2');
   is($vf->{start}, 25043669, 'DB - validate_vf - successful transform 3');
