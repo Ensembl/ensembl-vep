@@ -1200,6 +1200,37 @@ is_deeply(
   'TranscriptVariationAllele_to_output_hash - non-coding'
 );
 
+$ib = get_annotated_buffer({
+  input_file => $test_cfg->{test_vcf},
+  dir => $test_cfg->{cache_root_dir},
+});
+
+$vfoa = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[1];
+$of->param('shift_length', 1);
+$of->param('shift_3prime', 1);
+is_deeply(
+  $of->TranscriptVariationAllele_to_output_hash($vfoa, {}),
+  {
+    'STRAND' => -1,
+    'IMPACT' => 'MODERATE',
+    'Consequence' => [
+      'missense_variant'
+    ],
+    'Feature_type' => 'Transcript',
+    'Allele' => 'T',
+    'CDS_position' => 991,
+    'Gene' => 'ENSG00000154719',
+    'cDNA_position' => 1033,
+    'Protein_position' => 331,
+    'Amino_acids' => 'A/T',
+    'Feature' => 'ENST00000352957',
+    'Codons' => 'Gca/Aca',
+    'SHIFT_LENGTH' => 0,
+  },
+  'TranscriptVariationAllele_to_output_hash -> shift_length'
+);
+
+
 
 @flags = (
   [qw(sift     p SIFT     tolerated_low_confidence)],
@@ -1726,7 +1757,8 @@ is_deeply(
       'Amino_acids' => 'KKKG/S',
       'Feature' => 'ENST00000400075',
       'Codons' => 'aAGAAGAAAGgc/agc',
-      'Location' => '21:25741665-25741674'
+      'Location' => '21:25741665-25741674',
+      'SHIFT_LENGTH' => 0,
     },
     'T' => {
       'STRAND' => 1,
@@ -1745,7 +1777,8 @@ is_deeply(
       'Amino_acids' => 'P/S',
       'Feature' => 'ENST00000400075',
       'Codons' => 'Cca/Tca',
-      'Location' => '21:25741665-25741674'
+      'Location' => '21:25741665-25741674',
+      'SHIFT_LENGTH' => 0,
     }
   },
   'minimal - output hashes'
@@ -1911,7 +1944,8 @@ my $input_file_example = $test_cfg->create_input_file([qw(21 25592985 hgvsins A 
 # Shifting ON
 $ib = get_annotated_buffer({
   input_file => $input_file_example,
-  shift_hgvs => 1
+  shift_hgvs => 1,
+  shift_length => 1, 
 },1);
 
 $vfoa = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0])->[0];

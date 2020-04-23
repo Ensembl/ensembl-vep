@@ -122,6 +122,7 @@ our @FLAG_FIELDS = (
   { flag => 'check_svs',       fields => ['SV'] },
   { flag => 'dont_skip',       fields => ['CHECK_REF'] },
   { flag => 'overlaps',        fields => ['OverlapBP', 'OverlapPC']},
+  { flag => 'shift_length',    fields => ['SHIFT_LENGTH']},
 
   # regulatory
   { flag => 'regulatory',      fields => ['BIOTYPE','MOTIF_NAME','MOTIF_POS','HIGH_INF_POS','MOTIF_SCORE_CHANGE'] },
@@ -230,7 +231,8 @@ our %FIELD_DESCRIPTIONS = (
   'AMBIGUITY'          => 'Allele ambiguity code',
   'OverlapBP'          => 'Number of base pairs overlapping with the corresponding structural variation feature',
   'OverlapPC'          => 'Percentage of corresponding structural variation feature overlapped by the given input',
-  'CHECK_REF'	       => 'Reports variants where the input reference does not match the expected reference'
+  'CHECK_REF'	       => 'Reports variants where the input reference does not match the expected reference',
+  'SHIFT_LENGTH'       => 'Reports the number of bases the insertion or deletion has been shifted relative to the underlying transcript due to right alignment before consequence calculation'
 );
 
 our @DEFAULT_OUTPUT_COLS = qw(

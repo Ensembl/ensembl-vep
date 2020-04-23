@@ -1524,6 +1524,8 @@ sub TranscriptVariationAllele_to_output_hash {
   
   return undef unless $hash;
 
+  $hash->{SHIFT_LENGTH} = $shift_length if ($self->param('shift_3prime') && $self->param('shift_length')); 
+
   my $tv = $vfoa->base_variation_feature_overlap;
   my $tr = $tv->transcript;
   
