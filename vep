@@ -169,7 +169,7 @@ GetOptions(
   'ambiguity',               # Add allele ambiguity code
   'shift_3prime=i',          # enables shifting of all variants to 3prime
   'shift_genomic',           # adds genomic shifting to output, and provides shifting of intergenic variants
-  'shift_length',	     # adds the length of the shift to output
+  'shift_length',	     # adds the length of the transcript directional shift to output
 
   # cache stuff
   'database',                # must specify this to use DB now
