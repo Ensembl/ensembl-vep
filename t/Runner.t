@@ -307,6 +307,10 @@ throws_ok {$runner->get_output_file_handle} qr/Output file .+ already exists/, '
 $runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, output_file => 'stdout'});
 is($runner->get_output_file_handle, '*main::STDOUT', 'get_output_file_handle - stdout');
 
+$runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, shift_genomic => 1});
+$runner->post_setup_checks;
+is($runner->param('shift_3prime'), 1, 'shift_genomic switches on shift_3prime');
+
 unlink($test_cfg->{user_file}.'.out');
 
 $runner = Bio::EnsEMBL::VEP::Runner->new({
