@@ -23,8 +23,6 @@ use lib $Bin;
 use VEPTestingConfig;
 my $test_cfg = VEPTestingConfig->new();
 
-use Data::Dumper;
-
 my ($vf, $tmp, $expected);
 
 ## BASIC TESTS
