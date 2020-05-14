@@ -26,7 +26,6 @@
 148	\N	patch	patch_55_56_a.sql|probe_set.name_length
 151	\N	patch	patch_55_56_b.sql|probe_feature.cigar_line_format
 152	\N	patch	patch_55_56_c.sql|analysis_description.display_label_not_null
-153	\N	1	1
 154	\N	patch	patch_56_57_b.sql|uo.object_type_id_key
 155	\N	patch	patch_56_57_c.sql|uo.object_type_enum
 156	1	species.production_name	homo_sapiens
@@ -150,7 +149,6 @@
 589	\N	patch	patch_79_80_b.sql|dbfile_registry_unique_key
 592	\N	patch	patch_80_81_b.sql|add gender: mixed to table cell_type 
 593	\N	patch	patch_80_81_a.sql|schema_version
-594	1	hive_url	mysql://ensadmin:ensembl@ens-genomics2:3306/sequencing_tracking_homo_sapiens_funcgen_81_38
 595	\N	patch	patch_80_81_c.sql|drop experiment.date
 596	\N	patch	patch_81_82_a.sql|schema_version
 597	\N	patch	patch_82_83_a.sql|schema_version
