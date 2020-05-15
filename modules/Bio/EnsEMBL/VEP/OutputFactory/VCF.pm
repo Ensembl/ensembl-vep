@@ -271,6 +271,9 @@ sub get_all_lines_by_InputBuffer {
 
   my @return;
 
+  map {@{$self->reset_shifted_positions($_)}}
+    @{$buffer->buffer};
+
   foreach my $vf(@{$buffer->buffer}) {
 
     my $line;
