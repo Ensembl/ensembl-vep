@@ -202,6 +202,9 @@ sub get_all_output_hashes_by_InputBuffer {
   my $self = shift;
   my $buffer = shift;
 
+  map {@{$self->reset_shifted_positions($_)}}
+    @{$buffer->buffer};
+
   $self->rejoin_variants_in_InputBuffer($buffer) if $buffer->rejoin_required;
 
   my @return;
