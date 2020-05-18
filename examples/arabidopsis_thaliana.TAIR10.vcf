@@ -1,6 +1,7 @@
 ##fileformat=VCFv4.1
-# source: intersection_10001.vcf.gz
-# https://europepmc.org/article/MED/27293186
+##source: intersection_10001.vcf.gz
+##https://europepmc.org/article/MED/27293186
+##CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	10001
 1	135	.	C	T	28	PASS	DP=5	GT:GQ:DP	1|1:28:5
 1	138	.	T	C	36	PASS	DP=5	GT:GQ:DP	1|1:36:5
 1	346	.	C	T	32	PASS	DP=3	GT:GQ:DP	1|1:32:3
