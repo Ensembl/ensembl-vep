@@ -872,6 +872,19 @@ $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
 
 is($vf->{start}, 'foo', 'dont skip VF that fails validation with dont_skip');
 
+
+my $str = '25587759 ';
+$vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $cfg,
+  file => $test_cfg->create_input_file([
+    [21, $str, '.', 'C', 'A' ,'.', '.', '.'],
+  ]),
+  valid_chromosomes => [21]
+})->next();
+is($vf->{start}, 25587759, 'Trim whitespace from input coordinates');
+
+
+
 # restore STDERR
 open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 

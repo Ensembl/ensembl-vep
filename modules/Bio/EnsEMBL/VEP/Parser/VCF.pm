@@ -333,6 +333,9 @@ sub create_VariationFeatures {
     }
   }
 
+  $start =~ s/^\s+|\s+$//g;
+  $end =~ s/^\s+|\s+$//g;
+
   # create VF object
   my $vf = Bio::EnsEMBL::Variation::VariationFeature->new_fast({
     start          => $start,
