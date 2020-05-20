@@ -441,7 +441,7 @@ sub create_StructuralVariationFeatures {
   if($info->{SVTYPE} && $info->{SVTYPE} =~/BND/ ){
     ## break ends are not currently annotated as fusions between different regions/chromosomes
     ## only report 'reference' breakpoint if multiple chromosomes are involved
-    unless (defined $info->{CHR2} &&  $info->{CHR2} == $chr){
+    unless (defined $info->{CHR2} &&  $info->{CHR2} eq $chr){
       $end     = $start;
       $min_end = $min_start;
       $max_end = $max_start;
