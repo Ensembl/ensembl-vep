@@ -152,7 +152,12 @@ sub clean_regfeat {
     }
   }
 
-  $rf->{feature_type} = $rf->{feature_type}->{so_name} if $rf->{feature_type};
+  if ($rf->{feature_type}){
+    my $name_to_use = $rf->{feature_type}->{so_name};
+    $name_to_use  ||= $rf->{feature_type}->{so_term};
+
+    $rf->{feature_type} = $name_to_use;
+  }
 
   return $rf;
 }
