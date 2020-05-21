@@ -771,11 +771,6 @@ sub post_setup_checks {
     $self->param('shift_3prime', 0);
   }
 
-  if(defined($self->param('assembly')) && lc($self->param('assembly')) eq 'grch37' && defined($self->param('database') && !defined($self->param('port')))) {
-    $self->param('port', 3337);
-  }
-
-
   return 1;
 }
 
