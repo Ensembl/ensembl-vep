@@ -114,6 +114,10 @@ sub init {
   # log start time
   $self->stats->start_time();
 
+  if(defined($self->param('assembly')) && lc($self->param('assembly')) eq 'grch37' && defined($self->param('database') && !defined($self->param('port')))) {
+    $self->param('port', 3337);
+  }
+
   # setup DB connection
   $self->setup_db_connection();
 
@@ -766,6 +770,11 @@ sub post_setup_checks {
     $self->status_msg("INFO: --shift_hgvs has been set to zero, setting shift_3prime to 0\n");
     $self->param('shift_3prime', 0);
   }
+
+  if(defined($self->param('assembly')) && lc($self->param('assembly')) eq 'grch37' && defined($self->param('database') && !defined($self->param('port')))) {
+    $self->param('port', 3337);
+  }
+
 
   return 1;
 }
