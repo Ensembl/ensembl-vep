@@ -342,12 +342,7 @@ sub dir {
             "ERROR: Cache assembly version ($matched_assembly) ".
             "and database or selected assembly version (".$config_assembly.
             ") do not match\n".
-            (
-              $self->param('host') eq 'ensembldb.ensembl.org' ?
-              "\nIf using human GRCh37 add \"--port 3337\"".
-              " to use the GRCh37 database, or --offline to avoid database connection entirely\n" :
-              ''
-            )
+            "\n You can use --offline to avoid a database connection entirely\n" 
           );
         }
 
