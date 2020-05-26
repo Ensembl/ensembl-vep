@@ -53,7 +53,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg && !$@;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 2 unless $can_use_db;
+  skip 'No local database configured', 3 unless $can_use_db;
 
   my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens');
 
@@ -103,6 +103,43 @@ SKIP: {
   $vf = $p->next();
   delete($vf->{$_}) for qw(adaptor variation slice variation_name _line);
   is_deeply($vf, $expected, 'spdi genomic');
+
+  my $spdi_1 = Bio::EnsEMBL::VEP::Parser::SPDI->new({
+    config => $cfg,
+    file => $test_cfg->create_input_file('LRG_485:6673:G:A'),
+    valid_chromosomes => [21,'LRG_485'],
+  });
+
+  my $spdi_expected = bless( {
+    'source' => undef,
+    'is_somatic' => undef,
+    'clinical_significance' => undef,
+    'display' => undef,
+    'dbID' => undef,
+    'minor_allele_count' => undef,
+    'seqname' => undef,
+    'strand' => 1,
+    'evidence' => undef,
+    '_variation_id' => undef,
+    'class_SO_term' => undef,
+    'allele_string' => 'G/A',
+    'ancestral_allele' => undef,
+    'map_weight' => 1,
+    'chr' => 'LRG_485',
+    '_source_id' => undef,
+    'analysis' => undef,
+    'end' => 6674,
+    'seq_region_end' => 6674,
+    'minor_allele_frequency' => undef,
+    'overlap_consequences' => undef,
+    'minor_allele' => undef,
+    'start' => 6674,
+    'seq_region_start' => 6674
+  }, 'Bio::EnsEMBL::Variation::VariationFeature' );
+
+  my $spdi_vf = $spdi_1->next();
+  delete($spdi_vf->{$_}) for qw(adaptor variation slice variation_name _line);
+  is_deeply($spdi_vf, $spdi_expected, 'spdi genomic LRG');
 
   1;
 };
