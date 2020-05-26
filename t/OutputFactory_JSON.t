@@ -408,7 +408,7 @@ SKIP: {
     {map {$_->{variant_allele} => $_} @{$json->decode($of->get_all_lines_by_InputBuffer($ib)->[0])->{transcript_consequences}}},
     {
       '-' => {
-        'cds_start' => 68,
+        'cds_start' => 67,
         'gene_id' => 'ENSG00000154727',
         'variant_allele' => '-',
         'cdna_end' => 603,
@@ -422,7 +422,7 @@ SKIP: {
         'protein_end' => 26,
         'strand' => 1,
         'amino_acids' => 'KKKG/S',
-        'cdna_start' => 595,
+        'cdna_start' => 594,
         'transcript_id' => 'ENST00000354828',
         'impact' => 'MODERATE',
         'allele_num' => 2,
@@ -431,14 +431,14 @@ SKIP: {
         'cds_start' => 67,
         'gene_id' => 'ENSG00000154727',
         'variant_allele' => 'T',
-        'cdna_end' => 594,
+        'cdna_end' => 603,
         'protein_start' => 23,
         'codons' => 'Cca/Tca',
-        'cds_end' => 67,
+        'cds_end' => 76,
         'consequence_terms' => [
           'missense_variant'
         ],
-        'protein_end' => 23,
+        'protein_end' => 26,
         'strand' => 1,
         'amino_acids' => 'P/S',
         'cdna_start' => 594,
