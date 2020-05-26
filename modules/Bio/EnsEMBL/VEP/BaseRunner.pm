@@ -127,12 +127,7 @@ sub setup_db_connection {
     throw(
       "ERROR: Assembly version specified by --assembly (".$config_assembly.
       ") and assembly version in coord_system table (".$db_assembly.") do not match\n".
-      (
-        $self->param('host') eq 'ensembldb.ensembl.org' ?
-        "\nIf using human GRCh37 add \"--port 3337\"".
-        " to use the GRCh37 database, or --offline to avoid database connection entirely\n" :
-        ''
-      )
+      "\n You can use --offline to avoid a database connection entirely\n"
     ) if $config_assembly && $config_assembly ne $db_assembly;
 
     # update to database version
