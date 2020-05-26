@@ -184,8 +184,6 @@ sub create_VariationFeatures {
     return $self->create_VariationFeatures;
   }
 
-  my $ref_seq = (split(':', $spdi))[0];
-
   foreach my $vf(@$vfs) {
 
     # transfer to whole chromosome slice
