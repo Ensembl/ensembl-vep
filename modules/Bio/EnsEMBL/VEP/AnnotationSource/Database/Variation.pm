@@ -79,6 +79,7 @@ our @VAR_CACHE_COLS = qw(
   minor_allele_freq
   clin_sig
   phenotype_or_disease
+  var_synonyms
 );
 
 
@@ -159,20 +160,24 @@ sub get_features_by_regions_uncached {
     next unless $sr_cache->{$chr} || $chr_is_seq_region;
 
     my $phenotype_attrib_id = $self->phenotype_attrib_id || 0;
-
+    
     my $sth = $self->var_dbc->prepare(qq{
       SELECT
         vf.variation_id, vf.variation_name, IF(fv.variation_id IS NULL, 0, 1),
         vf.somatic, vf.seq_region_start, vf.seq_region_end,
         vf.allele_string, vf.seq_region_strand, vf.minor_allele, vf.minor_allele_freq,
         REPLACE(vf.clinical_significance, " ", "_"),
-        IF(FIND_IN_SET(?, evidence_attribs) > 0, 1, 0)
-      FROM variation_feature vf
-      LEFT JOIN failed_variation fv ON fv.variation_id = vf.variation_id
-      WHERE vf.seq_region_id = ?
-      AND vf.seq_region_start >= ?
-      AND vf.seq_region_start <= ?
+        IF(FIND_IN_SET(?, evidence_attribs) > 0, 1, 0), group_concat(sy.str SEPARATOR '-') as str
+        FROM variation_feature vf
+        LEFT JOIN failed_variation fv ON fv.variation_id = vf.variation_id
+        LEFT JOIN ( select subtab.variation_id, group_concat(subtab.str separator '-') as str from (select variation_id, concat(s.name, ':', group_concat(vs.name order by vs.variation_id separator ',')) as str from variation_synonym vs inner join source s on s.source_id = vs.source_id where s.source_id in (select source_id from source where name not like '%dbSNP%') group by variation_id, s.name) as subtab group by subtab.variation_id) AS sy ON vf.variation_id = sy.variation_id 
+        WHERE vf.seq_region_id = ?
+        AND vf.seq_region_start >= ?
+        AND vf.seq_region_start <= ?
+        group by vf.variation_name;
     }, {mysql_use_result => 1});
+
+
 
     $sth->execute($phenotype_attrib_id, $chr_is_seq_region ? $chr : $sr_cache->{$chr}, $s, $e);
 
@@ -186,6 +191,7 @@ sub get_features_by_regions_uncached {
     my @vars;
     while($sth->fetch) {
       my %v_copy = %v;
+      $DB::single = ($v{variation_name} eq 'rs4961');
       $v_copy{allele_string} =~ s/\s+/\_/g;
       my $v_clinsigs = $attribs->{($chr_is_seq_region ? $chr : $sr_cache->{$chr}) . ':' . $v_copy{start} . '-' . $v_copy{end}};
       my @pfas_by_allele;

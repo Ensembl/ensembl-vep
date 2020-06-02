@@ -76,7 +76,7 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
 use Bio::EnsEMBL::Variation::Utils::Constants;
 use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
-use Bio::EnsEMBL::VEP::Utils qw(format_coords merge_arrays);
+use Bio::EnsEMBL::VEP::Utils qw(format_coords merge_arrays stringify_synonyms);
 use Bio::EnsEMBL::VEP::Constants;
 
 use Bio::EnsEMBL::VEP::OutputFactory::VEP_output;
@@ -192,6 +192,7 @@ sub new {
     gene_phenotype
     mirna
     ambiguity
+    var_synonyms
 
     total_length
     hgvsc
@@ -932,6 +933,12 @@ sub VariationFeature_to_output_hash {
 
   # check_ref tests
   $hash->{CHECK_REF} = 'failed' if defined($vf->{check_ref_failed});
+
+  # check for variation synonyms
+  if ($self->{var_synonyms}) {
+    $hash->{VAR_SYNONYMS} = stringify_synonyms($vf->variation->{synonyms});
+  }
+
 
   $self->stats->log_VariationFeature($vf, $hash) unless $self->{no_stats};
 
