@@ -186,7 +186,7 @@ CREATE TABLE `meta` (
   PRIMARY KEY (`meta_id`),
   UNIQUE KEY `species_key_value_idx` (`species_id`,`meta_key`,`meta_value`),
   KEY `species_value_idx` (`species_id`,`meta_value`)
-) ENGINE=MyISAM AUTO_INCREMENT=154 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=156 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `meta_coord` (
   `table_name` varchar(40) NOT NULL,
@@ -220,7 +220,7 @@ CREATE TABLE `phenotype` (
   `stable_id` varchar(255) DEFAULT NULL,
   `name` varchar(50) DEFAULT NULL,
   `description` varchar(255) DEFAULT NULL,
-  `class_attrib_id` INT DEFAULT NULL,
+  `class_attrib_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`phenotype_id`),
   UNIQUE KEY `desc_idx` (`description`),
   KEY `stable_idx` (`stable_id`),
@@ -430,7 +430,7 @@ CREATE TABLE `structural_variation` (
   `source_id` int(10) unsigned NOT NULL,
   `study_id` int(10) unsigned DEFAULT NULL,
   `class_attrib_id` int(10) unsigned NOT NULL DEFAULT '0',
-  `clinical_significance` set('uncertain significance','not provided','benign','likely benign','likely pathogenic','pathogenic','drug response','histocompatibility','other','confers sensitivity','risk factor','association','protective') DEFAULT NULL,
+  `clinical_significance` set('uncertain significance','not provided','benign','likely benign','likely pathogenic','pathogenic','drug response','histocompatibility','other','confers sensitivity','risk factor','association','protective','affects') DEFAULT NULL,
   `validation_status` enum('validated','not validated','high quality') DEFAULT NULL,
   `is_evidence` tinyint(4) DEFAULT '0',
   `somatic` tinyint(1) NOT NULL DEFAULT '0',
@@ -472,8 +472,8 @@ CREATE TABLE `structural_variation_feature` (
   `breakpoint_order` tinyint(4) DEFAULT NULL,
   `length` int(10) DEFAULT NULL,
   `variation_set_id` set('1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36','37','38','39','40','41','42','43','44','45','46','47','48','49','50','51','52','53','54','55','56','57','58','59','60','61','62','63','64') NOT NULL DEFAULT '',
-  `allele_freq` FLOAT DEFAULT NULL,
-  `allele_count` INT(10) UNSIGNED DEFAULT NULL,
+  `allele_freq` float DEFAULT NULL,
+  `allele_count` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`structural_variation_feature_id`),
   KEY `pos_idx` (`seq_region_id`,`seq_region_start`,`seq_region_end`),
   KEY `structural_variation_idx` (`structural_variation_id`),
@@ -590,7 +590,7 @@ CREATE TABLE `variation` (
   `minor_allele` varchar(50) DEFAULT NULL,
   `minor_allele_freq` float DEFAULT NULL,
   `minor_allele_count` int(10) unsigned DEFAULT NULL,
-  `clinical_significance` set('uncertain significance','not provided','benign','likely benign','likely pathogenic','pathogenic','drug response','histocompatibility','other','confers sensitivity','risk factor','association','protective') DEFAULT NULL,
+  `clinical_significance` set('uncertain significance','not provided','benign','likely benign','likely pathogenic','pathogenic','drug response','histocompatibility','other','confers sensitivity','risk factor','association','protective','affects') DEFAULT NULL,
   `evidence_attribs` set('367','368','369','370','371','372','418','421','573','585') DEFAULT NULL,
   `display` int(1) DEFAULT '1',
   PRIMARY KEY (`variation_id`),
@@ -634,7 +634,7 @@ CREATE TABLE `variation_feature` (
   `minor_allele_freq` float DEFAULT NULL,
   `minor_allele_count` int(10) unsigned DEFAULT NULL,
   `alignment_quality` double DEFAULT NULL,
-  `clinical_significance` set('uncertain significance','not provided','benign','likely benign','likely pathogenic','pathogenic','drug response','histocompatibility','other','confers sensitivity','risk factor','association','protective') DEFAULT NULL,
+  `clinical_significance` set('uncertain significance','not provided','benign','likely benign','likely pathogenic','pathogenic','drug response','histocompatibility','other','confers sensitivity','risk factor','association','protective','affects') DEFAULT NULL,
   `evidence_attribs` set('367','368','369','370','371','372','418','421','573','585') DEFAULT NULL,
   `display` int(1) DEFAULT '1',
   PRIMARY KEY (`variation_feature_id`),
