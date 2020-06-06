@@ -67,7 +67,7 @@ sub run {
 
   my $hive_dbc = $self->dbc;
   $hive_dbc->disconnect_if_idle() if defined $hive_dbc;
-$DB::single = 1;
+  
   my $as = Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation->new({
     config => $config,
     cache_region_size => $region_size,
@@ -221,8 +221,6 @@ sub dump_obj {
   
   my $pubmed = $self->pubmed;
   foreach my $v(@$obj) {
-    $DB::single = defined($v->{synonyms});
-    $DB::single = ($v->{variation_name} eq 'rs4961');
     my @tmp = (
       $v->{variation_name},
       $v->{failed} == 0 ? '' : $v->{failed},
@@ -235,8 +233,8 @@ sub dump_obj {
       defined($v->{minor_allele_freq}) && $v->{minor_allele_freq} =~ /^[0-9\.]+$/ ? sprintf("%.4f", $v->{minor_allele_freq}) : '',
       $v->{clin_sig} || '',
       $v->{phenotype_or_disease} == 0 ? '' : $v->{phenotype_or_disease},
+      $v->{var_synonyms} || '',
       $v->{clin_sig_allele} || '',
-      defined($v->{synonyms}) ? stringify_synonyms($v->{synonyms}) : '',
     );
   
     push @tmp, $pubmed->{$v->{variation_name}} || '';

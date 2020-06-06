@@ -933,11 +933,11 @@ sub VariationFeature_to_output_hash {
 
   # check_ref tests
   $hash->{CHECK_REF} = 'failed' if defined($vf->{check_ref_failed});
-
+#$DB::single = 1;
   # check for variation synonyms
-  if ($self->{var_synonyms}) {
-    $hash->{VAR_SYNONYMS} = stringify_synonyms($vf->variation->{synonyms});
-  }
+  #if ($self->{var_synonyms}) {
+  #  $hash->{VAR_SYNONYMS} = stringify_synonyms($vf->variation->{synonyms});
+  #}
 
 
   $self->stats->log_VariationFeature($vf, $hash) unless $self->{no_stats};
@@ -963,7 +963,7 @@ sub add_colocated_variant_info {
   my $self = shift;
   my $vf = shift;
   my $hash = shift;
-
+$DB::single = 1;
   return unless $vf->{existing} && scalar @{$vf->{existing}};
 
   my $this_allele = $hash->{Allele};
@@ -1004,6 +1004,10 @@ sub add_colocated_variant_info {
 
     # ID
     push @{$hash->{Existing_variation}}, $ex->{variation_name} if $ex->{variation_name};
+
+$DB::single = 1;
+    # Variation Synonyms
+    push @{$hash->{VAR_SYNONYMS}}, $ex->{var_synonyms} if $self->{var_synonyms} && $ex->{var_synonyms}; 
 
     # Find allele specific clin_sig data if it exists
     if(defined($ex->{clin_sig_allele}) && $self->{clin_sig_allele} )
