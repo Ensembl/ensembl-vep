@@ -170,11 +170,11 @@ sub pubmed {
     }
   }
   if(-e $file) {
-    unlink($file);
+    unlink($file) or die "Failed to delete pubmed file";;
   }
     
   if($dbc) {
-    open OUT, ">$lock";
+    open OUT, ">$lock" or die 'Could not write to pubmed lock file';
     print OUT "$$\n";
     close OUT;
     $self->{_lock_file} = $lock;
@@ -192,7 +192,7 @@ sub pubmed {
     my ($v, $p);
     $sth->bind_columns(\$v, \$p);
 
-    open OUT, ">$file";
+    open OUT, ">$file" or die 'Could not write to pubmed file';
     while($sth->fetch()) {
       $pm{$v} = $p;
       print OUT "$v\t$p\n";
@@ -200,7 +200,7 @@ sub pubmed {
 
     close OUT;
 
-    unlink($lock);
+    unlink($lock) or die "Failed to delete pubmed lock file";
 
     $sth->finish();
   } 
@@ -233,11 +233,11 @@ sub synonyms {
     }
   }
   if(-e $file) {
-    unlink($file);
+    unlink($file) or die "Failed to delete var synonyms file";
   }
 
   if($dbc) {
-    open OUT, ">$lock";
+    open OUT, ">$lock" or die 'Could not write to synonyms lock file';;
     print OUT "$$\n";
     close OUT;
     $self->{_lock_file} = $lock;
@@ -260,7 +260,7 @@ sub synonyms {
     my ($v, $p);
     $sth->bind_columns(\$v, \$p);
 
-    open OUT, ">$file";
+    open OUT, ">$file" or die 'Could not write to synonyms file';
     while($sth->fetch()) {
       $pm{$v} = $p;
       print OUT "$v\t$p\n";
@@ -268,7 +268,7 @@ sub synonyms {
 
     close OUT;
 
-    unlink($lock);
+    unlink($lock) or die "Failed to delete var synonyms lock file";;
 
     $sth->finish();
   }
