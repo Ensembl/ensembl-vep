@@ -42,7 +42,6 @@ use Bio::EnsEMBL::VEP::Utils qw(
   convert_arrayref
   merge_hashes
   merge_arrays
-  stringify_synonyms
 );
 
 # 5-10
@@ -94,7 +93,6 @@ use vars qw(@ISA @EXPORT_OK);
   &get_compressed_filehandle
   &get_version_data
   &get_version_string
-  &stringify_synonyms
 );
 
 our ($CAN_USE_PERLIO_GZIP, $CAN_USE_GZIP, $CAN_USE_IO_UNCOMPRESS);
@@ -510,35 +508,6 @@ sub get_version_string {
     }
     sort keys %$version_data
   );
-}
-
-=head2 get_version_string
-
-  Arg 1      : Hash of variation synonyms
-  Example    : $version_string = stringify_synonyms($v->{synonyms})
-  Description: Gets a hash of variation synonyms (usually taken from
-	       $variation->{synonyms} and creates a string to be used
-	       in VEP output or cache creation.
-  Returntype : string
-  Exceptions : none
-  Caller     : vep
-  Status     : Stable
-
-=cut
-
-sub stringify_synonyms {
-  my $synonyms = shift;
-  $DB::single = 1;
-  my @sources = grep { $_ !~ /dbSNP/ } keys(%{$synonyms});
-  my $syn_string = "";
-  foreach my $source (sort(@sources)) {
-    $syn_string = $syn_string . $source . ':';
-    foreach my $syn (sort(keys(%{$synonyms->{$source}}))) {
-      $syn_string = $syn_string . $syn . ',';
-    }
-    $syn_string = substr($syn_string, 0, -1) . '-';
-  }
-  return substr($syn_string, 0, -1);
 }
 
 1;
