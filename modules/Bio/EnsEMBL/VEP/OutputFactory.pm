@@ -957,7 +957,7 @@ sub add_colocated_variant_info {
   my $self = shift;
   my $vf = shift;
   my $hash = shift;
-  
+
   return unless $vf->{existing} && scalar @{$vf->{existing}};
 
   my $this_allele = $hash->{Allele};
