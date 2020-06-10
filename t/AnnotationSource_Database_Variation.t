@@ -189,6 +189,7 @@ SKIP: {
       'variation_name' => 'rs142513484',
       'minor_allele' => 'T',
       'start' => 25585733,
+      'variation_id' => 28751744,
       'matched_alleles' => [{
         a_allele => 'T',
         a_index => 0,
@@ -229,6 +230,7 @@ SKIP: {
       'end' => 25891796,
       'variation_name' => 'rs63750066',
       'minor_allele' => 'T',
+      'variation_id' => 13264416,
       'start' => 25891796,
       'matched_alleles' => [{
         a_allele => 'T',

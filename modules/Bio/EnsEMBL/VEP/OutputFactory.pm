@@ -192,6 +192,7 @@ sub new {
     gene_phenotype
     mirna
     ambiguity
+    var_synonyms
 
     total_length
     hgvsc
@@ -997,6 +998,9 @@ sub add_colocated_variant_info {
 
     # ID
     push @{$hash->{Existing_variation}}, $ex->{variation_name} if $ex->{variation_name};
+
+    # Variation Synonyms
+    push @{$hash->{VAR_SYNONYMS}}, $ex->{var_synonyms} if $self->{var_synonyms} && $ex->{var_synonyms}; 
 
     # Find allele specific clin_sig data if it exists
     if(defined($ex->{clin_sig_allele}) && $self->{clin_sig_allele} )
