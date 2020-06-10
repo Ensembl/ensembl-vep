@@ -178,7 +178,8 @@ sub _generic_dump_info {
   my @cols = (
     @{$as->get_cache_columns()},
     'clin_sig_allele',
-    'pubmed'
+    'pubmed',
+    'var_synonyms',
   );
   foreach my $pop(map {@{$_->{prefixed_pops} || $_->{pops}}} @{$self->{freq_vcf} || []}) {
     $pop = uc_gnomad_pop($pop) if ($pop =~ /^$gnomad_prefix/);
@@ -220,6 +221,7 @@ sub dump_obj {
   $self->freqs_from_vcf($obj, $chr) if $self->{freq_vcf};
   
   my $pubmed = $self->pubmed;
+  my $var_synonyms = $self->var_synonyms;
   foreach my $v(@$obj) {
     my @tmp = (
       $v->{variation_name},
@@ -237,6 +239,7 @@ sub dump_obj {
     );
   
     push @tmp, $pubmed->{$v->{variation_name}} || '';
+    push @tmp, $var_synonyms->{$v->{variation_id}} || '';
 
     if($self->{freq_vcf}) {
       foreach my $pop(map {@{$_->{prefixed_pops} || $_->{pops}}} @{$self->{freq_vcf}}) {
@@ -425,7 +428,7 @@ sub pubmed {
     );
     
     if(-e $file) {
-      open IN, $file;
+      open IN, $file or die "Could not write to pubmed file $file $!";
       while(<IN>) {
         chomp;
         my @split = split;
@@ -442,6 +445,42 @@ sub pubmed {
 
   return $self->{_pubmed};
 }
+
+sub var_synonyms {
+  my $self = shift;
+  my $as = shift;
+
+  if(!exists($self->{_var_synonyms})) {
+
+    my %pm;
+    my $file = sprintf(
+      '%s/var_synonyms_%s_%s_%s.txt',
+      $self->required_param('pipeline_dir'),
+      $self->required_param('species'),
+      $self->required_param('ensembl_release'),
+      $self->required_param('assembly')
+    );
+
+    if(-e $file) {
+      open IN, $file or die "Could not write to var synonyms file $file $!";
+      while(<IN>) {
+        chomp;
+        my @split = split(/\t/);
+        $pm{$split[0]} = $split[1];
+      }
+      close IN;
+    }
+    else{
+      $self->warning('Unable to find Variation Synonyms file: ' . $file);
+    }
+
+    $self->{_var_synonyms} = \%pm;
+  }
+
+  return $self->{_var_synonyms};
+}
+
+
 
 sub DESTROY {
   unlink($_[0]->{_lock_file}) if $_[0]->{_lock_file};

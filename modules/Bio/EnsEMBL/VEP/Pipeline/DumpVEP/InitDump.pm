@@ -129,6 +129,8 @@ sub generate_species_jobs {
     $species_hash{$_} = $has_sift_poly->{$_} for keys %$has_sift_poly;
     
     $self->pubmed($dbc_var, $current_db_name, $species_id);
+    $self->synonyms($dbc_var, $current_db_name, $species_id);
+    
   }
 
   push @return, \%species_hash;
@@ -168,11 +170,11 @@ sub pubmed {
     }
   }
   if(-e $file) {
-    unlink($file);
+    unlink($file) or die "Failed to delete pubmed file $file $!";
   }
     
   if($dbc) {
-    open OUT, ">$lock";
+    open OUT, ">$lock" or die "Could not write to pubmed lock file $lock $!";
     print OUT "$$\n";
     close OUT;
     $self->{_lock_file} = $lock;
@@ -190,7 +192,7 @@ sub pubmed {
     my ($v, $p);
     $sth->bind_columns(\$v, \$p);
 
-    open OUT, ">$file";
+    open OUT, ">$file" or die "Could not write to pubmed file $file $!";
     while($sth->fetch()) {
       $pm{$v} = $p;
       print OUT "$v\t$p\n";
@@ -198,13 +200,80 @@ sub pubmed {
 
     close OUT;
 
-    unlink($lock);
+    unlink($lock) or die "Failed to delete pubmed lock file $lock $!";
 
     $sth->finish();
   } 
   return \%pm;
 }
 
+sub synonyms {
+  my ($self, $dbc, $current_db_name, $species_id) = @_;
+  $species_id ||= 0;
+
+  my %pm;
+  my $pipeline_dump_dir = $self->param('pipeline_dir');
+
+  my $file = sprintf(
+      '%s/var_synonyms_%s_%s_%s.txt',
+      $pipeline_dump_dir,
+      $self->required_param('species'),
+      $self->required_param('ensembl_release'),
+      $self->get_assembly($dbc, $current_db_name, $species_id)
+      );
+
+  my $lock = $file.'.lock';
+  unlink($file) if -e $file;
+  unlink($lock) if -e $lock;
+  my $sleep_count = 0;
+  if(-e $lock) {
+    while(-e $lock) {
+      sleep 1;
+      die("I've been waiting for $lock to be removed for $sleep_count seconds, something may have gone wrong\n") if ++$sleep_count > 900;
+    }
+  }
+  if(-e $file) {
+    unlink($file) or die "Failed to delete var synonyms file $file $!";
+  }
+
+  if($dbc) {
+    open OUT, ">$lock" or die "Could not write to synonyms lock file $lock $!";
+    print OUT "$$\n";
+    close OUT;
+    $self->{_lock_file} = $lock;
+
+    my $sth = $dbc->prepare(qq{
+    select subtab.variation_id, group_concat(subtab.str separator '--') as str 
+    from (
+	   select variation_id, concat(s.name, '::', group_concat(vs.name order by vs.variation_id separator ',')) as str 
+	   from variation_synonym vs 
+	   inner join source s on s.source_id = vs.source_id 
+	   where s.source_id in ( 
+               select source_id 
+	       from source 
+	       where name not like '%dbSNP%')
+	    group by variation_id, s.name) as subtab 
+    group by subtab.variation_id;
+    });
+    $sth->execute();
+
+    my ($v, $p);
+    $sth->bind_columns(\$v, \$p);
+
+    open OUT, ">$file" or die "Could not write to synonyms file $file $!";
+    while($sth->fetch()) {
+      $pm{$v} = $p;
+      print OUT "$v\t$p\n";
+    }
+
+    close OUT;
+
+    unlink($lock) or die "Failed to delete var synonyms lock file $lock $!";
+
+    $sth->finish();
+  }
+  return \%pm;
+}
 
 sub get_species_id {
   my ($self, $dbc, $current_db_name, $species) = @_;

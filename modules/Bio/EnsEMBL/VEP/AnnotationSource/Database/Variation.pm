@@ -200,7 +200,7 @@ sub get_features_by_regions_uncached {
       }
       my @array = keys(%clin_sigs);
       $v_copy{clin_sig_allele} = join ';', @array if scalar(@array);
-
+      $v_copy{variation_id} = $var_id;
       ## fix for e!94 alleles
       $v_copy{allele_string} =~ s/\/$//g;
       $v_copy{allele_string} =~ s/\/\//\//;
