@@ -243,9 +243,9 @@ sub synonyms {
     $self->{_lock_file} = $lock;
 
     my $sth = $dbc->prepare(qq{
-    select subtab.variation_id, group_concat(subtab.str separator '-') as str 
+    select subtab.variation_id, group_concat(subtab.str separator '--') as str 
     from (
-	   select variation_id, concat(s.name, ':', group_concat(vs.name order by vs.variation_id separator ',')) as str 
+	   select variation_id, concat(s.name, '::', group_concat(vs.name order by vs.variation_id separator ',')) as str 
 	   from variation_synonym vs 
 	   inner join source s on s.source_id = vs.source_id 
 	   where s.source_id in ( 
