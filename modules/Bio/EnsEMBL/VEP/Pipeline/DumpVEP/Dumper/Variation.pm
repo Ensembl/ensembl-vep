@@ -465,7 +465,7 @@ sub var_synonyms {
       open IN, $file or die 'Could not write to var synonyms file';
       while(<IN>) {
         chomp;
-        my @split = split;
+        my @split = split(/\t/);
         $pm{$split[0]} = $split[1];
       }
       close IN;
