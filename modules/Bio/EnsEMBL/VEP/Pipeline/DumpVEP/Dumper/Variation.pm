@@ -428,7 +428,7 @@ sub pubmed {
     );
     
     if(-e $file) {
-      open IN, $file or die 'Could not write to pubmed file';
+      open IN, $file or die "Could not write to pubmed file $file $!";
       while(<IN>) {
         chomp;
         my @split = split;
@@ -462,7 +462,7 @@ sub var_synonyms {
     );
 
     if(-e $file) {
-      open IN, $file or die 'Could not write to var synonyms file';
+      open IN, $file or die "Could not write to var synonyms file $file $!";
       while(<IN>) {
         chomp;
         my @split = split(/\t/);

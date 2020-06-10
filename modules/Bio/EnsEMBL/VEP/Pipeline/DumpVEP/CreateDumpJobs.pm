@@ -194,7 +194,7 @@ sub get_chr_jobs {
       $species_hash->{pipeline_dump_dir},
       $species_hash->{species},
       $species_hash->{assembly}
-    ) or die "ERROR: Could not write to synonyms file\n";
+    ) or die "ERROR: Could not write to synonyms file\n $_";
 
     # synonyms can be indirect i.e. A <-> B <-> C
     # and there may not be a direct link between A <-> C in the DB
