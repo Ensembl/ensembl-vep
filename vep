@@ -167,6 +167,7 @@ GetOptions(
   'show_ref_allele',         # indicate reference allele
   'no_escape',               # don't percent-escape HGVS strings
   'ambiguity',               # Add allele ambiguity code
+  'var_synonyms', 	     # include variation synonyms in output
   'shift_3prime=i',          # enables shifting of all variants to 3prime
   'shift_genomic',           # adds genomic shifting to output, and provides shifting of intergenic variants
   'shift_length',	     # adds the length of the transcript directional shift to output

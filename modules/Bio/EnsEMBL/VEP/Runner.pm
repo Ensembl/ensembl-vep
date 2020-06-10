@@ -118,6 +118,11 @@ sub init {
     $self->param('port', 3337);
   }
 
+  if(defined($self->param('var_synonyms')) && !$self->param('check_existing')) {
+    $self->status_msg("INFO: Colocated variants will be provided when using --var_synonyms\n");
+    $self->param('check_existing', 1);
+  }
+
   # setup DB connection
   $self->setup_db_connection();
 

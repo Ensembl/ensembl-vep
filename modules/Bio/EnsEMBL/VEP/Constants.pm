@@ -123,6 +123,7 @@ our @FLAG_FIELDS = (
   { flag => 'dont_skip',       fields => ['CHECK_REF'] },
   { flag => 'overlaps',        fields => ['OverlapBP', 'OverlapPC']},
   { flag => 'shift_length',    fields => ['SHIFT_LENGTH']},
+  { flag => 'var_synonyms',    fields => ['VAR_SYNONYMS']},
 
   # regulatory
   { flag => 'regulatory',      fields => ['BIOTYPE','MOTIF_NAME','MOTIF_POS','HIGH_INF_POS','MOTIF_SCORE_CHANGE', 'TRANSCRIPTION_FACTORS'] },
@@ -215,6 +216,7 @@ our %FIELD_DESCRIPTIONS = (
   'BIOTYPE'            => 'Biotype of transcript or regulatory feature',
   'PUBMED'             => 'Pubmed ID(s) of publications that cite existing variant',
   'ALLELE_NUM'         => 'Allele number from input; 0 is reference, 1 is first alternate etc',
+  'VAR_SYNONYMS'       => 'List of known variation synonyms and their sources',
   'REF_ALLELE'         => 'Reference allele',
   'STRAND'             => 'Strand of the feature (1/-1)',
   'PICK'               => 'Indicates if this consequence has been picked as the most severe',
