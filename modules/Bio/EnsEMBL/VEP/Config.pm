@@ -155,6 +155,7 @@ our @OPTION_SETS = (
       af_gnomad      => 1,
       max_af         => 1,
       pubmed         => 1,
+      var_synonyms   => 1,
       uniprot        => 1,
       mane           => 1,
       tsl            => 1,
