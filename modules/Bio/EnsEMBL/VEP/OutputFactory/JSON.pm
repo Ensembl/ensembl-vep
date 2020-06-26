@@ -421,6 +421,19 @@ sub add_colocated_variant_info_JSON {
     $ex->{$field} = [split(',', $ex->{$field})];
   }
 
+  # update variation synonyms
+  if(defined($ex->{var_synonyms})){
+    my $var_syn_hash;
+    my @str = split /--/, $ex->{var_synonyms};
+    foreach my $source (@str){
+      my @spl = split /::/, $source;
+      my @output = split /,/, $spl[1];
+      $var_syn_hash->{$spl[0]} = \@output;
+    }
+
+    $ex->{var_synonyms} = $var_syn_hash;
+  }
+
   push @{$hash->{colocated_variants}}, $ex;
 
   return $hash;
