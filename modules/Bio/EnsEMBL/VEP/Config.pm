@@ -155,6 +155,7 @@ our @OPTION_SETS = (
       af_gnomad      => 1,
       max_af         => 1,
       pubmed         => 1,
+      var_synonyms   => 1,
       uniprot        => 1,
       mane           => 1,
       tsl            => 1,
@@ -631,7 +632,7 @@ sub check_config {
   
   # turn off some options if using --everything and --database
   if($config->{everything} && $config->{database}) {
-    delete $config->{$_} for qw(af_1kg af_esp af_exac af_gnomad max_af pubmed);
+    delete $config->{$_} for qw(af_1kg af_esp af_exac af_gnomad max_af pubmed var_synonyms);
   }
   
   # check valid values for flags
