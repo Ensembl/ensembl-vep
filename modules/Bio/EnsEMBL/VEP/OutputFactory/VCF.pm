@@ -274,6 +274,8 @@ sub get_all_lines_by_InputBuffer {
   map {@{$self->reset_shifted_positions($_)}}
     @{$buffer->buffer};
 
+  $self->rejoin_variants_in_InputBuffer($buffer) if $buffer->rejoin_required;
+
   foreach my $vf(@{$buffer->buffer}) {
 
     my $line;
