@@ -576,7 +576,21 @@ ok(
   "SV overlap percent and length available"
 );
 
+## rejoin on minimal
 
+$ib = get_runner({
+  input_file => $test_cfg->create_input_file([qw(21 25741665 . CAGAAGAAAG TAGAAGAAAG,C . . .)]),
+  minimal => 1,
+})->get_InputBuffer;
+$of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({config => $ib->config});
+
+is(scalar @{$ib->buffer}, 2, 'minimal - expanded count');
+is($ib->buffer->[0]->allele_string, 'C/T', 'minimal - expanded first allele string');
+
+$of->rejoin_variants_in_InputBuffer($ib);
+
+is(scalar @{$ib->buffer}, 1, 'minimal - rejoined count');
+is($ib->buffer->[0]->allele_string, 'CAGAAGAAAG/TAGAAGAAAG/C', 'minimal - rejoined allele string');
 
 
 ## test getting stuff from input
