@@ -84,7 +84,8 @@ sub configure {
     'gz',                      # force read as gzipped
     'only_matched',            # rewrite CSQ field in VCF with only matched "blobs"
     'vcf_info_field=s',        # VCF INFO field name to parse
-    
+    'soft_filter',             # do not exclude failed variants, only changes the FILTER value in the vcf
+
     'ontology|y',              # use ontology for matching consequence terms
     'host=s',                  # DB options
     'user=s',
@@ -219,9 +220,10 @@ sub main {
       $config->{format} ||= detect_format($line);
       throw("ERROR: Could not detect input file format - perhaps you need to specify it with --format?\n") unless $config->{format};
       throw("ERROR: --only_matched is compatible only with VCF files\n") if $config->{format} ne 'vcf' && $config->{only_matched};
-      
+      throw("ERROR: --soft_filter is compatible only with VCF files\n") if $config->{format} ne 'vcf' && $config->{soft_filter};
+
       my (@data, @chunks);
-      
+
       if($config->{format} eq 'tab') {
         push @data, parse_line($line, \@headers, "\t");
         push @chunks, $line;
@@ -267,10 +269,10 @@ sub main {
         my $chunk_pass;
         my $parsed_chunk = $data[$i];
         my $raw_chunk = $chunks[$i];
-        
+
         $chunk_pass = $filter_set->evaluate($parsed_chunk);
         $line_pass += $chunk_pass;
-        
+
         push @new_chunks, $raw_chunk if $chunk_pass;
       }
       
@@ -283,9 +285,32 @@ sub main {
       $count++ if $line_pass;
       
       next unless $count >= $config->{start};
-      
-      print $out_fh "$line\n" if $line_pass && !defined($config->{count});
-      
+
+      my $new_line;
+
+      if($config->{soft_filter}) {
+        my @line_splitted = split /\t/, $line;
+        my $option;
+
+        $option = $line_pass ? "PASS" : "FAILED";
+
+        foreach my $x(0..$#line_splitted) {
+          if($x == 6) {
+            $new_line = $new_line . "\t" . $option;
+          }
+          else {
+            $new_line = $new_line . "\t" . $line_splitted[$x];
+          }
+        }
+      }
+
+      if($config->{soft_filter}) {
+        print $out_fh "$new_line\n"
+      }
+      else {
+        print $out_fh "$line\n" if $line_pass && !defined($config->{count});
+      }
+
       last if $count >= $config->{limit} + $config->{start} - 1;
     }
   }
