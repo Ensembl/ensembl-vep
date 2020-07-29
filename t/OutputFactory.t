@@ -1800,6 +1800,13 @@ $of->rejoin_variants_in_InputBuffer($ib);
 
 is(scalar @{$ib->buffer}, 2, 'minimal - intergenic - rejoined count');
 
+foreach my $vf (@{$ib->buffer}) {
+  my $vfoas = $of->get_all_VariationFeatureOverlapAlleles($vf);
+  foreach my $vfoa (@{$vfoas}) {
+    is(ref($vfoa->base_variation_feature_overlap), 'Bio::EnsEMBL::Variation::IntergenicVariation', 'base_variation_feature_overlap is set after rejoin');
+  }
+}
+
 is_deeply(
   [map {$_->display_consequence} @{$ib->buffer}],
   ['intergenic_variant', 'intergenic_variant'],
