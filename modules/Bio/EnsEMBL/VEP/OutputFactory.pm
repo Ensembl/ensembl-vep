@@ -70,7 +70,6 @@ package Bio::EnsEMBL::VEP::OutputFactory;
 use base qw(Bio::EnsEMBL::VEP::BaseVEP);
 
 use Scalar::Util qw(looks_like_number);
-
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
@@ -281,6 +280,7 @@ sub get_all_output_hashes_by_InputBuffer {
   # rejoin variants that have been split
   # this can happen when using --minimal
   $self->rejoin_variants_in_InputBuffer($buffer) if $buffer->rejoin_required;
+
 
   map {@{$self->reset_shifted_positions($_)}}
     @{$buffer->buffer};
@@ -2127,7 +2127,6 @@ sub rejoin_variants_in_InputBuffer {
         foreach my $key(keys %{$vf->{$type} || {}}) {
           my $val = $vf->{$type}->{$key};
           $val->base_variation_feature($original);
-
           # rename the key they're stored under
           $original->{$type}->{$vf->{allele_string}.'_'.$key} = $val;
         }
@@ -2137,12 +2136,15 @@ sub rejoin_variants_in_InputBuffer {
       # there is only one, and no reference feature to key on
       # means we have to copy over alleles manually
       if(my $iv = $vf->{intergenic_variation}) {
-
+        my $bfvo = $original->{intergenic_variation};
         $iv->base_variation_feature($original);
 
         if(my $oiv = $original->{intergenic_variation}) {
-            push @{$oiv->{alt_alleles}}, @{$iv->{alt_alleles}};
-            $oiv->{_alleles_by_seq}->{$_->variation_feature_seq} = $_ for @{$oiv->{alt_alleles}};
+          foreach my $alt (@{$iv->{alt_alleles}}) {
+            $alt->base_variation_feature_overlap($bfvo);
+            push @{$oiv->{alt_alleles}}, $alt;
+          }
+          $oiv->{_alleles_by_seq}->{$_->variation_feature_seq} = $_ for @{$oiv->{alt_alleles}};
         }
 
         # this probably won't happen, but can't hurt to cover all bases
