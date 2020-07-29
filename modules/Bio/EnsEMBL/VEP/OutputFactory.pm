@@ -2125,12 +2125,15 @@ sub rejoin_variants_in_InputBuffer {
       # there is only one, and no reference feature to key on
       # means we have to copy over alleles manually
       if(my $iv = $vf->{intergenic_variation}) {
-
+        my $bfvo = $original->{intergenic_variation};
         $iv->base_variation_feature($original);
 
         if(my $oiv = $original->{intergenic_variation}) {
-            push @{$oiv->{alt_alleles}}, @{$iv->{alt_alleles}};
-            $oiv->{_alleles_by_seq}->{$_->variation_feature_seq} = $_ for @{$oiv->{alt_alleles}};
+          foreach my $alt (@{$iv->{alt_alleles}}) {
+            $alt->base_variation_feature_overlap($bfvo);
+            push @{$oiv->{alt_alleles}}, $alt;
+          }
+          $oiv->{_alleles_by_seq}->{$_->variation_feature_seq} = $_ for @{$oiv->{alt_alleles}};
         }
 
         # this probably won't happen, but can't hurt to cover all bases
