@@ -332,7 +332,7 @@ sub lazy_load_transcript {
 sub prefetch_transcript_data {
   my $self = shift;
   my $tr = shift;
-
+$DB::single = 1;
   my $vep_cache = $tr->{_variation_effect_feature_cache} ||= {};
 
   $vep_cache->{introns} ||= $tr->get_all_Introns;
@@ -650,21 +650,27 @@ sub prefetch_translation_ids {
     $tr->{_swissprot} = '-';
     my @entries = grep {$_->database eq 'Uniprot/SWISSPROT'} @{$tl->get_all_DBEntries};
     if(scalar @entries) {
-      $tr->{_swissprot} = join ",", map {$_->primary_id} @entries;
+      $tr->{_swissprot} = join ",", map {$_->display_id} @entries;
     }
 
     $tr->{_trembl} = '-';
     @entries = grep {$_->database eq 'Uniprot/SPTREMBL'} @{$tl->get_all_DBEntries};
     if(scalar @entries) {
-      $tr->{_trembl} = join ",", map {$_->primary_id} @entries;
+      $tr->{_trembl} = join ",", map {$_->display_id} @entries;
     }
-
 
     $tr->{_uniparc} = '-';
     @entries = grep {$_->database eq 'UniParc'} @{$tl->get_all_DBEntries};
     if(scalar @entries) {
-      $tr->{_uniparc} = join ",", map {$_->primary_id} @entries;
+      $tr->{_uniparc} = join ",", map {$_->display_id} @entries;
     }
+    
+    $tr->{_uniprot_isoform} = '-';
+    @entries = grep {$_->database eq 'Uniprot_isoform'} @{$tl->get_all_DBEntries};
+    if(scalar @entries) {
+      $tr->{_uniprot_isoform} = join ",", map {$_->display_id} @entries;
+    }
+
   }
 
   # Ensembl protein ID

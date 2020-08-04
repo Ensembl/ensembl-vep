@@ -1417,7 +1417,7 @@ sub BaseTranscriptVariationAllele_to_output_hash {
 
   # uniprot
   if($self->{uniprot}) {
-    for my $db(qw(swissprot trembl uniparc)) {
+    for my $db(qw(swissprot trembl uniparc uniprot_isoform)) {
       my $id = $tr->{'_'.$db};
       $id = undef if defined($id) && $id eq '-';
       $hash->{uc($db)} = [split(',', $id)] if defined($id);
