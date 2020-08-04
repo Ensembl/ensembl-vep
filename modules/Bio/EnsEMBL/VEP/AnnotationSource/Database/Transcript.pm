@@ -332,7 +332,7 @@ sub lazy_load_transcript {
 sub prefetch_transcript_data {
   my $self = shift;
   my $tr = shift;
-$DB::single = 1;
+
   my $vep_cache = $tr->{_variation_effect_feature_cache} ||= {};
 
   $vep_cache->{introns} ||= $tr->get_all_Introns;
