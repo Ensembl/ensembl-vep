@@ -125,6 +125,8 @@ GetOptions(
   'coding_only',             # only return results for consequences in coding regions
   'canonical',               # indicates if transcript is canonical
   'mane',                    # output mane transcript status
+  'mane_select',             # output mane select transcript status
+  'mane_plus',               # output mane plus transcript status
   'tsl',                     # output transcript support level
   'appris',                  # output APPRIS transcript annotation
   'ccds',                    # output CCDS identifer
