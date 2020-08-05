@@ -84,7 +84,7 @@ sub configure {
     'gz',                      # force read as gzipped
     'only_matched',            # rewrite CSQ field in VCF with only matched "blobs"
     'vcf_info_field=s',        # VCF INFO field name to parse
-    'soft_filter',             # do not exclude failed variants, only changes the FILTER value in the vcf
+    'soft_filter',             # do not exclude variants failing the filter - add a flag to the FILTER value in the vcf
 
     'ontology|y',              # use ontology for matching consequence terms
     'host=s',                  # DB options
@@ -222,6 +222,11 @@ sub main {
       throw("ERROR: --only_matched is compatible only with VCF files\n") if $config->{format} ne 'vcf' && $config->{only_matched};
       throw("ERROR: --soft_filter is compatible only with VCF files\n") if $config->{format} ne 'vcf' && $config->{soft_filter};
 
+      # Can't skip any variants if soft_filter switched on
+      if($config->{soft_filter}) {
+        $config->{start} = 0;
+      }
+
       my (@data, @chunks);
 
       if($config->{format} eq 'tab') {
@@ -289,23 +294,17 @@ sub main {
       my $new_line;
 
       if($config->{soft_filter}) {
-        my @line_splitted = split /\t/, $line;
+        my @split_line = split /\t/, $line;
         my $option;
 
         $option = $line_pass ? "PASS" : "FAILED";
-
-        foreach my $x(0..$#line_splitted) {
-          if($x == 6) {
-            $new_line = $new_line . "\t" . $option;
-          }
-          else {
-            $new_line = $new_line . "\t" . $line_splitted[$x];
-          }
+        if($split_line[6] ne '.') {
+          $option = $split_line[6] . "," . $option;
         }
-      }
 
-      if($config->{soft_filter}) {
-        print $out_fh "$new_line\n"
+        $new_line = join("\t", @split_line[0..5], $option, @split_line[7..$#split_line]);
+
+        print $out_fh "$new_line\n";
       }
       else {
         print $out_fh "$line\n" if $line_pass && !defined($config->{count});
