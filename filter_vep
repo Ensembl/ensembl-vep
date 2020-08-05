@@ -299,7 +299,7 @@ sub main {
 
         $option = $line_pass ? "PASS" : "FAILED";
         if($split_line[6] ne '.') {
-          $option = $split_line[6] . "," . $option;
+          $option = join(",", $split_line[6], $option);
         }
 
         $new_line = join("\t", @split_line[0..5], $option, @split_line[7..$#split_line]);
