@@ -85,6 +85,7 @@ sub configure {
     'only_matched',            # rewrite CSQ field in VCF with only matched "blobs"
     'vcf_info_field=s',        # VCF INFO field name to parse
     'soft_filter',             # do not exclude variants failing the filter - add a flag to the FILTER value in the vcf
+                               # 'vep_filter_pass' variant passed the filter; 'vep_filter_fail' variant failed the filter 
 
     'ontology|y',              # use ontology for matching consequence terms
     'host=s',                  # DB options
@@ -297,7 +298,7 @@ sub main {
         my @split_line = split /\t/, $line;
         my $option;
 
-        $option = $line_pass ? "PASS" : "FAILED";
+        $option = $line_pass ? "vep_filter_pass" : "vep_filter_fail";
         if($split_line[6] ne '.') {
           $option = join(",", $split_line[6], $option);
         }
