@@ -75,6 +75,7 @@ our @FLAG_FIELDS = (
   { flag => 'flag_pick_allele_gene', fields => ['PICK'] },
   { flag => 'variant_class',   fields => ['VARIANT_CLASS']},
   { flag => 'minimal',         fields => ['MINIMISED']},
+  { flag => 'spdi',            fields => ['SPDI']},
 
   # gene-related
   { flag => 'symbol',          fields => ['SYMBOL','SYMBOL_SOURCE','HGNC_ID'] },
@@ -170,6 +171,7 @@ our %FIELD_DESCRIPTIONS = (
   'HGVSc'              => 'HGVS coding sequence name',
   'HGVSp'              => 'HGVS protein sequence name',
   'HGVSg'              => 'HGVS genomic sequence name',
+  'SPDI'               => 'Genomic SPDI notation',
   'SIFT'               => 'SIFT prediction and/or score',
   'PolyPhen'           => 'PolyPhen prediction and/or score',
   'EXON'               => 'Exon number(s) / total',

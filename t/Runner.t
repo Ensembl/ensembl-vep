@@ -208,6 +208,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'mane' => undef,
   'mane_select' => undef,
   'mane_plus' => undef,
+  'spdi'  => undef,
   'header_info' => $info,
   'plugins' => [],
   'no_stats' => 1,
