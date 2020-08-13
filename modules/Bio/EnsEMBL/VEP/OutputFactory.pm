@@ -1267,7 +1267,7 @@ sub VariationFeatureOverlapAllele_to_output_hash {
     $vf->{_spdi_genomic} = $vf->spdi_genomic(); 
       
     if(my $spdi = $vf->{_spdi_genomic}->{$hash->{Allele}}){
-      $hash->{spdi} = $spdi;  
+      $hash->{SPDI} = $spdi;  
     }
   }
 
