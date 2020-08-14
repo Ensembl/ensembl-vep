@@ -84,7 +84,9 @@ sub configure {
     'gz',                      # force read as gzipped
     'only_matched',            # rewrite CSQ field in VCF with only matched "blobs"
     'vcf_info_field=s',        # VCF INFO field name to parse
-    
+    'soft_filter',             # do not exclude variants failing the filter - add a flag to the FILTER value in the vcf
+                               # 'filter_vep_pass' variant passed the filter; 'filter_vep_fail' variant failed the filter 
+
     'ontology|y',              # use ontology for matching consequence terms
     'host=s',                  # DB options
     'user=s',
@@ -182,7 +184,7 @@ sub main {
     chomp;
     
     $config->{line_number}++;
-    
+   
     # header line?
     if(/^\#/) {
       push @raw_headers, $_;
@@ -194,13 +196,20 @@ sub main {
       # parse headers before processing input
       if(!(scalar @headers)) {
         throw("ERROR: No headers found in input file\n") unless scalar @raw_headers;
-        
+
+        if($config->{soft_filter} && (scalar @raw_headers)) {
+          my $chr_header = pop @raw_headers;
+          push @raw_headers, "##FILTER=<ID=filter_vep_pass,Description=\"Variant passes filter_vep\">";
+          push @raw_headers, "##FILTER=<ID=filter_vep_fail,Description=\"Variant fails filter_vep\">";
+          push @raw_headers, $chr_header;
+        }
+       
         # write headers to output
         unless(defined($config->{count}) || defined($config->{list})) {
           print $out_fh join("\n", @raw_headers);
           print $out_fh "\n";
         }
-        
+
         # parse into data structures
         parse_headers($config, \@raw_headers);
         @headers = @{$config->{headers} || $config->{col_headers}};
@@ -219,9 +228,15 @@ sub main {
       $config->{format} ||= detect_format($line);
       throw("ERROR: Could not detect input file format - perhaps you need to specify it with --format?\n") unless $config->{format};
       throw("ERROR: --only_matched is compatible only with VCF files\n") if $config->{format} ne 'vcf' && $config->{only_matched};
-      
+      throw("ERROR: --soft_filter is compatible only with VCF files\n") if $config->{format} ne 'vcf' && $config->{soft_filter};
+
+      # Can't skip any variants if soft_filter switched on
+      if($config->{soft_filter}) {
+        $config->{start} = 0;
+      }
+
       my (@data, @chunks);
-      
+
       if($config->{format} eq 'tab') {
         push @data, parse_line($line, \@headers, "\t");
         push @chunks, $line;
@@ -267,10 +282,10 @@ sub main {
         my $chunk_pass;
         my $parsed_chunk = $data[$i];
         my $raw_chunk = $chunks[$i];
-        
+
         $chunk_pass = $filter_set->evaluate($parsed_chunk);
         $line_pass += $chunk_pass;
-        
+
         push @new_chunks, $raw_chunk if $chunk_pass;
       }
       
@@ -283,9 +298,26 @@ sub main {
       $count++ if $line_pass;
       
       next unless $count >= $config->{start};
-      
-      print $out_fh "$line\n" if $line_pass && !defined($config->{count});
-      
+
+      my $new_line;
+
+      if($config->{soft_filter}) {
+        my @split_line = split /\t/, $line;
+        my $option;
+
+        $option = $line_pass ? "filter_vep_pass" : "filter_vep_fail";
+        if($split_line[6] ne '.') {
+          $option = join(";", $split_line[6], $option);
+        }
+
+        $new_line = join("\t", @split_line[0..5], $option, @split_line[7..$#split_line]);
+
+        print $out_fh "$new_line\n";
+      }
+      else {
+        print $out_fh "$line\n" if $line_pass && !defined($config->{count});
+      }
+
       last if $count >= $config->{limit} + $config->{start} - 1;
     }
   }
