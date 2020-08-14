@@ -199,8 +199,8 @@ sub main {
 
         if($config->{soft_filter} && (scalar @raw_headers)) {
           my $chr_header = pop @raw_headers;
-          push @raw_headers, "##FILTER=<ID=passes filter_vep,Description=\"Variant pass vep filter\">";
-          push @raw_headers, "##FILTER=<ID=fails filter_vep,Description=\"Variant fails vep filter\">";
+          push @raw_headers, "##FILTER=<ID=filter_vep_pass,Description=\"Variant passes filter_vep\">";
+          push @raw_headers, "##FILTER=<ID=filter_vep_fail,Description=\"Variant fails filter_vep\">";
           push @raw_headers, $chr_header;
         }
        
@@ -305,7 +305,7 @@ sub main {
         my @split_line = split /\t/, $line;
         my $option;
 
-        $option = $line_pass ? "passes filter_vep" : "fails filter_vep";
+        $option = $line_pass ? "filter_vep_pass" : "filter_vep_fail";
         if($split_line[6] ne '.') {
           $option = join(";", $split_line[6], $option);
         }
