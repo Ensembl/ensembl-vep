@@ -755,7 +755,7 @@ sub info {
         my $sth = $refseq_mca->db->dbc->prepare(qq{
           SELECT CONCAT(db_version, IF(db_file IS NOT NULL, concat(' - ', db_file), ''))
           FROM analysis
-          WHERE logic_name = $logic_name
+          WHERE logic_name = '$logic_name'
         });
         $sth->execute;
 
