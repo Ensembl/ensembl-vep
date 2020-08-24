@@ -67,6 +67,7 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::Runner;
 use Bio::EnsEMBL::VEP::Utils qw(find_in_ref merge_arrays);
 
+use Data::Dumper;
 
 =head2 new
 
@@ -245,18 +246,102 @@ sub _get_all_results {
 
   my %want_keys = map {$_ => 1} @{$self->param('fields')};
 
+  # Some keys are not linked to any allele
+  my %keys_no_allele;
+ 
+  if($want_keys{'id'}) {
+    $keys_no_allele{'id'} = 1;
+    delete($want_keys{'id'});
+  }
+  if($want_keys{'vcf_string'}) {
+    $keys_no_allele{'vcf_string'} = 1;
+    delete($want_keys{'vcf_string'});
+  }
+
+  # my %want_keys_no_allele = $want_keys{@keys_no_allele};
+
+  # print "NO ALLELES: ", Dumper(\%want_keys_no_allele);
+
+  print Dumper(\%want_keys);
+  # print "-> ", Dumper(\%keys_no_allele);
+
   while(my $line = $self->next_output_line(1)) {
     delete($line->{id});
     my $line_id = $line->{input};
-    
+   
+    # print "\nLINE: ", Dumper($line), ", LINE ID: $line_id\n";
+
+    my %line_by_allele;
+    # intergenic_consequences
+    # transcript_consequences
+    #
+    my $consequences = $line->{transcript_consequences} ||= $line->{intergenic_consequences};
+
+    # Split the consequences by alleles
+    my %allele_consequence;
+    foreach my $consequence (@$consequences) {
+      my $allele = $consequence->{'variant_allele'};
+      push @{$allele_consequence{$allele}}, $consequence;
+    }
+
+    $line_by_allele{'consequences'} = \%allele_consequence;
+
+    # Parse vcf string and build a hash by allele
+    my %vcf_string_by_allele;
+    if($keys_no_allele{'vcf_string'}) {
+      if(ref($line->{'vcf_string'})) {
+        foreach my $vcf_string (@{$line->{'vcf_string'}}) {
+          # print "-> $vcf_string\n";
+          my @split_vcf = split /\-/, $vcf_string;
+          my $allele_vcf = $split_vcf[-1];
+          $vcf_string_by_allele{$allele_vcf}->{'vcf_string'} = $vcf_string;
+        }
+      }
+      else {
+        my @split_vcf = split /\-/, $line->{'vcf_string'};
+        my $allele_vcf = $split_vcf[-1];
+        $vcf_string_by_allele{$allele_vcf}->{'vcf_string'} = $line->{'vcf_string'};
+      }
+    }
+
+    # Do the same for ids
+    if($keys_no_allele{'id'}) {
+      foreach my $co_var (@{$line->{'colocated_variants'}}) {
+        # Need to put this id somewhere - all alleles(?)
+        next if($co_var->{'allele_string'} =~ /COSMIC/);
+        
+        my @split_allele = split /\//, $co_var->{'allele_string'};
+        shift @split_allele;
+        foreach my $allele (@split_allele) {
+          $vcf_string_by_allele{$allele}->{'id'} = $co_var->{'id'};
+        }
+      }
+    }
+
+    # print "VCF: ", Dumper(\%vcf_string_by_allele);
+
     merge_arrays($order, [$line_id]);
-    find_in_ref($line, \%want_keys, $results->{$line_id} ||= {input => $line_id});
+
+    foreach my $allele (keys %{$line_by_allele{'consequences'}}) {
+      # print "ALLELE: $allele\n";
+      find_in_ref($line_by_allele{'consequences'}->{$allele}, \%want_keys, $results->{$line_id}->{$allele} ||= {input => $line_id});
+  #    find_in_ref($line, \%keys_no_allele, $results->{$line_id} ||= {input => $line_id});
+      find_in_ref($vcf_string_by_allele{$allele}, \%keys_no_allele, $results->{$line_id}->{$allele} ||= {input => $line_id});
+    }
+
+    # find_in_ref($line, \%want_keys, $results->{$line_id} ||= {input => $line_id});
+
+    # print "ORDER: ", Dumper($order), "\n";
+    # print "(1) ", Dumper($results->{$line_id}), "\n";
+    # print "(2) ", Dumper({input => $line_id}), "\n";
 
     if(@{$self->warnings}) {
       $results->{$line_id}->{warnings} = [map {$_->{msg}} @{$self->warnings}];
       $self->internalise_warnings();
     }
   }
+
+  # print "RESULTS: ", Dumper($results->{$_});
 
   return [map {$results->{$_}} @$order];
 }
