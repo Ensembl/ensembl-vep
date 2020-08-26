@@ -745,11 +745,17 @@ sub info {
 
     # refseq
     if($self->{source_type} eq 'refseq') {
+
+      my $logic_name = 'refseq_import';
+      if($info{'assembly'} =~ /GRCh37/) {
+        $logic_name = 'refseq_import_grch38';
+      }
+
       if(my $refseq_mca = $self->get_adaptor('otherfeatures', 'metacontainer')) {
         my $sth = $refseq_mca->db->dbc->prepare(qq{
           SELECT CONCAT(db_version, IF(db_file IS NOT NULL, concat(' - ', db_file), ''))
           FROM analysis
-          WHERE logic_name = 'refseq_import'          
+          WHERE logic_name = '$logic_name'
         });
         $sth->execute;
 
