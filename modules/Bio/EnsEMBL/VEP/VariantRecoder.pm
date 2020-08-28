@@ -68,6 +68,8 @@ use Bio::EnsEMBL::VEP::Runner;
 use Bio::EnsEMBL::VEP::Utils qw(find_in_ref merge_arrays);
 use Bio::EnsEMBL::Variation::VariationFeature;
 use Bio::EnsEMBL::Variation::Utils::VEP;
+use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
+
 use Data::Dumper;
 
 =head2 new
@@ -307,7 +309,14 @@ sub _get_all_results {
           # delete ref allele
           shift @split_allele;
           foreach my $allele (@split_allele) {
-            push @{$vcf_string_by_allele{$allele}->{'id'}}, $co_var->{'id'};
+            my $allele_rev = $allele;
+            reverse_comp(\$allele_rev);
+            if($allele_consequence{$allele}) {
+              push @{$vcf_string_by_allele{$allele}->{'id'}}, $co_var->{'id'};
+            }
+            else {
+              push @{$vcf_string_by_allele{$allele_rev}->{'id'}}, $co_var->{'id'};
+            }
           }
         }
       }
@@ -341,7 +350,7 @@ sub _get_all_results {
 
   Example    : my $allele = $idt->_minimise_allele($allele_string, $start, $end, $strand);
   Description: Internal method used to minimise the alleles for comparison.
-  Caller     : recode(), recode_all()
+  Caller     : _get_all_results()
   Status     : Stable
 
 =cut
@@ -370,6 +379,15 @@ sub _minimise_allele {
 
   return $minimise_alleles;
 }
+
+=head2 _minimise_allele_vcf
+
+  Example    : my $allele = $idt->_minimise_allele_vcf($vcf_string, $start, $end, $strand, $hash);
+  Description: Internal method used to minimise the VCF alleles for comparison.
+  Caller     : _get_all_results()
+  Status     : Stable
+
+=cut
 
 sub _minimise_allele_vcf {
   my ($self, $vcf_string, $start, $end, $strand, $minimise_alleles_hash) = @_;
