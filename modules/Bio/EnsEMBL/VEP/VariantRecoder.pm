@@ -70,8 +70,6 @@ use Bio::EnsEMBL::Variation::VariationFeature;
 use Bio::EnsEMBL::Variation::Utils::VEP;
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
 
-use Data::Dumper;
-
 =head2 new
 
   Arg 1      : hashref $config

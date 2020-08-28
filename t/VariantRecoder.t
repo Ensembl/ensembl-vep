@@ -22,8 +22,6 @@ use FindBin qw($Bin);
 use lib $Bin;
 use VEPTestingConfig;
 
-use Data::Dumper;
-
 my $test_cfg = VEPTestingConfig->new();
 
 my $cfg_hash = $test_cfg->base_testing_cfg;
