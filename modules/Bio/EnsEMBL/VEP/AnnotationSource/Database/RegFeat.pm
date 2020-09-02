@@ -216,7 +216,7 @@ sub get_features_by_regions_uncached {
     } 
 
     foreach my $mf(@motif_features) {
-      $mf->binding_matrix->summary_as_hash();
+      $mf->get_BindingMatrix->summary_as_hash();
       if($self->{cell_type} && scalar(@{$self->{cell_type}})) {
         my %cl =  
           map {$_->[0] => $_->[1]}
