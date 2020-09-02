@@ -66,7 +66,9 @@ use base qw(Bio::EnsEMBL::VEP::Runner);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::Runner;
 use Bio::EnsEMBL::VEP::Utils qw(find_in_ref merge_arrays);
-
+use Bio::EnsEMBL::Variation::VariationFeature;
+use Bio::EnsEMBL::Variation::Utils::VEP;
+use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
 
 =head2 new
 
@@ -245,12 +247,93 @@ sub _get_all_results {
 
   my %want_keys = map {$_ => 1} @{$self->param('fields')};
 
+  # Store data that is originally not linked to an allele
+  my %keys_no_allele;
+ 
+  if($want_keys{'id'}) {
+    $keys_no_allele{'id'} = 1;
+    delete($want_keys{'id'});
+  }
+  if($want_keys{'vcf_string'}) {
+    $keys_no_allele{'vcf_string'} = 1;
+    delete($want_keys{'vcf_string'});
+  }
+
   while(my $line = $self->next_output_line(1)) {
     delete($line->{id});
     my $line_id = $line->{input};
-    
+   
+    my %line_by_allele;
+    my $consequences = $line->{transcript_consequences} ||= $line->{intergenic_consequences};
+
+    # Split the consequences by alleles
+    my %allele_consequence;
+    foreach my $consequence (@$consequences) {
+      my $allele = $consequence->{'variant_allele'};
+      push @{$allele_consequence{$allele}}, $consequence;
+    }
+
+    $line_by_allele{'consequences'} = \%allele_consequence;
+
+    # Parse vcf string and build a hash by allele
+    my %vcf_string_by_allele;
+    if($keys_no_allele{'vcf_string'}) {
+      # Minimise alleles
+      my $minimise_alleles_hash = $self->_minimise_allele($line->{'allele_string'}, $line->{start}, $line->{end}, $line->{strand});
+      # If there is more than one vcf_string then it's an array
+      if(ref($line->{'vcf_string'})) {
+        foreach my $vcf_string (@{$line->{'vcf_string'}}) {
+          my $alt_allele_vcf_2 = $self->_minimise_allele_vcf($vcf_string, $line->{start}, $line->{end}, $line->{strand}, $minimise_alleles_hash);
+          $vcf_string_by_allele{$alt_allele_vcf_2}->{'vcf_string'} = $vcf_string;
+        }
+      }
+      else {
+        my $alt_allele_vcf = $self->_minimise_allele_vcf($line->{'vcf_string'}, $line->{start}, $line->{end}, $line->{strand}, $minimise_alleles_hash);
+        $vcf_string_by_allele{$alt_allele_vcf}->{'vcf_string'} = $line->{'vcf_string'};
+      }
+    }
+
+    # Parse ID and build a hash by allele
+    # COSMIC and HGMD IDs don't have an allele - they are annexed to all alleles
+    if($keys_no_allele{'id'}) {
+      my @ids_no_allele;
+      foreach my $co_var (@{$line->{'colocated_variants'}}) {
+        # Store the COSMIC and HGMD IDs (not linked to an allele) for later 
+        if($co_var->{'allele_string'} =~ /COSMIC|HGMD/) {
+          push @ids_no_allele, $co_var->{'id'}; 
+        }
+        else {
+          my @split_allele = split /\//, $co_var->{'allele_string'};
+          # delete ref allele
+          shift @split_allele;
+          foreach my $allele (@split_allele) {
+            my $allele_rev = $allele;
+            reverse_comp(\$allele_rev);
+            if($allele_consequence{$allele}) {
+              push @{$vcf_string_by_allele{$allele}->{'id'}}, $co_var->{'id'};
+            }
+            else {
+              push @{$vcf_string_by_allele{$allele_rev}->{'id'}}, $co_var->{'id'};
+            }
+          }
+        }
+      }
+      # Link the COSMIC and HGMD IDs to all alleles
+      if(scalar(@ids_no_allele) != 0) { 
+        foreach my $key_allele (keys %{$line_by_allele{'consequences'}}) {
+          foreach my $id_no_allele (@ids_no_allele) {
+            push @{$vcf_string_by_allele{$key_allele}->{'id'}}, $id_no_allele;
+          }
+        }
+      }
+    }
+
     merge_arrays($order, [$line_id]);
-    find_in_ref($line, \%want_keys, $results->{$line_id} ||= {input => $line_id});
+
+    foreach my $allele (keys %{$line_by_allele{'consequences'}}) {
+      find_in_ref($line_by_allele{'consequences'}->{$allele}, \%want_keys, $results->{$line_id}->{$allele} ||= {input => $line_id});
+      find_in_ref($vcf_string_by_allele{$allele}, \%keys_no_allele, $results->{$line_id}->{$allele} ||= {input => $line_id});
+    }
 
     if(@{$self->warnings}) {
       $results->{$line_id}->{warnings} = [map {$_->{msg}} @{$self->warnings}];
@@ -259,6 +342,70 @@ sub _get_all_results {
   }
 
   return [map {$results->{$_}} @$order];
+}
+
+=head2 _minimise_allele
+
+  Example    : my $allele = $idt->_minimise_allele($allele_string, $start, $end, $strand);
+  Description: Internal method used to minimise the alleles for comparison.
+  Caller     : _get_all_results()
+  Status     : Stable
+
+=cut
+
+sub _minimise_allele {
+  my ($self, $allele_string, $start, $end, $strand) = @_;
+
+  my $minimise_alleles;
+
+  my @split_allele = split /\//, $allele_string;
+  my $ref_allele = shift @split_allele;
+
+  foreach my $alt_allele (@split_allele) {
+    my $vf = Bio::EnsEMBL::Variation::VariationFeature->new(
+        -start   => $start,
+        -end     => $end,
+        -strand  => $strand,
+        -allele_string => $ref_allele.'/'.$alt_allele,
+    );
+
+    my $minimise_vf = Bio::EnsEMBL::Variation::Utils::VEP->minimise_alleles([$vf]);
+    my $final_allele = $minimise_vf->[0]->{allele_string};
+
+    $minimise_alleles->{$final_allele} = $alt_allele;
+  }
+
+  return $minimise_alleles;
+}
+
+=head2 _minimise_allele_vcf
+
+  Example    : my $allele = $idt->_minimise_allele_vcf($vcf_string, $start, $end, $strand, $hash);
+  Description: Internal method used to minimise the VCF alleles for comparison.
+  Caller     : _get_all_results()
+  Status     : Stable
+
+=cut
+
+sub _minimise_allele_vcf {
+  my ($self, $vcf_string, $start, $end, $strand, $minimise_alleles_hash) = @_;
+
+  my @split_vcf = split /\-/, $vcf_string;
+  my $ref_allele_vcf = $split_vcf[2];
+  my $alt_allele_vcf = $split_vcf[-1];
+
+  my $vf = Bio::EnsEMBL::Variation::VariationFeature->new(
+      -start   => $start,
+      -end     => $end,
+      -strand  => $strand,
+      -allele_string => $ref_allele_vcf.'/'.$alt_allele_vcf,
+  );
+
+  my $minimise_vf = Bio::EnsEMBL::Variation::Utils::VEP->minimise_alleles([$vf]);
+  my $after_minimise_alleles = $minimise_vf->[0]->{allele_string};
+  my $final_alt_allele = $minimise_alleles_hash->{$after_minimise_alleles};
+
+  return $final_alt_allele;
 }
 
 1;
