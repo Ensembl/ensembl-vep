@@ -60,7 +60,6 @@ sub run {
 
   my $var_db_name = $self->has_var_db($dbc, $current_db_name);
   my $dbc_var;
-
   if($var_db_name){
     my $dba_var = Bio::EnsEMBL::Registry->get_DBAdaptor($species, 'variation');
     $dbc_var = $dba_var->dbc();
@@ -71,8 +70,10 @@ sub run {
 
   unless($skip_meta_checks) {
     my $metadata_dba = Bio::EnsEMBL::Registry->get_DBAdaptor( "multi", "metadata" );
-    my $meta_dbc = $meta_dba->dbc();
+    my $meta_dbc = $metadata_dba->dbc();
     my $meta_has_variations = $self->meta_has_variation($meta_dbc, $species, $version);
+  
+    die ('Expected variation database not found') if $meta_has_variations && !defined($dbc_var);
   }
 
   #Special case for otherfeatures
@@ -347,8 +348,7 @@ sub has_refseq {
 
 sub meta_has_variation {
   my ($self, $meta_dbc, $species_name, $ensembl_version) = @_;
-
-  my $sth = $dbc->prepare(qq{
+  my $sth = $meta_dbc->prepare(qq{
     select has_variations from genome 
     where organism_id in (select organism_id from organism where name = '$species_name') 
     and data_release_id in (select data_release_id from data_release where ensembl_version = $ensembl_version);  

@@ -253,6 +253,7 @@ sub pipeline_analyses {
       -module        => 'Bio::EnsEMBL::VEP::Pipeline::DumpVEP::InitDump',
       -parameters    => {
         group           => 'core',
+        skip_meta_checks => $self->o('skip_meta_checks'),
       },
       -rc_name       => 'default',
       -hive_capacity => 1,
@@ -267,6 +268,7 @@ sub pipeline_analyses {
       -module        => 'Bio::EnsEMBL::VEP::Pipeline::DumpVEP::InitDump',
       -parameters    => {
         group           => 'otherfeatures',
+        skip_meta_checks => $self->o('skip_meta_checks'),
       },
       -rc_name       => 'default',
       -hive_capacity => 1,
