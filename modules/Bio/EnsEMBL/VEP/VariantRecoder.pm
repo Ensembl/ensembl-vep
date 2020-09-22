@@ -273,14 +273,20 @@ sub _get_all_results {
       push @{$allele_consequence{$allele}}, $consequence;
     }
 
+    # Hash contains all consequences separated by allele
     $line_by_allele{'consequences'} = \%allele_consequence;
 
+    ##################
+    ### vcf_string ###
     # Parse vcf string and build a hash by allele
     my %vcf_string_by_allele;
     if($keys_no_allele{'vcf_string'}) {
-      # Minimise alleles
+      # Minimise alleles - the alleles from vcf_string need to be compared with the alleles from allele_string
+      # but we need to minimise both, otherwise we are comparing different things
+      # example: rs1160446270 -> allele string is CCCCCCC but in vcf_string allele is CCC "22-16251519-CC-CCC"
       my $minimise_alleles_hash = $self->_minimise_allele($line->{'allele_string'}, $line->{start}, $line->{end}, $line->{strand});
       # If there is more than one vcf_string then it's an array
+      # example: rs56116432 -> "9-133256042-C-T" and "CHR_HG2030_PATCH-133256189-C-T"
       if(ref($line->{'vcf_string'})) {
         foreach my $vcf_string (@{$line->{'vcf_string'}}) {
           my $alt_allele_vcf_2 = $self->_minimise_allele_vcf($vcf_string, $line->{start}, $line->{end}, $line->{strand}, $minimise_alleles_hash);
@@ -288,31 +294,38 @@ sub _get_all_results {
         }
       }
       else {
+        # It only contains one vcf_string
+        # minimise the alleles and check if it already exists (e.g. if it's the same as one of the alleles from allele_string)
         my $alt_allele_vcf = $self->_minimise_allele_vcf($line->{'vcf_string'}, $line->{start}, $line->{end}, $line->{strand}, $minimise_alleles_hash);
         $vcf_string_by_allele{$alt_allele_vcf}->{'vcf_string'} = $line->{'vcf_string'};
       }
     }
+    ### vcf_string ###
+    ##################
 
+    ##################
+    ####### ID #######
     # Parse ID and build a hash by allele
     # COSMIC and HGMD IDs don't have an allele - they are annexed to all alleles
     if($keys_no_allele{'id'}) {
-      my @ids_no_allele;
+      my @ids_no_allele; # stores the cosmic and hgms ids
       foreach my $co_var (@{$line->{'colocated_variants'}}) {
-        # Store the COSMIC and HGMD IDs (not linked to an allele) for later 
+        # Store the COSMIC and HGMD IDs (not linked to an allele) for later
         if($co_var->{'allele_string'} =~ /COSMIC|HGMD/) {
           push @ids_no_allele, $co_var->{'id'}; 
         }
         else {
           my @split_allele = split /\//, $co_var->{'allele_string'};
-          # delete ref allele
+          # delete ref allele - we only want to check the alt alleles from the colocated variants
           shift @split_allele;
           foreach my $allele (@split_allele) {
-            my $allele_rev = $allele;
-            reverse_comp(\$allele_rev);
             if($allele_consequence{$allele}) {
               push @{$vcf_string_by_allele{$allele}->{'id'}}, $co_var->{'id'};
             }
             else {
+              # If the allele is not stored then we need to check for the reverse
+              my $allele_rev = $allele;
+              reverse_comp(\$allele_rev);
               push @{$vcf_string_by_allele{$allele_rev}->{'id'}}, $co_var->{'id'};
             }
           }
@@ -327,6 +340,8 @@ sub _get_all_results {
         }
       }
     }
+    ####### ID #######
+    ##################
 
     merge_arrays($order, [$line_id]);
 
