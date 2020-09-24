@@ -289,14 +289,23 @@ sub _get_all_results {
       # example: rs56116432 -> "9-133256042-C-T" and "CHR_HG2030_PATCH-133256189-C-T"
       if(ref($line->{'vcf_string'})) {
         foreach my $vcf_string (@{$line->{'vcf_string'}}) {
-          my $alt_allele_vcf_2 = $self->_minimise_allele_vcf($vcf_string, $line->{start}, $line->{end}, $line->{strand}, $minimise_alleles_hash);
+          my $alt_allele_vcf_2 = $self->_minimise_allele_vcf($vcf_string, $line->{start}, $line->{end}, $line->{strand}, $minimise_alleles_hash, 0);
+          # If allele_string or vcf_string have reversed alleles then need to check the reverse for the comparison
+          # Example: allele_string is 'G/C' and vcf_string is '21-25891856-C-G', 'G/C' can't be compared with 'C/G'
+          if(!$alt_allele_vcf_2) {
+            $alt_allele_vcf_2 = $self->_minimise_allele_vcf($vcf_string, $line->{start}, $line->{end}, $line->{strand}, $minimise_alleles_hash, 1);
+          }
           $vcf_string_by_allele{$alt_allele_vcf_2}->{'vcf_string'} = $vcf_string;
         }
       }
       else {
         # It only contains one vcf_string
         # minimise the alleles and check if it already exists (e.g. if it's the same as one of the alleles from allele_string)
-        my $alt_allele_vcf = $self->_minimise_allele_vcf($line->{'vcf_string'}, $line->{start}, $line->{end}, $line->{strand}, $minimise_alleles_hash);
+        my $alt_allele_vcf = $self->_minimise_allele_vcf($line->{'vcf_string'}, $line->{start}, $line->{end}, $line->{strand}, $minimise_alleles_hash, 0);
+        # Same as above - reverse alleles
+        if(!$alt_allele_vcf) {
+          $alt_allele_vcf = $self->_minimise_allele_vcf($line->{'vcf_string'}, $line->{start}, $line->{end}, $line->{strand}, $minimise_alleles_hash, 1);
+        }
         $vcf_string_by_allele{$alt_allele_vcf}->{'vcf_string'} = $line->{'vcf_string'};
       }
     }
@@ -403,11 +412,13 @@ sub _minimise_allele {
 =cut
 
 sub _minimise_allele_vcf {
-  my ($self, $vcf_string, $start, $end, $strand, $minimise_alleles_hash) = @_;
+  my ($self, $vcf_string, $start, $end, $strand, $minimise_alleles_hash, $reverse) = @_;
 
   my @split_vcf = split /\-/, $vcf_string;
-  my $ref_allele_vcf = $split_vcf[2];
-  my $alt_allele_vcf = $split_vcf[-1];
+  # Example: allele_string is 'G/C' and vcf_string is '21-25891856-C-G', 'G/C' can't be compared with 'C/G'
+  # If reverse = 1 then the new vcf_string is 'G/C' which can be compared with allele_string 'G/C'
+  my $ref_allele_vcf = $reverse == 0 ? $split_vcf[2] : $split_vcf[-1];
+  my $alt_allele_vcf = $reverse == 0 ? $split_vcf[-1] : $split_vcf[2];
 
   my $vf = Bio::EnsEMBL::Variation::VariationFeature->new(
       -start   => $start,
