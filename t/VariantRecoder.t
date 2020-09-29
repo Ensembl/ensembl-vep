@@ -178,16 +178,6 @@ SKIP: {
   );
   $vr->param('fields', $bak);
 
-# Tests need to be allele specific
-#  $vr->param('input_file', $test_cfg->{vr_vcf});
-#  my $results = $vr->recode_all();
-
-#  is_deeply(
-#    [map {$_->{T}->{hgvsg}->[0]} @$results],
-#    ['21:g.25585733C>T', '21:g.25587701T>C', '21:g.25587758G>A'],
-#    'recode_all'
-#  );
-
   # Test output VCF format
   my $vr_2 = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', fields => 'spdi,vcf_string'});
   is_deeply(
