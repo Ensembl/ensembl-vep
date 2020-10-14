@@ -186,7 +186,7 @@ sub new {
     biotype
     mane
     mane_select
-    mane_plus
+    mane_plus_clinical
     tsl
     appris
     transcript_version
@@ -1443,9 +1443,9 @@ sub BaseTranscriptVariationAllele_to_output_hash {
     }
   }
 
-  if($self->{mane_plus} && (my ($mane) = grep {$_->code eq 'MANE_Plus'} @attribs)) {
+  if($self->{mane_plus_clinical} && (my ($mane) = grep {$_->code eq 'MANE_Plus_Clinical'} @attribs)) {
     if(my $mane_value = $mane->value) {
-      $hash->{MANE_PLUS} = $mane_value;
+      $hash->{MANE_PLUS_CLINICAL} = $mane_value;
     }
   }
   

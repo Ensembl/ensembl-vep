@@ -354,7 +354,7 @@ our @OPTION_SETS = (
     flags => ['mane'],
     set   => {
       mane_select => 1,
-      mane_plus => 1,
+      mane_plus_clinical => 1,
     }
   },
 
