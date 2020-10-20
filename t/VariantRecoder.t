@@ -199,6 +199,26 @@ SKIP: {
     'recode - output vcf_string' 
   );
 
+  my $vr_3 = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', fields => 'spdi,vcf_string'});
+  is_deeply(
+    $vr_3->recode("ENST00000352957:c.971_973del"),
+    [
+      {
+      "-" =>
+        {
+          "input" => "ENST00000352957:c.971_973del",
+          "vcf_string" => [
+             "21-25585750-GTTA-G"
+          ],
+          "spdi" => [
+             "21:25585750:TTA:"
+          ]
+        }
+      }
+    ],
+    'recode - input HGVS and output vcf_string'
+  );
+
 };
 
 done_testing();
