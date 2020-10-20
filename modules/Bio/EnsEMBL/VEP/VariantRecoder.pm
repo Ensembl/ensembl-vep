@@ -352,15 +352,12 @@ sub _get_all_results {
               # If the allele is not stored then we need to check for the reverse
               my $allele_rev = $allele;
               reverse_comp(\$allele_rev);
+              # We also check the minimised allele
+              my $minimise_co_allele = $self->_minimise_allele($co_var->{'allele_string'}, $line->{start}, $line->{end}, $line->{strand}, 0);
+              $minimise_co_allele =~ s/.*\///;
+              my $xxx = $allele_consequence{$allele_rev} ? $allele_rev : $minimise_co_allele;
 
-              if($vcf_string_by_allele{$allele_rev}) {
-                push @{$vcf_string_by_allele{$allele_rev}->{'id'}}, $co_var->{'id'};
-              }
-              else {
-                my $minimise_co_allele = $self->_minimise_allele($co_var->{'allele_string'}, $line->{start}, $line->{end}, $line->{strand}, 0);
-                $minimise_co_allele =~ s/.*\///;
-                push @{$vcf_string_by_allele{$minimise_co_allele}->{'id'}}, $co_var->{'id'};
-              }
+              push @{$vcf_string_by_allele{$xxx}->{'id'}}, $co_var->{'id'};
             }
           }
         }
