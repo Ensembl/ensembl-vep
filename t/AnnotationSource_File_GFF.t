@@ -231,6 +231,71 @@ SKIP: {
   is(scalar (grep {defined($_)} map {$as->lazy_load_transcript($_)} @{$as->_create_transcripts($records)}), 3, 'overlapping exons skips transcript');
   ok($tmp =~ /Failed to add exon to transcript/, 'overlapping exons warning message');
 
+  # missing exons for protein_coding transcript
+  my %feature_record = (
+     '_children' => [
+         { '_parent_id' => [ 'parent_gene_id.1' ],
+           'attributes' => { 'Parent' => 'parent_gene_id.1' },
+           'chr' => '21',
+           'end' => 36705932,
+           'phase' => 0,
+           'source' => 'test',
+           'start' => 36705821,
+           'strand' => '-1',
+           'type' => 'CDS',
+        },
+        {  '_parent_id' => [ 'parent_gene_id.1' ],
+           'attributes' =>  { 'Parent' => 'parent_gene_id.1'},
+           'chr' => '21',
+           'end' => 36705714,
+           'phase' => 2,
+           'source' => 'test',
+           'start' => 36705179,
+           'strand' => '-1',
+           'type' => 'CDS',
+        } ],
+     '_gene_record' => {
+        '_parent_id' => [],
+        'attributes' => {
+           'ID' => 'parent_gene_id',
+         },
+        'chr' => '21',
+        'end' => 36705932,
+        'phase' => undef,
+        'source' => 'test',
+        'start' => 36705179,
+        'strand' => '-1',
+        'type' => 'gene',
+      },
+     '_id' => 'parent_gene_id.1',
+     '_parent_id' => [ 'parent_gene_id' ],
+     'attributes' => {
+        'ID' => 'parent_gene_id.1',
+        'Parent' => 'parent_gene_id',
+      },
+     'chr' => '21',
+     'end' => 36705932,
+     'phase' => undef,
+     'source' => 'test',
+     'start' => 36705179,
+     'strand' => '-1',
+     'type' => 'mRNA',
+  );
+  my %gene_record = (
+   '_id' => 'parent_gene_id',
+   '_parent_id' => [],
+   'attributes' => { 'ID' => 'parent_gene_id', },
+   'chr' => '21',
+   'end' => 36705932,
+   'source' => 'test',
+   'phase' => undef,
+   'start' => 36705179,
+   'strand' => '-1',
+   'type' => 'gene',
+  );
+  my $trans = $as->lazy_load_transcript(\%feature_record, \%gene_record);
+  ok($tmp =~ /No exons found for protein_coding transcript/, 'no exons warning message');
+
   # restore STDERR
   open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
