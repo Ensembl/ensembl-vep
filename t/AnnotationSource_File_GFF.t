@@ -281,19 +281,7 @@ SKIP: {
      'strand' => '-1',
      'type' => 'mRNA',
   );
-  my %gene_record = (
-   '_id' => 'parent_gene_id',
-   '_parent_id' => [],
-   'attributes' => { 'ID' => 'parent_gene_id', },
-   'chr' => '21',
-   'end' => 36705932,
-   'source' => 'test',
-   'phase' => undef,
-   'start' => 36705179,
-   'strand' => '-1',
-   'type' => 'gene',
-  );
-  my $trans = $as->lazy_load_transcript(\%feature_record, \%gene_record);
+  my $trans = $as->lazy_load_transcript(\%feature_record, $feature_record{_gene_record});
   ok($tmp =~ /No exons found for protein_coding transcript/, 'no exons warning message');
 
   # restore STDERR
