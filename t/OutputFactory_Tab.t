@@ -272,6 +272,21 @@ is(
   'get_all_lines_by_InputBuffer - configure fields'
 );
 
+#show REF_ALLELE via fields
+$ib = get_annotated_buffer({
+  input_file => $test_cfg->{test_vcf},
+  dir => $test_cfg->{cache_root_dir},
+  fields => 'REF_ALLELE'
+});
+$of = Bio::EnsEMBL::VEP::OutputFactory::Tab->new({config => $ib->config});
+@lines = @{$of->get_all_lines_by_InputBuffer($ib)};
+
+is(
+  $lines[0],
+  "C",
+  'get_all_lines_by_InputBuffer - REF_ALLELE configure fields'
+);
+
 done_testing();
 
 sub get_annotated_buffer {
