@@ -1375,7 +1375,8 @@ sub BaseTranscriptVariationAllele_to_output_hash {
   }
 
   # gene symbol
-  if($self->{symbol}) {
+  my $in_fields = defined($self->{_config}->{_params}->{fields}) ? grep(/SYMBOL/, @{$self->{_config}->{_params}->{fields}}) : 0 ;
+  if($self->{symbol} || $in_fields) {
     my $symbol  = $tr->{_gene_symbol} || $tr->{_gene_hgnc};
     my $source  = $tr->{_gene_symbol_source};
     my $hgnc_id = $tr->{_gene_hgnc_id} if defined($tr->{_gene_hgnc_id});
