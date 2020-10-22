@@ -1249,7 +1249,8 @@ sub VariationFeatureOverlapAllele_to_output_hash {
   $hash->{ALLELE_NUM} = $vfoa->allele_number if $self->{allele_number};
 
   # reference allele
-  $hash->{REF_ALLELE} = $vf->ref_allele_string if $self->{show_ref_allele};
+  my $in_fields = defined($self->{_config}->{_params}->{fields}) ? grep(/REF_ALLELE/, @{$self->{_config}->{_params}->{fields}}) : 0 ;
+  $hash->{REF_ALLELE} = $vf->ref_allele_string if $self->{show_ref_allele} || $in_fields;
 
   # picked?
   $hash->{PICK} = 1 if defined($vfoa->{PICK});
