@@ -1249,7 +1249,11 @@ sub VariationFeatureOverlapAllele_to_output_hash {
   $hash->{ALLELE_NUM} = $vfoa->allele_number if $self->{allele_number};
 
   # reference allele
-  my $in_fields = defined($self->{_config}->{_params}->{fields}) ? grep(/REF_ALLELE/, @{$self->{_config}->{_params}->{fields}}) : 0 ;
+  my $in_fields = 0;
+  $DB::single=1;
+  if ($self->{output_format} eq 'tab' || $self->{output_format} eq 'vcf'){
+    $in_fields = defined($self->{_config}->{_params}->{fields}) ? grep(/REF_ALLELE/, @{$self->{_config}->{_params}->{fields}}) : 0 ;
+  }
   $hash->{REF_ALLELE} = $vf->ref_allele_string if $self->{show_ref_allele} || $in_fields;
 
   # picked?
@@ -1375,7 +1379,10 @@ sub BaseTranscriptVariationAllele_to_output_hash {
   }
 
   # gene symbol
-  my $in_fields = defined($self->{_config}->{_params}->{fields}) ? grep(/SYMBOL/, @{$self->{_config}->{_params}->{fields}}) : 0 ;
+  my $in_fields = 0;
+  if ($self->{output_format} eq 'tab' || $self->{output_format} eq 'vcf'){
+    $in_fields = defined($self->{_config}->{_params}->{fields}) ? grep(/SYMBOL/, @{$self->{_config}->{_params}->{fields}}) : 0 ;
+  }
   if($self->{symbol} || $in_fields) {
     my $symbol  = $tr->{_gene_symbol} || $tr->{_gene_hgnc};
     my $source  = $tr->{_gene_symbol_source};
