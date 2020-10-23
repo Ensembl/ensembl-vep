@@ -1250,7 +1250,6 @@ sub VariationFeatureOverlapAllele_to_output_hash {
 
   # reference allele
   my $in_fields = 0;
-  $DB::single=1;
   if ($self->{output_format} eq 'tab' || $self->{output_format} eq 'vcf'){
     $in_fields = defined($self->{_config}->{_params}->{fields}) ? grep(/REF_ALLELE/, @{$self->{_config}->{_params}->{fields}}) : 0 ;
   }
