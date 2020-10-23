@@ -272,11 +272,12 @@ is(
   'get_all_lines_by_InputBuffer - configure fields'
 );
 
-#show REF_ALLELE via fields
+#show REF_ALLELE,SYMBOL via fields
 $ib = get_annotated_buffer({
   input_file => $test_cfg->{test_vcf},
   dir => $test_cfg->{cache_root_dir},
-  fields => 'REF_ALLELE,SYMBOL'
+  fields => 'REF_ALLELE,SYMBOL',
+  output_format =>'tab'
 });
 $of = Bio::EnsEMBL::VEP::OutputFactory::Tab->new({config => $ib->config});
 @lines = @{$of->get_all_lines_by_InputBuffer($ib)};
