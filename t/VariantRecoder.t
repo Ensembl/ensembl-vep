@@ -46,7 +46,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg && !$@;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 19 unless $can_use_db;
+  skip 'No local database configured', 22 unless $can_use_db;
 
   my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens') if $can_use_db;
   
@@ -197,6 +197,75 @@ SKIP: {
       }
     ],
     'recode - output vcf_string' 
+  );
+
+  my $vr_3 = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', fields => 'spdi,vcf_string'});
+  is_deeply(
+    $vr_3->recode("ENST00000352957:c.971_973del"),
+    [
+      {
+      "-" =>
+        {
+          "input" => "ENST00000352957:c.971_973del",
+          "vcf_string" => [
+             "21-25585750-GTTA-G"
+          ],
+          "spdi" => [
+             "21:25585750:TTA:"
+          ]
+        }
+      }
+    ],
+    'recode - input HGVS and output vcf_string'
+  );
+
+  my $vr_4 = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', fields => 'spdi,vcf_string,id,hgvsg'});
+  is_deeply(
+    $vr_4->recode("rs1444184259"),
+    [
+      {
+      "CCCCCCC" =>
+        {
+          "input" => "rs1444184259",
+          "vcf_string" => [
+             "21-25639356-C-CC"
+          ],
+          "spdi" => [
+             "21:25639355:CCCCCC:CCCCCCC"
+          ],
+          "id" => [
+             "rs1444184259"
+          ],
+          "hgvsg" => [
+             "21:g.25639361_25639362insC"
+          ]
+        }
+      }
+    ],
+    'recode - insertion'
+  );
+
+  my $vr_5 = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', fields => 'spdi,vcf_string,hgvsg'});
+  is_deeply(
+    $vr_5->recode("21:g.25639361_25639362insC"),
+    [
+      {
+      "C" =>
+        {
+          "input" => "21:g.25639361_25639362insC",
+          "vcf_string" => [
+             "21-25639361-C-CC"
+          ],
+          "spdi" => [
+             "21:25639361::C"
+          ],
+          "hgvsg" => [
+             "21:g.25639361dup"
+          ]
+        }
+      }
+    ],
+    'recode - input HGVS genomic insertion'
   );
 
 };

@@ -130,3 +130,4 @@
 5486864	131543	25712374	25712374	1	5808681	A/C	A	rs9976382	1	\N	1	missense_variant,non_coding_transcript_variant,non_coding_transcript_exon_variant,NMD_transcript_variant,3_prime_UTR_variant,downstream_gene_variant	2,6,9,11,14,15,17,18,19,20,21,22,40,42,48,49,50,51,52,53,54,55,56	2	0	C	0.0189696	95	1	\N	367,368,369,370,372,421	1
 5491725	131543	25749077	25749077	1	5813543	A/G	A	rs9981487	1	\N	1	synonymous_variant,non_coding_transcript_variant,non_coding_transcript_exon_variant	42,43,50,51,52,53,54,55,56	2	0	G	0.00559105	28	1	\N	367,368,370,372,421	1
 5492919	131543	25698693	25698693	1	5814737	A/G	A	rs9982750	1	\N	1	synonymous_variant,NMD_transcript_variant,upstream_gene_variant	2,14,42,48,49,50,51,52,53,54,55,56	2	0	G	0.0223642	112	1	\N	367,368,370,372,421	1
+5492920	131543	25639356	25639361	1	5814738	CCCCCC/CCCCCCC	CCCCCC	rs1444184259	1	\N	1	5_prime_UTR_variant,regulatory_region_variant	\N	14	0	\N	0	0	0	\N	367,368,370,372,421	1
