@@ -32,7 +32,7 @@ SKIP: {
   no warnings 'once';
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'Bio::DB::HTS::Tabix module not available', 44 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+  skip 'Bio::DB::HTS::Tabix module not available', 51 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
 
   ## BASIC TESTS
   ##############
@@ -426,6 +426,7 @@ SKIP: {
   close IN;
   unlink($test_cfg->{user_file}.'.out');
   unlink($test_cfg->{user_file}.'.out_warnings.txt');
+  is(scalar (grep {/SEQ_21/} @tmp_lines), 1, 'dont_skip variants which are not in GFF file');
 }
 
 done_testing();
