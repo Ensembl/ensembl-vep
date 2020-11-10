@@ -19,7 +19,7 @@ use Test::More;
 use Test::Exception;
 use FindBin qw($Bin);
 use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
-
+use Data::Dumper;
 use lib $Bin;
 use VEPTestingConfig;
 my $test_cfg = VEPTestingConfig->new();
@@ -406,6 +406,26 @@ SKIP: {
   $ib->finish_annotation();
 
   is($ib->buffer->[0]->display_consequence, 'missense_variant', 'annotate_InputBuffer - display_consequence');
+
+  my $in = qq{21\t25585733\trs142513484\tC\tT\t.\t.\t.
+  SEQ_21\t25587758\trs116645811\tG\tA\t.\t.\t.};
+
+  $runner = Bio::EnsEMBL::VEP::Runner->new({
+    %{$test_cfg->base_testing_cfg},
+    input_data => $in,
+    output_file => $test_cfg->{user_file}.'.out',
+    gff => $test_cfg->{custom_gff},
+    no_stats => 1,
+    dont_skip => 1,
+    quiet => 1,
+  });
+
+  $runner->run;
+  open IN, $test_cfg->{user_file}.'.out';
+  my @tmp_lines = <IN>;
+  close IN;
+  unlink($test_cfg->{user_file}.'.out');
+  unlink($test_cfg->{user_file}.'.out_warnings.txt');
 }
 
 done_testing();
