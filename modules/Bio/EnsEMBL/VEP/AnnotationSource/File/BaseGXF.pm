@@ -505,6 +505,12 @@ sub _create_transcript {
     }
   }
 
+  # check for exons for protein_coding biotype
+  if ($biotype eq 'protein_coding' && scalar @exons == 0){
+    $self->warning_msg("WARNING: No exons found for protein_coding transcript $id");
+    return;
+  }
+
   # sort exons
   if($tr_record->{strand} > 0) {
     @exons = sort {$a->{start} <=> $b->{start}} @exons;
