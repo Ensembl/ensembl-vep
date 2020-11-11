@@ -19,7 +19,6 @@ use Test::More;
 use Test::Exception;
 use FindBin qw($Bin);
 use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
-use Data::Dumper;
 use lib $Bin;
 use VEPTestingConfig;
 my $test_cfg = VEPTestingConfig->new();
@@ -406,7 +405,8 @@ SKIP: {
   $ib->finish_annotation();
 
   is($ib->buffer->[0]->display_consequence, 'missense_variant', 'annotate_InputBuffer - display_consequence');
-  # dont_skip test
+  # dont_skip test Check that variants that are on seq_regions which are not part of the GFF file are still
+  # included in the output if --dont_skip is used
   my $in = qq{21\t25585733\trs142513484\tC\tT\t.\t.\t.
   SEQ_21\t25587758\trs116645811\tG\tA\t.\t.\t.};
 
