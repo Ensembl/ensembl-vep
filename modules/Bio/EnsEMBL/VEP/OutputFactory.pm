@@ -1437,7 +1437,7 @@ sub BaseTranscriptVariationAllele_to_output_hash {
 
   # gene phenotype
   $hash->{GENE_PHENO} = 1 if $self->{gene_phenotype} && $tr->{_gene_phenotype};
-  if($self->{mane_select} && (my ($mane) = grep {$_->code eq 'MANE_Select'} @attribs)) {
+  if($self->{mane} && (my ($mane) = grep {$_->code eq 'MANE_Select'} @attribs)) {
     if(my $mane_value = $mane->value) {
       $hash->{MANE_SELECT} = $mane_value;
     }

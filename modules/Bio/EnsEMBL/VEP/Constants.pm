@@ -52,7 +52,7 @@ use warnings;
 
 use base qw(Exporter);
 
-our $VEP_VERSION     = 102;
+our $VEP_VERSION     = 103;
 our $VEP_SUB_VERSION = 0;
 
 our @EXPORT_OK = qw(
@@ -82,7 +82,7 @@ our @FLAG_FIELDS = (
   { flag => 'biotype',         fields => ['BIOTYPE'] },
   { flag => 'canonical',       fields => ['CANONICAL'] },
   { flag => 'mane_select',     fields => ['MANE_SELECT']},
-  { flag => 'mane_plus_clinical', fields => ['MANE_PLUS_CLINICAL']},
+  { flag => 'mane',            fields => ['MANE']},
   { flag => 'tsl',             fields => ['TSL']},
   { flag => 'appris',          fields => ['APPRIS']},
   { flag => 'ccds',            fields => ['CCDS'] },
@@ -153,6 +153,7 @@ our %FIELD_DESCRIPTIONS = (
   'CANONICAL'          => 'Indicates if transcript is canonical for this gene',
   'MANE_SELECT'        => 'MANE Select (Matched Annotation by NCBI and EMBL-EBI) Transcript',
   'MANE_PLUS_CLINICAL' => 'MANE Plus Clinical (Matched Annotation by NCBI and EMBL-EBI) Transcript',
+  'MANE'               => 'MANE (Matched Annotation by NCBI and EMBL-EBI) Transcript',
   'TSL'                => 'Transcript support level',
   'APPRIS'             => 'Annotates alternatively spliced transcripts as primary or alternate based on a range of computational methods',
   'CCDS'               => 'Indicates if transcript is a CCDS transcript',

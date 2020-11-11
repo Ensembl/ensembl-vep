@@ -158,7 +158,7 @@ SKIP: {
   is(ref($features->[0]), 'HASH', 'get_all_features_by_InputBuffer ref 2');
   is(ref($features->[-1]), 'HASH', 'get_all_features_by_InputBuffer ref 3');
   is($features->[0]->{variation_name}, 'rs142513484', 'get_all_features_by_InputBuffer variation_name');
-  is(scalar @$features, 132, 'get_all_features_by_InputBuffer count');
+  is(scalar @$features, 133, 'get_all_features_by_InputBuffer count');
 
   # do it again to get them from memory
   $features = $as->get_all_features_by_InputBuffer($ib);

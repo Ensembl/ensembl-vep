@@ -46,7 +46,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg && !$@;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 19 unless $can_use_db;
+  skip 'No local database configured', 22 unless $can_use_db;
 
   my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens') if $can_use_db;
   
@@ -69,17 +69,16 @@ SKIP: {
   throws_ok {$vr->recode()} qr/No input data/, 'recode - no input';
 
   foreach my $input(qw(
-    rs142513484
-    21:g.25585733C>T
     ENST00000352957.8:c.991G>A
     NM_017446.3:c.991G>A
     ENSP00000284967.6:p.Ala331Thr
     NP_059142.2:p.Ala331Thr
-    21:25585732:C:T
   )) {
     is_deeply(
       $vr->recode($input),
       [
+        {
+        "A" =>
         {
           "hgvsp" => [
              "ENSP00000284967.6:p.Ala331Thr",
@@ -104,13 +103,54 @@ SKIP: {
              "21:25585732:C:T"
           ]
         }
+        }
+      ],
+      'recode - '.$input
+    );
+  }
+
+  foreach my $input(qw(
+    rs142513484
+    21:g.25585733C>T
+    21:25585732:C:T
+  )) {
+    is_deeply(
+      $vr->recode($input),
+      [
+        {
+        "T" =>
+        {
+          "hgvsp" => [
+             "ENSP00000284967.6:p.Ala331Thr",
+             "NP_059142.2:p.Ala331Thr",
+             "XP_011527953.1:p.Ala289Thr"
+          ],
+          "hgvsc" => [
+             "ENST00000307301.11:c.*18G>A",
+             "ENST00000352957.8:c.991G>A",
+             "NM_017446.3:c.991G>A",
+             "NM_080794.3:c.*18G>A",
+             "XM_011529651.1:c.865G>A"
+          ],
+          "input" => $input,
+          "id" => [
+             "rs142513484"
+          ],
+          "hgvsg" => [
+             "21:g.25585733C>T"
+          ],
+          "spdi" => [
+             "21:25585732:C:T"
+          ]
+        }
+        }
       ],
       'recode - '.$input
     );
   }
 
   is_deeply(
-    [map {@{$_->{hgvsg}}} @{$vr->recode("JAM2:c.721A>T")}],
+    [map {@{$_->{T}->{hgvsg}}} @{$vr->recode("JAM2:c.721A>T")}],
     [
        "21:g.25706002A>T",
        "21:g.25709954A>T",
@@ -125,24 +165,18 @@ SKIP: {
     $vr->recode("rs142513484"),
     [
       {
-        "input" => "rs142513484",
-        "hgvsg" => [
-           "21:g.25585733C>T"
-        ]
+      "T" =>
+        {
+          "input" => "rs142513484",
+          "hgvsg" => [
+             "21:g.25585733C>T"
+          ]
+        }
       }
     ],
     'recode - limit fields'
   );
   $vr->param('fields', $bak);
-
-  $vr->param('input_file', $test_cfg->{vr_vcf});
-  my $results = $vr->recode_all();
-
-  is_deeply(
-    [map {$_->{hgvsg}->[0]} @$results],
-    ['21:g.25585733C>T', '21:g.25587701T>C', '21:g.25587758G>A'],
-    'recode_all'
-  );
 
   # Test output VCF format
   my $vr_2 = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', fields => 'spdi,vcf_string'});
@@ -150,16 +184,88 @@ SKIP: {
     $vr_2->recode("rs142513484"),
     [
       {
-        "input" => "rs142513484",
-        "vcf_string" => [
-           "21-25585733-C-T"
-        ],
-        "spdi" => [
-           "21:25585732:C:T"
-        ]
+      "T" =>
+        {
+          "input" => "rs142513484",
+          "vcf_string" => [
+             "21-25585733-C-T"
+          ],
+          "spdi" => [
+             "21:25585732:C:T"
+          ]
+        }
       }
     ],
     'recode - output vcf_string' 
+  );
+
+  my $vr_3 = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', fields => 'spdi,vcf_string'});
+  is_deeply(
+    $vr_3->recode("ENST00000352957:c.971_973del"),
+    [
+      {
+      "-" =>
+        {
+          "input" => "ENST00000352957:c.971_973del",
+          "vcf_string" => [
+             "21-25585750-GTTA-G"
+          ],
+          "spdi" => [
+             "21:25585750:TTA:"
+          ]
+        }
+      }
+    ],
+    'recode - input HGVS and output vcf_string'
+  );
+
+  my $vr_4 = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', fields => 'spdi,vcf_string,id,hgvsg'});
+  is_deeply(
+    $vr_4->recode("rs1444184259"),
+    [
+      {
+      "CCCCCCC" =>
+        {
+          "input" => "rs1444184259",
+          "vcf_string" => [
+             "21-25639356-C-CC"
+          ],
+          "spdi" => [
+             "21:25639355:CCCCCC:CCCCCCC"
+          ],
+          "id" => [
+             "rs1444184259"
+          ],
+          "hgvsg" => [
+             "21:g.25639361_25639362insC"
+          ]
+        }
+      }
+    ],
+    'recode - insertion'
+  );
+
+  my $vr_5 = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', fields => 'spdi,vcf_string,hgvsg'});
+  is_deeply(
+    $vr_5->recode("21:g.25639361_25639362insC"),
+    [
+      {
+      "C" =>
+        {
+          "input" => "21:g.25639361_25639362insC",
+          "vcf_string" => [
+             "21-25639361-C-CC"
+          ],
+          "spdi" => [
+             "21:25639361::C"
+          ],
+          "hgvsg" => [
+             "21:g.25639361dup"
+          ]
+        }
+      }
+    ],
+    'recode - input HGVS genomic insertion'
   );
 
 };
