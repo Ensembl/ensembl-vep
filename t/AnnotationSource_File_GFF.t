@@ -32,7 +32,7 @@ SKIP: {
   no warnings 'once';
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'Bio::DB::HTS::Tabix module not available', 51 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+  skip 'Bio::DB::HTS::Tabix module not available', 52 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
 
   ## BASIC TESTS
   ##############
@@ -406,7 +406,7 @@ SKIP: {
   $ib->finish_annotation();
 
   is($ib->buffer->[0]->display_consequence, 'missense_variant', 'annotate_InputBuffer - display_consequence');
-
+  # dont_skip test
   my $in = qq{21\t25585733\trs142513484\tC\tT\t.\t.\t.
   SEQ_21\t25587758\trs116645811\tG\tA\t.\t.\t.};
 
