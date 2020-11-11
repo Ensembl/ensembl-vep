@@ -126,7 +126,6 @@ GetOptions(
   'canonical',               # indicates if transcript is canonical
   'mane',                    # output mane transcript value
   'mane_select',             # output mane select transcript value
-  'mane_plus_clinical',      # output mane plus clinical transcript value
   'tsl',                     # output transcript support level
   'appris',                  # output APPRIS transcript annotation
   'ccds',                    # output CCDS identifer
