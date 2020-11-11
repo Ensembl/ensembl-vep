@@ -208,8 +208,11 @@ sub _get_records_by_coords {
   my ($self, $c, $s, $e, $no_rescan) = @_;
 
   my $parser = $self->parser();
-  $parser->seek($c, $s - 1, $e + 1);
-  $parser->next();
+  if ($parser->seek($c, $s - 1, $e + 1)) {
+    $parser->next();
+  } else {
+    return;
+  }
 
   my $include = $self->include_feature_types;
 
