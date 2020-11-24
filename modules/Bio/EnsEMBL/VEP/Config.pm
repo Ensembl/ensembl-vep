@@ -349,7 +349,13 @@ our @OPTION_SETS = (
       bam_edited => 1,
     }
   },
-
+  {
+    flags => ['mane'],
+    set   => {
+      mane_select => 1,
+      mane_plus_clinical => 1,
+    }
+  },
   {
     flags => ['use_given_ref'],
     set   => {

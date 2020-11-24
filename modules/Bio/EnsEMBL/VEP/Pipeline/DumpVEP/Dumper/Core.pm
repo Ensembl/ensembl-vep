@@ -196,7 +196,8 @@ sub clean_transcript {
       enst_refseq_compare
       _rna_edit
       MANE_Select
-    );
+      MANE_Plus_Clinical 
+   );
 
     foreach my $att(@{$tr->{attributes}}) {
       delete $att->{description};
