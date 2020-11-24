@@ -200,6 +200,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'hgvsp' => undef,
   'hgvsg' => undef,
   'hgvsg_use_accession' => undef,
+  'remove_hgvsp_version' => undef,
   'spdi' => undef,
   'merged' => undef,
   'af_1kg' => undef,
