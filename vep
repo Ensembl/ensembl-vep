@@ -104,6 +104,8 @@ GetOptions(
   'clin_sig_allele=i',       # use allele specific clinical significance data where it exists
   'overlaps',                # report length and percent of a transcript or regulatory feature overlaped with a SV
   'max_sv_size=i',           # modify the size of structural variant to be handled (limited by default to reduce memory requirements)
+  'remove_hgvsp_version',    # removes translation version from hgvs_protein output 
+
 
   # verbosity options
   'verbose|v',               # print out a bit more info while running
