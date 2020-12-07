@@ -208,6 +208,7 @@ sub new {
     cell_type
     shift_3prime
     shift_genomic
+    remove_hgvsp_version
   )]);
 
   my $hashref = $_[0];
@@ -1591,6 +1592,7 @@ sub TranscriptVariationAllele_to_output_hash {
     }
 
     if($self->{hgvsp}) {
+      $vfoa->{remove_hgvsp_version} = 1 if $self->{remove_hgvsp_version};
       my $hgvs_p = $vfoa->hgvs_protein;
       my $offset = $vfoa->hgvs_offset;
 
