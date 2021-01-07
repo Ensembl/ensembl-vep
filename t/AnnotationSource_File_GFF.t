@@ -32,7 +32,7 @@ SKIP: {
   no warnings 'once';
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'Bio::DB::HTS::Tabix module not available', 44 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+  skip 'Bio::DB::HTS::Tabix module not available', 52 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
 
   ## BASIC TESTS
   ##############
@@ -459,6 +459,28 @@ SKIP: {
   $ib->finish_annotation();
 
   is($ib->buffer->[0]->display_consequence, 'missense_variant', 'annotate_InputBuffer - display_consequence');
+  # dont_skip test Check that variants that are on seq_regions which are not part of the GFF file are still
+  # included in the output if --dont_skip is used
+  my $in = qq{21\t25585733\trs142513484\tC\tT\t.\t.\t.
+  SEQ_21\t25587758\trs116645811\tG\tA\t.\t.\t.};
+
+  $runner = Bio::EnsEMBL::VEP::Runner->new({
+  %{$test_cfg->base_testing_cfg},
+  input_data => $in,
+  output_file => $test_cfg->{user_file}.'.out',
+  gff => $test_cfg->{custom_gff},
+  no_stats => 1,
+  dont_skip => 1,
+  quiet => 1,
+  });
+
+  $runner->run;
+  open IN, $test_cfg->{user_file}.'.out';
+  my @tmp_lines = <IN>;
+  close IN;
+  unlink($test_cfg->{user_file}.'.out');
+  unlink($test_cfg->{user_file}.'.out_warnings.txt');
+  is(scalar (grep {/SEQ_21/} @tmp_lines), 1, 'dont_skip variants which are not in GFF file');
 }
 
 done_testing();
