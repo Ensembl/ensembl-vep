@@ -156,6 +156,9 @@ SKIP: {
           'start' => 25585733,
           'strand' => 1,
           'allele_string' => 'C/T',
+	  'var_synonyms' => {
+	    'ClinVar' => ['TEST']
+	  },
           'pubmed' => [10, 20, 30],
           'clin_sig' => ["pathogenic", "benign"],
         }
@@ -288,6 +291,9 @@ SKIP: {
           'start' => 25585733,
           'strand' => 1,
           'allele_string' => 'C/T',
+          'var_synonyms' => {
+            'ClinVar' => ['TEST']
+          },
         }
       ],
       'assembly_name' => 'GRCh38',
@@ -382,7 +388,7 @@ SKIP: {
       'id' => 'rs142513484',
       'allele_string' => 'C/T',
       'most_severe_consequence' => 'missense_variant',
-      'start' => 25585733
+      'start' => 25585733,
     },
     'get_all_lines_by_InputBuffer - everything'
   );
