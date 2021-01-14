@@ -93,6 +93,9 @@ sub default_options {
     # include LRGs in dumps
     lrg => 1,
 
+    # don't check metadata db for status of variation data
+    skip_meta_checks => 0,
+
     # don't change this unless you know what you're doing!!!
     region_size => 1e6,
     
@@ -250,6 +253,7 @@ sub pipeline_analyses {
       -module        => 'Bio::EnsEMBL::VEP::Pipeline::DumpVEP::InitDump',
       -parameters    => {
         group           => 'core',
+        skip_meta_checks => $self->o('skip_meta_checks'),
       },
       -rc_name       => 'default',
       -hive_capacity => 1,
@@ -264,6 +268,7 @@ sub pipeline_analyses {
       -module        => 'Bio::EnsEMBL::VEP::Pipeline::DumpVEP::InitDump',
       -parameters    => {
         group           => 'otherfeatures',
+        skip_meta_checks => $self->o('skip_meta_checks'),
       },
       -rc_name       => 'default',
       -hive_capacity => 1,
