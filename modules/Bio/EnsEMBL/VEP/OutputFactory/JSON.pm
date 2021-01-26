@@ -121,6 +121,7 @@ my %NUMBERIFY_EXEMPT = (
 my @LIST_FIELDS = qw(
   clin_sig
   pubmed
+  var_synonyms
 );
 
 
@@ -418,7 +419,19 @@ sub add_colocated_variant_info_JSON {
 
   # lists
   foreach my $field(grep {defined($ex->{$_})} @LIST_FIELDS) {
-    $ex->{$field} = [split(',', $ex->{$field})];
+    if($field eq 'var_synonyms'){
+      my @source_list = split('--', $ex->{$field});
+      my %output_hash = ();
+      foreach my $syn_source(@source_list){
+        my @split = split('::', $syn_source);
+        my @syns = split(',', $split[1]);
+	$output_hash{$split[0]} = \@syns;
+      }
+      $ex->{$field} = \%output_hash;
+    }
+    else{
+      $ex->{$field} = [split(',', $ex->{$field})];
+    }
   }
 
   push @{$hash->{colocated_variants}}, $ex;
