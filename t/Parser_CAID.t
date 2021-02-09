@@ -1,11 +1,11 @@
 # Copyright [2016-2021] EMBL-European Bioinformatics Institute
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 # http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -56,7 +56,7 @@ SKIP: {
   skip 'No local database configured', 8 unless $can_use_db;
 
   my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens') if $can_use_db;
-  
+
   my $cfg = Bio::EnsEMBL::VEP::Config->new({
     %$db_cfg,
     database => 1,
@@ -69,9 +69,9 @@ SKIP: {
     file => $test_cfg->create_input_file('CA9985736'),
     valid_chromosomes => [21],
   });
-  
+
   is(ref($p), 'Bio::EnsEMBL::VEP::Parser::CAID', 'class ref');
-  
+
   $expected = bless( {
     'is_somatic' => '0',
     'display' => '1',
@@ -106,10 +106,10 @@ SKIP: {
   $vf = $p->next();
   delete($vf->{$_}) for qw(adaptor variation slice variation_name class_display_term);
   is_deeply($vf, $expected, 'basic input test');
-  
+
   my $tmp;
   no warnings 'once';
-  open(SAVE, ">&STDERR") or die "Can't save STDERR\n"; 
+  open(SAVE, ">&STDERR") or die "Can't save STDERR\n";
   close STDERR;
   open STDERR, '>', \$tmp;
 

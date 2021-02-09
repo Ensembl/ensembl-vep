@@ -46,16 +46,16 @@ my $vf = $parser->next();
 
 =head1 DESCRIPTION
 
-CAid - ClinGen Canonical Allele identifier format parser. 
+CAid - ClinGen Canonical Allele identifier format parser.
 
 See:  ClinGen Allele Registry: https://doi.org/10.1002/humu.23637
 
 CAids are looked up in the Ensembl homo_sapiens Variation database.
 
-CAids stored in the database are downloaded from http://reg.genome.network 
+CAids stored in the database are downloaded from http://reg.genome.network
 
 One CAid may return multiple VariationFeature objects as several variants may
-have equivalent alleles or be co-located. Therefore as for similar parsers 
+have equivalent alleles or be co-located. Therefore as for similar parsers
 a method create_VariationFeatures returns an array ref of VariationFeatures.
 
 
@@ -96,7 +96,7 @@ use Bio::EnsEMBL::IO::ListBasedParser;
 sub new {
   my $caller = shift;
   my $class = ref($caller) || $caller;
-  
+
   my $self = $class->SUPER::new(@_);
 
   # requires db connection
