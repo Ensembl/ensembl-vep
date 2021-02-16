@@ -142,7 +142,6 @@ is_deeply(
       'version' => undef,
       'name' => 'chromosome',
       'default' => 0,
-      'alias_to' => undef,
       'sequence_level' => 0,
       'rank' => 1
     }, 'Bio::EnsEMBL::CoordSystem' ),
