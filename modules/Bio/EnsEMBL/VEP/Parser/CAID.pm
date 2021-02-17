@@ -100,7 +100,7 @@ sub new {
   my $self = $class->SUPER::new(@_);
 
   # requires db connection
-  throw("ERROR: Cannot use CAID format in offline mode") if $self->param('offline');
+  throw("ERROR: Cannot use CAid format in offline mode") if $self->param('offline');
 
   $self->{adaptor} = $self->get_adaptor('variation', 'VariationFeature');
 
@@ -132,7 +132,7 @@ sub parser {
                of input; multiple may be returned if a CAid maps to multiple
                variant alleles
   Returntype : arrayref of Bio::EnsEMBL::VariationFeature
-  Exceptions : warns if CAID not found in database
+  Exceptions : warns if CAid not found in database
   Caller     : next()
   Status     : Stable
 

@@ -39,7 +39,7 @@ throws_ok {
     config => Bio::EnsEMBL::VEP::Config->new({offline => 1}),
     file => $test_cfg->create_input_file('CAID')
   });
-} qr/Cannot use CAID format in offline mode/, 'throw without DB';
+} qr/Cannot use CAid format in offline mode/, 'throw without DB';
 
 SKIP: {
   my $db_cfg = $test_cfg->db_cfg;
