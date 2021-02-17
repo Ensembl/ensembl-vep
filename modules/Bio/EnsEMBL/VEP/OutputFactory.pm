@@ -194,6 +194,7 @@ sub new {
     mirna
     ambiguity
     var_synonyms
+    variant_synonyms
 
     total_length
     hgvsc
@@ -887,6 +888,12 @@ sub VariationFeature_to_output_hash {
     else{
       $hash->{vcf_string} = $vf->{chr}.'-'.${$converted_to_vcf}[1].'-'.${$converted_to_vcf}[3].'-'.${$converted_to_vcf}[4];
     }
+  }
+
+  # get variation synonyms for Variant Recoder
+  if($self->{variant_synonyms} || (defined($self->{_config}->{_params}->{fields}) && grep(/variant_synonyms/, @{$self->{_config}->{_params}->{fields}}))){
+    my $var_synonyms = $vf->get_var_synonyms();
+    $hash->{variant_synonyms} = $var_synonyms;
   }
 
   # overlapping SVs
