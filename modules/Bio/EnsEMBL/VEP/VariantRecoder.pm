@@ -106,7 +106,7 @@ sub new {
     buffer_size
   );
 
-  $config->{fields} ||= 'id,hgvsg,hgvsc,hgvsp,spdi,caid';
+  $config->{fields} ||= 'id,hgvsg,hgvsc,hgvsp,spdi';
 
   my %set_fields = map {$_ => 1} ref($config->{fields}) eq 'ARRAY' ? @{$config->{fields}} : split(',', $config->{fields});
 
