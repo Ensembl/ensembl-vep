@@ -49,7 +49,7 @@
 57	\N	patch	patch_77_78_c.sql|Drop the table study_variation
 58	\N	patch	patch_77_78_d.sql|Extend the index type_val_idx in the table attrib
 59	\N	patch	patch_77_78_e.sql|add indexes on father_ and mother_individual_id and population name
-2	\N	schema_version	103
+2	\N	schema_version	104
 60	\N	patch	patch_78_79_a.sql|schema version
 61	\N	patch	patch_78_79_b.sql|change the column attrib_type_id by attrib_id in the variation_attrib table
 62	\N	patch	patch_78_79_c.sql|Store more detailed Sift information
@@ -123,3 +123,4 @@
 154	\N	patch	patch_101_102_a.sql|schema version
 155	\N	patch	patch_101_102_b.sql|Add new clinical_significance to variation, variation_feature and structural_variation
 156	\N	patch	patch_102_103_a.sql|schema version
+157	\N	patch	patch_103_104_a.sql|schema version
