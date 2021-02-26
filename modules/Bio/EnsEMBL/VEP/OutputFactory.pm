@@ -1039,7 +1039,7 @@ sub add_colocated_variant_info {
   }
   
   # post-process to merge var synonyms into one entry so we can control the delimiter
-  $hash->{VAR_SYNONYMS} = join '--', @{$hash->{VAR_SYNONYMS}};
+  $hash->{VAR_SYNONYMS} = join '--', @{$hash->{VAR_SYNONYMS}} if defined($hash->{VAR_SYNONYMS});
 
   my @keys = keys(%clin_sigs);
   $tmp->{CLIN_SIG} = join(';', @keys) if scalar(@keys) && $self->{clin_sig_allele};
