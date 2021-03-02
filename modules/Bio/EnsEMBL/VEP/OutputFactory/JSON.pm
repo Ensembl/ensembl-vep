@@ -124,6 +124,13 @@ my @LIST_FIELDS = qw(
   var_synonyms
 );
 
+my @FREQ_FIELDS = qw(
+  AFR AMR ASN EAS SAS EUR
+  AA EA
+  ExAC ExAC_Adj ExAC_AFR ExAC_AMR ExAC_EAS ExAC_FIN ExAC_NFE ExAC_OTH ExAC_SAS
+  gnomAD gnomAD_AFR gnomAD_AMR gnomAD_ASJ gnomAD_EAS gnomAD_FIN gnomAD_NFE gnomAD_OTH gnomAD_SAS
+);
+
 
 =head2 new
 
@@ -409,6 +416,12 @@ sub add_colocated_variant_info_JSON {
   # remove empty
   foreach my $key(keys %$ex) {
     delete $ex->{$key} if !defined($ex->{$key}) || $ex->{$key} eq '' || ($key !~ /af/ && $ex->{$key} eq 0);
+  }
+
+  # Remove the frequencies from the co-located variant
+  # that are not part of frequency hash
+  foreach my $key (@FREQ_FIELDS) {
+    delete $ex->{$key};
   }
 
   # rename
