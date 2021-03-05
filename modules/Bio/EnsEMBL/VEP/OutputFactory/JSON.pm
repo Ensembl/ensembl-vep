@@ -400,12 +400,7 @@ sub add_colocated_variant_info_JSON {
   foreach my $frequency_hash (@$frequency_hashes) {
     my $allele = $frequency_hash->{Allele};
     # frequencies
-    foreach my $pop (grep {defined($frequency_hash->{"$_\_AF"})} qw(
-      AFR AMR ASN EAS SAS EUR
-      AA EA
-      ExAC ExAC_Adj ExAC_AFR ExAC_AMR ExAC_EAS ExAC_FIN ExAC_NFE ExAC_OTH ExAC_SAS
-      gnomAD gnomAD_AFR gnomAD_AMR gnomAD_ASJ gnomAD_EAS gnomAD_FIN gnomAD_NFE gnomAD_OTH gnomAD_SAS
-    )) {
+    foreach my $pop (grep {defined($frequency_hash->{"$_\_AF"})} @FREQ_FIELDS) {
       my $lc_pop = lc($pop);
       $frequencies->{$allele}->{$lc_pop} = $frequency_hash->{"$pop\_AF"}[0];
       delete $ex->{$pop};
