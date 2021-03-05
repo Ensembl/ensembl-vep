@@ -34,7 +34,7 @@ SKIP: {
   no warnings 'once';
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'JSON module not available', 18 unless $Bio::EnsEMBL::VEP::OutputFactory::CAN_USE_JSON;
+  skip 'JSON module not available', 19 unless $Bio::EnsEMBL::VEP::OutputFactory::CAN_USE_JSON;
 
   ## BASIC TESTS
   ##############
@@ -165,6 +165,60 @@ SKIP: {
       ]
     },
     'add_colocated_variant_info_JSON'
+  );
+
+  # Frequency test for a variant that has a multi-allelic co-located variant.
+  # The input allele matches the co-located variant allele with no associated
+  # 1kg frequency.
+  # 1kg frequency is availabe on the other allele of the co-located variant.
+  # The test checks that 1kg frequency for the other allele is not reported.
+  no warnings 'qw';
+  $ib = get_annotated_buffer({
+    input_file => $test_cfg->create_input_file([qw(21 25891785 var_1 G A . . .)]),
+    check_existing => 1
+  });
+
+  $vf = $ib->buffer->[0];
+  $ex = $vf->{existing}->[0];
+
+  $frequency_hash = {Allele => 'A'};
+  $super_of = Bio::EnsEMBL::VEP::OutputFactory->new({config => $cfg});
+  $super_of->{af_1kg} = 1;
+  $super_of->{af_esp} = 1;
+  $super_of->{af_gnomad} = 1;
+  $super_of->{af_exac} = 1;
+  $super_of->add_colocated_frequency_data({}, $frequency_hash, $ex);
+  my $x = $of->add_colocated_variant_info_JSON({}, [$frequency_hash], $ex);
+
+  is_deeply(
+    $of->add_colocated_variant_info_JSON({}, [$frequency_hash], $ex),
+    {
+      'colocated_variants' => [
+         {
+           'strand' => 1,
+           'id' => 'rs145564988',
+           'allele_string' => 'G/A/T',
+           'minor_allele_freq' => '0.0016',
+           'frequencies' => {
+              'A' => {
+                'gnomad_afr' => '6.534e-05',
+                'gnomad_sas' => '3.249e-05',
+                'gnomad_fin' => '0',
+                'gnomad_amr' => '0',
+                'gnomad' => '7.313e-05',
+                'gnomad_oth' => '0',
+                'gnomad_asj' => '0',
+                'gnomad_eas' => '0',
+                'gnomad_nfe' => '0.0001433'
+              }
+           },
+           'end' => '25891785',
+           'minor_allele' => 'T',
+           'start' => '25891785'
+         }
+      ],
+    },
+    'add_colocated_variant_info_JSON_multi'
   );
 
   $ib = get_annotated_buffer({input_file => $test_cfg->{test_vcf}});
