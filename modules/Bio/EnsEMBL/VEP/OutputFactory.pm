@@ -892,7 +892,8 @@ sub VariationFeature_to_output_hash {
 
   # get variation synonyms for Variant Recoder
   if($self->{variant_synonyms} || (defined($self->{_config}->{_params}->{fields}) && grep(/variant_synonyms/, @{$self->{_config}->{_params}->{fields}}))){
-    my $var_synonyms = $vf->get_var_synonyms();
+    my $variation = $vf->variation();
+    my $var_synonyms = $variation->get_variation_synonyms();
     $hash->{variant_synonyms} = $var_synonyms;
   }
 
