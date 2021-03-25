@@ -194,7 +194,6 @@ sub new {
     mirna
     ambiguity
     var_synonyms
-    variant_synonyms
 
     total_length
     hgvsc
@@ -891,10 +890,12 @@ sub VariationFeature_to_output_hash {
   }
 
   # get variation synonyms for Variant Recoder
-  if($self->{variant_synonyms} || (defined($self->{_config}->{_params}->{fields}) && grep(/variant_synonyms/, @{$self->{_config}->{_params}->{fields}}))){
+  # check which tool is running, Variant Recoder or VEP
+  # Variant Recoder fetches the variation synonyms from the database
+  if(($0 =~ /variant_recoder/ || $0 =~ /VariantRecoder/) && ($self->{var_synonyms} || (defined($self->{_config}->{_params}->{fields}) && grep(/var_synonyms/, @{$self->{_config}->{_params}->{fields}})))){
     my $variation = $vf->variation();
     my $var_synonyms = $variation->get_all_synonyms('', 1);
-    $hash->{variant_synonyms} = $var_synonyms;
+    $hash->{var_synonyms} = $var_synonyms;
   }
 
   # overlapping SVs
@@ -1011,7 +1012,8 @@ sub add_colocated_variant_info {
     push @{$hash->{Existing_variation}}, $ex->{variation_name} if $ex->{variation_name};
 
     # Variation Synonyms
-    push @{$hash->{VAR_SYNONYMS}}, $ex->{var_synonyms} if $self->{var_synonyms} && $ex->{var_synonyms}; 
+    # VEP fetches the variation synonyms from the cache
+    push @{$hash->{VAR_SYNONYMS}}, $ex->{var_synonyms} if $self->{var_synonyms} && $ex->{var_synonyms} && $0 eq 'vep';
 
     # Find allele specific clin_sig data if it exists
     if(defined($ex->{clin_sig_allele}) && $self->{clin_sig_allele} )

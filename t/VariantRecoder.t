@@ -268,7 +268,7 @@ SKIP: {
     'recode - input HGVS genomic insertion'
   );
 
-  my $vr_6 = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', fields => 'spdi,vcf_string,variant_synonyms'});
+  my $vr_6 = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', fields => 'spdi,vcf_string,var_synonyms'});
   is_deeply(
     $vr_6->recode("rs142513484"),
     [
@@ -282,7 +282,7 @@ SKIP: {
           "spdi" => [
              "21:25585732:C:T"
           ],
-          "variant_synonyms" => [
+          "var_synonyms" => [
              "LSDB: NM_017446.3:c.991G>A"
           ],
         }

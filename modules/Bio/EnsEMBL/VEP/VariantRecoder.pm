@@ -258,9 +258,9 @@ sub _get_all_results {
     $keys_no_allele{'vcf_string'} = 1;
     delete($want_keys{'vcf_string'});
   }
-  if($want_keys{'variant_synonyms'}) {
-    $keys_no_allele{'variant_synonyms'} = 1;
-    delete($want_keys{'variant_synonyms'});
+  if($want_keys{'var_synonyms'}) {
+    $keys_no_allele{'var_synonyms'} = 1;
+    delete($want_keys{'var_synonyms'});
   }
 
   while(my $line = $self->next_output_line(1)) {
@@ -381,9 +381,9 @@ sub _get_all_results {
     ################################
     ####### Variant synonyms #######
     # Attach variant synonyms to hash by allele
-    if($line->{'variant_synonyms'} && $keys_no_allele{'variant_synonyms'}) {
+    if($line->{'var_synonyms'} && $keys_no_allele{'var_synonyms'}) {
       foreach my $key_allele (keys %{$line_by_allele{'consequences'}}) {
-      $vcf_string_by_allele{$key_allele}->{'variant_synonyms'} = $line->{'variant_synonyms'};
+      $vcf_string_by_allele{$key_allele}->{'var_synonyms'} = $line->{'var_synonyms'};
       }
     }
 
