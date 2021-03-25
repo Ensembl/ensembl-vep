@@ -108,6 +108,9 @@ sub new {
 
   $config->{fields} ||= 'id,hgvsg,hgvsc,hgvsp,spdi';
 
+  # Flag to indicate it is a Variant Recoder job
+  $config->{is_vr} = 1;
+
   my %set_fields = map {$_ => 1} ref($config->{fields}) eq 'ARRAY' ? @{$config->{fields}} : split(',', $config->{fields});
 
   # do some trickery to make sure we're not running unnecessary code
