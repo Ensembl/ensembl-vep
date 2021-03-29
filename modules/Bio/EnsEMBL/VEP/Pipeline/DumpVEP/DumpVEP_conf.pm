@@ -162,7 +162,7 @@ sub default_options {
                 pops => ['', qw(afr amr asj eas fin nfe oth sas)],
                 name => 'gnomAD',
                 prefix => 'gnomAD',
-                version => 'v2.1.1',
+                version => 'r2.1.1',
               },
             ],
           },
