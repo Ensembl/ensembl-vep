@@ -158,11 +158,11 @@ sub default_options {
               # },
               {
                 file => $self->o('data_dir').'/gnomAD/v2.1.1/grch38/exomes/gnomad.exomes.r2.1.1.sites.+++CHR+++.liftover_grch38_no_VEP.vcf.gz',
-
                 pops => ['', qw(afr amr asj eas fin nfe oth sas)],
                 name => 'gnomAD',
                 prefix => 'gnomAD',
                 version => 'r2.1.1',
+                use_chr_prefix => 1,
               },
             ],
           },
