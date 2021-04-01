@@ -291,6 +291,10 @@ sub freqs_from_vcf {
     my $parser = $self->{_vcf_parsers}->{$file} ||= Bio::EnsEMBL::IO::Parser::VCF4Tabix->open($file);
     next unless $parser;
 
+    if (defined $vcf_conf->{use_chr_prefix} && $vcf_conf->{use_chr_prefix}) {
+      $chr = "chr$chr";
+    }
+
     $parser->seek($chr, $list[0]->{start} - 1, $list[-1]->{end} + 1);
 
     while($parser->next) {
