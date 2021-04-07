@@ -199,31 +199,56 @@ Use `--pretty` to pre-format and indent JSON output.
 
 Example output:
 ```bash
-./variant_recoder --id "AGT:p.Met268Thr" --pretty
+./variant_recoder --id "AGT:p.Met259Thr" --pretty
 [
    {
-      "input" : "AGT:p.Met268Thr",
-      "id" : [
-         "rs699",
-         "CM920010"
+     "warnings" : [
+         "Possible invalid use of gene or protein identifier 'AGT' as HGVS reference; AGT:p.Met259Thr may resolve to multiple genomic locations"
       ],
-      "hgvsg" : [
-         "NC_000001.11:g.230710048A>G"
-      ],
-      "hgvsc" : [
-         "ENST00000366667.4:c.803T>C",
-         "NM_000029.3:c.803T>C"
-      ],
-      "hgvsp" : [
-         "ENSP00000355627.4:p.Met268Thr",
-         "NP_000020.1:p.Met268Thr"
-      ],
-      "spdi" : [
-         "NC_000001.11:230710047:A:G"
-      ],
-      "warnings" : [
-         "Possible invalid use of gene name 'AGT' as HGVS reference; AGT:p.Met268Thr may resolve to multiple genomic locations"
-      ]
+     "C" : {
+        "input" : "AGT:p.Met259Thr",
+        "id" : [
+           "rs699",
+           "CM920010",
+           "COSV64184214"
+        ],
+        "hgvsg" : [
+           "NC_000001.11:g.230710048A>G"
+        ],
+        "hgvsc" : [
+           "ENST00000366667.6:c.776T>C",
+           "ENST00000679684.1:c.776T>C",
+           "ENST00000679738.1:c.776T>C",
+           "ENST00000679802.1:c.776T>C",
+           "ENST00000679854.1:n.1287T>C",
+           "ENST00000679957.1:c.776T>C",
+           "ENST00000680041.1:c.776T>C",
+           "ENST00000680783.1:c.776T>C",
+           "ENST00000681269.1:c.776T>C",
+           "ENST00000681347.1:n.1287T>C",
+           "ENST00000681514.1:c.776T>C",
+           "ENST00000681772.1:c.776T>C",
+           "NM_001382817.3:c.776T>C",
+           "NM_001384479.1:c.776T>C"
+        ],
+        "hgvsp" : [
+           "ENSP00000355627.5:p.Met259Thr",
+           "ENSP00000505981.1:p.Met259Thr",
+           "ENSP00000505063.1:p.Met259Thr",
+           "ENSP00000505184.1:p.Met259Thr",
+           "ENSP00000506646.1:p.Met259Thr",
+           "ENSP00000504866.1:p.Met259Thr",
+           "ENSP00000506329.1:p.Met259Thr",
+           "ENSP00000505985.1:p.Met259Thr",
+           "ENSP00000505963.1:p.Met259Thr",
+           "ENSP00000505829.1:p.Met259Thr",
+           "NP_001369746.2:p.Met259Thr",
+           "NP_001371408.1:p.Met259Thr"
+        ],
+        "spdi" : [
+           "NC_000001.11:230710047:A:G"
+        ]
+     }
    }
 ]
 ```
