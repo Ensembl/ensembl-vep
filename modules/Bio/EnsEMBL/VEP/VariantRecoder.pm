@@ -129,6 +129,10 @@ sub new {
     $config->{fields} = $config->{fields} . ',vcf_string';
   }
 
+  if($config->{var_synonyms} && $config->{fields} !~ /var_synonyms/){
+    $config->{fields} = $config->{fields} . ',var_synonyms';
+  }
+
   my $self = $class->SUPER::new($config);
 
   return $self;
