@@ -1,12 +1,12 @@
 #!/usr/bin/env perl
 # Copyright [2016-2020] EMBL-European Bioinformatics Institute
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 # http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,7 +28,7 @@ my @argv_copy = @ARGV;
 GetOptions(
   $config,
   'help',                    # displays help message
-  
+
   # input options,
   'config=s',                # config file name
   'input_file|i=s',          # input file name
@@ -37,7 +37,7 @@ GetOptions(
   'output_format=s',         # output file format
   'delimiter=s',             # delimiter between fields in input
   'no_check_variants_order', # skip check about the variants ordering within a region
-  
+
   # DB options
   'species|s=s',             # species e.g. human, homo_sapiens
   'registry=s',              # registry file
@@ -104,14 +104,14 @@ GetOptions(
   'clin_sig_allele=i',       # use allele specific clinical significance data where it exists
   'overlaps',                # report length and percent of a transcript or regulatory feature overlaped with a SV
   'max_sv_size=i',           # modify the size of structural variant to be handled (limited by default to reduce memory requirements)
-  'remove_hgvsp_version',    # removes translation version from hgvs_protein output 
+  'remove_hgvsp_version',    # removes translation version from hgvs_protein output
 
 
   # verbosity options
   'verbose|v',               # print out a bit more info while running
   'quiet|q',                 # print nothing to STDOUT (unless using -o stdout)
   'no_progress',             # don't display progress bars
-  
+
   # output options
   'everything|e',            # switch on EVERYTHING :-)
   'output_file|o=s',         # output file name
@@ -178,7 +178,7 @@ GetOptions(
 
   # cache stuff
   'database',                # must specify this to use DB now
-  'cache',                   # use cache
+  'cache:s',                 # use cache, optionally supplying the dir
   'cache_version=i',         # specify a different cache version
   'show_cache_info',         # print cache info and quit
   'dir=s',                   # dir where cache is found (defaults to $HOME/.vep/)
@@ -211,7 +211,7 @@ GetOptions(
   # plugins
   'plugin=s' => ($config->{plugin} ||= []), # specify a method in a module in the plugins directory
   'safe',                                   # die if plugins don't compile or spit warnings
-  
+
   # debug
   'debug',                   # print out debug info
 ) or die "ERROR: Failed to parse command-line flags\n";
@@ -219,6 +219,23 @@ GetOptions(
 &usage && exit(0) if (!$arg_count) || $config->{help};
 
 $config->{database} ||= 0;
+
+# If the optional parameter is supplied for --cache,
+#   AND that parameter is a directory
+#   AND --dir|dir_cache|dir_plugins is not also defined,
+#   set --dir|dir_cache|dir_plugins to the value given for --cache.
+
+if (-d "$config->{cache}"}
+  if (!defined($config->{dir})) {
+    $config->{dir} = $config->{cache};
+  }
+  if (!defined($config->{dir_cache})) {
+    $config->{dir_cache} = $config->{cache};
+  }
+  if (!defined($config->{dir_plugins})) {
+    $config->{dir_plugins} = $config->{cache};
+  }
+}
 
 my $runner = Bio::EnsEMBL::VEP::Runner->new($config);
 
@@ -263,9 +280,9 @@ Basic options
 -o | --output_file     Output file
 --force_overwrite      Force overwriting of output file
 --species [species]    Species to use [default: "human"]
-                       
+
 --everything           Shortcut switch to turn on commonly used options. See web
-                       documentation for details [default: off]                       
+                       documentation for details [default: off]
 --fork [num_forks]     Use forking to improve script runtime
 
 For full option documentation see:
