@@ -223,18 +223,13 @@ $config->{database} ||= 0;
 # If the optional parameter is supplied for --cache,
 #   AND that parameter is a directory
 #   AND --dir|dir_cache|dir_plugins is not also defined,
-#   set --dir|dir_cache|dir_plugins to the value given for --cache.
+#   set --dir|dir_cache to the value given for --cache.
+#     (--dir_plugins gets --cache ./Plugins
 
-if (-d "$config->{cache}"}
-  if (!defined($config->{dir})) {
-    $config->{dir} = $config->{cache};
-  }
-  if (!defined($config->{dir_cache})) {
-    $config->{dir_cache} = $config->{cache};
-  }
-  if (!defined($config->{dir_plugins})) {
-    $config->{dir_plugins} = $config->{cache};
-  }
+if (-d "$config->{cache}") {
+  $config->{dir} ||= $config->{cache};
+  $config->{dir_cache} ||= $config->{cache};
+  $config->{dir_plugins} ||= ($config->{dir} || $config->{cache}).'/Plugins';
 }
 
 my $runner = Bio::EnsEMBL::VEP::Runner->new($config);
