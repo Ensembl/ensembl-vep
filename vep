@@ -218,11 +218,19 @@ GetOptions(
 
 &usage && exit(0) if (!$arg_count) || $config->{help};
 
-if (-d "$config->{cache}") {
-  $config->{dir} ||= $config->{cache};
-  $config->{dir_cache} ||= $config->{cache};
-  $config->{dir_plugins} ||= ($config->{dir} || $config->{cache}) . '/Plugins';
+if (defined $config->{cache}){ 
+  if (-d "$config->{cache}") {
+    $config->{dir} ||= $config->{cache};
+    $config->{dir_cache} ||= $config->{cache};
+    $config->{dir_plugins} ||= ($config->{dir} || $config->{cache}) . '/Plugins';
+    
+  } else {
+    warn "Specified --cache $config->{cache} is not a directory" if $config->{cache} ;
+  }
+  $config->{cache} = 1;
 }
+
+
 
 $config->{database} ||= 0;
 
