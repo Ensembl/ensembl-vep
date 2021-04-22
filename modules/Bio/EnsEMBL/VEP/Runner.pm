@@ -114,7 +114,7 @@ sub init {
   # log start time
   $self->stats->start_time();
 
-  if(defined($self->param('assembly')) && lc($self->param('assembly')) eq 'grch37' && defined($self->param('database') && !defined($self->param('port')))) {
+  if(defined($self->param('assembly')) && lc($self->param('assembly')) eq 'grch37' && defined($self->param('database')) && !defined($self->param('port'))) {
     $self->param('port', 3337);
   }
 
