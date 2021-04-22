@@ -578,8 +578,8 @@ sub generate_chart_data {
   
   foreach my $chr(sort {($a !~ /^\d+$/ || $b !~ /^\d+/ || $a =~ /^\d\w/ || $b =~ /^\d\w/ ) ? $a cmp $b : $a <=> $b} keys %{$stats->{chr}}) {
     my $chr_id = $chr;
-    $chr_id =~ s/\./\_/g;
-    
+    $chr_id =~ s/\.|-/\_/g;
+
     push @charts, {
       id => 'chr_'.$chr_id,
       title => 'Distribution of variants on chromosome '.$chr,
