@@ -465,6 +465,12 @@ sub new {
   
   # set defaults
   # we need to do this first so paths are set for reading config etc
+
+  # Assign default port for GRCh37
+  if (defined($config->{'assembly'}) && lc($config->{'assembly'}) eq 'grch37' && defined($config->{'database'}) && !defined($config->{'port'})) {
+    $config->{'port'} = 3337;
+  }
+
   foreach my $key(keys %DEFAULTS) {
     $config->{$key} = $DEFAULTS{$key} unless exists($config->{$key});
   }
