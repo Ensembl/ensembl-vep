@@ -116,6 +116,7 @@ my %NUMBERIFY_EXEMPT = (
   'gene_id' => 1,
   'gene_symbol' => 1,
   'transcript_id' => 1,
+  'SYMBOL' => 1
 );
 
 my @LIST_FIELDS = qw(
