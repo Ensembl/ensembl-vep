@@ -108,6 +108,9 @@ sub new {
 
   $config->{fields} ||= 'id,hgvsg,hgvsc,hgvsp,spdi';
 
+  # Flag to indicate it is a Variant Recoder job
+  $config->{is_vr} = 1;
+
   my %set_fields = map {$_ => 1} ref($config->{fields}) eq 'ARRAY' ? @{$config->{fields}} : split(',', $config->{fields});
 
   # do some trickery to make sure we're not running unnecessary code
@@ -124,6 +127,10 @@ sub new {
   
   if($config->{vcf_string}){
     $config->{fields} = $config->{fields} . ',vcf_string';
+  }
+
+  if($config->{var_synonyms} && $config->{fields} !~ /var_synonyms/){
+    $config->{fields} = $config->{fields} . ',var_synonyms';
   }
 
   my $self = $class->SUPER::new($config);
@@ -258,6 +265,10 @@ sub _get_all_results {
     $keys_no_allele{'vcf_string'} = 1;
     delete($want_keys{'vcf_string'});
   }
+  if($want_keys{'var_synonyms'}) {
+    $keys_no_allele{'var_synonyms'} = 1;
+    delete($want_keys{'var_synonyms'});
+  }
 
   while(my $line = $self->next_output_line(1)) {
     delete($line->{id});
@@ -373,6 +384,15 @@ sub _get_all_results {
     }
     ####### ID #######
     ##################
+
+    ################################
+    ####### Variant synonyms #######
+    # Attach variant synonyms to hash by allele
+    if($line->{'var_synonyms'} && $keys_no_allele{'var_synonyms'}) {
+      foreach my $key_allele (keys %{$line_by_allele{'consequences'}}) {
+      $vcf_string_by_allele{$key_allele}->{'var_synonyms'} = $line->{'var_synonyms'};
+      }
+    }
 
     merge_arrays($order, [$line_id]);
 
