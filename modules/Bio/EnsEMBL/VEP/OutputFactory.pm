@@ -889,6 +889,14 @@ sub VariationFeature_to_output_hash {
     }
   }
 
+  # get variation synonyms for Variant Recoder
+  # if the tool is Variant Recoder fetches the variation synonyms from the database
+  if($self->{_config}->{_params}->{is_vr} && $self->{var_synonyms}){
+    my $variation = $vf->variation();
+    my $var_synonyms = $variation->get_all_synonyms('', 1);
+    $hash->{var_synonyms} = $var_synonyms;
+  }
+
   # overlapping SVs
   if($vf->{overlapping_svs}) {
     $hash->{SV} = [sort keys %{$vf->{overlapping_svs}}];
@@ -1003,7 +1011,8 @@ sub add_colocated_variant_info {
     push @{$hash->{Existing_variation}}, $ex->{variation_name} if $ex->{variation_name};
 
     # Variation Synonyms
-    push @{$hash->{VAR_SYNONYMS}}, $ex->{var_synonyms} if $self->{var_synonyms} && $ex->{var_synonyms}; 
+    # VEP fetches the variation synonyms from the cache
+    push @{$hash->{VAR_SYNONYMS}}, $ex->{var_synonyms} if $self->{var_synonyms} && $ex->{var_synonyms} && !$self->{_config}->{_params}->{is_vr};
 
     # Find allele specific clin_sig data if it exists
     if(defined($ex->{clin_sig_allele}) && $self->{clin_sig_allele} )
