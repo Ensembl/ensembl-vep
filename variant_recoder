@@ -81,6 +81,7 @@ GetOptions(
   'fields=s',                # define your own output fields
   'synonyms=s',              # file of chromosome synonyms
   'vcf_string',              # returns the vcf format in a string
+  'var_synonyms',            # returns the variation synonyms
 
   # these flags are for use with RefSeq caches
   'bam=s',                   # bam file used to modify transcripts
