@@ -193,6 +193,7 @@ Output is a JSON array of objects, one per input variant, with the following key
 * **hgvsp**: HGVS protein nomenclature
 * **spdi**: Genomic SPDI notation
 * **vcf_string**: VCF format (optional)
+* **var_synonyms**: Variation synonyms (optional)
 * **warnings**: Warnings generated e.g. for invalid HGVS
 
 Use `--pretty` to pre-format and indent JSON output.
@@ -263,6 +264,8 @@ Example output:
 * `--grch37`: use GRCh37 assembly instead of GRCh38.
 * `--genomes`: set database parameters for [Ensembl Genomes](http://ensemblgenomes.org/) species.
 * `--pretty`: write pre-formatted indented JSON.
-* `--fields [field1,field2]`: limit output fields. Comma-separated list, one or more of: `id`, `hgvsg`, `hgvsc`, `hgvsp`, `spdi`, `vcf_string`.
+* `--fields [field1,field2]`: limit output fields. Comma-separated list, one or more of: `id`, `hgvsg`, `hgvsc`, `hgvsp`, `spdi`.
+* `--vcf_string : report VCF
+* `--var_synonyms : report variation synonyms
 * `--host [db_host]`: change database host from default `ensembldb.ensembl.org` (UK); geographic mirrors are `useastdb.ensembl.org` (US East Coast) and `asiadb.ensembl.org` (Asia). `--user`, `--port` and `--pass` may also be set.
 * `--pick`, `--per_gene`, `--pick_allele`, `--pick_allele_gene`, `--pick_order`: set and customise transcript selection process, see [VEP documentation](http://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick)
