@@ -265,7 +265,7 @@ Example output:
 * `--genomes`: set database parameters for [Ensembl Genomes](http://ensemblgenomes.org/) species.
 * `--pretty`: write pre-formatted indented JSON.
 * `--fields [field1,field2]`: limit output fields. Comma-separated list, one or more of: `id`, `hgvsg`, `hgvsc`, `hgvsp`, `spdi`.
-* `--vcf_string : report VCF
-* `--var_synonyms : report variation synonyms
+* `--vcf_string` : report VCF
+* `--var_synonyms` : report variation synonyms
 * `--host [db_host]`: change database host from default `ensembldb.ensembl.org` (UK); geographic mirrors are `useastdb.ensembl.org` (US East Coast) and `asiadb.ensembl.org` (Asia). `--user`, `--port` and `--pass` may also be set.
 * `--pick`, `--per_gene`, `--pick_allele`, `--pick_allele_gene`, `--pick_order`: set and customise transcript selection process, see [VEP documentation](http://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick)
