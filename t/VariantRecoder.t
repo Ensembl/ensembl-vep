@@ -179,7 +179,7 @@ SKIP: {
   $vr->param('fields', $bak);
 
   # Test output VCF format
-  my $vr_2 = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', fields => 'spdi,vcf_string'});
+  my $vr_2 = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', fields => 'spdi', vcf_string => 1});
   is_deeply(
     $vr_2->recode("rs142513484"),
     [
@@ -199,7 +199,7 @@ SKIP: {
     'recode - output vcf_string' 
   );
 
-  my $vr_3 = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', fields => 'spdi,vcf_string'});
+  my $vr_3 = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', fields => 'spdi', vcf_string => 1});
   is_deeply(
     $vr_3->recode("ENST00000352957:c.971_973del"),
     [
@@ -219,7 +219,7 @@ SKIP: {
     'recode - input HGVS and output vcf_string'
   );
 
-  my $vr_4 = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', fields => 'spdi,vcf_string,id,hgvsg'});
+  my $vr_4 = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', fields => 'spdi,id,hgvsg', vcf_string => 1});
   is_deeply(
     $vr_4->recode("rs1444184259"),
     [
@@ -245,7 +245,7 @@ SKIP: {
     'recode - insertion'
   );
 
-  my $vr_5 = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', fields => 'spdi,vcf_string,hgvsg'});
+  my $vr_5 = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', fields => 'spdi,hgvsg', vcf_string => 1});
   is_deeply(
     $vr_5->recode("21:g.25639361_25639362insC"),
     [
@@ -280,7 +280,7 @@ SKIP: {
              "rs142513484"
           ],
           "spdi" => [
-             "21:25585732:C:T"
+             "NC_000021.9:25585732:C:T"
           ],
           "var_synonyms" => [
              "LSDB: NM_017446.3:c.991G>A"
@@ -298,7 +298,7 @@ SKIP: {
              "XM_011529651.1:c.865G>A"
           ],
           "hgvsg" => [
-             "21:g.25585733C>T"
+             "NC_000021.9:g.25585733C>T"
           ]
         }
       }
