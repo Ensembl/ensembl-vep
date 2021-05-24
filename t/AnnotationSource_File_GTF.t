@@ -32,7 +32,7 @@ SKIP: {
   no warnings 'once';
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'Bio::DB::HTS::Tabix module not available', 21 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+  skip 'Bio::DB::HTS::Tabix module not available', 25 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
 
   ## BASIC TESTS
   ##############
@@ -207,6 +207,26 @@ SKIP: {
   $ib->finish_annotation();
 
   is($ib->buffer->[0]->display_consequence, 'missense_variant', 'annotate_InputBuffer - display_consequence');
+
+  ## Test chromosome MT
+  my $runner_mt = Bio::EnsEMBL::VEP::Runner->new({%{$test_cfg->base_testing_cfg}, input_file => $test_cfg->{test_vcf_MT}});
+  $runner_mt->init();
+
+  my $gtf_mt = Bio::EnsEMBL::VEP::AnnotationSource::File::GTF->new({file => $test_cfg->{custom_gtf_mt}, config => $runner_mt->config});
+
+  my $p_mt = Bio::EnsEMBL::VEP::Parser::VCF->new({
+    config => $runner_mt->config,
+    file => $test_cfg->create_input_file([qw(MT 4472 rs1057520067 T C . . .)]),
+    valid_chromosomes => ['MT']
+  });
+
+  my $ib_mt = Bio::EnsEMBL::VEP::InputBuffer->new({config => $runner_mt->config, parser => $p_mt});
+  is(ref($ib_mt->next()), 'ARRAY', 'check buffer next (MT)');
+
+  $gtf_mt->annotate_InputBuffer($ib_mt);
+  $ib_mt->finish_annotation();
+  is ($ib_mt->buffer->[0]->get_all_TranscriptVariations->[0]->_codon_table, 2, 'codon table for MT chromosome');
+
 }
 
 
