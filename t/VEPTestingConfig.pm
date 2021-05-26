@@ -57,6 +57,7 @@ our %DEFAULTS = (
   test_vcf4      => $Bin.'/testdata/input/test4.vcf',
   test_vcf5      => $Bin.'/testdata/input/test5.vcf',
   test_vcf6      => $Bin.'/testdata/input/test6.vcf',
+  test_vcf_MT    => $Bin.'/testdata/input/test_MT.vcf',
   not_ord_vcf    => $Bin.'/testdata/input/test_not_ordered.vcf',
   no_trans_vcf   => $Bin.'/testdata/input/test_no_trans.vcf',
   vr_vcf         => $Bin.'/testdata/input/idt_test.vcf',
@@ -69,6 +70,7 @@ our %DEFAULTS = (
   custom_gff     => $Bin.'/testdata/custom/test.gff.gz',
   custom_refseq_gff => $Bin.'/testdata/custom/refseq.gff.gz',
   custom_gtf     => $Bin.'/testdata/custom/test.gtf.gz',
+  custom_gtf_mt     => $Bin.'/testdata/custom/test_MT.gtf.gz',
   custom_bigwig  => $Bin.'/testdata/custom/test.bw',
 
   bam_edit_gff   => $Bin.'/testdata/custom/bam_edit.gff.gz',
