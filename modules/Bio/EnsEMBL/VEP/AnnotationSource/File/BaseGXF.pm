@@ -721,12 +721,18 @@ sub _add_translation {
   $translation->end($offset);
   $translation->end_Exon($ordered_cdss->[-1]->{_exon});
 
+  my $chr = $tr->{slice}->seq_region_name;
+
   # translate
   # we have to delete slice otherwise the API tries to look up codon tables etc
   # from a non-existent adaptor
   my $slice = delete($tr->{slice});
   $tr->{_variation_effect_feature_cache}->{peptide} = $translation->seq;
   $tr->{_variation_effect_feature_cache}->{codon_table} = 1;
+  if($chr eq 'MT') {
+    $tr->{_variation_effect_feature_cache}->{codon_table} = 2;
+  }
+
   $tr->{slice} = $slice;
 
   return $translation;
