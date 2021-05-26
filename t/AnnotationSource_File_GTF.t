@@ -216,7 +216,7 @@ SKIP: {
 
   my $p_mt = Bio::EnsEMBL::VEP::Parser::VCF->new({
     config => $runner_mt->config,
-    file => $test_cfg->create_input_file([qw(MT 4472 rs1057520067 T C . . .)]),
+    file => $test_cfg->create_input_file([qw(MT 4472 var1 T A . . .)]),
     valid_chromosomes => ['MT']
   });
 
@@ -225,7 +225,8 @@ SKIP: {
 
   $gtf_mt->annotate_InputBuffer($ib_mt);
   $ib_mt->finish_annotation();
-  is ($ib_mt->buffer->[0]->get_all_TranscriptVariations->[0]->_codon_table, 2, 'codon table for MT chromosome');
+  is ($ib_mt->buffer->[0]->get_all_TranscriptVariations->[0]->_codon_table, 2, 'codon table for MT chromosome is correct');
+  is ($ib_mt->buffer->[0]->get_all_TranscriptVariations->[0]->pep_allele_string, 'I/M', 'codon table for MT chromosome - check allele');
 
 }
 
