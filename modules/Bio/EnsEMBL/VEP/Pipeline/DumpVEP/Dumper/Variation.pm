@@ -91,7 +91,7 @@ sub run {
     }
     $self->{freq_vcf} = $vep_params->{freq_vcf};
   }
-$DB::single = 1;
+  
   $self->dump_chrs($as, $cache);
 
   # bgzip and tabix-index all_vars files
