@@ -63,11 +63,14 @@ sub default_options {
 
     # a directory to keep hive output files and your registry file, you should
     # create this if it doesn't exist
-    pipeline_dir            => '/hps/nobackup/production/ensembl/'.$ENV{'USER'}.'/'.$self->o('pipeline_name').'/'.$self->o('ensembl_release'),
+    pipeline_dir            => '/hps/nobackup/flicek/ensembl/variation/'.$ENV{'USER'}.'/'.$self->o('pipeline_name').'/'.$self->o('ensembl_release'),
 
     # contains frequency data
-    data_dir                => '/nfs/production/panda/ensembl/variation/data/',
+    data_dir                => '/nfs/production/flicek/ensembl/variation/data/',
     dump_vep_data_dir       => $self->o('data_dir') . '/dump_vep',
+    
+    # temporary space
+    tmp_dir       => '/hps/scratch/variation',
         
     # dump databases of this version number
     ensembl_release => undef,
@@ -176,10 +179,10 @@ sub default_options {
     # reflect their usage, but you may want to change the details (memory
     # requirements, queue parameters etc.) to suit your own data
         
-    default_lsf_options => '-q production-rh74 -R"select[mem>4000] rusage[mem=4000]" -M4000',
-    urgent_lsf_options  => '-q production-rh74 -R"select[mem>2000] rusage[mem=2000]" -M2000',
-    highmem_lsf_options => '-q production-rh74 -R"select[mem>15000] rusage[mem=15000]" -M15000', # this is Sanger LSF speak for "give me 15GB of memory"
-    long_lsf_options    => '-q production-rh74 -R"select[mem>2000] rusage[mem=2000]" -M2000',
+    default_lsf_options => '-q production -R"select[mem>4000] rusage[mem=4000]" -M4000',
+    urgent_lsf_options  => '-q production -R"select[mem>2000] rusage[mem=2000]" -M2000',
+    highmem_lsf_options => '-q production -R"select[mem>15000] rusage[mem=15000]" -M15000', # this is Sanger LSF speak for "give me 15GB of memory"
+    long_lsf_options    => '-q production -R"select[mem>2000] rusage[mem=2000]" -M2000',
     
     debug => 0,
     qc => 1,
@@ -328,6 +331,7 @@ sub pipeline_analyses {
       -parameters    => {
         species_flags  => $self->o('species_flags'),
         convert        => $self->o('convert'),
+        tmp_dir        => $self->o('tmp_dir'),
       },
       -rc_name       => 'default',
       -analysis_capacity => 10,
