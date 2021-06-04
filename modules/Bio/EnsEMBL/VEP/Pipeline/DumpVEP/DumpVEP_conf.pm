@@ -70,7 +70,7 @@ sub default_options {
     dump_vep_data_dir       => $self->o('data_dir') . '/dump_vep',
     
     # temporary space
-    tmp_dir       => '/hps/scratch/variation',
+    tmp_dir       => '/hps/scratch/vepdump',
         
     # dump databases of this version number
     ensembl_release => undef,
