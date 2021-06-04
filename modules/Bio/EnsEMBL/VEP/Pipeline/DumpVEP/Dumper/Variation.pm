@@ -91,7 +91,7 @@ sub run {
     }
     $self->{freq_vcf} = $vep_params->{freq_vcf};
   }
-
+  
   $self->dump_chrs($as, $cache);
 
   # bgzip and tabix-index all_vars files
@@ -106,7 +106,7 @@ sub run {
     # add 2, 1 to correct for 0->1 indexing, 1 because we've added a chr column
     my $start_i = $indexes{start} + 2;
     
-    my $tmp_dir = '/hps/nobackup2/production/ensembl/variation/tmpdump';
+    my $tmp_dir = $self->param('tmp_dir');
     
     mkdir($tmp_dir) unless -e $tmp_dir;
    
@@ -296,103 +296,104 @@ sub freqs_from_vcf {
     }
 
     $parser->seek($chr, $list[0]->{start} - 1, $list[-1]->{end} + 1);
+    if (defined $parser->{iterator}){
+      while($parser->next) {
 
-    while($parser->next) {
+        my $vcf_ref  = $parser->get_reference;
+        my $vcf_pos  = $parser->get_raw_start;
+        my @vcf_alts = @{$parser->get_alternatives};
 
-      my $vcf_ref  = $parser->get_reference;
-      my $vcf_pos  = $parser->get_raw_start;
-      my @vcf_alts = @{$parser->get_alternatives};
+        # scan from from pos to inferred end
+        for my $start(grep {$by_pos{$_}} ($vcf_pos..($vcf_pos + length($vcf_ref)))) {
 
-      # scan from from pos to inferred end
-      for my $start(grep {$by_pos{$_}} ($vcf_pos..($vcf_pos + length($vcf_ref)))) {
+          foreach my $v(@{$by_pos{$start}}) {
+            if ($v->{allele_string} =~ /^\/.+$/) {
+              $self->warning('Could not be added to cache ' . $v->{variation_name} . ' ' . $v->{allele_string});
+              next;
+            }
+            $DB::single = 1 if $v->{variation_name} eq 'TMP_ESP_1_179086420_179086420';
 
-        foreach my $v(@{$by_pos{$start}}) {
-          if ($v->{allele_string} =~ /^\/.+$/) {
-            $self->warning('Could not be added to cache ' . $v->{variation_name} . ' ' . $v->{allele_string});
-            next;
-          }
-          $DB::single = 1 if $v->{variation_name} eq 'TMP_ESP_1_179086420_179086420';
-
-          my $matches = [];
-          eval{
-            $matches = get_matched_variant_alleles(
-              {
-                allele_string => $v->{allele_string},
-                pos           => $v->{start},
-                strand        => $v->{strand},
-              },
-              {
-                ref  => $vcf_ref,
-                alts => \@vcf_alts,
-                pos  => $vcf_pos,
-              }
-            );
-          };
-          die "$file Failed to get vf matches for " .$v->{variation_name} ."\n" unless $@ eq '';  
-
-          if(@$matches) {
-
-            my %allele_map = map {$_->{b_index} => $_->{a_allele}} @$matches;
-
-            # get INFO field data from VCF
-            my $info = $parser->get_info;
-
-            foreach my $pop(@{$vcf_conf->{pops}}) {
-
-              my $info_prefix = '';
-              my $info_suffix = '';
-
-              # have to process ExAC differently from 1KG and ESP
-              if($prefix =~ /exac|gnomad/i && $pop) {
-                $info_suffix = '_'.$pop if $pop;
-              }
-              elsif($pop) {
-                $info_prefix = $pop.'_';
-              }
-
-              my $tmp_f;
-
-              if(exists($info->{$info_prefix.'AF'.$info_suffix})) {
-                my $f = $info->{$info_prefix.'AF'.$info_suffix};
-                my @split = split(',', $f);
-
-                # there will be one item in @split for each of the original alts
-                # since we may not be dealing with all the alts here
-                # we have to use the indexes and alts we logged in %allele_map
-                $tmp_f = join(',',
-                  map {$allele_map{$_}.':'.($split[$_] == 0 ? 0 : sprintf('%.4g', $split[$_]))}
-                  grep {$allele_map{$_}}
-                  grep {looks_like_number($split[$_])}
-                  0..$#split
-                );
-              }
-              elsif(exists($info->{$info_prefix.'AC'.$info_suffix})) {
-                my $c = $info->{$info_prefix.'AC'.$info_suffix};
-                my $n = $info->{$info_prefix.'AN'.$info_suffix};
-                my @split = split(',', $c);
-
-                unless($n) {
-                  $n += $_ for @split;
+            my $matches = [];
+            eval{
+              $matches = get_matched_variant_alleles(
+                {
+                  allele_string => $v->{allele_string},
+                  pos           => $v->{start},
+                  strand        => $v->{strand},
+                },
+                {
+                  ref  => $vcf_ref,
+                  alts => \@vcf_alts,
+                  pos  => $vcf_pos,
                 }
+              );
+            };
+            die "$file Failed to get vf matches for " .$v->{variation_name} ."\n" unless $@ eq '';  
+
+            if(@$matches) {
+
+              my %allele_map = map {$_->{b_index} => $_->{a_allele}} @$matches;
+
+              # get INFO field data from VCF
+              my $info = $parser->get_info;
+
+              foreach my $pop(@{$vcf_conf->{pops}}) {
+
+                my $info_prefix = '';
+                my $info_suffix = '';
+
+                # have to process ExAC differently from 1KG and ESP
+                if($prefix =~ /exac|gnomad/i && $pop) {
+                  $info_suffix = '_'.$pop if $pop;
+                }
+                elsif($pop) {
+                  $info_prefix = $pop.'_';
+                }
+
+                my $tmp_f;
+
+                if(exists($info->{$info_prefix.'AF'.$info_suffix})) {
+                  my $f = $info->{$info_prefix.'AF'.$info_suffix};
+                  my @split = split(',', $f);
+
+                  # there will be one item in @split for each of the original alts
+                  # since we may not be dealing with all the alts here
+                  # we have to use the indexes and alts we logged in %allele_map
+                  $tmp_f = join(',',
+                    map {$allele_map{$_}.':'.($split[$_] == 0 ? 0 : sprintf('%.4g', $split[$_]))}
+                    grep {$allele_map{$_}}
+                    grep {looks_like_number($split[$_])}
+                    0..$#split
+                  );
+                }
+                elsif(exists($info->{$info_prefix.'AC'.$info_suffix})) {
+                  my $c = $info->{$info_prefix.'AC'.$info_suffix};
+                  my $n = $info->{$info_prefix.'AN'.$info_suffix};
+                  my @split = split(',', $c);
+
+                  unless($n) {
+                    $n += $_ for @split;
+                  }
                 
-                next unless $n;
+                  next unless $n;
 
-                # ESP VCFs include REF as last allele, just to annoy everyone
-                pop @split if scalar @split > scalar @vcf_alts;
+                  # ESP VCFs include REF as last allele, just to annoy everyone
+                  pop @split if scalar @split > scalar @vcf_alts;
 
-                $tmp_f = join(',',
-                  map {$allele_map{$_}.':'.($split[$_] ? sprintf('%.4g', $split[$_] / $n) : 0)}
-                  grep {$allele_map{$_}}
-                  grep {looks_like_number($split[$_])}
-                  0..$#split
-                );
-              }              
+                  $tmp_f = join(',',
+                    map {$allele_map{$_}.':'.($split[$_] ? sprintf('%.4g', $split[$_] / $n) : 0)}
+                    grep {$allele_map{$_}}
+                    grep {looks_like_number($split[$_])}
+                    0..$#split
+                  );
+                }              
 
-              if(defined($tmp_f) && $tmp_f ne '') {
-                my $store_name = $prefix;
-                $store_name .= ($vcf_conf->{name} eq 'gnomAD' && $pop) ? uc($pop) : $pop;
-                $store_name =~ s/\_$//;
-                $v->{$store_name} = $v->{$store_name} ? $v->{$store_name}.','.$tmp_f : $tmp_f;
+                if(defined($tmp_f) && $tmp_f ne '') {
+                  my $store_name = $prefix;
+                  $store_name .= ($vcf_conf->{name} eq 'gnomAD' && $pop) ? uc($pop) : $pop;
+                  $store_name =~ s/\_$//;
+                  $v->{$store_name} = $v->{$store_name} ? $v->{$store_name}.','.$tmp_f : $tmp_f;
+                }
               }
             }
           }
