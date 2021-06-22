@@ -65,7 +65,7 @@ use base qw(Bio::EnsEMBL::VEP::Runner);
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::Runner;
-use Bio::EnsEMBL::VEP::Utils qw(find_in_ref merge_arrays);
+use Bio::EnsEMBL::VEP::Utils qw(find_in_ref merge_arrays add_to_output);
 use Bio::EnsEMBL::Variation::VariationFeature;
 use Bio::EnsEMBL::Variation::Utils::VEP;
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
@@ -419,13 +419,11 @@ sub _get_all_results {
           my $mane_hgvsc = $object->{'hgvsc'} || '-';
           my $mane_hgvsp = $object->{'hgvsp'} || '-';
 
-          my @mane_object;
-          push @mane_object, 'hgvsg: ' . $mane_hgvsg;
-          push @mane_object, 'hgvsc: ' . $mane_hgvsc;
-          push @mane_object, 'hgvsp: ' . $mane_hgvsp;
-          push @mane_result, join (', ', @mane_object);
-
-          $mane_by_allele{$key_allele}->{'mane_select'} = \@mane_result if (@mane_result);
+          my %mane_object;
+          $mane_object{'hgvsg'} = $mane_hgvsg;
+          $mane_object{'hgvsc'} = $mane_hgvsc;
+          $mane_object{'hgvsp'} = $mane_hgvsp;
+          push @{$mane_by_allele{$key_allele}->{'mane_select'}}, \%mane_object;
         }
       }
     }
@@ -435,7 +433,7 @@ sub _get_all_results {
     foreach my $allele (keys %{$line_by_allele{'consequences'}}) {
       find_in_ref($line_by_allele{'consequences'}->{$allele}, \%want_keys, $results->{$line_id}->{$allele} ||= {input => $line_id});
       find_in_ref($vcf_string_by_allele{$allele}, \%keys_no_allele, $results->{$line_id}->{$allele} ||= {input => $line_id});
-      find_in_ref($mane_by_allele{$allele}, \%key_mane, $results->{$line_id}->{$allele} ||= {input => $line_id});
+      add_to_output($mane_by_allele{$allele}, \%key_mane, $results->{$line_id}->{$allele} ||= {input => $line_id});
     }
 
     if(@{$self->warnings}) {

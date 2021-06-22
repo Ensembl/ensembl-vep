@@ -90,6 +90,7 @@ use vars qw(@ISA @EXPORT_OK);
   &merge_hashes
   &merge_arrays
   &find_in_ref
+  &add_to_output
   &get_compressed_filehandle
   &get_version_data
   &get_version_string
@@ -354,6 +355,46 @@ sub find_in_ref {
   }
 
   return $return;
+}
+
+
+=head2 add_to_output
+
+  Arg 1      : ref $ref
+  Arg 2      : hashref $required_keys
+  Arg 3      : (optional) hashref $return
+  Example    : $data = add_to_output($ref, {foo => 1});
+  Description: Find values for the keys specified in $required_keys in the
+               arbitrarily nested data structure $ref. Values found for
+               the required keys are added to the $return hashref as:
+               {
+                 key1 => [object],
+                 key2 => [object2, object3]
+               }
+  Returntype : hashref
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
+sub add_to_output {
+  my ($ref, $want_keys, $return) = @_;
+
+  $return ||= {};
+
+  foreach my $key(keys %$want_keys) {
+    my $object = $ref->{$key};
+    foreach my $el(@$object) {
+      if($return->{$key}) {
+        push @{$return->{$key}}, $el;
+      }
+      else {
+        $return->{$key} = [$el];
+      }
+    }
+  }
+
 }
 
 
