@@ -283,7 +283,6 @@ sub _get_all_results {
   }
 
   while(my $line = $self->next_output_line(1)) {
-
     delete($line->{id});
     my $line_id = $line->{input};
    
