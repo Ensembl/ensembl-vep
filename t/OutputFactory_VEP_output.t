@@ -94,14 +94,13 @@ is_deeply(
     '## Protein_position : Relative position of amino acid in protein',
     '## Amino_acids : Reference and variant amino acids',
     '## Codons : Reference and variant codon sequence',
-    '## Existing_variation : Identifier(s) of co-located known variants',
     '## Extra column keys:',
     '## IMPACT : Subjective impact classification of consequence type',
     '## DISTANCE : Shortest distance from variant to transcript',
     '## STRAND : Strand of the feature (1/-1)',
     '## FLAGS : Transcript quality flags',
     '## custom_test : test.vcf.gz (overlap)',
-    "#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tExisting_variation\tExtra"
+    "#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tExtra"
   ],
   'headers'
 );
@@ -114,18 +113,18 @@ my $runner = get_annotated_buffer_runner({
 is(
   $runner->get_OutputFactory->headers->[-2].$runner->get_OutputFactory->headers->[-1],
   "## test : header".
-  "#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tExisting_variation\tExtra",
+  "#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tExtra",
   'headers - plugin'
 );
 
 
-is($of->output_hash_to_line({}), '-'.("\t\-" x 13), 'output_hash_to_line - empty');
+is($of->output_hash_to_line({}), '-'.("\t\-" x 12), 'output_hash_to_line - empty');
 
 is(
   $of->output_hash_to_line({
     Uploaded_variation => 0,
   }),
-  '0'.("\t\-" x 13),
+  '0'.("\t\-" x 12),
   'output_hash_to_line - test 0'
 );
 
@@ -134,7 +133,7 @@ is(
     Existing_variation => 'rs123',
     Foo => 'bar',
   }),
-  '-'.("\t\-" x 11)."\trs123\tFoo\=bar",
+  '-'.("\t\-" x 11)."\tExisting_variation\=rs123;Foo\=bar",
   'output_hash_to_line - test extra 1'
 );
 
@@ -144,7 +143,7 @@ is(
     Foo => 'bar',
     IMPACT => 'HIGH'
   }),
-  '-'.("\t\-" x 11)."\trs123\tIMPACT\=HIGH;Foo\=bar",
+  '-'.("\t\-" x 11)."\tIMPACT\=HIGH;Existing_variation\=rs123;Foo\=bar",
   'output_hash_to_line - test extra 2'
 );
 
@@ -170,7 +169,7 @@ is(
     Transcript
     3_prime_UTR_variant
     1122
-    - - - - -
+    - - - -
     REF_ALLELE=C;IMPACT=MODIFIER;STRAND=-1
   )),
   'get_all_lines_by_InputBuffer - check first'
@@ -191,7 +190,6 @@ is(
     278
     V/I
     Gtt/Att
-    -
     REF_ALLELE=C;IMPACT=MODERATE;STRAND=-1;FLAGS=cds_start_NF
   )),
   'get_all_lines_by_InputBuffer - check last'
@@ -215,7 +213,7 @@ is(
   'HGVSc=ENST00000307301.11:c.*18G>A;'.
   'AF=0.0010;AFR_AF=0.003;AMR_AF=0.0014;EAS_AF=0;EUR_AF=0;SAS_AF=0;AA_AF=0.004998;EA_AF=0;'.
   'gnomAD_AF=0.0003478;gnomAD_AFR_AF=0.004643;gnomAD_AMR_AF=0.0003236;gnomAD_ASJ_AF=0;'.
-  'gnomAD_EAS_AF=0;gnomAD_FIN_AF=0;gnomAD_NFE_AF=1.886e-05;gnomAD_OTH_AF=0;gnomAD_SAS_AF=0;MAX_AF=0.004998;MAX_AF_POPS=AA',
+  'gnomAD_EAS_AF=0;gnomAD_FIN_AF=0;gnomAD_NFE_AF=1.886e-05;gnomAD_OTH_AF=0;gnomAD_SAS_AF=0;MAX_AF=0.004998;MAX_AF_POPS=AA;Existing_variation=rs142513484',
   'get_all_lines_by_InputBuffer - everything'
 );
 
@@ -249,7 +247,7 @@ SKIP: {
       Transcript
       3_prime_UTR_variant
       1122
-      - - - - -
+      - - - -
       IMPACT=MODIFIER;STRAND=-1;test=test1;test_FILTER=PASS;test_FOO=BAR
     )),
     'get_all_lines_by_InputBuffer - custom'

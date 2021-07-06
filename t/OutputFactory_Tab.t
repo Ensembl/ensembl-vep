@@ -59,7 +59,6 @@ is_deeply(
     Protein_position
     Amino_acids
     Codons
-    Existing_variation
     IMPACT
     DISTANCE
     STRAND
@@ -88,13 +87,12 @@ is_deeply(
     '## Protein_position : Relative position of amino acid in protein',
     '## Amino_acids : Reference and variant amino acids',
     '## Codons : Reference and variant codon sequence',
-    '## Existing_variation : Identifier(s) of co-located known variants',
     '## IMPACT : Subjective impact classification of consequence type',
     '## DISTANCE : Shortest distance from variant to transcript',
     '## STRAND : Strand of the feature (1/-1)',
     '## FLAGS : Transcript quality flags',
     '## custom_test : test.vcf.gz (overlap)',
-    "#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tExisting_variation\tIMPACT\tDISTANCE\tSTRAND\tFLAGS\tcustom_test"
+    "#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tIMPACT\tDISTANCE\tSTRAND\tFLAGS\tcustom_test"
   ],
   'headers'
 );
@@ -119,7 +117,7 @@ my $runner = get_annotated_buffer_runner({
 is(
   $runner->get_OutputFactory->headers->[-2].$runner->get_OutputFactory->headers->[-1],
   "## test : header".
-  "#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tExisting_variation\tREF_ALLELE\tIMPACT\tDISTANCE\tSTRAND\tFLAGS\ttest",
+  "#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tREF_ALLELE\tIMPACT\tDISTANCE\tSTRAND\tFLAGS\ttest",
   'headers - plugin'
 );
 
@@ -127,13 +125,13 @@ $of = Bio::EnsEMBL::VEP::OutputFactory::Tab->new({
   config => $cfg,
   header_info => $test_cfg->{header_info}
 });
-is($of->output_hash_to_line({}), '-'.("\t\-" x 17), 'output_hash_to_line - empty');
+is($of->output_hash_to_line({}), '-'.("\t\-" x 16), 'output_hash_to_line - empty');
 
 is(
   $of->output_hash_to_line({
     Uploaded_variation => 0,
   }),
-  '0'.("\t\-" x 17),
+  '0'.("\t\-" x 16),
   'output_hash_to_line - test 0'
 );
 
@@ -159,7 +157,7 @@ is(
     Transcript
     3_prime_UTR_variant
     1122
-    - - - - -
+    - - - -
     C
     MODIFIER
     -
@@ -184,7 +182,6 @@ is(
     278
     V/I
     Gtt/Att
-    -
     C
     MODERATE
     -
@@ -224,7 +221,7 @@ SKIP: {
       Transcript
       3_prime_UTR_variant
       1122
-      - - - - -
+      - - - -
       MODIFIER
       -
       -1
@@ -249,10 +246,10 @@ $of = Bio::EnsEMBL::VEP::OutputFactory::Tab->new({config => $ib->config});
 is(
   $lines[0],
   "rs142513484\t21:25585733\tT\tENSG00000154719\tENST00000307301\tTranscript\t3_prime_UTR_variant\t1122\t".
-  "-\t-\t-\t-\trs142513484\tMODIFIER\t-\t-1\t-\tSNV\tMRPL39\tHGNC\tHGNC:14027\tprotein_coding\tYES\t-\t-\t5\t-\t".
+  "-\t-\t-\t-\tMODIFIER\t-\t-1\t-\tSNV\tMRPL39\tHGNC\tHGNC:14027\tprotein_coding\tYES\t-\t-\t5\t-\t".
   "CCDS33522.1\tENSP00000305682\tQ9NYK5\t-\tUPI00001AEAC0\t-\t-\t-\t-\t11/11\t-\t-\t-\tENST00000307301.11:c.*18G>A\t".
   "-\t-\t0.0010\t0.003\t0.0014\t0\t0\t0\t0.004998\t0\t0.0003478\t0.004643\t0.0003236\t0\t0\t0\t1.886e-05\t0\t0\t".
-  "0.004998\tAA\t-\t-\t-\t-\t-\t-\t-\t-\t-",
+  "0.004998\tAA\t-\t-\t-\trs142513484\t-\t-\t-\t-\t-\t-",
   'get_all_lines_by_InputBuffer - everything'
 );
 

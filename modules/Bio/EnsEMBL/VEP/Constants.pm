@@ -119,7 +119,7 @@ our @FLAG_FIELDS = (
   { flag => 'check_frequency', fields => ['FREQS'] },
 
   # misc variation stuff
-  { flag => 'check_existing',  fields => ['CLIN_SIG','SOMATIC','PHENO'] },
+  { flag => 'check_existing',  fields => ['CLIN_SIG','SOMATIC','PHENO', 'Existing_variation'] },
   { flag => 'pubmed',          fields => ['PUBMED'] },
   { flag => 'check_svs',       fields => ['SV'] },
   { flag => 'dont_skip',       fields => ['CHECK_REF'] },
@@ -256,7 +256,6 @@ our @DEFAULT_OUTPUT_COLS = qw(
   Protein_position
   Amino_acids
   Codons
-  Existing_variation
 );
 
 our %TS_TV = (

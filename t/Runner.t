@@ -244,7 +244,7 @@ is_deeply(
       Transcript
       3_prime_UTR_variant
       1122
-      - - - - -
+      - - - -
       IMPACT=MODIFIER;STRAND=-1
     )),
     join("\t", qw(
@@ -260,7 +260,6 @@ is_deeply(
       331
       A/T
       Gca/Aca
-      -
       IMPACT=MODERATE;STRAND=-1
     )),
     join("\t", qw(
@@ -271,7 +270,6 @@ is_deeply(
       ENST00000567517
       Transcript
       upstream_gene_variant
-      -
       -
       -
       -
@@ -296,7 +294,7 @@ is(
     Transcript
     3_prime_UTR_variant
     1122
-    - - - - -
+    - - - -
     IMPACT=MODIFIER;STRAND=-1
   )),
   'next_output_line'
@@ -432,14 +430,14 @@ ok($runner->run, 'run - ok');
 open IN, $test_cfg->{user_file}.'.out';
 my @tmp_lines = <IN>;
 close IN;
-is(scalar @tmp_lines, 40, 'run - count lines');
+is(scalar @tmp_lines, 39, 'run - count lines');
 
 is_deeply(
   [grep {!/^\#/} @tmp_lines],
   [
-    "rs142513484\t21:25585733\tT\tENSG00000154719\tENST00000307301\tTranscript\t3_prime_UTR_variant\t1122\t-\t-\t-\t-\t-\tIMPACT=MODIFIER;STRAND=-1\n",
-    "rs142513484\t21:25585733\tT\tENSG00000154719\tENST00000352957\tTranscript\tmissense_variant\t1033\t991\t331\tA/T\tGca/Aca\t-\tIMPACT=MODERATE;STRAND=-1\n",
-    "rs142513484\t21:25585733\tT\tENSG00000260583\tENST00000567517\tTranscript\tupstream_gene_variant\t-\t-\t-\t-\t-\t-\tIMPACT=MODIFIER;DISTANCE=2407;STRAND=-1\n",
+    "rs142513484\t21:25585733\tT\tENSG00000154719\tENST00000307301\tTranscript\t3_prime_UTR_variant\t1122\t-\t-\t-\t-\tIMPACT=MODIFIER;STRAND=-1\n",
+    "rs142513484\t21:25585733\tT\tENSG00000154719\tENST00000352957\tTranscript\tmissense_variant\t1033\t991\t331\tA/T\tGca/Aca\tIMPACT=MODERATE;STRAND=-1\n",
+    "rs142513484\t21:25585733\tT\tENSG00000260583\tENST00000567517\tTranscript\tupstream_gene_variant\t-\t-\t-\t-\t-\tIMPACT=MODIFIER;DISTANCE=2407;STRAND=-1\n",
   ],
   'run - lines content'
 );
