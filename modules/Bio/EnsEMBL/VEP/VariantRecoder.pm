@@ -135,7 +135,7 @@ sub new {
 
   # return MANE Select transcripts
   # switches on hgvsg, hgvsc and hgvsp
-  if($config->{mane_select} && $config->{fields} !~ /mane_select/){
+  if($config->{mane_select}){
     $config->{fields} = $config->{fields} . ',mane_select';
     $config->{hgvsg} = 1;
     $config->{hgvsc} = 1;
