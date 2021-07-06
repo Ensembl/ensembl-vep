@@ -65,7 +65,7 @@ use base qw(Bio::EnsEMBL::VEP::Runner);
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::Runner;
-use Bio::EnsEMBL::VEP::Utils qw(find_in_ref merge_arrays);
+use Bio::EnsEMBL::VEP::Utils qw(find_in_ref merge_arrays add_to_output);
 use Bio::EnsEMBL::Variation::VariationFeature;
 use Bio::EnsEMBL::Variation::Utils::VEP;
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
@@ -131,6 +131,15 @@ sub new {
 
   if($config->{var_synonyms} && $config->{fields} !~ /var_synonyms/){
     $config->{fields} = $config->{fields} . ',var_synonyms';
+  }
+
+  # return MANE Select transcripts
+  # switches on hgvsg, hgvsc and hgvsp
+  if($config->{mane_select}){
+    $config->{fields} = $config->{fields} . ',mane_select';
+    $config->{hgvsg} = 1;
+    $config->{hgvsc} = 1;
+    $config->{hgvsp} = 1;
   }
 
   my $self = $class->SUPER::new($config);
@@ -270,6 +279,13 @@ sub _get_all_results {
     delete($want_keys{'var_synonyms'});
   }
 
+  # store MANE key in a separate hash to distingish it from mane_select coming from vep
+  my %key_mane;
+  if($want_keys{'mane_select'}) {
+    $key_mane{'mane_select'} = 1;
+    delete($want_keys{'mane_select'});
+  }
+
   while(my $line = $self->next_output_line(1)) {
     delete($line->{id});
     my $line_id = $line->{input};
@@ -394,11 +410,33 @@ sub _get_all_results {
       }
     }
 
+    ################################
+    ####### MANE transcripts #######
+    my %mane_by_allele;
+    foreach my $key_allele (keys %{$line_by_allele{'consequences'}}) {
+      my @mane_result;
+
+      foreach my $object (@{$line_by_allele{'consequences'}->{$key_allele}}) {
+        if((grep {$_ =~ 'mane_select'} keys %{$object})) {
+          my $mane_hgvsg = $object->{'hgvsg'} || '-';
+          my $mane_hgvsc = $object->{'hgvsc'} || '-';
+          my $mane_hgvsp = $object->{'hgvsp'} || '-';
+
+          my %mane_object;
+          $mane_object{'hgvsg'} = $mane_hgvsg;
+          $mane_object{'hgvsc'} = $mane_hgvsc;
+          $mane_object{'hgvsp'} = $mane_hgvsp;
+          push @{$mane_by_allele{$key_allele}->{'mane_select'}}, \%mane_object;
+        }
+      }
+    }
+
     merge_arrays($order, [$line_id]);
 
     foreach my $allele (keys %{$line_by_allele{'consequences'}}) {
       find_in_ref($line_by_allele{'consequences'}->{$allele}, \%want_keys, $results->{$line_id}->{$allele} ||= {input => $line_id});
       find_in_ref($vcf_string_by_allele{$allele}, \%keys_no_allele, $results->{$line_id}->{$allele} ||= {input => $line_id});
+      add_to_output($mane_by_allele{$allele}, \%key_mane, $results->{$line_id}->{$allele} ||= {input => $line_id});
     }
 
     if(@{$self->warnings}) {
