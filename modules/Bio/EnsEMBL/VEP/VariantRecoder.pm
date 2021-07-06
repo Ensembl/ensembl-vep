@@ -134,8 +134,12 @@ sub new {
   }
 
   # return MANE Select transcripts
-  if($config->{mane_select}){
+  # switches on hgvsg, hgvsc and hgvsp
+  if($config->{mane_select} && $config->{fields} !~ /mane_select/){
     $config->{fields} = $config->{fields} . ',mane_select';
+    $config->{hgvsg} = 1;
+    $config->{hgvsc} = 1;
+    $config->{hgvsp} = 1;
   }
 
   my $self = $class->SUPER::new($config);
