@@ -349,6 +349,31 @@ SKIP: {
     'recode - output MANE Select'
   );
 
+  my $vr_mane_fields = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', mane_select => 1, fields => 'spdi'});
+
+  is_deeply(
+    $vr_mane_fields->recode("rs142513484"),
+    [
+      {
+      "T" =>
+        {
+          "input" => "rs142513484",
+          "spdi" => [
+             "NC_000021.9:25585732:C:T"
+          ],
+          "mane_select" => [
+            {
+              'hgvsp' => 'ENSP00000284967.6:p.Ala331Thr',
+              'hgvsc' => 'ENST00000352957.8:c.991G>A',
+              'hgvsg' => 'NC_000021.9:g.25585733C>T'
+             }
+          ]
+        }
+      }
+    ],
+    'recode - output MANE Select and fields'
+  );
+
   };
 
 done_testing();
