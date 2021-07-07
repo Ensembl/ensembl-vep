@@ -374,6 +374,44 @@ SKIP: {
     'recode - output MANE Select and fields'
   );
 
+  my $vr_mane_hgvs = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', mane_select => 1, fields => 'spdi,hgvsg'});
+
+  is_deeply(
+    $vr_mane_hgvs->recode("GABPA:p.Trp189Ter"),
+    [
+      {
+      'warnings' => [
+        'Possible invalid use of gene or protein identifier \'GABPA\' as HGVS reference; GABPA:p.Trp189Ter may resolve to multiple genomic locations'
+      ],
+      "A" =>
+        {
+          "input" => "GABPA:p.Trp189Ter",
+          "hgvsg" => [
+             "NC_000021.9:g.25758022G>A",
+             "NC_000021.9:g.25758023G>A"
+          ],
+          "spdi" => [
+             "NC_000021.9:25758021:G:A",
+             "NC_000021.9:25758022:G:A"
+          ],
+          "mane_select" => [
+           {
+             "hgvsp" => "ENSP00000382948.3:p.Trp189Ter",
+             "hgvsc" => "ENST00000400075.3:c.566G>A",
+             "hgvsg" => "NC_000021.9:g.25758022G>A"
+           },
+           {
+             "hgvsp" => "ENSP00000382948.3:p.Trp189Ter",
+             "hgvsc" => "ENST00000400075.3:c.567G>A",
+             "hgvsg" => "NC_000021.9:g.25758023G>A"
+            }
+          ]
+        }
+      }
+    ],
+    'recode - output MANE Select multiple genomic location'
+  );
+
   };
 
 done_testing();
