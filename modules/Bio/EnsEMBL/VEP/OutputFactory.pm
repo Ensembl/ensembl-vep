@@ -874,7 +874,7 @@ sub VariationFeature_to_output_hash {
 
   my $alt_allele_vcf = ${$converted_to_vcf}[4];
 
-  if($self->{vcf_string} || (defined($self->{_config}->{_params}->{fields}) && grep(/vcf_string/, @{$self->{_config}->{_params}->{fields}}))){
+  if($self->{vcf_string}){
     if($alt_allele_vcf =~ /,/){
       my @list_vcfs;
       my @alt_splited_list = split(q(,), $alt_allele_vcf);
@@ -887,6 +887,14 @@ sub VariationFeature_to_output_hash {
     else{
       $hash->{vcf_string} = $vf->{chr}.'-'.${$converted_to_vcf}[1].'-'.${$converted_to_vcf}[3].'-'.${$converted_to_vcf}[4];
     }
+  }
+
+  # get variation synonyms for Variant Recoder
+  # if the tool is Variant Recoder fetches the variation synonyms from the database
+  if($self->{_config}->{_params}->{is_vr} && $self->{var_synonyms}){
+    my $variation = $vf->variation();
+    my $var_synonyms = $variation->get_all_synonyms('', 1);
+    $hash->{var_synonyms} = $var_synonyms;
   }
 
   # overlapping SVs
@@ -1003,7 +1011,8 @@ sub add_colocated_variant_info {
     push @{$hash->{Existing_variation}}, $ex->{variation_name} if $ex->{variation_name};
 
     # Variation Synonyms
-    push @{$hash->{VAR_SYNONYMS}}, $ex->{var_synonyms} if $self->{var_synonyms} && $ex->{var_synonyms}; 
+    # VEP fetches the variation synonyms from the cache
+    push @{$hash->{VAR_SYNONYMS}}, $ex->{var_synonyms} if $self->{var_synonyms} && $ex->{var_synonyms} && !$self->{_config}->{_params}->{is_vr};
 
     # Find allele specific clin_sig data if it exists
     if(defined($ex->{clin_sig_allele}) && $self->{clin_sig_allele} )

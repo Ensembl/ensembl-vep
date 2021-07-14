@@ -465,6 +465,12 @@ sub new {
   
   # set defaults
   # we need to do this first so paths are set for reading config etc
+
+  # Assign default port for GRCh37
+  if (defined($config->{'assembly'}) && lc($config->{'assembly'}) eq 'grch37' && defined($config->{'database'}) && !defined($config->{'port'})) {
+    $config->{'port'} = 3337;
+  }
+
   foreach my $key(keys %DEFAULTS) {
     $config->{$key} = $DEFAULTS{$key} unless exists($config->{$key});
   }
@@ -628,7 +634,7 @@ sub _is_flag_active {
 sub check_config {
   my $self = shift;
   my $config = shift;
-    
+
   # force quiet if outputting to STDOUT
   if(defined($config->{output_file}) && $config->{output_file} =~ /stdout/i) {
     delete $config->{verbose} if defined($config->{verbose});
@@ -656,10 +662,11 @@ sub check_config {
   }
   
   # check incompatible flags
+  # exception: var_synonyms works online only for Variant Recoder
   unless($config->{safe}) {
     foreach my $flag(grep {$self->_is_flag_active($config, $_)} keys %INCOMPATIBLE) {
       foreach my $invalid(grep {$self->_is_flag_active($config, $_)} @{$INCOMPATIBLE{$flag}}) {
-        die sprintf("ERROR: Can't use --%s and --%s together\n", $flag, $invalid);
+        die sprintf("ERROR: Can't use --%s and --%s together\n", $flag, $invalid) unless $self->{_raw_config}->{is_vr} && $flag eq "database" && $invalid eq "var_synonyms";
       }
     }
   }
