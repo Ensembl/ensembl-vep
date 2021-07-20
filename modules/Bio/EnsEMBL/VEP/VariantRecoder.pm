@@ -69,6 +69,7 @@ use Bio::EnsEMBL::VEP::Utils qw(find_in_ref merge_arrays add_to_output);
 use Bio::EnsEMBL::Variation::VariationFeature;
 use Bio::EnsEMBL::Variation::Utils::VEP;
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
+use Bio::EnsEMBL::Variation::Utils::Sequence qw(ga4gh_vrs_from_spdi);
 
 =head2 new
 
@@ -117,6 +118,7 @@ sub new {
   # this first one only switches on the HGVS options for the requested fields  
   $config->{$_} = 1 for grep {$_ =~ /^hgvs/} keys %set_fields;
   $config->{$_} = 1 for grep {$_ =~ /^spdi/} keys %set_fields;
+  $config->{$_} = 1 for grep {$_ =~ /^ga4gh_vrs/} keys %set_fields;
 
   # and this one switches on check_existing if the user wants variant IDs
   my %opt_map = ('id' => 'check_existing');
@@ -140,6 +142,10 @@ sub new {
     $config->{hgvsg} = 1;
     $config->{hgvsc} = 1;
     $config->{hgvsp} = 1;
+  }
+
+  if($config->{ga4gh_vrs}){
+    $config->{fields} = $config->{fields} . ',ga4gh_vrs';
   }
 
   my $self = $class->SUPER::new($config);
@@ -284,6 +290,12 @@ sub _get_all_results {
   if($want_keys{'mane_select'}) {
     $key_mane{'mane_select'} = 1;
     delete($want_keys{'mane_select'});
+  }
+
+  my $ga4gh_vrs = 0;
+  if ($want_keys{'ga4gh_vrs'}) {
+    $want_keys{'ga4gh_spdi'} = 1;
+    $ga4gh_vrs = 1;
   }
 
   while(my $line = $self->next_output_line(1)) {
@@ -437,6 +449,20 @@ sub _get_all_results {
       find_in_ref($line_by_allele{'consequences'}->{$allele}, \%want_keys, $results->{$line_id}->{$allele} ||= {input => $line_id});
       find_in_ref($vcf_string_by_allele{$allele}, \%keys_no_allele, $results->{$line_id}->{$allele} ||= {input => $line_id});
       add_to_output($mane_by_allele{$allele}, \%key_mane, $results->{$line_id}->{$allele} ||= {input => $line_id});
+    }
+
+    # Adding GA4GH VRS allele objects
+    # The genomic refseq SPDI are stored in 'ga4gh_spdi'
+    # The find_in_ref calls make the ga4gh_spdi unique
+    if ($ga4gh_vrs) {
+      for my $allele (keys %{$results->{$line_id}}) {
+        next if (! exists $results->{$line_id}->{$allele}->{'ga4gh_spdi'});
+        my @ga4gh_spdis = @{$results->{$line_id}->{$allele}->{'ga4gh_spdi'}};
+        for my $ga4gh_spdi (@ga4gh_spdis) {
+          push @{$results->{$line_id}->{$allele}->{'ga4gh_vrs'}}, ga4gh_vrs_from_spdi($ga4gh_spdi);
+        }
+        delete($results->{$line_id}->{$allele}->{'ga4gh_spdi'});
+      }
     }
 
     if(@{$self->warnings}) {
