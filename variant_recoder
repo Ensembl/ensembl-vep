@@ -83,6 +83,7 @@ GetOptions(
   'vcf_string',              # returns the vcf format in a string
   'var_synonyms',            # returns the variation synonyms
   'mane_select',             # returns MANE Select transcripts in HGVS format (e.g. hgvsg, hgvsc, hgvsp)
+  'ga4gh_vrs',               # returns the GA4GH VRS allele object
 
   # these flags are for use with RefSeq caches
   'bam=s',                   # bam file used to modify transcripts
