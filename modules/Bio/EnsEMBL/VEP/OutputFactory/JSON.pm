@@ -84,6 +84,7 @@ use base qw(Bio::EnsEMBL::VEP::OutputFactory);
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Variation::Utils::Constants;
+use Bio::EnsEMBL::Variation::Utils::Sequence qw(ga4gh_vrs_from_spdi);
 
 use Bio::EnsEMBL::VEP::Utils qw(numberify);
 
@@ -361,7 +362,12 @@ sub add_VariationFeatureOverlapAllele_info {
       $vfoa_hash->{$rename{$key}} = $vfoa_hash->{$key};
       delete $vfoa_hash->{$key};
     }
-
+    if (defined($vfoa_hash->{ga4gh_spdi})) {
+      my $ga4gh_vrs = ga4gh_vrs_from_spdi($vfoa_hash->{ga4gh_spdi});
+      if ($ga4gh_vrs) {
+          $vfoa_hash->{ga4gh_vrs} = $ga4gh_vrs;
+      }
+    }
     push @{$hash->{$ftype.'_consequences'}}, $vfoa_hash;
   }
 
