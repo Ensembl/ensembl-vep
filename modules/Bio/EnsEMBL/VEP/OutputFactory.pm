@@ -1116,8 +1116,8 @@ sub add_colocated_frequency_data {
 
   my $max_af = 0;
   my @max_af_pops;
-
-  foreach my $group(@keys) {
+  
+  foreach my $group(sort @keys) {
     foreach my $key(grep {$ex->{$_}} @{$FREQUENCY_KEYS{$group}}) {
 
       my %freq_data;
