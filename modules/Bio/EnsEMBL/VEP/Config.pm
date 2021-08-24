@@ -396,8 +396,7 @@ our %INCOMPATIBLE = (
   tab         => [qw(vcf json)],
   individual  => [qw(minimal)],
   check_ref   => [qw(lookup_ref)],
-  check_svs   => [qw(offline)],
-  ga4gh_vrs   => [qw(vcf tab txt)]
+  check_svs   => [qw(offline)]
 );
 
 # deprecated/replaced flags
