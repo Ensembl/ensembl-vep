@@ -141,6 +141,7 @@ GetOptions(
   'gene_phenotype',          # indicate if genes are phenotype-associated
   'mirna',                   # identify miRNA structural elements overlapped by variant
   'spdi',                    # add genomic SPDI
+  'ga4gh_vrs',               # add GA4GH_VRS
   'hgvs',                    # add HGVS names to extra column
   'hgvsg',                   # add HGVS g. also
   'hgvsg_use_accession',     # force HGVSg to return on chromosome accession instead of input chr name

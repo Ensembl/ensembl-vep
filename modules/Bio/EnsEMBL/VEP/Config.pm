@@ -381,6 +381,7 @@ our %REQUIRES = (
   phyloP    => [qw(ucsc_assembly)],
   phastCons => [qw(ucsc_assembly)],
   custom_multi_allelic => [qw(custom)],
+  ga4gh_vrs => [qw(json)]
 );
 
 # incompatible options
@@ -395,7 +396,7 @@ our %INCOMPATIBLE = (
   tab         => [qw(vcf json)],
   individual  => [qw(minimal)],
   check_ref   => [qw(lookup_ref)],
-  check_svs   => [qw(offline)],
+  check_svs   => [qw(offline)]
 );
 
 # deprecated/replaced flags

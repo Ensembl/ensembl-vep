@@ -227,6 +227,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'vcf_string' => undef,
   'clin_sig_allele' => 1,
   'var_synonyms' => undef,
+  'ga4gh_vrs' => undef,
 }, 'Bio::EnsEMBL::VEP::OutputFactory::VEP_output' ), 'get_OutputFactory');
 
 
@@ -1160,7 +1161,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg && !$@;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 5 unless $can_use_db;
+  skip 'No local database configured', 6 unless $can_use_db;
 
   my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens') if $can_use_db;
   
@@ -1191,6 +1192,64 @@ SKIP: {
   is($info->{db_host}, $db_cfg->{host}, 'get_output_header_info - db_host');
   ok($info->{db_name} =~ /homo_vepiens_core.+/, 'get_output_header_info - db_name');
   ok($info->{db_version}, 'get_output_header_info - db_version');
+
+  # GA4GH VRS Allele object
+  $runner = Bio::EnsEMBL::VEP::Runner->new({
+    %$cfg_hash,
+    fasta => $test_cfg->{fasta},
+    input_data => '21 10524654 . C A',
+    %$db_cfg,
+    database => 1,
+    ga4gh_vrs => 1,
+    json => 1,
+    offline => 0,
+    species => 'human_vep',
+  });
+
+  $runner->init();
+  is_deeply(
+     $runner->run_rest(),
+     [{
+         "allele_string" => "C/A",
+         "assembly_name" => "GRCh38",
+         "end" => 10524654,
+         "id" => ".",
+         "input" =>  "21 10524654 . C A",
+         "intergenic_consequences" => [
+             {
+                 "consequence_terms" => [
+                     "intergenic_variant"
+                 ],
+                 "ga4gh_spdi" => "NC_000021.9:10524653:C:A",
+                 "ga4gh_vrs" =>  {
+                     "location" => {
+                         "interval"  => {
+                             "end" =>  10524654,
+                             "start" => 10524653,
+                             "type" => "SimpleInterval"
+                         },
+                         "sequence_id" => "refseq:NC_000021.9",
+                         "type" => "SequenceLocation"
+                     },
+                     "state" => {
+                         "sequence" => "A",
+                         "type" => "SequenceState"
+                     },
+                     "type" =>  "Allele"
+                 },
+                 "impact" =>  "MODIFIER",
+                 "variant_allele" => "A"
+             }
+         ],
+         "most_severe_consequence" => "intergenic_variant",
+         "seq_region_name" =>  "21",
+         "start" =>  10524654,
+         "strand" => 1
+     }],
+     'GA4GH VRS Allele',
+  );
 };
+
+
 
 done_testing();
