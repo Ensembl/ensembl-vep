@@ -946,6 +946,9 @@ sub VariationFeature_to_output_hash {
   $hash->{CHECK_REF} = 'failed' if defined($vf->{check_ref_failed});
 
   $self->stats->log_VariationFeature($vf, $hash) unless $self->{no_stats};
+  
+  # ensures that multi-allelic variants with different shift lengths don't cache incorrect data
+  $self->reset_shifted_positions($vf);
 
   return $hash;
 }
