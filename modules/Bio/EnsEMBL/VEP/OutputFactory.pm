@@ -1101,7 +1101,8 @@ sub add_colocated_frequency_data {
   my @ex_alleles = split('/', $ex->{allele_string});
 
   # gmaf stored a bit differently, but we can get it in the same format
-  $ex->{AF} = $ex->{minor_allele}.':'.$ex->{minor_allele_freq} if $ex->{minor_allele};
+  # AF only set for SNV, to exclude incorrect AF for insertion/deletion
+  $ex->{AF} = $ex->{minor_allele}.':'.$ex->{minor_allele_freq} if ($ex->{minor_allele} && $vf->class_SO_term() eq 'SNV');
 
   my @keys = keys %FREQUENCY_KEYS;
   @keys = grep {$self->{$_}} @keys unless $self->{max_af};

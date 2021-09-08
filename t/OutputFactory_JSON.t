@@ -123,7 +123,7 @@ SKIP: {
   $super_of->{af_esp} = 1;
   $super_of->{af_gnomad} = 1;
   $super_of->{af_exac} = 1;
-  $super_of->add_colocated_frequency_data({}, $frequency_hash, $ex);
+  $super_of->add_colocated_frequency_data($vf, $frequency_hash, $ex);
   is_deeply(
     $of->add_colocated_variant_info_JSON({}, [$frequency_hash], $ex),
     {
@@ -187,7 +187,7 @@ SKIP: {
   $super_of->{af_esp} = 1;
   $super_of->{af_gnomad} = 1;
   $super_of->{af_exac} = 1;
-  $super_of->add_colocated_frequency_data({}, $frequency_hash, $ex);
+  $super_of->add_colocated_frequency_data($vf, $frequency_hash, $ex);
   my $x = $of->add_colocated_variant_info_JSON({}, [$frequency_hash], $ex);
 
   is_deeply(
