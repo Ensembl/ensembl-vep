@@ -32,6 +32,7 @@ package Bio::EnsEMBL::VEP::Pipeline::DumpVEP::DumpVEP_conf;
 
 use strict;
 use warnings;
+use File::Spec::Functions qw(catdir);
 
 use Bio::EnsEMBL::Hive::PipeConfig::HiveGeneric_conf;
  # All Hive databases configuration files should inherit from HiveGeneric, directly or indirectly
@@ -70,7 +71,7 @@ sub default_options {
     dump_vep_data_dir       => $self->o('data_dir') . '/dump_vep',
     
     # temporary space
-    tmp_dir       => '/hps/scratch/vepdump',
+    tmp_dir                 => catdir('/hps/nobackup/flicek/ensembl', $ENV{'USER'}, $self->o('pipeline_name'), 'vepdump'),
         
     # dump databases of this version number
     ensembl_release => undef,
