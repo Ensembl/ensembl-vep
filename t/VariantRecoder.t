@@ -46,7 +46,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg && !$@;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 22 unless $can_use_db;
+  skip 'No local database configured', 27 unless $can_use_db;
 
   my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens') if $can_use_db;
   
