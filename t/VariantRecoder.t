@@ -46,7 +46,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg && !$@;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 24 unless $can_use_db;
+  skip 'No local database configured', 27 unless $can_use_db;
 
   my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens') if $can_use_db;
   
@@ -445,8 +445,21 @@ SKIP: {
     'recode - SNV SPDI input - output GA4GH VRS Allele, SPDI'
     );
 
+  my $vr_mane_hgvs = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', mane_select => 1, fields => 'spdi'});
+
+  my $result = $vr_mane_hgvs->recode("GABPA:p.Trp189Ter");
+  my $mane_result = @$result[0]->{"A"}->{"mane_select"};
+  my @mane_hgvsg;
+  foreach my $x (@$mane_result) {
+    push @mane_hgvsg, $x->{"hgvsg"};
+  }
+
+  is_deeply(
+  [sort @mane_hgvsg],
+  [qw(NC_000021.9:g.25758022G>A NC_000021.9:g.25758023G>A)],
+  'recode - output MANE Select returns multiple genomic locations'
+  );
+
 };
-
-
 
 done_testing();

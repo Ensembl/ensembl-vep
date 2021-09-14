@@ -287,6 +287,7 @@ sub _get_all_results {
 
   # store MANE key in a separate hash to distingish it from mane_select coming from vep
   my %key_mane;
+  my %mane_unique_keys;
   if($want_keys{'mane_select'}) {
     $key_mane{'mane_select'} = 1;
     delete($want_keys{'mane_select'});
@@ -430,15 +431,23 @@ sub _get_all_results {
 
       foreach my $object (@{$line_by_allele{'consequences'}->{$key_allele}}) {
         if((grep {$_ =~ 'mane_select'} keys %{$object})) {
-          my $mane_hgvsg = $object->{'hgvsg'} || '-';
-          my $mane_hgvsc = $object->{'hgvsc'} || '-';
-          my $mane_hgvsp = $object->{'hgvsp'} || '-';
+          my $key_hgvsg = $object->{'hgvsg'};
+          my $key_hgvsc = $object->{'hgvsc'};
 
-          my %mane_object;
-          $mane_object{'hgvsg'} = $mane_hgvsg;
-          $mane_object{'hgvsc'} = $mane_hgvsc;
-          $mane_object{'hgvsp'} = $mane_hgvsp;
-          push @{$mane_by_allele{$key_allele}->{'mane_select'}}, \%mane_object;
+          # Avoids duplicated values in the output
+          if (!$mane_unique_keys{$key_hgvsg.'-'.$key_hgvsc}) {
+            my $mane_hgvsg = $key_hgvsg || '-';
+            my $mane_hgvsc = $key_hgvsc || '-';
+            my $mane_hgvsp = $object->{'hgvsp'} || '-';
+
+            my %mane_object;
+            $mane_object{'hgvsg'} = $mane_hgvsg;
+            $mane_object{'hgvsc'} = $mane_hgvsc;
+            $mane_object{'hgvsp'} = $mane_hgvsp;
+            push @{$mane_by_allele{$key_allele}->{'mane_select'}}, \%mane_object;
+
+            $mane_unique_keys{$key_hgvsg.'-'.$key_hgvsc} = 1;
+          }
         }
       }
     }
