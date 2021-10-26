@@ -510,7 +510,42 @@ SKIP: {
     'minimal - get_all_lines_by_InputBuffer'
   );
 
+  # test refseq keys: used_ref and given_ref
+  $ib = get_annotated_buffer({
+    input_file => $test_cfg->create_input_file([qw(21 25891785 . G GA . . .)]),
+    refseq => 1,
+    fasta => $test_cfg->{fasta},
+  });
+  $of = Bio::EnsEMBL::VEP::OutputFactory::JSON->new({config => $ib->config});
+  @lines = @{$of->get_all_lines_by_InputBuffer($ib)};
 
+  is_deeply(
+    $json->decode($lines[0])->{'transcript_consequences'}[0],
+    {
+      'given_ref' => '-',
+      'variant_allele' => 'A',
+      'cdna_end' => 2348,
+      'codons' => 'atc/atTc',
+      'used_ref' => '-',
+      'protein_end' => 716,
+      'amino_acids' => 'I/IX',
+      'strand' => -1,
+      'cdna_start' => 2347,
+      'transcript_id' => 'NM_000484.3',
+      'gene_id' => '351',
+      'cds_start' => 2147,
+      'protein_start' => 716,
+      'refseq_match' => [
+        'rseq_mrna_match'
+       ],
+      'cds_end' => 2148,
+      'consequence_terms' => [
+        'frameshift_variant'
+      ],
+      'impact' => 'HIGH'
+    },
+    'get_all_lines_by_InputBuffer - refseq used_ref'
+  );
 
   # test custom
   use_ok('Bio::EnsEMBL::VEP::AnnotationSource::File');
