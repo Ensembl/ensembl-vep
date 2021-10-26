@@ -240,7 +240,6 @@ sub get_all_output_hashes_by_InputBuffer {
 
     # get other data from super methods
     my $extra_hash = $self->VariationFeature_to_output_hash($vf);
-
     $hash->{lc($_)} = $extra_hash->{$_} for grep {!$SKIP_KEYS{$_}} keys %$extra_hash;
 
     $self->add_VariationFeatureOverlapAllele_info($vf, $hash);
