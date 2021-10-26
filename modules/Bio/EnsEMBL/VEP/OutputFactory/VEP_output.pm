@@ -80,6 +80,8 @@ use base qw(Bio::EnsEMBL::VEP::OutputFactory::BaseTab);
 use Bio::EnsEMBL::VEP::Utils qw(convert_arrayref);
 use Bio::EnsEMBL::VEP::Constants;
 
+use Data::Dumper;
+
 my %OUTPUT_COLS_HASH = map {$_ => 1} @Bio::EnsEMBL::VEP::Constants::DEFAULT_OUTPUT_COLS;
 
 
@@ -99,6 +101,8 @@ my %OUTPUT_COLS_HASH = map {$_ => 1} @Bio::EnsEMBL::VEP::Constants::DEFAULT_OUTP
 sub output_hash_to_line {
   my $self = shift;
   my $hash = shift;
+
+  # print Dumper($hash);
 
   # "core" fields
   my @line = map {defined($hash->{$_}) ? convert_arrayref($hash->{$_}) : '-'} @Bio::EnsEMBL::VEP::Constants::DEFAULT_OUTPUT_COLS;

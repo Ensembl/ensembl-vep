@@ -34,7 +34,7 @@ SKIP: {
   no warnings 'once';
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'JSON module not available', 19 unless $Bio::EnsEMBL::VEP::OutputFactory::CAN_USE_JSON;
+  skip 'JSON module not available', 23 unless $Bio::EnsEMBL::VEP::OutputFactory::CAN_USE_JSON;
 
   ## BASIC TESTS
   ##############
