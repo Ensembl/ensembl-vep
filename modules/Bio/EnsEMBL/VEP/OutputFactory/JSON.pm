@@ -305,7 +305,7 @@ sub add_VariationFeatureOverlapAllele_info {
       my $tmp = $vfoa_hash->{$key};
       delete $vfoa_hash->{$key};
 
-      next if !defined($tmp) || ($key ne 'Allele' && $tmp eq '-');
+      next if !defined($tmp) || (($key ne 'Allele' && lc($key) ne 'used_ref' && lc($key) ne 'given_ref') && $tmp eq '-');
 
       # convert YES to 1
       $tmp = 1 if $tmp eq 'YES';
