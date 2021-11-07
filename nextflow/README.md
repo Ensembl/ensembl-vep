@@ -24,7 +24,7 @@ By default all the images are expected under the `singularity-images` dir.
    ```bash
       singularity pull bcftools.sif docker://quay.io/biocontainers/bcftools:1.13--h3a49de5_0
    ```
-  * [vep](https://www.ensembl.info/2021/05/24/cool-stuff-the-vep-can-do-singularity/)
+  * [VEP](https://www.ensembl.info/2021/05/24/cool-stuff-the-vep-can-do-singularity/)
   
 In order to point to a different path to the image, the nextflow config file can be modified accordingly. 
 
