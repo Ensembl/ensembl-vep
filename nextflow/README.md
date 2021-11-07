@@ -7,24 +7,26 @@ The nextflow pipeline aims to run VEP faster. It contains the following steps:
 
 ##### Table of contents
 * [Installation and requirements](#install)
-  * [Creating singularity images](#singularity)
+  * [Fetching singularity images](#singularity)
 * [Usage](#usage)
 
 ---
 <a name="install"></a>
 ### Installation and requirements
 The nextflow pipeline requires the following dependencies:
-  * Nextflow (tested on 21.04.3.5560)
-  * Singularity (tested on 3.7)
+  * **Nextflow** (tested on 21.04.3.5560)
+  * **Singularity** (tested on 3.7)
 
 <a name="singularity"></a>
-#### Creating singularity images
-All the images are placed in the `singularity-images` dir. Ensure you are in the `nextflow` directory, run `mkdir -p singularity-images`
-  * bcftools.sif
+#### Fetching singularity images
+By default all the images are expected under the `singularity-images` dir. 
+  * bcftools
    ```bash
       singularity pull bcftools.sif docker://quay.io/biocontainers/bcftools:1.13--h3a49de5_0
    ```
-  * [vep.sif](https://www.ensembl.info/2021/05/24/cool-stuff-the-vep-can-do-singularity/)
+  * [vep](https://www.ensembl.info/2021/05/24/cool-stuff-the-vep-can-do-singularity/)
+  
+In order to point to a different path to the image, the nextflow config file can be modified accordingly. 
 
 ---
 <a name="usage"></a>
