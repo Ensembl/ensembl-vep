@@ -36,6 +36,24 @@ if (params.help) {
   exit 1
 }
 
+// Input validation
+if( !params.chros) {
+  exit 1, "Undefined --chros parameter. Please provide a comma-separated string with chromosomes: chr1,chr2, ..."
+}
+if( !params.vcf) {
+  exit 1, "Undefined --vcf parameter. Please provide the path to a VCF file"
+}
+
+vcfFile = file(params.vcf)
+if( !vcfFile.exists() ) {
+  exit 1, "The specified VCF file does not exist: ${params.vcf}"
+}
+
+vepFile = file(params.vep_config)
+if( !vepFile.exists() ) {
+  exit 1, "The specified VEP config does not exist: ${params.vep_config}"
+}
+
 log.info 'Starting workflow.....'
 
 workflow {

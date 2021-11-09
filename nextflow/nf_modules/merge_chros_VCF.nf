@@ -10,7 +10,7 @@ nextflow.enable.dsl=2
 prefix = "out"
 mergedVCF = "merged-file"
 params.outdir = ""
-cpus = 1
+params.cpus = 1
 
 process mergeVCF {
 	/*
@@ -26,6 +26,8 @@ process mergeVCF {
  	publishDir "${params.outdir}", 
 	 	enabled: params.outdir,
 	 	mode:'move'
+    
+  cpus ${params.cpus}
      
 	input:
 	path(vcfFiles)

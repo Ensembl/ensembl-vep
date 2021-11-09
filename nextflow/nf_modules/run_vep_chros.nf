@@ -9,7 +9,7 @@ nextflow.enable.dsl=2
 // defaults
 prefix = "vep"
 params.outdir = ""
-cpus = 1
+params.cpus = 1
 
 process chrosVEP {
 	/*
@@ -21,7 +21,8 @@ process chrosVEP {
 		1) VEP output file for each chromosome-wise split VCF
 		2) A tabix index for that VCF output file
 	*/
-	
+	cpus ${params.cpus}
+  
 	input:
   tuple path(vcfFile), path(indexFile)
   path(vep_config)

@@ -8,8 +8,8 @@ nextflow.enable.dsl=2
 
 // defaults
 prefix = "out"
-cpus = 1
 params.outdir = ""
+params.cpus = 1
 
 process splitVCF {
   /*
@@ -21,6 +21,7 @@ process splitVCF {
       1) A VCF format file for each splitted chromosome
       2) A tabix index for that VCF
   */
+  cpus ${params.cpus}
 
   input:
   val(chr)
