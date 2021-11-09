@@ -2,18 +2,14 @@
 
 /* 
  * Script to run VEP on chromosome-wise split VCF files
- *
- * @author
- * Likhitha Surapaneni <likhitha3996@gmail.com>
- *
  */
+
 nextflow.enable.dsl=2
-// params defaults
+
+// defaults
 prefix = "vep"
 params.outdir = ""
 cpus = 1
-
-
 
 process chrosVEP {
 	/*
@@ -27,21 +23,16 @@ process chrosVEP {
 	*/
 	
 	input:
-	tuple path(vcfFile), path(indexFile)
-	path(vep_config)
-
-	
+  tuple path(vcfFile), path(indexFile)
+  path(vep_config)
 
 	output:
-	path("${prefix}-*.vcf.gz"), emit: vcfFile
-	path("${prefix}-*.vcf.gz.tbi"), emit: indexFile
+  path("${prefix}-*.vcf.gz"), emit: vcfFile
+  path("${prefix}-*.vcf.gz.tbi"), emit: indexFile
 
 	script:
 	"""
 	vep -i ${vcfFile} -o ${prefix}-${vcfFile} --vcf --compress_output bgzip --format vcf --config ${vep_config} 
 	tabix -p vcf ${prefix}-${vcfFile}
-	"""
-	
-
-	
+	"""	
 }

@@ -2,19 +2,15 @@
 
 /* 
  * Script to merge chromosome-wise VCF files into single VCF file
- *
- * @author
- * Likhitha Surapaneni <likhitha3996@gmail.com>
- *
  */
+
 nextflow.enable.dsl=2
 
+// defaults
 prefix = "out"
 mergedVCF = "merged-file"
 params.outdir = ""
 cpus = 1
-
-
 
 process mergeVCF {
 	/*
@@ -31,7 +27,6 @@ process mergeVCF {
 	 	enabled: params.outdir,
 	 	mode:'move'
      
-
 	input:
 	path(vcfFiles)
 	path(indexFiles)
@@ -39,8 +34,9 @@ process mergeVCF {
 	output:
 	path("${ mergedVCF }.vcf.gz*")
 
+  script:
 	"""
 	bcftools concat ${ vcfFiles } -Oz -o ${ mergedVCF}.vcf.gz
-    bcftools  index -t ${ mergedVCF}.vcf.gz
+  bcftools  index -t ${ mergedVCF}.vcf.gz
 	"""
 }
