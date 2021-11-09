@@ -21,7 +21,7 @@ process chrosVEP {
 		1) VEP output file for each chromosome-wise split VCF
 		2) A tabix index for that VCF output file
 	*/
-	cpus ${params.cpus}
+	cpus params.cpus
   
 	input:
   tuple path(vcfFile), path(indexFile)

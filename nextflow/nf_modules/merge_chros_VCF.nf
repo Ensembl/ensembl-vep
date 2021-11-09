@@ -27,7 +27,7 @@ process mergeVCF {
 	 	enabled: params.outdir,
 	 	mode:'move'
     
-  cpus ${params.cpus}
+  cpus params.cpus
      
 	input:
 	path(vcfFiles)
