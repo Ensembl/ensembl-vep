@@ -231,6 +231,8 @@ sub get_features_by_regions_uncached {
 
     my @features;
 
+    next if $self->{core_type} eq 'otherfeatures' && $sub_slice->seq_region_name() =~ /LRG/;
+
     foreach my $gene(map {$_->transfer($sr_slice)} @{$sub_slice->get_all_Genes(undef, undef, 1)}) {
       my $gene_stable_id = $gene->stable_id;
       my $canonical_tr_id = $gene->{canonical_transcript_id};
