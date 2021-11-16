@@ -460,6 +460,34 @@ SKIP: {
   'recode - output MANE Select returns multiple genomic locations'
   );
 
+  # Test LRG
+  my $vr_lrg = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', fields => 'id,hgvsg,hgvsc,hgvsp'});
+  my $lrg_input = "LRG_485:6673:G:A";
+  is_deeply(
+    $vr_lrg->recode($lrg_input),
+    [
+     {
+      'A' => {
+        'input' => 'LRG_485:6673:G:A',
+        'hgvsp' => [
+          'LRG_485p1:p.Val41Met',
+          'ENSP00000291568.5:p.Val41Met'
+        ],
+        'hgvsc' => [
+          'LRG_485t1:c.121G>A',
+          'ENST00000291568.5:c.121G>A',
+          'ENST00000480147.1:n.158G>A'
+        ],
+        'hgvsg' => [
+          'LRG_485:g.6674G>A',
+          'NC_000021.9:g.43774705C>T'
+        ]
+      }
+     }
+   ],
+   'recode - LRG input'
+   );
+
 };
 
 done_testing();
