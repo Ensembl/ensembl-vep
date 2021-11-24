@@ -26,14 +26,22 @@ process chrosVEP {
   input:
   tuple path(vcfFile), path(indexFile)
   path(vep_config)
-
+  
   output:
   path("${prefix}-*.vcf.gz"), emit: vcfFile
   path("${prefix}-*.vcf.gz.tbi"), emit: indexFile
 
   script:
-  """
-  vep -i ${vcfFile} -o ${prefix}-${vcfFile} --vcf --compress_output bgzip --format vcf --config ${vep_config} 
-  tabix -p vcf ${prefix}-${vcfFile}
-  """	
+  if( !vcfFile.exists() ) {
+    exit 1, "VCF file is not generated: ${vcfFile}"
+  }
+  else if ( !indexFile.exists() ){
+    exit 1, "VCF index file is not generated: ${indexFile}"
+  }
+  else {
+    """
+    vep -i ${vcfFile} -o ${prefix}-${vcfFile} --vcf --compress_output bgzip --format vcf --config ${vep_config} 
+    tabix -p vcf ${prefix}-${vcfFile}
+    """	
+  }
 }

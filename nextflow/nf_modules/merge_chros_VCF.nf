@@ -37,6 +37,17 @@ process mergeVCF {
   path("${ mergedVCF }.vcf.gz*")
 
   script:
+  vcfFiles.each{
+    if ( !it.exists() ){
+     exit 1, "VCF file is not generated: $it"
+     } 
+  }
+  indexFiles.each{
+    if ( !it.exists() ){
+     exit 1, "VCF index file is not generated: $it"
+     }
+  }
+  
   """
   bcftools concat ${ vcfFiles } -Oz -o ${ mergedVCF}.vcf.gz
   bcftools  index -t ${ mergedVCF}.vcf.gz
