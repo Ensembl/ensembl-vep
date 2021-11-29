@@ -7,7 +7,7 @@ The nextflow pipeline aims to run VEP faster. It contains the following steps:
 
 ##### Table of contents
 * [Installation and requirements](#install)
-  * [Fetching singularity images](#singularity)
+* [Pipeline setup](#setup)
 * [Usage](#usage)
 
 ---
@@ -17,22 +17,36 @@ The nextflow pipeline requires the following dependencies:
   * **Nextflow** (tested on 21.04.3.5560)
   * **Singularity** (tested on 3.7)
 
-<a name="singularity"></a>
-#### Fetching singularity images
-By default all the images are expected under the `singularity-images` dir. 
+<a name="setup"></a>
+### Pipeline setup
+
+#### Singularity images
+Singularity images are required in order to run the following tools:
   * bcftools
-   ```bash
-      singularity pull bcftools.sif docker://quay.io/biocontainers/bcftools:1.13--h3a49de5_0
-   ```
-  * [VEP](https://www.ensembl.info/2021/05/24/cool-stuff-the-vep-can-do-singularity/)
-  
-In order to point to a different path to the image, the nextflow config file can be modified accordingly. 
+  * VEP
+
+The singularity images can be fetched by running:
+```bash
+   ./setup-images.sh
+```
+
+#### Config files
+The following config files are used:
+  * VEP config file 
+  ```bash
+     cp nf_config/vep.ini.template nf_config/vep.ini
+  ```
+  Modify the vep config file as required
+
+  * Nextflow config file
+  `nf_config/nextflow.config` has the default options for running the pipeline. The file can be modified to change the default options or override them using command line options
+  The default executor is LSF. This can be modified by following the nextflow [documentation](https://www.nextflow.io/docs/latest/executor.html)
 
 ---
 <a name="usage"></a>
 ### Usage
 ```bash
-  nextflow -C nf_config/run_vep.config run workflows/run_vep.nf --vcf /path/to/vcf --chros 1,2 --vep_config /path/to/vep.ini
+  nextflow -C nf_config/nextflow.config run workflows/run_vep.nf --vcf <path-to-vcf> --chros 1,2 
 ```
 
 #### Options
@@ -40,7 +54,8 @@ In order to point to a different path to the image, the nextflow config file can
   --vcf VCF                VCF that will be split.
   --outdir DIRNAME         Name of output dir. Default: outdir
   --vep_config FILENAME    VEP config file. Default: nf_config/vep.ini
-  --chros LIST_OF_CHROS    Comma-separated list of chromosomes to generate. i.e. chr1,chr2,...
+  --chros LIST_OF_CHROS    Comma-separated list of chromosomes to generate. i.e. 1,2,..., Default: All chromosomes
   --cpus INT               Number of CPUs to use. Default 1.
 ```
 
+ 
