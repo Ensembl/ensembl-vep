@@ -25,20 +25,20 @@ if (params.help) {
   log.info '-------------------------------------------------------'
   log.info ''
   log.info 'Usage: '
-  log.info '  nextflow -C nf_config/run_vep.config run workflows/run_vep.nf --vcf /mnt/d/work/repos/nf_genomics_pipelines/test-data/test.vcf.gz --chros 1,2 --vep_config /path/to/vep.ini'
+  log.info '  nextflow -C nf_config/nextflow.config run workflows/run_vep.nf --vcf <path-to-vcf> --chros 1,2 --vep_config'
   log.info ''
   log.info 'Options:'
-  log.info '  --vcf VCF                 VCF that will be split.'
+  log.info '  --vcf VCF                 VCF that will be split. Currently supports sorted and bgzipped file'
   log.info '  --outdir DIRNAME          Name of output dir. Default: outdir'
   log.info '  --vep_config FILENAME     VEP config file. Default: nf_config/vep.ini'
-  log.info '  --chros LIST_OF_CHROS	    Comma-separated list of chromosomes to generate. i.e. chr1,chr2,...'
-  log.info '  --cpus INT	              Number of CPUs to use. Default 1.'
+  log.info '  --chros LIST_OF_CHROS	Comma-separated list of chromosomes to generate. i.e. 1,2,... Default: 1,2,...,X,Y,MT'
+  log.info '  --cpus INT	        Number of CPUs to use. Default 1.'
   exit 1
 }
 
 // Input validation
 if( !params.chros) {
-  exit 1, "Undefined --chros parameter. Please provide a comma-separated string with chromosomes: chr1,chr2, ..."
+  exit 1, "Undefined --chros parameter. Please provide a comma-separated string with chromosomes: 1,2, ... Default: 1,2,...,X,Y,MT"
 }
 if( !params.vcf) {
   exit 1, "Undefined --vcf parameter. Please provide the path to a VCF file"
@@ -47,6 +47,11 @@ if( !params.vcf) {
 vcfFile = file(params.vcf)
 if( !vcfFile.exists() ) {
   exit 1, "The specified VCF file does not exist: ${params.vcf}"
+}
+check_bgzipped = "bgzip -t $params.vcf".execute()
+check_bgzipped.waitFor()
+if(check_bgzipped.exitValue()){
+  exit 1, "The specified VCF file is not bgzipped: ${params.vcf}"
 }
 
 vepFile = file(params.vep_config)
