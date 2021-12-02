@@ -26,13 +26,13 @@ process splitVCF {
   input:
   val(chr)
   path(vcf)
+  path(vcf_index)
 
   output:
   tuple path("${prefix}.${chr}.vcf.gz"), path("${prefix}.${chr}.vcf.gz.tbi")
 
   script:
   """
-  bcftools index -t ${vcf}
   bcftools view -r ${chr} ${vcf} -o ${prefix}.${chr}.vcf.gz -O z
   bcftools index -t ${prefix}.${chr}.vcf.gz
   """

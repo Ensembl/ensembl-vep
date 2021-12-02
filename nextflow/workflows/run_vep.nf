@@ -12,6 +12,7 @@ params.help = false
 params.cpus = 1
 params.outdir = "outdir"
 params.vep_config=""
+params.singularity_dir=""
 
 // module imports
 include { splitVCF } from '../nf_modules/split_into_chros.nf' 
@@ -48,11 +49,21 @@ vcfFile = file(params.vcf)
 if( !vcfFile.exists() ) {
   exit 1, "The specified VCF file does not exist: ${params.vcf}"
 }
+
 check_bgzipped = "bgzip -t $params.vcf".execute()
 check_bgzipped.waitFor()
 if(check_bgzipped.exitValue()){
   exit 1, "The specified VCF file is not bgzipped: ${params.vcf}"
 }
+
+def sout = new StringBuilder(), serr = new StringBuilder()
+check_parsing = "$params.singularity_dir/vep.sif tabix -p vcf -f $params.vcf".execute()
+check_parsing.consumeProcessOutput(sout, serr)
+check_parsing.waitFor()
+if( serr ){
+  exit 1, "The specified VCF file has issues in parsing: $serr"
+}
+vcf_index = "${params.vcf}.tbi"
 
 vepFile = file(params.vep_config)
 if( !vepFile.exists() ) {
@@ -63,7 +74,7 @@ log.info 'Starting workflow.....'
 
 workflow {
   chr = Channel.of(params.chros.split(','))
-  splitVCF(chr, params.vcf)
+  splitVCF(chr, params.vcf, vcf_index)
   chrosVEP(splitVCF.out, params.vep_config)
   mergeVCF(chrosVEP.out.vcfFile.collect(), chrosVEP.out.indexFile.collect())
 }  
