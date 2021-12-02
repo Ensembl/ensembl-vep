@@ -58,7 +58,7 @@ The following config files are used:
   --chros LIST_OF_CHROS    Comma-separated list of chromosomes to generate. i.e. 1,2,..., Default: 1,2,...X,Y,MT
   --cpus INT               Number of CPUs to use. Default 1.
 ```
-NB: File paths are expected to be abosulte paths 
+NB: File paths are expected to be absolute paths 
 
 ---
 <a name="example"></a>
