@@ -40,10 +40,12 @@ The following config files are used and can be modified depending on user requir
 
 
   * Nextflow config file
+ 
     `nf_config/nextflow.config` has the default options for running the pipeline. The file can be modified to change the default options or override them using command line options
   
  Currently supported profiles for executors are standard (local) and LSF.
- NB: If no profile is mentioned, the pipeline takes the standard executor
+ 
+ NB: If no profile is mentioned, the pipeline takes the standard profile.
 
 ---
 <a name="usage"></a>
