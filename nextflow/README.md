@@ -32,16 +32,17 @@ The singularity images can be fetched by running:
 ```
 
 #### Config files
-The following config files are used:
-  * VEP config file 
+The following config files are used and can be modified depending on user requirements:
+  * VEP config file:
   ```bash
      cp nf_config/vep.ini.template nf_config/vep.ini
   ```
-  Modify the vep config file as required
 
-  * Nextflow config file
-  `nf_config/nextflow.config` has the default options for running the pipeline. The file can be modified to change the default options or override them using command line options
-  The default executor is LSF. This can be modified by following the nextflow [documentation](https://www.nextflow.io/docs/latest/executor.html)
+  * Nextflow config file depending on executors
+     * Local : `cp nf_config/nextflow-local.config.template nf_config/nextflow.config` 
+     * LSF: `cp nf_config/nextflow-lsf.config.template nf_config/nextflow.config`
+  
+ This can be modified by following the nextflow [documentation](https://www.nextflow.io/docs/latest/executor.html)
 
 ---
 <a name="usage"></a>
