@@ -22,9 +22,9 @@ process mergeVCF {
       1) A VCF format file 
       2) A tabix index for that VCF
   */
-  
+
   publishDir "${params.outdir}", 
-    enabled: params.outdir,
+    enabled: "${params.outdir}" as Boolean,
     mode:'move'
     
   cpus params.cpus
