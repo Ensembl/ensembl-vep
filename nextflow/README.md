@@ -15,7 +15,7 @@ The nextflow pipeline aims to run VEP faster. It contains the following steps:
 <a name="install"></a>
 ### Installation and requirements
 The nextflow pipeline requires the following dependencies:
-  * **Nextflow** (tested on 21.04.3.5560)
+  * **Nextflow** (tested on 21.10.0)
   * **Singularity** (tested on 3.7)
 
 <a name="setup"></a>
@@ -33,12 +33,21 @@ The singularity images can be fetched by running:
 
 #### Config files
 The following config files are used and can be modified depending on user requirements:
-  * VEP config file:  `cp nf_config/vep.ini.template nf_config/vep.ini`
+  * VEP config file 
+  ``` bash
+      cp nf_config/vep.ini.template nf_config/vep.ini`
+  ```
 
 
   * Nextflow config file depending on executors
-     * Local :  `cp nf_config/nextflow-local.config.template nf_config/nextflow.config` 
-     * LSF:  `cp nf_config/nextflow-lsf.config.template nf_config/nextflow.config`
+     * Local  
+     ```bash 
+        cp nf_config/nextflow-local.config.template nf_config/nextflow.config
+     ```
+     * LSF 
+     ```bash 
+        cp nf_config/nextflow-lsf.config.template nf_config/nextflow.config
+     ```
   
  This can be modified by following the nextflow [documentation](https://www.nextflow.io/docs/latest/executor.html)
 
@@ -71,7 +80,7 @@ The above commands start the pipeline and generate the output file upon completi
 ```bash
   singularity-images/bcftools.sif bcftools view -H outdir/merged-file.vcf.gz -r 1
 ```
-Expected result:
+Expected result
 ```bash
 1	925952	1019397	G	A	.	.	ALLELEID=1003021;CLNDISDB=MedGen:CN517202;CLNDN=not_provided;CLNHGVS=NC_000001.11:g.925952G>A;CLNREVSTAT=criteria_provided,_single_submitter;CLNSIG=Uncertain_significance;CLNVC=single_nucleotide_variant;CLNVCSO=SO:0001483;GENEINFO=SAMD11:148398;MC=SO:0001583|missense_variant;ORIGIN=1;CSQ=A|upstream_gene_variant|MODIFIER|SAMD11|ENSG00000187634|Transcript|ENST00000341065|protein_coding|||||||||||4360|1|cds_start_NF|HGNC|HGNC:28706,A|missense_variant|MODERATE|SAMD11|ENSG00000187634|Transcript|ENST00000342066|protein_coding|2/14||||101|11|4|G/E|gGg/gAg|||1||HGNC|HGNC:28706,A|missense_variant|MODERATE|SAMD11|ENSG00000187634|Transcript|ENST00000437963|protein_coding|2/5||||71|11|4|G/E|gGg/gAg|||1|cds_end_NF|HGNC|HGNC:28706,A|upstream_gene_variant|MODIFIER|LINC02593|ENSG00000223764|Transcript|ENST00000609207|retained_intron|||||||||||4936|-1||HGNC|HGNC:53933,A|missense_variant|MODERATE|SAMD11|ENSG00000187634|Transcript|ENST00000616016|protein_coding|2/14||||1057|548|183|G/E|gGg/gAg|||1||HGNC|HGNC:28706,A|missense_variant|MODERATE|SAMD11|ENSG00000187634|Transcript|ENST00000616125|protein_coding|1/11||||11|11|4|G/E|gGg/gAg|||1|cds_start_NF|HGNC|HGNC:28706,A|missense_variant|MODERATE|SAMD11|ENSG00000187634|Transcript|ENST00000617307|protein_coding|1/13||||11|11|4|G/E|gGg/gAg|||1|cds_start_NF|HGNC|HGNC:28706,A|missense_variant|MODERATE|SAMD11|ENSG00000187634|Transcript|ENST00000618181|protein_coding|1/10||||11|11|4|G/E|gGg/gAg|||1|cds_start_NF|HGNC|HGNC:28706,A|missense_variant|MODERATE|SAMD11|ENSG00000187634|Transcript|ENST00000618323|protein_coding|2/14||||1057|548|183|G/E|gGg/gAg|||1||HGNC|HGNC:28706,A|missense_variant|MODERATE|SAMD11|ENSG00000187634|Transcript|ENST00000618779|protein_coding|1/12||||11|11|4|G/E|gGg/gAg|||1|cds_start_NF|HGNC|HGNC:28706,A|missense_variant|MODERATE|SAMD11|ENSG00000187634|Transcript|ENST00000622503|protein_coding|1/13||||11|11|4|G/E|gGg/gAg|||1|cds_start_NF|HGNC|HGNC:28706
 1	930139	1125147	C	T	.	.	ALLELEID=1110865;CLNDISDB=MedGen:CN517202;CLNDN=not_provided;CLNHGVS=NC_000001.11:g.930139C>T;CLNREVSTAT=criteria_provided,_single_submitter;CLNSIG=Likely_benign;CLNVC=single_nucleotide_variant;CLNVCSO=SO:0001483;GENEINFO=SAMD11:148398;MC=SO:0001627|intron_variant;ORIGIN=1;CSQ=T|upstream_gene_variant|MODIFIER|SAMD11|ENSG00000187634|Transcript|ENST00000341065|protein_coding|||||||||||173|1|cds_start_NF|HGNC|HGNC:28706,T|intron_variant|MODIFIER|SAMD11|ENSG00000187634|Transcript|ENST00000342066|protein_coding||2/13||||||||||1||HGNC|HGNC:28706,T|intron_variant|MODIFIER|SAMD11|ENSG00000187634|Transcript|ENST00000437963|protein_coding||2/4||||||||||1|cds_end_NF|HGNC|HGNC:28706,T|intron_variant|MODIFIER|SAMD11|ENSG00000187634|Transcript|ENST00000616016|protein_coding||2/13||||||||||1||HGNC|HGNC:28706,T|intron_variant|MODIFIER|SAMD11|ENSG00000187634|Transcript|ENST00000616125|protein_coding||1/10||||||||||1|cds_start_NF|HGNC|HGNC:28706,T|intron_variant|MODIFIER|SAMD11|ENSG00000187634|Transcript|ENST00000617307|protein_coding||1/12||||||||||1|cds_start_NF|HGNC|HGNC:28706,T|intron_variant|MODIFIER|SAMD11|ENSG00000187634|Transcript|ENST00000618181|protein_coding||1/9||||||||||1|cds_start_NF|HGNC|HGNC:28706,T|intron_variant|MODIFIER|SAMD11|ENSG00000187634|Transcript|ENST00000618323|protein_coding||2/13||||||||||1||HGNC|HGNC:28706,T|intron_variant|MODIFIER|SAMD11|ENSG00000187634|Transcript|ENST00000618779|protein_coding||1/11||||||||||1|cds_start_NF|HGNC|HGNC:28706,T|intron_variant|MODIFIER|SAMD11|ENSG00000187634|Transcript|ENST00000622503|protein_coding||1/12||||||||||1|cds_start_NF|HGNC|HGNC:28706
