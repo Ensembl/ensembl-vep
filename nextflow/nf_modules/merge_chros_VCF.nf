@@ -28,7 +28,8 @@ process mergeVCF {
     mode:'move'
     
   cpus params.cpus
-     
+  container "${params.singularity_dir}/bcftools.sif"
+   
   input:
   path(vcfFiles)
   path(indexFiles)

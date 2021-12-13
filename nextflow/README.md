@@ -39,23 +39,17 @@ The following config files are used and can be modified depending on user requir
   ```
 
 
-  * Nextflow config file depending on executors
-     * Local  
-     ```bash 
-        cp nf_config/nextflow-local.config.template nf_config/nextflow.config
-     ```
-     * LSF 
-     ```bash 
-        cp nf_config/nextflow-lsf.config.template nf_config/nextflow.config
-     ```
+  * Nextflow config file
+    `nf_config/nextflow.config` has the default options for running the pipeline. The file can be modified to change the default options or override them using command line options
   
- This can be modified by following the nextflow [documentation](https://www.nextflow.io/docs/latest/executor.html)
+ Currently supported profiles for executors are standard (local) and LSF.
+ NB: If no profile is mentioned, the pipeline takes the standard executor
 
 ---
 <a name="usage"></a>
 ### Usage
 ```bash
-  nextflow -C nf_config/nextflow.config run workflows/run_vep.nf --vcf <path-to-vcf> --chros 1,2 
+  nextflow -C nf_config/nextflow.config run workflows/run_vep.nf --vcf <path-to-vcf> --chros 1,2 -profile <standard or lsf>
 ```
 
 #### Options
@@ -66,7 +60,7 @@ The following config files are used and can be modified depending on user requir
   --chros LIST_OF_CHROS    Comma-separated list of chromosomes to generate. i.e. 1,2,..., Default: 1,2,...X,Y,MT
   --cpus INT               Number of CPUs to use. Default 1.
 ```
-NB: File paths are expected to be absolute paths 
+NB: File paths are expected to be absolute paths. 
 
 ---
 <a name="example"></a>

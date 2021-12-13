@@ -22,6 +22,7 @@ process chrosVEP {
       2) A tabix index for that VCF output file
   */
   cpus params.cpus
+  container "${params.singularity_dir}/vep.sif"
 
   input:
   tuple path(vcfFile), path(indexFile)
