@@ -33,7 +33,7 @@ The singularity images can be fetched by running:
 
 #### Config files
 The following config files are used and can be modified depending on user requirements:
-  * VEP config file:
+  * VEP config file
   ```bash
      cp nf_config/vep.ini.template nf_config/vep.ini
   ```
