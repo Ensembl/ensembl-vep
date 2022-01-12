@@ -29,6 +29,7 @@ process mergeVCF {
     
   cpus params.cpus
   container "${params.singularity_dir}/bcftools.sif"
+
    
   input:
   path(vcfFiles)
@@ -37,18 +38,7 @@ process mergeVCF {
   output:
   path("${ mergedVCF }.vcf.gz*")
 
-  script:
-  vcfFiles.each{
-    if ( !it.exists() ){
-     exit 1, "VCF file is not generated: $it"
-     } 
-  }
-  indexFiles.each{
-    if ( !it.exists() ){
-     exit 1, "VCF index file is not generated: $it"
-     }
-  }
-  
+  script: 
   """
   bcftools concat ${ vcfFiles } -Oz -o ${ mergedVCF}.vcf.gz
   bcftools  index -t ${ mergedVCF}.vcf.gz
