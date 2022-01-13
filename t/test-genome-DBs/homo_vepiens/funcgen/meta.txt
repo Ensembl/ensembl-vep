@@ -1,4 +1,4 @@
-534	\N	schema_version	106
+534	\N	schema_version	107
 80	\N	patch	patch_50_51_b.sql|multispecies
 83	\N	patch	patch_50_51_c.sql|associated_feature_type
 82	\N	patch	patch_50_51_a.sql|cell_type_description
@@ -331,3 +331,4 @@
 777	\N	patch	patch_104_105_a.sql|schema_version
 778	\N	patch	patch_104_105_b.sql|New indices
 779	\N	patch	patch_105_106_a.sql|schema_version
+780	\N	patch	patch_106_107_a.sql|schema_version
