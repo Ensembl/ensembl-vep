@@ -1,4 +1,4 @@
-# Copyright [2016-2021] EMBL-European Bioinformatics Institute
+# Copyright [2016-2022] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ SKIP: {
   no warnings 'once';
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'JSON module not available', 19 unless $Bio::EnsEMBL::VEP::OutputFactory::CAN_USE_JSON;
+  skip 'JSON module not available', 23 unless $Bio::EnsEMBL::VEP::OutputFactory::CAN_USE_JSON;
 
   ## BASIC TESTS
   ##############
@@ -510,7 +510,42 @@ SKIP: {
     'minimal - get_all_lines_by_InputBuffer'
   );
 
+  # test refseq keys: used_ref and given_ref
+  $ib = get_annotated_buffer({
+    input_file => $test_cfg->create_input_file([qw(21 25891785 . G GA . . .)]),
+    refseq => 1,
+    fasta => $test_cfg->{fasta},
+  });
+  $of = Bio::EnsEMBL::VEP::OutputFactory::JSON->new({config => $ib->config});
+  @lines = @{$of->get_all_lines_by_InputBuffer($ib)};
 
+  is_deeply(
+    $json->decode($lines[0])->{'transcript_consequences'}[0],
+    {
+      'given_ref' => '-',
+      'variant_allele' => 'A',
+      'cdna_end' => 2348,
+      'codons' => 'atc/atTc',
+      'used_ref' => '-',
+      'protein_end' => 716,
+      'amino_acids' => 'I/IX',
+      'strand' => -1,
+      'cdna_start' => 2347,
+      'transcript_id' => 'NM_000484.3',
+      'gene_id' => '351',
+      'cds_start' => 2147,
+      'protein_start' => 716,
+      'refseq_match' => [
+        'rseq_mrna_match'
+       ],
+      'cds_end' => 2148,
+      'consequence_terms' => [
+        'frameshift_variant'
+      ],
+      'impact' => 'HIGH'
+    },
+    'get_all_lines_by_InputBuffer - refseq used_ref'
+  );
 
   # test custom
   use_ok('Bio::EnsEMBL::VEP::AnnotationSource::File');

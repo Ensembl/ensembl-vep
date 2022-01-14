@@ -1,4 +1,4 @@
-# Copyright [2016-2021] EMBL-European Bioinformatics Institute
+# Copyright [2016-2022] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -157,7 +157,7 @@ SKIP: {
   no warnings 'once';
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'Bio::DB::HTS::Tabix module or tabix binary not available', 19
+  skip 'Bio::DB::HTS::Tabix module or tabix binary not available', 25
     unless $Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix::CAN_USE_TABIX_CL
     or $Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix::CAN_USE_TABIX_PM;
 
@@ -366,7 +366,6 @@ SKIP: {
     'get_frequency_data - rev strand'
   );
 
-
   ## frequency_check_buffer
 
   # exclude (default)
@@ -421,9 +420,6 @@ SKIP: {
   # reset
   $c->{freq_freq} = $orig{freq_freq};
   $c->{no_check_alleles} = 0;
-
-
-
 
   # test some nastiness
   no warnings 'qw';
@@ -492,6 +488,23 @@ SKIP: {
       }
     ],
     'nastiness 4'
+  );
+
+  # Test frequency match for 'matched alleles'
+  my $ib_freq = get_ib([qw(21 25005812 . CA CAAA . . .)]);
+  $c->{freq_pop} = '1KG_AMR';
+  $c->annotate_InputBuffer($ib_freq);
+  $vf = $ib_freq->buffer->[0];
+  $c->get_frequency_data($vf);
+
+  is_deeply(
+    $vf->{_freq_check_freqs},
+    {
+      '1KG_AMR' => {
+        'AAA' => '0.4107'
+      },
+    },
+    'get_frequency_data - matched alleles'
   );
 }
 

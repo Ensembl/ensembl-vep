@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2021] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -230,6 +230,8 @@ sub get_features_by_regions_uncached {
     $sub_slice->seq;
 
     my @features;
+
+    next if $self->{core_type} eq 'otherfeatures' && $sub_slice->seq_region_name() =~ /^LRG_\d+/;
 
     foreach my $gene(map {$_->transfer($sr_slice)} @{$sub_slice->get_all_Genes(undef, undef, 1)}) {
       my $gene_stable_id = $gene->stable_id;

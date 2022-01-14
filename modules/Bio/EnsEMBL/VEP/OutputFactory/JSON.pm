@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2021] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -305,7 +305,7 @@ sub add_VariationFeatureOverlapAllele_info {
       my $tmp = $vfoa_hash->{$key};
       delete $vfoa_hash->{$key};
 
-      next if !defined($tmp) || ($key ne 'Allele' && $tmp eq '-');
+      next if !defined($tmp) || (($key ne 'Allele' && lc($key) ne 'used_ref' && lc($key) ne 'given_ref') && $tmp eq '-');
 
       # convert YES to 1
       $tmp = 1 if $tmp eq 'YES';

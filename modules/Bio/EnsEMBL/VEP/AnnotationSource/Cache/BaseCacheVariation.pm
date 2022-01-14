@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2021] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -185,17 +185,27 @@ sub get_frequency_data {
   $freq_pop_full =~ s/gnomad/gnomAD/i;
   my ($freq_group, $freq_pop) = split('_', $freq_pop_full);
 
+  my %matched_alleles;
+
   my $vf_strand = $vf->{strand} || 1;
 
   my %freq_data;
 
   foreach my $ex(@{$vf->{existing}}) {
+
     my $ex_strand = $ex->{strand} || 1;
 
     my %ex_alleles;
     foreach my $a(split('/', $ex->{allele_string})) {
       reverse_comp(\$a) unless $vf_strand == $ex_strand;
       $ex_alleles{$a} = 1;
+    }
+
+    # save the alternative alleles that match the vf alt allele
+    if($ex->{matched_alleles}) {
+      foreach my $m_allele (@{$ex->{matched_alleles}}) {
+        $matched_alleles{$m_allele->{a_allele}} = $m_allele->{b_allele};
+      }
     }
 
     my $total_freq = 0;
@@ -206,6 +216,7 @@ sub get_frequency_data {
       $ex->{minor_allele} &&
       defined($ex->{minor_allele_freq}) && looks_like_number($ex->{minor_allele_freq})
     ) {
+
       my $a = $ex->{minor_allele};
       my $f = $ex->{minor_allele_freq};
       
@@ -218,6 +229,7 @@ sub get_frequency_data {
     }
     # otherwise check match on first full pop name (e.g. ExAC_AMR, then last part e.g. AMR)
     elsif(my $tmp = ($ex->{$freq_pop_full} || $ex->{$freq_pop || ''})) {
+
       foreach my $a_f(split(',', $tmp)) {
         my ($a, $f) = split(':', $a_f);
 
@@ -239,7 +251,7 @@ sub get_frequency_data {
     }
   }
 
-  $self->_add_check_freq_data_to_vf($vf, \%freq_data) if %freq_data;
+  $self->_add_check_freq_data_to_vf($vf, \%freq_data, \%matched_alleles) if %freq_data;
 }
 
 
@@ -365,6 +377,7 @@ sub frequency_check_buffer {
 
   Arg 1      : Bio::EnsEMBL::Variation::VariationFeature $vf
   Arg 2      : hashref $freq_data
+  Arg 3      : hashref $matched_alleles (optional)
   Example    : $as->_add_check_freq_data_to_vf($vf, $freq_data);
   Description: Adds any frequency data used to filter the variant
                to the VariationFeature object using the key
@@ -380,6 +393,7 @@ sub _add_check_freq_data_to_vf {
   my $self = shift;
   my $vf = shift;
   my $freq_data = shift;
+  my $matched_alleles = shift;
 
   my $freq_freq     = $self->{freq_freq};
   my $freq_gt_lt    = $self->{freq_gt_lt};
@@ -404,10 +418,16 @@ sub _add_check_freq_data_to_vf {
 
     if ($f eq 'NA') {
       $pass = 0;
+
+      # check if there is frequency for the matched alleles
+      my $match_b = $matched_alleles->{$alt};
+      if($match_b && $freq_data->{$match_b}) {
+        $f = $freq_data->{$match_b};
+        $pass = $self->check_pass($pass, $f, $freq_freq, $freq_gt_lt);
+      }
     }
     else {
-      $pass = 1 if $f >= $freq_freq and $freq_gt_lt eq 'gt';
-      $pass = 1 if $f <= $freq_freq and $freq_gt_lt eq 'lt';
+      $pass = $self->check_pass($pass, $f, $freq_freq, $freq_gt_lt);
     }
     $used_freqs{$alt} = $f;
 
@@ -421,6 +441,31 @@ sub _add_check_freq_data_to_vf {
   # all passed or failed?
   $vf->{_freq_check_all_passed} = 1 if $pass_count == scalar @$alts;
   $vf->{_freq_check_all_failed} = 1 if $pass_count == 0;
+}
+
+
+=head2 check_pass
+
+  Example    : $pass = $as->check_pass();
+  Description: Check if frequency pass the filter
+  Returntype : integer
+  Exceptions : none
+  Caller     : _add_check_freq_data_to_vf()
+  Status     : Stable
+
+=cut
+
+sub check_pass {
+  my $self = shift;
+  my $pass = shift;
+  my $f = shift;
+  my $freq_freq = shift;
+  my $freq_gt_lt = shift;
+  
+  $pass = 1 if $f >= $freq_freq and $freq_gt_lt eq 'gt';
+  $pass = 1 if $f <= $freq_freq and $freq_gt_lt eq 'lt';
+  
+  return $pass;
 }
 
 

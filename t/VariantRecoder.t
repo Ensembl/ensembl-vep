@@ -1,4 +1,4 @@
-# Copyright [2016-2021] EMBL-European Bioinformatics Institute
+# Copyright [2016-2022] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg && !$@;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 27 unless $can_use_db;
+  skip 'No local database configured', 29 unless $can_use_db;
 
   my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens') if $can_use_db;
   
@@ -459,6 +459,34 @@ SKIP: {
   [qw(NC_000021.9:g.25758022G>A NC_000021.9:g.25758023G>A)],
   'recode - output MANE Select returns multiple genomic locations'
   );
+
+  # Test LRG
+  my $vr_lrg = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', fields => 'id,hgvsg,hgvsc,hgvsp'});
+  my $lrg_input = "LRG_485:6673:G:A";
+  is_deeply(
+    $vr_lrg->recode($lrg_input),
+    [
+     {
+      'A' => {
+        'input' => 'LRG_485:6673:G:A',
+        'hgvsp' => [
+          'LRG_485p1:p.Val41Met',
+          'ENSP00000291568.5:p.Val41Met'
+        ],
+        'hgvsc' => [
+          'LRG_485t1:c.121G>A',
+          'ENST00000291568.5:c.121G>A',
+          'ENST00000480147.1:n.158G>A'
+        ],
+        'hgvsg' => [
+          'LRG_485:g.6674G>A',
+          'NC_000021.9:g.43774705C>T'
+        ]
+      }
+     }
+   ],
+   'recode - LRG input'
+   );
 
 };
 
