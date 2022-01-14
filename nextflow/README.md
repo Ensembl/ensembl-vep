@@ -1,6 +1,6 @@
 ## Nextflow VEP pipeline
 
-The nextflow pipeline aims to run VEP faster utilising simple parallelisation. It is deployable on an individual nix machine (linux or mac) or on computing clusters running lsf or slurm (not tested). The process can be summarised briefly by the following steps:
+The nextflow pipeline aims to run VEP faster utilising simple parallelisation. It is deployable on an individual Linux machine or on computing clusters running lsf or slurm (not tested). The process can be summarised briefly by the following steps:
 
  * Splitting the VCF chromosome-wise
  * Running VEP on chromosome-wise VCFs in parallel
@@ -84,8 +84,8 @@ NB: File paths are expected to be absolute paths.
 ```bash
   bgzip -c $PWD/examples/clinvar-testset/input.vcf > $PWD/examples/clinvar-testset/input.vcf.gz
 
-  nextflow run workflows/run_vep.nf \
-    -C nf_config/nextflow.config \
+  nextflow -C nf_config/nextflow.config \
+    run workflows/run_vep.nf \
     --vcf $PWD/examples/clinvar-testset/input.vcf.gz
  ```
 The above commands start the pipeline and generate the output file upon completion.
