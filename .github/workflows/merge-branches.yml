@@ -1,0 +1,32 @@
+name: Merge postreleasefix with release and master branches
+on:
+  push:
+    branches:
+      - 'postreleasefix/*'
+jobs:
+  sync-branch:
+    runs-on: ubuntu-latest
+    steps:      
+      - uses: actions/checkout@master
+
+      - name: Set the release version
+        run: |
+          echo "release=$(echo ${GITHUB_REF} | grep -o [0-9]*$)" >> $GITHUB_ENV
+          
+      - name: "Merge postreleasefix/${{ env.release }} -> master"
+        uses: devmasx/merge-branch@master
+        with:
+          type: now
+          from_branch: "postreleasefix/${{ env.release }}"
+          target_branch: master
+          github_token: ${{ github.token }}
+          message: "Merge branch 'postreleasefix/${{ env.release }}'"
+
+      - name: "Merge postreleasefix/${{ env.release }} -> release/${{ env.release }}"
+        uses: devmasx/merge-branch@master
+        with:
+          type: now
+          from_branch: "postreleasefix/${{ env.release }}"
+          target_branch: "release/${{ env.release }}"
+          github_token: ${{ github.token }}
+          message: "Merge branch 'postreleasefix/${{ env.release }}'"
