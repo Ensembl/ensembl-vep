@@ -20,8 +20,8 @@ The nextflow pipeline aims to run VEP faster utilising simple parallelisation. I
 
 The nextflow pipeline requires the following dependencies:
 
-  * **Nextflow** (tested on 21.10.0)
-  * **Singularity** (tested on 3.7)
+  * **[Nextflow](https://www.nextflow.io)** (tested on 21.10.0)
+  * **[Singularity](https://sylabs.io/guides/3.7/admin-guide/installation.html)** (tested on 3.7)
 
 <a id="setup"></a>
 ### Pipeline setup
@@ -86,7 +86,8 @@ NB: File paths are expected to be absolute paths.
 
   nextflow -C nf_config/nextflow.config \
     run workflows/run_vep.nf \
-    --vcf $PWD/examples/clinvar-testset/input.vcf.gz
+    --vcf $PWD/examples/clinvar-testset/input.vcf.gz \
+    -profile lsf
  ```
 The above commands start the pipeline and generate the output file upon completion.
 

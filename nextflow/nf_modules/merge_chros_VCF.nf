@@ -40,7 +40,8 @@ process mergeVCF {
 
   script: 
   """
-  bcftools concat ${ vcfFiles } -Oz -o ${ mergedVCF}.vcf.gz
+  bcftools concat ${ vcfFiles } -Oz -o temp-${ mergedVCF}.vcf.gz
+  bcftools sort -Oz temp-${ mergedVCF}.vcf.gz -o ${ mergedVCF}.vcf.gz 
   bcftools  index -t ${ mergedVCF}.vcf.gz
   """
 }
