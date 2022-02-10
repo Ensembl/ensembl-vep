@@ -254,6 +254,9 @@ sub get_features_by_regions_uncached {
         
         # remove transcripts of biotype artifact: ENSVAR-4557
         next if $tr->biotype eq 'artifact';
+        
+        # remove readthrough transcripts: ENSVAR-4245
+        next if @{ $tr->get_all_Attributes("readthrough_tra") };
 
 	## Due to the inclusion of the new RefSeq transcript set (mapped from 38) into the 37 otherfeatures database,
 	## older, lower quality transcripts have been removed from the cache files. To do this, we filter out all transcripts
