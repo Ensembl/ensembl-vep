@@ -251,6 +251,9 @@ sub get_features_by_regions_uncached {
         # in human and mouse otherfeatures DB, there may be duplicate genes
         # skip those from analysis refseq_human_import and refseq_mouse_import
         next if $self->{core_type} eq 'otherfeatures' && $self->assembly !~ /GRCh37/i && $tr->analysis && $tr->analysis->logic_name =~ /^refseq_[a-z]+_import$/;
+        
+        # remove transcripts of biotype artifact: ENSVAR-4557
+        next if $tr->biotype eq 'artifact';
 
 	## Due to the inclusion of the new RefSeq transcript set (mapped from 38) into the 37 otherfeatures database,
 	## older, lower quality transcripts have been removed from the cache files. To do this, we filter out all transcripts
