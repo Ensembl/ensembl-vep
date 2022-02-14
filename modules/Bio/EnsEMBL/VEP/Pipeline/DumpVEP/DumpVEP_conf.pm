@@ -125,13 +125,6 @@ sub default_options {
                 pops => [qw(AA EA)],
                 name => 'ESP',
               },
-              # {
-              #   file => $self->o('data_dir').'/ExAC.0.3.GRCh37.vcf.gz',
-              #   pops => ['', qw(AFR AMR Adj EAS FIN NFE OTH SAS)],
-              #   name => 'ExAC',
-              #   prefix => 'ExAC',
-              #   version => 0.3,
-              # },
               {
                 file => $self->o('data_dir').'/gnomAD/v2.1/grch37/exomes/gnomad.exomes.r2.1.sites.chr+++CHR+++_noVEP.vcf.gz',
                 pops => ['', qw(afr amr asj eas fin nfe oth sas)],
@@ -156,13 +149,6 @@ sub default_options {
                 name => 'ESP',
                 version => 'V2-SSA137',
               },
-              # {
-              #   file => $self->o('data_dir').'/ExAC.0.3.GRCh38.vcf.gz',
-              #   pops => ['', qw(AFR AMR Adj EAS FIN NFE OTH SAS)],
-              #   name => 'ExAC',
-              #   prefix => 'ExAC',
-              #   version => 0.3,
-              # },
               {
                 file => $self->o('data_dir').'/gnomAD/v2.1.1/grch38/exomes/gnomad.exomes.r2.1.1.sites.+++CHR+++.liftover_grch38_no_VEP.vcf.gz',
                 pops => ['', qw(afr amr asj eas fin nfe oth sas)],
