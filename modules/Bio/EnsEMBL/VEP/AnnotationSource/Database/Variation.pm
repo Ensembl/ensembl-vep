@@ -154,6 +154,9 @@ sub get_features_by_regions_uncached {
     # no seq_region_id?
     next unless $sr_cache->{$chr} || $chr_is_seq_region;
 
+    # do not look up phenotypes if running Variant Recoder
+    next if($self->{_config}->{_params}->{is_vr});
+
     my $adaptor = $self->get_adaptor('variation', 'phenotypefeature');
     my $source_id = $self->clinvar_source_id_cache;
     my $attribs = $adaptor->get_clinsig_alleles_by_location($chr_is_seq_region ? $chr : $sr_cache->{$chr}, $s, $e, $source_id) if defined($adaptor) && defined($source_id);
