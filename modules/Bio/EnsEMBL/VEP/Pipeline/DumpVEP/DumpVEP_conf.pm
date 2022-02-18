@@ -121,11 +121,6 @@ sub default_options {
                 version => 'phase3'
               },
               {
-                file => $self->o('dump_vep_data_dir').'/ESP6500SI-V2-SSA137.vcf.gz',
-                pops => [qw(AA EA)],
-                name => 'ESP',
-              },
-              {
                 file => $self->o('data_dir').'/gnomAD/v2.1/grch37/exomes/gnomad.exomes.r2.1.sites.chr+++CHR+++_noVEP.vcf.gz',
                 pops => ['', qw(afr amr asj eas fin nfe oth sas)],
                 name => 'gnomAD',
@@ -142,12 +137,6 @@ sub default_options {
                 pops => [qw(AFR AMR EAS EUR SAS)],
                 name => '1000genomes',
                 version => 'phase3'
-              },
-              {
-                file => $self->o('dump_vep_data_dir').'/ESP6500SI-V2-SSA137_GRCh38.vcf.gz',
-                pops => [qw(AA EA)],
-                name => 'ESP',
-                version => 'V2-SSA137',
               },
               {
                 file => $self->o('data_dir').'/gnomAD/v2.1.1/grch38/exomes/gnomad.exomes.r2.1.1.sites.+++CHR+++.liftover_grch38_no_VEP.vcf.gz',
