@@ -289,6 +289,17 @@ SKIP: {
   is(scalar(grep { $_->biotype eq "artifact" } @{ $features }), 0,
      'get_features_by_regions_uncached - discard transcripts of biotype "artifact"');
 
+  # Discard readthrough transcripts located in chr 21: 39380332 - 39515506
+  my $transcripts = $ta->fetch_all();
+  is(scalar(
+     grep { $_->get_all_Attributes("readthrough_tra")->[0] } @{ $transcripts }),
+     3, 'count readthrough transcripts in test database');
+
+  $features = $as->get_features_by_regions_uncached([[21, 787]]);
+  is(scalar(
+    grep { $_->get_all_Attributes("readthrough_tra")->[0] } @{ $features }),
+    0, 'get_features_by_regions_uncached - discard readthrough transcripts');
+
   $as->clean_cache();
   is_deeply($as->cache, {}, 'clean_cache');
 

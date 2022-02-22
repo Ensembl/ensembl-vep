@@ -134,3 +134,6 @@
 236266602	131543	6858539	6858547	1	226812683	TGTTGTTGT/TGTTGT	TGTTGTTGT	rs1201697658	1	\N	1	non_coding_transcript_exon_variant,regulatory_region_variant		14	0	\N	\N	\N	\N	368,573	\N	1
 296017919	131543	6897294	6897294	1	283236029	T/C	T	rs1432068864	1	\N	1	non_coding_transcript_exon_variant		2	0	\N	\N	\N	\N	368,573	\N	1
 320048061	131543	6445912	6445912	1	305902589	C/T	C	rs1555846766	1	\N	1	non_coding_transcript_variant,intron_variant,regulatory_region_variant		2	0	\N	\N	\N	\N	\N	\N	1
+727608048	131543	34511125	34511125	1	694328774	C/T	C	rs530953425	1	\N	1	non_coding_transcript_exon_variant,NMD_transcript_variant,5_prime_UTR_variant,3_prime_UTR_variant,regulatory_region_variant		2	0	\N	\N	\N	\N	368	\N	1
+194670940	131543	39380349	39380349	1	187770714	G/A	G	rs745518185	1	\N	1	NMD_transcript_variant,5_prime_UTR_variant,intron_variant,regulatory_region_variant,TF_binding_site_variant	56,57	2	0	\N	\N	\N	\N	368,421,585	\N	1
+195019342	131543	39380325	39380333	1	188107166	TGTTGTTGT/TGTTGT	TGTTGTTGT	rs749616026	1	\N	1	5_prime_UTR_variant,intron_variant,regulatory_region_variant,TF_binding_site_variant		14	0	\N	\N	\N	\N	\N	\N	1
