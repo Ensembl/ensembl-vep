@@ -46,7 +46,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg && !$@;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 83 unless $can_use_db;
+  skip 'No local database configured', 86 unless $can_use_db;
 
   my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens') if $can_use_db;
 
@@ -278,7 +278,19 @@ SKIP: {
   $as->clean_cache();
   is_deeply($as->cache, {}, 'clean_cache');
 
+  ## TEST FILTERED TRANSCRIPTS
+  ############################
 
+  # Discard artifact transcripts located in chr 21: 6850001 - 6900000
+  is($ta->count_all_by_biotype('artifact'), 3,
+     'count transcripts of biotype "artifact" in test database');
+
+  $features = $as->get_features_by_regions_uncached([[21, 137]]);
+  is(scalar(grep { $_->biotype eq "artifact" } @{ $features }), 0,
+     'get_features_by_regions_uncached - discard transcripts of biotype "artifact"');
+
+  $as->clean_cache();
+  is_deeply($as->cache, {}, 'clean_cache');
 
   ## TEST REFSEQ
   ##############
