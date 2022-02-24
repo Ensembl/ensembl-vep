@@ -262,7 +262,7 @@ sub get_features_by_regions_uncached {
         }
         
         # remove transcripts of biotype artifact: ENSVAR-4557
-        next if $tr->biotype eq 'artifact';
+        next if $tr->{biotype} eq 'artifact';
         
         # remove readthrough transcripts: ENSVAR-4245
         next if @{ $tr->get_all_Attributes("readthrough_tra") };
