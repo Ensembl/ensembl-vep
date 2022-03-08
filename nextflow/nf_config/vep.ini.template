@@ -1,0 +1,5 @@
+cache 1
+dir_cache  <path/to/cache/directory>
+assembly 'GRCh38'
+offline 1
+force_overwrite 1
