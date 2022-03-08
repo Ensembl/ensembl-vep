@@ -1,0 +1,7 @@
+*.nextflow*
+*.ini
+work/
+outdir/
+singularity-images/
+*.vcf.gz
+*.tbi
