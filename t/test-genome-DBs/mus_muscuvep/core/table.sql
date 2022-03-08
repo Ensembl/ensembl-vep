@@ -490,7 +490,7 @@ CREATE TABLE `meta` (
   PRIMARY KEY (`meta_id`),
   UNIQUE KEY `species_key_value_idx` (`species_id`,`meta_key`,`meta_value`),
   KEY `species_value_idx` (`species_id`,`meta_value`)
-) ENGINE=MyISAM AUTO_INCREMENT=1879 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=1881 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `meta_coord` (
   `table_name` varchar(40) NOT NULL,
@@ -776,6 +776,7 @@ CREATE TABLE `seq_region_mapping` (
   `external_seq_region_id` int(10) unsigned NOT NULL,
   `internal_seq_region_id` int(10) unsigned NOT NULL,
   `mapping_set_id` int(10) unsigned NOT NULL,
+  UNIQUE KEY `seq_region_mapping_uindex` (`external_seq_region_id`,`internal_seq_region_id`,`mapping_set_id`),
   KEY `mapping_set_idx` (`mapping_set_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 

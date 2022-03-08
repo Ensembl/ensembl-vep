@@ -1,5 +1,5 @@
 1	\N	schema_type	core
-2	\N	schema_version	106
+2	\N	schema_version	107
 3	\N	patch	patch_65_66_a.sql|schema_version
 4	\N	patch	patch_65_66_b.sql|fix_external_db_id
 5	\N	patch	patch_65_66_c.sql|reorder_unmapped_obj_index
@@ -198,3 +198,5 @@
 1876	\N	patch	patch_103_104_a.sql|schema_version
 1877	\N	patch	patch_104_105_a.sql|schema_version
 1878	\N	patch	patch_105_106_a.sql|schema_version
+1879	\N	patch	patch_106_107_a.sql|schema_version
+1880	\N	patch	patch_106_107_b.sql|Added index for seq_region_mapping

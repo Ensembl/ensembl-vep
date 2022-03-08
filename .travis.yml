@@ -35,7 +35,7 @@ before_install:
   - git clone --branch $ENSEMBL_BRANCH --depth 1 https://github.com/Ensembl/ensembl-test.git
   - git clone --branch $ENSEMBL_BRANCH --depth 1 https://github.com/Ensembl/ensembl.git
   - git clone --branch $ENSEMBL_BRANCH --depth 1 https://github.com/Ensembl/ensembl-io.git
-  - git clone --branch $ENSEMBL_BRANCH --depth 1 https://github.com/Ensembl/ensembl-funcgen.git
+  - git clone --branch main --depth 1 https://github.com/Ensembl/ensembl-funcgen.git
   - git clone --branch $ENSEMBL_BRANCH --depth 1 https://github.com/Ensembl/ensembl-variation.git
 
   - export CWD=$PWD

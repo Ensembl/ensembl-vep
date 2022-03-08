@@ -1795,16 +1795,16 @@ sub unpack_arch {
   }
   else {
     if($arch_file =~ /.zip$/ && $CAN_USE_UNZIP) {
-      `unzip -qq $arch_file -d $dir` and die("ERROR: Failed to unpack file $arch_file\n");
+      system "unzip -qq $arch_file -d $dir" and die("ERROR: Failed to unpack file $arch_file\n");
     }
     elsif($arch_file =~ /(\.tar\.|\.t)gz$/ && $CAN_USE_TAR) {
-      `tar -C $dir -zxf $arch_file` and die("ERROR: Failed to unpack file $arch_file\n");
+      system "tar -C $dir -zxf $arch_file" and die("ERROR: Failed to unpack file $arch_file\n");
     }
     elsif($arch_file =~ /\.gz$/ && $arch_file !~ /(\.tar\.|\.t)gz$/ && $CAN_USE_GZIP) {
       my $unpacked = $arch_file;
       $unpacked =~ s/.*\///g;
       $unpacked =~ s/\.gz$//;
-      `gzip -dc $arch_file > $dir/$unpacked` and die("ERROR: Failed to unpack file $arch_file\n");
+      system "gzip -dc $arch_file > $dir/$unpacked" and die("ERROR: Failed to unpack file $arch_file\n");
     }
     else {
       die("ERROR: Unable to unpack file $arch_file without Archive::Extract or tar/unzip/gzip\n");
