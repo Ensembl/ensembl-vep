@@ -9,7 +9,9 @@ on:
 jobs:
   sync-branch:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true && github.event.label.name == 'auto-merge'
+    if: |
+      github.event.pull_request.merged == true &&
+      contains(github.event.pull_request.labels.*.name, 'auto-merge')
     steps:      
       - uses: actions/checkout@master
 
