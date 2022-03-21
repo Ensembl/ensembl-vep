@@ -240,7 +240,14 @@ sub check_dirs {
 
   # check for dirs that don't appear in this list of slices
   delete($dirs_in_cache{$_->seq_region_name}) for @slices;
-  die("ERROR: Found ".(scalar keys %dirs_in_cache)." dirs in cache that have no corresponding slice\n") if scalar keys %dirs_in_cache;
+
+  my $n_dirs_in_cache = scalar keys %dirs_in_cache;
+  if ( $n_dirs_in_cache ) {
+    my @seqlevel_slices = @{$sa->fetch_all('seqlevel')};
+    delete($dirs_in_cache{$_->seq_region_name}) for @seqlevel_slices;
+    die("ERROR: Found ".(scalar keys %dirs_in_cache)." dirs in cache that have no corresponding slice\n") if scalar keys %dirs_in_cache;
+    warn("WARNING: Found $n_dirs_in_cache dirs in cache that have no corresponding features in database\n");
+  }
 
   # now filter out slices with no transcripts
   my $ta = $dba->get_TranscriptAdaptor();
