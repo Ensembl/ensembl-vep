@@ -1034,7 +1034,16 @@ sub test() {
 #############
 
 sub format_file_size {
+  # Format $size (in bytes) based on most adequate unit, e.g.:
+  #             0 =>   0 bytes
+  #           421 => 421 bytes
+  #          1000 =>   1 KB
+  #     432340000 => 432 MB
+  #   62340002001 =>  62 GB
+  # 3126340002001 =>   3 TB
+  
   my $size = shift;
+  # Units sorted from the biggest to smallest order of magnitude
   my @units = ( 'TB', 'GB', 'MB', 'KB', 'bytes' );
   
   for (@units) {
