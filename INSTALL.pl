@@ -1046,7 +1046,7 @@ sub format_file_size {
   # Units sorted from the biggest to smallest order of magnitude
   my @units = ( 'TB', 'GB', 'MB', 'KB', 'bytes' );
   
-  for (@units) {
+  while (@units) {
     my $unit = shift @units;
     # Calculate order of magnitude based on length of @units
     my $factor = 10 ** ( 3 * scalar @units );
