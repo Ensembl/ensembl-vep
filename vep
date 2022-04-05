@@ -222,6 +222,7 @@ $config->{output_file}=@{$config->{output_file}}[0] if ($config->{output_file});
 &usage && exit(0) if (!$arg_count) || $config->{help};
 
 $config->{database} ||= 0;
+
 my $runner = Bio::EnsEMBL::VEP::Runner->new($config);
 
 if($config->{show_cache_info}) {
