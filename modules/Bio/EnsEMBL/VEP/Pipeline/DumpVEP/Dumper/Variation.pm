@@ -52,7 +52,7 @@ BEGIN {
 
 use base qw(Bio::EnsEMBL::VEP::Pipeline::DumpVEP::Dumper);
 
-my $gnomad_prefix = 'gnomAD_';
+my $gnomad_prefix = 'gnomAD-v';
 
 sub run {
   my $self = shift;
@@ -343,7 +343,7 @@ sub freqs_from_vcf {
                 my $info_suffix = '';
 
                 # have to process ExAC differently from 1KG and ESP
-                if($prefix =~ /exac|gnomad/i && $pop) {
+                if($prefix =~ /exac|gnomad-v2|gnomad-v3/i && $pop) {
                   $info_suffix = '_'.$pop if $pop;
                 }
                 elsif($pop) {
@@ -390,7 +390,7 @@ sub freqs_from_vcf {
 
                 if(defined($tmp_f) && $tmp_f ne '') {
                   my $store_name = $prefix;
-                  $store_name .= ($vcf_conf->{name} eq 'gnomAD' && $pop) ? uc($pop) : $pop;
+                  $store_name .= ($vcf_conf->{name} eq 'gnomAD-v2' || $vcf_conf->{name} eq 'gnomAD-v3'  && $pop) ? uc($pop) : $pop;
                   $store_name =~ s/\_$//;
                   $v->{$store_name} = $v->{$store_name} ? $v->{$store_name}.','.$tmp_f : $tmp_f;
                 }
@@ -403,13 +403,13 @@ sub freqs_from_vcf {
   }
 }
 
-# r2.1 of gnomad has changed the population names from upper to lower case.
+# r2.1 and 3.1.2 of gnomad has changed the population names from upper to lower case.
 # In order to keep the gnomad allele frequency key the same we need to convert
 # to upper case population names 
 sub uc_gnomad_pop {
   my $pop = shift;
   my $ucpop = uc $pop;
-  $ucpop =~ s/GNOMAD_/$gnomad_prefix/;
+  $ucpop =~ s/GNOMAD-V/$gnomad_prefix/;
   return $ucpop; 
 }
 
