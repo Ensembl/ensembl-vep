@@ -114,7 +114,7 @@ GetOptions(
   
   # output options
   'everything|e',            # switch on EVERYTHING :-)
-  'output_file|o=s',         # output file name
+  'output_file|o=s@',         # output file name
   'compress_output=s',       # compress output with e.g. bgzip, gzip
   'no_headers',              # don't print headers
   'stats_file|sf=s',         # stats file name
@@ -217,6 +217,8 @@ GetOptions(
   'debug',                   # print out debug info
 ) or die "ERROR: Failed to parse command-line flags\n";
 
+warn("WARNING: More than one output file command-line flag provided. Using the last value provided: '@{$config->{output_file}}[-1]' \n") unless (scalar @{$config->{output_file}} <= 1);
+$config->{output_file}=@{$config->{output_file}}[-1] if ($config->{output_file});
 &usage && exit(0) if (!$arg_count) || $config->{help};
 
 $config->{database} ||= 0;
