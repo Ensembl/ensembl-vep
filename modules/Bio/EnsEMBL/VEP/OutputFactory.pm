@@ -107,7 +107,7 @@ my %FREQUENCY_KEYS = (
   af_1kg    => [qw(AFR AMR ASN EAS EUR SAS)],
   af_esp    => [qw(AA EA)],
   af_exac   => [('ExAC', map {'ExAC_'.$_} qw(Adj AFR AMR EAS FIN NFE OTH SAS))],
-  af_gnomad => [('gnomAD', map {'gnomAD_'.$_} qw(AFR AMR ASJ EAS FIN NFE OTH SAS))],
+  af_gnomad => [('gnomAD-v2', map {'gnomAD-v2_'.$_} qw(AFR AMR ASJ EAS FIN NFE OTH SAS))],
 );
 
 
@@ -1162,7 +1162,7 @@ sub add_colocated_frequency_data {
 
         # update max_af data if required
         # make sure we don't include any combined-level pops
-        if($self->{max_af} && $key ne 'AF' && $key ne 'ExAC' && $key ne 'ExAC_Adj' && $key ne 'gnomAD') {
+        if($self->{max_af} && $key ne 'AF' && $key ne 'ExAC' && $key ne 'ExAC_Adj' && $key ne 'gnomAD-v2') {
           if($f > $max_af) {
             $max_af = $f;
             @max_af_pops = ($key);
