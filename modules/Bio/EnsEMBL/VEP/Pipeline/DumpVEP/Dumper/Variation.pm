@@ -282,6 +282,9 @@ sub freqs_from_vcf {
   # iterate over each VCF file in the config
   foreach my $vcf_conf(@{$self->{freq_vcf}}) {
     my $file = $vcf_conf->{file};
+
+    # Remove chr from chromosome name
+    $chr =~ s/chr//;
     $file =~ s/\+\+\+CHR\+\+\+/$chr/;
     next unless -e $file;
 
@@ -343,7 +346,7 @@ sub freqs_from_vcf {
                 my $info_suffix = '';
 
                 # have to process ExAC differently from 1KG and ESP
-                if($prefix =~ /exac|gnomad-v2|gnomad-v3/i && $pop) {
+                if($prefix =~ /exac|gnomAD-v2|gnomAD-v3/i && $pop) {
                   $info_suffix = '_'.$pop if $pop;
                 }
                 elsif($pop) {
@@ -390,7 +393,7 @@ sub freqs_from_vcf {
 
                 if(defined($tmp_f) && $tmp_f ne '') {
                   my $store_name = $prefix;
-                  $store_name .= ($vcf_conf->{name} eq 'gnomAD-v2' || $vcf_conf->{name} eq 'gnomAD-v3'  && $pop) ? uc($pop) : $pop;
+                  $store_name .= (($vcf_conf->{name} eq 'gnomAD-v2' || $vcf_conf->{name} eq 'gnomAD-v3') && $pop) ? uc($pop) : $pop;
                   $store_name =~ s/\_$//;
                   $v->{$store_name} = $v->{$store_name} ? $v->{$store_name}.','.$tmp_f : $tmp_f;
                 }
