@@ -147,8 +147,8 @@ sub default_options {
                 use_chr_prefix => 1,
               },
               {
-                file => $self->o('data_dir').'/gnomAD/v3.1.2/grch38/genomes/gnomad.genomes.v3.1.2.sites.+++CHR+++_trimmed_info.vcf.bgz',
-                pops => ['', qw(afr amr asj eas fin nfe oth sas)],
+                file => $self->o('data_dir').'/gnomAD/v3.1.2/grch38/genomes/gnomad.genomes.v3.1.2.sites.chr+++CHR+++_trimmed_info.vcf.bgz',
+                pops => ['', qw(afr ami amr asj eas fin mid nfe oth sas)],
                 name => 'gnomAD-v3',
                 prefix => 'gnomAD-v3',
                 version => 'v3.1.2',
