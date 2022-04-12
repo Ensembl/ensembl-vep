@@ -103,11 +103,12 @@ my %FORMAT_MAP = (
 my %DISTANCE_CONS = (upstream_gene_variant => 1, downstream_gene_variant => 1);
 
 my %FREQUENCY_KEYS = (
-  af        => ['AF'],
-  af_1kg    => [qw(AFR AMR ASN EAS EUR SAS)],
-  af_esp    => [qw(AA EA)],
-  af_exac   => [('ExAC', map {'ExAC_'.$_} qw(Adj AFR AMR EAS FIN NFE OTH SAS))],
-  af_gnomad => [('gnomAD-v2', map {'gnomAD-v2_'.$_} qw(AFR AMR ASJ EAS FIN NFE OTH SAS))],
+  af           => ['AF'],
+  af_1kg       => [qw(AFR AMR ASN EAS EUR SAS)],
+  af_esp       => [qw(AA EA)],
+  af_exac      => [('ExAC', map {'ExAC_'.$_} qw(Adj AFR AMR EAS FIN NFE OTH SAS))],
+  af_gnomad    => [('gnomAD-v2', map {'gnomAD-v2_'.$_} qw(AFR AMR ASJ EAS FIN NFE OTH SAS))],
+  af_gnomad_v3 => [('gnomAD-v3', map {'gnomAD-v3_'.$_} qw(AFR AMI AMR ASJ EAS FIN MID NFE OTH SAS))],
 );
 
 
@@ -169,6 +170,7 @@ sub new {
     af_esp
     af_exac
     af_gnomad
+    af_gnomad_v3
     max_af
     pubmed
     clin_sig_allele
@@ -1162,7 +1164,7 @@ sub add_colocated_frequency_data {
 
         # update max_af data if required
         # make sure we don't include any combined-level pops
-        if($self->{max_af} && $key ne 'AF' && $key ne 'ExAC' && $key ne 'ExAC_Adj' && $key ne 'gnomAD-v2') {
+        if($self->{max_af} && $key ne 'AF' && $key ne 'ExAC' && $key ne 'ExAC_Adj' && $key ne 'gnomAD-v2' && $key ne 'gnomAD-v3') {
           if($f > $max_af) {
             $max_af = $f;
             @max_af_pops = ($key);

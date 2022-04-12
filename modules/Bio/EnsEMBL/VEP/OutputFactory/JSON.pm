@@ -131,6 +131,7 @@ my @FREQ_FIELDS = qw(
   AA EA
   ExAC ExAC_Adj ExAC_AFR ExAC_AMR ExAC_EAS ExAC_FIN ExAC_NFE ExAC_OTH ExAC_SAS
   gnomAD-v2 gnomAD-v2_AFR gnomAD-v2_AMR gnomAD-v2_ASJ gnomAD-v2_EAS gnomAD-v2_FIN gnomAD-v2_NFE gnomAD-v2_OTH gnomAD-v2_SAS
+  gnomAD-v3 gnomAD-v3_AFR gnomAD-v3_AMI gnomAD-v3_AMR gnomAD-v3_ASJ gnomAD-v3_EAS gnomAD-v3_FIN gnomAD-v3_MID gnomAD-v3_NFE gnomAD-v3_OTH gnomAD-v3_SAS
 );
 
 
@@ -158,6 +159,7 @@ sub new {
   $self->{af_1kg} = 1;
   $self->{af_esp} = 1;
   $self->{af_gnomad} = 1;
+  $self->{af_gnomad_v3} = 1;
   $self->{af_exac} = 1;
 
   # add shortcuts to these params
