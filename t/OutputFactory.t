@@ -801,31 +801,31 @@ is_deeply(
   $of->add_colocated_frequency_data($ib->buffer->[0], {Allele => 'T'}, $ib->buffer->[0]->{existing}->[0]),
   {
     'Allele' => 'T',
-    'gnomAD_NFE_AF' => [
+    'gnomAD-v2_NFE_AF' => [
       '2.687e-05'
     ],
-    'gnomAD_AF' => [
+    'gnomAD-v2_AF' => [
       '9.75e-05'
     ],
-    'gnomAD_OTH_AF' => [
+    'gnomAD-v2_OTH_AF' => [
       '0.0001823'
     ],
-    'gnomAD_AFR_AF' => [
+    'gnomAD-v2_AFR_AF' => [
       '0'
     ],
-    'gnomAD_EAS_AF' => [
+    'gnomAD-v2_EAS_AF' => [
       '0'
     ],
-    'gnomAD_AMR_AF' => [
+    'gnomAD-v2_AMR_AF' => [
       '0.0005957'
     ],
-    'gnomAD_SAS_AF' => [
+    'gnomAD-v2_SAS_AF' => [
       '0'
     ],
-    'gnomAD_FIN_AF' => [
+    'gnomAD-v2_FIN_AF' => [
       '0'
     ],
-    'gnomAD_ASJ_AF' => [
+    'gnomAD-v2_ASJ_AF' => [
       '0'
     ]
   },
@@ -868,7 +868,7 @@ is_deeply(
     'Allele' => 'G',
     'MAX_AF' => '0.8223',
     'MAX_AF_POPS' => [
-      'gnomAD_ASJ',
+      'gnomAD-v2_ASJ',
     ],
   },
   'add_colocated_frequency_data - max_af',
