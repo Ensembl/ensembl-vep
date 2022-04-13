@@ -252,14 +252,20 @@ sub get_features_by_regions_uncached {
         # skip those from analysis refseq_human_import and refseq_mouse_import
         next if $self->{core_type} eq 'otherfeatures' && $self->assembly !~ /GRCh37/i && $tr->analysis && $tr->analysis->logic_name =~ /^refseq_[a-z]+_import$/;
 
-	## Due to the inclusion of the new RefSeq transcript set (mapped from 38) into the 37 otherfeatures database,
-	## older, lower quality transcripts have been removed from the cache files. To do this, we filter out all transcripts
-	## with the analysis logic_name 'refseq_import' or 'refseq_human_import'. 
-	## All new transcripts have the logic name 'refseq_import_grch38'
-	next if $self->{core_type} eq 'otherfeatures' && $self->assembly =~ /GRCh37/i && $tr->analysis && $tr->analysis->logic_name =~ /^refseq.+import$/;
-	if($self->{core_type} eq 'otherfeatures' && defined($tr->display_xref)){
-	         $tr->{stable_id} = $tr->display_xref->{display_id};
+        ## Due to the inclusion of the new RefSeq transcript set (mapped from 38) into the 37 otherfeatures database,
+        ## older, lower quality transcripts have been removed from the cache files. To do this, we filter out all transcripts
+        ## with the analysis logic_name 'refseq_import' or 'refseq_human_import'. 
+        ## All new transcripts have the logic name 'refseq_import_grch38'
+        next if $self->{core_type} eq 'otherfeatures' && $self->assembly =~ /GRCh37/i && $tr->analysis && $tr->analysis->logic_name =~ /^refseq.+import$/;
+        if($self->{core_type} eq 'otherfeatures' && defined($tr->display_xref)){
+          $tr->{stable_id} = $tr->display_xref->{display_id};
         }
+        
+        # remove transcripts of biotype artifact
+        next if $tr->{biotype} eq 'artifact';
+        
+        # remove readthrough transcripts
+        next if @{ $tr->get_all_Attributes("readthrough_tra") };
         
         $tr->{_gene_stable_id} = $gene_stable_id;
         $tr->{_gene} = $gene;
