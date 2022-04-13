@@ -20,4 +20,4 @@ source_ClinVar	201704
 source_dbSNP	149
 source_1000genomes	phase3
 source_ESP	V2-SSA137
-source_gnomAD	170228
+source_gnomAD-v2	170228
