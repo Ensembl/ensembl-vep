@@ -131,3 +131,9 @@
 5491725	131543	25749077	25749077	1	5813543	A/G	A	rs9981487	1	\N	1	synonymous_variant,non_coding_transcript_variant,non_coding_transcript_exon_variant	42,43,50,51,52,53,54,55,56	2	0	G	0.00559105	28	1	\N	367,368,370,372,421	1
 5492919	131543	25698693	25698693	1	5814737	A/G	A	rs9982750	1	\N	1	synonymous_variant,NMD_transcript_variant,upstream_gene_variant	2,14,42,48,49,50,51,52,53,54,55,56	2	0	G	0.0223642	112	1	\N	367,368,370,372,421	1
 5492920	131543	25639356	25639361	1	5814738	CCCCCC/CCCCCCC	CCCCCC	rs1444184259	1	\N	1	5_prime_UTR_variant,regulatory_region_variant	\N	14	0	\N	0	0	0	\N	367,368,370,372,421	1
+236266602	131543	6858539	6858547	1	226812683	TGTTGTTGT/TGTTGT	TGTTGTTGT	rs1201697658	1	\N	1	non_coding_transcript_exon_variant,regulatory_region_variant		14	0	\N	\N	\N	\N	368,573	\N	1
+296017919	131543	6897294	6897294	1	283236029	T/C	T	rs1432068864	1	\N	1	non_coding_transcript_exon_variant		2	0	\N	\N	\N	\N	368,573	\N	1
+320048061	131543	6445912	6445912	1	305902589	C/T	C	rs1555846766	1	\N	1	non_coding_transcript_variant,intron_variant,regulatory_region_variant		2	0	\N	\N	\N	\N	\N	\N	1
+727608048	131543	34511125	34511125	1	694328774	C/T	C	rs530953425	1	\N	1	non_coding_transcript_exon_variant,NMD_transcript_variant,5_prime_UTR_variant,3_prime_UTR_variant,regulatory_region_variant		2	0	\N	\N	\N	\N	368	\N	1
+194670940	131543	39380349	39380349	1	187770714	G/A	G	rs745518185	1	\N	1	NMD_transcript_variant,5_prime_UTR_variant,intron_variant,regulatory_region_variant,TF_binding_site_variant	56,57	2	0	\N	\N	\N	\N	368,421,585	\N	1
+195019342	131543	39380325	39380333	1	188107166	TGTTGTTGT/TGTTGT	TGTTGTTGT	rs749616026	1	\N	1	5_prime_UTR_variant,intron_variant,regulatory_region_variant,TF_binding_site_variant		14	0	\N	\N	\N	\N	\N	\N	1
