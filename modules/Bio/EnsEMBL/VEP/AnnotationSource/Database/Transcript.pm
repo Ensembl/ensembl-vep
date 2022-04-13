@@ -261,10 +261,10 @@ sub get_features_by_regions_uncached {
           $tr->{stable_id} = $tr->display_xref->{display_id};
         }
         
-        # remove transcripts of biotype artifact: ENSVAR-4557
+        # remove transcripts of biotype artifact
         next if $tr->{biotype} eq 'artifact';
         
-        # remove readthrough transcripts: ENSVAR-4245
+        # remove readthrough transcripts
         next if @{ $tr->get_all_Attributes("readthrough_tra") };
         
         $tr->{_gene_stable_id} = $gene_stable_id;
