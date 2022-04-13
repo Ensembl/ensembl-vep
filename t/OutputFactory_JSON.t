@@ -133,7 +133,7 @@ SKIP: {
             'T' => {
               'amr' => '0.0014',
               'gnomad_v2_sas' => '0',
-              'gnomad_AAAv2' => '0.0003478',
+              'gnomad_v2' => '0.0003478',
               'ea' => '0',
               'gnomad_v2_oth' => '0',
               'gnomad_v2_asj' => '0',
