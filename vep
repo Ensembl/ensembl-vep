@@ -87,7 +87,7 @@ GetOptions(
   'af_gnomad',               # add gnomAD exomes AFs of existing vars
   'af_gnomad_v3',            # add gnomAD v3 genomes AFs of existing vars
   'old_maf',                 # report 1KG/ESP MAFs in the old way (no allele, always < 0.5)
-  'max_af',                  # report maximum observed allele frequency in any 1KG, ESP, ExAC pop
+  'max_af',                  # report maximum observed allele frequency in any 1KG, gnomAD v2 exomes, gnomAD v3 genomes pops
   'pubmed',                  # add Pubmed IDs for publications that cite existing vars
   'freq_filter=s',           # exclude or include
   'freq_freq=f',             # frequency to filter on
