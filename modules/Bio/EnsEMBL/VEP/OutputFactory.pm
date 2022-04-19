@@ -2287,8 +2287,13 @@ sub get_custom_headers {
   my @headers;
 
   foreach my $custom(@{$self->header_info->{custom_info} || []}) {
-    push @headers, [$custom->{short_name}, sprintf("%s (%s)", $custom->{file}, $custom->{type})];
     
+    if (grep { { $_->[1] =~ /$custom->{short_name}/} } @{\@headers}){
+      print "";
+    } else {
+      push @headers, [$custom->{short_name}, sprintf("%s (%s)", $custom->{file}, $custom->{type})];
+    }
+
     foreach my $field(@{$custom->{fields} || []}) {
       push @headers, [
         sprintf("%s_%s", $custom->{short_name}, $field),
@@ -2296,6 +2301,11 @@ sub get_custom_headers {
       ];
     }
   }
+
+  use feature 'say';
+  use Data::Dumper;
+
+  say Dumper(\@headers);
 
   return \@headers;
 }
