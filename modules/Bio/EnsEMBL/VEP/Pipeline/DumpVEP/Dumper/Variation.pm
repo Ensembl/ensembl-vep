@@ -411,7 +411,8 @@ sub freqs_from_vcf {
 sub uc_gnomad_pop {
   my $pop = shift;
   my $ucpop = uc $pop;
-  $ucpop =~ s/GNOMAD/$gnomad_prefix/;
+  $ucpop =~ s/GNOMADE/${gnomad_prefix}e/;
+  $ucpop =~ s/GNOMADG/${gnomad_prefix}g/;
   return $ucpop; 
 }
 
