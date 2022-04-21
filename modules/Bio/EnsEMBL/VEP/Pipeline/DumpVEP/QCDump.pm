@@ -574,7 +574,7 @@ sub human_frequency_checks {
     af_esp => 1,
     af_gnomad => 1,
     af_gnomad_v3 => 1,
-    fields => 'Uploaded_variation,AFR_AF,AMR_AF,EAS_AF,EUR_AF,SAS_AF,AA_AF,EA_AF,gnomAD-v2_AF,gnomAD-v2_AFR_AF,gnomAD-v2_AMR_AF,gnomAD-v2_ASJ_AF,gnomAD-v2_EAS_AF,gnomAD-v2_FIN_AF,gnomAD-v2_NFE_AF,gnomAD-v2_OTH_AF,gnomAD-v2_SAS_AF,gnomAD-v3_AF,gnomAD-v3_AFR_AF,gnomAD-v3_AMI_AF,gnomAD-v3_AMR_AF,gnomAD-v3_ASJ_AF,gnomAD-v3_EAS_AF,gnomAD-v3_FIN_AF,gnomAD-v3_MID_AF,gnomAD-v3_NFE_AF,gnomAD-v3_OTH_AF,gnomAD-v3_SAS_AF',
+    fields => 'Uploaded_variation,AF,AFR_AF,AMR_AF,EAS_AF,EUR_AF,SAS_AF,AA_AF,EA_AF,gnomADe_AF,gnomADe_AFR_AF,gnomADe_AMR_AF,gnomADe_ASJ_AF,gnomADe_EAS_AF,gnomADe_FIN_AF,gnomADe_NFE_AF,gnomADe_OTH_AF,gnomADe_SAS_AF,gnomADg_AF,gnomADg_AFR_AF,gnomADg_AMI_AF,gnomADg_AMR_AF,gnomADg_ASJ_AF,gnomADg_EAS_AF,gnomADg_FIN_AF,gnomADg_MID_AF,gnomADg_NFE_AF,gnomADg_OTH_AF,gnomADg_SAS_AF',
     buffer_size => 1,
     pick => 1,
     failed => 1,

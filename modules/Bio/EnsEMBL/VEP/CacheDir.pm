@@ -176,7 +176,7 @@ sub get_all_AnnotationSources {
       # don't do this check with --everything
       unless($self->param('everything')) {
         my $have_exac   = (grep {$_ eq 'ExAC'} @{$info->{variation_cols}});
-        my $have_gnomad = (grep {$_ eq 'gnomAD-v2'} @{$info->{variation_cols}});
+        my $have_gnomad = (grep {$_ eq 'gnomADe'} @{$info->{variation_cols}});
 
         if($self->param('af_exac') && !$have_exac) {
           throw(

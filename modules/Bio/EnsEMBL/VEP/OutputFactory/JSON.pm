@@ -130,8 +130,8 @@ my @FREQ_FIELDS = qw(
   AFR AMR ASN EAS SAS EUR
   AA EA
   ExAC ExAC_Adj ExAC_AFR ExAC_AMR ExAC_EAS ExAC_FIN ExAC_NFE ExAC_OTH ExAC_SAS
-  gnomAD-v2 gnomAD-v2_AFR gnomAD-v2_AMR gnomAD-v2_ASJ gnomAD-v2_EAS gnomAD-v2_FIN gnomAD-v2_NFE gnomAD-v2_OTH gnomAD-v2_SAS
-  gnomAD-v3 gnomAD-v3_AFR gnomAD-v3_AMI gnomAD-v3_AMR gnomAD-v3_ASJ gnomAD-v3_EAS gnomAD-v3_FIN gnomAD-v3_MID gnomAD-v3_NFE gnomAD-v3_OTH gnomAD-v3_SAS
+  gnomADe gnomADe_AFR gnomADe_AMR gnomADe_ASJ gnomADe_EAS gnomADe_FIN gnomADe_NFE gnomADe_OTH gnomADe_SAS
+  gnomADg gnomADg_AFR gnomADg_AMI gnomADg_AMR gnomADg_ASJ gnomADg_EAS gnomADg_FIN gnomADg_MID gnomADg_NFE gnomADg_OTH gnomADg_SAS
 );
 
 
