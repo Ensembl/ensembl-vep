@@ -52,7 +52,7 @@ BEGIN {
 
 use base qw(Bio::EnsEMBL::VEP::Pipeline::DumpVEP::Dumper);
 
-my $gnomad_prefix = 'gnomAD-v';
+my $gnomad_prefix = 'gnomAD';
 
 sub run {
   my $self = shift;
@@ -345,7 +345,7 @@ sub freqs_from_vcf {
                 my $info_suffix = '';
 
                 # have to process gnomADe and gnomADg differently from 1KG and ESP
-                if($prefix =~ /gnomAD-v2|gnomAD-v3/i && $pop) {
+                if($prefix =~ /gnomADe|gnomADg/i && $pop) {
                   $info_suffix = '_'.$pop if $pop;
                 }
                 elsif($pop) {
@@ -392,7 +392,7 @@ sub freqs_from_vcf {
 
                 if(defined($tmp_f) && $tmp_f ne '') {
                   my $store_name = $prefix;
-                  $store_name .= (($vcf_conf->{name} eq 'gnomAD-v2' || $vcf_conf->{name} eq 'gnomAD-v3') && $pop) ? uc($pop) : $pop;
+                  $store_name .= (($vcf_conf->{name} eq 'gnomADe' || $vcf_conf->{name} eq 'gnomADg') && $pop) ? uc($pop) : $pop;
                   $store_name =~ s/\_$//;
                   $v->{$store_name} = $v->{$store_name} ? $v->{$store_name}.','.$tmp_f : $tmp_f;
                 }
@@ -411,7 +411,7 @@ sub freqs_from_vcf {
 sub uc_gnomad_pop {
   my $pop = shift;
   my $ucpop = uc $pop;
-  $ucpop =~ s/GNOMAD-V/$gnomad_prefix/;
+  $ucpop =~ s/GNOMAD/$gnomad_prefix/;
   return $ucpop; 
 }
 
