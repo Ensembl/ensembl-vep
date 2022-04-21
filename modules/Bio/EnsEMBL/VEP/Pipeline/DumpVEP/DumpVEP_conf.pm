@@ -134,7 +134,7 @@ sub default_options {
             freq_vcf => [
               {
                 file => $self->o('dump_vep_data_dir').'/1KG.phase3.GRCh38_2018_02_26.vcf.gz',
-                pops => [qw(AFR AMR EAS EUR SAS)],
+                pops => ['', qw(AFR AMR EAS EUR SAS)],
                 name => '1000genomes',
                 version => 'phase3'
               },
