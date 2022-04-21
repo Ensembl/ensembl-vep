@@ -314,7 +314,6 @@ sub freqs_from_vcf {
               $self->warning('Could not be added to cache ' . $v->{variation_name} . ' ' . $v->{allele_string});
               next;
             }
-            $DB::single = 1 if $v->{variation_name} eq 'TMP_ESP_1_179086420_179086420';
 
             my $matches = [];
             eval{
