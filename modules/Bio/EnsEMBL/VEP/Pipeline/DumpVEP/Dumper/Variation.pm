@@ -345,8 +345,8 @@ sub freqs_from_vcf {
                 my $info_prefix = '';
                 my $info_suffix = '';
 
-                # have to process ExAC differently from 1KG and ESP
-                if($prefix =~ /exac|gnomAD-v2|gnomAD-v3/i && $pop) {
+                # have to process gnomADe and gnomADg differently from 1KG and ESP
+                if($prefix =~ /gnomAD-v2|gnomAD-v3/i && $pop) {
                   $info_suffix = '_'.$pop if $pop;
                 }
                 elsif($pop) {
