@@ -114,8 +114,8 @@ our @FLAG_FIELDS = (
   { flag => 'af_1kg',          fields => ['AF','AFR_AF','AMR_AF','EAS_AF','EUR_AF','SAS_AF'] },
   { flag => 'af_esp',          fields => ['AA_AF','EA_AF'] },
   { flag => 'af_exac',         fields => ['ExAC_AF','ExAC_Adj_AF','ExAC_AFR_AF','ExAC_AMR_AF','ExAC_EAS_AF','ExAC_FIN_AF','ExAC_NFE_AF','ExAC_OTH_AF','ExAC_SAS_AF'] },
-  { flag => 'af_gnomad',       fields => ['gnomADe_AF','gnomADe_AFR_AF','gnomADe_AMR_AF','gnomADe_ASJ_AF','gnomADe_EAS_AF','gnomADe_FIN_AF','gnomADe_NFE_AF','gnomADe_OTH_AF','gnomADe_SAS_AF'] },
-  { flag => 'af_gnomad_v3',    fields => ['gnomADg_AF','gnomADg_AFR_AF', ,'gnomADg_AMI_AF', 'gnomADg_AMR_AF','gnomADg_ASJ_AF','gnomADg_EAS_AF','gnomADg_FIN_AF','gnomADg_MID_AF','gnomADg_NFE_AF','gnomADg_OTH_AF','gnomADg_SAS_AF'] },
+  { flag => 'af_gnomade',       fields => ['gnomADe_AF','gnomADe_AFR_AF','gnomADe_AMR_AF','gnomADe_ASJ_AF','gnomADe_EAS_AF','gnomADe_FIN_AF','gnomADe_NFE_AF','gnomADe_OTH_AF','gnomADe_SAS_AF'] },
+  { flag => 'af_gnomadg',    fields => ['gnomADg_AF','gnomADg_AFR_AF', ,'gnomADg_AMI_AF', 'gnomADg_AMR_AF','gnomADg_ASJ_AF','gnomADg_EAS_AF','gnomADg_FIN_AF','gnomADg_MID_AF','gnomADg_NFE_AF','gnomADg_OTH_AF','gnomADg_SAS_AF'] },
   { flag => 'max_af',          fields => ['MAX_AF', 'MAX_AF_POPS'] },
   { flag => 'check_frequency', fields => ['FREQS'] },
 

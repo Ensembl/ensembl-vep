@@ -152,8 +152,8 @@ our @OPTION_SETS = (
       af             => 1,
       af_1kg         => 1,
       af_esp         => 1,
-      af_gnomad      => 1,
-      af_gnomad_v3   => 1,
+      af_gnomade     => 1,
+      af_gnomadg     => 1,
       max_af         => 1,
       pubmed         => 1,
       uniprot        => 1,
@@ -219,7 +219,7 @@ our @OPTION_SETS = (
   },
   
   {
-    flags => [qw(check_frequency af af_1kg af_esp af_exac af_gnomad af_gnomad_v3 max_af pubmed)],
+    flags => [qw(check_frequency af af_1kg af_esp af_exac af_gnomade af_gnomadg max_af pubmed)],
     set   => {
       check_existing => 1,
     },
@@ -389,7 +389,7 @@ our %REQUIRES = (
 our %INCOMPATIBLE = (
   most_severe => [qw(biotype no_intergenic protein symbol sift polyphen coding_only ccds mane canonical xref_refseq numbers domains tsl appris uniprot summary pick flag_pick pick_allele flag_pick_allele)],
   summary     => [qw(biotype no_intergenic protein symbol sift polyphen coding_only ccds mane canonical xref_refseq numbers domains tsl appris uniprot most_severe pick flag_pick pick_allele flag_pick_allele)],
-  database    => [qw(af_1kg af_esp af_exac af_gnomad af_gnomad_v3 max_af pubmed var_synonyms offline cache)],
+  database    => [qw(af_1kg af_esp af_exac af_gnomade af_gnomadg max_af pubmed var_synonyms offline cache)],
   quiet       => [qw(verbose)],
   refseq      => [qw(gencode_basic merged)],
   json        => [qw(vcf tab)],
@@ -645,7 +645,7 @@ sub check_config {
   
   # turn off some options if using --everything and --database
   if($config->{everything} && $config->{database}) {
-    delete $config->{$_} for qw(af_1kg af_esp af_exac af_gnomad af_gnomad_v3 max_af pubmed);
+    delete $config->{$_} for qw(af_1kg af_esp af_exac af_gnomade af_gnomadg max_af pubmed);
   }
   
   # check valid values for flags

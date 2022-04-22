@@ -107,8 +107,8 @@ my %FREQUENCY_KEYS = (
   af_1kg       => [qw(AF AFR AMR ASN EAS EUR SAS)],
   af_esp       => [qw(AA EA)],
   af_exac      => [('ExAC', map {'ExAC_'.$_} qw(Adj AFR AMR EAS FIN NFE OTH SAS))],
-  af_gnomad    => [('gnomADe', map {'gnomADe_'.$_} qw(AFR AMR ASJ EAS FIN NFE OTH SAS))],
-  af_gnomad_v3 => [('gnomADg', map {'gnomADg_'.$_} qw(AFR AMI AMR ASJ EAS FIN MID NFE OTH SAS))],
+  af_gnomade    => [('gnomADe', map {'gnomADe_'.$_} qw(AFR AMR ASJ EAS FIN NFE OTH SAS))],
+  af_gnomadg => [('gnomADg', map {'gnomADg_'.$_} qw(AFR AMI AMR ASJ EAS FIN MID NFE OTH SAS))],
 );
 
 
@@ -169,8 +169,8 @@ sub new {
     af_1kg
     af_esp
     af_exac
-    af_gnomad
-    af_gnomad_v3
+    af_gnomade
+    af_gnomadg
     max_af
     pubmed
     clin_sig_allele
