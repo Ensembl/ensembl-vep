@@ -724,6 +724,7 @@ is_deeply(
   $of->add_colocated_frequency_data($vf, {Allele => 'T'}, $vf->{existing}->[0]),
   {
     Allele => 'T',
+    AF => ['0.0010'],
     AFR_AF => ['0.003'],
     AMR_AF => ['0.0014'],
     EAS_AF => ['0'],
