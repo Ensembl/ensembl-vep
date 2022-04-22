@@ -68,6 +68,7 @@ use warnings;
 package Bio::EnsEMBL::VEP::OutputFactory;
 
 use base qw(Bio::EnsEMBL::VEP::BaseVEP);
+use Number::Format qw(format_number);
 
 use Scalar::Util qw(looks_like_number);
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
@@ -1103,9 +1104,6 @@ sub add_colocated_frequency_data {
 
   my @ex_alleles = split('/', $ex->{allele_string});
 
-  # gmaf stored a bit differently, but we can get it in the same format
-  $ex->{AF} = $ex->{minor_allele}.':'.$ex->{minor_allele_freq} if $ex->{minor_allele};
-
   my @keys = keys %FREQUENCY_KEYS;
   @keys = grep {$self->{$_}} @keys unless $self->{max_af};
   
@@ -1115,7 +1113,7 @@ sub add_colocated_frequency_data {
   
   my ($matched_allele) = grep {$_->{a_allele} eq $this_allele || $_->{a_allele} eq $this_allele_unshifted} @{$ex->{matched_alleles} || []};
 
-  return $hash unless $matched_allele || (grep {$_ eq 'af'} @keys);
+  return $hash unless $matched_allele;
 
   my $max_af = 0;
   my @max_af_pops;
@@ -1132,6 +1130,7 @@ sub add_colocated_frequency_data {
       # get the frequencies for each allele into a hashref
       foreach my $pair(split(',', $ex->{$key})) {
         my ($a, $f) = split(':', $pair);
+        $f = format_number($f, 4, 1) if $key eq 'AF'; # this format is just to keep old compability with dbSNP import
         $freq_data{$a} = $f;
         $total += $f;
         delete $remaining{$a} if $remaining{$a};
@@ -1141,10 +1140,6 @@ sub add_colocated_frequency_data {
       # we can only do this reliably for the AF key as only the minor AF is stored
       # for others we expect all ALTs to have a store frequency, those without cannot be reliably interpolated
       my $interpolated = 0;
-      if(scalar @ex_alleles == 2 && scalar keys %remaining == 1 && $key eq 'AF') {
-        $freq_data{(keys %remaining)[0]} = 1 - $total;
-        $interpolated = 1;
-      }
 
       if(
         ($matched_allele && exists($freq_data{$matched_allele->{b_allele}})) ||
@@ -1188,8 +1183,6 @@ sub add_colocated_frequency_data {
     
     push @{$hash->{MAX_AF_POPS}}, @max_af_pops if $max_af >= $current_max;
   }
-
-  delete $ex->{AF};
 
   return $hash;
 }
