@@ -182,7 +182,8 @@ sub get_frequency_data {
 
   my $freq_pop_full = uc($self->{freq_pop});
   $freq_pop_full =~ s/EXAC/ExAC/i;
-  $freq_pop_full =~ s/GNOMAD-V/gnomAD-v/i;
+  $freq_pop_full =~ s/GNOMADG/gnomADg/i;
+  $freq_pop_full =~ s/GNOMADE/gnomADe/i;
   my ($freq_group, $freq_pop) = split('_', $freq_pop_full);
 
   my %matched_alleles;
