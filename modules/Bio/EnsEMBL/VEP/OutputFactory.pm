@@ -68,7 +68,6 @@ use warnings;
 package Bio::EnsEMBL::VEP::OutputFactory;
 
 use base qw(Bio::EnsEMBL::VEP::BaseVEP);
-use Number::Format qw(format_number);
 
 use Scalar::Util qw(looks_like_number);
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
@@ -1130,7 +1129,7 @@ sub add_colocated_frequency_data {
       # get the frequencies for each allele into a hashref
       foreach my $pair(split(',', $ex->{$key})) {
         my ($a, $f) = split(':', $pair);
-        $f = format_number($f, 4, 1) if $key eq 'AF'; # this format is just to keep old compability with dbSNP import
+        $f = sprintf("%.4f", $f) if $key eq 'AF'; # this format is just to keep old compability with dbSNP import
         $freq_data{$a} = $f;
         $total += $f;
         delete $remaining{$a} if $remaining{$a};
