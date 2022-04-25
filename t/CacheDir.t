@@ -206,7 +206,8 @@ is_deeply(
       'gnomADe_NFE',
       'gnomADe_OTH',
       'gnomADe_SAS',
-      'var_synonyms'
+      'var_synonyms',
+      'AF'
     ],
     'assembly' => 'GRCh38',
     'valid_chromosomes' => [21, 22, 'LRG_485'],

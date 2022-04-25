@@ -127,7 +127,7 @@ my @LIST_FIELDS = qw(
 );
 
 my @FREQ_FIELDS = qw(
-  AFR AMR ASN EAS SAS EUR
+  AF AFR AMR ASN EAS SAS EUR
   AA EA
   ExAC ExAC_Adj ExAC_AFR ExAC_AMR ExAC_EAS ExAC_FIN ExAC_NFE ExAC_OTH ExAC_SAS
   gnomADe gnomADe_AFR gnomADe_AMR gnomADe_ASJ gnomADe_EAS gnomADe_FIN gnomADe_NFE gnomADe_OTH gnomADe_SAS
