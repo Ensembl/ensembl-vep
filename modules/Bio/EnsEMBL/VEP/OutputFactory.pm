@@ -1112,7 +1112,7 @@ sub add_colocated_frequency_data {
   
   my ($matched_allele) = grep {$_->{a_allele} eq $this_allele || $_->{a_allele} eq $this_allele_unshifted} @{$ex->{matched_alleles} || []};
 
-  return $hash unless $matched_allele;
+  return $hash unless $matched_allele || (grep {$_ eq 'af'} @keys);
 
   my $max_af = 0;
   my @max_af_pops;
@@ -1139,6 +1139,10 @@ sub add_colocated_frequency_data {
       # we can only do this reliably for the AF key as only the minor AF is stored
       # for others we expect all ALTs to have a store frequency, those without cannot be reliably interpolated
       my $interpolated = 0;
+      if(scalar @ex_alleles == 2 && scalar keys %remaining == 1 && $key eq 'AF') {
+        $freq_data{(keys %remaining)[0]} = 1 - $total;
+        $interpolated = 1;
+      }
 
       if(
         ($matched_allele && exists($freq_data{$matched_allele->{b_allele}})) ||

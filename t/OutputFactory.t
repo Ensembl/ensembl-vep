@@ -796,7 +796,7 @@ $ib = get_annotated_buffer({
   check_existing => 1,
   input_file => $test_cfg->create_input_file([qw(21 25891796 . C T . . .)]),
 });
-$of->{af_gnomad} = 1;
+$of->{af_gnomade} = 1;
 
 is_deeply(
   $of->add_colocated_frequency_data($ib->buffer->[0], {Allele => 'T'}, $ib->buffer->[0]->{existing}->[0]),
@@ -832,28 +832,12 @@ is_deeply(
   },
   'add_colocated_frequency_data - af_gnomad',
 );
-$of->{af_gnomad} = 0;
+$of->{af_gnomade} = 0;
 
 $ib = get_annotated_buffer({
   check_existing => 1,
   input_file => $test_cfg->create_input_file([qw(21 25975223 . G A . . .)])
 });
-
-$of->{af_esp} = 1;
-is_deeply(
-  $of->add_colocated_frequency_data($ib->buffer->[0], {Allele => 'A'}, $ib->buffer->[0]->{existing}->[0]),
-  {
-    'Allele' => 'A',
-    'AA_AF' => [
-      '0',
-    ],
-    'EA_AF' => [
-      '0.000814',
-    ],
-  },
-  'add_colocated_frequency_data - af_esp',
-);
-$of->{af_esp} = 0;
 
 
 # max_af
