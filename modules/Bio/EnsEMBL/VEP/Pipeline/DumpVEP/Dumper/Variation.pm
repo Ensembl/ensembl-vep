@@ -183,6 +183,7 @@ sub _generic_dump_info {
   );
   foreach my $pop(map {@{$_->{prefixed_pops} || $_->{pops}}} @{$self->{freq_vcf} || []}) {
     $pop = uc_gnomad_pop($pop) if ($pop =~ /^$gnomad_prefix/);
+    $pop = "AF" if $pop eq '';
     push @cols, $pop;
   }
 
