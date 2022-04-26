@@ -67,6 +67,7 @@ our %DEFAULTS = (
 
   custom_bed     => $Bin.'/testdata/custom/test.bed.gz',
   custom_vcf     => $Bin.'/testdata/custom/test.vcf.gz',
+  custom_vcf_2   => $Bin.'/testdata/custom/test2.vcf.gz',
   custom_gff     => $Bin.'/testdata/custom/test.gff.gz',
   custom_refseq_gff => $Bin.'/testdata/custom/refseq.gff.gz',
   custom_gtf     => $Bin.'/testdata/custom/test.gtf.gz',
