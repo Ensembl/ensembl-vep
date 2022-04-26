@@ -42,6 +42,7 @@ use Bio::EnsEMBL::VEP::Utils qw(
   convert_arrayref
   merge_hashes
   merge_arrays
+  get_flaltten
 );
 
 # 5-10
@@ -94,6 +95,7 @@ use vars qw(@ISA @EXPORT_OK);
   &get_compressed_filehandle
   &get_version_data
   &get_version_string
+  &get_flatten
 );
 
 our ($CAN_USE_PERLIO_GZIP, $CAN_USE_GZIP, $CAN_USE_IO_UNCOMPRESS);
@@ -553,3 +555,19 @@ sub get_version_string {
 
 1;
 
+=head2 get_flatten
+
+  Arg 1      : Multi-dimensional array
+  Example    : @flatten_array = get_flatten($dir)
+  Description: Recursive function to get a unidimensional
+               array from any multidimensional-array or tuple
+  Returntype : array
+  Exceptions : none
+  Caller     : vep
+  Status     : Stable
+
+=cut
+
+sub get_flatten {
+  return map { ref $_ ? get_flatten(@{$_}) : $_ } @_;
+}
