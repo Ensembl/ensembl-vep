@@ -2288,16 +2288,21 @@ sub get_custom_headers {
 
   foreach my $custom(@{$self->header_info->{custom_info} || []}) {
     
-    if (grep { /^$custom->{short_name}$/ }  get_flatten(\@headers)){
-      print "";
+    my @flatten_header = get_flatten(\@headers);
+    my %pos = map { $flatten_header[$_]=~/o/?($flatten_header[$_]=>$_):() } 0..$#flatten_header if @flatten_header;
+
+    if (grep { /^$custom->{short_name}$/ }  @flatten_header){
+      my $pos = $pos{$custom->{short_name}} / 2;
+      $headers[$pos][1] =~ s/ \(/,$custom->{file} \(/g;
     } else {
       push @headers, [$custom->{short_name}, sprintf("%s (%s)", $custom->{file}, $custom->{type})];
     }
 
     foreach my $field(@{$custom->{fields} || []}) {
       my $sub_id = sprintf("%s_%s", $custom->{short_name}, $field);
-      if (grep { /^$sub_id$/ } get_flatten(\@headers)){
-        print "";
+      if (grep { /^$sub_id$/ } @flatten_header){
+        my $pos = $pos{$sub_id} / 2;
+        $headers[$pos][1] .= ",$custom->{file}";
       } else {
         push @headers, [
           $sub_id,
@@ -2306,11 +2311,6 @@ sub get_custom_headers {
       }
     }
   }
-
-  use feature 'say';
-  use Data::Dumper;
-
-  say Dumper(\@headers);
 
   return \@headers;
 }
