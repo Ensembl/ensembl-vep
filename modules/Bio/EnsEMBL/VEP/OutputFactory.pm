@@ -2288,7 +2288,7 @@ sub get_custom_headers {
 
   foreach my $custom(@{$self->header_info->{custom_info} || []}) {
     
-    if (grep { /$custom->{short_name}/ }  get_flatten(\@headers)){
+    if (grep { /^$custom->{short_name}$/ }  get_flatten(\@headers)){
       print "";
     } else {
       push @headers, [$custom->{short_name}, sprintf("%s (%s)", $custom->{file}, $custom->{type})];
@@ -2296,8 +2296,8 @@ sub get_custom_headers {
 
     foreach my $field(@{$custom->{fields} || []}) {
       my $sub_id = sprintf("%s_%s", $custom->{short_name}, $field);
-      if (grep { /$sub_id/ } get_flatten(\@headers)){
-        print $sub_id . "\n";
+      if (grep { /^$sub_id$/ } get_flatten(\@headers)){
+        print "";
       } else {
         push @headers, [
           $sub_id,
