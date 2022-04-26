@@ -75,7 +75,7 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
 use Bio::EnsEMBL::Variation::Utils::Constants;
 use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
-use Bio::EnsEMBL::VEP::Utils qw(format_coords merge_arrays);
+use Bio::EnsEMBL::VEP::Utils qw(format_coords merge_arrays get_flatten);
 use Bio::EnsEMBL::VEP::Constants;
 
 use Bio::EnsEMBL::VEP::OutputFactory::VEP_output;
@@ -2288,17 +2288,22 @@ sub get_custom_headers {
 
   foreach my $custom(@{$self->header_info->{custom_info} || []}) {
     
-    if (grep { { $_->[1] =~ /$custom->{short_name}/} } @{\@headers}){
+    if (grep { /$custom->{short_name}/ }  get_flatten(\@headers)){
       print "";
     } else {
       push @headers, [$custom->{short_name}, sprintf("%s (%s)", $custom->{file}, $custom->{type})];
     }
 
     foreach my $field(@{$custom->{fields} || []}) {
-      push @headers, [
-        sprintf("%s_%s", $custom->{short_name}, $field),
-        sprintf("%s field from %s", $field, $custom->{file})
-      ];
+      my $sub_id = sprintf("%s_%s", $custom->{short_name}, $field);
+      if (grep { /$sub_id/ } get_flatten(\@headers)){
+        print $sub_id . "\n";
+      } else {
+        push @headers, [
+          $sub_id,
+          sprintf("%s field from %s", $field, $custom->{file})
+        ];
+      }
     }
   }
 
@@ -2309,7 +2314,6 @@ sub get_custom_headers {
 
   return \@headers;
 }
-
 
 =head2 flag_fields
 
