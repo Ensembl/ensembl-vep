@@ -141,7 +141,6 @@ sub new {
 
   throw("ERROR: No file given\n") unless $hashref->{file};
   $self->file($hashref->{file});
-  print "$hashref->{file}\n"; # HEREEEE
 
   $hashref->{short_name} = $self->short_name($hashref->{short_name} || (split '/', $self->file)[-1]);
   $hashref->{type} = $self->type($hashref->{type} || 'overlap');
