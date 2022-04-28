@@ -110,7 +110,7 @@ SKIP: {
   no warnings 'once';
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'Bio::DB::HTS::Tabix module not available', 4 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+  skip 'Bio::DB::HTS::Tabix module not available', 5 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
 
   $asa->param('custom', [$test_cfg->{custom_vcf}.',test,vcf,exact']);
   is_deeply(
@@ -209,6 +209,109 @@ SKIP: {
     ],
     'get_all_custom - fields'
   );
+
+  my $test = $test_cfg->{test_vcf};
+  my $output_test = $test_cfg->{test_vcf};
+  $test =~ s/\.vcf/\+\+\+CHR\+\+\+\.vcf.gz/;
+  $output_test =~ s/\.vcf/2\.vcf.gz/;
+  $asa->param('custom', [$test.',test,vcf,overlap,1,FOO,BAR']);
+  is_deeply(
+    $asa->get_all_custom(),
+    [
+      bless( {
+        'short_name' => 'test',
+        '_config' => $asa->config,
+        'report_coords' => 1,
+        'fields' => ['FOO', 'BAR'],
+        'file' => $output_test,
+        'type' => 'overlap',
+        'custom_multi_allelic' => undef,
+        'info' => {
+          'custom_info' => {
+            'short_name' => 'test',
+            'report_coords' => 1,
+            'fields' => ['FOO', 'BAR'],
+            'file' => $output_test,
+            'type' => 'overlap',
+          }
+        }
+      }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' ),
+  bless( {
+    'info' => {
+      'custom_info' => {
+        'fields' => ['FOO', 'BAR'],
+        'short_name' => 'test',
+        'report_coords' => '1',
+        'file' => '/hps/software/users/ensembl/repositories/diegomscoelho/ensembl-vep/t/testdata/input/test3.vcf.gz',
+        'type' => 'overlap'
+      }
+    },
+    'short_name' => 'test',
+    '_config' => $asa->config,
+    'report_coords' => '1',
+    'file' => '/hps/software/users/ensembl/repositories/diegomscoelho/ensembl-vep/t/testdata/input/test3.vcf.gz',
+    'fields' => ['FOO', 'BAR'],
+    'custom_multi_allelic' => undef,
+    'type' => 'overlap'
+  }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' ),
+  bless( {
+    'info' => {
+      'custom_info' => {
+        'fields' => ['FOO', 'BAR'],
+        'short_name' => 'test',
+        'report_coords' => '1',
+        'file' => '/hps/software/users/ensembl/repositories/diegomscoelho/ensembl-vep/t/testdata/input/test4.vcf.gz',
+        'type' => 'overlap'
+      }
+    },
+    'short_name' => 'test',
+    '_config' => $asa->config,
+    'report_coords' => '1',
+    'file' => '/hps/software/users/ensembl/repositories/diegomscoelho/ensembl-vep/t/testdata/input/test4.vcf.gz',
+    'fields' => ['FOO', 'BAR'],
+    'custom_multi_allelic' => undef,
+    'type' => 'overlap'
+  }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' ),
+  bless( {
+    'info' => {
+      'custom_info' => {
+        'fields' => ['FOO', 'BAR'],
+        'short_name' => 'test',
+        'report_coords' => '1',
+        'file' => '/hps/software/users/ensembl/repositories/diegomscoelho/ensembl-vep/t/testdata/input/test5.vcf.gz',
+        'type' => 'overlap'
+      }
+    },
+    'short_name' => 'test',
+    '_config' => $asa->config,
+    'report_coords' => '1',
+    'file' => '/hps/software/users/ensembl/repositories/diegomscoelho/ensembl-vep/t/testdata/input/test5.vcf.gz',
+    'fields' => ['FOO', 'BAR'],
+    'custom_multi_allelic' => undef,
+    'type' => 'overlap'
+  }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' ),
+  bless( {
+    'info' => {
+      'custom_info' => {
+        'fields' => ['FOO', 'BAR'],
+        'short_name' => 'test',
+        'report_coords' => '1',
+        'file' => '/hps/software/users/ensembl/repositories/diegomscoelho/ensembl-vep/t/testdata/input/test6.vcf.gz',
+        'type' => 'overlap'
+      }
+    },
+    'short_name' => 'test',
+    '_config' => $asa->config,
+    'report_coords' => '1',
+    'file' => '/hps/software/users/ensembl/repositories/diegomscoelho/ensembl-vep/t/testdata/input/test6.vcf.gz',
+    'fields' => ['FOO', 'BAR'],
+    'custom_multi_allelic' => undef,
+    'type' => 'overlap'
+  }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
+    ],
+    'get_all_custom - automated +++CHR+++'
+  );
+
 }
 
 $asa->param('custom', []);
