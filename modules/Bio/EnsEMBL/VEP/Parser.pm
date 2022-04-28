@@ -567,8 +567,7 @@ sub validate_vf {
         # could not transform
         else {
           $self->warning_msg(
-            "WARNING: Chromosome ".$vf->{chr}." not found in annotation sources or synonyms and could not transform to toplevel on line ".$self->line_number
-            
+            "WARNING: Chromosome ".$vf->{chr}." not found in annotation sources or synonyms and could not transform to toplevel on line ".$self->line_number  
           );
           return 0;
         }
