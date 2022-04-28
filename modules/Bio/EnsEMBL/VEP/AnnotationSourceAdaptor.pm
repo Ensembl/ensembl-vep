@@ -228,16 +228,13 @@ sub get_all_custom {
 
     if (grep { /\+\+\+CHR\+\+\+/ } $file){
 
-      my $new_file = $file;
-      my $new_opts = { %$opts };
-
       foreach my $chr (@VALID_CHRS){
+        my $new_file = $file;
+        my $new_opts = { %$opts };
         $new_file =~ s/\+\+\+CHR\+\+\+/$chr/;
         next unless -e $new_file;
         $new_opts->{file} = $new_file;
         push @as, Bio::EnsEMBL::VEP::AnnotationSource::File->new($new_opts);
-        $new_file = $file;
-        $new_opts = { %$opts };
       }
 
       # Non-match +++CHR+++ pattern scenario
