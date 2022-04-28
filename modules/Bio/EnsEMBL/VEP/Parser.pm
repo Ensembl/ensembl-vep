@@ -568,6 +568,7 @@ sub validate_vf {
         else {
           $self->warning_msg(
             "WARNING: Chromosome ".$vf->{chr}." not found in annotation sources or synonyms and could not transform to toplevel on line ".$self->line_number
+            
           );
           return 0;
         }
@@ -585,7 +586,7 @@ sub validate_vf {
     # offline, can't transform
     else {
       $self->warning_msg(
-        "WARNING: Chromosome ".$vf->{chr}." not found in annotation sources or synonyms on line ".$self->line_number
+        "WARNING: Chromosome ".$vf->{chr}." not found in annotation sources or synonyms on line ".$self->line_number."\n. Chromosome ".$vf->{chr}. " not found to overlap any features"
       );
       return 0;
     }
