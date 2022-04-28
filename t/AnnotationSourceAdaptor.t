@@ -211,9 +211,7 @@ SKIP: {
   );
 
   my $test = $test_cfg->{test_vcf};
-  my $output_test = $test_cfg->{test_vcf};
   $test =~ s/\.vcf/\+\+\+CHR\+\+\+\.vcf.gz/;
-  $output_test =~ s/\.vcf/2\.vcf.gz/;
   $asa->param('custom', [$test.',test,vcf,overlap,1,FOO,BAR']);
   is_deeply(
     $asa->get_all_custom(),
@@ -223,7 +221,7 @@ SKIP: {
         '_config' => $asa->config,
         'report_coords' => 1,
         'fields' => ['FOO', 'BAR'],
-        'file' => $output_test,
+        'file' => $test_cfg->{test_vcf2},
         'type' => 'overlap',
         'custom_multi_allelic' => undef,
         'info' => {
@@ -231,7 +229,7 @@ SKIP: {
             'short_name' => 'test',
             'report_coords' => 1,
             'fields' => ['FOO', 'BAR'],
-            'file' => $output_test,
+            'file' => $test_cfg->{test_vcf2},
             'type' => 'overlap',
           }
         }
@@ -242,14 +240,14 @@ SKIP: {
         'fields' => ['FOO', 'BAR'],
         'short_name' => 'test',
         'report_coords' => '1',
-        'file' => '/hps/software/users/ensembl/repositories/diegomscoelho/ensembl-vep/t/testdata/input/test3.vcf.gz',
+        'file' => $test_cfg->{test_vcf3},
         'type' => 'overlap'
       }
     },
     'short_name' => 'test',
     '_config' => $asa->config,
     'report_coords' => '1',
-    'file' => '/hps/software/users/ensembl/repositories/diegomscoelho/ensembl-vep/t/testdata/input/test3.vcf.gz',
+    'file' => $test_cfg->{test_vcf3},
     'fields' => ['FOO', 'BAR'],
     'custom_multi_allelic' => undef,
     'type' => 'overlap'
@@ -260,14 +258,14 @@ SKIP: {
         'fields' => ['FOO', 'BAR'],
         'short_name' => 'test',
         'report_coords' => '1',
-        'file' => '/hps/software/users/ensembl/repositories/diegomscoelho/ensembl-vep/t/testdata/input/test4.vcf.gz',
+        'file' => $test_cfg->{test_vcf4},
         'type' => 'overlap'
       }
     },
     'short_name' => 'test',
     '_config' => $asa->config,
     'report_coords' => '1',
-    'file' => '/hps/software/users/ensembl/repositories/diegomscoelho/ensembl-vep/t/testdata/input/test4.vcf.gz',
+    'file' => $test_cfg->{test_vcf4},
     'fields' => ['FOO', 'BAR'],
     'custom_multi_allelic' => undef,
     'type' => 'overlap'
@@ -278,14 +276,14 @@ SKIP: {
         'fields' => ['FOO', 'BAR'],
         'short_name' => 'test',
         'report_coords' => '1',
-        'file' => '/hps/software/users/ensembl/repositories/diegomscoelho/ensembl-vep/t/testdata/input/test5.vcf.gz',
+        'file' => $test_cfg->{test_vcf5},
         'type' => 'overlap'
       }
     },
     'short_name' => 'test',
     '_config' => $asa->config,
     'report_coords' => '1',
-    'file' => '/hps/software/users/ensembl/repositories/diegomscoelho/ensembl-vep/t/testdata/input/test5.vcf.gz',
+    'file' => $test_cfg->{test_vcf5},
     'fields' => ['FOO', 'BAR'],
     'custom_multi_allelic' => undef,
     'type' => 'overlap'
@@ -296,14 +294,14 @@ SKIP: {
         'fields' => ['FOO', 'BAR'],
         'short_name' => 'test',
         'report_coords' => '1',
-        'file' => '/hps/software/users/ensembl/repositories/diegomscoelho/ensembl-vep/t/testdata/input/test6.vcf.gz',
+        'file' => $test_cfg->{test_vcf6},
         'type' => 'overlap'
       }
     },
     'short_name' => 'test',
     '_config' => $asa->config,
     'report_coords' => '1',
-    'file' => '/hps/software/users/ensembl/repositories/diegomscoelho/ensembl-vep/t/testdata/input/test6.vcf.gz',
+    'file' => $test_cfg->{test_vcf6},
     'fields' => ['FOO', 'BAR'],
     'custom_multi_allelic' => undef,
     'type' => 'overlap'
