@@ -754,43 +754,6 @@ $ib = get_annotated_buffer({
   input_file => $test_cfg->create_input_file([qw(21 25891796 . C T . . .)]),
   dir => $test_cfg->{exac_root_dir},
 });
-$of->{af_exac} = 1;
-
-is_deeply(
-  $of->add_colocated_frequency_data($ib->buffer->[0], {Allele => 'T'}, $ib->buffer->[0]->{existing}->[0]),
-  {
-    Allele => 'T',
-    'ExAC_OTH_AF' => [
-      '0.001101'
-    ],
-    'ExAC_Adj_AF' => [
-      '5.768e-05'
-    ],
-    'ExAC_AFR_AF' => [
-      '0'
-    ],
-    'ExAC_AMR_AF' => [
-      '0.0003457'
-    ],
-    'ExAC_NFE_AF' => [
-      '2.998e-05'
-    ],
-    'ExAC_SAS_AF' => [
-      '0'
-    ],
-    'ExAC_FIN_AF' => [
-      '0'
-    ],
-    'ExAC_EAS_AF' => [
-      '0'
-    ],
-    'ExAC_AF' => [
-      '5.765e-05'
-    ]
-  },
-  'add_colocated_frequency_data - af_exac',
-);
-$of->{af_exac} = 0;
 
 $ib = get_annotated_buffer({
   check_existing => 1,

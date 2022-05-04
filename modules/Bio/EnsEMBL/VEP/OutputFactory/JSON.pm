@@ -157,10 +157,8 @@ sub new {
   
   my $self = $class->SUPER::new(@_);
   $self->{af_1kg} = 1;
-  $self->{af_esp} = 1;
   $self->{af_gnomade} = 1;
   $self->{af_gnomadg} = 1;
-  $self->{af_exac} = 1;
 
   # add shortcuts to these params
   $self->add_shortcuts([qw(

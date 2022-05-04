@@ -82,8 +82,6 @@ GetOptions(
   'check_frequency',         # enable frequency checking
   'af',                      # add global AF of existing var
   'af_1kg',                  # add 1KG AFs of existing vars
-  'af_esp',                  # add ESP AFs of existing vars
-  'af_exac',                 # add ExAC AFs of existing vars
   'af_gnomade',              # add gnomAD v2 exomes AFs of existing vars
   'af_gnomadg',              # add gnomAD v3 genomes AFs of existing vars
   'old_maf',                 # report 1KG/ESP MAFs in the old way (no allele, always < 0.5)

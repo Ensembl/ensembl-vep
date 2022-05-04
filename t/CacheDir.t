@@ -313,16 +313,7 @@ ok($as = $cd->get_all_AnnotationSources, 'get_all_AnnotationSources - gnomad ava
 
 $cfg = Bio::EnsEMBL::VEP::Config->new({%$cfg_hash, check_existing => 1, af_gnomad => 1});
 $cd = Bio::EnsEMBL::VEP::CacheDir->new({config => $cfg, root_dir => $test_cfg->{exac_root_dir}});
-throws_ok {$cd->get_all_AnnotationSources} qr/gnomad.+not available.+exac/i, 'get_all_AnnotationSources - gnomad not available';
-
-$cfg = Bio::EnsEMBL::VEP::Config->new({%$cfg_hash, check_existing => 1, af_exac => 1});
-$cd = Bio::EnsEMBL::VEP::CacheDir->new({config => $cfg, root_dir => $test_cfg->{exac_root_dir}});
-ok($as = $cd->get_all_AnnotationSources, 'get_all_AnnotationSources - exac available');
-
-$cfg = Bio::EnsEMBL::VEP::Config->new({%$cfg_hash, check_existing => 1, af_exac => 1});
-$cd = Bio::EnsEMBL::VEP::CacheDir->new({config => $cfg, root_dir => $cfg_hash->{dir}});
-throws_ok {$cd->get_all_AnnotationSources} qr/exac.+not available.+gnomad/i, 'get_all_AnnotationSources - exac not available';
-
+throws_ok {$cd->get_all_AnnotationSources} qr/gnomad.+not available./i, 'get_all_AnnotationSources - gnomad not available';
 
 # switch on both
 $cfg = Bio::EnsEMBL::VEP::Config->new({%$cfg_hash, check_existing => 1, regulatory => 1});
