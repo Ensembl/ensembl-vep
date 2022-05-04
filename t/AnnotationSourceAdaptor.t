@@ -211,7 +211,7 @@ SKIP: {
   );
 
   my $test = $test_cfg->{test_vcf};
-  $test =~ s/\.vcf/\+\+\+CHR\+\+\+\.vcf.gz/;
+  $test =~ s/\.vcf/\#\#\#CHR\#\#\#\.vcf.gz/;
   $asa->param('custom', [$test.',test,vcf,overlap,1,FOO,BAR']);
   is_deeply(
     $asa->get_all_custom(),
@@ -307,7 +307,7 @@ SKIP: {
     'type' => 'overlap'
   }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
     ],
-    'get_all_custom - automated +++CHR+++'
+    'get_all_custom - automated ###CHR###'
   );
 
 }

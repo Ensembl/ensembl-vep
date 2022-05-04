@@ -226,7 +226,7 @@ sub get_all_custom {
 
     $opts->{fields} = \@fields if @fields;
 
-    if (grep { /\+\+\+CHR\+\+\+/ } $file){
+    if (grep { /\#\#\#CHR\#\#\#/ } $file){
 
       foreach my $chr (@VALID_CHRS){
         my $new_file = $file;
@@ -237,7 +237,7 @@ sub get_all_custom {
         push @as, Bio::EnsEMBL::VEP::AnnotationSource::File->new($new_opts);
       }
 
-      # Non-match +++CHR+++ pattern scenario
+      # Non-match ###CHR### pattern scenario
       die "Error: No file with pattern $file were found" unless @as;
     
     } else {
