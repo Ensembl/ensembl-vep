@@ -1166,7 +1166,7 @@ sub add_colocated_frequency_data {
             @max_af_pops = ($key);
           }
           elsif($f == $max_af) {
-            push @max_af_pops, $key;
+            push @max_af_pops, $key unless grep{$_ eq $key} @max_af_pops;
           }
         }
       }
