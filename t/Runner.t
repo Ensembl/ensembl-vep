@@ -215,6 +215,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'show_ref_allele' => undef,
   'max_af' => undef,
   'use_transcript_ref' => undef,
+  'af_gnomad' => undef,
   'af_gnomade' => undef,
   'af_gnomadg' => undef,
   'transcript_version' => undef,
