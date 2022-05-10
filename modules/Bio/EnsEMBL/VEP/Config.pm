@@ -151,7 +151,6 @@ our @OPTION_SETS = (
       biotype        => 1,
       af             => 1,
       af_1kg         => 1,
-      af_gnomad     => 1,
       af_gnomade     => 1,
       af_gnomadg     => 1,
       max_af         => 1,
