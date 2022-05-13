@@ -123,6 +123,7 @@ sub default_options {
               {
                 file => $self->o('data_dir').'/gnomAD/v2.1/grch37/exomes/gnomad.exomes.r2.1.sites.chr+++CHR+++_noVEP.vcf.gz',
                 pops => ['', qw(afr amr asj eas fin nfe oth sas)],
+                chroms => [qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y)],
                 name => 'gnomADe',
                 prefix => 'gnomADe',
                 version => 'r2.1',
@@ -141,6 +142,7 @@ sub default_options {
               {
                 file => $self->o('data_dir').'/gnomAD/v2.1.1/grch38/exomes/gnomad.exomes.r2.1.1.sites.+++CHR+++.liftover_grch38_no_VEP.vcf.gz',
                 pops => ['', qw(afr amr asj eas fin nfe oth sas)],
+                chroms => [qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y)],
                 name => 'gnomADe',
                 prefix => 'gnomADe',
                 version => 'r2.1.1',
@@ -149,6 +151,7 @@ sub default_options {
               {
                 file => $self->o('data_dir').'/gnomAD/v3.1.2/grch38/genomes/gnomad.genomes.v3.1.2.sites.chr+++CHR+++_trimmed_info.vcf.bgz',
                 pops => ['', qw(afr ami amr asj eas fin mid nfe oth sas)],
+                chroms => [qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y)],
                 name => 'gnomADg',
                 prefix => 'gnomADg',
                 version => 'v3.1.2',

@@ -287,7 +287,10 @@ sub freqs_from_vcf {
     # Remove chr from chromosome name
     $chr =~ s/chr//;
     $file =~ s/\+\+\+CHR\+\+\+/$chr/;
-    next unless -e $file;
+
+    next unless grep { /$chr/ } @{$vcf_conf->{chroms}};
+
+    die "ERROR: File for known chromossome ($chr): $file where not found\n" unless -e $file;
 
     my $prefix = $vcf_conf->{prefix} || '';
     $prefix .= '_' if $prefix && $prefix !~ /\_$/;
