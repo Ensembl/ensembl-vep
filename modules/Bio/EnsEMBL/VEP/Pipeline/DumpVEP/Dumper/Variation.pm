@@ -288,7 +288,7 @@ sub freqs_from_vcf {
     $chr =~ s/chr//;
     $file =~ s/\+\+\+CHR\+\+\+/$chr/;
 
-    next unless grep { /$chr/ } @{$vcf_conf->{chroms}};
+    next unless grep { /$chr/ } @{$self->{chroms}};
 
     die "ERROR: File for known chromossome ($chr): $file where not found\n" unless -e $file;
 
