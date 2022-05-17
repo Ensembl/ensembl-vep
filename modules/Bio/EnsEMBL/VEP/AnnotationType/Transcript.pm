@@ -214,7 +214,7 @@ sub filter_transcript {
       (
         $self->{source_type} eq 'refseq' &&
         !(($t->stable_id || '') =~ /^[A-Z]{2}\_\d+|^\d{4}$|^rna-[A-Z]{3,4}\d+/ || 
-        (defined($t->display_xref) && ($t->display_xref->{display_id} || '') =~ /^[A-Z]{2}\_\d+|^\d{4}$|^[A-Z]{3,4}\d+/))
+        (defined($t->display_xref) && ($t->display_xref->{display_id} || '') =~ /^[A-Z]{2}\_\d+|^\d{4}$/))
       ) 
       
       ||
@@ -224,7 +224,7 @@ sub filter_transcript {
         $self->{source_type} eq 'merged' &&
         ($t->{_source_cache} || '') eq 'RefSeq' &&
         !(($t->stable_id || '') =~ /^[A-Z]{2}\_\d+|^\d{4}$|^rna-[A-Z]{3,4}\d+/ || 
-        (defined($t->display_xref) && ($t->display_xref->{display_id} || '') =~ /^[A-Z]{2}\_\d+|^\d{4}$|^[A-Z]{3,4}\d+/))
+        (defined($t->display_xref) && ($t->display_xref->{display_id} || '') =~ /^[A-Z]{2}\_\d+|^\d{4}$/))
       )
     )
   ) {
