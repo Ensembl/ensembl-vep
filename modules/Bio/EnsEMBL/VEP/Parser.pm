@@ -624,7 +624,7 @@ sub validate_vf {
   }
 
   my $ref_allele = shift @alleles;
-  my $alt_allele = pop @alleles;
+  my $alt_allele = $alleles[-1];
 
   if($ref_allele =~ /^[ACGT]*$/ && ($vf->{end} - $vf->{start}) + 1 != length($ref_allele)) {
     $self->warning_msg(
