@@ -624,12 +624,7 @@ sub validate_vf {
   }
 
   my $ref_allele = shift @alleles;
-  use Data::Dumper;
-  print Dumper($ref_allele);
-
   my $alt_allele = pop @alleles;
-  use Data::Dumper;
-  print Dumper ($alt_allele);
 
   if($ref_allele =~ /^[ACGT]*$/ && ($vf->{end} - $vf->{start}) + 1 != length($ref_allele)) {
     $self->warning_msg(
