@@ -127,10 +127,11 @@ my @LIST_FIELDS = qw(
 );
 
 my @FREQ_FIELDS = qw(
-  AFR AMR ASN EAS SAS EUR
+  AF AFR AMR ASN EAS SAS EUR
   AA EA
   ExAC ExAC_Adj ExAC_AFR ExAC_AMR ExAC_EAS ExAC_FIN ExAC_NFE ExAC_OTH ExAC_SAS
-  gnomAD gnomAD_AFR gnomAD_AMR gnomAD_ASJ gnomAD_EAS gnomAD_FIN gnomAD_NFE gnomAD_OTH gnomAD_SAS
+  gnomADe gnomADe_AFR gnomADe_AMR gnomADe_ASJ gnomADe_EAS gnomADe_FIN gnomADe_NFE gnomADe_OTH gnomADe_SAS
+  gnomADg gnomADg_AFR gnomADg_AMI gnomADg_AMR gnomADg_ASJ gnomADg_EAS gnomADg_FIN gnomADg_MID gnomADg_NFE gnomADg_OTH gnomADg_SAS
 );
 
 
@@ -156,9 +157,9 @@ sub new {
   
   my $self = $class->SUPER::new(@_);
   $self->{af_1kg} = 1;
-  $self->{af_esp} = 1;
   $self->{af_gnomad} = 1;
-  $self->{af_exac} = 1;
+  $self->{af_gnomade} = 1;
+  $self->{af_gnomadg} = 1;
 
   # add shortcuts to these params
   $self->add_shortcuts([qw(
