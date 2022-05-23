@@ -108,7 +108,9 @@ sub run {
     
     my $tmp_dir = $self->param('tmp_dir');
     
-    mkdir($tmp_dir) unless -e $tmp_dir;
+    unless(-e $tmp_dir){
+      mkdir($tmp_dir) or die "Cannot create temp_dir - $!";
+    }
    
     foreach my $chr(keys %{{map {$_->{chr} => 1} @{$self->param('regions')}}}) {
 
