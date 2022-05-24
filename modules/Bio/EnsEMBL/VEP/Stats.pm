@@ -577,8 +577,8 @@ sub generate_chart_data {
   } if $stats->{chr_totals};
   
   foreach my $chr(sort {
-                         (my $aterm = $a) =~ s/chr//r;
-                         (my $bterm = $b) =~ s/chr//r;
+                         (my $aterm = $a) =~ s/chr//;
+                         (my $bterm = $b) =~ s/chr//;
                          $aterm = ord($aterm) unless $aterm =~ /^\d+$/;
                          $bterm = ord($bterm) unless $bterm =~ /^\d+$/;
                          return $aterm <=> $bterm;
@@ -916,8 +916,8 @@ sub stats_html_head {
       $chart->{title},
       $chart->{header}->[0], $chart->{header}->[1],
       join(",", map {"['".$_."',".$chart->{data}->{$_}."]"} sort {
-          (my $aterm = $a) =~ s/chr//r;
-          (my $bterm = $b) =~ s/chr//r;
+          (my $aterm = $a) =~ s/chr//;
+          (my $bterm = $b) =~ s/chr//;
           $aterm = ord($aterm) unless $aterm =~ /^\d+$/;
           $bterm = ord($bterm) unless $bterm =~ /^\d+$/;
           return $aterm <=> $bterm;
@@ -935,8 +935,8 @@ sub stats_html_head {
         $chart->{title},
         $chart->{header}->[0], $chart->{header}->[1],
         join(",", map {"['".$_."',".$chart->{data}->{$_}."]"} sort {
-            (my $aterm = $a) =~ s/chr//r;
-            (my $bterm = $b) =~ s/chr//r;
+            (my $aterm = $a) =~ s/chr//;
+            (my $bterm = $b) =~ s/chr//;
             $aterm = ord($aterm) unless $aterm =~ /^\d+$/;
             $bterm = ord($bterm) unless $bterm =~ /^\d+$/;
             return $aterm <=> $bterm;
