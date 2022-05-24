@@ -234,8 +234,6 @@ sub dump_obj {
       $v->{end} == $v->{start} ? '' : $v->{end},
       $v->{allele_string},
       $v->{strand} == 1 ? '' : $v->{strand},
-      $v->{minor_allele} || '',
-      defined($v->{minor_allele_freq}) && $v->{minor_allele_freq} =~ /^[0-9\.]+$/ ? sprintf("%.4f", $v->{minor_allele_freq}) : '',
       $v->{clin_sig} || '',
       $v->{phenotype_or_disease} == 0 ? '' : $v->{phenotype_or_disease},
       $v->{clin_sig_allele} || '',
