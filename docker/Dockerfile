@@ -22,7 +22,7 @@ RUN apt-get update && apt-get -y install \
 ENV OPT /opt/vep
 ENV OPT_SRC $OPT/src
 ENV HTSLIB_DIR $OPT_SRC/htslib
-ENV BRANCH release/107
+ENV BRANCH master
 
 # Working directory
 WORKDIR $OPT_SRC
