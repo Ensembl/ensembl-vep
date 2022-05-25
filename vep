@@ -82,11 +82,11 @@ GetOptions(
   'check_frequency',         # enable frequency checking
   'af',                      # add global AF of existing var
   'af_1kg',                  # add 1KG AFs of existing vars
-  'af_esp',                  # add ESP AFs of existing vars
-  'af_exac',                 # add ExAC AFs of existing vars
-  'af_gnomad',               # add gnomAD AFs of existing vars
+  'af_gnomade',              # add gnomAD v2 exomes AFs of existing vars
+  'af_gnomad',               # Same as --af_gnomade to keep old compatibility
+  'af_gnomadg',              # add gnomAD v3 genomes AFs of existing vars
   'old_maf',                 # report 1KG/ESP MAFs in the old way (no allele, always < 0.5)
-  'max_af',                  # report maximum observed allele frequency in any 1KG, ESP, ExAC pop
+  'max_af',                  # report maximum observed allele frequency in any 1KG, gnomAD v2 exomes, gnomAD v3 genomes pops
   'pubmed',                  # add Pubmed IDs for publications that cite existing vars
   'freq_filter=s',           # exclude or include
   'freq_freq=f',             # frequency to filter on

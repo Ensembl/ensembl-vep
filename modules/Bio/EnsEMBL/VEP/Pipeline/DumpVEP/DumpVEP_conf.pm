@@ -113,62 +113,47 @@ sub default_options {
         assembly_specific => {
           GRCh37 => {
             bam => $self->o('dump_vep_data_dir').'/GCF_000001405.25_GRCh37.p13_knownrefseq_alns.bam',
+            chroms => [qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y)],
             freq_vcf => [
               {
                 file => $self->o('dump_vep_data_dir').'/1KG.phase3.GRCh37.vcf.gz',
-                pops => [qw(AFR AMR EAS EUR SAS)],
+                pops => ['', qw(AFR AMR EAS EUR SAS)],
                 name => '1000genomes',
                 version => 'phase3'
               },
               {
-                file => $self->o('dump_vep_data_dir').'/ESP6500SI-V2-SSA137.vcf.gz',
-                pops => [qw(AA EA)],
-                name => 'ESP',
-              },
-              # {
-              #   file => $self->o('data_dir').'/ExAC.0.3.GRCh37.vcf.gz',
-              #   pops => ['', qw(AFR AMR Adj EAS FIN NFE OTH SAS)],
-              #   name => 'ExAC',
-              #   prefix => 'ExAC',
-              #   version => 0.3,
-              # },
-              {
                 file => $self->o('data_dir').'/gnomAD/v2.1/grch37/exomes/gnomad.exomes.r2.1.sites.chr+++CHR+++_noVEP.vcf.gz',
                 pops => ['', qw(afr amr asj eas fin nfe oth sas)],
-                name => 'gnomAD',
-                prefix => 'gnomAD',
+                name => 'gnomADe',
+                prefix => 'gnomADe',
                 version => 'r2.1',
               },
             ],
           },
           GRCh38 => {
             bam => $self->o('dump_vep_data_dir').'/GCF_000001405.39_GRCh38.p13_knownrefseq_alns.bam',
+            chroms => [qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y)],
             freq_vcf => [
               {
                 file => $self->o('dump_vep_data_dir').'/1KG.phase3.GRCh38_2018_02_26.vcf.gz',
-                pops => [qw(AFR AMR EAS EUR SAS)],
+                pops => ['', qw(AFR AMR EAS EUR SAS)],
                 name => '1000genomes',
                 version => 'phase3'
               },
               {
-                file => $self->o('dump_vep_data_dir').'/ESP6500SI-V2-SSA137_GRCh38.vcf.gz',
-                pops => [qw(AA EA)],
-                name => 'ESP',
-                version => 'V2-SSA137',
-              },
-              # {
-              #   file => $self->o('data_dir').'/ExAC.0.3.GRCh38.vcf.gz',
-              #   pops => ['', qw(AFR AMR Adj EAS FIN NFE OTH SAS)],
-              #   name => 'ExAC',
-              #   prefix => 'ExAC',
-              #   version => 0.3,
-              # },
-              {
                 file => $self->o('data_dir').'/gnomAD/v2.1.1/grch38/exomes/gnomad.exomes.r2.1.1.sites.+++CHR+++.liftover_grch38_no_VEP.vcf.gz',
                 pops => ['', qw(afr amr asj eas fin nfe oth sas)],
-                name => 'gnomAD',
-                prefix => 'gnomAD',
+                name => 'gnomADe',
+                prefix => 'gnomADe',
                 version => 'r2.1.1',
+                use_chr_prefix => 1,
+              },
+              {
+                file => $self->o('data_dir').'/gnomAD/v3.1.2/grch38/genomes/gnomad.genomes.v3.1.2.sites.chr+++CHR+++_trimmed_info.vcf.bgz',
+                pops => ['', qw(afr ami amr asj eas fin mid nfe oth sas)],
+                name => 'gnomADg',
+                prefix => 'gnomADg',
+                version => 'v3.1.2',
                 use_chr_prefix => 1,
               },
             ],

@@ -18,7 +18,7 @@ jobs:
       github.event.pull_request.merged == true &&
       contains(github.event.pull_request.labels.*.name, 'auto-merge')
     steps:      
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@main
 
       - name: Set the release version
         run: |

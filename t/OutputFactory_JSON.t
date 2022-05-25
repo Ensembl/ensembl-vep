@@ -120,9 +120,7 @@ SKIP: {
   my $frequency_hash = {Allele => 'T'};
   my $super_of = Bio::EnsEMBL::VEP::OutputFactory->new({config => $cfg});
   $super_of->{af_1kg} = 1;
-  $super_of->{af_esp} = 1;
-  $super_of->{af_gnomad} = 1;
-  $super_of->{af_exac} = 1;
+  $super_of->{af_gnomade} = 1;
   $super_of->add_colocated_frequency_data({}, $frequency_hash, $ex);
   is_deeply(
     $of->add_colocated_variant_info_JSON({}, [$frequency_hash], $ex),
@@ -132,19 +130,17 @@ SKIP: {
           'frequencies' => {
             'T' => {
               'amr' => '0.0014',
-              'gnomad_sas' => '0',
-              'gnomad' => '0.0003478',
-              'ea' => '0',
-              'gnomad_oth' => '0',
-              'gnomad_asj' => '0',
-              'gnomad_nfe' => '1.886e-05',
-              'aa' => '0.004998',
-              'gnomad_afr' => '0.004643',
+              'gnomade_sas' => '0',
+              'gnomade' => '0.0003478',
+              'gnomade_oth' => '0',
+              'gnomade_asj' => '0',
+              'gnomade_nfe' => '1.886e-05',
+              'gnomade_afr' => '0.004643',
               'afr' => '0.003',
-              'gnomad_amr' => '0.0003236',
-              'gnomad_fin' => '0',
+              'gnomade_amr' => '0.0003236',
+              'gnomade_fin' => '0',
               'sas' => '0',
-              'gnomad_eas' => '0',
+              'gnomade_eas' => '0',
               'eur' => '0',
               'eas' => '0'
             }
@@ -184,9 +180,7 @@ SKIP: {
   $frequency_hash = {Allele => 'A'};
   $super_of = Bio::EnsEMBL::VEP::OutputFactory->new({config => $cfg});
   $super_of->{af_1kg} = 1;
-  $super_of->{af_esp} = 1;
-  $super_of->{af_gnomad} = 1;
-  $super_of->{af_exac} = 1;
+  $super_of->{af_gnomade} = 1;
   $super_of->add_colocated_frequency_data({}, $frequency_hash, $ex);
   my $x = $of->add_colocated_variant_info_JSON({}, [$frequency_hash], $ex);
 
@@ -201,15 +195,15 @@ SKIP: {
            'minor_allele_freq' => '0.0016',
            'frequencies' => {
               'A' => {
-                'gnomad_afr' => '6.534e-05',
-                'gnomad_sas' => '3.249e-05',
-                'gnomad_fin' => '0',
-                'gnomad_amr' => '0',
-                'gnomad' => '7.313e-05',
-                'gnomad_oth' => '0',
-                'gnomad_asj' => '0',
-                'gnomad_eas' => '0',
-                'gnomad_nfe' => '0.0001433'
+                'gnomade_afr' => '6.534e-05',
+                'gnomade_sas' => '3.249e-05',
+                'gnomade_fin' => '0',
+                'gnomade_amr' => '0',
+                'gnomade' => '7.313e-05',
+                'gnomade_oth' => '0',
+                'gnomade_asj' => '0',
+                'gnomade_eas' => '0',
+                'gnomade_nfe' => '0.0001433'
               }
            },
            'end' => '25891785',
@@ -321,19 +315,17 @@ SKIP: {
           'frequencies' => {
             'T' => {
               'amr' => 0.0014,
-              'gnomad_sas' => 0,
-              'gnomad' => 0.0003478,
-              'ea' => 0,
-              'gnomad_oth' => 0,
-              'gnomad_asj' => 0,
-              'gnomad_nfe' =>  1.886e-05,
-              'aa' => 0.004998,
-              'gnomad_afr' => 0.004643,
+              'gnomade_sas' => 0,
+              'gnomade' => 0.0003478,
+              'gnomade_oth' => 0,
+              'gnomade_asj' => 0,
+              'gnomade_nfe' =>  1.886e-05,
+              'gnomade_afr' => 0.004643,
               'afr' => 0.003,
-              'gnomad_amr' => 0.0003236,
-              'gnomad_fin' => 0,
+              'gnomade_amr' => 0.0003236,
+              'gnomade_fin' => 0,
               'sas' => 0,
-              'gnomad_eas' => 0,
+              'gnomade_eas' => 0,
               'eur' => 0,
               'eas' => 0
             }
