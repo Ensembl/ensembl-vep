@@ -1865,7 +1865,7 @@ SKIP: {
     [
       [
         'test',
-        $test_cfg->{custom_vcf}.' (overlap)'
+        $test_cfg->{custom_vcf}
       ]
     ],
     'get_custom_headers'
@@ -1894,7 +1894,7 @@ SKIP: {
     [
       [
         'test',
-        $test_cfg->{custom_vcf} . ',' . $test_cfg->{custom_vcf_2} . ' (overlap)'
+        $test_cfg->{custom_vcf} . ',' . $test_cfg->{custom_vcf_2}
       ]
     ],
     'get_multiple_custom_headers'

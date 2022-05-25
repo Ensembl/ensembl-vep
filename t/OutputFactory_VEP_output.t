@@ -100,7 +100,7 @@ is_deeply(
     '## DISTANCE : Shortest distance from variant to transcript',
     '## STRAND : Strand of the feature (1/-1)',
     '## FLAGS : Transcript quality flags',
-    '## custom_test : test.vcf.gz (overlap)',
+    '## custom_test : test.vcf.gz',
     "#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tExisting_variation\tExtra"
   ],
   'headers'
