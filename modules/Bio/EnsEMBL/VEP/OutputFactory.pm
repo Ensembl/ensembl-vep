@@ -2336,4 +2336,22 @@ sub flag_fields {
   return \@return;
 }
 
+
+=head2 get_full_command
+
+  Example    : $headers = $of->get_full_command();
+  Description: Get headers from custom data files
+  Returntype : arrayref of arrayrefs [$key, $header]
+  Exceptions : none
+  Caller     : description_headers() in child classes
+  Status     : Stable
+
+=cut
+
+sub get_full_command {
+  my $self = shift;
+
+  return $self->{_config}->{_raw_config}->{full_command};
+}
+
 1;
