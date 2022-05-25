@@ -182,7 +182,8 @@ sub get_frequency_data {
 
   my $freq_pop_full = uc($self->{freq_pop});
   $freq_pop_full =~ s/EXAC/ExAC/i;
-  $freq_pop_full =~ s/gnomad/gnomAD/i;
+  $freq_pop_full =~ s/GNOMADG/gnomADg/i;
+  $freq_pop_full =~ s/GNOMADE/gnomADe/i;
   my ($freq_group, $freq_pop) = split('_', $freq_pop_full);
 
   my %matched_alleles;
@@ -275,7 +276,8 @@ sub check_frequency_filter {
   my $freq_pop_full = uc($self->{freq_pop});
   $freq_pop_full =~ s/EXAC/ExAC/;
   $freq_pop_full =~ s/ADJ/Adj/;
-  $freq_pop_full =~ s/GNOMAD/gnomAD/;
+  $freq_pop_full =~ s/GNOMADE/gnomADe/;
+  $freq_pop_full =~ s/GNOMADg/gnomADg/;
   my ($freq_group, $freq_pop) = split('_', $freq_pop_full);
 
   my %valid = map {$_ => 1} @{$self->get_valid_populations};
