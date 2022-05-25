@@ -2293,9 +2293,12 @@ sub get_custom_headers {
 
     if (grep { /^$custom->{short_name}$/ }  @flatten_header){
       my $pos = $pos{$custom->{short_name}} / 2;
-      $headers[$pos][1] =~ s/ \(/,$custom->{file} \(/g;
+      $headers[$pos][1] .= ",$custom->{file}";
     } else {
-      push @headers, [$custom->{short_name}, sprintf("%s (%s)", $custom->{file}, $custom->{type})];
+      push @headers, [
+        $custom->{short_name},
+        sprintf("%s", $custom->{file})
+      ];
     }
 
     foreach my $field(@{$custom->{fields} || []}) {
