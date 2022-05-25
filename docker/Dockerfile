@@ -28,7 +28,7 @@ ENV BRANCH release/107
 WORKDIR $OPT_SRC
 
 # Clone/download repositories/libraries
-RUN if [ "$BRANCH" = "master" ]; \
+RUN if [ "$BRANCH" = "main" ]; \
     then export BRANCH_OPT=""; \
     else export BRANCH_OPT="-b $BRANCH"; \
     fi && \
