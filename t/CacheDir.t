@@ -105,6 +105,13 @@ throws_ok {
   })->dir()
 } qr/Cache directory .+ not found/, 'new with invalid species';
 
+throws_ok { 
+  Bio::EnsEMBL::VEP::CacheDir->new({
+    root_dir => $cfg_hash->{dir},
+    config => Bio::EnsEMBL::VEP::Config->new({%$cfg_hash, species => 'homo_sapiens_refseq'})
+  })->dir()
+} qr/Should not use .+ as --species.\nTry using flags --refseq or --merged with --species homo_sapiens\n/, 'Not allow homo_sapiens_refseq / homo_sapiens_merged';
+
 throws_ok {
   Bio::EnsEMBL::VEP::CacheDir->new({
     root_dir => $cfg_hash->{dir},

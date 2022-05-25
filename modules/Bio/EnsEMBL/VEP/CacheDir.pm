@@ -294,6 +294,8 @@ sub dir {
 
     # complete dir with species name and db_version
     my $species_dir_name = $self->species();
+    throw("Should not use ${species_dir_name} as --species.\nTry using flags --refseq or --merged with --species homo_sapiens\n") if
+    ${species_dir_name} eq "homo_sapiens_refseq" || ${species_dir_name} eq "homo_sapiens_merged";
     $species_dir_name .= '_'.$_ for grep { $self->param($_) } qw(refseq merged);
 
     # add species dir name
