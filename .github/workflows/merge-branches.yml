@@ -1,4 +1,4 @@
-name: Merge postreleasefix with release and master branches
+name: Merge postreleasefix with release and main branches
 
 on:
   pull_request:
@@ -13,18 +13,18 @@ jobs:
       github.event.pull_request.merged == true &&
       contains(github.event.pull_request.labels.*.name, 'auto-merge')
     steps:      
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v3
 
       - name: Set the release version
         run: |
           echo "release=$(echo ${GITHUB_REF} | grep -o [0-9]*$)" >> $GITHUB_ENV
           
-      - name: "Merge postreleasefix/${{ env.release }} -> master"
+      - name: "Merge postreleasefix/${{ env.release }} -> main"
         uses: devmasx/merge-branch@master
         with:
           type: now
           from_branch: "postreleasefix/${{ env.release }}"
-          target_branch: master
+          target_branch: main
           github_token: ${{ github.token }}
           message: "Merge branch 'postreleasefix/${{ env.release }}'"
 
