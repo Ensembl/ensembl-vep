@@ -2351,7 +2351,7 @@ sub flag_fields {
 sub get_full_command {
   my $self = shift;
 
-  return $self->{_config}->{_raw_config}->{full_command};
+  return $self->{_config}->{_raw_config}->{full_command}  || "";
 }
 
 1;
