@@ -6,6 +6,11 @@ on:
       - closed # Run after closing PR
     branches:
       - 'postreleasefix/*'
+
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   sync-branch:
     runs-on: ubuntu-latest
