@@ -23,7 +23,7 @@ use Bio::EnsEMBL::VEP::Utils qw(get_version_string);
 my $config = {};
 
 my $arg_count = scalar @ARGV;
-my @argv_copy = @ARGV;
+my $full_command = "vep " . join(" ", @ARGV);
 
 GetOptions(
   $config,
@@ -220,6 +220,9 @@ GetOptions(
 &usage && exit(0) if (!$arg_count) || $config->{help};
 
 $config->{database} ||= 0;
+
+# Add full command string to config
+$config->{full_command} = $full_command;
 
 my $runner = Bio::EnsEMBL::VEP::Runner->new($config);
 
