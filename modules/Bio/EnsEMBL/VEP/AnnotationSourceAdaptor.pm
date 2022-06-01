@@ -70,6 +70,8 @@ use Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation;
 use Bio::EnsEMBL::VEP::AnnotationSource::Database::StructuralVariation;
 use Bio::EnsEMBL::VEP::AnnotationSource::File;
 
+use LWP::Simple;
+
 my @VALID_CHRS = ((1..22), qw(X Y MT));
 
 =head2 get_all
@@ -232,7 +234,7 @@ sub get_all_custom {
         my $new_file = $file;
         my $new_opts = { %$opts };
         $new_file =~ s/\#\#\#CHR\#\#\#/$chr/;
-        next unless -e $new_file;
+        next unless ( -e $new_file || head($new_file) );
         $new_opts->{file} = $new_file;
         push @as, Bio::EnsEMBL::VEP::AnnotationSource::File->new($new_opts);
       }
