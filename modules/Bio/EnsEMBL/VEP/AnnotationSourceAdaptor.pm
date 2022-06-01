@@ -238,7 +238,7 @@ sub get_all_custom {
       }
 
       # Non-match ###CHR### pattern scenario
-      die "Error: No file with pattern $file were found" unless @as;
+      die "Error: No files with pattern $file were found\n" unless @as;
     
     } else {
       push @as, Bio::EnsEMBL::VEP::AnnotationSource::File->new($opts);
