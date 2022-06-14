@@ -102,6 +102,8 @@ sub headers {
 
   push @headers, @{$self->description_headers};
 
+  push @headers, sprintf("## VEP command-line: %s", $self->get_full_command);
+
   push @headers, $self->column_header;
 
   return \@headers;

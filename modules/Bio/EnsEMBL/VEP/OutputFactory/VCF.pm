@@ -246,6 +246,8 @@ sub headers {
   # custom headers
   push @headers, map {sprintf('##INFO=<ID=%s,Number=.,Type=String,Description="%s">', $_->[0], $_->[1])} @{$self->get_custom_headers};
 
+  push @headers, sprintf("##VEP-command-line='%s'", $self->get_full_command);
+
   push @headers, $col_heading;
 
   return \@headers;
