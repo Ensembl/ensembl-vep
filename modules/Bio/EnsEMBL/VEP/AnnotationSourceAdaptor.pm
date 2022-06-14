@@ -72,8 +72,6 @@ use Bio::EnsEMBL::VEP::AnnotationSource::File;
 
 use LWP::Simple;
 
-my @VALID_CHRS = ((1..22), qw(X Y MT));
-
 =head2 get_all
 
   Example    : $sources = $asa->get_all()
@@ -230,7 +228,9 @@ sub get_all_custom {
 
     if (grep { /\#\#\#CHR\#\#\#/ } $file){
 
-      foreach my $chr (@VALID_CHRS){
+      my @valid_chromosomes = keys $self->chr_lengths() > 0 ? keys $self->chr_lengths(): ((1..22), qw(X Y MT));
+      
+      foreach my $chr (@valid_chromosomes){
         my $new_file = $file;
         my $new_opts = { %$opts };
         $new_file =~ s/\#\#\#CHR\#\#\#/$chr/;
