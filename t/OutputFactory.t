@@ -1813,10 +1813,39 @@ SKIP: {
     [
       [
         'test',
-        $test_cfg->{custom_vcf}.' (overlap)'
+        $test_cfg->{custom_vcf}
       ]
     ],
     'get_custom_headers'
+  );
+}
+
+
+SKIP: {
+  no warnings 'once';
+
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  skip 'Bio::DB::HTS::Tabix module not available', 1 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+
+  $runner = get_annotated_buffer_runner({
+    input_file => $test_cfg->create_input_file([qw(21 25606454 test G C . . .)]),
+    custom => [$test_cfg->{custom_vcf}.',test,vcf', $test_cfg->{custom_vcf_2}.',test,vcf'],
+    quiet => 1,
+    warning_file => 'STDERR',
+  });
+
+  $of = $runner->get_OutputFactory();
+  $ib = $runner->get_InputBuffer();
+
+  is_deeply(
+    $of->get_custom_headers,
+    [
+      [
+        'test',
+        $test_cfg->{custom_vcf} . ',' . $test_cfg->{custom_vcf_2}
+      ]
+    ],
+    'get_multiple_custom_headers'
   );
 }
 
