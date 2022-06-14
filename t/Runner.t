@@ -72,7 +72,7 @@ is_deeply(
         '1000genomes' => 'phase3',
         'COSMIC' => '80',
         'ESP' => 'V2-SSA137',
-        'gnomAD' => '170228',
+        'gnomADe' => '170228',
         'gencode' => 'GENCODE 24',
         'genebuild' => '2014-07',
         'HGMD-PUBLIC' => '20164',
@@ -146,7 +146,7 @@ is_deeply(
     '1000genomes' => 'phase3',
     'COSMIC' => '80',
     'ESP' => 'V2-SSA137',
-    'gnomAD' => '170228',
+    'gnomADe' => '170228',
     'gencode' => 'GENCODE 24',
     'genebuild' => '2014-07',
     'HGMD-PUBLIC' => '20164',
@@ -181,13 +181,11 @@ is_deeply($runner->get_OutputFactory, bless( {
   'gene_phenotype' => undef,
   'flag_pick_allele' => undef,
   'process_ref_homs' => undef,
-  'af_esp' => undef,
   'most_severe' => undef,
   'terms' => 'SO',
   'flag_pick_allele_gene' => undef,
   'flag_pick' => undef,
   'summary' => undef,
-  'af_exac' => undef,
   'polyphen' => undef,
   'af' => undef,
   'biotype' => undef,
@@ -218,6 +216,8 @@ is_deeply($runner->get_OutputFactory, bless( {
   'max_af' => undef,
   'use_transcript_ref' => undef,
   'af_gnomad' => undef,
+  'af_gnomade' => undef,
+  'af_gnomadg' => undef,
   'transcript_version' => undef,
   'cell_type' => undef,
   'mirna' => undef,
@@ -433,7 +433,7 @@ ok($runner->run, 'run - ok');
 open IN, $test_cfg->{user_file}.'.out';
 my @tmp_lines = <IN>;
 close IN;
-is(scalar @tmp_lines, 40, 'run - count lines');
+is(scalar @tmp_lines, 41, 'run - count lines');
 
 is_deeply(
   [grep {!/^\#/} @tmp_lines],

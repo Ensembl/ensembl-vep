@@ -140,7 +140,7 @@ is($cfg->param('quiet'), 1, 'STDOUT output turns on quiet');
 is($cfg->param('verbose'), undef, 'STDOUT output turns off verbose');
 
 $cfg = Bio::EnsEMBL::VEP::Config->new({everything => 1, database => 1});
-is($cfg->param($_), undef, 'everything with database turns off '.$_) for qw(af_1kg af_esp af_exac af_gnomad pubmed);
+is($cfg->param($_), undef, 'everything with database turns off '.$_) for qw(af_1kg af_gnomad pubmed);
 
 #$cfg = Bio::EnsEMBL::VEP::Config->new({species => 'mus_musculus1'});
 #is($cfg->param('species'), 'mus_musculus', '1 getting trimmed from species name');

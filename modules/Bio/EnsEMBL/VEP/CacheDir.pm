@@ -175,19 +175,11 @@ sub get_all_AnnotationSources {
       # check for presence of ExAC/gnomAD vs what user has requested
       # don't do this check with --everything
       unless($self->param('everything')) {
-        my $have_exac   = (grep {$_ eq 'ExAC'} @{$info->{variation_cols}});
-        my $have_gnomad = (grep {$_ eq 'gnomAD'} @{$info->{variation_cols}});
+        my $have_gnomad = (grep {$_ eq 'gnomADe'} @{$info->{variation_cols}});
 
-        if($self->param('af_exac') && !$have_exac) {
-          throw(
-            "ERROR: ExAC data is not available in this cache".
-            ($have_gnomad ? "; gnomAD exome data is available with --af_gnomad\n" : "\n")
-          );
-        }
         if($self->param('af_gnomad') && !$have_gnomad) {
           throw(
-            "ERROR: gnomAD data is not available in this cache".
-            ($have_exac ? "; ExAC data is available with --af_exac\n" : "\n")
+            "ERROR: gnomAD data is not available in this cache\n"
           );
         }
       }
@@ -302,6 +294,8 @@ sub dir {
 
     # complete dir with species name and db_version
     my $species_dir_name = $self->species();
+    throw("Should not use ${species_dir_name} as --species.\nTry using flags --refseq or --merged with --species homo_sapiens\n") if
+    ${species_dir_name} eq "homo_sapiens_refseq" || ${species_dir_name} eq "homo_sapiens_merged";
     $species_dir_name .= '_'.$_ for grep { $self->param($_) } qw(refseq merged);
 
     # add species dir name

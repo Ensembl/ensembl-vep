@@ -94,6 +94,7 @@ is_deeply(
     '## STRAND : Strand of the feature (1/-1)',
     '## FLAGS : Transcript quality flags',
     '## custom_test : test.vcf.gz',
+    '## VEP command-line: ',
     "#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tExisting_variation\tIMPACT\tDISTANCE\tSTRAND\tFLAGS\tcustom_test"
   ],
   'headers'
@@ -118,7 +119,7 @@ my $runner = get_annotated_buffer_runner({
 });
 is(
   $runner->get_OutputFactory->headers->[-2].$runner->get_OutputFactory->headers->[-1],
-  "## test : header".
+  "## VEP command-line: ".
   "#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tExisting_variation\tREF_ALLELE\tIMPACT\tDISTANCE\tSTRAND\tFLAGS\ttest",
   'headers - plugin'
 );
@@ -251,8 +252,10 @@ is(
   "rs142513484\t21:25585733\tT\tENSG00000154719\tENST00000307301\tTranscript\t3_prime_UTR_variant\t1122\t".
   "-\t-\t-\t-\trs142513484\tMODIFIER\t-\t-1\t-\tSNV\tMRPL39\tHGNC\tHGNC:14027\tprotein_coding\tYES\t-\t-\t5\t-\t".
   "CCDS33522.1\tENSP00000305682\tQ9NYK5\t-\tUPI00001AEAC0\t-\t-\t-\t-\t11/11\t-\t-\t-\tENST00000307301.11:c.*18G>A\t".
-  "-\t-\t0.0010\t0.003\t0.0014\t0\t0\t0\t0.004998\t0\t0.0003478\t0.004643\t0.0003236\t0\t0\t0\t1.886e-05\t0\t0\t".
-  "0.004998\tAA\t-\t-\t-\t-\t-\t-\t-\t-\t-",
+  "-\t-\t0.0010\t0.003\t0.0014\t0\t0\t0\t".
+  "0.0003478\t0.004643\t0.0003236\t0\t0\t0\t1.886e-05\t0\t0\t".
+  "-\t-\t-\t-\t-\t-\t-\t-\t-\t".
+  "-\t-\t0.004643\tgnomADe_AFR\t-\t-\t-\t-\t-\t-\t-\t-\t-",
   'get_all_lines_by_InputBuffer - everything'
 );
 

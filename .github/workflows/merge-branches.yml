@@ -1,0 +1,43 @@
+name: Merge postreleasefix with release and main branches
+
+on:
+  pull_request:
+    types:
+      - closed # Run after closing PR
+    branches:
+      - 'postreleasefix/*'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync-branch:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.merged == true &&
+      contains(github.event.pull_request.labels.*.name, 'auto-merge')
+    steps:      
+      - uses: actions/checkout@main
+
+      - name: Set the release version
+        run: |
+          echo "release=$(echo ${GITHUB_REF} | grep -o [0-9]*$)" >> $GITHUB_ENV
+          
+      - name: "Merge postreleasefix/${{ env.release }} -> main"
+        uses: devmasx/merge-branch@master
+        with:
+          type: now
+          from_branch: "postreleasefix/${{ env.release }}"
+          target_branch: main
+          github_token: ${{ github.token }}
+          message: "Merge branch 'postreleasefix/${{ env.release }}'"
+
+      - name: "Merge postreleasefix/${{ env.release }} -> release/${{ env.release }}"
+        uses: devmasx/merge-branch@master
+        with:
+          type: now
+          from_branch: "postreleasefix/${{ env.release }}"
+          target_branch: "release/${{ env.release }}"
+          github_token: ${{ github.token }}
+          message: "Merge branch 'postreleasefix/${{ env.release }}'"
