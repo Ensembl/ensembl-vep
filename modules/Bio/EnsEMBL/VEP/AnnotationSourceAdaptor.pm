@@ -228,9 +228,10 @@ sub get_all_custom {
 
     if (grep { /\#\#\#CHR\#\#\#/ } $file){
 
-      my @valid_chromosomes = keys $self->chr_lengths > 0 ? keys $self->chr_lengths: ((1..22), qw(X Y MT));
+      my @valid_chromosomes = keys %{$self->chr_lengths} > 0 ? keys %{$self->chr_lengths}: ((1..22), qw(X Y MT));
       
       foreach my $chr (@valid_chromosomes){
+        print $chr."\n";
         my $new_file = $file;
         my $new_opts = { %$opts };
         $new_file =~ s/\#\#\#CHR\#\#\#/$chr/;
