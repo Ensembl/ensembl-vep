@@ -210,44 +210,26 @@ SKIP: {
     'get_all_custom - fields'
   );
 
-  my $test = $test_cfg->{test_vcf};
-  $test =~ s/\.vcf/\#\#\#CHR\#\#\#\.vcf.gz/;
+  my $test = $test_cfg->{test_vcf_MT};
+  $test =~ s/MT.vcf.gz/\#\#\#CHR\#\#\#\.vcf.gz/;
   $asa->param('custom', [$test.',test,vcf,overlap,1,FOO,BAR']);
   is_deeply(
     $asa->get_all_custom(),
     [
-      bless( {
-        'short_name' => 'test',
-        '_config' => $asa->config,
-        'report_coords' => 1,
-        'fields' => ['FOO', 'BAR'],
-        'file' => $test_cfg->{test_vcf2},
-        'type' => 'overlap',
-        'custom_multi_allelic' => undef,
-        'info' => {
-          'custom_info' => {
-            'short_name' => 'test',
-            'report_coords' => 1,
-            'fields' => ['FOO', 'BAR'],
-            'file' => $test_cfg->{test_vcf2},
-            'type' => 'overlap',
-          }
-        }
-      }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' ),
   bless( {
     'info' => {
       'custom_info' => {
         'fields' => ['FOO', 'BAR'],
         'short_name' => 'test',
         'report_coords' => '1',
-        'file' => $test_cfg->{test_vcf3},
+        'file' => $test_cfg->{test_vcf21},
         'type' => 'overlap'
       }
     },
     'short_name' => 'test',
     '_config' => $asa->config,
     'report_coords' => '1',
-    'file' => $test_cfg->{test_vcf3},
+    'file' => $test_cfg->{test_vcf21},
     'fields' => ['FOO', 'BAR'],
     'custom_multi_allelic' => undef,
     'type' => 'overlap'
@@ -258,50 +240,14 @@ SKIP: {
         'fields' => ['FOO', 'BAR'],
         'short_name' => 'test',
         'report_coords' => '1',
-        'file' => $test_cfg->{test_vcf4},
+        'file' => $test_cfg->{test_vcf_MT},
         'type' => 'overlap'
       }
     },
     'short_name' => 'test',
     '_config' => $asa->config,
     'report_coords' => '1',
-    'file' => $test_cfg->{test_vcf4},
-    'fields' => ['FOO', 'BAR'],
-    'custom_multi_allelic' => undef,
-    'type' => 'overlap'
-  }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' ),
-  bless( {
-    'info' => {
-      'custom_info' => {
-        'fields' => ['FOO', 'BAR'],
-        'short_name' => 'test',
-        'report_coords' => '1',
-        'file' => $test_cfg->{test_vcf5},
-        'type' => 'overlap'
-      }
-    },
-    'short_name' => 'test',
-    '_config' => $asa->config,
-    'report_coords' => '1',
-    'file' => $test_cfg->{test_vcf5},
-    'fields' => ['FOO', 'BAR'],
-    'custom_multi_allelic' => undef,
-    'type' => 'overlap'
-  }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' ),
-  bless( {
-    'info' => {
-      'custom_info' => {
-        'fields' => ['FOO', 'BAR'],
-        'short_name' => 'test',
-        'report_coords' => '1',
-        'file' => $test_cfg->{test_vcf6},
-        'type' => 'overlap'
-      }
-    },
-    'short_name' => 'test',
-    '_config' => $asa->config,
-    'report_coords' => '1',
-    'file' => $test_cfg->{test_vcf6},
+    'file' => $test_cfg->{test_vcf_MT},
     'fields' => ['FOO', 'BAR'],
     'custom_multi_allelic' => undef,
     'type' => 'overlap'
