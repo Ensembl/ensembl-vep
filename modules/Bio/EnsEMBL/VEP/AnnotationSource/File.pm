@@ -345,9 +345,8 @@ sub annotate_VariationFeature {
   my $vf = shift;
 
   my $overlap_result = $self->_record_overlaps_VF($vf);
-
-  if(@{$self->_create_records($overlap_result)}[0]->{'name'} =~  /^COSV/) {
-    push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$self->_create_records($overlap_result)} if $overlap_result && !(grep{$_->{'name'} eq @{$self->_create_records($overlap_result)}[0]->{'name'}} @{$vf->{_custom_annotations}->{$self->short_name}});
+  if ($overlap_result && @{$self->_create_records($overlap_result)}[0]->{'name'} =~  /^COSV/) {
+    push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$self->_create_records($overlap_result)} if !(grep{$_->{'name'} eq @{$self->_create_records($overlap_result)}[0]->{'name'}} @{$vf->{_custom_annotations}->{$self->short_name}});
   }
   else {
     push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$self->_create_records($overlap_result)} if $overlap_result;
