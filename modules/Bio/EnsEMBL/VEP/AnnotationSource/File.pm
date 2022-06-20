@@ -343,14 +343,26 @@ sub valid_chromosomes {
 sub annotate_VariationFeature {
   my $self = shift;
   my $vf = shift;
-
+  use Data::Dumper;
   my $overlap_result = $self->_record_overlaps_VF($vf);
   if ($overlap_result && @{$self->_create_records($overlap_result)}[0]->{'name'} =~  /^COSV/) {
-    push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$self->_create_records($overlap_result)} if !(grep{$_->{'name'} eq @{$self->_create_records($overlap_result)}[0]->{'name'}} @{$vf->{_custom_annotations}->{$self->short_name}});
+    my ($matched_cosmic_record) = grep{$_->{'name'} eq @{$self->_create_records($overlap_result)}[0]->{'name'}} @{$vf->{_custom_annotations}->{$self->short_name}};
+    if ($matched_cosmic_record){
+      foreach my $key (keys %{@{$self->_create_records($overlap_result)}[0]->{'fields'}}) {
+        unless (exists $matched_cosmic_record->{'fields'}->{$key}) {
+          $matched_cosmic_record->{'fields'}{$key} = @{$self->_create_records($overlap_result)}[0]->{'fields'}->{$key};
+        }   
+      }
+    }
+    else
+    {
+      push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$self->_create_records($overlap_result)};
+    }
   }
   else {
     push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$self->_create_records($overlap_result)} if $overlap_result;
   }
+  
 }
 
 
