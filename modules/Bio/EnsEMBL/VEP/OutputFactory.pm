@@ -75,7 +75,7 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
 use Bio::EnsEMBL::Variation::Utils::Constants;
 use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
-use Bio::EnsEMBL::VEP::Utils qw(format_coords merge_arrays);
+use Bio::EnsEMBL::VEP::Utils qw(format_coords merge_arrays get_flatten);
 use Bio::EnsEMBL::VEP::Constants;
 
 use Bio::EnsEMBL::VEP::OutputFactory::VEP_output;
@@ -2283,19 +2283,36 @@ sub get_custom_headers {
   my @headers;
 
   foreach my $custom(@{$self->header_info->{custom_info} || []}) {
-    push @headers, [$custom->{short_name}, sprintf("%s (%s)", $custom->{file}, $custom->{type})];
     
-    foreach my $field(@{$custom->{fields} || []}) {
+    my @flatten_header = get_flatten(\@headers);
+    my %pos = map { $flatten_header[$_]=~/o/?($flatten_header[$_]=>$_):() } 0..$#flatten_header if @flatten_header;
+
+    if (grep { /^$custom->{short_name}$/ }  @flatten_header){
+      my $pos = $pos{$custom->{short_name}} / 2;
+      $headers[$pos][1] .= ",$custom->{file}";
+    } else {
       push @headers, [
-        sprintf("%s_%s", $custom->{short_name}, $field),
-        sprintf("%s field from %s", $field, $custom->{file})
+        $custom->{short_name},
+        sprintf("%s", $custom->{file})
       ];
+    }
+
+    foreach my $field(@{$custom->{fields} || []}) {
+      my $sub_id = sprintf("%s_%s", $custom->{short_name}, $field);
+      if (grep { /^$sub_id$/ } @flatten_header){
+        my $pos = $pos{$sub_id} / 2;
+        $headers[$pos][1] .= ",$custom->{file}";
+      } else {
+        push @headers, [
+          $sub_id,
+          sprintf("%s field from %s", $field, $custom->{file})
+        ];
+      }
     }
   }
 
   return \@headers;
 }
-
 
 =head2 flag_fields
 
@@ -2330,6 +2347,24 @@ sub flag_fields {
   }
 
   return \@return;
+}
+
+
+=head2 get_full_command
+
+  Example    : $headers = $of->get_full_command();
+  Description: Get headers from custom data files
+  Returntype : arrayref of arrayrefs [$key, $header]
+  Exceptions : none
+  Caller     : description_headers() in child classes
+  Status     : Stable
+
+=cut
+
+sub get_full_command {
+  my $self = shift;
+
+  return $self->{_config}->{_raw_config}->{full_command}  || "";
 }
 
 1;

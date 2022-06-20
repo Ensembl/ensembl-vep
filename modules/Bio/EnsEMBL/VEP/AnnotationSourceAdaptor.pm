@@ -70,6 +70,7 @@ use Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation;
 use Bio::EnsEMBL::VEP::AnnotationSource::Database::StructuralVariation;
 use Bio::EnsEMBL::VEP::AnnotationSource::File;
 
+use LWP::Simple;
 
 =head2 get_all
 
@@ -224,8 +225,27 @@ sub get_all_custom {
     }
 
     $opts->{fields} = \@fields if @fields;
+
+    if (grep { /\#\#\#CHR\#\#\#/ } $file){
+
+      my @valid_chromosomes = keys %{$self->chr_lengths} > 0 ? sort keys %{$self->chr_lengths}: ((1..22), qw(X Y MT));
+      
+      foreach my $chr (@valid_chromosomes){
+        print $chr."\n";
+        my $new_file = $file;
+        my $new_opts = { %$opts };
+        $new_file =~ s/\#\#\#CHR\#\#\#/$chr/;
+        next unless ( -e $new_file || head($new_file) );
+        $new_opts->{file} = $new_file;
+        push @as, Bio::EnsEMBL::VEP::AnnotationSource::File->new($new_opts);
+      }
+
+      # Non-match ###CHR### pattern scenario
+      die "Error: No files with pattern $file were found\n" unless @as;
     
-    push @as, Bio::EnsEMBL::VEP::AnnotationSource::File->new($opts);
+    } else {
+      push @as, Bio::EnsEMBL::VEP::AnnotationSource::File->new($opts);
+    }
   }
 
   return \@as;

@@ -53,7 +53,8 @@ is_deeply(
     '##fileformat=VCFv4.1',
     '##VEP="v1" time="test"',
     '##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|custom_test">',
-    '##INFO=<ID=custom_test,Number=.,Type=String,Description="test.vcf.gz (overlap)">',
+    '##INFO=<ID=custom_test,Number=.,Type=String,Description="test.vcf.gz">',
+    "##VEP-command-line=''",
     "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO"
   ],
   'headers'
@@ -61,7 +62,7 @@ is_deeply(
 
 my $headers = get_runner({plugin => ['TestPlugin'], quiet => 1, input_file => $test_cfg->{test_vcf}, vcf => 1})->get_OutputFactory->headers;
 is_deeply(
-  [$headers->[-3], $headers->[-2], $headers->[-1]],
+  [$headers->[-4], $headers->[-3], $headers->[-1]],
   [
     '##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|SYMBOL_SOURCE|HGNC_ID|test">',
     '##test=header',
@@ -72,7 +73,7 @@ is_deeply(
 
 $headers = get_runner({refseq => 1, fasta => $test_cfg->{fasta}, quiet => 1, input_file => $test_cfg->{test_vcf}, vcf => 1})->get_OutputFactory->headers;
 is(
-  $headers->[-2],
+  $headers->[-3],
   '##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|SYMBOL_SOURCE|HGNC_ID|REFSEQ_MATCH|REFSEQ_OFFSET|GIVEN_REF|USED_REF|BAM_EDIT">',
   'headers - BAM_EDIT'
 );
@@ -517,7 +518,7 @@ my $runner2 = get_runner({
 $of = $runner2->get_OutputFactory;
 
 is_deeply(
-  [map {$of->headers->[$_]} (0,2,3)],
+  [map {$of->headers->[$_]} (0,2,4)],
   [
     '##fileformat=VCFv4.1',
     '##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|SYMBOL_SOURCE|HGNC_ID">',
@@ -617,7 +618,7 @@ is_deeply(
 
 
 is(
-  $of->headers->[-2],
+  $of->headers->[-3],
   '##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|SYMBOL_SOURCE|HGNC_ID">',
   'headers - from input 2'
 );
