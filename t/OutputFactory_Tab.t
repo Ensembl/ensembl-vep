@@ -93,7 +93,8 @@ is_deeply(
     '## DISTANCE : Shortest distance from variant to transcript',
     '## STRAND : Strand of the feature (1/-1)',
     '## FLAGS : Transcript quality flags',
-    '## custom_test : test.vcf.gz (overlap)',
+    '## custom_test : test.vcf.gz',
+    '## VEP command-line: ',
     "#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tExisting_variation\tIMPACT\tDISTANCE\tSTRAND\tFLAGS\tcustom_test"
   ],
   'headers'
@@ -118,7 +119,7 @@ my $runner = get_annotated_buffer_runner({
 });
 is(
   $runner->get_OutputFactory->headers->[-2].$runner->get_OutputFactory->headers->[-1],
-  "## test : header".
+  "## VEP command-line: ".
   "#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tExisting_variation\tREF_ALLELE\tIMPACT\tDISTANCE\tSTRAND\tFLAGS\ttest",
   'headers - plugin'
 );

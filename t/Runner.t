@@ -433,7 +433,7 @@ ok($runner->run, 'run - ok');
 open IN, $test_cfg->{user_file}.'.out';
 my @tmp_lines = <IN>;
 close IN;
-is(scalar @tmp_lines, 40, 'run - count lines');
+is(scalar @tmp_lines, 41, 'run - count lines');
 
 is_deeply(
   [grep {!/^\#/} @tmp_lines],

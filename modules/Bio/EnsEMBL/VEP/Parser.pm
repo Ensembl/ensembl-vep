@@ -624,6 +624,7 @@ sub validate_vf {
   }
 
   my $ref_allele = shift @alleles;
+  my $alt_allele = $alleles[-1];
 
   if($ref_allele =~ /^[ACGT]*$/ && ($vf->{end} - $vf->{start}) + 1 != length($ref_allele)) {
     $self->warning_msg(
@@ -652,6 +653,13 @@ sub validate_vf {
       else {
         $ok = (uc($slice_ref_allele) eq uc($ref_allele) ? 1 : 0);
       }
+    }
+    if (($ref_allele eq $alt_allele) && ($ref_allele ne defined($slice_ref_allele)) ){
+      $ok = 0;
+    }
+
+    if (!$alt_allele){
+      $ok = 0;
     }
 
     if(!$ok) {

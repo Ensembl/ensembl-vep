@@ -192,6 +192,10 @@ ok($tmp =~ /Specified reference allele.+does not match Ensembl reference allele/
 $vf = get_vf({allele_string => 'CTT/TCC', chr => 21, start => 25585733, end => 25585735});
 is($p->validate_vf($vf), 1, 'validate_vf - check_ref long ok');
 
+$vf = get_vf({allele_string => 'TTT/T', chr => 21, start => 25585733, end => 25585735});
+is($p->validate_vf($vf), 0, 'validate_vf - check_ref_fail_issue');
+ok($tmp =~ /Specified reference allele.+does not match Ensembl reference allele/, 'validate_vf - check_ref fail msg');
+
 $p->{check_ref} = 0;
 
 # lookup_ref
