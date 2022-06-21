@@ -1,0 +1,7 @@
+##### After AUTO local installation dependencies
+
+Bio/*
+biodbhts/*
+.version/*
+Faidx.so
+HTS.so
