@@ -577,7 +577,6 @@ sub generate_chart_data {
   } if $stats->{chr_totals};
   
   foreach my $chr(sort {($a !~ /^\d+$/ || $b !~ /^\d+/ || $a =~ /^\d\w/ || $b =~ /^\d\w/ ) ? $a cmp $b : $a <=> $b} keys %{$stats->{chr}}) {
-
     my $chr_id = $chr;
     $chr_id =~ s/\.|-/\_/g;
 
@@ -917,7 +916,6 @@ sub stats_html_head {
       $chart->{title},
       $chart->{header}->[0], $chart->{header}->[1],
       join(",", map {"['".$_."',".$chart->{data}->{$_}."]"} @keys),
-
       $chart->{options} || 'null',
     );
     
@@ -930,7 +928,7 @@ sub stats_html_head {
         $chart->{id}.'_table',
         $chart->{title},
         $chart->{header}->[0], $chart->{header}->[1],
-      join(",", map {"['".$_."',".$chart->{data}->{$_}."]"} @keys)
+        join(",", map {"['".$_."',".$chart->{data}->{$_}."]"} @keys)
       );
       
       # interaction between table/chart
