@@ -576,17 +576,8 @@ sub generate_chart_data {
     options => '{legend: {position: "none"}}',
   } if $stats->{chr_totals};
   
-<<<<<<< HEAD
   foreach my $chr(sort {($a !~ /^\d+$/ || $b !~ /^\d+/ || $a =~ /^\d\w/ || $b =~ /^\d\w/ ) ? $a cmp $b : $a <=> $b} keys %{$stats->{chr}}) {
-=======
-  foreach my $chr(sort {
-                         (my $aterm = $a) =~ s/chr//;
-                         (my $bterm = $b) =~ s/chr//;
-                         $aterm = ord($aterm) unless $aterm =~ /^\d+$/;
-                         $bterm = ord($bterm) unless $bterm =~ /^\d+$/;
-                         return $aterm <=> $bterm;
-	               } keys %{$stats->{chr}}) {
->>>>>>> bc3778e30d7642fa00e48e49dabbe3406231798e
+
     my $chr_id = $chr;
     $chr_id =~ s/\.|-/\_/g;
 
@@ -925,17 +916,8 @@ sub stats_html_head {
       $chart->{id}.'_'.$chart->{type},
       $chart->{title},
       $chart->{header}->[0], $chart->{header}->[1],
-<<<<<<< HEAD
       join(",", map {"['".$_."',".$chart->{data}->{$_}."]"} @keys),
-=======
-      join(",", map {"['".$_."',".$chart->{data}->{$_}."]"} sort {
-          (my $aterm = $a) =~ s/chr//;
-          (my $bterm = $b) =~ s/chr//;
-          $aterm = ord($aterm) unless $aterm =~ /^\d+$/;
-          $bterm = ord($bterm) unless $bterm =~ /^\d+$/;
-          return $aterm <=> $bterm;
-      } @keys),
->>>>>>> bc3778e30d7642fa00e48e49dabbe3406231798e
+
       $chart->{options} || 'null',
     );
     
@@ -948,17 +930,7 @@ sub stats_html_head {
         $chart->{id}.'_table',
         $chart->{title},
         $chart->{header}->[0], $chart->{header}->[1],
-<<<<<<< HEAD
       join(",", map {"['".$_."',".$chart->{data}->{$_}."]"} @keys)
-=======
-        join(",", map {"['".$_."',".$chart->{data}->{$_}."]"} sort {
-            (my $aterm = $a) =~ s/chr//;
-            (my $bterm = $b) =~ s/chr//;
-            $aterm = ord($aterm) unless $aterm =~ /^\d+$/;
-            $bterm = ord($bterm) unless $bterm =~ /^\d+$/;
-            return $aterm <=> $bterm;
-        } @keys)
->>>>>>> bc3778e30d7642fa00e48e49dabbe3406231798e
       );
       
       # interaction between table/chart
