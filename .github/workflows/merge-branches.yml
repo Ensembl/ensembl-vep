@@ -7,9 +7,7 @@ on:
     branches:
       - 'postreleasefix/*'
 
-permissions:
-  contents: write
-  pull-requests: write
+permissions: write-all
 
 jobs:
   sync-branch:
