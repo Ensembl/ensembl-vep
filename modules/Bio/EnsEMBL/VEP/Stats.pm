@@ -576,13 +576,7 @@ sub generate_chart_data {
     options => '{legend: {position: "none"}}',
   } if $stats->{chr_totals};
   
-  foreach my $chr(sort {
-                         (my $aterm = $a) =~ s/chr//r;
-                         (my $bterm = $b) =~ s/chr//r;
-                         $aterm = ord($aterm) unless $aterm =~ /^\d+$/;
-                         $bterm = ord($bterm) unless $bterm =~ /^\d+$/;
-                         return $aterm <=> $bterm;
-	               } keys %{$stats->{chr}}) {
+  foreach my $chr(sort {($a !~ /^\d+$/ || $b !~ /^\d+/ || $a =~ /^\d\w/ || $b =~ /^\d\w/ ) ? $a cmp $b : $a <=> $b} keys %{$stats->{chr}}) {
     my $chr_id = $chr;
     $chr_id =~ s/\.|-/\_/g;
 
@@ -748,7 +742,13 @@ sub sort_keys {
   # sort data
   if(defined($sort)) {
     if($sort eq 'chr') {
-      @keys = sort {($a !~ /^\d+$/ || $b !~ /^\d+/ || $a =~ /^\d\w/ || $b =~ /^\d\w/ ) ? $a cmp $b : $a <=> $b} keys %{$data};
+      @keys = sort {                         
+        (my $aterm = $a) =~ s/chr//;
+        (my $bterm = $b) =~ s/chr//;
+        $aterm = ord($aterm) unless $aterm =~ /^\d+$/;
+        $bterm = ord($bterm) unless $bterm =~ /^\d+$/;
+        return $aterm <=> $bterm;
+      } keys %{$data};
     }
     elsif($sort eq 'value') {
       @keys = sort {$data->{$a} <=> $data->{$b}} keys %{$data};
@@ -915,13 +915,7 @@ sub stats_html_head {
       $chart->{id}.'_'.$chart->{type},
       $chart->{title},
       $chart->{header}->[0], $chart->{header}->[1],
-      join(",", map {"['".$_."',".$chart->{data}->{$_}."]"} sort {
-          (my $aterm = $a) =~ s/chr//r;
-          (my $bterm = $b) =~ s/chr//r;
-          $aterm = ord($aterm) unless $aterm =~ /^\d+$/;
-          $bterm = ord($bterm) unless $bterm =~ /^\d+$/;
-          return $aterm <=> $bterm;
-      } @keys),
+      join(",", map {"['".$_."',".$chart->{data}->{$_}."]"} @keys),
       $chart->{options} || 'null',
     );
     
@@ -934,13 +928,7 @@ sub stats_html_head {
         $chart->{id}.'_table',
         $chart->{title},
         $chart->{header}->[0], $chart->{header}->[1],
-        join(",", map {"['".$_."',".$chart->{data}->{$_}."]"} sort {
-            (my $aterm = $a) =~ s/chr//r;
-            (my $bterm = $b) =~ s/chr//r;
-            $aterm = ord($aterm) unless $aterm =~ /^\d+$/;
-            $bterm = ord($bterm) unless $bterm =~ /^\d+$/;
-            return $aterm <=> $bterm;
-        } @keys)
+      join(",", map {"['".$_."',".$chart->{data}->{$_}."]"} @keys)
       );
       
       # interaction between table/chart
