@@ -217,6 +217,8 @@ GetOptions(
   'debug',                   # print out debug info
 ) or die "ERROR: Failed to parse command-line flags\n";
 
+die("ERROR: Unexpected extra command-line parameter(s): " . join(", ", @ARGV)) if scalar @ARGV;
+
 warn("WARNING: More than one output file command-line flag provided. Using the last value provided: '@{$config->{output_file}}[-1]' \n") unless (scalar @{$config->{output_file}} <= 1);
 $config->{output_file}=@{$config->{output_file}}[-1] if ($config->{output_file});
 &usage && exit(0) if (!$arg_count) || $config->{help};
