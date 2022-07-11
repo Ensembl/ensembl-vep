@@ -1,2 +1,0 @@
-WARNING: Chromosome 211 not found in annotation sources on line 0
-WARNING: Start x or end 25585733 coordinate invalid on line 0
