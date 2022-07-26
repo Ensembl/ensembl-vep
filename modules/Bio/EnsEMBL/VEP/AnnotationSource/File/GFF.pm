@@ -210,7 +210,8 @@ sub _record_get_id {
   Arg 2      : hashref $gene_record_hash
   Example    : $biotype = $as->_record_get_biotype($tr_record, $gene_record);
   Description: Get sequence ontology (SO) biotype of this record. Attempts to
-               find it in the "biotype" or "transcript_type" attribute fields,
+               find it in the "biotype", "transcript_type" or
+               "transcript_biotype" attribute fields,
                and if that fails (as it will for RefSeq GFFs), make an
                educated guess looking at the record type and various other
                attributes.
@@ -227,7 +228,9 @@ sub _record_get_biotype {
   if(!exists($record->{_biotype})) {
 
     # Ensembl-y GFFs have biotype as an attribute
-    my $biotype = $record->{attributes}->{biotype} || $record->{attributes}->{transcript_type};
+    my $biotype = $record->{attributes}->{biotype} ||
+                  $record->{attributes}->{transcript_type} ||
+                  $record->{attributes}->{transcript_biotype};
 
     # others we need to (guess) work it out
     if(!$biotype) {
