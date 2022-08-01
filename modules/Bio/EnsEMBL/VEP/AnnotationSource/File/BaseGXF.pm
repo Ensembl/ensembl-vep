@@ -503,6 +503,9 @@ sub _create_transcript {
     elsif($type eq 'cds' || $type eq 'stop_codon') {
       $cdss{$child->{start}} = $child;
     }
+    elsif($type eq 'mirna') {
+      next;
+    }
     else {
       throw("ERROR: Transcript has unexpected type of child record: ".Dumper($child)."\n");
     }
