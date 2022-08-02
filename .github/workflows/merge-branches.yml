@@ -28,7 +28,7 @@ jobs:
           type: now
           from_branch: "postreleasefix/${{ env.release }}"
           target_branch: main
-          token: ${{ secrets.ENSVAR }}
+          github_token: ${{ secrets.ENSVAR }}
           message: "Merge branch 'postreleasefix/${{ env.release }}'"
 
       - name: "Merge postreleasefix/${{ env.release }} -> release/${{ env.release }}"
@@ -37,5 +37,5 @@ jobs:
           type: now
           from_branch: "postreleasefix/${{ env.release }}"
           target_branch: "release/${{ env.release }}"
-          token: ${{ secrets.ENSVAR }}
+          github_token: ${{ secrets.ENSVAR }}
           message: "Merge branch 'postreleasefix/${{ env.release }}'"
