@@ -34,7 +34,7 @@ SKIP: {
   no warnings 'once';
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'JSON module not available', 23 unless $Bio::EnsEMBL::VEP::OutputFactory::CAN_USE_JSON;
+  skip 'JSON module not available', 24 unless $Bio::EnsEMBL::VEP::OutputFactory::CAN_USE_JSON;
 
   ## BASIC TESTS
   ##############
@@ -538,6 +538,54 @@ SKIP: {
     },
     'get_all_lines_by_InputBuffer - refseq used_ref'
   );
+  # test total_length
+  $ib = get_annotated_buffer({
+    input_file => $test_cfg->{test_vcf},
+    total_length => 1,
+  });
+  $of = Bio::EnsEMBL::VEP::OutputFactory::JSON->new({config => $ib->config});
+  @lines = @{$of->get_all_lines_by_InputBuffer($ib)};
+  is_deeply($json->decode($lines[0])->{'transcript_consequences'}, [{
+    'gene_id' => 'ENSG00000154719',
+    'variant_allele' => 'T',
+    'cdna_end' => '1122/1199',
+    'consequence_terms' => [
+      '3_prime_UTR_variant'
+    ],
+    'strand' => -1,
+    'transcript_id' => 'ENST00000307301',
+    'cdna_start' => '1122/1199',
+    'impact' => 'MODIFIER'
+  },
+  {
+    'cds_start' => '991/1017',
+    'gene_id' => 'ENSG00000154719',
+    'variant_allele' => 'T',
+    'cdna_end' => '1033/1110',
+    'protein_start' => '331/338',
+    'codons' => 'Gca/Aca',
+    'cds_end' => '991/1017',
+    'consequence_terms' => [
+      'missense_variant'
+    ],
+    'protein_end' => '331/338',
+    'strand' => -1,
+    'amino_acids' => 'A/T',
+    'cdna_start' => '1033/1110',
+    'transcript_id' => 'ENST00000352957',
+    'impact' => 'MODERATE'
+  },
+  {
+    'gene_id' => 'ENSG00000260583',
+    'consequence_terms' => [
+      'upstream_gene_variant'
+    ],
+    'distance' => 2407,
+    'variant_allele' => 'T',
+    'strand' => -1,
+    'transcript_id' => 'ENST00000567517',
+    'impact' => 'MODIFIER'
+  }], "use total_length 1");
 
   # test custom
   use_ok('Bio::EnsEMBL::VEP::AnnotationSource::File');
