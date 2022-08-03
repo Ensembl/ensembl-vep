@@ -22,7 +22,7 @@ process chrosVEP {
       2) A tabix index for that VCF output file
   */
   publishDir "${params.outdir}/vep-summary",
-    pattern: "${prefix}-*.vcf.gz_summary.html",
+    pattern: "${prefix}-*.vcf.gz_summary.*",
     mode:'move'
   cpus params.cpus
   container "${params.singularity_dir}/vep.sif"
@@ -34,7 +34,7 @@ process chrosVEP {
   output:
   path("${prefix}-*.vcf.gz"), emit: vcfFile
   path("${prefix}-*.vcf.gz.tbi"), emit: indexFile
-  path("${prefix}-*.vcf.gz_summary.html")
+  path("${prefix}-*.vcf.gz_summary.*")
 
   script:
   if( !vcfFile.exists() ) {

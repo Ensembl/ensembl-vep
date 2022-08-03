@@ -13,6 +13,8 @@ params.cpus = 1
 params.outdir = "outdir"
 params.vep_config=""
 params.singularity_dir=""
+params.chros=""
+params.chros_file=""
 
 // module imports
 include { splitVCF } from '../nf_modules/split_into_chros.nf' 
@@ -33,13 +35,16 @@ if (params.help) {
   log.info '  --outdir DIRNAME          Name of output dir. Default: outdir'
   log.info '  --vep_config FILENAME     VEP config file. Default: nf_config/vep.ini'
   log.info '  --chros LIST_OF_CHROS	Comma-separated list of chromosomes to generate. i.e. 1,2,... Default: 1,2,...,X,Y,MT'
+  log.info '  --chros_file LIST_OF_CHROS_FILE Path to file containing list of chromosomes'
   log.info '  --cpus INT	        Number of CPUs to use. Default 1.'
   exit 1
 }
 
 // Input validation
-if( !params.chros) {
-  exit 1, "Undefined --chros parameter. Please provide a comma-separated string with chromosomes: 1,2, ... Default: 1,2,...,X,Y,MT"
+
+// If both chros and chros_file are defined, list takes precedence over file 
+if( !params.chros && !params.chros_file) {
+  exit 1, "Undefined --chros or --chros_file parameter. Please provide a list or a file containing chromosomes"
 }
 if( !params.vcf) {
   exit 1, "Undefined --vcf parameter. Please provide the path to a VCF file"
@@ -73,8 +78,15 @@ if( !vepFile.exists() ) {
 log.info 'Starting workflow.....'
 
 workflow {
+  if (params.chros){
+  log.info 'Reading chromosomes from list'
   chr_str = params.chros.toString()
   chr = Channel.of(chr_str.split(','))
+  }
+  else if (params.chros_file){
+  log.info 'Reading chromosomes from file'
+  chr = Channel.fromPath(params.chros_file).splitText().map{it -> it.trim()}
+  }
   splitVCF(chr, params.vcf, vcf_index)
   chrosVEP(splitVCF.out, params.vep_config)
   mergeVCF(chrosVEP.out.vcfFile.collect(), chrosVEP.out.indexFile.collect())
