@@ -7,9 +7,7 @@ on:
     branches:
       - 'postreleasefix/*'
 
-permissions:
-  contents: write
-  pull-requests: write
+permissions: write-all
 
 jobs:
   sync-branch:
@@ -30,7 +28,7 @@ jobs:
           type: now
           from_branch: "postreleasefix/${{ env.release }}"
           target_branch: main
-          github_token: ${{ github.token }}
+          github_token: ${{ secrets.ENSVAR }}
           message: "Merge branch 'postreleasefix/${{ env.release }}'"
 
       - name: "Merge postreleasefix/${{ env.release }} -> release/${{ env.release }}"
@@ -39,5 +37,5 @@ jobs:
           type: now
           from_branch: "postreleasefix/${{ env.release }}"
           target_branch: "release/${{ env.release }}"
-          github_token: ${{ github.token }}
+          github_token: ${{ secrets.ENSVAR }}
           message: "Merge branch 'postreleasefix/${{ env.release }}'"
