@@ -85,6 +85,7 @@ my %INCLUDE_FEATURE_TYPES = map {$_ => 1} qw(
   NMD_transcript_variant
   processed_pseudogene
   processed_transcript
+  protein_coding_gene
   pseudogene
   pseudogenic_transcript
   RNA

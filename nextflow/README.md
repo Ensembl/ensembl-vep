@@ -6,7 +6,6 @@ The nextflow pipeline aims to run VEP faster utilising simple parallelisation. I
  * Running VEP on chromosome-wise VCFs in parallel
  * Merging VEP outputs into a single file
 
-
 ##### Table of contents
 
 * [Installation and requirements](#install)
