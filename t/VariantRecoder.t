@@ -283,7 +283,8 @@ SKIP: {
              "NC_000021.9:25585732:C:T"
           ],
           "var_synonyms" => [
-             "LSDB: NM_017446.3:c.991G>A"
+             "LSDB: NM_017446.3:c.991G>A",
+             "PharmGKB: PA166153533"
           ],
           "hgvsp" => [
              "ENSP00000284967.6:p.Ala331Thr",
@@ -347,6 +348,33 @@ SKIP: {
       }
     ],
     'recode - output MANE Select'
+  );
+
+  my $vr_mane_synonyms = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, input_file => $test_cfg->{vr_txt}, offline => 0, database => 1, species => 'homo_vepiens', mane_select => 1});
+
+  my $output = $vr_mane_synonyms->recode_all;
+  is_deeply(
+    $output->[0]->{'T'}->{'mane_select'},
+    [
+      {
+        'hgvsp' => 'ENSP00000284967.6:p.Ala331Thr',
+        'hgvsc' => 'ENST00000352957.8:c.991G>A',
+        'hgvsg' => 'NC_000021.9:g.25585733C>T'
+      }
+    ],
+    'recode - input synonyms variants (rs142513484), output MANE Select'
+  );
+
+  is_deeply(
+    $output->[1]->{'T'}->{'mane_select'},
+    [
+      {
+        'hgvsp' => 'ENSP00000284967.6:p.Ala331Thr',
+        'hgvsc' => 'ENST00000352957.8:c.991G>A',
+        'hgvsg' => 'NC_000021.9:g.25585733C>T'
+      }
+    ],
+    'recode - input synonyms variants (PA166153533), output MANE Select'
   );
 
   my $vr_mane_fields = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', mane_select => 1, fields => 'spdi'});

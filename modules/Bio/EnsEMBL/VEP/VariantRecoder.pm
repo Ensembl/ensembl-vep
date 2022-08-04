@@ -435,7 +435,7 @@ sub _get_all_results {
           my $key_hgvsc = $object->{'hgvsc'};
 
           # Avoids duplicated values in the output
-          if (!$mane_unique_keys{$key_hgvsg.'-'.$key_hgvsc}) {
+          if (!$mane_unique_keys{$line_id.'-'.$line_id.'-'.$key_hgvsg.'-'.$key_hgvsc}) {
             my $mane_hgvsg = $key_hgvsg || '-';
             my $mane_hgvsc = $key_hgvsc || '-';
             my $mane_hgvsp = $object->{'hgvsp'} || '-';
@@ -446,7 +446,7 @@ sub _get_all_results {
             $mane_object{'hgvsp'} = $mane_hgvsp;
             push @{$mane_by_allele{$key_allele}->{'mane_select'}}, \%mane_object;
 
-            $mane_unique_keys{$key_hgvsg.'-'.$key_hgvsc} = 1;
+            $mane_unique_keys{$line_id.'-'.$line_id.'-'.$key_hgvsg.'-'.$key_hgvsc} = 1;
           }
         }
       }
