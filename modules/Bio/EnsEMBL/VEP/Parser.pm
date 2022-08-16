@@ -654,7 +654,7 @@ sub validate_vf {
         if (uc($slice_ref_allele) eq uc($ref_allele)){
           $ok = 1;
         }
-        elsif ((($ref_allele eq $alt_allele) && ($ref_allele ne $slice_ref_allele)) || ((!$alt_allele) && ($ref_allele ne $slice_ref_allele )) || (uc($ref_allele) ne uc($slice_ref_allele))) {
+        elsif (((uc($ref_allele) eq uc($alt_allele)) && (uc($ref_allele) ne uc($slice_ref_allele))) || ((!$alt_allele) && (uc($ref_allele) ne uc($slice_ref_allele) )) || (uc($ref_allele) ne uc($slice_ref_allele))) {
           $ok = 0;
         }
         else {
