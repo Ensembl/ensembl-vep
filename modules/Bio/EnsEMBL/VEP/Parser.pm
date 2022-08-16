@@ -647,20 +647,28 @@ sub validate_vf {
     else {
       my $slice_ref_allele = $self->_get_ref_allele($vf);
 
+      use Data::Dumper;
+      print Dumper($ref_allele);
+      print Dumper($alt_allele);
+      print Dumper($slice_ref_allele);
+
       if(!defined($slice_ref_allele)) {
         $self->warning_msg("WARNING: Could not fetch sub-slice from ".$vf->{chr}.":".$vf->{start}."\-".$vf->{end}."\(".$vf->{strand}."\) on line ".$self->line_number);
       }
-      else {
-        $ok = (uc($slice_ref_allele) eq uc($ref_allele) ? 1 : 0);
-      }
-    }
-    if (($ref_allele eq $alt_allele) && ($ref_allele ne defined($slice_ref_allele)) ){
-      $ok = 0;
-    }
 
-    if (!$alt_allele){
-      $ok = 0;
-    }
+      if(defined($slice_ref_allele)) {
+        if (uc($slice_ref_allele) eq uc($ref_allele)){
+          $ok = 1;
+        }
+        elsif ((($ref_allele eq $alt_allele) && ($ref_allele ne $slice_ref_allele)) || ((!$alt_allele) && ($ref_allele ne $slice_ref_allele )) || ($ref_allele ne $alt_allele)) {
+          $ok = 0;
+        }
+        else {
+          $ok = 1;
+        }
+
+      }
+    } 
 
     if(!$ok) {
       $vf->{check_ref_failed} = 1;
