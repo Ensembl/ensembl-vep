@@ -635,6 +635,7 @@ sub validate_vf {
     return 0;
   }
 
+
   # check reference allele if requested
   if($self->{check_ref}) {
     my $ok = 0;
@@ -650,17 +651,16 @@ sub validate_vf {
       if(!defined($slice_ref_allele)) {
         $self->warning_msg("WARNING: Could not fetch sub-slice from ".$vf->{chr}.":".$vf->{start}."\-".$vf->{end}."\(".$vf->{strand}."\) on line ".$self->line_number);
       }
-      else {
-        $ok = (uc($slice_ref_allele) eq uc($ref_allele) ? 1 : 0);
+      if(defined($slice_ref_allele)) {
+        if (uc($slice_ref_allele) ne uc($ref_allele)){
+          $ok = 0;
+        }
+        else {
+          $ok = 1;
+        }
       }
-    }
-    if (($ref_allele eq $alt_allele) && ($ref_allele ne defined($slice_ref_allele)) ){
-      $ok = 0;
-    }
-
-    if (!$alt_allele){
-      $ok = 0;
-    }
+    } 
+  
 
     if(!$ok) {
       $vf->{check_ref_failed} = 1;
