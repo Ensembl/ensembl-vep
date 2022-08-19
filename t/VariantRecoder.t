@@ -349,6 +349,34 @@ SKIP: {
     'recode - output MANE Select'
   );
 
+  my $vr_mane_synonyms = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, input_file => $test_cfg->{vr_txt}, offline => 0, database => 1, species => 'homo_vepiens', mane_select => 1});
+
+  my $output = $vr_mane_synonyms->recode_all;
+  
+  is_deeply(
+    $output->[0]->{'A'}->{'mane_select'},
+    [
+      {
+        'hgvsp' => 'ENSP00000382948.3:p.Thr368=',
+        'hgvsc' => 'ENST00000400075.3:c.1104G>A',
+        'hgvsg' => 'NC_000021.9:g.25764755G>A'
+      }
+    ],
+    'recode - input synonyms variants (rs143054530), output MANE Select'
+  );
+
+  is_deeply(
+    $output->[1]->{'A'}->{'mane_select'},
+    [
+      {
+        'hgvsp' => 'ENSP00000382948.3:p.Thr368=',
+        'hgvsc' => 'ENST00000400075.3:c.1104G>A',
+        'hgvsg' => 'NC_000021.9:g.25764755G>A'
+      }
+    ],
+    'recode - input synonyms variants (PA166153533), output MANE Select'
+  );
+
   my $vr_mane_fields = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', mane_select => 1, fields => 'spdi'});
 
   is_deeply(
