@@ -65,6 +65,7 @@ our %DEFAULTS = (
   windows_vcf    => $Bin.'/testdata/input/windows.vcf',
   test_gzvcf     => $Bin.'/testdata/input/test.vcf.gz',
   user_file      => $Bin.'/testdata/user_file'.$$,
+  vr_txt         => $Bin.'/testdata/input/test_vr.txt',
 
   custom_bed     => $Bin.'/testdata/custom/test.bed.gz',
   custom_vcf     => $Bin.'/testdata/custom/test.vcf.gz',
