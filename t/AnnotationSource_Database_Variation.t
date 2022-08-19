@@ -186,7 +186,6 @@ SKIP: {
       'clin_sig' => undef,
       'end' => 25585733,
       'variation_name' => 'rs142513484',
-      'minor_allele' => 'T',
       'start' => 25585733,
       'variation_id' => 28751744,
       'matched_alleles' => [{
@@ -227,7 +226,6 @@ SKIP: {
       'clin_sig' => 'not_provided,pathogenic',
       'end' => 25891796,
       'variation_name' => 'rs63750066',
-      'minor_allele' => 'T',
       'variation_id' => 13264416,
       'start' => 25891796,
       'matched_alleles' => [{
