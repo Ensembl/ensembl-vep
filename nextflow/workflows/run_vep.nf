@@ -11,8 +11,8 @@ nextflow.enable.dsl=2
 params.help = false
 params.cpus = 1
 params.outdir = "outdir"
-params.vep_config=""
 params.singularity_dir=""
+params.vep_config=""
 params.chros=""
 params.chros_file=""
 
@@ -67,9 +67,15 @@ if( serr ){
 }
 vcf_index = "${params.vcf}.tbi"
 
-vepFile = file(params.vep_config)
-if( !vepFile.exists() ) {
-  exit 1, "The specified VEP config does not exist: ${params.vep_config}"
+if ( params.vep_config ){
+  vepFile = file(params.vep_config)
+  if( !vepFile.exists() ){
+    exit 1, "The specified VEP config does not exist: ${params.vep_config}"
+  }
+}
+else
+{
+  exit 1, "Undefined --vep_config parameter. Please provide a VEP config file"
 }
 
 log.info 'Starting workflow.....'
