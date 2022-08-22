@@ -315,7 +315,7 @@ SKIP: {
         {
           'frequencies' => {
             'T' => {
-              'af' => '0.0010',
+              'af' => '0.001',
               'amr' => 0.0014,
               'gnomade_sas' => 0,
               'gnomade' => 0.0003478,
