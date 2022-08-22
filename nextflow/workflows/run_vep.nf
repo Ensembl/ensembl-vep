@@ -11,13 +11,16 @@ nextflow.enable.dsl=2
 params.help = false
 params.cpus = 1
 params.outdir = "outdir"
-params.vep_config=""
 params.singularity_dir=""
+params.vep_config=""
+params.chros=""
+params.chros_file=""
 
 // module imports
 include { splitVCF } from '../nf_modules/split_into_chros.nf' 
 include { mergeVCF } from '../nf_modules/merge_chros_VCF.nf'  
 include { chrosVEP } from '../nf_modules/run_vep_chros.nf'
+include { readChrVCF } from '../nf_modules/read_chros_VCF.nf'
 
  // print usage
 if (params.help) {
@@ -33,14 +36,13 @@ if (params.help) {
   log.info '  --outdir DIRNAME          Name of output dir. Default: outdir'
   log.info '  --vep_config FILENAME     VEP config file. Default: nf_config/vep.ini'
   log.info '  --chros LIST_OF_CHROS	Comma-separated list of chromosomes to generate. i.e. 1,2,... Default: 1,2,...,X,Y,MT'
+  log.info '  --chros_file LIST_OF_CHROS_FILE Path to file containing list of chromosomes' 
   log.info '  --cpus INT	        Number of CPUs to use. Default 1.'
   exit 1
 }
 
 // Input validation
-if( !params.chros) {
-  exit 1, "Undefined --chros parameter. Please provide a comma-separated string with chromosomes: 1,2, ... Default: 1,2,...,X,Y,MT"
-}
+
 if( !params.vcf) {
   exit 1, "Undefined --vcf parameter. Please provide the path to a VCF file"
 }
@@ -65,17 +67,35 @@ if( serr ){
 }
 vcf_index = "${params.vcf}.tbi"
 
-vepFile = file(params.vep_config)
-if( !vepFile.exists() ) {
-  exit 1, "The specified VEP config does not exist: ${params.vep_config}"
+if ( params.vep_config ){
+  vepFile = file(params.vep_config)
+  if( !vepFile.exists() ){
+    exit 1, "The specified VEP config does not exist: ${params.vep_config}"
+  }
+}
+else
+{
+  exit 1, "Undefined --vep_config parameter. Please provide a VEP config file"
 }
 
 log.info 'Starting workflow.....'
 
 workflow {
-  chr_str = params.chros.toString()
-  chr = Channel.of(chr_str.split(','))
-  splitVCF(chr, params.vcf, vcf_index)
+  if (params.chros){
+    log.info 'Reading chromosome names from list'
+    chr_str = params.chros.toString()
+    chr = Channel.of(chr_str.split(','))
+  }
+  else if (params.chros_file) {
+    log.info 'Reading chromosome names from file'
+    chr = Channel.fromPath(params.chros_file).splitText().map{it -> it.trim()}
+  }
+  else {
+    log.info 'Computing chromosome names from input'
+    readChrVCF(params.vcf, vcf_index)
+    chr = readChrVCF.out.splitText().map{it -> it.trim()}
+  }
+  splitVCF(chr , params.vcf, vcf_index)
   chrosVEP(splitVCF.out, params.vep_config)
   mergeVCF(chrosVEP.out.vcfFile.collect(), chrosVEP.out.indexFile.collect())
 }  
