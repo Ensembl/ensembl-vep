@@ -234,8 +234,6 @@ sub dump_obj {
       $v->{end} == $v->{start} ? '' : $v->{end},
       $v->{allele_string},
       $v->{strand} == 1 ? '' : $v->{strand},
-      $v->{minor_allele} || '',
-      defined($v->{minor_allele_freq}) && $v->{minor_allele_freq} =~ /^[0-9\.]+$/ ? sprintf("%.4f", $v->{minor_allele_freq}) : '',
       $v->{clin_sig} || '',
       $v->{phenotype_or_disease} == 0 ? '' : $v->{phenotype_or_disease},
       $v->{clin_sig_allele} || '',
@@ -290,7 +288,7 @@ sub freqs_from_vcf {
     $chr =~ s/chr//;
     $file =~ s/\+\+\+CHR\+\+\+/$chr/;
 
-    next unless grep { /$chr/ } @{$self->{chroms}};
+    next unless grep { /$chr/ } @{$vcf_conf->{chroms}};
 
     die "ERROR: File for known chromossome ($chr): $file where not found\n" unless -e $file;
 

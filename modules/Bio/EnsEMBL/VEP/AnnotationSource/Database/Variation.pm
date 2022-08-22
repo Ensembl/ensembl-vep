@@ -75,8 +75,6 @@ our @VAR_CACHE_COLS = qw(
   end
   allele_string
   strand
-  minor_allele
-  minor_allele_freq
   clin_sig
   phenotype_or_disease
 );
@@ -164,7 +162,7 @@ sub get_features_by_regions_uncached {
       SELECT
         vf.variation_id, vf.variation_name, IF(fv.variation_id IS NULL, 0, 1),
         vf.somatic, vf.seq_region_start, vf.seq_region_end,
-        vf.allele_string, vf.seq_region_strand, vf.minor_allele, vf.minor_allele_freq,
+        vf.allele_string, vf.seq_region_strand,
         REPLACE(vf.clinical_significance, " ", "_"),
         IF(FIND_IN_SET(?, evidence_attribs) > 0, 1, 0)
       FROM variation_feature vf
