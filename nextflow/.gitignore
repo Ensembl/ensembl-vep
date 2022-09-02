@@ -3,5 +3,3 @@
 work/
 outdir/
 singularity-images/
-*.vcf.gz
-*.tbi
