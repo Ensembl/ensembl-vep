@@ -101,6 +101,10 @@ main($config);
 sub main {
   my $config = shift;
 
+  if($config->{mane_select} && defined($config->{species}) && $config->{species} !~ /homo_sapiens|human/) {
+    die("ERROR: MANE Select is only available for human\n");
+  }
+
   my $vr = Bio::EnsEMBL::VEP::VariantRecoder->new($config);
  
   my $results = $vr->recode_all;
