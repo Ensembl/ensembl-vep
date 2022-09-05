@@ -67,6 +67,7 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::Runner;
 use Bio::EnsEMBL::VEP::Utils qw(find_in_ref merge_arrays add_to_output);
 use Bio::EnsEMBL::Variation::VariationFeature;
+use Bio::EnsEMBL::Variation::DBSQL::VariationAdaptor;
 use Bio::EnsEMBL::Variation::Utils::VEP;
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
 use Bio::EnsEMBL::Variation::Utils::Sequence qw(ga4gh_vrs_from_spdi);
@@ -367,6 +368,8 @@ sub _get_all_results {
     ### vcf_string ###
     ##################
 
+    my $id_bk;
+
     ##################
     ####### ID #######
     # Parse ID and build a hash by allele
@@ -380,7 +383,7 @@ sub _get_all_results {
           push @ids_no_allele, $co_var->{'id'}; 
         }
         else {
-
+          $id_bk = $co_var->{'id'};
           my @split_allele = split /\//, $co_var->{'allele_string'};
           # delete ref allele - we only want to check the alt alleles from the colocated variants
           shift @split_allele;
@@ -418,8 +421,15 @@ sub _get_all_results {
     ####### Variant synonyms #######
     # Attach variant synonyms to hash by allele
     if($line->{'var_synonyms'} && $keys_no_allele{'var_synonyms'}) {
+      # If there are no synonyms try to get the synonyms for one of the colocated variants
+      if($id_bk && scalar(@{$line->{'var_synonyms'}}) == 0) {
+        my $va = $self->get_adaptor('variation', 'Variation');
+        my $variation = $va->fetch_by_name($id_bk);
+        my $synonyms = $variation->get_all_synonyms('',1);
+        $line->{'var_synonyms'} = $synonyms;
+      }
       foreach my $key_allele (keys %{$line_by_allele{'consequences'}}) {
-      $vcf_string_by_allele{$key_allele}->{'var_synonyms'} = $line->{'var_synonyms'};
+        $vcf_string_by_allele{$key_allele}->{'var_synonyms'} = $line->{'var_synonyms'};
       }
     }
 
