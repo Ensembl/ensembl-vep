@@ -306,6 +306,44 @@ SKIP: {
     'recode - output variant synonyms'
   );
 
+  my $vr_synonyms = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', var_synonyms => 1});
+  is_deeply(
+    $vr_synonyms->recode("ENSP00000284967.6:p.Ala331Thr"),
+    [
+      {
+      "A" =>
+        {
+          "input" => "ENSP00000284967.6:p.Ala331Thr",
+          "id" => [
+             "rs142513484"
+          ],
+          "spdi" => [
+             "NC_000021.9:25585732:C:T"
+          ],
+          "var_synonyms" => [
+             "LSDB: NM_017446.3:c.991G>A"
+          ],
+          "hgvsp" => [
+             "ENSP00000284967.6:p.Ala331Thr",
+             "NP_059142.2:p.Ala331Thr",
+             "XP_011527953.1:p.Ala289Thr"
+          ],
+          "hgvsc" => [
+             "ENST00000307301.11:c.*18G>A",
+             "ENST00000352957.8:c.991G>A",
+             "NM_017446.3:c.991G>A",
+             "NM_080794.3:c.*18G>A",
+             "XM_011529651.1:c.865G>A"
+          ],
+          "hgvsg" => [
+             "NC_000021.9:g.25585733C>T"
+          ]
+        }
+      }
+    ],
+    'recode - input hgvs, output variant synonyms'
+  );
+
   my $vr_mane = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', mane_select => 1});
 
   is_deeply(
