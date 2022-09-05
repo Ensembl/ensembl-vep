@@ -422,7 +422,7 @@ sub _get_all_results {
     # Attach variant synonyms to hash by allele
     if($line->{'var_synonyms'} && $keys_no_allele{'var_synonyms'}) {
       # If there are no synonyms try to get the synonyms for one of the colocated variants
-      if(scalar(@{$line->{'var_synonyms'}}) == 0) {
+      if($id_bk && scalar(@{$line->{'var_synonyms'}}) == 0) {
         my $va = $self->get_adaptor('variation', 'Variation');
         my $variation = $va->fetch_by_name($id_bk);
         my $synonyms = $variation->get_all_synonyms('',1);
