@@ -206,6 +206,16 @@ CREATE TABLE `epigenome` (
   UNIQUE KEY `short_name_idx` (`short_name`)
 ) ENGINE=MyISAM AUTO_INCREMENT=273 DEFAULT CHARSET=latin1;
 
+CREATE TABLE `epigenome_track` (
+  `epigenome_track_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `epigenome_id` int(10) unsigned NOT NULL,
+  `feature_type_id` int(10) unsigned NOT NULL,
+  `data_file_id` int(11) unsigned NOT NULL,
+  `track_type` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`epigenome_track_id`),
+  KEY `et_index` (`epigenome_id`,`feature_type_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
 CREATE TABLE `execution_plan` (
   `execution_plan_id` int(18) unsigned NOT NULL AUTO_INCREMENT,
   `time` bigint(20) DEFAULT NULL,
@@ -381,7 +391,7 @@ CREATE TABLE `meta` (
   PRIMARY KEY (`meta_id`),
   UNIQUE KEY `species_key_value_idx` (`species_id`,`meta_key`,`meta_value`),
   KEY `species_value_idx` (`species_id`,`meta_value`)
-) ENGINE=MyISAM AUTO_INCREMENT=782 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=784 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `meta_coord` (
   `table_name` varchar(40) NOT NULL,
