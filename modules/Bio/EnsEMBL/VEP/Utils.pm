@@ -78,6 +78,7 @@ use Exporter;
 use Scalar::Util qw(looks_like_number);
 use FindBin qw($RealBin);
 use Bio::EnsEMBL::VEP::Constants;
+use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
 use vars qw(@ISA @EXPORT_OK);
 
@@ -426,23 +427,24 @@ sub get_compressed_filehandle {
   die("ERROR: File $file does not exist\n") unless -e $file;
   die("ERROR: File $file does not look like a binary file\n") unless -B $file;
 
+  my $fh;
   if($CAN_USE_PERLIO_GZIP && !$multi) {
-    open my $fh, "<:gzip", $file or die("ERROR: $!");
-    return $fh;
+    eval q{ open $fh, "<:gzip", $file; };
+    warning("Opening $file failed using PerlIO::gzip\nERROR: $@\nTrying other methods..\n") if $@;
+    return $fh unless $@;
   }
-  elsif($CAN_USE_GZIP) {
-    open my $fh, "gzip -dc $file |" or die("ERROR: $!");
-    return $fh;
+  if($CAN_USE_GZIP) {
+    eval q{ open $fh, "gzip -dc $file |"; };
+    warning("Opening $file failed using system gzip\nERROR: $!\nTrying other methods..\n") if $!;
+    return $fh unless $!;
   }
-  elsif($CAN_USE_IO_UNCOMPRESS) {
-    my $fh;
+  if($CAN_USE_IO_UNCOMPRESS) {
     eval q{ $fh = IO::Uncompress::Gunzip->new($file, MultiStream => $multi) or die("ERROR: $GunzipError"); };
-    die($@) if $@;
-    return $fh;
+    warning("Opening $file failed using IO::Uncompress::Gunzip\n", "ERROR: $@\n") if $@;
+    return $fh unless $@;
   }
-  else {
-    die("Cannot read from compressed or binary file");
-  }
+  
+  die("ERROR: Cannot read from compressed or binary file\n");
 }
 
 
