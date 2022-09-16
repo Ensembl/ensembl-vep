@@ -413,3 +413,4 @@ The main requirement behind this entry, is to be able to link TAIR GO annotation
 50826	PB_REF	\N	KNOWNXREF	1	PomBase Reference	MISC	\N	\N	Specific accession used by PomBase for source reference
 50827	GEO	\N	XREF	0	Gene Expression Omnibus	MISC	\N	\N	\N
 50828	GigaDB_A_tauschii	1	KNOWNXREF	1	Aegilops tauschii GigaDB identifier	MISC	\N	\N	Aegilops tauschii GigaDB gene identifier
+50829	GeneCards	\N	XREF	50	GeneCards	MISC	\N	\N	\N
