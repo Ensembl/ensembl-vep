@@ -178,7 +178,7 @@ GetOptions(
 
   # cache stuff
   'database',                # must specify this to use DB now
-  'cache:s',                 # use cache (optional param treated like --dir)
+  'cache:s',                 # use cache (optional param treated like --cache-dir)
   'cache_version=i',         # specify a different cache version
   'show_cache_info',         # print cache info and quit
   'dir=s',                   # dir where cache is found (defaults to $HOME/.vep/)
@@ -217,20 +217,6 @@ GetOptions(
 ) or die "ERROR: Failed to parse command-line flags\n";
 
 &usage && exit(0) if (!$arg_count) || $config->{help};
-
-if (defined $config->{cache}){ 
-  if (-d "$config->{cache}") {
-    $config->{dir} ||= $config->{cache};
-    $config->{dir_cache} ||= $config->{cache};
-    $config->{dir_plugins} ||= ($config->{dir} || $config->{cache}) . '/Plugins';
-    
-  } else {
-    warn "Specified --cache $config->{cache} is not a directory" if $config->{cache} ;
-  }
-  $config->{cache} = 1;
-}
-
-
 
 $config->{database} ||= 0;
 
