@@ -430,17 +430,14 @@ sub get_compressed_filehandle {
   my $fh;
   if($CAN_USE_PERLIO_GZIP && !$multi) {
     eval q{ open $fh, "<:gzip", $file; };
-    warning("Opening $file failed using PerlIO::gzip\nERROR: $@\nTrying other methods..\n") if $@;
     return $fh unless $@;
   }
   if($CAN_USE_GZIP) {
     eval q{ open $fh, "gzip -dc $file |"; };
-    warning("Opening $file failed using system gzip\nERROR: $!\nTrying other methods..\n") if $!;
     return $fh unless $!;
   }
   if($CAN_USE_IO_UNCOMPRESS) {
-    eval q{ $fh = IO::Uncompress::Gunzip->new($file, MultiStream => $multi) or die("ERROR: $GunzipError"); };
-    warning("Opening $file failed using IO::Uncompress::Gunzip\n", "ERROR: $@\n") if $@;
+    eval q{ $fh = IO::Uncompress::Gunzip->new($file, MultiStream => $multi); };
     return $fh unless $@;
   }
   
