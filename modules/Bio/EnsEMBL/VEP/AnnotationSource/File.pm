@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2021] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -345,8 +345,24 @@ sub annotate_VariationFeature {
   my $vf = shift;
 
   my $overlap_result = $self->_record_overlaps_VF($vf);
-
-  push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$self->_create_records($overlap_result)} if $overlap_result;
+  if ($overlap_result && @{$self->_create_records($overlap_result)}[0]->{'name'} =~  /^COSV/) {
+    my ($matched_cosmic_record) = grep{$_->{'name'} eq @{$self->_create_records($overlap_result)}[0]->{'name'}} @{$vf->{_custom_annotations}->{$self->short_name}};
+    if ($matched_cosmic_record){
+      foreach my $key (keys %{@{$self->_create_records($overlap_result)}[0]->{'fields'}}) {
+        unless (exists $matched_cosmic_record->{'fields'}->{$key}) {
+          $matched_cosmic_record->{'fields'}{$key} = @{$self->_create_records($overlap_result)}[0]->{'fields'}->{$key};
+        }   
+      }
+    }
+    else
+    {
+      push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$self->_create_records($overlap_result)};
+    }
+  }
+  else {
+    push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$self->_create_records($overlap_result)} if $overlap_result;
+  }
+  
 }
 
 

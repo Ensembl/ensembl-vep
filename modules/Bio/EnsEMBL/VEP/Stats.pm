@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2021] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -742,7 +742,13 @@ sub sort_keys {
   # sort data
   if(defined($sort)) {
     if($sort eq 'chr') {
-      @keys = sort {($a !~ /^\d+$/ || $b !~ /^\d+/ || $a =~ /^\d\w/ || $b =~ /^\d\w/ ) ? $a cmp $b : $a <=> $b} keys %{$data};
+      @keys = sort {                         
+        (my $aterm = $a) =~ s/chr//;
+        (my $bterm = $b) =~ s/chr//;
+        $aterm = ord($aterm) unless $aterm =~ /^\d+$/;
+        $bterm = ord($bterm) unless $bterm =~ /^\d+$/;
+        return $aterm <=> $bterm;
+      } keys %{$data};
     }
     elsif($sort eq 'value') {
       @keys = sort {$data->{$a} <=> $data->{$b}} keys %{$data};

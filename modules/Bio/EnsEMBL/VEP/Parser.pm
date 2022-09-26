@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2021] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -585,7 +585,7 @@ sub validate_vf {
     # offline, can't transform
     else {
       $self->warning_msg(
-        "WARNING: Chromosome ".$vf->{chr}." not found in annotation sources or synonyms on line ".$self->line_number
+        "WARNING: Chromosome ".$vf->{chr}." not found in annotation sources or synonyms on line ".$self->line_number.". \nChromosome ".$vf->{chr}. " does not overlap any features"
       );
       return 0;
     }
@@ -624,6 +624,7 @@ sub validate_vf {
   }
 
   my $ref_allele = shift @alleles;
+  my $alt_allele = $alleles[-1];
 
   if($ref_allele =~ /^[ACGT]*$/ && ($vf->{end} - $vf->{start}) + 1 != length($ref_allele)) {
     $self->warning_msg(
@@ -633,6 +634,7 @@ sub validate_vf {
     );
     return 0;
   }
+
 
   # check reference allele if requested
   if($self->{check_ref}) {
@@ -649,10 +651,16 @@ sub validate_vf {
       if(!defined($slice_ref_allele)) {
         $self->warning_msg("WARNING: Could not fetch sub-slice from ".$vf->{chr}.":".$vf->{start}."\-".$vf->{end}."\(".$vf->{strand}."\) on line ".$self->line_number);
       }
-      else {
-        $ok = (uc($slice_ref_allele) eq uc($ref_allele) ? 1 : 0);
+      if(defined($slice_ref_allele)) {
+        if (uc($slice_ref_allele) ne uc($ref_allele)){
+          $ok = 0;
+        }
+        else {
+          $ok = 1;
+        }
       }
-    }
+    } 
+  
 
     if(!$ok) {
       $vf->{check_ref_failed} = 1;

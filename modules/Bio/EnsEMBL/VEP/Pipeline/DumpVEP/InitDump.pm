@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2021] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -55,13 +55,25 @@ sub run {
   my $dba = Bio::EnsEMBL::Registry->get_DBAdaptor($species, $group);
   my $dbc = $dba->dbc();
   my $current_db_name = $dbc->dbname();
- 
+
+  my $version = $self->param('eg_version') || $self->required_param('ensembl_release');
+
   my $var_db_name = $self->has_var_db($dbc, $current_db_name);
   my $dbc_var;
-
   if($var_db_name){
     my $dba_var = Bio::EnsEMBL::Registry->get_DBAdaptor($species, 'variation');
     $dbc_var = $dba_var->dbc();
+  }
+
+  #Check metadata DB for variation db status
+  my $skip_meta_checks = $self->param('skip_meta_checks');
+
+  unless($skip_meta_checks) {
+    my $metadata_dba = Bio::EnsEMBL::Registry->get_DBAdaptor( "multi", "metadata" );
+    my $meta_dbc = $metadata_dba->dbc();
+    my $meta_has_variations = $self->meta_has_variation($meta_dbc, $species, $version);
+  
+    die ('Expected variation database not found') if $meta_has_variations && !defined($dbc_var);
   }
 
   #Special case for otherfeatures
@@ -332,6 +344,24 @@ sub has_refseq {
   $sth->finish();
 
   return $count ? $count : undef;
+}
+
+sub meta_has_variation {
+  my ($self, $meta_dbc, $species_name, $ensembl_version) = @_;
+  my $sth = $meta_dbc->prepare(qq{
+    select has_variations from genome 
+    where organism_id in (select organism_id from organism where name = '$species_name') 
+    and data_release_id in (select data_release_id from data_release where ensembl_version = $ensembl_version);  
+  });
+
+  $sth->execute;
+
+  my $has_variations;
+  $sth->bind_columns(\$has_variations);
+  $sth->fetch;
+  $sth->finish();
+
+  return $has_variations;
 }
 
 sub has_sift_poly {

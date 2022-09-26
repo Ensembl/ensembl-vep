@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2021] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -75,8 +75,6 @@ our @VAR_CACHE_COLS = qw(
   end
   allele_string
   strand
-  minor_allele
-  minor_allele_freq
   clin_sig
   phenotype_or_disease
 );
@@ -151,12 +149,12 @@ sub get_features_by_regions_uncached {
       ($region_start + 1) * $cache_region_size
     );
 
+    # no seq_region_id?
+    next unless $sr_cache->{$chr} || $chr_is_seq_region;
+
     my $adaptor = $self->get_adaptor('variation', 'phenotypefeature');
     my $source_id = $self->clinvar_source_id_cache;
     my $attribs = $adaptor->get_clinsig_alleles_by_location($chr_is_seq_region ? $chr : $sr_cache->{$chr}, $s, $e, $source_id) if defined($adaptor) && defined($source_id);
-
-    # no seq_region_id?
-    next unless $sr_cache->{$chr} || $chr_is_seq_region;
 
     my $phenotype_attrib_id = $self->phenotype_attrib_id || 0;
 
@@ -164,7 +162,7 @@ sub get_features_by_regions_uncached {
       SELECT
         vf.variation_id, vf.variation_name, IF(fv.variation_id IS NULL, 0, 1),
         vf.somatic, vf.seq_region_start, vf.seq_region_end,
-        vf.allele_string, vf.seq_region_strand, vf.minor_allele, vf.minor_allele_freq,
+        vf.allele_string, vf.seq_region_strand,
         REPLACE(vf.clinical_significance, " ", "_"),
         IF(FIND_IN_SET(?, evidence_attribs) > 0, 1, 0)
       FROM variation_feature vf

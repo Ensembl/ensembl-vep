@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2021] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -221,7 +221,7 @@ sub get_features_by_regions_uncached {
         my %cl =  
           map {$_->[0] => $_->[1]}
           map {$_->[0] =~ s/ /\_/g; $_}
-          map { [$_->get_PeakCalling->get_Epigenome->name, 1] } @{$mf->get_all_overlapping_Peaks};
+          map { [$_->name, 1] } @{$mf->get_all_Epigenomes_with_experimental_evidence};
         $mf->{cell_types} = \%cl;
       }
     }

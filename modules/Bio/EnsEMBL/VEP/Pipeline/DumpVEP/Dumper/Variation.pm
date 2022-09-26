@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2021] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ BEGIN {
 
 use base qw(Bio::EnsEMBL::VEP::Pipeline::DumpVEP::Dumper);
 
-my $gnomad_prefix = 'gnomAD_';
+my $gnomad_prefix = 'gnomAD';
 
 sub run {
   my $self = shift;
@@ -108,7 +108,9 @@ sub run {
     
     my $tmp_dir = $self->param('tmp_dir');
     
-    mkdir($tmp_dir) unless -e $tmp_dir;
+    unless(-e $tmp_dir){
+      mkdir($tmp_dir) or die "Cannot create temp_dir - $!";
+    }
    
     foreach my $chr(keys %{{map {$_->{chr} => 1} @{$self->param('regions')}}}) {
 
@@ -183,6 +185,7 @@ sub _generic_dump_info {
   );
   foreach my $pop(map {@{$_->{prefixed_pops} || $_->{pops}}} @{$self->{freq_vcf} || []}) {
     $pop = uc_gnomad_pop($pop) if ($pop =~ /^$gnomad_prefix/);
+    $pop = "AF" if $pop eq '';
     push @cols, $pop;
   }
 
@@ -231,8 +234,6 @@ sub dump_obj {
       $v->{end} == $v->{start} ? '' : $v->{end},
       $v->{allele_string},
       $v->{strand} == 1 ? '' : $v->{strand},
-      $v->{minor_allele} || '',
-      defined($v->{minor_allele_freq}) && $v->{minor_allele_freq} =~ /^[0-9\.]+$/ ? sprintf("%.4f", $v->{minor_allele_freq}) : '',
       $v->{clin_sig} || '',
       $v->{phenotype_or_disease} == 0 ? '' : $v->{phenotype_or_disease},
       $v->{clin_sig_allele} || '',
@@ -282,8 +283,14 @@ sub freqs_from_vcf {
   # iterate over each VCF file in the config
   foreach my $vcf_conf(@{$self->{freq_vcf}}) {
     my $file = $vcf_conf->{file};
+
+    # Remove chr from chromosome name
+    $chr =~ s/chr//;
     $file =~ s/\+\+\+CHR\+\+\+/$chr/;
-    next unless -e $file;
+
+    next unless grep { /$chr/ } @{$vcf_conf->{chroms}};
+
+    die "ERROR: File for known chromossome ($chr): $file where not found\n" unless -e $file;
 
     my $prefix = $vcf_conf->{prefix} || '';
     $prefix .= '_' if $prefix && $prefix !~ /\_$/;
@@ -311,7 +318,6 @@ sub freqs_from_vcf {
               $self->warning('Could not be added to cache ' . $v->{variation_name} . ' ' . $v->{allele_string});
               next;
             }
-            $DB::single = 1 if $v->{variation_name} eq 'TMP_ESP_1_179086420_179086420';
 
             my $matches = [];
             eval{
@@ -342,8 +348,8 @@ sub freqs_from_vcf {
                 my $info_prefix = '';
                 my $info_suffix = '';
 
-                # have to process ExAC differently from 1KG and ESP
-                if($prefix =~ /exac|gnomad/i && $pop) {
+                # have to process gnomADe and gnomADg differently from 1KG and ESP
+                if($prefix =~ /gnomADe|gnomADg/i && $pop) {
                   $info_suffix = '_'.$pop if $pop;
                 }
                 elsif($pop) {
@@ -390,7 +396,7 @@ sub freqs_from_vcf {
 
                 if(defined($tmp_f) && $tmp_f ne '') {
                   my $store_name = $prefix;
-                  $store_name .= ($vcf_conf->{name} eq 'gnomAD' && $pop) ? uc($pop) : $pop;
+                  $store_name .= (($vcf_conf->{name} eq 'gnomADe' || $vcf_conf->{name} eq 'gnomADg') && $pop) ? uc($pop) : $pop;
                   $store_name =~ s/\_$//;
                   $v->{$store_name} = $v->{$store_name} ? $v->{$store_name}.','.$tmp_f : $tmp_f;
                 }
@@ -403,13 +409,14 @@ sub freqs_from_vcf {
   }
 }
 
-# r2.1 of gnomad has changed the population names from upper to lower case.
+# r2.1 and 3.1.2 of gnomad has changed the population names from upper to lower case.
 # In order to keep the gnomad allele frequency key the same we need to convert
 # to upper case population names 
 sub uc_gnomad_pop {
   my $pop = shift;
   my $ucpop = uc $pop;
-  $ucpop =~ s/GNOMAD_/$gnomad_prefix/;
+  $ucpop =~ s/GNOMADE/${gnomad_prefix}e/;
+  $ucpop =~ s/GNOMADG/${gnomad_prefix}g/;
   return $ucpop; 
 }
 

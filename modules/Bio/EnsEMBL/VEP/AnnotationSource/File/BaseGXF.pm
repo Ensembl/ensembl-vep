@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2021] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -235,6 +235,9 @@ sub _get_records_by_coords {
       }
 
       push @records, $self->_record_to_hash();
+    }
+    else {
+      $self->warning_msg("The feature_type ".$parser->get_type." is being skipped\n");
     }
 
     $parser->next();

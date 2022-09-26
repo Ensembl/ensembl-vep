@@ -1,4 +1,4 @@
-# Copyright [2016-2021] EMBL-European Bioinformatics Institute
+# Copyright [2016-2022] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ my $exp = [
       '1000genomes' => 'phase3',
       'COSMIC' => '80',
       'ESP' => 'V2-SSA137',
-      'gnomAD' => '170228',
+      'gnomADe' => '170228',
       'gencode' => 'GENCODE 24',
       'genebuild' => '2014-07',
       'HGMD-PUBLIC' => '20164',
@@ -110,7 +110,7 @@ SKIP: {
   no warnings 'once';
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'Bio::DB::HTS::Tabix module not available', 4 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+  skip 'Bio::DB::HTS::Tabix module not available', 5 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
 
   $asa->param('custom', [$test_cfg->{custom_vcf}.',test,vcf,exact']);
   is_deeply(
@@ -209,6 +209,53 @@ SKIP: {
     ],
     'get_all_custom - fields'
   );
+
+  my $test = $test_cfg->{test_vcf_MT};
+  $test =~ s/MT.vcf.gz/\#\#\#CHR\#\#\#\.vcf.gz/;
+  $asa->param('custom', [$test.',test,vcf,overlap,1,FOO,BAR']);
+  is_deeply(
+    $asa->get_all_custom(),
+    [
+  bless( {
+    'info' => {
+      'custom_info' => {
+        'fields' => ['FOO', 'BAR'],
+        'short_name' => 'test',
+        'report_coords' => '1',
+        'file' => $test_cfg->{test_vcf21},
+        'type' => 'overlap'
+      }
+    },
+    'short_name' => 'test',
+    '_config' => $asa->config,
+    'report_coords' => '1',
+    'file' => $test_cfg->{test_vcf21},
+    'fields' => ['FOO', 'BAR'],
+    'custom_multi_allelic' => undef,
+    'type' => 'overlap'
+  }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' ),
+  bless( {
+    'info' => {
+      'custom_info' => {
+        'fields' => ['FOO', 'BAR'],
+        'short_name' => 'test',
+        'report_coords' => '1',
+        'file' => $test_cfg->{test_vcf_MT},
+        'type' => 'overlap'
+      }
+    },
+    'short_name' => 'test',
+    '_config' => $asa->config,
+    'report_coords' => '1',
+    'file' => $test_cfg->{test_vcf_MT},
+    'fields' => ['FOO', 'BAR'],
+    'custom_multi_allelic' => undef,
+    'type' => 'overlap'
+  }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
+    ],
+    'get_all_custom - automated ###CHR###'
+  );
+
 }
 
 $asa->param('custom', []);

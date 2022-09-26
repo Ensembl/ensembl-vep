@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2021] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -231,6 +231,8 @@ sub get_features_by_regions_uncached {
 
     my @features;
 
+    next if $self->{core_type} eq 'otherfeatures' && $sub_slice->seq_region_name() =~ /^LRG_\d+/;
+
     foreach my $gene(map {$_->transfer($sr_slice)} @{$sub_slice->get_all_Genes(undef, undef, 1)}) {
       my $gene_stable_id = $gene->stable_id;
       my $canonical_tr_id = $gene->{canonical_transcript_id};
@@ -250,14 +252,20 @@ sub get_features_by_regions_uncached {
         # skip those from analysis refseq_human_import and refseq_mouse_import
         next if $self->{core_type} eq 'otherfeatures' && $self->assembly !~ /GRCh37/i && $tr->analysis && $tr->analysis->logic_name =~ /^refseq_[a-z]+_import$/;
 
-	## Due to the inclusion of the new RefSeq transcript set (mapped from 38) into the 37 otherfeatures database,
-	## older, lower quality transcripts have been removed from the cache files. To do this, we filter out all transcripts
-	## with the analysis logic_name 'refseq_import' or 'refseq_human_import'. 
-	## All new transcripts have the logic name 'refseq_import_grch38'
-	next if $self->{core_type} eq 'otherfeatures' && $self->assembly =~ /GRCh37/i && $tr->analysis && $tr->analysis->logic_name =~ /^refseq.+import$/;
-	if($self->{core_type} eq 'otherfeatures' && defined($tr->display_xref)){
-	         $tr->{stable_id} = $tr->display_xref->{display_id};
+        ## Due to the inclusion of the new RefSeq transcript set (mapped from 38) into the 37 otherfeatures database,
+        ## older, lower quality transcripts have been removed from the cache files. To do this, we filter out all transcripts
+        ## with the analysis logic_name 'refseq_import' or 'refseq_human_import'. 
+        ## All new transcripts have the logic name 'refseq_import_grch38'
+        next if $self->{core_type} eq 'otherfeatures' && $self->assembly =~ /GRCh37/i && $tr->analysis && $tr->analysis->logic_name =~ /^refseq.+import$/;
+        if($self->{core_type} eq 'otherfeatures' && defined($tr->display_xref)){
+          $tr->{stable_id} = $tr->display_xref->{display_id};
         }
+        
+        # remove transcripts of biotype artifact
+        next if $tr->{biotype} eq 'artifact';
+        
+        # remove readthrough transcripts
+        next if @{ $tr->get_all_Attributes("readthrough_tra") };
         
         $tr->{_gene_stable_id} = $gene_stable_id;
         $tr->{_gene} = $gene;

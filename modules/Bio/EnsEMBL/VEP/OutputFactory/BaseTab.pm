@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2021] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -101,6 +101,8 @@ sub headers {
   push @headers, "## $_ version ".$info->{version_data}->{$_} for keys %{$info->{version_data} || {}};
 
   push @headers, @{$self->description_headers};
+
+  push @headers, sprintf("## VEP command-line: %s", $self->get_full_command);
 
   push @headers, $self->column_header;
 

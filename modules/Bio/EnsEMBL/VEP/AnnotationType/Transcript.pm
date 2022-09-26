@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2021] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -210,9 +210,10 @@ sub filter_transcript {
     (
       # we only want RefSeq transcripts e.g. NM_12930,
       # or 4540 for MT transcripts
+      # or rna-TRNP for MT transcripts
       (
         $self->{source_type} eq 'refseq' &&
-        !(($t->stable_id || '') =~ /^[A-Z]{2}\_\d+|^\d{4}$/ || 
+        !(($t->stable_id || '') =~ /^[A-Z]{2}\_\d+|^\d{4}$|^rna-[A-Z]{3,4}\d{0,1}/ || 
         (defined($t->display_xref) && ($t->display_xref->{display_id} || '') =~ /^[A-Z]{2}\_\d+|^\d{4}$/))
       ) 
       
@@ -222,7 +223,7 @@ sub filter_transcript {
       (
         $self->{source_type} eq 'merged' &&
         ($t->{_source_cache} || '') eq 'RefSeq' &&
-        !(($t->stable_id || '') =~ /^[A-Z]{2}\_\d+|^\d{4}$/ || 
+        !(($t->stable_id || '') =~ /^[A-Z]{2}\_\d+|^\d{4}$|^rna-[A-Z]{3,4}\d{0,1}/ || 
         (defined($t->display_xref) && ($t->display_xref->{display_id} || '') =~ /^[A-Z]{2}\_\d+|^\d{4}$/))
       )
     )

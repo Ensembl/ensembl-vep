@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2021] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
 use Bio::EnsEMBL::Variation::Utils::Constants;
 use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
-use Bio::EnsEMBL::VEP::Utils qw(format_coords merge_arrays);
+use Bio::EnsEMBL::VEP::Utils qw(format_coords merge_arrays get_flatten);
 use Bio::EnsEMBL::VEP::Constants;
 
 use Bio::EnsEMBL::VEP::OutputFactory::VEP_output;
@@ -103,11 +103,11 @@ my %FORMAT_MAP = (
 my %DISTANCE_CONS = (upstream_gene_variant => 1, downstream_gene_variant => 1);
 
 my %FREQUENCY_KEYS = (
-  af        => ['AF'],
-  af_1kg    => [qw(AFR AMR ASN EAS EUR SAS)],
-  af_esp    => [qw(AA EA)],
-  af_exac   => [('ExAC', map {'ExAC_'.$_} qw(Adj AFR AMR EAS FIN NFE OTH SAS))],
-  af_gnomad => [('gnomAD', map {'gnomAD_'.$_} qw(AFR AMR ASJ EAS FIN NFE OTH SAS))],
+  af           => ['AF'],
+  af_1kg       => [qw(AF AFR AMR ASN EAS EUR SAS)],
+  af_gnomad    => [('gnomADe', map {'gnomADe_'.$_} qw(AFR AMR ASJ EAS FIN NFE OTH SAS))],
+  af_gnomade    => [('gnomADe', map {'gnomADe_'.$_} qw(AFR AMR ASJ EAS FIN NFE OTH SAS))],
+  af_gnomadg => [('gnomADg', map {'gnomADg_'.$_} qw(AFR AMI AMR ASJ EAS FIN MID NFE OTH SAS))],
 );
 
 
@@ -166,9 +166,9 @@ sub new {
     variant_class
     af
     af_1kg
-    af_esp
-    af_exac
     af_gnomad
+    af_gnomade
+    af_gnomadg
     max_af
     pubmed
     clin_sig_allele
@@ -202,6 +202,7 @@ sub new {
     hgvsg_use_accession
     spdi
     sift
+    ga4gh_vrs
     polyphen
     polyphen_analysis
 
@@ -1100,9 +1101,6 @@ sub add_colocated_frequency_data {
 
   my @ex_alleles = split('/', $ex->{allele_string});
 
-  # gmaf stored a bit differently, but we can get it in the same format
-  $ex->{AF} = $ex->{minor_allele}.':'.$ex->{minor_allele_freq} if $ex->{minor_allele};
-
   my @keys = keys %FREQUENCY_KEYS;
   @keys = grep {$self->{$_}} @keys unless $self->{max_af};
   
@@ -1116,8 +1114,8 @@ sub add_colocated_frequency_data {
 
   my $max_af = 0;
   my @max_af_pops;
-
-  foreach my $group(@keys) {
+  
+  foreach my $group(sort @keys) {
     foreach my $key(grep {$ex->{$_}} @{$FREQUENCY_KEYS{$group}}) {
 
       my %freq_data;
@@ -1129,6 +1127,7 @@ sub add_colocated_frequency_data {
       # get the frequencies for each allele into a hashref
       foreach my $pair(split(',', $ex->{$key})) {
         my ($a, $f) = split(':', $pair);
+        $f = sprintf("%.4f", $f) if $key eq 'AF'; # this format is just to keep old compability with dbSNP import
         $freq_data{$a} = $f;
         $total += $f;
         delete $remaining{$a} if $remaining{$a};
@@ -1161,13 +1160,13 @@ sub add_colocated_frequency_data {
 
         # update max_af data if required
         # make sure we don't include any combined-level pops
-        if($self->{max_af} && $key ne 'AF' && $key ne 'ExAC' && $key ne 'ExAC_Adj' && $key ne 'gnomAD') {
+        if($self->{max_af} && $key ne 'AF' && $key ne 'ExAC' && $key ne 'ExAC_Adj' && $key ne 'gnomADe' && $key ne 'gnomADg') {
           if($f > $max_af) {
             $max_af = $f;
             @max_af_pops = ($key);
           }
           elsif($f == $max_af) {
-            push @max_af_pops, $key;
+            push @max_af_pops, $key unless grep{$_ eq $key} @max_af_pops;
           }
         }
       }
@@ -1185,8 +1184,6 @@ sub add_colocated_frequency_data {
     
     push @{$hash->{MAX_AF_POPS}}, @max_af_pops if $max_af >= $current_max;
   }
-
-  delete $ex->{AF};
 
   return $hash;
 }
@@ -1283,6 +1280,17 @@ sub VariationFeatureOverlapAllele_to_output_hash {
       
     if(my $spdi = $vf->{_spdi_genomic}->{$hash->{Allele}}){
       $hash->{SPDI} = $spdi;  
+    }
+  }
+
+  # ga4gh_vrs
+  if ($self->{ga4gh_vrs}) {
+    $vf->{_ga4gh_spdi_genomic} = $vf->spdi_genomic();
+
+    if (my $ga4gh_spdi = $vf->{_ga4gh_spdi_genomic}->{$hash->{Allele}}) {
+      if ($ga4gh_spdi =~ /^NC/) {
+        $hash->{GA4GH_SPDI} = $ga4gh_spdi;
+      }
     }
   }
 
@@ -2275,19 +2283,36 @@ sub get_custom_headers {
   my @headers;
 
   foreach my $custom(@{$self->header_info->{custom_info} || []}) {
-    push @headers, [$custom->{short_name}, sprintf("%s (%s)", $custom->{file}, $custom->{type})];
     
-    foreach my $field(@{$custom->{fields} || []}) {
+    my @flatten_header = get_flatten(\@headers);
+    my %pos = map { $flatten_header[$_]=~/o/?($flatten_header[$_]=>$_):() } 0..$#flatten_header if @flatten_header;
+
+    if (grep { /^$custom->{short_name}$/ }  @flatten_header){
+      my $pos = $pos{$custom->{short_name}} / 2;
+      $headers[$pos][1] .= ",$custom->{file}";
+    } else {
       push @headers, [
-        sprintf("%s_%s", $custom->{short_name}, $field),
-        sprintf("%s field from %s", $field, $custom->{file})
+        $custom->{short_name},
+        sprintf("%s", $custom->{file})
       ];
+    }
+
+    foreach my $field(@{$custom->{fields} || []}) {
+      my $sub_id = sprintf("%s_%s", $custom->{short_name}, $field);
+      if (grep { /^$sub_id$/ } @flatten_header){
+        my $pos = $pos{$sub_id} / 2;
+        $headers[$pos][1] .= ",$custom->{file}";
+      } else {
+        push @headers, [
+          $sub_id,
+          sprintf("%s field from %s", $field, $custom->{file})
+        ];
+      }
     }
   }
 
   return \@headers;
 }
-
 
 =head2 flag_fields
 
@@ -2322,6 +2347,24 @@ sub flag_fields {
   }
 
   return \@return;
+}
+
+
+=head2 get_full_command
+
+  Example    : $headers = $of->get_full_command();
+  Description: Get headers from custom data files
+  Returntype : arrayref of arrayrefs [$key, $header]
+  Exceptions : none
+  Caller     : description_headers() in child classes
+  Status     : Stable
+
+=cut
+
+sub get_full_command {
+  my $self = shift;
+
+  return $self->{_config}->{_raw_config}->{full_command}  || "";
 }
 
 1;

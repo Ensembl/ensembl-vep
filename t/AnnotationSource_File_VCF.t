@@ -1,4 +1,4 @@
-# Copyright [2016-2021] EMBL-European Bioinformatics Institute
+# Copyright [2016-2022] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -49,9 +49,7 @@ SKIP: {
 
   my $cfg = Bio::EnsEMBL::VEP::Config->new($test_cfg->base_testing_cfg);
   ok($cfg, 'get new config object');
-
-
-
+ 
   ## TESTS WITH INPUT BUFFER
   ##########################
 
@@ -79,6 +77,7 @@ SKIP: {
     },
     'annotate_InputBuffer - overlap'
   );
+
 
   # overlap with insertions
   $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
@@ -432,6 +431,31 @@ SKIP: {
     },
     'annotate_InputBuffer - INFO chunk count doesnt match ALT count'
   );
-}
 
+  ## COSMIC id without duplication
+  my $file_2 = $test_cfg->{custom_cosmic};
+  my $as_2 = Bio::EnsEMBL::VEP::AnnotationSource::File::VCF->new({file => $file_2});
+  my $ib_2 = Bio::EnsEMBL::VEP::InputBuffer->new({
+    config => $cfg,
+    parser => Bio::EnsEMBL::VEP::Parser::VCF->new({
+      config => $cfg,
+      file => $test_cfg->create_input_file([qw(1 36469721 . TG T .)]),
+      valid_chromosomes => [1]
+    })
+  });
+  $ib_2->next;
+  $as_2->annotate_InputBuffer($ib_2);
+  is_deeply(
+    $ib_2->buffer->[0]->{_custom_annotations},
+    {
+    'cosmic.vcf.gz' => [
+      {
+        'name' => 'COSV58963001'
+      }
+    ]
+  }, 
+    'annotate_InputBuffer - COSMIC id without duplication'
+  );
+
+}
 done_testing();

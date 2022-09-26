@@ -1,4 +1,4 @@
-# Copyright [2016-2021] EMBL-European Bioinformatics Institute
+# Copyright [2016-2022] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -53,7 +53,8 @@ is_deeply(
     '##fileformat=VCFv4.1',
     '##VEP="v1" time="test"',
     '##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|custom_test">',
-    '##INFO=<ID=custom_test,Number=.,Type=String,Description="test.vcf.gz (overlap)">',
+    '##INFO=<ID=custom_test,Number=.,Type=String,Description="test.vcf.gz">',
+    "##VEP-command-line=''",
     "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO"
   ],
   'headers'
@@ -61,7 +62,7 @@ is_deeply(
 
 my $headers = get_runner({plugin => ['TestPlugin'], quiet => 1, input_file => $test_cfg->{test_vcf}, vcf => 1})->get_OutputFactory->headers;
 is_deeply(
-  [$headers->[-3], $headers->[-2], $headers->[-1]],
+  [$headers->[-4], $headers->[-3], $headers->[-1]],
   [
     '##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|SYMBOL_SOURCE|HGNC_ID|test">',
     '##test=header',
@@ -72,7 +73,7 @@ is_deeply(
 
 $headers = get_runner({refseq => 1, fasta => $test_cfg->{fasta}, quiet => 1, input_file => $test_cfg->{test_vcf}, vcf => 1})->get_OutputFactory->headers;
 is(
-  $headers->[-2],
+  $headers->[-3],
   '##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|SYMBOL_SOURCE|HGNC_ID|REFSEQ_MATCH|REFSEQ_OFFSET|GIVEN_REF|USED_REF|BAM_EDIT">',
   'headers - BAM_EDIT'
 );
@@ -349,14 +350,14 @@ is(
 '21	25585733	rs142513484	C	T	.	.	CSQ=T|3_prime_UTR_variant'.
 '|MODIFIER|MRPL39|ENSG00000154719|Transcript|ENST00000307301|protein_coding|11/11||ENST00000307301.11:c.*18G>A||1122|'.
 '||||rs142513484||-1||SNV|HGNC|HGNC:14027|YES|||5||CCDS33522.1|ENSP00000305682|Q9NYK5||UPI00001AEAC0|'.
-'|||||||0.0010|0.003|0.0014|0|0|0|0.004998|0|0.0003478|0.004643|0.0003236|0|0|0|1.886e-05|0|0|0.004998|AA||'.
+'|||||||0.0010|0.003|0.0014|0|0|0|0.0003478|0.004643|0.0003236|0|0|0|1.886e-05|0|0||||||||||||0.004643|gnomADe_AFR||'.
 '|||||||,T|missense_variant|MODERATE|MRPL39|ENSG00000154719|Transcript|ENST00000352957|protein_coding|10/10|'.
 '|ENST00000352957.8:c.991G>A|ENSP00000284967.6:p.Ala331Thr|1033|991|331|A/T|Gca/Aca|rs142513484||-1||SNV|HGNC'.
 '|HGNC:14027||||1|P1|CCDS13573.1|ENSP00000284967|Q9NYK5||UPI00001AEE66|||tolerated_low_confidence(0.17)|benign(0.001)'.
-'||||0.0010|0.003|0.0014|0|0|0|0.004998|0|0.0003478|0.004643|0.0003236|0|0|0|1.886e-05|0|0|0.004998|AA|||||||||,T'.
+'||||0.0010|0.003|0.0014|0|0|0|0.0003478|0.004643|0.0003236|0|0|0|1.886e-05|0|0||||||||||||0.004643|gnomADe_AFR|||||||||,T'.
 '|upstream_gene_variant|MODIFIER|AP000223.1|ENSG00000260583|Transcript|ENST00000567517|antisense||||||||||rs142513484'.
-'|2407|-1||SNV|Clone_based_ensembl_gene||YES|||||||||||||||||0.0010|0.003|0.0014|0|0|0|0.004998|0|0.0003478|0.004643'.
-'|0.0003236|0|0|0|1.886e-05|0|0|0.004998|AA|||||||||	GT	0|0'
+'|2407|-1||SNV|Clone_based_ensembl_gene||YES|||||||||||||||||0.0010|0.003|0.0014|0|0|0|0.0003478|0.004643'.
+'|0.0003236|0|0|0|1.886e-05|0|0||||||||||||0.004643|gnomADe_AFR|||||||||	GT	0|0'
 ,'get_all_lines_by_InputBuffer - everything'
 );
 
@@ -517,7 +518,7 @@ my $runner2 = get_runner({
 $of = $runner2->get_OutputFactory;
 
 is_deeply(
-  [map {$of->headers->[$_]} (0,2,3)],
+  [map {$of->headers->[$_]} (0,2,4)],
   [
     '##fileformat=VCFv4.1',
     '##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|SYMBOL_SOURCE|HGNC_ID">',
@@ -617,7 +618,7 @@ is_deeply(
 
 
 is(
-  $of->headers->[-2],
+  $of->headers->[-3],
   '##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|SYMBOL_SOURCE|HGNC_ID">',
   'headers - from input 2'
 );

@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2021] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ package Bio::EnsEMBL::VEP::Pipeline::DumpVEP::DumpVEP_conf;
 
 use strict;
 use warnings;
+use File::Spec::Functions qw(catdir);
 
 use Bio::EnsEMBL::Hive::PipeConfig::HiveGeneric_conf;
  # All Hive databases configuration files should inherit from HiveGeneric, directly or indirectly
@@ -70,7 +71,7 @@ sub default_options {
     dump_vep_data_dir       => $self->o('data_dir') . '/dump_vep',
     
     # temporary space
-    tmp_dir       => '/hps/scratch/vepdump',
+    tmp_dir                 => catdir('/hps/nobackup/flicek/ensembl', $ENV{'USER'}, $self->o('pipeline_name'), 'vepdump'),
         
     # dump databases of this version number
     ensembl_release => undef,
@@ -96,6 +97,9 @@ sub default_options {
     # include LRGs in dumps
     lrg => 1,
 
+    # don't check metadata db for status of variation data
+    skip_meta_checks => 0,
+
     # don't change this unless you know what you're doing!!!
     region_size => 1e6,
     
@@ -112,27 +116,17 @@ sub default_options {
             freq_vcf => [
               {
                 file => $self->o('dump_vep_data_dir').'/1KG.phase3.GRCh37.vcf.gz',
-                pops => [qw(AFR AMR EAS EUR SAS)],
+                pops => ['', qw(AFR AMR EAS EUR SAS)],
+                chroms => [qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y)],
                 name => '1000genomes',
                 version => 'phase3'
               },
               {
-                file => $self->o('dump_vep_data_dir').'/ESP6500SI-V2-SSA137.vcf.gz',
-                pops => [qw(AA EA)],
-                name => 'ESP',
-              },
-              # {
-              #   file => $self->o('data_dir').'/ExAC.0.3.GRCh37.vcf.gz',
-              #   pops => ['', qw(AFR AMR Adj EAS FIN NFE OTH SAS)],
-              #   name => 'ExAC',
-              #   prefix => 'ExAC',
-              #   version => 0.3,
-              # },
-              {
                 file => $self->o('data_dir').'/gnomAD/v2.1/grch37/exomes/gnomad.exomes.r2.1.sites.chr+++CHR+++_noVEP.vcf.gz',
                 pops => ['', qw(afr amr asj eas fin nfe oth sas)],
-                name => 'gnomAD',
-                prefix => 'gnomAD',
+                chroms => [qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y)],
+                name => 'gnomADe',
+                prefix => 'gnomADe',
                 version => 'r2.1',
               },
             ],
@@ -142,29 +136,27 @@ sub default_options {
             freq_vcf => [
               {
                 file => $self->o('dump_vep_data_dir').'/1KG.phase3.GRCh38_2018_02_26.vcf.gz',
-                pops => [qw(AFR AMR EAS EUR SAS)],
+                pops => ['', qw(AFR AMR EAS EUR SAS)],
+                chroms => [qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y)],
                 name => '1000genomes',
                 version => 'phase3'
               },
               {
-                file => $self->o('dump_vep_data_dir').'/ESP6500SI-V2-SSA137_GRCh38.vcf.gz',
-                pops => [qw(AA EA)],
-                name => 'ESP',
-                version => 'V2-SSA137',
-              },
-              # {
-              #   file => $self->o('data_dir').'/ExAC.0.3.GRCh38.vcf.gz',
-              #   pops => ['', qw(AFR AMR Adj EAS FIN NFE OTH SAS)],
-              #   name => 'ExAC',
-              #   prefix => 'ExAC',
-              #   version => 0.3,
-              # },
-              {
                 file => $self->o('data_dir').'/gnomAD/v2.1.1/grch38/exomes/gnomad.exomes.r2.1.1.sites.+++CHR+++.liftover_grch38_no_VEP.vcf.gz',
                 pops => ['', qw(afr amr asj eas fin nfe oth sas)],
-                name => 'gnomAD',
-                prefix => 'gnomAD',
+                chroms => [qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y)],
+                name => 'gnomADe',
+                prefix => 'gnomADe',
                 version => 'r2.1.1',
+                use_chr_prefix => 1,
+              },
+              {
+                file => $self->o('data_dir').'/gnomAD/v3.1.2/grch38/genomes/gnomad.genomes.v3.1.2.sites.chr+++CHR+++_trimmed_info.vcf.bgz',
+                pops => ['', qw(afr ami amr asj eas fin mid nfe oth sas)],
+                chroms => [qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y)],
+                name => 'gnomADg',
+                prefix => 'gnomADg',
+                version => 'v3.1.2',
                 use_chr_prefix => 1,
               },
             ],
@@ -254,6 +246,7 @@ sub pipeline_analyses {
       -module        => 'Bio::EnsEMBL::VEP::Pipeline::DumpVEP::InitDump',
       -parameters    => {
         group           => 'core',
+        skip_meta_checks => $self->o('skip_meta_checks'),
       },
       -rc_name       => 'default',
       -hive_capacity => 1,
@@ -268,6 +261,7 @@ sub pipeline_analyses {
       -module        => 'Bio::EnsEMBL::VEP::Pipeline::DumpVEP::InitDump',
       -parameters    => {
         group           => 'otherfeatures',
+        skip_meta_checks => $self->o('skip_meta_checks'),
       },
       -rc_name       => 'default',
       -hive_capacity => 1,

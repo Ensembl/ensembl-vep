@@ -1,4 +1,4 @@
-# Copyright [2016-2021] EMBL-European Bioinformatics Institute
+# Copyright [2016-2022] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -105,6 +105,13 @@ throws_ok {
   })->dir()
 } qr/Cache directory .+ not found/, 'new with invalid species';
 
+throws_ok { 
+  Bio::EnsEMBL::VEP::CacheDir->new({
+    root_dir => $cfg_hash->{dir},
+    config => Bio::EnsEMBL::VEP::Config->new({%$cfg_hash, species => 'homo_sapiens_refseq'})
+  })->dir()
+} qr/Should not use .+ as --species.\nTry using flags --refseq or --merged with --species homo_sapiens\n/, 'Not allow homo_sapiens_refseq / homo_sapiens_merged';
+
 throws_ok {
   Bio::EnsEMBL::VEP::CacheDir->new({
     root_dir => $cfg_hash->{dir},
@@ -165,7 +172,7 @@ is_deeply(
       '1000genomes' => 'phase3',
       'COSMIC' => '80',
       'ESP' => 'V2-SSA137',
-      'gnomAD' => '170228',
+      'gnomADe' => '170228',
       'gencode' => 'GENCODE 24',
       'genebuild' => '2014-07',
       'HGMD-PUBLIC' => '20164',
@@ -197,16 +204,17 @@ is_deeply(
       'SAS',
       'AA',
       'EA',
-      'gnomAD',
-      'gnomAD_AFR',
-      'gnomAD_AMR',
-      'gnomAD_ASJ',
-      'gnomAD_EAS',
-      'gnomAD_FIN',
-      'gnomAD_NFE',
-      'gnomAD_OTH',
-      'gnomAD_SAS',
-      'var_synonyms'
+      'gnomADe',
+      'gnomADe_AFR',
+      'gnomADe_AMR',
+      'gnomADe_ASJ',
+      'gnomADe_EAS',
+      'gnomADe_FIN',
+      'gnomADe_NFE',
+      'gnomADe_OTH',
+      'gnomADe_SAS',
+      'var_synonyms',
+      'AF'
     ],
     'assembly' => 'GRCh38',
     'valid_chromosomes' => [21, 22, 'LRG_485'],
@@ -222,7 +230,7 @@ is_deeply(
     '1000genomes' => 'phase3',
     'COSMIC' => '80',
     'ESP' => 'V2-SSA137',
-    'gnomAD' => '170228',
+    'gnomADe' => '170228',
     'gencode' => 'GENCODE 24',
     'genebuild' => '2014-07',
     'HGMD-PUBLIC' => '20164',
@@ -312,16 +320,7 @@ ok($as = $cd->get_all_AnnotationSources, 'get_all_AnnotationSources - gnomad ava
 
 $cfg = Bio::EnsEMBL::VEP::Config->new({%$cfg_hash, check_existing => 1, af_gnomad => 1});
 $cd = Bio::EnsEMBL::VEP::CacheDir->new({config => $cfg, root_dir => $test_cfg->{exac_root_dir}});
-throws_ok {$cd->get_all_AnnotationSources} qr/gnomad.+not available.+exac/i, 'get_all_AnnotationSources - gnomad not available';
-
-$cfg = Bio::EnsEMBL::VEP::Config->new({%$cfg_hash, check_existing => 1, af_exac => 1});
-$cd = Bio::EnsEMBL::VEP::CacheDir->new({config => $cfg, root_dir => $test_cfg->{exac_root_dir}});
-ok($as = $cd->get_all_AnnotationSources, 'get_all_AnnotationSources - exac available');
-
-$cfg = Bio::EnsEMBL::VEP::Config->new({%$cfg_hash, check_existing => 1, af_exac => 1});
-$cd = Bio::EnsEMBL::VEP::CacheDir->new({config => $cfg, root_dir => $cfg_hash->{dir}});
-throws_ok {$cd->get_all_AnnotationSources} qr/exac.+not available.+gnomad/i, 'get_all_AnnotationSources - exac not available';
-
+throws_ok {$cd->get_all_AnnotationSources} qr/gnomad.+not available./i, 'get_all_AnnotationSources - gnomad not available';
 
 # switch on both
 $cfg = Bio::EnsEMBL::VEP::Config->new({%$cfg_hash, check_existing => 1, regulatory => 1});

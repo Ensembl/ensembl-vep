@@ -1,4 +1,4 @@
-# Copyright [2016-2021] EMBL-European Bioinformatics Institute
+# Copyright [2016-2022] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg && !$@;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 22 unless $can_use_db;
+  skip 'No local database configured', 29 unless $can_use_db;
 
   my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens') if $can_use_db;
   
@@ -306,6 +306,44 @@ SKIP: {
     'recode - output variant synonyms'
   );
 
+  my $vr_synonyms = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', var_synonyms => 1});
+  is_deeply(
+    $vr_synonyms->recode("ENSP00000284967.6:p.Ala331Thr"),
+    [
+      {
+      "A" =>
+        {
+          "input" => "ENSP00000284967.6:p.Ala331Thr",
+          "id" => [
+             "rs142513484"
+          ],
+          "spdi" => [
+             "NC_000021.9:25585732:C:T"
+          ],
+          "var_synonyms" => [
+             "LSDB: NM_017446.3:c.991G>A"
+          ],
+          "hgvsp" => [
+             "ENSP00000284967.6:p.Ala331Thr",
+             "NP_059142.2:p.Ala331Thr",
+             "XP_011527953.1:p.Ala289Thr"
+          ],
+          "hgvsc" => [
+             "ENST00000307301.11:c.*18G>A",
+             "ENST00000352957.8:c.991G>A",
+             "NM_017446.3:c.991G>A",
+             "NM_080794.3:c.*18G>A",
+             "XM_011529651.1:c.865G>A"
+          ],
+          "hgvsg" => [
+             "NC_000021.9:g.25585733C>T"
+          ]
+        }
+      }
+    ],
+    'recode - input hgvs, output variant synonyms'
+  );
+
   my $vr_mane = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', mane_select => 1});
 
   is_deeply(
@@ -349,6 +387,34 @@ SKIP: {
     'recode - output MANE Select'
   );
 
+  my $vr_mane_synonyms = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, input_file => $test_cfg->{vr_txt}, offline => 0, database => 1, species => 'homo_vepiens', mane_select => 1});
+
+  my $output = $vr_mane_synonyms->recode_all;
+  
+  is_deeply(
+    $output->[0]->{'A'}->{'mane_select'},
+    [
+      {
+        'hgvsp' => 'ENSP00000382948.3:p.Thr368=',
+        'hgvsc' => 'ENST00000400075.3:c.1104G>A',
+        'hgvsg' => 'NC_000021.9:g.25764755G>A'
+      }
+    ],
+    'recode - input synonyms variants (rs143054530), output MANE Select'
+  );
+
+  is_deeply(
+    $output->[1]->{'A'}->{'mane_select'},
+    [
+      {
+        'hgvsp' => 'ENSP00000382948.3:p.Thr368=',
+        'hgvsc' => 'ENST00000400075.3:c.1104G>A',
+        'hgvsg' => 'NC_000021.9:g.25764755G>A'
+      }
+    ],
+    'recode - input synonyms variants (PA166153533), output MANE Select'
+  );
+
   my $vr_mane_fields = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', mane_select => 1, fields => 'spdi'});
 
   is_deeply(
@@ -374,6 +440,120 @@ SKIP: {
     'recode - output MANE Select and fields'
   );
 
-  };
+  my $vr_ga4gh_vrs = Bio::EnsEMBL::VEP::VariantRecoder->new(
+                      {%$cfg_hash, %$db_cfg, offline => 0,
+                       database => 1, species => 'homo_vepiens',
+                       ga4gh_vrs => 1, fields => 'spdi'});
+  is_deeply(
+    $vr_ga4gh_vrs->recode('rs142513484'),
+    [
+     {
+      'T' => {
+        'input' => 'rs142513484',
+        'spdi' => [
+           'NC_000021.9:25585732:C:T'
+        ],
+        'ga4gh_vrs' => [
+           {
+             'location' => {
+                 'sequence_id' => 'refseq:NC_000021.9',
+                 'type' => 'SequenceLocation',
+                 'interval' => {
+                     'type' => 'SimpleInterval',
+                     'end' => 25585733,
+                     'start' => 25585732
+                 }
+             },
+             'type' => 'Allele',
+             'state' => {
+                'sequence' => 'T',
+                'type' => 'SequenceState'
+             }
+           }
+        ]
+      }
+     }
+   ],
+   'recode - SNV ID input - output GA4GH VRS Allele, SPDI'
+   );
+
+   my $vrs_input_2 = 'NC_000021.9:25585732:C:T';
+   is_deeply(
+     $vr_ga4gh_vrs->recode($vrs_input_2),
+     [
+      {
+       'T' => {
+         'input' => 'NC_000021.9:25585732:C:T',
+         'spdi' => [
+            'NC_000021.9:25585732:C:T'
+         ],
+         'ga4gh_vrs' => [
+            {
+              'location' => {
+                  'sequence_id' => 'refseq:NC_000021.9',
+                  'type' => 'SequenceLocation',
+                  'interval' => {
+                      'type' => 'SimpleInterval',
+                      'end' => 25585733,
+                      'start' => 25585732
+                  }
+              },
+              'type' => 'Allele',
+              'state' => {
+                 'sequence' => 'T',
+                 'type' => 'SequenceState'
+              }
+            }
+         ]
+       }
+      }
+    ],
+    'recode - SNV SPDI input - output GA4GH VRS Allele, SPDI'
+    );
+
+  my $vr_mane_hgvs = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', mane_select => 1, fields => 'spdi'});
+
+  my $result = $vr_mane_hgvs->recode("GABPA:p.Trp189Ter");
+  my $mane_result = @$result[0]->{"A"}->{"mane_select"};
+  my @mane_hgvsg;
+  foreach my $x (@$mane_result) {
+    push @mane_hgvsg, $x->{"hgvsg"};
+  }
+
+  is_deeply(
+  [sort @mane_hgvsg],
+  [qw(NC_000021.9:g.25758022G>A NC_000021.9:g.25758023G>A)],
+  'recode - output MANE Select returns multiple genomic locations'
+  );
+
+  # Test LRG
+  my $vr_lrg = Bio::EnsEMBL::VEP::VariantRecoder->new({%$cfg_hash, %$db_cfg, offline => 0, database => 1, species => 'homo_vepiens', fields => 'id,hgvsg,hgvsc,hgvsp'});
+  my $lrg_input = "LRG_485:6673:G:A";
+  is_deeply(
+    $vr_lrg->recode($lrg_input),
+    [
+     {
+      'A' => {
+        'input' => 'LRG_485:6673:G:A',
+        'hgvsp' => [
+          'LRG_485p1:p.Val41Met',
+          'ENSP00000291568.5:p.Val41Met'
+        ],
+        'hgvsc' => [
+          'LRG_485t1:c.121G>A',
+          'ENST00000291568.5:c.121G>A',
+          'ENST00000480147.1:n.158G>A'
+        ],
+        'hgvsg' => [
+          'LRG_485:g.6674G>A',
+          'NC_000021.9:g.43774705C>T'
+        ]
+      }
+     }
+   ],
+   'recode - LRG input'
+   );
+
+};
 
 done_testing();

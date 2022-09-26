@@ -1,4 +1,4 @@
-# Copyright [2016-2021] EMBL-European Bioinformatics Institute
+# Copyright [2016-2022] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -63,30 +63,30 @@ my $p = Bio::EnsEMBL::VEP::Parser::VCF->new({config => $cfg, file => $test_cfg->
 ok($p, 'get parser object');
 
 my $exp = [{
-  'gnomAD_ASJ' => 'T:0',
+  'gnomADe_ASJ' => 'T:0',
   'phenotype_or_disease' => 0,
-  'gnomAD_SAS' => 'T:0',
+  'gnomADe_SAS' => 'T:0',
   'SAS' => 'T:0',
-  'gnomAD' => 'T:0.0003478',
+  'gnomADe' => 'T:0.0003478',
   'failed' => 0,
-  'gnomAD_AMR' => 'T:0.0003236',
+  'gnomADe_AMR' => 'T:0.0003236',
   'AA' => 'T:0.004998',
   'somatic' => 0,
   'AFR' => 'T:0.003',
   'strand' => 1,
-  'gnomAD_FIN' => 'T:0',
+  'gnomADe_FIN' => 'T:0',
   'allele_string' => 'C/T',
-  'gnomAD_AFR' => 'T:0.004643',
+  'gnomADe_AFR' => 'T:0.004643',
   'minor_allele_freq' => '0.0010',
   'AMR' => 'T:0.0014',
   'chr' => '21',
-  'gnomAD_OTH' => 'T:0',
-  'gnomAD_EAS' => 'T:0',
+  'gnomADe_OTH' => 'T:0',
+  'gnomADe_EAS' => 'T:0',
   'EUR' => 'T:0',
   'clin_sig' => undef,
   'EAS' => 'T:0',
   'end' => 25585733,
-  'gnomAD_NFE' => 'T:1.886e-05',
+  'gnomADe_NFE' => 'T:1.886e-05',
   'variation_name' => 'rs142513484',
   'minor_allele' => 'T',
   'EA' => 'T:0',
@@ -157,7 +157,7 @@ SKIP: {
   no warnings 'once';
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'Bio::DB::HTS::Tabix module or tabix binary not available', 19
+  skip 'Bio::DB::HTS::Tabix module or tabix binary not available', 25
     unless $Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix::CAN_USE_TABIX_CL
     or $Bio::EnsEMBL::VEP::AnnotationSource::Cache::VariationTabix::CAN_USE_TABIX_PM;
 
@@ -180,30 +180,30 @@ SKIP: {
     $ib->buffer->[0]->{existing},
     [
       {
-        'gnomAD_ASJ' => undef,
+        'gnomADe_ASJ' => undef,
         'phenotype_or_disease' => '1',
-        'gnomAD_SAS' => undef,
+        'gnomADe_SAS' => undef,
         'SAS' => undef,
-        'gnomAD' => undef,
+        'gnomADe' => undef,
         'failed' => 0,
-        'gnomAD_AMR' => undef,
+        'gnomADe_AMR' => undef,
         'AA' => undef,
         'somatic' => 0,
         'AFR' => undef,
         'strand' => 1,
-        'gnomAD_FIN' => undef,
+        'gnomADe_FIN' => undef,
         'allele_string' => 'HGMD_MUTATION',
-        'gnomAD_AFR' => undef,
+        'gnomADe_AFR' => undef,
         'minor_allele_freq' => undef,
         'AMR' => undef,
         'chr' => '21',
-        'gnomAD_OTH' => undef,
-        'gnomAD_EAS' => undef,
+        'gnomADe_OTH' => undef,
+        'gnomADe_EAS' => undef,
         'EUR' => undef,
         'clin_sig' => undef,
         'EAS' => undef,
         'end' => 25891796,
-        'gnomAD_NFE' => undef,
+        'gnomADe_NFE' => undef,
         'variation_name' => 'CM930033',
         'minor_allele' => undef,
         'EA' => undef,
@@ -211,30 +211,30 @@ SKIP: {
         'pubmed' => undef
       },
       {
-        'gnomAD_ASJ' => 'T:0',
+        'gnomADe_ASJ' => 'T:0',
         'phenotype_or_disease' => '1',
-        'gnomAD_SAS' => 'T:0',
+        'gnomADe_SAS' => 'T:0',
         'SAS' => 'T:0',
-        'gnomAD' => 'T:9.75e-05',
+        'gnomADe' => 'T:9.75e-05',
         'failed' => 0,
-        'gnomAD_AMR' => 'T:0.0005957',
+        'gnomADe_AMR' => 'T:0.0005957',
         'AA' => undef,
         'somatic' => 0,
         'AFR' => 'T:0',
         'strand' => 1,
-        'gnomAD_FIN' => 'T:0',
+        'gnomADe_FIN' => 'T:0',
         'allele_string' => 'C/T',
-        'gnomAD_AFR' => 'T:0',
+        'gnomADe_AFR' => 'T:0',
         'minor_allele_freq' => '0.0002',
         'AMR' => 'T:0.0014',
         'chr' => '21',
-        'gnomAD_OTH' => 'T:0.0001823',
-        'gnomAD_EAS' => 'T:0',
+        'gnomADe_OTH' => 'T:0.0001823',
+        'gnomADe_EAS' => 'T:0',
         'EUR' => 'T:0',
         'clin_sig' => 'not_provided,pathogenic',
         'EAS' => 'T:0',
         'end' => 25891796,
-        'gnomAD_NFE' => 'T:2.687e-05',
+        'gnomADe_NFE' => 'T:2.687e-05',
         'variation_name' => 'rs63750066',
         'minor_allele' => 'T',
         'EA' => undef,
@@ -270,7 +270,7 @@ SKIP: {
   $c->{freq_pop} = 'foo';
   throws_ok { $c->check_frequency_filter } qr/Invalid population/, 'check_frequency_filter - fails on missing pop';
 
-  $c->{freq_pop} = 'gnomAD_AFR_AF';
+  $c->{freq_pop} = 'gnomADe_AFR_AF';
   throws_ok { $c->check_frequency_filter } qr/Invalid population/, 'check_frequency_filter - fails on pop with AF added';
 
   $c->{freq_pop} = 'ExAC_AFR';
@@ -366,7 +366,6 @@ SKIP: {
     'get_frequency_data - rev strand'
   );
 
-
   ## frequency_check_buffer
 
   # exclude (default)
@@ -421,9 +420,6 @@ SKIP: {
   # reset
   $c->{freq_freq} = $orig{freq_freq};
   $c->{no_check_alleles} = 0;
-
-
-
 
   # test some nastiness
   no warnings 'qw';
@@ -492,6 +488,23 @@ SKIP: {
       }
     ],
     'nastiness 4'
+  );
+
+  # Test frequency match for 'matched alleles'
+  my $ib_freq = get_ib([qw(21 25005812 . CA CAAA . . .)]);
+  $c->{freq_pop} = '1KG_AMR';
+  $c->annotate_InputBuffer($ib_freq);
+  $vf = $ib_freq->buffer->[0];
+  $c->get_frequency_data($vf);
+
+  is_deeply(
+    $vf->{_freq_check_freqs},
+    {
+      '1KG_AMR' => {
+        'AAA' => '0.4107'
+      },
+    },
+    'get_frequency_data - matched alleles'
   );
 }
 

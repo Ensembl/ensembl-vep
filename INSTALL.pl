@@ -3,7 +3,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2021] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -1032,6 +1032,28 @@ sub test() {
 
 # CACHE FILES
 #############
+
+sub format_file_size {
+  # Format $size (in bytes) based on most adequate unit, e.g.:
+  #             0 =>   0 bytes
+  #           421 => 421 bytes
+  #          1000 =>   1 KB
+  #     432340000 => 432 MB
+  #   62340002001 =>  62 GB
+  # 3126340002001 =>   3 TB
+  
+  my $size = shift;
+  # Units sorted from the biggest to smallest order of magnitude
+  my @units = ( 'TB', 'GB', 'MB', 'KB', 'bytes' );
+  
+  while (@units) {
+    my $unit = shift @units;
+    # Calculate order of magnitude based on length of @units
+    my $factor = 10 ** ( 3 * scalar @units );
+    return int($size / $factor) . " " . $unit if $size >= $factor || $unit eq "bytes";
+  }
+}
+
 sub cache() {
 
   my $ok;
@@ -1082,8 +1104,6 @@ sub cache() {
   chomp($tabix);
   $tabix ||= "$HTSLIB_DIR/tabix";
   
-  my $num = 1;
-  my $species_list;
   my $URL_TO_USE = (-e $tabix) ? $CACHE_URL_INDEXED : $CACHE_URL;
 
   if($URL_TO_USE =~ /^ftp/i) {
@@ -1123,8 +1143,15 @@ sub cache() {
     @files = sort {($a =~ /homo_sapiens/) <=> ($b =~ /homo_sapiens/) || $a cmp $b} @files;
   }
 
+  my $num = 0;
+  my $species_list;
+  my $size;
+  my $total_size = 0;
   foreach my $file(@files) {
-    $species_list .= $num++." : ".$file."\n";
+    $size = defined $ftp ? $ftp->size($file) : 0;
+    $total_size += $size;
+    $size = $size ? " (" . format_file_size($size) . ")" : "";
+    $species_list .= ++$num . " : $file$size\n";
   }
 
   if($AUTO) {
@@ -1171,7 +1198,11 @@ sub cache() {
     @indexes = sort {$a <=> $b} keys %{{map {$_ => 1} @indexes}};
   }
   else {
-    print "The following species/files are available; which do you want (can specify multiple separated by spaces or 0 for all): \n$species_list\n? ";
+    $total_size = $total_size <= 0 ? "" :
+                    " " . format_file_size($total_size) . " for all";
+    print "The following species/files are available; which do you want " .
+          "(specify multiple separated by spaces or 0 for all): \n".
+          "$species_list\n  Total:$total_size $num files\n\n? ";
     @indexes = split /\s+/, <>;
 
     # user wants all species found
@@ -1795,16 +1826,16 @@ sub unpack_arch {
   }
   else {
     if($arch_file =~ /.zip$/ && $CAN_USE_UNZIP) {
-      `unzip -qq $arch_file -d $dir` and die("ERROR: Failed to unpack file $arch_file\n");
+      system "unzip -qq $arch_file -d $dir" and die("ERROR: Failed to unpack file $arch_file\n");
     }
     elsif($arch_file =~ /(\.tar\.|\.t)gz$/ && $CAN_USE_TAR) {
-      `tar -C $dir -zxf $arch_file` and die("ERROR: Failed to unpack file $arch_file\n");
+      system "tar -C $dir -zxf $arch_file" and die("ERROR: Failed to unpack file $arch_file\n");
     }
     elsif($arch_file =~ /\.gz$/ && $arch_file !~ /(\.tar\.|\.t)gz$/ && $CAN_USE_GZIP) {
       my $unpacked = $arch_file;
       $unpacked =~ s/.*\///g;
       $unpacked =~ s/\.gz$//;
-      `gzip -dc $arch_file > $dir/$unpacked` and die("ERROR: Failed to unpack file $arch_file\n");
+      system "gzip -dc $arch_file > $dir/$unpacked" and die("ERROR: Failed to unpack file $arch_file\n");
     }
     else {
       die("ERROR: Unable to unpack file $arch_file without Archive::Extract or tar/unzip/gzip\n");

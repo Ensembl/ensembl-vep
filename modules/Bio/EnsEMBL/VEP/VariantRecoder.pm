@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2021] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -67,8 +67,10 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::Runner;
 use Bio::EnsEMBL::VEP::Utils qw(find_in_ref merge_arrays add_to_output);
 use Bio::EnsEMBL::Variation::VariationFeature;
+use Bio::EnsEMBL::Variation::DBSQL::VariationAdaptor;
 use Bio::EnsEMBL::Variation::Utils::VEP;
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
+use Bio::EnsEMBL::Variation::Utils::Sequence qw(ga4gh_vrs_from_spdi);
 
 =head2 new
 
@@ -117,6 +119,7 @@ sub new {
   # this first one only switches on the HGVS options for the requested fields  
   $config->{$_} = 1 for grep {$_ =~ /^hgvs/} keys %set_fields;
   $config->{$_} = 1 for grep {$_ =~ /^spdi/} keys %set_fields;
+  $config->{$_} = 1 for grep {$_ =~ /^ga4gh_vrs/} keys %set_fields;
 
   # and this one switches on check_existing if the user wants variant IDs
   my %opt_map = ('id' => 'check_existing');
@@ -140,6 +143,10 @@ sub new {
     $config->{hgvsg} = 1;
     $config->{hgvsc} = 1;
     $config->{hgvsp} = 1;
+  }
+
+  if($config->{ga4gh_vrs}){
+    $config->{fields} = $config->{fields} . ',ga4gh_vrs';
   }
 
   my $self = $class->SUPER::new($config);
@@ -281,9 +288,16 @@ sub _get_all_results {
 
   # store MANE key in a separate hash to distingish it from mane_select coming from vep
   my %key_mane;
+  my %mane_unique_keys;
   if($want_keys{'mane_select'}) {
     $key_mane{'mane_select'} = 1;
     delete($want_keys{'mane_select'});
+  }
+
+  my $ga4gh_vrs = 0;
+  if ($want_keys{'ga4gh_vrs'}) {
+    $want_keys{'ga4gh_spdi'} = 1;
+    $ga4gh_vrs = 1;
   }
 
   while(my $line = $self->next_output_line(1)) {
@@ -354,6 +368,8 @@ sub _get_all_results {
     ### vcf_string ###
     ##################
 
+    my $id_bk;
+
     ##################
     ####### ID #######
     # Parse ID and build a hash by allele
@@ -367,7 +383,7 @@ sub _get_all_results {
           push @ids_no_allele, $co_var->{'id'}; 
         }
         else {
-
+          $id_bk = $co_var->{'id'};
           my @split_allele = split /\//, $co_var->{'allele_string'};
           # delete ref allele - we only want to check the alt alleles from the colocated variants
           shift @split_allele;
@@ -405,8 +421,15 @@ sub _get_all_results {
     ####### Variant synonyms #######
     # Attach variant synonyms to hash by allele
     if($line->{'var_synonyms'} && $keys_no_allele{'var_synonyms'}) {
+      # If there are no synonyms try to get the synonyms for one of the colocated variants
+      if($id_bk && scalar(@{$line->{'var_synonyms'}}) == 0) {
+        my $va = $self->get_adaptor('variation', 'Variation');
+        my $variation = $va->fetch_by_name($id_bk);
+        my $synonyms = $variation->get_all_synonyms('',1);
+        $line->{'var_synonyms'} = $synonyms;
+      }
       foreach my $key_allele (keys %{$line_by_allele{'consequences'}}) {
-      $vcf_string_by_allele{$key_allele}->{'var_synonyms'} = $line->{'var_synonyms'};
+        $vcf_string_by_allele{$key_allele}->{'var_synonyms'} = $line->{'var_synonyms'};
       }
     }
 
@@ -418,15 +441,23 @@ sub _get_all_results {
 
       foreach my $object (@{$line_by_allele{'consequences'}->{$key_allele}}) {
         if((grep {$_ =~ 'mane_select'} keys %{$object})) {
-          my $mane_hgvsg = $object->{'hgvsg'} || '-';
-          my $mane_hgvsc = $object->{'hgvsc'} || '-';
-          my $mane_hgvsp = $object->{'hgvsp'} || '-';
+          my $key_hgvsg = $object->{'hgvsg'};
+          my $key_hgvsc = $object->{'hgvsc'};
 
-          my %mane_object;
-          $mane_object{'hgvsg'} = $mane_hgvsg;
-          $mane_object{'hgvsc'} = $mane_hgvsc;
-          $mane_object{'hgvsp'} = $mane_hgvsp;
-          push @{$mane_by_allele{$key_allele}->{'mane_select'}}, \%mane_object;
+          # Avoids duplicated values in the output
+          if (!$mane_unique_keys{$line_id.'-'.$key_hgvsg.'-'.$key_hgvsc}) {
+            my $mane_hgvsg = $key_hgvsg || '-';
+            my $mane_hgvsc = $key_hgvsc || '-';
+            my $mane_hgvsp = $object->{'hgvsp'} || '-';
+
+            my %mane_object;
+            $mane_object{'hgvsg'} = $mane_hgvsg;
+            $mane_object{'hgvsc'} = $mane_hgvsc;
+            $mane_object{'hgvsp'} = $mane_hgvsp;
+            push @{$mane_by_allele{$key_allele}->{'mane_select'}}, \%mane_object;
+
+            $mane_unique_keys{$line_id.'-'.$key_hgvsg.'-'.$key_hgvsc} = 1;
+          }
         }
       }
     }
@@ -437,6 +468,20 @@ sub _get_all_results {
       find_in_ref($line_by_allele{'consequences'}->{$allele}, \%want_keys, $results->{$line_id}->{$allele} ||= {input => $line_id});
       find_in_ref($vcf_string_by_allele{$allele}, \%keys_no_allele, $results->{$line_id}->{$allele} ||= {input => $line_id});
       add_to_output($mane_by_allele{$allele}, \%key_mane, $results->{$line_id}->{$allele} ||= {input => $line_id});
+    }
+
+    # Adding GA4GH VRS allele objects
+    # The genomic refseq SPDI are stored in 'ga4gh_spdi'
+    # The find_in_ref calls make the ga4gh_spdi unique
+    if ($ga4gh_vrs) {
+      for my $allele (keys %{$results->{$line_id}}) {
+        next if (! exists $results->{$line_id}->{$allele}->{'ga4gh_spdi'});
+        my @ga4gh_spdis = @{$results->{$line_id}->{$allele}->{'ga4gh_spdi'}};
+        for my $ga4gh_spdi (@ga4gh_spdis) {
+          push @{$results->{$line_id}->{$allele}->{'ga4gh_vrs'}}, ga4gh_vrs_from_spdi($ga4gh_spdi);
+        }
+        delete($results->{$line_id}->{$allele}->{'ga4gh_spdi'});
+      }
     }
 
     if(@{$self->warnings}) {

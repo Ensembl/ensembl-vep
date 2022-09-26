@@ -1,4 +1,4 @@
-# Copyright [2016-2021] EMBL-European Bioinformatics Institute
+# Copyright [2016-2022] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -140,7 +140,7 @@ is($cfg->param('quiet'), 1, 'STDOUT output turns on quiet');
 is($cfg->param('verbose'), undef, 'STDOUT output turns off verbose');
 
 $cfg = Bio::EnsEMBL::VEP::Config->new({everything => 1, database => 1});
-is($cfg->param($_), undef, 'everything with database turns off '.$_) for qw(af_1kg af_esp af_exac af_gnomad pubmed);
+is($cfg->param($_), undef, 'everything with database turns off '.$_) for qw(af_1kg af_gnomad pubmed);
 
 #$cfg = Bio::EnsEMBL::VEP::Config->new({species => 'mus_musculus1'});
 #is($cfg->param('species'), 'mus_musculus', '1 getting trimmed from species name');

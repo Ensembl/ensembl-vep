@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
-# Copyright [2016-2021] EMBL-European Bioinformatics Institute
-#
+# Copyright [2016-2022] EMBL-European Bioinformatics Institute
+# 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,7 +23,7 @@ use Bio::EnsEMBL::VEP::Utils qw(get_version_string);
 my $config = {};
 
 my $arg_count = scalar @ARGV;
-my @argv_copy = @ARGV;
+my $full_command = "vep " . join(" ", @ARGV);
 
 GetOptions(
   $config,
@@ -82,11 +82,11 @@ GetOptions(
   'check_frequency',         # enable frequency checking
   'af',                      # add global AF of existing var
   'af_1kg',                  # add 1KG AFs of existing vars
-  'af_esp',                  # add ESP AFs of existing vars
-  'af_exac',                 # add ExAC AFs of existing vars
-  'af_gnomad',               # add gnomAD AFs of existing vars
+  'af_gnomade',              # add gnomAD v2 exomes AFs of existing vars
+  'af_gnomad',               # Same as --af_gnomade to keep old compatibility
+  'af_gnomadg',              # add gnomAD v3 genomes AFs of existing vars
   'old_maf',                 # report 1KG/ESP MAFs in the old way (no allele, always < 0.5)
-  'max_af',                  # report maximum observed allele frequency in any 1KG, ESP, ExAC pop
+  'max_af',                  # report maximum observed allele frequency in any 1KG, gnomAD v2 exomes, gnomAD v3 genomes pops
   'pubmed',                  # add Pubmed IDs for publications that cite existing vars
   'freq_filter=s',           # exclude or include
   'freq_freq=f',             # frequency to filter on
@@ -114,7 +114,7 @@ GetOptions(
 
   # output options
   'everything|e',            # switch on EVERYTHING :-)
-  'output_file|o=s',         # output file name
+  'output_file|o=s@',         # output file name
   'compress_output=s',       # compress output with e.g. bgzip, gzip
   'no_headers',              # don't print headers
   'stats_file|sf=s',         # stats file name
@@ -141,6 +141,7 @@ GetOptions(
   'gene_phenotype',          # indicate if genes are phenotype-associated
   'mirna',                   # identify miRNA structural elements overlapped by variant
   'spdi',                    # add genomic SPDI
+  'ga4gh_vrs',               # add GA4GH_VRS
   'hgvs',                    # add HGVS names to extra column
   'hgvsg',                   # add HGVS g. also
   'hgvsg_use_accession',     # force HGVSg to return on chromosome accession instead of input chr name
@@ -216,9 +217,16 @@ GetOptions(
   'debug',                   # print out debug info
 ) or die "ERROR: Failed to parse command-line flags\n";
 
+die("ERROR: Unexpected extra command-line parameter(s): " . join(", ", @ARGV)) if scalar @ARGV;
+
+warn("WARNING: More than one output file command-line flag provided. Using the last value provided: '@{$config->{output_file}}[-1]' \n") unless (scalar @{$config->{output_file}} <= 1);
+$config->{output_file}=@{$config->{output_file}}[-1] if ($config->{output_file});
 &usage && exit(0) if (!$arg_count) || $config->{help};
 
 $config->{database} ||= 0;
+
+# Add full command string to config
+$config->{full_command} = $full_command;
 
 my $runner = Bio::EnsEMBL::VEP::Runner->new($config);
 

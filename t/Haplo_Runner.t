@@ -1,4 +1,4 @@
-# Copyright [2016-2021] EMBL-European Bioinformatics Institute
+# Copyright [2016-2022] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ SKIP: {
           '1000genomes' => 'phase3',
           'COSMIC' => '80',
           'ESP' => 'V2-SSA137',
-          'gnomAD' => '170228',
+          'gnomADe' => '170228',
           'gencode' => 'GENCODE 24',
           'genebuild' => '2014-07',
           'HGMD-PUBLIC' => '20164',

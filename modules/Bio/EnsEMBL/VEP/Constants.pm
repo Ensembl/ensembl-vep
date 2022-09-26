@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2021] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ use warnings;
 
 use base qw(Exporter);
 
-our $VEP_VERSION     = 105;
+our $VEP_VERSION     = 109;
 our $VEP_SUB_VERSION = 0;
 
 our @EXPORT_OK = qw(
@@ -111,10 +111,10 @@ our @FLAG_FIELDS = (
 
   # frequency stuff
   { flag => 'af',              fields => ['AF'] },
-  { flag => 'af_1kg',          fields => ['AFR_AF','AMR_AF','EAS_AF','EUR_AF','SAS_AF'] },
-  { flag => 'af_esp',          fields => ['AA_AF','EA_AF'] },
-  { flag => 'af_exac',         fields => ['ExAC_AF','ExAC_Adj_AF','ExAC_AFR_AF','ExAC_AMR_AF','ExAC_EAS_AF','ExAC_FIN_AF','ExAC_NFE_AF','ExAC_OTH_AF','ExAC_SAS_AF'] },
-  { flag => 'af_gnomad',       fields => ['gnomAD_AF','gnomAD_AFR_AF','gnomAD_AMR_AF','gnomAD_ASJ_AF','gnomAD_EAS_AF','gnomAD_FIN_AF','gnomAD_NFE_AF','gnomAD_OTH_AF','gnomAD_SAS_AF'] },
+  { flag => 'af_1kg',          fields => ['AF','AFR_AF','AMR_AF','EAS_AF','EUR_AF','SAS_AF'] },
+  { flag => 'af_gnomad',       fields => ['gnomADe_AF','gnomADe_AFR_AF','gnomADe_AMR_AF','gnomADe_ASJ_AF','gnomADe_EAS_AF','gnomADe_FIN_AF','gnomADe_NFE_AF','gnomADe_OTH_AF','gnomADe_SAS_AF'] },
+  { flag => 'af_gnomade',      fields => ['gnomADe_AF','gnomADe_AFR_AF','gnomADe_AMR_AF','gnomADe_ASJ_AF','gnomADe_EAS_AF','gnomADe_FIN_AF','gnomADe_NFE_AF','gnomADe_OTH_AF','gnomADe_SAS_AF'] },
+  { flag => 'af_gnomadg',      fields => ['gnomADg_AF','gnomADg_AFR_AF', ,'gnomADg_AMI_AF', 'gnomADg_AMR_AF','gnomADg_ASJ_AF','gnomADg_EAS_AF','gnomADg_FIN_AF','gnomADg_MID_AF','gnomADg_NFE_AF','gnomADg_OTH_AF','gnomADg_SAS_AF'] },
   { flag => 'max_af',          fields => ['MAX_AF', 'MAX_AF_POPS'] },
   { flag => 'check_frequency', fields => ['FREQS'] },
 
@@ -205,15 +205,26 @@ our %FIELD_DESCRIPTIONS = (
   'ExAC_NFE_AF',       => 'Frequency of existing variant in ExAC Non-Finnish European population',
   'ExAC_OTH_AF',       => 'Frequency of existing variant in ExAC other combined populations',
   'ExAC_SAS_AF',       => 'Frequency of existing variant in ExAC South Asian population',
-  'gnomAD_AF',         => 'Frequency of existing variant in gnomAD exomes combined population',
-  'gnomAD_AFR_AF',     => 'Frequency of existing variant in gnomAD exomes African/American population',
-  'gnomAD_AMR_AF',     => 'Frequency of existing variant in gnomAD exomes American population',
-  'gnomAD_ASJ_AF',     => 'Frequency of existing variant in gnomAD exomes Ashkenazi Jewish population',
-  'gnomAD_EAS_AF',     => 'Frequency of existing variant in gnomAD exomes East Asian population',
-  'gnomAD_FIN_AF',     => 'Frequency of existing variant in gnomAD exomes Finnish population',
-  'gnomAD_NFE_AF',     => 'Frequency of existing variant in gnomAD exomes Non-Finnish European population',
-  'gnomAD_OTH_AF',     => 'Frequency of existing variant in gnomAD exomes other combined populations',
-  'gnomAD_SAS_AF',     => 'Frequency of existing variant in gnomAD exomes South Asian population',
+  'gnomADe_AF',         => 'Frequency of existing variant in gnomAD exomes combined population',
+  'gnomADe_AFR_AF',     => 'Frequency of existing variant in gnomAD exomes African/American population',
+  'gnomADe_AMR_AF',     => 'Frequency of existing variant in gnomAD exomes American population',
+  'gnomADe_ASJ_AF',     => 'Frequency of existing variant in gnomAD exomes Ashkenazi Jewish population',
+  'gnomADe_EAS_AF',     => 'Frequency of existing variant in gnomAD exomes East Asian population',
+  'gnomADe_FIN_AF',     => 'Frequency of existing variant in gnomAD exomes Finnish population',
+  'gnomADe_NFE_AF',     => 'Frequency of existing variant in gnomAD exomes Non-Finnish European population',
+  'gnomADe_OTH_AF',     => 'Frequency of existing variant in gnomAD exomes other combined populations',
+  'gnomADe_SAS_AF',     => 'Frequency of existing variant in gnomAD exomes South Asian population',
+  'gnomADg_AF',         => 'Frequency of existing variant in gnomAD genomes combined population',
+  'gnomADg_AFR_AF',     => 'Frequency of existing variant in gnomAD genomes African/American population',
+  'gnomADg_AMI_AF',     => 'Frequency of existing variant in gnomAD genomes Amish population',
+  'gnomADg_AMR_AF',     => 'Frequency of existing variant in gnomAD genomes American population',
+  'gnomADg_ASJ_AF',     => 'Frequency of existing variant in gnomAD genomes Ashkenazi Jewish population',
+  'gnomADg_EAS_AF',     => 'Frequency of existing variant in gnomAD genomes East Asian population',
+  'gnomADg_FIN_AF',     => 'Frequency of existing variant in gnomAD genomes Finnish population',
+  'gnomADg_MID_AF',     => 'Frequency of existing variant in gnomAD genomes Mid-eastern population',
+  'gnomADg_NFE_AF',     => 'Frequency of existing variant in gnomAD genomes Non-Finnish European population',
+  'gnomADg_OTH_AF',     => 'Frequency of existing variant in gnomAD genomes other combined populations',
+  'gnomADg_SAS_AF',     => 'Frequency of existing variant in gnomAD genomes South Asian population',
   'MAX_AF',            => 'Maximum observed allele frequency in 1000 Genomes, ESP and ExAC/gnomAD',
   'MAX_AF_POPS'        => 'Populations in which maximum allele frequency was observed',
   'DISTANCE'           => 'Shortest distance from variant to transcript',

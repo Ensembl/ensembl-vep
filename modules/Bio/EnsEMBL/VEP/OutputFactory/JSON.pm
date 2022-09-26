@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2021] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -84,6 +84,7 @@ use base qw(Bio::EnsEMBL::VEP::OutputFactory);
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Variation::Utils::Constants;
+use Bio::EnsEMBL::Variation::Utils::Sequence qw(ga4gh_vrs_from_spdi);
 
 use Bio::EnsEMBL::VEP::Utils qw(numberify);
 
@@ -126,10 +127,11 @@ my @LIST_FIELDS = qw(
 );
 
 my @FREQ_FIELDS = qw(
-  AFR AMR ASN EAS SAS EUR
+  AF AFR AMR ASN EAS SAS EUR
   AA EA
   ExAC ExAC_Adj ExAC_AFR ExAC_AMR ExAC_EAS ExAC_FIN ExAC_NFE ExAC_OTH ExAC_SAS
-  gnomAD gnomAD_AFR gnomAD_AMR gnomAD_ASJ gnomAD_EAS gnomAD_FIN gnomAD_NFE gnomAD_OTH gnomAD_SAS
+  gnomADe gnomADe_AFR gnomADe_AMR gnomADe_ASJ gnomADe_EAS gnomADe_FIN gnomADe_NFE gnomADe_OTH gnomADe_SAS
+  gnomADg gnomADg_AFR gnomADg_AMI gnomADg_AMR gnomADg_ASJ gnomADg_EAS gnomADg_FIN gnomADg_MID gnomADg_NFE gnomADg_OTH gnomADg_SAS
 );
 
 
@@ -155,9 +157,9 @@ sub new {
   
   my $self = $class->SUPER::new(@_);
   $self->{af_1kg} = 1;
-  $self->{af_esp} = 1;
   $self->{af_gnomad} = 1;
-  $self->{af_exac} = 1;
+  $self->{af_gnomade} = 1;
+  $self->{af_gnomadg} = 1;
 
   # add shortcuts to these params
   $self->add_shortcuts([qw(
@@ -304,7 +306,7 @@ sub add_VariationFeatureOverlapAllele_info {
       my $tmp = $vfoa_hash->{$key};
       delete $vfoa_hash->{$key};
 
-      next if !defined($tmp) || ($key ne 'Allele' && $tmp eq '-');
+      next if !defined($tmp) || (($key ne 'Allele' && lc($key) ne 'used_ref' && lc($key) ne 'given_ref') && $tmp eq '-');
 
       # convert YES to 1
       $tmp = 1 if $tmp eq 'YES';
@@ -317,8 +319,8 @@ sub add_VariationFeatureOverlapAllele_info {
         $vfoa_hash->{$coord_type.'_end'} = defined($e) && $e =~ /^\d+$/ ? $e : $s;
 
         # on rare occasions coord can be "?"; for now just don't print anything
-        delete $vfoa_hash->{$coord_type.'_start'} unless looks_like_number($vfoa_hash->{$coord_type.'_start'});
-        delete $vfoa_hash->{$coord_type.'_end'}   unless looks_like_number($vfoa_hash->{$coord_type.'_end'});
+        delete $vfoa_hash->{$coord_type.'_start'} unless $vfoa_hash->{$coord_type.'_start'} =~ /^\d+(\/\d)?\d*$/ ;
+        delete $vfoa_hash->{$coord_type.'_end'}   unless $vfoa_hash->{$coord_type.'_end'} =~ /^\d+(\/\d)?\d*$/ ;
         next;
       }
 
@@ -361,7 +363,12 @@ sub add_VariationFeatureOverlapAllele_info {
       $vfoa_hash->{$rename{$key}} = $vfoa_hash->{$key};
       delete $vfoa_hash->{$key};
     }
-
+    if (defined($vfoa_hash->{ga4gh_spdi})) {
+      my $ga4gh_vrs = ga4gh_vrs_from_spdi($vfoa_hash->{ga4gh_spdi});
+      if ($ga4gh_vrs) {
+          $vfoa_hash->{ga4gh_vrs} = $ga4gh_vrs;
+      }
+    }
     push @{$hash->{$ftype.'_consequences'}}, $vfoa_hash;
   }
 
@@ -400,6 +407,7 @@ sub add_colocated_variant_info_JSON {
   my $frequencies = {};
   foreach my $frequency_hash (@$frequency_hashes) {
     my $allele = $frequency_hash->{Allele};
+    $frequencies->{$allele}->{"af"} = $frequency_hash->{"AF"}[0] if defined($frequency_hash->{"AF"}[0]);
     # frequencies
     foreach my $pop (grep {defined($frequency_hash->{"$_\_AF"})} @FREQ_FIELDS) {
       my $lc_pop = lc($pop);
@@ -407,7 +415,7 @@ sub add_colocated_variant_info_JSON {
       delete $ex->{$pop};
     }
   }
- 
+
   $ex->{frequencies} = $frequencies if (keys %$frequencies);
   # remove empty
   foreach my $key(keys %$ex) {

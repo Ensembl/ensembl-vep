@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2021] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -240,7 +240,14 @@ sub check_dirs {
 
   # check for dirs that don't appear in this list of slices
   delete($dirs_in_cache{$_->seq_region_name}) for @slices;
-  die("ERROR: Found ".(scalar keys %dirs_in_cache)." dirs in cache that have no corresponding slice\n") if scalar keys %dirs_in_cache;
+
+  my $n_dirs_in_cache = scalar keys %dirs_in_cache;
+  if ( $n_dirs_in_cache ) {
+    my @seqlevel_slices = @{$sa->fetch_all('seqlevel')};
+    delete($dirs_in_cache{$_->seq_region_name}) for @seqlevel_slices;
+    die("ERROR: Found ".(scalar keys %dirs_in_cache)." dirs in cache that have no corresponding slice\n") if scalar keys %dirs_in_cache;
+    warn("WARNING: Found $n_dirs_in_cache dirs in cache that have no corresponding features in database\n");
+  }
 
   # now filter out slices with no transcripts
   my $ta = $dba->get_TranscriptAdaptor();
@@ -571,9 +578,10 @@ sub human_frequency_checks {
     no_stats => 1,
     check_existing => $has_var,
     af_1kg => 1,
-    af_esp => 1,
     af_gnomad => 1,
-    fields => 'Uploaded_variation,AFR_AF,AMR_AF,EAS_AF,EUR_AF,SAS_AF,AA_AF,EA_AF,gnomAD_AF,gnomAD_AFR_AF,gnomAD_AMR_AF,gnomAD_ASJ_AF,gnomAD_EAS_AF,gnomAD_FIN_AF,gnomAD_NFE_AF,gnomAD_OTH_AF,gnomAD_SAS_AF',
+    af_gnomade => 1,
+    af_gnomadg => 1,
+    fields => 'Uploaded_variation,AF,AFR_AF,AMR_AF,EAS_AF,EUR_AF,SAS_AF,AA_AF,EA_AF,gnomADe_AF,gnomADe_AFR_AF,gnomADe_AMR_AF,gnomADe_ASJ_AF,gnomADe_EAS_AF,gnomADe_FIN_AF,gnomADe_NFE_AF,gnomADe_OTH_AF,gnomADe_SAS_AF,gnomADg_AF,gnomADg_AFR_AF,gnomADg_AMI_AF,gnomADg_AMR_AF,gnomADg_ASJ_AF,gnomADg_EAS_AF,gnomADg_FIN_AF,gnomADg_MID_AF,gnomADg_NFE_AF,gnomADg_OTH_AF,gnomADg_SAS_AF',
     buffer_size => 1,
     pick => 1,
     failed => 1,

@@ -12,7 +12,7 @@ source_gencode	GENCODE 24
 source_genebuild	2014-07
 source_regbuild	13.0
 source_assembly	GRCh38.p5
-variation_cols	variation_name,failed,somatic,start,end,allele_string,strand,minor_allele,minor_allele_freq,clin_sig,phenotype_or_disease,pubmed,AFR,AMR,EAS,EUR,SAS,AA,EA,gnomAD,gnomAD_AFR,gnomAD_AMR,gnomAD_ASJ,gnomAD_EAS,gnomAD_FIN,gnomAD_NFE,gnomAD_OTH,gnomAD_SAS,var_synonyms
+variation_cols	variation_name,failed,somatic,start,end,allele_string,strand,minor_allele,minor_allele_freq,clin_sig,phenotype_or_disease,pubmed,AFR,AMR,EAS,EUR,SAS,AA,EA,gnomADe,gnomADe_AFR,gnomADe_AMR,gnomADe_ASJ,gnomADe_EAS,gnomADe_FIN,gnomADe_NFE,gnomADe_OTH,gnomADe_SAS,var_synonyms,AF
 source_COSMIC	80
 source_HGMD-PUBLIC	20164
 source_ESP	20141103
@@ -20,4 +20,4 @@ source_ClinVar	201704
 source_dbSNP	149
 source_1000genomes	phase3
 source_ESP	V2-SSA137
-source_gnomAD	170228
+source_gnomADe	170228

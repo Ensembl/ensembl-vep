@@ -1,4 +1,4 @@
-# Copyright [2016-2021] EMBL-European Bioinformatics Institute
+# Copyright [2016-2022] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ is_deeply(
         '1000genomes' => 'phase3',
         'COSMIC' => '80',
         'ESP' => 'V2-SSA137',
-        'gnomAD' => '170228',
+        'gnomADe' => '170228',
         'gencode' => 'GENCODE 24',
         'genebuild' => '2014-07',
         'HGMD-PUBLIC' => '20164',
@@ -146,7 +146,7 @@ is_deeply(
     '1000genomes' => 'phase3',
     'COSMIC' => '80',
     'ESP' => 'V2-SSA137',
-    'gnomAD' => '170228',
+    'gnomADe' => '170228',
     'gencode' => 'GENCODE 24',
     'genebuild' => '2014-07',
     'HGMD-PUBLIC' => '20164',
@@ -181,13 +181,11 @@ is_deeply($runner->get_OutputFactory, bless( {
   'gene_phenotype' => undef,
   'flag_pick_allele' => undef,
   'process_ref_homs' => undef,
-  'af_esp' => undef,
   'most_severe' => undef,
   'terms' => 'SO',
   'flag_pick_allele_gene' => undef,
   'flag_pick' => undef,
   'summary' => undef,
-  'af_exac' => undef,
   'polyphen' => undef,
   'af' => undef,
   'biotype' => undef,
@@ -218,6 +216,8 @@ is_deeply($runner->get_OutputFactory, bless( {
   'max_af' => undef,
   'use_transcript_ref' => undef,
   'af_gnomad' => undef,
+  'af_gnomade' => undef,
+  'af_gnomadg' => undef,
   'transcript_version' => undef,
   'cell_type' => undef,
   'mirna' => undef,
@@ -227,6 +227,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'vcf_string' => undef,
   'clin_sig_allele' => 1,
   'var_synonyms' => undef,
+  'ga4gh_vrs' => undef,
 }, 'Bio::EnsEMBL::VEP::OutputFactory::VEP_output' ), 'get_OutputFactory');
 
 
@@ -432,7 +433,7 @@ ok($runner->run, 'run - ok');
 open IN, $test_cfg->{user_file}.'.out';
 my @tmp_lines = <IN>;
 close IN;
-is(scalar @tmp_lines, 40, 'run - count lines');
+is(scalar @tmp_lines, 41, 'run - count lines');
 
 is_deeply(
   [grep {!/^\#/} @tmp_lines],
@@ -1160,7 +1161,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg && !$@;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 5 unless $can_use_db;
+  skip 'No local database configured', 6 unless $can_use_db;
 
   my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens') if $can_use_db;
   
@@ -1191,6 +1192,64 @@ SKIP: {
   is($info->{db_host}, $db_cfg->{host}, 'get_output_header_info - db_host');
   ok($info->{db_name} =~ /homo_vepiens_core.+/, 'get_output_header_info - db_name');
   ok($info->{db_version}, 'get_output_header_info - db_version');
+
+  # GA4GH VRS Allele object
+  $runner = Bio::EnsEMBL::VEP::Runner->new({
+    %$cfg_hash,
+    fasta => $test_cfg->{fasta},
+    input_data => '21 10524654 . C A',
+    %$db_cfg,
+    database => 1,
+    ga4gh_vrs => 1,
+    json => 1,
+    offline => 0,
+    species => 'human_vep',
+  });
+
+  $runner->init();
+  is_deeply(
+     $runner->run_rest(),
+     [{
+         "allele_string" => "C/A",
+         "assembly_name" => "GRCh38",
+         "end" => 10524654,
+         "id" => ".",
+         "input" =>  "21 10524654 . C A",
+         "intergenic_consequences" => [
+             {
+                 "consequence_terms" => [
+                     "intergenic_variant"
+                 ],
+                 "ga4gh_spdi" => "NC_000021.9:10524653:C:A",
+                 "ga4gh_vrs" =>  {
+                     "location" => {
+                         "interval"  => {
+                             "end" =>  10524654,
+                             "start" => 10524653,
+                             "type" => "SimpleInterval"
+                         },
+                         "sequence_id" => "refseq:NC_000021.9",
+                         "type" => "SequenceLocation"
+                     },
+                     "state" => {
+                         "sequence" => "A",
+                         "type" => "SequenceState"
+                     },
+                     "type" =>  "Allele"
+                 },
+                 "impact" =>  "MODIFIER",
+                 "variant_allele" => "A"
+             }
+         ],
+         "most_severe_consequence" => "intergenic_variant",
+         "seq_region_name" =>  "21",
+         "start" =>  10524654,
+         "strand" => 1
+     }],
+     'GA4GH VRS Allele',
+  );
 };
+
+
 
 done_testing();
