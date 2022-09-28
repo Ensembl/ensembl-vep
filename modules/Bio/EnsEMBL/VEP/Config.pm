@@ -465,27 +465,31 @@ sub new {
   # 3: $HOME/.vep/vep.ini file
   # 4: %DEFAULTS
   
-  # set defaults
-  # we need to do this first so paths are set for reading config etc
+  # read config file if defined
+  $self->read_config_from_file($config->{config}, $config) if defined $config->{config};
 
-  # Assign default port for GRCh37
+  # read default config file if defined
+  my $ini_file = ( $config->{dir} || $DEFAULTS{dir} ). '/vep.ini';
+  $self->read_config_from_file($ini_file, $config) if -e $ini_file;
+
+  # assign default port for GRCh37
   if (defined($config->{'assembly'}) && lc($config->{'assembly'}) eq 'grch37' && defined($config->{'database'}) && !defined($config->{'port'})) {
     $config->{'port'} = 3337;
   }
 
+  # set cache directory based on cache or defaults
+  if (defined $config->{cache} && $config->{cache}){
+    $config->{dir_cache} ||= $config->{cache} if -d "$config->{cache}";
+    $config->{cache} = 1;
+  }
+
+  # set all other defaults
   foreach my $key(keys %DEFAULTS) {
     $config->{$key} = $DEFAULTS{$key} unless exists($config->{$key});
   }
 
-  # set those that will be arrayrefs empty if not defined
+  # set params that will be arrayrefs empty if not defined
   $config->{$_} ||= [] for @ALLOW_MULTIPLE;
-    
-  # config file?
-  $self->read_config_from_file($config->{config}, $config) if defined $config->{config};
-  
-  # ini file?
-  my $ini_file = $config->{dir}.'/vep.ini';
-  $self->read_config_from_file($ini_file, $config) if -e $ini_file;
   
   # these flags need turning into listrefs
   foreach my $flag(grep {defined($config->{$_}) && ref($config->{$_}) ne 'ARRAY'} @LIST_FLAGS) {
