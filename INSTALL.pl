@@ -270,7 +270,16 @@ if($AUTO) {
 }
 
 else {
-  print "\nHello! This installer is configured to install v$API_VERSION of the Ensembl API for use by the VEP.\nIt will not affect any existing installations of the Ensembl API that you may have.\n\nIt will also download and install cache files from Ensembl's FTP server.\n\n" unless $QUIET;
+  my $api_msg = $NO_UPDATE ? "" :
+      "  - Install v$API_VERSION of the Ensembl API for use by the VEP. " .
+      "It will not affect any existing installations of the Ensembl API that you may have.\n";
+
+  print "Hello! This installer will help you set up VEP v$API_VERSION, including:\n" .
+    $api_msg .
+    "  - Download and install cache files from Ensembl's FTP server.\n" .
+    "  - Download FASTA files from Ensembl's FTP server.\n" .
+    "  - Download VEP plugins.\n\n"
+    unless $QUIET;
 
   # run subs
   api() if check_api();
@@ -502,6 +511,7 @@ sub api() {
 # CHECK EXISTING
 ################
 sub check_api() {
+  return 0 if $NO_UPDATE;
   print "Checking for installed versions of the Ensembl API..." unless $QUIET;
 
   my $has_api = {};
@@ -1873,7 +1883,7 @@ Options
 -a | --AUTO        Run installer without user prompts. Use "a" (API + Faidx/htslib),
                    "l" (Faidx/htslib only), "c" (cache), "f" (FASTA), "p" (plugins) to specify
                    parts to install e.g. -a ac for API and cache
--n | --NO_UPDATE   Do not check for updates to ensembl-vep
+-n | --NO_UPDATE   Do not check for updates to ensembl-vep or API
 -s | --SPECIES     Comma-separated list of species to install when using --AUTO
 -y | --ASSEMBLY    Assembly name to use if more than one during --AUTO
 -g | --PLUGINS     Comma-separated list of plugins to install when using --AUTO
