@@ -463,7 +463,8 @@ sub new {
   # 1: command line flags
   # 2: config file
   # 3: $HOME/.vep/vep.ini file
-  # 4: %DEFAULTS
+  # 4: environment variables
+  # 5: %DEFAULTS
   
   # read config file if defined
   $self->read_config_from_file($config->{config}, $config) if defined $config->{config};
@@ -471,6 +472,9 @@ sub new {
   # read default config file if defined
   my $ini_file = ( $config->{dir} || $DEFAULTS{dir} ). '/vep.ini';
   $self->read_config_from_file($ini_file, $config) if -e $ini_file;
+
+  # read environment variables with a VEP_ prefix, e.g. VEP_DIR_PLUGINS
+  $self->read_config_from_environment($config);
 
   # assign default port for GRCh37
   if (defined($config->{'assembly'}) && lc($config->{'assembly'}) eq 'grch37' && defined($config->{'database'}) && !defined($config->{'port'})) {
@@ -778,6 +782,51 @@ sub read_config_from_file {
   close CONFIG;
 
   $self->status_msg("Read configuration from $file") if $self->param('verbose');
+
+  return $config;
+}
+
+
+=head2 read_config_from_environment
+
+  Arg 1      : hashref $config
+  Example    : $config_hash = $config->read_config_from_environment($config)
+  Description: Read config params from environment variables prefixed by VEP_
+               and add them to config hash; e.g., dir_plugins is set to
+               VEP_DIR_PLUGINS, if defined. NB: VEP arguments are assumed to
+               always be lowercase.
+  Returntype : none
+  Caller     : new()
+  Status     : Stable
+
+=cut
+
+sub read_config_from_environment {
+  my $self = shift;
+  my $config = shift;
+
+  for my $key (keys %ENV) {
+    # Look for environment variables that start with VEP_
+    next unless $key =~ "^VEP_";
+
+    # Avoid setting empty strings
+    my $value = $ENV{$key};
+    next if $value eq "";
+
+    # Assumption: VEP arguments are always lowercase
+    $key = lc $key;
+    $key =~ s/^VEP_//ig;
+
+    if (grep {$key eq $_} @ALLOW_MULTIPLE) {
+      # Properly set flags that can be specified more than once
+      push @{$config->{$key}}, $value;
+    } else {
+      $config->{$key} ||= $value;
+    }
+  }
+
+  $self->status_msg("Read configuration from environment variables")
+    if $self->param('verbose');
 
   return $config;
 }
