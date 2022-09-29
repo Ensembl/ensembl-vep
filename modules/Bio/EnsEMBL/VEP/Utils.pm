@@ -429,16 +429,16 @@ sub get_compressed_filehandle {
 
   my $fh;
   if($CAN_USE_PERLIO_GZIP && !$multi) {
-    eval q{ open $fh, "<:gzip", $file; };
-    return $fh unless $@;
+    return $fh if eval q{ open $fh, "<:gzip", $file; };
+    warn "Could not open compressed or binary file using PerlIO::gzip - $!\n";
   }
   if($CAN_USE_GZIP) {
-    eval q{ open $fh, "gzip -dc $file |"; };
-    return $fh unless $!;
+    return $fh if eval q{ open $fh, "gzip -dc $file |"; };
+    warn "Could not open compressed or binary file using system gzip - $!\n";
   }
   if($CAN_USE_IO_UNCOMPRESS) {
-    eval q{ $fh = IO::Uncompress::Gunzip->new($file, MultiStream => $multi); };
-    return $fh unless $@;
+    return $fh if eval q{ $fh = IO::Uncompress::Gunzip->new($file, MultiStream => $multi); };
+    warn "Could not open compressed or binary file using IO::Uncompress::Gunzip - $!\n";
   }
   
   die("ERROR: Cannot read from compressed or binary file\n");
