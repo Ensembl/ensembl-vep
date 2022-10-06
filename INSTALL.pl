@@ -146,30 +146,77 @@ my $VEP_MODULE_NAME = 'ensembl-vep';
 
 our (@store_species, @indexes, @files, $ftp, $dirname);
 
+my $config = {};
 GetOptions(
-  'DESTDIR|d=s'        => \$DEST_DIR,
-  'VERSION|v=i'        => \$API_VERSION, # Deprecated
-  'CACHE_VERSION|e=i'  => \$DATA_VERSION,
-  'ASSEMBLY|y=s'       => \$ASSEMBLY,
-  'BIOPERL|b=s'        => \$BIOPERL_URL,
-  'CACHEURL|u=s'       => \$CACHE_URL,
-  'CACHEDIR|c=s'       => \$CACHE_DIR,
-  'FASTAURL|f=s'       => \$FASTA_URL,
-  'HELP|h'             => \$HELP,
-  'NO_UPDATE|n'        => \$NO_UPDATE,
-  'SPECIES|s=s'        => \$SPECIES,
-  'PLUGINS|g=s'        => \$PLUGINS,
-  'PLUGINSDIR|r=s'     => \$PLUGINS_DIR,
-  'PLUGINURL=s'        => \$PLUGIN_URL,
-  'AUTO|a=s'           => \$AUTO,
-  'QUIET|q'            => \$QUIET,
-  'PREFER_BIN|p'       => \$PREFER_BIN,
-  'CONVERT|t'          => \$CONVERT,
-  'TEST'               => \$TEST,
-  'NO_HTSLIB|l'        => \$NO_HTSLIB,
-  'NO_TEST'            => \$NO_TEST,
-  'NO_BIOPERL'         => \$NO_BIOPERL
+  $config,
+  'DESTDIR|d=s',
+  'VERSION|v=i', # Deprecated
+  'CACHE_VERSION|e=i',
+  'ASSEMBLY|y=s',
+  'BIOPERL|b=s',
+  'CACHEURL|u=s',
+  'CACHEDIR|c=s',
+  'FASTAURL|f=s',
+  'HELP|h',
+  'NO_UPDATE|n',
+  'SPECIES|s=s',
+  'PLUGINS|g=s',
+  'PLUGINSDIR|r=s',
+  'PLUGINURL=s',
+  'AUTO|a=s',
+  'QUIET|q',
+  'PREFER_BIN|p',
+  'CONVERT|t',
+  'TEST',
+  'NO_HTSLIB|l',
+  'NO_TEST',
+  'NO_BIOPERL'
 ) or die("ERROR: Failed to parse arguments");
+
+# Read configuration from environment variables starting with VEP_
+# Priority is given to command-line arguments
+sub read_config_from_environment {
+  my $config = shift;
+
+  for my $key (keys %ENV) {
+    # Look for environment variables that start with VEP_
+    next unless $key =~ "^VEP_";
+
+    # Avoid setting empty strings
+    my $value = $ENV{$key};
+    next if $value eq "";
+    $key =~ s/^VEP_//ig;
+
+    # Prioritise previous values
+    $config->{$key} ||= $value;
+  }
+  return $config;
+}
+$config = read_config_from_environment($config);
+
+# Quick fix: this script should use $config instead of multiple global variables
+$DEST_DIR     ||=  $config->{DESTDIR};
+$API_VERSION  ||=  $config->{VERSION};
+$DATA_VERSION ||=  $config->{CACHE_VERSION};
+$ASSEMBLY     ||=  $config->{ASSEMBLY};
+$BIOPERL_URL  ||=  $config->{BIOPERL};
+$CACHE_URL    ||=  $config->{CACHEURL};
+$CACHE_DIR    ||=  $config->{CACHEDIR};
+$FASTA_URL    ||=  $config->{FASTAURL};
+$HELP         ||=  $config->{HELP};
+$NO_UPDATE    ||=  $config->{NO_UPDATE};
+$SPECIES      ||=  $config->{SPECIES};
+$PLUGINS      ||=  $config->{PLUGINS};
+$PLUGINS_DIR  ||=  $config->{PLUGINSDIR};
+$PLUGIN_URL   ||=  $config->{PLUGINURL};
+$AUTO         ||=  $config->{AUTO};
+$QUIET        ||=  $config->{QUIET};
+$PREFER_BIN   ||=  $config->{PREFER_BIN};
+$CONVERT      ||=  $config->{CONVERT};
+$TEST         ||=  $config->{TEST};
+$NO_HTSLIB    ||=  $config->{NO_HTSLIB};
+$NO_TEST      ||=  $config->{NO_TEST};
+$NO_BIOPERL   ||=  $config->{NO_BIOPERL};
 
 # load version data
 our $CURRENT_VERSION_DATA = get_version_data($RealBin.'/.version');
@@ -270,7 +317,16 @@ if($AUTO) {
 }
 
 else {
-  print "\nHello! This installer is configured to install v$API_VERSION of the Ensembl API for use by the VEP.\nIt will not affect any existing installations of the Ensembl API that you may have.\n\nIt will also download and install cache files from Ensembl's FTP server.\n\n" unless $QUIET;
+  my $api_msg = $NO_UPDATE ? "" :
+      "  - Install v$API_VERSION of the Ensembl API for use by the VEP. " .
+      "It will not affect any existing installations of the Ensembl API that you may have.\n";
+
+  print "Hello! This installer will help you set up VEP v$API_VERSION, including:\n" .
+    $api_msg .
+    "  - Download and install cache files from Ensembl's FTP server.\n" .
+    "  - Download FASTA files from Ensembl's FTP server.\n" .
+    "  - Download VEP plugins.\n\n"
+    unless $QUIET;
 
   # run subs
   api() if check_api();
@@ -502,6 +558,7 @@ sub api() {
 # CHECK EXISTING
 ################
 sub check_api() {
+  return 0 if $NO_UPDATE;
   print "Checking for installed versions of the Ensembl API..." unless $QUIET;
 
   my $has_api = {};
@@ -1873,7 +1930,7 @@ Options
 -a | --AUTO        Run installer without user prompts. Use "a" (API + Faidx/htslib),
                    "l" (Faidx/htslib only), "c" (cache), "f" (FASTA), "p" (plugins) to specify
                    parts to install e.g. -a ac for API and cache
--n | --NO_UPDATE   Do not check for updates to ensembl-vep
+-n | --NO_UPDATE   Do not check for updates to ensembl-vep or API
 -s | --SPECIES     Comma-separated list of species to install when using --AUTO
 -y | --ASSEMBLY    Assembly name to use if more than one during --AUTO
 -g | --PLUGINS     Comma-separated list of plugins to install when using --AUTO
