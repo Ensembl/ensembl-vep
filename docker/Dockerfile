@@ -150,6 +150,7 @@ RUN ensembl-vep/travisci/build_c.sh && \
     /usr/sbin/update-locale LANG=$LANG_VAR && \
     # Copy htslib executables. It also requires the packages 'zlib1g-dev', 'libbz2-dev' and 'liblzma-dev'
     cp $HTSLIB_DIR/bgzip $HTSLIB_DIR/tabix $HTSLIB_DIR/htsfile /usr/local/bin/ && \
+    # Delete cache from cpanm
     rm -rf /root/.cpanm
 
 ENV LC_ALL $LANG_VAR
