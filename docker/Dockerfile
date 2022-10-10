@@ -168,3 +168,6 @@ RUN echo >> $OPT/.profile && \
     echo export PATH >> $OPT/.profile && \
     # Run INSTALL.pl and remove the ensemb-vep tests and travis
     ./INSTALL.pl -a a -l -n && rm -rf t travisci .travis.yml
+
+# Avoid update checks for VEP and Ensembl API when running INSTALL.pl
+ENV VEP_NO_UPDATE=1
