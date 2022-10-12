@@ -482,7 +482,7 @@ sub new {
   }
 
   # set cache directory based on cache or defaults
-  if (defined $config->{cache} && $config->{cache}){
+  if (defined $config->{cache} && $config->{cache} ne 0){
     $config->{dir_cache} ||= $config->{cache} if -d "$config->{cache}";
     $config->{cache} = 1;
   }
