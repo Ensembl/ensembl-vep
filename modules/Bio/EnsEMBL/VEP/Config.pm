@@ -772,7 +772,7 @@ sub read_config_from_file {
     s/[\"\']//g for @split;
 
     if(grep {$key eq $_} @ALLOW_MULTIPLE) {
-      push @{$config->{$key}}, @split;
+      push @{$config->{$key}}, join('', @split);
     }
     else {
       $config->{$key} ||= $split[0];
