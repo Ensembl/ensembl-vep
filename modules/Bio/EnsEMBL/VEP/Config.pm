@@ -761,7 +761,7 @@ sub read_config_from_file {
     # preserve spaces between quotes
     s/([\"\'].*)(\s)(.*[\"\'])/$1\_\_\_SPACE\_\_\_$3/g;
 
-    my @split = split /\s+|\=/;
+    my @split = split /\s+/;
     my $key = shift @split;
     $key =~ s/^\-//g;
 
@@ -772,7 +772,7 @@ sub read_config_from_file {
     s/[\"\']//g for @split;
 
     if(grep {$key eq $_} @ALLOW_MULTIPLE) {
-      push @{$config->{$key}}, join('', @split);
+      push @{$config->{$key}}, join(' ', @split);
     }
     else {
       $config->{$key} ||= $split[0];
