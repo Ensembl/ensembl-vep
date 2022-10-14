@@ -171,3 +171,9 @@ RUN echo >> $OPT/.profile && \
 
 # Avoid update checks for VEP and Ensembl API when running INSTALL.pl
 ENV VEP_NO_UPDATE=1
+
+# Set working directory as symlink to $OPT/.vep
+USER root
+RUN ln -s $OPT/.vep /data
+USER vep
+WORKDIR /data
