@@ -260,9 +260,9 @@ $FTP_USER     ||= 'anonymous';
 ## Set the indexed cache url if it's been overwritten by the user
 $CACHE_URL_INDEXED = $CACHE_URL;
 
-$CACHE_URL  ||= "ftp://ftp.ensembl.org/pub/release-$DATA_VERSION/variation/vep";
-$CACHE_URL_INDEXED  ||= "ftp://ftp.ensembl.org/pub/release-$DATA_VERSION/variation/indexed_vep_cache";
-$FASTA_URL  ||= "ftp://ftp.ensembl.org/pub/release-$DATA_VERSION/fasta/";
+$CACHE_URL  ||= "https://ftp.ensembl.org/pub/release-$DATA_VERSION/variation/vep";
+$CACHE_URL_INDEXED  ||= "https://ftp.ensembl.org/pub/release-$DATA_VERSION/variation/indexed_vep_cache";
+$FASTA_URL  ||= "https://ftp.ensembl.org/pub/release-$DATA_VERSION/fasta/";
 $PLUGIN_URL ||= 'https://raw.githubusercontent.com/Ensembl/VEP_plugins';
 
 # using PREFER_BIN can save memory when extracting archives
