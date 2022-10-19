@@ -345,25 +345,28 @@ sub annotate_VariationFeature {
   my $vf = shift;
 
   my ($overlap_percentage, $overlap_result) = $self->_record_overlaps_VF($vf);
+
   return if $overlap_percentage < 80;
-  if ($overlap_result && @{$self->_create_records($overlap_result)}[0]->{'name'} =~  /^COSV/) {
-    my ($matched_cosmic_record) = grep{$_->{'name'} eq @{$self->_create_records($overlap_result)}[0]->{'name'}} @{$vf->{_custom_annotations}->{$self->short_name}};
+
+  my $record = $self->_create_records($overlap_result);
+
+  if ($overlap_result && @{$record}[0]->{'name'} =~  /^COSV/) {
+    my ($matched_cosmic_record) = grep{$_->{'name'} eq @{$record}[0]->{'name'}} @{$vf->{_custom_annotations}->{$self->short_name}};
     if ($matched_cosmic_record){
-      foreach my $key (keys %{@{$self->_create_records($overlap_result)}[0]->{'fields'}}) {
+      foreach my $key (keys %{@{$record}[0]->{'fields'}}) {
         unless (exists $matched_cosmic_record->{'fields'}->{$key}) {
-          $matched_cosmic_record->{'fields'}{$key} = @{$self->_create_records($overlap_result)}[0]->{'fields'}->{$key};
+          $matched_cosmic_record->{'fields'}{$key} = @{$record}[0]->{'fields'}->{$key};
         }   
       }
     }
     else
     {
-      push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$self->_create_records($overlap_result)};
+      push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$record};
     }
   }
   else {
     if ($overlap_result){
-      my $record = $self->_create_records($overlap_result);
-      $record->[0]->{"fields"}->{"PC"} = $overlap_percentage;
+      $record->[0]->{"fields"}->{"PC"} = $overlap_percentage if grep $_ eq "PC", $self->fields;
       push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$record};
     }
   }
