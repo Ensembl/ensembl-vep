@@ -167,8 +167,6 @@ sub new {
     return $class->new({%$hashref, config => $self->config});
   }
 
-  push $self->{fields}, "PC";
-
   return $self;
 }
 
