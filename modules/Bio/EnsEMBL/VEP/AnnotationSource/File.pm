@@ -167,6 +167,8 @@ sub new {
     return $class->new({%$hashref, config => $self->config});
   }
 
+  push $self->{fields}, "PC";
+
   return $self;
 }
 
@@ -344,7 +346,8 @@ sub annotate_VariationFeature {
   my $self = shift;
   my $vf = shift;
 
-  my $overlap_result = $self->_record_overlaps_VF($vf);
+  my ($overlap_percentage, $overlap_result) = $self->_record_overlaps_VF($vf);
+  return if $overlap_percentage < 80;
   if ($overlap_result && @{$self->_create_records($overlap_result)}[0]->{'name'} =~  /^COSV/) {
     my ($matched_cosmic_record) = grep{$_->{'name'} eq @{$self->_create_records($overlap_result)}[0]->{'name'}} @{$vf->{_custom_annotations}->{$self->short_name}};
     if ($matched_cosmic_record){
@@ -360,7 +363,11 @@ sub annotate_VariationFeature {
     }
   }
   else {
-    push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$self->_create_records($overlap_result)} if $overlap_result;
+    if ($overlap_result){
+      my $record = $self->_create_records($overlap_result);
+      $record->[0]->{"fields"}->{"PC"} = $overlap_percentage;
+      push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$record};
+    }
   }
   
 }
@@ -437,8 +444,14 @@ sub _record_overlaps_VF {
     # account for insertions in Ensembl world where s = e+1
     my ($vs, $ve) = ($vf->{start}, $vf->{end});
     ($vs, $ve) = ($ve, $vs) if $vs > $ve;
+    my $length = $ve - $vs + 1;
+
+    my @overlap_start = sort { $a <=> $b } ($vs, $parser->get_start);
+    my @overlap_end   = sort { $a <=> $b } ($ve, $parser->get_end);
+
+    my $overlap_percentage = 100 * (1+ $overlap_end[0]  - $overlap_start[1])/ $length;
     
-    return overlap($parser->get_start, $parser->get_end, $vs, $ve);
+    return $overlap_percentage, overlap($parser->get_start, $parser->get_end, $vs, $ve);
   }
   elsif($type eq 'exact') {
     return $parser->get_start == $vf->{start} && $parser->get_end == $vf->{end};
