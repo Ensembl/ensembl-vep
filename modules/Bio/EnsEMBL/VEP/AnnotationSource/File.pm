@@ -361,6 +361,7 @@ sub annotate_VariationFeature {
     }
     else
     {
+      $record->[0]->{"fields"}->{"PC"} = $overlap_percentage if grep $_ eq "PC", $self->fields;
       push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$record};
     }
   }
