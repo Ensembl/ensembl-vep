@@ -359,11 +359,11 @@ sub annotate_VariationFeature {
         }   
       }
     } else {
-      $record->[0]->{"fields"}->{"PC"} = $overlap_percentage if (defined($self->{fields}) && grep $_ eq "PC", $self->fields);
+      $record->[0]->{"fields"}->{"PC"} = $overlap_percentage if (defined($self->{fields}) && grep "/^PC$/", $self->{fields});
       push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$record};
     }
   } else {
-    $record->[0]->{"fields"}->{"PC"} = $overlap_percentage if (defined($self->{fields}) && grep $_ eq "PC", $self->fields);
+    $record->[0]->{"fields"}->{"PC"} = $overlap_percentage if (defined($self->{fields}) && grep "/^PC$/", $self->{fields});
     push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$record};
   }
   
@@ -446,7 +446,7 @@ sub _record_overlaps_VF {
     my @overlap_start = sort { $a <=> $b } ($vs, $parser->get_start);
     my @overlap_end   = sort { $a <=> $b } ($ve, $parser->get_end);
 
-    my $overlap_percentage = 100 * (1+ $overlap_end[0]  - $overlap_start[1])/ $length;
+    my $overlap_percentage = sprintf("%.3f", 100 * (1+ $overlap_end[0]  - $overlap_start[1])/ $length);
     
     return overlap($parser->get_start, $parser->get_end, $vs, $ve), $overlap_percentage;
   }
