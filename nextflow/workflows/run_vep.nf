@@ -85,6 +85,7 @@ else
 log.info 'Starting workflow.....'
 
 workflow {
+  chr = ""
   if (params.chros){
     log.info 'Reading chromosome names from list'
     chr_str = params.chros.toString()
@@ -99,7 +100,14 @@ workflow {
     readChrVCF(params.vcf, vcf_index)
     chr = readChrVCF.out.splitText().map{it -> it.trim()}
   }
-  splitVCF(chr , params.vcf, vcf_index)
+  
+  if( chr.equals("") ){
+    log.info 'Taking default chromosome values'
+    chr_str = params.chros_default.toString()
+    chr = Channel.of(chr_str.split(','))
+  }
+  
+  splitVCF(chr, params.vcf, vcf_index)
   chrosVEP(splitVCF.out, params.vep_config)
   mergeVCF(chrosVEP.out.vcfFile.collect(), chrosVEP.out.indexFile.collect())
 }  
