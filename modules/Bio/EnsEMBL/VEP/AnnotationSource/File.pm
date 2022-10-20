@@ -359,11 +359,11 @@ sub annotate_VariationFeature {
         }   
       }
     } else {
-      $record->[0]->{"fields"}->{"PC"} = $overlap_percentage if (defined($self->{fields}) && grep "/^PC$/", $self->{fields});
+      $record->[0]->{"fields"}->{"PC"} = $overlap_percentage if (defined($self->{fields}) && grep {$_ eq "PC"} @{$self->{fields}});
       push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$record};
     }
   } else {
-    $record->[0]->{"fields"}->{"PC"} = $overlap_percentage if (defined($self->{fields}) && grep "/^PC$/", $self->{fields});
+    $record->[0]->{"fields"}->{"PC"} = $overlap_percentage if (defined($self->{fields}) && grep {$_ eq "PC"} @{$self->{fields}});
     push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$record};
   }
   
