@@ -1487,7 +1487,9 @@ sub BaseTranscriptVariationAllele_to_output_hash {
   }
 
   # miRNA structure
-  if($self->{mirna} && (my ($mirna_attrib) = grep {$_->code eq 'ncRNA'} @attribs)) {
+  if($self->{mirna} && $tr->biotype eq 'miRNA' &&
+     (my ($mirna_attrib) = grep {$_->code eq 'ncRNA'} @attribs)) {
+
     my ($start, $end, $struct) = split /\s+|\:/, $mirna_attrib->value;
 
     my ($cdna_start, $cdna_end) = ($tv->cdna_start, $tv->cdna_end);
@@ -1497,7 +1499,6 @@ sub BaseTranscriptVariationAllele_to_output_hash {
       $start && $end && $cdna_start && $cdna_end &&
       overlap($start, $end, $cdna_start, $cdna_end)
     ) {
-
       # account for insertions
       ($cdna_start, $cdna_end) = ($cdna_end, $cdna_start) if $cdna_start > $cdna_end;
     
