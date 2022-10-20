@@ -149,7 +149,9 @@ RUN ensembl-vep/travisci/build_c.sh && \
     echo "$LANG_VAR UTF-8" >> /etc/locale.gen && locale-gen en_US.utf8 && \
     /usr/sbin/update-locale LANG=$LANG_VAR && \
     # Copy htslib executables. It also requires the packages 'zlib1g-dev', 'libbz2-dev' and 'liblzma-dev'
-    cp $HTSLIB_DIR/bgzip $HTSLIB_DIR/tabix $HTSLIB_DIR/htsfile /usr/local/bin/
+    cp $HTSLIB_DIR/bgzip $HTSLIB_DIR/tabix $HTSLIB_DIR/htsfile /usr/local/bin/ && \
+    # Delete cache from cpanm
+    rm -rf /root/.cpanm
 
 ENV LC_ALL $LANG_VAR
 ENV LANG $LANG_VAR
@@ -166,3 +168,12 @@ RUN echo >> $OPT/.profile && \
     echo export PATH >> $OPT/.profile && \
     # Run INSTALL.pl and remove the ensemb-vep tests and travis
     ./INSTALL.pl -a a -l -n && rm -rf t travisci .travis.yml
+
+# Avoid update checks for VEP and Ensembl API when running INSTALL.pl
+ENV VEP_NO_UPDATE=1
+
+# Set working directory as symlink to $OPT/.vep
+USER root
+RUN ln -s $OPT/.vep /data
+USER vep
+WORKDIR /data
