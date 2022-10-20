@@ -344,13 +344,13 @@ sub annotate_VariationFeature {
   my $self = shift;
   my $vf = shift;
 
-  my ($overlap_percentage, $overlap_result) = $self->_record_overlaps_VF($vf);
+  my ($overlap_result, $overlap_percentage) = $self->_record_overlaps_VF($vf);
 
-  return if $overlap_percentage < 80;
+  return unless ($overlap_result);
 
   my $record = $self->_create_records($overlap_result);
 
-  if ($overlap_result && @{$record}[0]->{'name'} =~  /^COSV/) {
+  if (@{$record}[0]->{'name'} =~  /^COSV/) {
     my ($matched_cosmic_record) = grep{$_->{'name'} eq @{$record}[0]->{'name'}} @{$vf->{_custom_annotations}->{$self->short_name}};
     if ($matched_cosmic_record){
       foreach my $key (keys %{@{$record}[0]->{'fields'}}) {
@@ -358,18 +358,13 @@ sub annotate_VariationFeature {
           $matched_cosmic_record->{'fields'}{$key} = @{$record}[0]->{'fields'}->{$key};
         }   
       }
-    }
-    else
-    {
-      $record->[0]->{"fields"}->{"PC"} = $overlap_percentage if grep $_ eq "PC", $self->fields;
+    } else {
+      $record->[0]->{"fields"}->{"PC"} = $overlap_percentage if ($self->fields && grep $_ eq "PC", $self->fields);
       push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$record};
     }
-  }
-  else {
-    if ($overlap_result){
-      $record->[0]->{"fields"}->{"PC"} = $overlap_percentage if grep $_ eq "PC", $self->fields;
-      push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$record};
-    }
+  } else {
+    $record->[0]->{"fields"}->{"PC"} = $overlap_percentage if ($self->fields && grep $_ eq "PC", $self->fields);
+    push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$record};
   }
   
 }
@@ -453,10 +448,10 @@ sub _record_overlaps_VF {
 
     my $overlap_percentage = 100 * (1+ $overlap_end[0]  - $overlap_start[1])/ $length;
     
-    return $overlap_percentage, overlap($parser->get_start, $parser->get_end, $vs, $ve);
+    return overlap($parser->get_start, $parser->get_end, $vs, $ve), $overlap_percentage;
   }
   elsif($type eq 'exact') {
-    return $parser->get_start == $vf->{start} && $parser->get_end == $vf->{end};
+    return ($parser->get_start == $vf->{start} && $parser->get_end == $vf->{end});
   }
 }
 
