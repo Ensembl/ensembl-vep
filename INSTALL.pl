@@ -457,6 +457,12 @@ sub update() {
 
 # CHECKS DIR SETUP AND PATHS ETC
 ################################
+
+sub is_url {
+  my $url = shift;
+  return $url =~ /^http/i;
+}
+
 sub check_default_dir {
   my $this_os =  $^O;
   my $default_dir_used;
@@ -1163,8 +1169,8 @@ sub cache() {
   
   my $URL_TO_USE = (-e $tabix) ? $CACHE_URL_INDEXED : $CACHE_URL;
 
-  if($URL_TO_USE =~ /^ftp/i) {
-    $URL_TO_USE =~ m/(ftp:\/\/)?(.+?)\/(.+)/;
+  if(is_url($URL_TO_USE)) {
+    $URL_TO_USE =~ m/(.*:\/\/)?(.+?)\/(.+)/;
     $ftp = Net::FTP->new($2, Passive => 1) or die "ERROR: Could not connect to FTP host $2\n$@\n";
     $ftp->login($FTP_USER) or die "ERROR: Could not login as $FTP_USER\n$@\n";
     $ftp->binary();
@@ -1322,7 +1328,7 @@ sub cache() {
     }
 
     my $target_file = "$CACHE_DIR/tmp/$file_name";
-    if($URL_TO_USE =~ /^ftp/) {
+    if(is_url($URL_TO_USE)) {
       print " - downloading $URL_TO_USE/$file_path\n" unless $QUIET;
       if(!$TEST) {
         $ftp->get($file_name, $target_file) or download_to_file("$URL_TO_USE/$file_path", $target_file);
@@ -1389,8 +1395,8 @@ sub fasta() {
     }
 
     # change URL to point to last e! version that had GRCh37 downloads
-    elsif($FASTA_URL =~ /ftp/) {
-      print "\nWARNING: Changing FTP URL for GRCh37\n";
+    elsif(is_url($FASTA_URL)) {
+      print "\nWARNING: Changing URL for GRCh37\n";
       $FASTA_URL =~ s/$DATA_VERSION/75/;
     }
   }
@@ -1415,8 +1421,8 @@ sub fasta() {
 
   my @dirs = ();
 
-  if($FASTA_URL =~ /^ftp/i) {
-    $FASTA_URL =~ m/(ftp:\/\/)?(.+?)\/(.+)/;
+  if(is_url($FASTA_URL)) {
+    $FASTA_URL =~ m/(.*:\/\/)?(.+?)\/(.+)/;
     $ftp = Net::FTP->new($2, Passive => 1) or die "ERROR: Could not connect to FTP host $2\n$@\n";
     $ftp->login($FTP_USER) or die "ERROR: Could not login as $FTP_USER\n$@\n";
     $ftp->binary();
