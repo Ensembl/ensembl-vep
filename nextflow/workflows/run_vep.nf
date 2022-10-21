@@ -16,6 +16,8 @@ params.vep_config=""
 params.chros=""
 params.chros_file=""
 
+chros_default = "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y,MT"
+
 // module imports
 include { splitVCF } from '../nf_modules/split_into_chros.nf' 
 include { mergeVCF } from '../nf_modules/merge_chros_VCF.nf'  
@@ -103,8 +105,7 @@ workflow {
   
   if( chr.equals("") ){
     log.info 'Taking default chromosome values'
-    chr_str = params.chros_default.toString()
-    chr = Channel.of(chr_str.split(','))
+    chr = Channel.of(chros_default.split(','))
   }
   
   splitVCF(chr, params.vcf, vcf_index)
