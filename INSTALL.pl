@@ -1717,6 +1717,9 @@ sub plugins() {
   # now establish which we are installing
   my (@indexes, @selected_plugins);
 
+  my $plugins_list = "Available plugins: " .
+                     join(",", sort map {$_->{key}} values %by_key) . "\n";
+
   # either from user input
   if(!$AUTO) {
     print "\nThe following plugins are available; which do you want (can specify multiple separated by spaces or 0 for all): \n$plugin_list\n? ";
@@ -1731,27 +1734,24 @@ sub plugins() {
   }
 
   # or from list passed on command line
-  else {
-    if(lc($PLUGINS->[0]) eq 'all' || $PLUGINS->[0] eq '0') {
-      @selected_plugins = sort {$a->{key} cmp $b->{key}} values %by_key;
-    }
-    else {
-      @selected_plugins = map {$by_key{lc($_)}} grep {$by_key{lc($_)}} @$PLUGINS;
-    }
-
+  elsif (lc($PLUGINS->[0]) eq 'list') {
+    # list the plugins and exit
+    print "\n" . $plugins_list;
+    return;
+  } elsif (lc($PLUGINS->[0]) eq 'all' || $PLUGINS->[0] eq '0') {
+    # download all plugins
+    @selected_plugins = sort {$a->{key} cmp $b->{key}} values %by_key;
+  } else {
+    # download specific plugins from command-line arguments
     my @not_found = grep {!$by_key{lc($_)}} @$PLUGINS;
-    if(@not_found) {
-      printf(
-        "\nWARNING: The following plugins have not been found: %s\nAvailable plugins: %s\n",
-        join(",", @not_found),
-        join(",", sort map {$_->{key}} values %by_key)
-      );
-    }
+    warn("\nWARNING: The following plugins have not been found: ",
+         join(",", @not_found) . "\n", $plugins_list, "\n") if @not_found;
+    @selected_plugins = map {$by_key{lc($_)}} grep {$by_key{lc($_)}} @$PLUGINS;
+  }
 
-    if(!@selected_plugins) {
-      printf("\nERROR: No valid plugins given\n");
-      return;
-    }
+  if(!@selected_plugins) {
+    printf("\nERROR: No valid plugins given\n");
+    return;
   }
 
   # store a flag to warn user at end if any plugins require additional setup
@@ -1933,7 +1933,8 @@ Options
 -n | --NO_UPDATE   Do not check for updates to ensembl-vep or API
 -s | --SPECIES     Comma-separated list of species to install when using --AUTO
 -y | --ASSEMBLY    Assembly name to use if more than one during --AUTO
--g | --PLUGINS     Comma-separated list of plugins to install when using --AUTO
+-g | --PLUGINS     Comma-separated list of plugins to install when using --AUTO; you can also
+                   use "list" to list all plugins and "all" to install all available plugins
 -r | --PLUGINSDIR  Set destination directory for VEP plugins files (default = '$ENV{HOME}/.vep/Plugins/')
 -q | --QUIET       Don't write any status output when using --AUTO
 -p | --PREFER_BIN  Use this if the installer fails with out of memory errors
