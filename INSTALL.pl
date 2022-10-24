@@ -58,6 +58,7 @@ our (
   $CACHE_URL,
   $CACHE_URL_INDEXED,
   $CACHE_DIR,
+  $NO_PLUGINS,
   $PLUGINS,
   $PLUGIN_URL,
   $PLUGINS_DIR,
@@ -160,6 +161,7 @@ GetOptions(
   'HELP|h',
   'NO_UPDATE|n',
   'SPECIES|s=s',
+  'NO_PLUGINS',
   'PLUGINS|g=s',
   'PLUGINSDIR|r=s',
   'PLUGINURL=s',
@@ -206,6 +208,7 @@ $FASTA_URL    ||=  $config->{FASTAURL};
 $HELP         ||=  $config->{HELP};
 $NO_UPDATE    ||=  $config->{NO_UPDATE};
 $SPECIES      ||=  $config->{SPECIES};
+$NO_PLUGINS   ||=  $config->{NO_PLUGINS};
 $PLUGINS      ||=  $config->{PLUGINS};
 $PLUGINS_DIR  ||=  $config->{PLUGINSDIR};
 $PLUGIN_URL   ||=  $config->{PLUGINURL};
@@ -317,22 +320,22 @@ if($AUTO) {
 }
 
 else {
-  my $api_msg = $NO_UPDATE ? "" :
+  my $api_msg = 
       "  - Install v$API_VERSION of the Ensembl API for use by the VEP. " .
       "It will not affect any existing installations of the Ensembl API that you may have.\n";
 
   print "Hello! This installer will help you set up VEP v$API_VERSION, including:\n" .
-    $api_msg .
+    ($NO_UPDATE ? "" : $api_msg) .
     "  - Download and install cache files from Ensembl's FTP server.\n" .
     "  - Download FASTA files from Ensembl's FTP server.\n" .
-    "  - Download VEP plugins.\n\n"
+    ($NO_PLUGINS ? "" : "  - Download VEP plugins.\n") . "\n"
     unless $QUIET;
 
   # run subs
-  api() if check_api();
+  api()     if check_api();
   cache();
   fasta();
-  plugins();
+  plugins() unless $NO_PLUGINS;
 }
 
 
@@ -1933,13 +1936,15 @@ Options
 -n | --NO_UPDATE   Do not check for updates to ensembl-vep or API
 -s | --SPECIES     Comma-separated list of species to install when using --AUTO
 -y | --ASSEMBLY    Assembly name to use if more than one during --AUTO
+
+--NO_PLUGINS       Skip plugin installation
 -g | --PLUGINS     Comma-separated list of plugins to install when using --AUTO; you can also
                    use "list" to list all plugins and "all" to install all available plugins
 -r | --PLUGINSDIR  Set destination directory for VEP plugins files (default = '$ENV{HOME}/.vep/Plugins/')
--q | --QUIET       Don't write any status output when using --AUTO
+-q | --QUIET       Do not write any status output when using --AUTO
 -p | --PREFER_BIN  Use this if the installer fails with out of memory errors
--l | --NO_HTSLIB   Don't attempt to install Faidx/htslib
---NO_BIOPERL       Don't install BioPerl
+-l | --NO_HTSLIB   Do not attempt to install Faidx/htslib
+--NO_BIOPERL       Do not install BioPerl
 
 -t | --CONVERT     Convert downloaded caches to use tabix for retrieving
                    co-located variants (requires tabix)
