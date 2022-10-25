@@ -481,6 +481,39 @@ SKIP: {
   unlink($test_cfg->{user_file}.'.out');
   unlink($test_cfg->{user_file}.'.out_warnings.txt');
   is(scalar (grep {/SEQ_21/} @tmp_lines), 1, 'dont_skip variants which are not in GFF file');
+
+  # REFSEQ miRNA
+  my $runner_refseq = Bio::EnsEMBL::VEP::Runner->new({%{
+    $test_cfg->base_testing_cfg},
+    input_file => $test_cfg->create_input_file([qw(21 25585733 rs142513484 C T . . .)]),
+    gff => $test_cfg->{custom_refseq_gff_v2},
+    offline => 0,
+    fasta => $test_cfg->{fasta}
+  });
+
+  $runner_refseq->init();
+
+  my $gff_refseq = Bio::EnsEMBL::VEP::AnnotationSource::File::GFF->new({
+    file => $test_cfg->{custom_refseq_gff_v2},
+    config => $runner_refseq->config
+  });
+
+  # requires synonyms
+  ok($gff_refseq->chromosome_synonyms($test_cfg->{chr_synonyms}), 'load synonyms');
+
+  my $p_refseq = Bio::EnsEMBL::VEP::Parser::VCF->new({
+    config => $runner_refseq->config,
+    file => $test_cfg->create_input_file([qw(21 25585733 rs142513484 C T . . .)]),
+    valid_chromosomes => ['21']
+  });
+
+  my $ib_refseq = Bio::EnsEMBL::VEP::InputBuffer->new({config => $runner_refseq->config, parser => $p_refseq});
+  is(ref($ib_refseq->next()), 'ARRAY', 'check buffer RefSeq');
+
+  $gff_refseq->annotate_InputBuffer($ib_refseq);
+  $ib_refseq->finish_annotation();
+
+  ok($ib_refseq->buffer->[0], 'RefSeq GFF annotation');
 }
 
 done_testing();
