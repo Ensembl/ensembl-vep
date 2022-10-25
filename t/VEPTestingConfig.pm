@@ -72,6 +72,7 @@ our %DEFAULTS = (
   custom_vcf_2   => $Bin.'/testdata/custom/test2.vcf.gz',
   custom_gff     => $Bin.'/testdata/custom/test.gff.gz',
   custom_refseq_gff => $Bin.'/testdata/custom/refseq.gff.gz',
+  custom_refseq_gff_v2 => $Bin.'/testdata/custom/refseq_v2.gff.gz',
   custom_gtf     => $Bin.'/testdata/custom/test.gtf.gz',
   custom_gtf_mt     => $Bin.'/testdata/custom/test_MT.gtf.gz',
   custom_bigwig  => $Bin.'/testdata/custom/test.bw',
