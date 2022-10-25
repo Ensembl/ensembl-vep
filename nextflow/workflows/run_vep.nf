@@ -16,8 +16,6 @@ params.vep_config=""
 params.chros=""
 params.chros_file=""
 
-chros_default = "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y,MT"
-
 // module imports
 include { splitVCF } from '../nf_modules/split_into_chros.nf' 
 include { mergeVCF } from '../nf_modules/merge_chros_VCF.nf'  
@@ -87,7 +85,6 @@ else
 log.info 'Starting workflow.....'
 
 workflow {
-  chr = ""
   if (params.chros){
     log.info 'Reading chromosome names from list'
     chr_str = params.chros.toString()
@@ -101,11 +98,6 @@ workflow {
     log.info 'Computing chromosome names from input'
     readChrVCF(params.vcf, vcf_index)
     chr = readChrVCF.out.splitText().map{it -> it.trim()}
-  }
-  
-  if( chr.equals("") ){
-    log.info 'Taking default chromosome values'
-    chr = Channel.of(chros_default.split(','))
   }
   
   splitVCF(chr, params.vcf, vcf_index)
