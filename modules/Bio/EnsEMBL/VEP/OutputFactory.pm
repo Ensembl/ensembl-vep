@@ -2303,6 +2303,11 @@ sub get_custom_headers {
       if (grep { /^$sub_id$/ } @flatten_header){
         my $pos = $pos{$sub_id} / 2;
         $headers[$pos][1] .= ",$custom->{file}";
+      } elsif ($field eq "PC") {
+        push @headers, [
+          $sub_id,
+          sprintf("Percentage of input variant covered by reference variant from %s", $custom->{file})
+        ];
       } else {
         push @headers, [
           $sub_id,

@@ -344,23 +344,27 @@ sub annotate_VariationFeature {
   my $self = shift;
   my $vf = shift;
 
-  my $overlap_result = $self->_record_overlaps_VF($vf);
-  if ($overlap_result && @{$self->_create_records($overlap_result)}[0]->{'name'} =~  /^COSV/) {
-    my ($matched_cosmic_record) = grep{$_->{'name'} eq @{$self->_create_records($overlap_result)}[0]->{'name'}} @{$vf->{_custom_annotations}->{$self->short_name}};
+  my ($overlap_result, $overlap_percentage) = $self->_record_overlaps_VF($vf);
+
+  return unless ($overlap_result);
+
+  my $record = $self->_create_records($overlap_result);
+
+  if (@{$record}[0]->{'name'} =~  /^COSV/) {
+    my ($matched_cosmic_record) = grep{$_->{'name'} eq @{$record}[0]->{'name'}} @{$vf->{_custom_annotations}->{$self->short_name}};
     if ($matched_cosmic_record){
-      foreach my $key (keys %{@{$self->_create_records($overlap_result)}[0]->{'fields'}}) {
+      foreach my $key (keys %{@{$record}[0]->{'fields'}}) {
         unless (exists $matched_cosmic_record->{'fields'}->{$key}) {
-          $matched_cosmic_record->{'fields'}{$key} = @{$self->_create_records($overlap_result)}[0]->{'fields'}->{$key};
+          $matched_cosmic_record->{'fields'}{$key} = @{$record}[0]->{'fields'}->{$key};
         }   
       }
+    } else {
+      $record->[0]->{"fields"}->{"PC"} = $overlap_percentage if (defined($self->{fields}) && grep {$_ eq "PC"} @{$self->{fields}});
+      push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$record};
     }
-    else
-    {
-      push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$self->_create_records($overlap_result)};
-    }
-  }
-  else {
-    push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$self->_create_records($overlap_result)} if $overlap_result;
+  } else {
+    $record->[0]->{"fields"}->{"PC"} = $overlap_percentage if (defined($self->{fields}) && grep {$_ eq "PC"} @{$self->{fields}});
+    push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$record};
   }
   
 }
@@ -437,11 +441,17 @@ sub _record_overlaps_VF {
     # account for insertions in Ensembl world where s = e+1
     my ($vs, $ve) = ($vf->{start}, $vf->{end});
     ($vs, $ve) = ($ve, $vs) if $vs > $ve;
+    my $length = $ve - $vs + 1;
+
+    my @overlap_start = sort { $a <=> $b } ($vs, $parser->get_start);
+    my @overlap_end   = sort { $a <=> $b } ($ve, $parser->get_end);
+
+    my $overlap_percentage = sprintf("%.3f", 100 * (1+ $overlap_end[0]  - $overlap_start[1])/ $length);
     
-    return overlap($parser->get_start, $parser->get_end, $vs, $ve);
+    return overlap($parser->get_start, $parser->get_end, $vs, $ve), $overlap_percentage;
   }
   elsif($type eq 'exact') {
-    return $parser->get_start == $vf->{start} && $parser->get_end == $vf->{end};
+    return ($parser->get_start == $vf->{start} && $parser->get_end == $vf->{end});
   }
 }
 
