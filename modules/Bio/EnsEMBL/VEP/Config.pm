@@ -476,6 +476,15 @@ sub new {
   # read environment variables with a VEP_ prefix, e.g. VEP_DIR_PLUGINS
   $self->read_config_from_environment($config);
 
+  my $config_command;
+
+  foreach (keys $config) {
+    next if $config->{$_} eq 0 || (ref($config->{$_}) eq "ARRAY" && @{$config->{$_}} == 0);
+    $config_command .= "--$_ $config->{$_} ";
+  }
+
+  $config->{full_command} = "vep $config_command" if !defined($config_command);
+
   # assign default port for GRCh37
   if (defined($config->{'assembly'}) && lc($config->{'assembly'}) eq 'grch37' && defined($config->{'database'}) && !defined($config->{'port'})) {
     $config->{'port'} = 3337;
