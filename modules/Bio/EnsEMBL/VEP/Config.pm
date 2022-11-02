@@ -489,13 +489,14 @@ sub new {
 
   my $config_command;
 
-  foreach (keys %$config) {
+  foreach (sort keys %$config) {
     next if $config->{$_} eq 0 || (ref($config->{$_}) eq "ARRAY" && @{$config->{$_}} == 0) || $_ eq "full_command";
-    
-    $config_command .= $config->{$_} eq 1? "--$_ "  : "--$_ $config->{$_} ";
+    my $flag = File::Basename::basename($_);
+    $config_command .= $config->{$_} eq 1? "--$flag "  : "--$flag $config->{$_} ";
   }
 
   $config->{full_command} = "vep $config_command";
+  $config->{full_command} =~ s/\s*$//;
 
   # set all other defaults
   foreach my $key(keys %DEFAULTS) {
