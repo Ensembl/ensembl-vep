@@ -94,7 +94,7 @@ is_deeply(
     '## STRAND : Strand of the feature (1/-1)',
     '## FLAGS : Transcript quality flags',
     '## custom_test : test.vcf.gz',
-    '## VEP command-line: ',
+    '## VEP command-line: vep',
     "#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tExisting_variation\tIMPACT\tDISTANCE\tSTRAND\tFLAGS\tcustom_test"
   ],
   'headers'
@@ -119,7 +119,7 @@ my $runner = get_annotated_buffer_runner({
 });
 is(
   $runner->get_OutputFactory->headers->[-2].$runner->get_OutputFactory->headers->[-1],
-  "## VEP command-line: ".
+  "## VEP command-line: vep --assembly GRCh38 --cache_version 84 --dir [path_to]/ --input_file [path_to]/test.vcf --no_stats --offline --plugin TestPlugin --quiet --show_ref_allele --species homo_sapiens --tab".
   "#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tExisting_variation\tREF_ALLELE\tIMPACT\tDISTANCE\tSTRAND\tFLAGS\ttest",
   'headers - plugin'
 );
