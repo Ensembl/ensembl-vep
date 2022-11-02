@@ -489,7 +489,7 @@ sub new {
 
   my $config_command;
 
-  for (keys($config)) {
+  foreach (keys %$config) {
     next if $config->{$_} eq 0 || (ref($config->{$_}) eq "ARRAY" && @{$config->{$_}} == 0) || $_ eq "full_command";
     
     $config_command .= $config->{$_} eq 1? "--$_ "  : "--$_ $config->{$_} ";
