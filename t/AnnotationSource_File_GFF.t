@@ -476,7 +476,7 @@ SKIP: {
 
   $runner->run;
   open IN, $test_cfg->{user_file}.'.out';
-  my @tmp_lines = <IN>;
+  my @tmp_lines = grep {!/^\#/} <IN>;
   close IN;
   unlink($test_cfg->{user_file}.'.out');
   unlink($test_cfg->{user_file}.'.out_warnings.txt');
