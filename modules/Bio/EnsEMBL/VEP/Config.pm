@@ -489,11 +489,12 @@ sub new {
 
   my $config_command;
 
-  foreach (sort keys %$config) {
-    my $value = $config->{$_};
+  my @skip_opts = qw(web_output host port stats_file user warning_file verbose);
 
-    next if $value eq 0 || (ref($value) eq "ARRAY" && @{$value} == 0);
-    my $flag = File::Basename::basename($_);
+  foreach my $flag (sort keys %$config) {
+    my $value = $config->{$flag};
+    next if $value eq 0 || (ref($value) eq "ARRAY" && @{$value} == 0) || grep { /$flag/ } @skip_opts;
+    
     $value = join(" --$flag ", @{$value}) if ref($value) eq "ARRAY";
     $value =~ s/(\/[\w-]+?)+\//\[path_to\]\//g;
     $config_command .= $value eq 1? "--$flag "  : "--$flag $value ";
