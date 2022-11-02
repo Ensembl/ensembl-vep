@@ -490,9 +490,11 @@ sub new {
   my $config_command;
 
   foreach (sort keys %$config) {
-    next if $config->{$_} eq 0 || (ref($config->{$_}) eq "ARRAY" && @{$config->{$_}} == 0);
-    my $flag = File::Basename::basename($_);
     my $value = $config->{$_};
+
+    next if $value eq 0 || (ref($value) eq "ARRAY" && @{$value} == 0);
+    my $flag = File::Basename::basename($_);
+    $value = join(" --$flag ", @{$value}) if ref($value) eq "ARRAY";
     $value =~ s/(\/[\w-]+?)+\//\[path_to\]\//g;
     $config_command .= $value eq 1? "--$flag "  : "--$flag $value ";
   }
