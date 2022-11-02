@@ -489,11 +489,11 @@ sub new {
 
   my $config_command;
 
-  my @skip_opts = qw(web_output host port stats_file user warning_file);
+  my @skip_opts = qw(web_output host port stats_file user warning_file input_data);
 
   foreach my $flag (sort keys %$config) {
     my $value = $config->{$flag};
-    next if $value eq 0 || (ref($value) eq "ARRAY" && @{$value} == 0) || grep { /$flag/ } @skip_opts;
+    next if !defined($value) || $value eq 0 || (ref($value) eq "ARRAY" && @{$value} == 0) || grep { /$flag/ } @skip_opts;
 
     $value = join(" --$flag ", @{$value}) if ref($value) eq "ARRAY";
     $value =~ s/(\/[\w-]+?)+\//\[PATH\]\//g;
