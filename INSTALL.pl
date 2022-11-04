@@ -134,19 +134,19 @@ our (@store_species, @indexes, @files, $ftp, $dirname);
 my $config = {};
 GetOptions(
   $config,
-  'destdir|dest_dir|dir_dest|d=s',
+  'dir_dest|destdir|dest_dir|d=s',
   'version|v=i', # Deprecated
   'cache_version|e=i',
   'assembly|y=s',
   'bioperl!|b=s',
-  'cacheurl|cache_url|u=s',
-  'cachedir|cache_dir|dir_cache|c=s',
-  'fastaurl|fasta_url|f=s',
+  'cache_url|cacheurl|u=s',
+  'dir_cache|cachedir|cache_dir|c=s',
+  'fasta_url|fastaurl|f=s',
   'help|h',
   'no_update|n',
   'species|s=s',
   'plugins|g=s',
-  'pluginsdir|plugins_dir|dir_plugins|r=s',
+  'dir_plugins|pluginsdir|plugins_dir|r=s',
   'plugins_url|pluginurl=s',
   'auto|a=s' => ($config->{auto} ||= 0),
   'quiet|q',
@@ -180,10 +180,10 @@ $config = read_config_from_environment($config);
 # Quick fix: this script should use $config instead of multiple global variables
 $API_VERSION  ||=  $config->{version};
 $DATA_VERSION ||=  $config->{cache_version};
-$CACHE_URL    ||=  $config->{cacheurl};
-$CACHE_DIR    ||=  $config->{cachedir};
-$FASTA_URL    ||=  $config->{fastaurl};
-$PLUGINS_DIR  ||=  $config->{pluginsdir};
+$CACHE_URL    ||=  $config->{cache_url};
+$CACHE_DIR    ||=  $config->{dir_cache};
+$FASTA_URL    ||=  $config->{fasta_url};
+$PLUGINS_DIR  ||=  $config->{dir_plugins};
 
 # load version data
 our $CURRENT_VERSION_DATA = get_version_data($RealBin.'/.version');
@@ -209,7 +209,7 @@ warn(
 
 my $default_dir_used = check_default_dir();
 
-$LIB_DIR            = $config->{destdir};
+$LIB_DIR            = $config->{dir_dest};
 $HTSLIB_DIR         = $LIB_DIR.'/htslib';
 $BIODBHTS_DIR       = $LIB_DIR.'/biodbhts';
 $REALPATH_DEST_DIR .= Cwd::realpath($DEST_DIR).'/Bio';
