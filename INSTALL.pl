@@ -375,7 +375,7 @@ sub update() {
   unlink($repo_file);
 
   unless($default_branch) {
-    print "WARNING: Unable to carry out version check for '$module'\n" unless $QUIET;
+    warn "WARNING: Unable to carry out version check for '$module'\n" unless $QUIET;
     return;
   }
 
@@ -698,7 +698,7 @@ sub setup_dirs() {
 
     else {
       unless($default_dir_used || $AUTO) {
-        print "WARNING: You are using a non-default install directory.\nPressing \"y\" again will remove $DEST_DIR and its contents!!!\nAre you really, really sure (y/n)? ";
+        warn "WARNING: You are using a non-default install directory.\nPressing \"y\" again will remove $DEST_DIR and its contents!!!\nAre you really, really sure (y/n)? ";
         $ok = <>;
 
         if($ok !~ /^y/i) {
@@ -1075,7 +1075,7 @@ sub test() {
     eval q{use Set::IntervalTree};
     @test_files = grep {!/Haplo/} @test_files if $@;
 
-    print "Warning: Tests failed, VEP may not run correctly\n" unless runtests(@test_files);
+    warn "Warning: Tests failed, VEP may not run correctly\n" unless runtests(@test_files);
   }
   else {
     my $test_vep = `perl -I $DEST_DIR $dirname/vep --help 2>&1`;
@@ -1295,7 +1295,7 @@ sub cache() {
 
       my $ok;
 
-      print "\nWARNING: It looks like you already have the cache for $species $assembly (v$DATA_VERSION) installed.\n" unless $QUIET;
+      warn "\nWARNING: It looks like you already have the cache for $species $assembly (v$DATA_VERSION) installed.\n" unless $QUIET;
 
       if($AUTO) {
         print "\nDelete the folder $CACHE_DIR/$species/$DATA_VERSION\_$assembly and re-run INSTALL.pl if you want to re-install\n";
@@ -1370,7 +1370,7 @@ sub cache() {
         print " - converting cache, this may take some time but will allow VEP to look up variants and frequency data much faster\n";
         print " - use CTRL-C to cancel if you do not wish to convert this cache now (you may run convert_cache.pl later)\n";
       }
-      system("perl $dirname/convert_cache.pl --dir $CACHE_DIR --species $species --version $DATA_VERSION\_$assembly --bgzip $bgzip --tabix $tabix") == 0 or print STDERR "WARNING: Failed to run convert script\n";
+      system("perl $dirname/convert_cache.pl --dir $CACHE_DIR --species $species --version $DATA_VERSION\_$assembly --bgzip $bgzip --tabix $tabix") == 0 or warn "WARNING: Failed to run convert script\n";
     }
   }
 }
@@ -1390,7 +1390,7 @@ sub fasta() {
 
     # change URL to point to last e! version that had GRCh37 downloads
     elsif($FASTA_URL =~ /ftp/) {
-      print "\nWARNING: Changing FTP URL for GRCh37\n";
+      warn "\nWARNING: Changing FTP URL for GRCh37\n";
       $FASTA_URL =~ s/$DATA_VERSION/75/;
     }
   }
@@ -1741,15 +1741,17 @@ sub plugins() {
 
     my @not_found = grep {!$by_key{lc($_)}} @$PLUGINS;
     if(@not_found) {
-      printf(
-        "\nWARNING: The following plugins have not been found: %s\nAvailable plugins: %s\n",
+      warn(
+        "\nWARNING: The following plugins have not been found: ",
         join(",", @not_found),
-        join(",", sort map {$_->{key}} values %by_key)
+        "\nAvailable plugins: ",
+        join(",", sort map {$_->{key}} values %by_key),
+        "\n"
       );
     }
 
     if(!@selected_plugins) {
-      printf("\nERROR: No valid plugins given\n");
+      warn("\nWARNING: No valid plugins given\n");
       return;
     }
   }
@@ -1783,7 +1785,7 @@ sub plugins() {
 
     # warn if failed
     unless(-e $local_file) {
-      print " - WARNING: Failed to download/install ".$pl->{key}."\n";
+      warn " - WARNING: Failed to download/install ".$pl->{key}."\n";
       next;
     }
 
