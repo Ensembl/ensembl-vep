@@ -36,6 +36,8 @@ INSTALL.pl - a script to install required code and data for VEP
 =cut
 
 use strict;
+use warnings;
+
 use FindBin qw($RealBin);
 use lib $RealBin.'/modules';
 use Getopt::Long;
@@ -266,92 +268,19 @@ $FASTA_URL  ||= "https://ftp.ensembl.org/pub/release-$DATA_VERSION/fasta/";
 $PLUGIN_URL ||= 'https://raw.githubusercontent.com/Ensembl/VEP_plugins';
 
 # using PREFER_BIN can save memory when extracting archives
-$PREFER_BIN = 0 unless defined($PREFER_BIN);
-$Archive::Extract::PREFER_BIN = $PREFER_BIN == 0 ? 0 : 1;
+$Archive::Extract::PREFER_BIN = $config->{PREFER_BIN} || 0;
 
-$QUIET = 0 unless $AUTO;
-
-# updates to ensembl-vep available?
-update() unless $NO_UPDATE or $AUTO;
-
-# auto?
-if($AUTO) {
-
-  # check
-  die("ERROR: Failed to parse AUTO string - must contain any of a (API), l (FAIDX/htslib), c (cache), f (FASTA), p (plugins)\n") unless $AUTO =~ /^[alcfp]+$/i;
-
-  # require species
-  if($AUTO =~ /[cf]/i) {
-    die("ERROR: No species specified\n") unless $SPECIES;
-    $SPECIES = [split /\,/, $SPECIES];
-  }
-
-  # require plugin list
-  if($AUTO =~ /p/i) {
-    die("ERROR: No plugins specified\n") unless $PLUGINS;
-    $PLUGINS = [split /\,/, $PLUGINS];
-  }
-
-  # run subs
-  if($AUTO =~ /l/ && $AUTO !~ /a/) {
-    my $curdir = getcwd;
-    chdir $curdir;
-    install_biodbhts();
-    chdir $curdir;
-
-    # remove Bio dir if empty
-    opendir DIR, $DEST_DIR;
-    my @files = grep {!/^\./} readdir DIR;
-    closedir DIR;
-
-    if(scalar @files <= 1) {
-      rmtree($DEST_DIR.'/'.$files[0]);
-      rmtree($DEST_DIR);
-    }
-  }
-
-  api()   if $AUTO =~ /a/;
-  cache() if $AUTO =~ /c/;
-  fasta() if $AUTO =~ /f/;
-  plugins() if $AUTO =~ /p/;
-}
-
-else {
-  my $api_msg = $NO_UPDATE ? "" :
-      "  - Install v$API_VERSION of the Ensembl API for use by the VEP. " .
-      "It will not affect any existing installations of the Ensembl API that you may have.\n";
-
-  print "Hello! This installer will help you set up VEP v$API_VERSION, including:\n" .
-    $api_msg .
-    "  - Download and install cache files from Ensembl's FTP server.\n" .
-    "  - Download FASTA files from Ensembl's FTP server.\n" .
-    "  - Download VEP plugins.\n\n"
-    unless $QUIET;
-
-  # run subs
-  api() if check_api();
-  cache();
-  fasta();
-  plugins();
-}
-
-
-# clean up
-if(-d "$CACHE_DIR/tmp" && !$TEST) {
-  rmtree("$CACHE_DIR/tmp") or die "ERROR: Could not delete directory $CACHE_DIR/tmp\n";
-}
-
-print "\nAll done\n" unless $QUIET;
-
+$config->{AUTO} ||= 0;
+$config->{QUIET} = 0 unless $config->{AUTO};
 
 ##########################################################################
 ##########################################################################
 ##########################################################################
 
 
-# UPDATE
-########
-sub update() {
+# UPDATE VEP
+############
+sub update_vep() {
 
   my $module = $VEP_MODULE_NAME;
 
@@ -1956,3 +1885,76 @@ END
 
   print $usage;
 }
+
+sub run {
+  # prompt user for updates to ensembl-vep
+  update_vep() unless $NO_UPDATE or $config->{AUTO};
+
+  # auto?
+  if($config->{AUTO}) {
+
+    # check
+    die("ERROR: Failed to parse AUTO string - must contain any of a (API), l (FAIDX/htslib), c (cache), f (FASTA), p (plugins)\n") unless $config->{AUTO} =~ /^[alcfp]+$/i;
+
+    # require species
+    if($config->{AUTO} =~ /[cf]/i) {
+      die("ERROR: No species specified\n") unless $SPECIES;
+      $SPECIES = [split /\,/, $SPECIES];
+    }
+
+    # require plugin list
+    if($config->{AUTO} =~ /p/i) {
+      die("ERROR: No plugins specified\n") unless $config->{PLUGINS};
+      $config->{PLUGINS} = [split /\,/, $config->{PLUGINS}];
+    }
+
+    # run subs
+    if($config->{AUTO} =~ /l/ && $config->{AUTO} !~ /a/) {
+      my $curdir = getcwd;
+      chdir $curdir;
+      install_biodbhts();
+      chdir $curdir;
+
+      # remove Bio dir if empty
+      opendir DIR, $DEST_DIR;
+      my @files = grep {!/^\./} readdir DIR;
+      closedir DIR;
+
+      if(scalar @files <= 1) {
+        rmtree($DEST_DIR.'/'.$files[0]);
+        rmtree($DEST_DIR);
+      }
+    }
+
+    api()   if $config->{AUTO} =~ /a/;
+    cache() if $config->{AUTO} =~ /c/;
+    fasta() if $config->{AUTO} =~ /f/;
+    plugins() if $config->{AUTO} =~ /p/;
+  } else {
+    my $api_msg = $NO_UPDATE ? "" :
+        "  - Install v$API_VERSION of the Ensembl API for use by the VEP. " .
+        "It will not affect any existing installations of the Ensembl API that you may have.\n";
+
+    print "Hello! This installer will help you set up VEP v$API_VERSION, including:\n" .
+      $api_msg .
+      "  - Download and install cache files from Ensembl's FTP server.\n" .
+      "  - Download FASTA files from Ensembl's FTP server.\n" .
+      "  - Download VEP plugins.\n\n"
+      unless $config->{QUIET};
+
+    # run subs
+    api() if check_api();
+    cache();
+    fasta();
+    plugins();
+  }
+
+  # clean up
+  if(-d "$CACHE_DIR/tmp" && !$config->{TEST}) {
+    rmtree("$CACHE_DIR/tmp") or die "ERROR: Could not delete directory $CACHE_DIR/tmp\n";
+  }
+
+  print "\nAll done\n" unless $config->{QUIET};
+}
+
+run()
