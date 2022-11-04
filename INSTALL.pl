@@ -55,23 +55,16 @@ our (
   $API_VERSION,
   $DATA_VERSION,
   $ENS_GIT_ROOT,
-  $BIOPERL_URL,
   $CACHE_URL,
   $CACHE_URL_INDEXED,
   $CACHE_DIR,
-  $PLUGIN_URL,
   $PLUGINS_DIR,
   $FASTA_URL,
   $FTP_USER,
-  $NO_UPDATE,
-  $CONVERT,
-  $NO_HTSLIB,
   $LIB_DIR,
   $HTSLIB_DIR,
   $BIODBHTS_DIR,
   $REALPATH_DEST_DIR,
-  $NO_TEST,
-  $NO_BIOPERL,
   $ua,
   $CAN_USE_CURL,
   $CAN_USE_LWP,
@@ -83,7 +76,6 @@ our (
   $CAN_USE_DBI,
   $CAN_USE_DBD_MYSQL,
 );
-
 
 ## VERSIONS OF INSTALLED SOFTWARE
 ## MAY BE UPDATED IF SUCCESSFULLY TESTED
@@ -142,11 +134,11 @@ our (@store_species, @indexes, @files, $ftp, $dirname);
 my $config = {};
 GetOptions(
   $config,
-  'destdir|d=s',
+  'destdir|dest_dir|dir_dest|d=s',
   'version|v=i', # Deprecated
   'cache_version|e=i',
   'assembly|y=s',
-  'bioperl|b=s',
+  'bioperl!|b=s',
   'cacheurl|cache_url|u=s',
   'cachedir|cache_dir|dir_cache|c=s',
   'fastaurl|fasta_url|f=s',
@@ -155,15 +147,13 @@ GetOptions(
   'species|s=s',
   'plugins|g=s',
   'pluginsdir|plugins_dir|dir_plugins|r=s',
-  'pluginurl|plugins_url=s',
-  'auto|a=s',
+  'plugins_url|pluginurl=s',
+  'auto|a=s' => ($config->{auto} ||= 0),
   'quiet|q',
   'prefer_bin|p',
   'convert|t',
-  'test',
-  'no_htslib|l',
-  'no_test',
-  'no_bioperl'
+  'test!',
+  'no_htslib|l'
 ) or die("ERROR: Failed to parse arguments");
 
 # Read configuration from environment variables starting with VEP_
@@ -188,20 +178,12 @@ sub read_config_from_environment {
 $config = read_config_from_environment($config);
 
 # Quick fix: this script should use $config instead of multiple global variables
-$DEST_DIR     ||=  $config->{destdir};
 $API_VERSION  ||=  $config->{version};
 $DATA_VERSION ||=  $config->{cache_version};
-$BIOPERL_URL  ||=  $config->{bioperl};
 $CACHE_URL    ||=  $config->{cacheurl};
 $CACHE_DIR    ||=  $config->{cachedir};
 $FASTA_URL    ||=  $config->{fastaurl};
-$NO_UPDATE    ||=  $config->{no_update};
 $PLUGINS_DIR  ||=  $config->{pluginsdir};
-$PLUGIN_URL   ||=  $config->{pluginurl};
-$CONVERT      ||=  $config->{convert};
-$NO_HTSLIB    ||=  $config->{no_htslib};
-$NO_TEST      ||=  $config->{no_test};
-$NO_BIOPERL   ||=  $config->{no_bioperl};
 
 # load version data
 our $CURRENT_VERSION_DATA = get_version_data($RealBin.'/.version');
@@ -227,7 +209,7 @@ warn(
 
 my $default_dir_used = check_default_dir();
 
-$LIB_DIR            = $DEST_DIR;
+$LIB_DIR            = $config->{destdir};
 $HTSLIB_DIR         = $LIB_DIR.'/htslib';
 $BIODBHTS_DIR       = $LIB_DIR.'/biodbhts';
 $REALPATH_DEST_DIR .= Cwd::realpath($DEST_DIR).'/Bio';
@@ -235,7 +217,7 @@ $DEST_DIR          .= '/Bio';
 $dirname            = dirname(__FILE__) || '.';
 
 $ENS_GIT_ROOT ||= 'https://github.com/Ensembl/';
-$BIOPERL_URL  ||= "https://github.com/bioperl/bioperl-live/archive/$BIOPERL_VERSION.zip";
+$config->{bioperl} ||= "https://github.com/bioperl/bioperl-live/archive/$BIOPERL_VERSION.zip";
 $API_VERSION  ||= $CURRENT_VERSION_DATA->{$VEP_MODULE_NAME}->{release};
 $DATA_VERSION ||= $API_VERSION;
 $CACHE_DIR    ||= $ENV{HOME} ? $ENV{HOME}.'/.vep' : 'cache';
@@ -248,13 +230,15 @@ $CACHE_URL_INDEXED = $CACHE_URL;
 $CACHE_URL  ||= "https://ftp.ensembl.org/pub/release-$DATA_VERSION/variation/vep";
 $CACHE_URL_INDEXED  ||= "https://ftp.ensembl.org/pub/release-$DATA_VERSION/variation/indexed_vep_cache";
 $FASTA_URL  ||= "https://ftp.ensembl.org/pub/release-$DATA_VERSION/fasta/";
-$PLUGIN_URL ||= 'https://raw.githubusercontent.com/Ensembl/VEP_plugins';
+$config->{plugins_url} ||= 'https://raw.githubusercontent.com/Ensembl/VEP_plugins';
 
 # using PREFER_BIN can save memory when extracting archives
 $Archive::Extract::PREFER_BIN = $config->{prefer_bin} || 0;
 
-$config->{auto} ||= 0;
-$config->{quiet} = 0 unless $config->{auto};
+$config->{bioperl} = 1;
+$config->{quiet}   = 0 unless $config->{auto};
+
+warn Data::Dumper::Dumper $config;
 
 ##########################################################################
 ##########################################################################
@@ -380,7 +364,7 @@ sub check_default_dir {
       print "Have you \n";
       print "1. added $DEST_DIR to your PERL5LIB environment variable?\n";
       print "2. added $DEST_DIR/htslib to your PATH environment variable?\n";
-      if( $this_os eq 'darwin' && !$NO_HTSLIB) {
+      if( $this_os eq 'darwin' && !$config->{no_htslib}) {
         print "3. added $DEST_DIR/htslib to your DYLD_LIBRARY_PATH environment variable?\n";
       }
       print "(y/n): ";
@@ -390,7 +374,7 @@ sub check_default_dir {
         print "Exiting. Please \n";
         print "1. add $DEST_DIR to your PERL5LIB environment variable\n";
         print "2. add $DEST_DIR/htslib to your PATH environment variable\n";
-        if( $this_os eq 'darwin' && !$NO_HTSLIB) {
+        if( $this_os eq 'darwin' && !$config->{no_htslib}) {
           print "3. add $DEST_DIR/htslib to your DYLD_LIBRARY_PATH environment variable\n";
         }
         exit(0);
@@ -401,7 +385,7 @@ sub check_default_dir {
       print "PLEASE REMEMBER TO \n";
       print "1. add $DEST_DIR to your PERL5LIB environment variable\n";
       print "2. add $DEST_DIR/htslib to your PATH environment variable\n";
-      if( $this_os eq 'darwin' && !$NO_HTSLIB) {
+      if( $this_os eq 'darwin' && !$config->{no_htslib}) {
         print "3. add $DEST_DIR/htslib to your DYLD_LIBRARY_PATH environment variable\n";
         print "\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n";
       }
@@ -417,7 +401,7 @@ sub check_default_dir {
     $default_dir_used = 1;
     my $current_dir = cwd();
 
-    if( !$NO_HTSLIB && $this_os eq 'darwin' ) {
+    if( !$config->{no_htslib} && $this_os eq 'darwin' ) {
       print "Installation on OSX requires that you set up some paths before running this installer.\n";
       if(!defined($config->{auto})){
         print "Have you \n";
@@ -449,28 +433,26 @@ sub check_default_dir {
 sub api() {
   setup_dirs();
   my $curdir = getcwd;
-  unless($NO_BIOPERL) {
-    bioperl();
-  }  
+  bioperl() if $config->{bioperl};
 
   # htslib needs to find bioperl to pass tests
   $ENV{PERL5LIB} = $ENV{PERL5LIB} ? $ENV{PERL5LIB}.':'.$DEST_DIR : $DEST_DIR;
 
-  unless($NO_HTSLIB) {
+  unless($config->{no_htslib}) {
     chdir $curdir;
     install_biodbhts();
   }
 
   chdir $curdir;
   install_api();
-  test() unless $NO_TEST;
+  test() if !defined($config->{test}) or $config->{test};
 }
 
 
 # CHECK EXISTING
 ################
 sub check_api() {
-  return 0 if $NO_UPDATE;
+  return 0 if $config->{no_update};
   print "Checking for installed versions of the Ensembl API..." unless $config->{quiet};
 
   my $has_api = {};
@@ -754,7 +736,7 @@ sub install_htslib() {
   my $git = `which git`;
   $git or die <<END;
   'git' command not in path. Please install git and try again.
-  (or to skip Bio::DB::HTS/htslib install re-run with --NO_HTSLIB)
+  (or to skip Bio::DB::HTS/htslib install re-run with --no_htslib)
 
   On Debian/Ubuntu systems you can do this with the command:
 
@@ -764,7 +746,7 @@ END
 
   `which cc` or die <<END;
   'cc' command not in path. Please install it and try again.
-  (or to skip Bio::DB::HTS/htslib install re-run with --NO_HTSLIB)
+  (or to skip Bio::DB::HTS/htslib install re-run with --no_htslib)
 
   On Debian/Ubuntu systems you can do this with the command:
 
@@ -773,7 +755,7 @@ END
 
   `which make` or die <<END;
   'make' command not in path. Please install it and try again.
-  (or to skip Bio::DB::HTS/htslib install re-run with --NO_HTSLIB)
+  (or to skip Bio::DB::HTS/htslib install re-run with --no_htslib)
 
   On Debian/Ubuntu systems you can do this with the command:
 
@@ -793,7 +775,7 @@ END
   if ($this_os ne 'darwin' ) {
  
     my $default_msg = qq{%s library header(s) not found in /usr/include. Please install it and try again.
-(or to skip Bio::DB::HTS/htslib install re-run with --NO_HTSLIB)
+(or to skip Bio::DB::HTS/htslib install re-run with --no_htslib)
 
 On Debian/Ubuntu systems you can do this with the command:
 
@@ -858,7 +840,7 @@ apt-get install %s};
 ######################
 sub install_biodbhts() {
 
-  print "Attempting to install Bio::DB::HTS and htslib.\n\n>>> If this fails, try re-running with --NO_HTSLIB\n\n";
+  print "Attempting to install Bio::DB::HTS and htslib.\n\n>>> If this fails, try re-running with --no_htslib\n\n";
 
   my $htslib_location = install_htslib();
   rmtree( $DEST_DIR.'/tmp' );
@@ -941,11 +923,13 @@ sub bioperl() {
   # now get BioPerl
   print " - fetching BioPerl\n" unless $config->{quiet};
 
-  my $bioperl_file = (split /\//, $BIOPERL_URL)[-1];
+  my $bioperl_url = $config->{bioperl_url};
+
+  my $bioperl_file = (split /\//, $bioperl_url)[-1];
 
   my $target_file = $DEST_DIR.'/tmp/'.$bioperl_file;
 
-  download_to_file($BIOPERL_URL, $target_file);
+  download_to_file($bioperl_url, $target_file);
 
   print " - unpacking $target_file\n" unless $config->{quiet};
   unpack_arch("$DEST_DIR/tmp/$bioperl_file", "$DEST_DIR/tmp/");
@@ -954,7 +938,7 @@ sub bioperl() {
 
   my $bioperl_dir;
 
-  if($BIOPERL_URL =~ /github/) {
+  if($bioperl_url =~ /github/) {
     $bioperl_file =~ s/\.zip//;
     $bioperl_dir = "bioperl-live-".$bioperl_file;
   }
@@ -1279,7 +1263,7 @@ sub cache() {
       closedir CACHEDIR;
     }
     
-    if(((-e $bgzip && -e $tabix) || $CONVERT) && !$config->{test}) {
+    if(((-e $bgzip && -e $tabix) || $config->{convert}) && !$config->{test}) {
       unless($config->{quiet}) {
         print " - converting cache, this may take some time but will allow VEP to look up variants and frequency data much faster\n";
         print " - use CTRL-C to cancel if you do not wish to convert this cache now (you may run convert_cache.pl later)\n";
@@ -1495,7 +1479,7 @@ sub fasta() {
       print "\nThe FASTA file should be automatically detected by the VEP when using --cache or --offline.\nIf it is not, use \"--fasta $ex\"\n\n" unless $config->{quiet};
     }
 
-    elsif($NO_HTSLIB) {
+    elsif($config->{no_htslib}) {
       print " - extracting data\n" unless $config->{quiet};
       unpack_arch($ex, "$CACHE_DIR/$orig_species/$DATA_VERSION\_$assembly/") unless $config->{test};
 
@@ -1562,7 +1546,7 @@ sub plugins() {
   }
   mkpath($PLUGINS_DIR) unless -e $PLUGINS_DIR;
 
-  my $plugin_url_root = $PLUGIN_URL.'/release/'.$API_VERSION;
+  my $plugin_url_root = $config->{plugins_url} . '/release/' . $API_VERSION;
 
   # download and eval plugin config file
   my $plugin_config_file = $PLUGINS_DIR.'/plugin_config.txt';
@@ -1839,37 +1823,36 @@ perl INSTALL.pl [arguments]
 Options
 =======
 
--h | --help        Display this message and quit
+-h | --help          Display this message and quit
 
--d | --destdir     Directory for API install (default: './')
---cache_version    Cache and FASTA version to install
--c | --dir_cache   Directory for cache files (default: '\$HOME/.vep/')
+-d | --dir_dest      Directory for API install (default: './')
+     --cache_version Cache and FASTA version to install
+-c | --dir_cache     Directory for cache files (default: '\$HOME/.vep/')
 
--a | --auto        Run installer without user prompts. Use
-                   "a" (API + Faidx/htslib), "l" (Faidx/htslib only),
-                   "c" (cache), "f" (FASTA), "p" (plugins) to specify
-                   parts to install e.g. -a ac for API and cache
--s | --species     Comma-separated list of species to install when using --AUTO
--y | --assembly    Preferred assembly when using --AUTO
--g | --plugins     Comma-separated list of plugins to install when using --AUTO
--r | --dir_plugins Directory for VEP plugins (default: '\$DIR_CACHE/Plugins/')
--q | --quiet       Suppress status output when using --AUTO
--p | --prefer_bin  Use this if the installer fails with out of memory errors
+-a | --auto          Run installer without user prompts. Use
+                     "a" (API + Faidx/htslib), "l" (Faidx/htslib only),
+                     "c" (cache), "f" (FASTA), "p" (plugins) to specify
+                     parts to install e.g. -a ac for API and cache
+-s | --species       Comma-separated list of species to install with --auto
+-y | --assembly      Preferred assembly with --auto
+-g | --plugins       Comma-separated list of plugins to install with --AUTO
+-r | --dir_plugins   Directory for VEP plugins (default: '\$DIR_CACHE/Plugins/')
+-q | --quiet         Suppress status output when using --AUTO
+-p | --prefer_bin    Use if the installer fails with out of memory errors
 
--n | --no_update   Skip updates to ensembl-vep or API
--l | --no_htslib   Skip install of Faidx/htslib
---no_bioperl       Skip install of BioPerl
+-n | --no_update     Skip updates to ensembl-vep or API
+-l | --no_htslib     Skip install of Faidx/htslib
+     --no_bioperl    Skip install of BioPerl
 
--t | --convert     Convert downloaded caches to use tabix for retrieving
-                   co-located variants (requires tabix)
+-t | --convert       Convert downloaded caches to use tabix for retrieving
+                     co-located variants (requires tabix)
 
-
--u | --cache_url   Local or remote URL for cache (default:
-                   "https://ftp.ensembl.org/pub/release-\$CACHE_VERSION/fasta/")
--f | --fasta_url   Local or remote URL for FASTA files. The FASTA URL/directory
-                   must have gzipped FASTA files under the following structure:
-                   [species]/[dna]/ (default:
-                   "https://ftp.ensembl.org/pub/release-\$DATA_VERSION/fasta/")
+-u | --cache_url     Local or remote URL for cache (default:
+                     https://ftp.ensembl.org/pub/release-\$CACHE_VERSION/fasta/)
+-f | --fasta_url     Local or remote URL for FASTA data. The FASTA URL/directory
+                     must have gzipped FASTA files with the following structure:
+                     [species]/[dna]/ (default:
+                     https://ftp.ensembl.org/pub/release-\$DATA_VERSION/fasta/)
 END
 
   print $usage;
@@ -1877,7 +1860,7 @@ END
 
 sub run {
   # prompt user for updates to ensembl-vep
-  update_vep() unless $NO_UPDATE or $config->{auto};
+  update_vep() unless $config->{no_update} or $config->{auto};
 
   # auto?
   if($config->{auto}) {
@@ -1920,7 +1903,7 @@ sub run {
     fasta() if $config->{auto} =~ /f/;
     plugins() if $config->{auto} =~ /p/;
   } else {
-    my $api_msg = $NO_UPDATE ? "" :
+    my $api_msg = $config->{no_update} ? "" :
         "  - Install v$API_VERSION of the Ensembl API for use by the VEP. " .
         "It will not affect any existing installations of the Ensembl API that you may have.\n";
 
