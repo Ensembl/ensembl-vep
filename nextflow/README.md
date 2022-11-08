@@ -73,6 +73,7 @@ The following config files are used and can be modified depending on user requir
   --vep_config FILENAME   VEP config file. Default: nf_config/vep.ini
   --chros LIST_OF_CHROS   Comma-separated list of chromosomes to generate. i.e. 1,2,..., Default: 1,2,...X,Y,MT
   --cpus INT              Number of CPUs to use. Default 1.
+  --output_prefix         Output filename prefix. The generated output file will have name <output_prefix>.vcf.gz
 ```
 NB: File paths are expected to be absolute paths.
 
