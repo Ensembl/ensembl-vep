@@ -59,7 +59,6 @@ if(check_bgzipped.exitValue()){
 }
 
 def sout = new StringBuilder(), serr = new StringBuilder()
-
 check_parsing = "$params.singularity_dir/vep.sif tabix -p vcf -f $params.vcf".execute()
 check_parsing.consumeProcessOutput(sout, serr)
 check_parsing.waitFor()
@@ -96,7 +95,6 @@ workflow {
     readChrVCF(params.vcf, vcf_index)
     chr = readChrVCF.out.splitText().map{it -> it.trim()}
   }
-  
   splitVCF(chr, params.vcf, vcf_index)
   chrosVEP(splitVCF.out, params.vep_config)
   mergeVCF(chrosVEP.out.vcfFile.collect(), chrosVEP.out.indexFile.collect())
