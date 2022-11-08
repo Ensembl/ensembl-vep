@@ -60,16 +60,13 @@ if(check_bgzipped.exitValue()){
 
 def sout = new StringBuilder(), serr = new StringBuilder()
 
-vcf_index = "${params.vcf}.tbi"
-
-if( !file(vcf_index).exists() ) {
-  check_parsing = "$params.singularity_dir/vep.sif tabix -p vcf -f $params.vcf".execute()
-  check_parsing.consumeProcessOutput(sout, serr)
-  check_parsing.waitFor()
-  if( serr ){
-    exit 1, "The specified VCF file has issues in parsing: $serr"
-  }
+check_parsing = "$params.singularity_dir/vep.sif tabix -p vcf -f $params.vcf".execute()
+check_parsing.consumeProcessOutput(sout, serr)
+check_parsing.waitFor()
+if( serr ){
+  exit 1, "The specified VCF file has issues in parsing: $serr"
 }
+vcf_index = "${params.vcf}.tbi"
 
 if ( params.vep_config ){
   vepFile = file(params.vep_config)
