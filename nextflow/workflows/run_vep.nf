@@ -38,6 +38,7 @@ if (params.help) {
   log.info '  --chros LIST_OF_CHROS	Comma-separated list of chromosomes to generate. i.e. 1,2,... Default: 1,2,...,X,Y,MT'
   log.info '  --chros_file LIST_OF_CHROS_FILE Path to file containing list of chromosomes' 
   log.info '  --cpus INT	        Number of CPUs to use. Default 1.'
+  log.info '  --output_prefix FILENAME_PREFIX   Output filename prefix. The generated output file will have name <output_prefix>.vcf.gz'
   exit 1
 }
 
@@ -81,6 +82,7 @@ else
 log.info 'Starting workflow.....'
 
 workflow {
+log.info params.chros
   if (params.chros){
     log.info 'Reading chromosome names from list'
     chr_str = params.chros.toString()
