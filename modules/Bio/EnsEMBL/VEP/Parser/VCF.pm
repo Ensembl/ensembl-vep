@@ -467,7 +467,7 @@ sub create_StructuralVariationFeatures {
   }
   else {
     $type = $info->{SVTYPE};
-  }
+  } 
 
   # set a default which we do not expect to see
   my $so_term = 'sequence_variant';
