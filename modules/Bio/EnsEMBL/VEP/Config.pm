@@ -487,6 +487,24 @@ sub new {
     $config->{cache} = 1;
   }
 
+  my $config_command;
+
+  my @skip_opts = qw(web_output host port stats_file user warning_file input_data);
+
+  foreach my $flag (sort keys %$config) {
+    my $value = $config->{$flag};
+    my $default = $DEFAULTS{$flag};
+    next if defined($default) && $default eq $value;
+    next if !defined($value) || (ref($value) eq "ARRAY" && @{$value} == 0) || grep { /$flag/ } @skip_opts;
+
+    $value = join(" --$flag ", @{$value}) if ref($value) eq "ARRAY";
+    $value =~ s/(\/[\w-]+?)+\//\[PATH\]\//g;
+    $config_command .= $value eq 1? "--$flag "  : "--$flag $value ";
+  }
+
+  $config->{full_command} = "vep $config_command";
+  $config->{full_command} =~ s/\s*$//;
+
   # set all other defaults
   foreach my $key(keys %DEFAULTS) {
     $config->{$key} = $DEFAULTS{$key} unless exists($config->{$key});
