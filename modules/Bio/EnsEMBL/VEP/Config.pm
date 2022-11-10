@@ -493,7 +493,9 @@ sub new {
 
   foreach my $flag (sort keys %$config) {
     my $value = $config->{$flag};
-    next if !defined($value) || $value eq 0 || (ref($value) eq "ARRAY" && @{$value} == 0) || grep { /$flag/ } @skip_opts;
+    my $default = $DEFAULTS{$flag};
+    next if defined($default) && $default eq $value;
+    next if !defined($value) || (ref($value) eq "ARRAY" && @{$value} == 0) || grep { /$flag/ } @skip_opts;
 
     $value = join(" --$flag ", @{$value}) if ref($value) eq "ARRAY";
     $value =~ s/(\/[\w-]+?)+\//\[PATH\]\//g;
