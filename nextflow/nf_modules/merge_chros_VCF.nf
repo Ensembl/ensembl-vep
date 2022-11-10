@@ -9,6 +9,9 @@ nextflow.enable.dsl=2
 // defaults
 prefix = "out"
 mergedVCF = "merged-file"
+if ( params.output_prefix != "" ){
+  mergedVCF = params.output_prefix
+}
 params.outdir = ""
 params.cpus = 1
 
