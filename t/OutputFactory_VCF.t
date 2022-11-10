@@ -54,7 +54,7 @@ is_deeply(
     '##VEP="v1" time="test"',
     '##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|custom_test">',
     '##INFO=<ID=custom_test,Number=.,Type=String,Description="test.vcf.gz">',
-    "##VEP-command-line=''",
+    "##VEP-command-line='vep --assembly GRCh38 --cache_version 84 --database 0 --dir [PATH]/ --no_stats --offline --species homo_sapiens'",
     "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO"
   ],
   'headers'
