@@ -138,12 +138,13 @@ GetOptions(
   'version|v=i', # Deprecated
   'cache_version|e=i',
   'assembly|y=s',
-  'bioperl!|b=s',
+  'bioperl|b=s',
   'cache_url|cacheurl|u=s',
   'dir_cache|cachedir|cache_dir|c=s',
   'fasta_url|fastaurl|f=s',
   'help|h',
   'no_update|n',
+  'no_bioperl',
   'species|s=s',
   'plugins|g=s',
   'dir_plugins|pluginsdir|plugins_dir|r=s',
@@ -237,8 +238,6 @@ $Archive::Extract::PREFER_BIN = $config->{prefer_bin} || 0;
 
 $config->{bioperl} = 1;
 $config->{quiet}   = 0 unless $config->{auto};
-
-warn Data::Dumper::Dumper $config;
 
 ##########################################################################
 ##########################################################################
@@ -433,7 +432,7 @@ sub check_default_dir {
 sub api() {
   setup_dirs();
   my $curdir = getcwd;
-  bioperl() if $config->{bioperl};
+  bioperl() unless $config->{no_bioperl};
 
   # htslib needs to find bioperl to pass tests
   $ENV{PERL5LIB} = $ENV{PERL5LIB} ? $ENV{PERL5LIB}.':'.$DEST_DIR : $DEST_DIR;
