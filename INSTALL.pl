@@ -404,7 +404,7 @@ sub update() {
 
 sub is_url {
   my $url = shift;
-  return $url =~ /^http/i;
+  return $url =~ /^(http|ftp)/i;
 }
 
 sub check_default_dir {
