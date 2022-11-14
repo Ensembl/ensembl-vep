@@ -467,9 +467,9 @@ sub create_StructuralVariationFeatures {
       $skip = 1;
     }
   } elsif ($alt =~ /\<CN/i) {
+    $type = "CNV";
     $type = "DEL" if $alt =~ /\<CN=?0\>/;
     $type = "DUP" if $alt =~ /\<CN=?2\>/;
-    $type = "CNV" if $alt =~ /\<CN=?[0-9]\>,\<CN=?[1-9]\>/;
   }
 
   # set a default which we do not expect to see
