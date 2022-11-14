@@ -1765,7 +1765,7 @@ sub plugins() {
 sub download_to_file {
   my ($url, $file) = @_;
 
-  $url =~ s/([a-z])\//$1\:21\// if $url =~ /ftp/ && $url !~ /\:21/;
+  $url =~ s/([a-z])\//$1\:21\// if $url =~ /^ftp/ && $url !~ /\:21/;
 
   if($CAN_USE_CURL) {
     my $response = `curl -s -o $file -w '%{http_code}' --location "$url" `;
