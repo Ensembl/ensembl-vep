@@ -32,6 +32,6 @@ process readChrVCF {
 
   shell:
   """
-  bcftools view -h ${vcf} | zgrep '##contig=<ID' |cut -d',' -f1| cut -d'=' -f3| cut -d'>' -f1 > scaffolds.txt 
+  tabix ${vcf} -l > scaffolds.txt 
   """
 }
