@@ -457,10 +457,9 @@ sub create_StructuralVariationFeatures {
   if ($info->{SVTYPE}) {
     $type = $info->{SVTYPE};
   } elsif ($alt =~ /\<CN/i) {
+    $type = "CNV";
     $type = "DEL" if $alt =~ /\<CN=?0\>/;
     $type = "DUP" if $alt =~ /\<CN=?2\>/;
-    $type = "CNV" if $alt =~ /\<CN=?0\>,\<CN=?2\>/;
-    $type = "CNV" if $alt =~ /\<CN=[1-9]\>,\<CN=[1-9]\>/;
   } elsif ($alt =~ /^\<|^\[|\]$|\>$/) {
     $type = $alt;
     $type =~ s/\<|\>//g;
