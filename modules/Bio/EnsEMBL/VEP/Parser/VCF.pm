@@ -464,10 +464,6 @@ sub create_StructuralVariationFeatures {
       $self->warning_msg("WARNING: VCF line on line ".$self->line_number." looks incomplete, skipping:\n$line\n");
       $skip = 1;
     }
-  } elsif ($alt =~ /\<CN/i) {
-    $type = "CNV";
-    $type = "DEL" if $alt =~ /\<CN=?0\>/;
-    $type = "DUP" if $alt =~ /\<CN=?2\>/;
   }
   else {
     $type = $info->{SVTYPE};
