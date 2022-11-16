@@ -454,24 +454,22 @@ sub create_StructuralVariationFeatures {
 
   ## avoid deriving type from alt for CNVs more precisely described by SVTYPE
   ## ALT: "<CN0>", "<CN0>,<CN2>,<CN3>" "<CN2>" => SVTYPE: DEL, CNV, DUP
-  if($alt =~ /^\<|^\[|\]$|\>$/ && $alt !~ /CN/) {
+  if ($info->{SVTYPE}) {
+    $type = $info->{SVTYPE};
+  } elsif ($alt =~ /\<CN/i) {
+    $type = "CNV";
+    $type = "DEL" if $alt =~ /\<CN=?0\>/;
+    $type = "DUP" if $alt =~ /\<CN=?2\>/;
+  } elsif ($alt =~ /^\<|^\[|\]$|\>$/) {
     $type = $alt;
     $type =~ s/\<|\>//g;
     $type =~ s/\:.+//g;
-
     if($start >= $end && $type =~ /del/i) {
       my $line = join("\t", @$record);
       $self->warning_msg("WARNING: VCF line on line ".$self->line_number." looks incomplete, skipping:\n$line\n");
       $skip = 1;
     }
-  } elsif ($alt =~ /\<CN/i) {
-    $type = "CNV";
-    $type = "DEL" if $alt =~ /\<CN=?0\>/;
-    $type = "DUP" if $alt =~ /\<CN=?2\>/;
   }
-  else {
-    $type = $info->{SVTYPE};
-  } 
 
   # set a default which we do not expect to see
   my $so_term = 'sequence_variant';
