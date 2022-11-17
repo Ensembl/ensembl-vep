@@ -171,6 +171,10 @@ sub get_all_regions_by_InputBuffer {
   my ($min, $max) = (1e10, 0);
 
   foreach my $vf(@{$buffer->buffer}) {
+
+    # skip long and unsupported types of SV; doing this here to avoid stopping looping
+    next if $vf->{vep_skip};
+
     my $chr = $vf->{chr} || $vf->slice->seq_region_name;
     throw("ERROR: Cannot get chromosome from VariationFeature") unless $chr;
 
