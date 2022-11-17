@@ -1274,11 +1274,11 @@ sub cache() {
     if(is_url($URL_TO_USE)) {
       print " - downloading $URL_TO_USE/$file_path\n" unless $QUIET;
       if(!$TEST) {
-        download_to_file("$URL_TO_USE/$file_path", $target_file);
+        $ftp->get($file_name, $target_file) or download_to_file("$URL_TO_USE/$file_path", $target_file);
 
         my $checksums = "CHECKSUMS";
         my $checksums_target_file = "$CACHE_DIR/tmp/$checksums";
-        download_to_file("$URL_TO_USE/$checksums", $checksums_target_file);
+        $ftp->get($checksums, $checksums_target_file) or download_to_file("$URL_TO_USE/$checksums", $checksums_target_file);
         if (-e $checksums_target_file) {
           my $sum_download = `sum $target_file`;
           $sum_download =~ m/([0-9]+)(\s+)([0-9]+)/;
@@ -1478,7 +1478,7 @@ sub fasta() {
     if($ftp) {
       print " - downloading $file\n" unless $QUIET;
       if(!$TEST) {
-        download_to_file("$FASTA_URL/$species/$dna_path/$file", $ex);
+        $ftp->get($file, $ex) or download_to_file("$FASTA_URL/$species/$dna_path/$file", $ex);
       }
     }
     else {
@@ -1514,7 +1514,7 @@ sub fasta() {
         if(!$TEST) {
           $index_file =~ /$file(\..+)/;
           print " - downloading $index_file\n" unless $QUIET;
-          download_to_file("$FASTA_URL/$species/$dna_path/$index_file", $ex.$1);
+          $ftp->get($index_file, $ex.$1) or download_to_file("$FASTA_URL/$species/$dna_path/$index_file", $ex.$1);
           $got_indexes++;
         }
       }
