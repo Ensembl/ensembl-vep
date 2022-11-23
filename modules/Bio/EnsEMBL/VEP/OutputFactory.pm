@@ -1287,7 +1287,9 @@ sub VariationFeatureOverlapAllele_to_output_hash {
         if ($ga4gh_vrs) {
           throw("ERROR: Cannot use --ga4gh_vrs without JSON module installed\n") unless $CAN_USE_JSON;
           my $json = JSON->new;
-          $hash->{GA4GH_VRS} = $json->encode($ga4gh_vrs);
+          # avoid encoding JSON twice in case of returning JSON output format
+          $ga4gh_vrs = $json->encode($ga4gh_vrs) if $self->{output_format} ne 'json';
+          $hash->{GA4GH_VRS} = $ga4gh_vrs;
         }
       }
     }
