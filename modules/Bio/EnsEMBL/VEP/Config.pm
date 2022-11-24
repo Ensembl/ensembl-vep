@@ -487,7 +487,7 @@ sub new {
     $config->{cache} = 1;
   }
 
-  my $config_command;
+  my $config_command = "";
 
   my @skip_opts = qw(web_output host port stats_file user warning_file input_data);
 
