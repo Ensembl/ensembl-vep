@@ -100,9 +100,6 @@ sub output_hash_to_line {
   my $self = shift;
   my $hash = shift;
 
-  print Data::Dumper::Dumper($self);
-  die "OK";
-
   # "core" fields
   my @line = map {defined($hash->{$_}) ? convert_arrayref($hash->{$_}) : '-'} @Bio::EnsEMBL::VEP::Constants::DEFAULT_OUTPUT_COLS;
 
