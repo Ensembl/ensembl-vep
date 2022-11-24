@@ -70,7 +70,7 @@ use base qw(Bio::EnsEMBL::VEP::BaseVEP);
 our %DEFAULTS = (  
 
   # database settings
-  database          => 0,
+  database          => 1,
   host              => 'ensembldb.ensembl.org',
   user              => 'anonymous',
   port              => 3306,
