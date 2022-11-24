@@ -222,7 +222,16 @@ sub get_all_output_hashes_by_InputBuffer {
 
   foreach my $vf(@{$buffer->buffer}) {
 
-    my $hash = {
+    my $hash;
+
+    # Include non-annotated line
+    if ($vf->{vep_skip}){
+      $hash->{input} = join($self->{delimiter}, @{$vf->{_line}}) if defined($vf->{_line});
+      push @return, $hash;
+      next;  
+    }
+
+    $hash = {
       id              => $vf->{variation_name},
       seq_region_name => $vf->{chr},
       start           => $vf->{start},
