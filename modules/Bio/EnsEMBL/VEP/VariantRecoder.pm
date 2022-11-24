@@ -296,7 +296,7 @@ sub _get_all_results {
 
   my $ga4gh_vrs = 0;
   if ($want_keys{'ga4gh_vrs'}) {
-    $want_keys{'ga4gh_spdi'} = 1;
+    $want_keys{'spdi'} = 1;
     $ga4gh_vrs = 1;
   }
 
