@@ -670,13 +670,14 @@ sub filter_StructuralVariationOverlapAlleles {
   Example    : $picked = $of->pick_worst_VariationFeatureOverlapAllele($vfoas);
   Description: Selects one VariationFeatureOverlapAllele from a list using criteria
                defined in the param pick_order. Criteria are in this default order:
-                1: canonical
-                2: transcript support level
-                3: biotype (protein coding favoured)
-                4: consequence rank
-                5: transcript length
-                6: transcript from Ensembl?
-                7: transcript from RefSeq?
+                1: mane
+                2: canonical
+                3: transcript support level
+                4: biotype (protein coding favoured)
+                5: consequence rank
+                6: transcript length
+                7: transcript from Ensembl?
+                8: transcript from RefSeq?
   Returntype : Bio::EnsEMBL::Variation::VariationFeatureOverlapAllele
   Exceptions : none
   Caller     : filter_VariationFeatureOverlapAlleles(),
@@ -783,7 +784,10 @@ sub pick_worst_VariationFeatureOverlapAllele {
 
       # otherwise shrink the array to just those that had the lowest
       # this gives fewer to sort on the next round
+      use Data::Dumper;
+      print Dumper(@vfoa_info);
       @vfoa_info = @tmp;
+
     }
 
     # probably shouldn't get here, but if we do, return the first
