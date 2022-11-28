@@ -784,8 +784,6 @@ sub pick_worst_VariationFeatureOverlapAllele {
 
       # otherwise shrink the array to just those that had the lowest
       # this gives fewer to sort on the next round
-      use Data::Dumper;
-      print Dumper(@vfoa_info);
       @vfoa_info = @tmp;
 
     }
