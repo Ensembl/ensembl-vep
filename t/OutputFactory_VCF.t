@@ -372,7 +372,7 @@ SKIP: {
 
   $runner = get_runner({
     input_file => $test_cfg->{test_vcf},
-    custom => [$test_cfg->{custom_vcf}.',test,vcf,exact,,FOO'],
+    custom => ['file=' . $test_cfg->{custom_vcf} . ',short_name=test,format=vcf,type=exact,fields=FOO'],
     output_format => 'vcf',
   });
   $of = $runner->get_OutputFactory;
@@ -389,7 +389,7 @@ SKIP: {
 
   $runner = get_runner({
     input_data => "21\t25585733\t.\tCATG\tTACG",
-    custom => [$test_cfg->{custom_vcf}.',test,vcf,overlap'],
+    custom => ['file=' . $test_cfg->{custom_vcf}.',short_name=test,format=vcf,type=overlap'],
     output_format => 'vcf',
   });
   $of = $runner->get_OutputFactory;
