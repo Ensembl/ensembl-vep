@@ -214,6 +214,7 @@ sub get_all_custom {
       $hash{$key} = $val;
     }
 
+    throw("ERROR: No format specified for custom annotation source. " $hash{"file"} . "\n") unless $hash{"format"};
     throw("ERROR: Access to remote data files disabled\n") if $self->param('no_remote') && $hash{"file"} =~ /^(ht|f)tp:\/\/.+/;
 
     my $opts = {
