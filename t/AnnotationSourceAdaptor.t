@@ -92,14 +92,17 @@ $asa->param('check_existing', 1);
 is_deeply(ref($asa->get_all()->[0]), 'Bio::EnsEMBL::VEP::AnnotationSource::Cache::Variation', 'get_all - var comes first');
 $asa->param('check_existing', 0);
 
-$asa->param('custom', [$test_cfg->{custom_vcf}]);
-throws_ok {$asa->get_all_custom} qr/No format/, 'get_all_custom - no format';
+# $asa->param('custom', [$test_cfg->{custom_vcf}]);
+# throws_ok {$asa->get_all_custom} qr/No format/, 'get_all_custom - no format';
 
-$asa->param('custom', [$test_cfg->{custom_vcf}.',test,foo,exact']);
-throws_ok {$asa->get_all_custom} qr/Unknown or unsupported format foo/, 'get_all_custom - invalid format';
+$asa->param('custom', ['test=' . $test_cfg->{custom_vcf} . ',format=vcf,short_name=foo,type=exact']);
+throws_ok {$asa->get_all_custom} qr/No 'file=' was added for custom annotation source./, 'get_all_custom - invalid file';
+
+$asa->param('custom', ['file=' . $test_cfg->{custom_vcf} . ',test=vcf,short_name=foo,type=exact']);
+throws_ok {$asa->get_all_custom} qr/No 'format=' specified for custom annotation source./, 'get_all_custom - invalid format';
 
 $asa->param('no_remote', 1);
-$asa->param('custom', ['http://foo.bar.com/file,test,foo,exact']);
+$asa->param('custom', ['file=http://foo.bar.com/file,format=test,short_name=foo,type=exact']);
 throws_ok {$asa->get_all_custom} qr/Access to remote data files disabled/, 'get_all_custom - no_remote';
 $asa->param('no_remote', 0);
 
@@ -112,7 +115,7 @@ SKIP: {
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
   skip 'Bio::DB::HTS::Tabix module not available', 5 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
 
-  $asa->param('custom', [$test_cfg->{custom_vcf}.',test,vcf,exact']);
+  $asa->param('custom', ['file=' . $test_cfg->{custom_vcf} . ',short_name=test,format=vcf,type=exact']);
   is_deeply(
     $asa->get_all_custom(),
     [
@@ -126,7 +129,7 @@ SKIP: {
         'info' => {
           'custom_info' => {
             'short_name' => 'test',
-            'report_coords' => undef,
+            'report_coords' => 0,
             'file' => $test_cfg->{custom_vcf},
             'type' => 'exact'
           }
@@ -136,7 +139,7 @@ SKIP: {
     'get_all_custom'
   );
 
-  $asa->param('custom', [$test_cfg->{custom_vcf}.',test,vcf']);
+  $asa->param('custom', ['file=' . $test_cfg->{custom_vcf} . ',short_name=test,format=vcf']);
   is_deeply(
     $asa->get_all_custom(),
     [
@@ -150,7 +153,7 @@ SKIP: {
         'info' => {
           'custom_info' => {
             'short_name' => 'test',
-            'report_coords' => undef,
+            'report_coords' => 0,
             'file' => $test_cfg->{custom_vcf},
             'type' => 'overlap'
           }
@@ -160,7 +163,7 @@ SKIP: {
     'get_all_custom - default overlap type'
   );
 
-  $asa->param('custom', [$test_cfg->{custom_vcf}.',test,vcf,overlap,1']);
+  $asa->param('custom', ['file=' . $test_cfg->{custom_vcf} . ',short_name=test,format=vcf,type=overlap,coords=1']);
   is_deeply(
     $asa->get_all_custom(),
     [
@@ -184,7 +187,7 @@ SKIP: {
     'get_all_custom - report_coords'
   );
 
-  $asa->param('custom', [$test_cfg->{custom_vcf}.',test,vcf,overlap,1,FOO,BAR']);
+  $asa->param('custom', ['file=' . $test_cfg->{custom_vcf} . ',short_name=test,format=vcf,type=overlap,coords=1,fields=FOO%BAR']);
   is_deeply(
     $asa->get_all_custom(),
     [
@@ -212,7 +215,7 @@ SKIP: {
 
   my $test = $test_cfg->{test_vcf_MT};
   $test =~ s/MT.vcf.gz/\#\#\#CHR\#\#\#\.vcf.gz/;
-  $asa->param('custom', [$test.',test,vcf,overlap,1,FOO,BAR']);
+  $asa->param('custom', ['file=' . $test . ',short_name=test,format=vcf,type=overlap,coords=1,fields=FOO%BAR']);
   is_deeply(
     $asa->get_all_custom(),
     [
