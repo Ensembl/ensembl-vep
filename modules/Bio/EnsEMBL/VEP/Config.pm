@@ -380,8 +380,7 @@ our %REQUIRES = (
   original  => [qw(filters)],
   phyloP    => [qw(ucsc_assembly)],
   phastCons => [qw(ucsc_assembly)],
-  custom_multi_allelic => [qw(custom)],
-  ga4gh_vrs => [qw(json)]
+  custom_multi_allelic => [qw(custom)]
 );
 
 # incompatible options
@@ -397,7 +396,8 @@ our %INCOMPATIBLE = (
   tab         => [qw(vcf json)],
   individual  => [qw(minimal)],
   check_ref   => [qw(lookup_ref)],
-  check_svs   => [qw(offline)]
+  check_svs   => [qw(offline)],
+  ga4gh_vrs   => [qw(vcf)]
 );
 
 # deprecated/replaced flags
@@ -487,7 +487,7 @@ sub new {
     $config->{cache} = 1;
   }
 
-  my $config_command;
+  my $config_command = "";
 
   my @skip_opts = qw(web_output host port stats_file user warning_file input_data);
 

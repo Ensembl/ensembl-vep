@@ -481,7 +481,9 @@ sub create_StructuralVariationFeatures {
       DEL  => 'deletion',
       TDUP => 'tandem_duplication',
       DUP  => 'duplication',
-      CNV  => 'copy_number_variation'
+      CNV  => 'copy_number_variation',
+      INV  => 'inversion',
+      BND  => 'breakpoint'
     );
 
     $so_term = defined $terms{$type} ? $terms{$type} : $type;
