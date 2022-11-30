@@ -74,6 +74,7 @@ use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
 use Bio::EnsEMBL::Variation::Utils::Constants;
+use Bio::EnsEMBL::Variation::Utils::Sequence qw(ga4gh_vrs_from_spdi);
 use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
 use Bio::EnsEMBL::VEP::Utils qw(format_coords merge_arrays get_flatten);
 use Bio::EnsEMBL::VEP::Constants;
@@ -1274,22 +1275,22 @@ sub VariationFeatureOverlapAllele_to_output_hash {
       $hash->{HGVSg} = $hgvsg; 
     }
   }
-  # spdi
-  if($self->{spdi}) { 
+  # spdi + ga4gh_vrs
+  if($self->{spdi} || $self->{ga4gh_vrs}) {
     $vf->{_spdi_genomic} = $vf->spdi_genomic(); 
-      
-    if(my $spdi = $vf->{_spdi_genomic}->{$hash->{Allele}}){
-      $hash->{SPDI} = $spdi;  
-    }
-  }
 
-  # ga4gh_vrs
-  if ($self->{ga4gh_vrs}) {
-    $vf->{_ga4gh_spdi_genomic} = $vf->spdi_genomic();
+    if (my $spdi = $vf->{_spdi_genomic}->{$hash->{Allele}}) {
+      $hash->{SPDI} = $spdi if $self->{spdi};
 
-    if (my $ga4gh_spdi = $vf->{_ga4gh_spdi_genomic}->{$hash->{Allele}}) {
-      if ($ga4gh_spdi =~ /^NC/) {
-        $hash->{GA4GH_SPDI} = $ga4gh_spdi;
+      if ($self->{ga4gh_vrs} && $spdi =~ /^NC/) {
+        my $ga4gh_vrs = ga4gh_vrs_from_spdi($spdi);
+        if ($ga4gh_vrs) {
+          throw("ERROR: Cannot use --ga4gh_vrs without JSON module installed\n") unless $CAN_USE_JSON;
+          my $json = JSON->new;
+          # avoid encoding JSON twice in case of returning JSON output format
+          $ga4gh_vrs = $json->encode($ga4gh_vrs) if $self->{output_format} ne 'json';
+          $hash->{GA4GH_VRS} = $ga4gh_vrs;
+        }
       }
     }
   }

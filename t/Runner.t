@@ -1220,7 +1220,6 @@ SKIP: {
                  "consequence_terms" => [
                      "intergenic_variant"
                  ],
-                 "ga4gh_spdi" => "NC_000021.9:10524653:C:A",
                  "ga4gh_vrs" =>  {
                      "location" => {
                          "interval"  => {
