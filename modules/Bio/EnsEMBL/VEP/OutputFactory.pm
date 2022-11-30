@@ -1280,7 +1280,7 @@ sub VariationFeatureOverlapAllele_to_output_hash {
     $vf->{_spdi_genomic} = $vf->spdi_genomic(); 
 
     if (my $spdi = $vf->{_spdi_genomic}->{$hash->{Allele}}) {
-      $hash->{SPDI} = $spdi;
+      $hash->{SPDI} = $spdi if $self->{spdi};
 
       if ($self->{ga4gh_vrs} && $spdi =~ /^NC/) {
         my $ga4gh_vrs = ga4gh_vrs_from_spdi($spdi);
