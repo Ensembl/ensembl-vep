@@ -1800,7 +1800,7 @@ SKIP: {
 
   $runner = get_annotated_buffer_runner({
     input_file => $test_cfg->create_input_file([qw(21 25606454 test G C . . .)]),
-    custom => [$test_cfg->{custom_vcf}.',test,vcf'],
+    custom => ['file=' . $test_cfg->{custom_vcf} . ',short_name=test,format=vcf'],
     quiet => 1,
     warning_file => 'STDERR',
   });
@@ -1829,7 +1829,8 @@ SKIP: {
 
   $runner = get_annotated_buffer_runner({
     input_file => $test_cfg->create_input_file([qw(21 25606454 test G C . . .)]),
-    custom => [$test_cfg->{custom_vcf}.',test,vcf', $test_cfg->{custom_vcf_2}.',test,vcf'],
+    custom => ['file=' . $test_cfg->{custom_vcf} . ',short_name=test,format=vcf',
+               'file=' . $test_cfg->{custom_vcf_2} . ',short_name=test,format=vcf'],
     quiet => 1,
     warning_file => 'STDERR',
   });
