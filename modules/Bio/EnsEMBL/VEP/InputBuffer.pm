@@ -209,8 +209,6 @@ sub next {
   if(my $parser = $self->parser) {
     while(@$buffer < $buffer_size && (my $vf = $parser->next)) {
 
-      # skip long and unsupported types of SV; doing this here to avoid stopping looping
-      next if $vf->{vep_skip};
 
       # exit the program if the maximum number of variants not ordered in the input file is reached
       if (!$self->param('no_check_variants_order') &&

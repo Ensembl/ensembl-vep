@@ -280,6 +280,12 @@ sub get_all_lines_by_InputBuffer {
 
   foreach my $vf(@{$buffer->buffer}) {
 
+    # Include non-annotated line
+    if ($vf->{vep_skip}){
+      push @return, join("\t", @{$vf->{_line}}) if $vf->{vep_skip};
+      next;  
+    }
+
     my $line;
     my $fieldname = $self->{vcf_info_field} || 'CSQ';
 
