@@ -255,6 +255,14 @@ sub get_all_regions_by_InputBuffer {
       push @regions, @new_regions;
       $min_max->{$chr} = [$min, $max];
     }
+
+    my $chr = $vf->{chr} || $vf->slice->seq_region_name;
+    throw("ERROR: Cannot get chromosome $chr from VariationFeature") unless $chr;
+
+    ($min, $max, $seen, my @new_regions) = $self->get_regions_from_coords(
+      $chr, $vf->{start}, $vf->{end},
+      $min, $max, $cache_region_size, $up_down_size, $seen);
+    push @regions, @new_regions;
   }
 
   $buffer->min_max($min_max);
