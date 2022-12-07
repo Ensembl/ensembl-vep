@@ -488,11 +488,40 @@ sub create_StructuralVariationFeatures {
   if($info->{SVTYPE} && $info->{SVTYPE} =~/BND/ ){
     ## break ends are not currently annotated as fusions between different regions/chromosomes
     ## only report 'reference' breakpoint if multiple chromosomes are involved
-    unless (defined $info->{CHR2} &&  $info->{CHR2} eq $chr){
+    unless (defined $info->{CHR2} && $info->{CHR2} eq $chr) {
       $end     = $start;
       $min_end = $min_start;
       $max_end = $max_start;
     }
+    
+    my $new_alts = [];
+    # Support multiple mates from a breakend variant
+    for my $alt_string (split ",", $alt) {
+      my ($alt_allele) = ($alt_string =~ '[\[\]]?([A-Za-z]+)[\[\]]?');
+      my ($alt_chr, $alt_pos) = ($alt_string =~ '([A-Za-z0-9]+) ?: ?([0-9]+)');
+      
+      # Mate orientation:
+      #   C[2:321682[  - normal
+      #   G]17:198982] - inverted
+      #   ]13:123456]T - normal
+      #   [17:198983[A - inverted
+      my $inverted = ($alt_string =~ '^\[|\]$') || 0;
+      
+      # Mate placement:
+      #   C[2:321682[  - left
+      #   [17:198983[A - right
+      my $placement = ($alt_string =~ '^(\[|\])') ? 'left' : 'right';
+      push $new_alts, {
+        string    => $alt_string,
+        allele    => $alt_allele,
+        pos       => $alt_pos,
+        chr       => $alt_chr,
+        inverted  => $inverted,
+        placement => $placement
+      };
+    }
+    $alts = $new_alts;
+    #$end += length($ref) - 1;
   }
 
   # avoid deriving type from alt if described by SVTYPE
@@ -518,6 +547,7 @@ sub create_StructuralVariationFeatures {
     chr            => $chr,
     class_SO_term  => $so_term,
     _line          => $record,
+    allele_string  => $alts
   });
 
   $svf->{vep_skip} = $skip if defined $skip;

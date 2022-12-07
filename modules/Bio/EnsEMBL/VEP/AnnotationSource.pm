@@ -144,6 +144,63 @@ sub get_all_features_by_InputBuffer {
   );
 }
 
+=head2 get_regions_from_coords
+
+  Arg 1      : string $chr
+  Arg 2      : int $start
+  Arg 3      : int $end
+  Arg 4      : int $min
+  Arg 5      : int $max
+  Arg 6      : int $cache_region_size
+  Arg 7      : int $up_down_size
+  Arg 8      : hashref $seen
+  Example    : $regions = $as->get_regions_from_coords($chr, $start, $end, $min,
+                 $max, $cache_region_size, $up_down_size, $seen)
+  Description: Fetches all non-overlapping regions that overlap the given
+               coordinates. Regions are a simple arrayref [$chr, $start],
+               corresponding to bins of genomic coordinates, size cache_region_size
+  Returntype : arrayref of region arrayrefs
+  Exceptions : none
+  Caller     : get_all_regions_by_InputBuffer()
+  Status     : Stable
+
+=cut
+
+sub get_regions_from_coords {
+  my $self  = shift;
+  my $chr   = shift;
+  my $start = shift;
+  my $end   = shift;
+  my $min   = shift;
+  my $max   = shift;
+  my $cache_region_size = shift;
+  my $up_down_size      = shift;
+  my $seen  = shift;
+
+  # find actual chromosome name used by AnnotationSource
+  my $source_chr = $self->get_source_chr_name($chr);
+
+  # allow for indels
+  ($start, $end) = ($end, $start) if $start > $end;
+
+  # log min/max
+  $min = $start if $start < $min;
+  $max = $end if $end > $max;
+
+  # convert to region-size
+  my ($r_s, $r_e) = map {int(($_ - 1) / $cache_region_size)} ($start - $up_down_size, $end + $up_down_size);
+
+  # add all regions between r_s and r_e inclusive (if not previously returned)
+  my @regions;
+  for(my $s = $r_s; $s <= $r_e; $s++) {
+    my $key = join(':', ($source_chr, $s));
+    next if $seen->{$key};
+
+    push @regions, [$source_chr, $s];
+    $seen->{$key} = 1;
+  }
+  return ($min, $max, $seen, @regions);
+}
 
 =head2 get_all_regions_by_InputBuffer
 
@@ -164,9 +221,9 @@ sub get_all_regions_by_InputBuffer {
   my $buffer = shift;
   my $cache_region_size = shift || $self->{cache_region_size};
 
+  my $seen;
   my @regions = ();
-  my %seen = ();
-  my $up_down_size = defined($self->{up_down_size}) ? $self->{up_down_size} : $self->up_down_size();
+  my $up_down_size = $self->{up_down_size} || $self->up_down_size();
 
   my ($min, $max) = (1e10, 0);
 
@@ -201,6 +258,14 @@ sub get_all_regions_by_InputBuffer {
       push @regions, [$source_chr, $s];
       $seen{$key} = 1;
     }
+
+    my $chr = $vf->{chr} || $vf->slice->seq_region_name;
+    throw("ERROR: Cannot get chromosome $chr from VariationFeature") unless $chr;
+
+    ($min, $max, $seen, my @new_regions) = $self->get_regions_from_coords(
+      $chr, $vf->{start}, $vf->{end},
+      $min, $max, $cache_region_size, $up_down_size, $seen);
+    push @regions, @new_regions;
   }
 
   $buffer->min_max([$min, $max]);
