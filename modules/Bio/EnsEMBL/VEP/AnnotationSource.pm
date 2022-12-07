@@ -233,7 +233,6 @@ sub get_all_regions_by_InputBuffer {
   my $max;
 
   foreach my $vf(@{$buffer->buffer}) {
-
     # skip long and unsupported types of SV; doing this here to avoid stopping looping
     next if $vf->{vep_skip};
 
