@@ -210,7 +210,7 @@ sub get_all_custom {
 
     foreach my $param(@params) {
       my ($key, $val) = split('=', $param);
-      die("ERROR: Failed to parse parameter $param; Please add <NAME_OF_PARAMETER>=$param\n") unless defined($key) && defined($val);
+      die("ERROR: Failed to parse parameter $param; Please add $param=<VALUE_OF_PARAMETER>\n") unless defined($key) && defined($val);
       $hash{$key} = $val;
     }
 
