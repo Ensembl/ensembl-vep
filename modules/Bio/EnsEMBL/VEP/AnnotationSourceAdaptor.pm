@@ -204,41 +204,35 @@ sub get_all_custom {
   my @as;
 
   foreach my $custom_string(@{$self->param('custom') || []}) {
-    my (@params) = split /\,/, $custom_string;
+    my ($file, $short_name, $format, $type, $report_coords, @fields) = split /\,/, $custom_string;
 
-    my %hash = ();
+    throw("ERROR: No format specified for custom annotation source $file\n") unless $format;
 
-    foreach my $param(@params) {
-      my ($key, $val) = split('=', $param);
-      die("ERROR: Failed to parse parameter $param; Please add <NAME_OF_PARAMETER>=$param\n") unless defined($key) && defined($val);
-      $hash{$key} = $val;
-    }
-
-    throw("ERROR: Access to remote data files disabled\n") if $self->param('no_remote') && $hash{"file"} =~ /^(ht|f)tp:\/\/.+/;
+    throw("ERROR: Access to remote data files disabled\n") if $self->param('no_remote') && $file =~ /^(ht|f)tp:\/\/.+/;
 
     my $opts = {
       config => $self->config,
-      file => $hash{"file"},
-      short_name => $hash{"short_name"} || $hash{"file"},
-      format => $hash{"format"},
-      type => $hash{"type"} || "overlap",
-      report_coords => $hash{"coords"} || 0,
+      file => $file,
+      short_name => $short_name,
+      format => $format,
+      type => $type,
+      report_coords => $report_coords,
     };
 
-    if(defined($hash{"format"}) && $hash{"format"} =~ /^G[TF]F$/i) {
+    if($format =~ /^G[TF]F$/i) {
       $opts->{filter} = $self->param('transcript_filter');
       $opts->{bam} = $self->param('bam');
     }
 
-    $opts->{fields} = [split /%/, $hash{"fields"}] if $hash{"fields"};
+    $opts->{fields} = \@fields if @fields;
 
-    if (grep { /\#\#\#CHR\#\#\#/ } $hash{"file"}){
+    if (grep { /\#\#\#CHR\#\#\#/ } $file){
 
       my @valid_chromosomes = keys %{$self->chr_lengths} > 0 ? sort keys %{$self->chr_lengths}: ((1..22), qw(X Y MT));
       
       foreach my $chr (@valid_chromosomes){
         print $chr."\n";
-        my $new_file = $hash{"file"};
+        my $new_file = $file;
         my $new_opts = { %$opts };
         $new_file =~ s/\#\#\#CHR\#\#\#/$chr/;
         next unless ( -e $new_file || head($new_file) );
@@ -247,7 +241,7 @@ sub get_all_custom {
       }
 
       # Non-match ###CHR### pattern scenario
-      die "Error: No files with pattern " . $hash{"file"} . " were found\n" unless @as;
+      die "Error: No files with pattern $file were found\n" unless @as;
     
     } else {
       push @as, Bio::EnsEMBL::VEP::AnnotationSource::File->new($opts);
