@@ -273,7 +273,7 @@ sub check_dirs {
         or $file eq 'all_vars.gz.tbi'
         or $file eq 'all_vars.gz.csi';
         
-      die("ERROR: File size of $file does not look right") if -z $file;
+      die("ERROR: File size of $file does not look right\n") if -z $file;
 
       if($file =~ /var/) {
         die("ERROR: Cache should not contain var files, found $file in $dir/$chr\n") unless $has_var;
