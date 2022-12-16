@@ -132,7 +132,7 @@ sub default_options {
             ],
           },
           GRCh38 => {
-            bam => $self->o('dump_vep_data_dir').'/GCF_000001405.39_GRCh38.p13_knownrefseq_alns.bam',
+            bam => $self->o('dump_vep_data_dir').'/GCF_000001405.40_GRCh38.p14_knownrefseq_alns.bam',
             freq_vcf => [
               {
                 file => $self->o('dump_vep_data_dir').'/1KG.phase3.GRCh38_2018_02_26.vcf.gz',
