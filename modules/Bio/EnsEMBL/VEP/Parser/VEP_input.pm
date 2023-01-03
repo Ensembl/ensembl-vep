@@ -159,15 +159,16 @@ sub create_VariationFeatures {
 
   # normal vf
   else {
-    my @allele_arr =  split(/\//,$allele_string);
-    my $ref = $allele_arr[0];
-    my $alt_allele = $allele_arr[1];
     my $is_indel = 0;
-    $is_indel = 1 if $alt_allele =~ /^[DI]/ or length($alt_allele) != length($ref);
+    $is_indel = 1 unless $allele_string =~ /[ATGC]{n}\/[ATGC]{n}/ or $allele_string =~ /-/;
 
     if($is_indel) {
     # insertion or deletion
-      if(substr($ref, 0, 1) eq substr($alt_allele, 0, 1)) {
+      my @allele_arr =  split(/\//,$allele_string);
+      my $ref = $allele_arr[0];
+      my $alt_allele = $allele_arr[1];
+      
+      while(substr($ref, 0, 1) eq substr($alt_allele, 0, 1)) {
         # chop off first base
         $ref = substr($ref, 1) || '-';
         $alt_allele = substr($alt_allele, 1) || '-';
