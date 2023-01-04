@@ -246,7 +246,7 @@ is_deeply(
       3_prime_UTR_variant
       1122
       - - - - -
-      IMPACT=MODIFIER;STRAND=-1
+      IMPACT=MODIFIER;STRAND=-1;MINIMISED=1
     )),
     join("\t", qw(
       rs142513484
@@ -262,7 +262,7 @@ is_deeply(
       A/T
       Gca/Aca
       -
-      IMPACT=MODERATE;STRAND=-1
+      IMPACT=MODERATE;STRAND=-1;MINIMISED=1
     )),
     join("\t", qw(
       rs142513484
@@ -439,8 +439,8 @@ is_deeply(
   [grep {!/^\#/} @tmp_lines],
   [
     "rs142513484\t21:25585733\tT\tENSG00000154719\tENST00000307301\tTranscript\t3_prime_UTR_variant\t1122\t-\t-\t-\t-\t-\tIMPACT=MODIFIER;STRAND=-1;MINIMISED=1\n",
-    "rs142513484\t21:25585733\tT\tENSG00000154719\tENST00000352957\tTranscript\tmissense_variant\t1033\t991\t331\tA/T\tGca/Aca\t-\tIMPACT=MODERATE;STRAND=-1\n",
-    "rs142513484\t21:25585733\tT\tENSG00000260583\tENST00000567517\tTranscript\tupstream_gene_variant\t-\t-\t-\t-\t-\t-\tIMPACT=MODIFIER;DISTANCE=2407;STRAND=-1\n",
+    "rs142513484\t21:25585733\tT\tENSG00000154719\tENST00000352957\tTranscript\tmissense_variant\t1033\t991\t331\tA/T\tGca/Aca\t-\tIMPACT=MODERATE;STRAND=-1;MINIMISED=1\n",
+    "rs142513484\t21:25585733\tT\tENSG00000260583\tENST00000567517\tTranscript\tupstream_gene_variant\t-\t-\t-\t-\t-\t-\tIMPACT=MODIFIER;DISTANCE=2407;STRAND=-1;MINIMISED=1\n",
   ],
   'run - lines content'
 );
