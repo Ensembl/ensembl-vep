@@ -95,7 +95,7 @@ our %DEFAULTS = (
   failed            => 0,
   core_type         => 'core',
   polyphen_analysis => 'humvar',
-  pick_order        => [qw(mane canonical appris tsl biotype ccds rank length ensembl refseq )],
+  pick_order        => [qw(mane_select mane_clinical canonical appris tsl biotype ccds rank length ensembl refseq )],
   terminal_width    => 48,
   vcf_info_field    => 'CSQ',
   ucsc_data_root    => 'http://hgdownload.cse.ucsc.edu/goldenpath/',
@@ -370,7 +370,7 @@ our %VALID = (
   terms           => [qw(SO display NCBI)],
   sift            => [qw(s p b)],
   polyphen        => [qw(s p b)],
-  pick_order      => [qw(mane canonical appris tsl biotype ccds rank length ensembl refseq)],
+  pick_order      => [qw(mane_select mane_clinical canonical appris tsl biotype ccds rank length ensembl refseq)],
   nearest         => [qw(transcript gene symbol)],
   compress_output => [qw(gzip bgzip)],
 );

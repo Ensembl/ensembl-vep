@@ -671,14 +671,15 @@ sub filter_StructuralVariationOverlapAlleles {
   Example    : $picked = $of->pick_worst_VariationFeatureOverlapAllele($vfoas);
   Description: Selects one VariationFeatureOverlapAllele from a list using criteria
                defined in the param pick_order. Criteria are in this default order:
-                1: mane
-                2: canonical
-                3: transcript support level
-                4: biotype (protein coding favoured)
-                5: consequence rank
-                6: transcript length
-                7: transcript from Ensembl?
-                8: transcript from RefSeq?
+                1: MANE_Select 
+                2: MANE_Plus_Clinical
+                3: canonical
+                4: transcript support level
+                5: biotype (protein coding favoured)
+                6: consequence rank
+                7: transcript length
+                8: transcript from Ensembl?
+                9: transcript from RefSeq?
   Returntype : Bio::EnsEMBL::Variation::VariationFeatureOverlapAllele
   Exceptions : none
   Caller     : filter_VariationFeatureOverlapAlleles(),
@@ -704,7 +705,8 @@ sub pick_worst_VariationFeatureOverlapAllele {
 
       # these will only be used by transcript types, default to 1 for others
       # to avoid writing an else clause below
-      mane => 1,
+      mane_select => 1,
+      mane_clinical => 1,
       canonical => 1,
       ccds => 1,
       length => 0,
@@ -720,6 +722,7 @@ sub pick_worst_VariationFeatureOverlapAllele {
 
       # 0 is "best"
       $info->{mane} = scalar(grep {$_->code eq 'MANE_Select'}  @{$tr->get_all_Attributes()}) ? 0 : 1;
+      $info->{mane} = scalar(grep {$_->code eq 'MANE_Plus_Clinical'}  @{$tr->get_all_Attributes()}) ? 0 : 1;
       $info->{canonical} = $tr->is_canonical ? 0 : 1;
       $info->{biotype} = $tr->biotype eq 'protein_coding' ? 0 : 1;
       $info->{ccds} = $tr->{_ccds} && $tr->{_ccds} ne '-' ? 0 : 1;
