@@ -706,7 +706,7 @@ sub pick_worst_VariationFeatureOverlapAllele {
       # these will only be used by transcript types, default to 1 for others
       # to avoid writing an else clause below
       mane_select => 1,
-      mane_clinical => 1,
+      mane_plus_clinical => 1,
       canonical => 1,
       ccds => 1,
       length => 0,
@@ -721,8 +721,8 @@ sub pick_worst_VariationFeatureOverlapAllele {
       my $tr = $vfoa->feature;
 
       # 0 is "best"
-      $info->{mane} = scalar(grep {$_->code eq 'MANE_Select'}  @{$tr->get_all_Attributes()}) ? 0 : 1;
-      $info->{mane} = scalar(grep {$_->code eq 'MANE_Plus_Clinical'}  @{$tr->get_all_Attributes()}) ? 0 : 1;
+      $info->{mane_select} = scalar(grep {$_->code eq 'MANE_Select'}  @{$tr->get_all_Attributes()}) ? 0 : 1;
+      $info->{mane_plus_clinical} = scalar(grep {$_->code eq 'MANE_Plus_Clinical'}  @{$tr->get_all_Attributes()}) ? 0 : 1;
       $info->{canonical} = $tr->is_canonical ? 0 : 1;
       $info->{biotype} = $tr->biotype eq 'protein_coding' ? 0 : 1;
       $info->{ccds} = $tr->{_ccds} && $tr->{_ccds} ne '-' ? 0 : 1;
