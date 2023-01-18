@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2022] EMBL-European Bioinformatics Institute
+Copyright [2016-2023] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -84,7 +84,6 @@ use base qw(Bio::EnsEMBL::VEP::OutputFactory);
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Variation::Utils::Constants;
-use Bio::EnsEMBL::Variation::Utils::Sequence qw(ga4gh_vrs_from_spdi);
 
 use Bio::EnsEMBL::VEP::Utils qw(numberify);
 
@@ -222,7 +221,16 @@ sub get_all_output_hashes_by_InputBuffer {
 
   foreach my $vf(@{$buffer->buffer}) {
 
-    my $hash = {
+    my $hash;
+
+    # Include non-annotated line
+    if ($vf->{vep_skip}){
+      $hash->{input} = join($self->{delimiter}, @{$vf->{_line}}) if defined($vf->{_line});
+      push @return, $hash;
+      next;  
+    }
+
+    $hash = {
       id              => $vf->{variation_name},
       seq_region_name => $vf->{chr},
       start           => $vf->{start},
@@ -362,12 +370,6 @@ sub add_VariationFeatureOverlapAllele_info {
     foreach my $key(grep {defined($vfoa_hash->{$_})} keys %rename) {
       $vfoa_hash->{$rename{$key}} = $vfoa_hash->{$key};
       delete $vfoa_hash->{$key};
-    }
-    if (defined($vfoa_hash->{ga4gh_spdi})) {
-      my $ga4gh_vrs = ga4gh_vrs_from_spdi($vfoa_hash->{ga4gh_spdi});
-      if ($ga4gh_vrs) {
-          $vfoa_hash->{ga4gh_vrs} = $ga4gh_vrs;
-      }
     }
     push @{$hash->{$ftype.'_consequences'}}, $vfoa_hash;
   }
