@@ -602,7 +602,7 @@ SKIP: {
       input_file => $test_cfg->{test_vcf},
       everything => 1,
       dir => $test_cfg->{cache_root_dir},
-      custom => [$test_cfg->{custom_vcf}.',test,vcf,exact,,FOO'],
+      custom => ['file=' . $test_cfg->{custom_vcf}.',short_name=test,format=vcf,type=exact,fields=FOO'],
     });
     $of = Bio::EnsEMBL::VEP::OutputFactory::JSON->new({config => $ib->config});
     @lines = @{$of->get_all_lines_by_InputBuffer($ib)};
@@ -628,7 +628,7 @@ SKIP: {
       input_data => "21\t25585733\t.\tCATG\tTACG",
       everything => 1,
       dir => $test_cfg->{cache_root_dir},
-      custom => [$test_cfg->{custom_vcf}.',test,vcf,overlap'],
+      custom => ['file=' . $test_cfg->{custom_vcf} . ',short_name=test,format=vcf,type=overlap'],
     });
     $of = Bio::EnsEMBL::VEP::OutputFactory::JSON->new({config => $ib->config});
     @lines = @{$of->get_all_lines_by_InputBuffer($ib)};

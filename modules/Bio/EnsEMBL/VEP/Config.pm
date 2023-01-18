@@ -303,14 +303,14 @@ our @OPTION_SETS = (
   {
     flags => ['gff'],
     set   => {
-      custom => '%gff%,,gff'
+      custom => 'file=%gff%,format=gff'
     }
   },
   
   {
     flags => ['gtf'],
     set   => {
-      custom => '%gtf%,,gtf'
+      custom => 'file=%gtf%,format=gtf'
     }
   },
   
