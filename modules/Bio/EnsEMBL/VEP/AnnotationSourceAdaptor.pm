@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2023] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -204,9 +204,9 @@ sub get_all_custom {
   my @as;
 
   foreach my $custom_string(@{$self->param('custom') || []}) {
-    my ($file, $short_name, $format, $type, $report_coords, @fields) = split /\,/, $custom_string;
+    my (@params) = split /\,/, $custom_string;
 
-    throw("ERROR: No format specified for custom annotation source $file\n") unless $format;
+    my %hash = ();
 
     foreach my $param(@params) {
       my ($key, $val) = split('=', $param);
@@ -220,27 +220,27 @@ sub get_all_custom {
 
     my $opts = {
       config => $self->config,
-      file => $file,
-      short_name => $short_name,
-      format => $format,
-      type => $type,
-      report_coords => $report_coords,
+      file => $hash{"file"},
+      short_name => $hash{"short_name"} || $hash{"file"},
+      format => $hash{"format"},
+      type => $hash{"type"} || "overlap",
+      report_coords => $hash{"coords"} || 0,
     };
 
-    if($format =~ /^G[TF]F$/i) {
+    if(defined($hash{"format"}) && $hash{"format"} =~ /^G[TF]F$/i) {
       $opts->{filter} = $self->param('transcript_filter');
       $opts->{bam} = $self->param('bam');
     }
 
-    $opts->{fields} = \@fields if @fields;
+    $opts->{fields} = [split /%/, $hash{"fields"}] if $hash{"fields"};
 
-    if (grep { /\#\#\#CHR\#\#\#/ } $file){
+    if (grep { /\#\#\#CHR\#\#\#/ } $hash{"file"}){
 
       my @valid_chromosomes = keys %{$self->chr_lengths} > 0 ? sort keys %{$self->chr_lengths}: ((1..22), qw(X Y MT));
       
       foreach my $chr (@valid_chromosomes){
         print $chr."\n";
-        my $new_file = $file;
+        my $new_file = $hash{"file"};
         my $new_opts = { %$opts };
         $new_file =~ s/\#\#\#CHR\#\#\#/$chr/;
         next unless ( -e $new_file || head($new_file) );
@@ -249,7 +249,7 @@ sub get_all_custom {
       }
 
       # Non-match ###CHR### pattern scenario
-      die "Error: No files with pattern $file were found\n" unless @as;
+      die "Error: No files with pattern " . $hash{"file"} . " were found\n" unless @as;
     
     } else {
       push @as, Bio::EnsEMBL::VEP::AnnotationSource::File->new($opts);

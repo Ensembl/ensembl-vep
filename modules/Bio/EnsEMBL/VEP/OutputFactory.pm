@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2023] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -74,7 +74,6 @@ use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
 use Bio::EnsEMBL::Variation::Utils::Constants;
-use Bio::EnsEMBL::Variation::Utils::Sequence qw(ga4gh_vrs_from_spdi);
 use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
 use Bio::EnsEMBL::VEP::Utils qw(format_coords merge_arrays get_flatten);
 use Bio::EnsEMBL::VEP::Constants;
@@ -671,14 +670,13 @@ sub filter_StructuralVariationOverlapAlleles {
   Example    : $picked = $of->pick_worst_VariationFeatureOverlapAllele($vfoas);
   Description: Selects one VariationFeatureOverlapAllele from a list using criteria
                defined in the param pick_order. Criteria are in this default order:
-                1: mane
-                2: canonical
-                3: transcript support level
-                4: biotype (protein coding favoured)
-                5: consequence rank
-                6: transcript length
-                7: transcript from Ensembl?
-                8: transcript from RefSeq?
+                1: canonical
+                2: transcript support level
+                3: biotype (protein coding favoured)
+                4: consequence rank
+                5: transcript length
+                6: transcript from Ensembl?
+                7: transcript from RefSeq?
   Returntype : Bio::EnsEMBL::Variation::VariationFeatureOverlapAllele
   Exceptions : none
   Caller     : filter_VariationFeatureOverlapAlleles(),
@@ -786,7 +784,6 @@ sub pick_worst_VariationFeatureOverlapAllele {
       # otherwise shrink the array to just those that had the lowest
       # this gives fewer to sort on the next round
       @vfoa_info = @tmp;
-
     }
 
     # probably shouldn't get here, but if we do, return the first
@@ -1277,22 +1274,22 @@ sub VariationFeatureOverlapAllele_to_output_hash {
       $hash->{HGVSg} = $hgvsg; 
     }
   }
-  # spdi + ga4gh_vrs
-  if($self->{spdi} || $self->{ga4gh_vrs}) {
+  # spdi
+  if($self->{spdi}) { 
     $vf->{_spdi_genomic} = $vf->spdi_genomic(); 
+      
+    if(my $spdi = $vf->{_spdi_genomic}->{$hash->{Allele}}){
+      $hash->{SPDI} = $spdi;  
+    }
+  }
 
-    if (my $spdi = $vf->{_spdi_genomic}->{$hash->{Allele}}) {
-      $hash->{SPDI} = $spdi if $self->{spdi};
+  # ga4gh_vrs
+  if ($self->{ga4gh_vrs}) {
+    $vf->{_ga4gh_spdi_genomic} = $vf->spdi_genomic();
 
-      if ($self->{ga4gh_vrs} && $spdi =~ /^NC/) {
-        my $ga4gh_vrs = ga4gh_vrs_from_spdi($spdi);
-        if ($ga4gh_vrs) {
-          throw("ERROR: Cannot use --ga4gh_vrs without JSON module installed\n") unless $CAN_USE_JSON;
-          my $json = JSON->new;
-          # avoid encoding JSON twice in case of returning JSON output format
-          $ga4gh_vrs = $json->encode($ga4gh_vrs) if $self->{output_format} ne 'json';
-          $hash->{GA4GH_VRS} = $ga4gh_vrs;
-        }
+    if (my $ga4gh_spdi = $vf->{_ga4gh_spdi_genomic}->{$hash->{Allele}}) {
+      if ($ga4gh_spdi =~ /^NC/) {
+        $hash->{GA4GH_SPDI} = $ga4gh_spdi;
       }
     }
   }

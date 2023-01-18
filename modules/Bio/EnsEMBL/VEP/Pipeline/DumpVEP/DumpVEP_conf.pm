@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2023] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -71,8 +71,7 @@ sub default_options {
     dump_vep_data_dir       => $self->o('data_dir') . '/dump_vep',
     
     # temporary space
-    tmp_base_dir            => '/hps/nobackup/flicek/ensembl/variation',
-    tmp_dir                 => catdir($self->o('tmp_base_dir'), $ENV{'USER'}, $self->o('pipeline_name'), 'vepdump'),
+    tmp_dir                 => catdir('/hps/nobackup/flicek/ensembl', $ENV{'USER'}, $self->o('pipeline_name'), 'vepdump'),
         
     # dump databases of this version number
     ensembl_release => undef,
@@ -133,7 +132,7 @@ sub default_options {
             ],
           },
           GRCh38 => {
-            bam => $self->o('dump_vep_data_dir').'/GCF_000001405.40_GRCh38.p14_knownrefseq_alns.bam',
+            bam => $self->o('dump_vep_data_dir').'/GCF_000001405.39_GRCh38.p13_knownrefseq_alns.bam',
             freq_vcf => [
               {
                 file => $self->o('dump_vep_data_dir').'/1KG.phase3.GRCh38_2018_02_26.vcf.gz',

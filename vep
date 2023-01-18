@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Copyright [2016-2023] EMBL-European Bioinformatics Institute
+# Copyright [2016-2022] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -173,7 +173,7 @@ GetOptions(
   'ambiguity',               # Add allele ambiguity code
   'var_synonyms', 	     # include variation synonyms in output
   'shift_3prime=i',          # enables shifting of all variants to 3prime
-  'shift_genomic=i',         # adds genomic shifting to output, and provides shifting of intergenic variants
+  'shift_genomic',           # adds genomic shifting to output, and provides shifting of intergenic variants
   'shift_length',	     # adds the length of the transcript directional shift to output
 
   # cache stuff
@@ -221,8 +221,6 @@ die("ERROR: Unexpected extra command-line parameter(s): " . join(", ", @ARGV)) i
 warn("WARNING: More than one output file command-line flag provided. Using the last value provided: '@{$config->{output_file}}[-1]' \n") unless (scalar @{$config->{output_file}} <= 1);
 $config->{output_file}=@{$config->{output_file}}[-1] if ($config->{output_file});
 &usage && exit(0) if (!$arg_count) || $config->{help};
-
-$config->{database} ||= 0;
 
 my $runner = Bio::EnsEMBL::VEP::Runner->new($config);
 

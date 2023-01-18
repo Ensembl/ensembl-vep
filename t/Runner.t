@@ -1,4 +1,4 @@
-# Copyright [2016-2023] EMBL-European Bioinformatics Institute
+# Copyright [2016-2022] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -1220,6 +1220,7 @@ SKIP: {
                  "consequence_terms" => [
                      "intergenic_variant"
                  ],
+                 "ga4gh_spdi" => "NC_000021.9:10524653:C:A",
                  "ga4gh_vrs" =>  {
                      "location" => {
                          "interval"  => {
