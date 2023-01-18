@@ -1,4 +1,4 @@
-# Copyright [2016-2022] EMBL-European Bioinformatics Institute
+# Copyright [2016-2023] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -1800,7 +1800,7 @@ SKIP: {
 
   $runner = get_annotated_buffer_runner({
     input_file => $test_cfg->create_input_file([qw(21 25606454 test G C . . .)]),
-    custom => ['file=' . $test_cfg->{custom_vcf} . ',short_name=test,format=vcf'],
+    custom => [$test_cfg->{custom_vcf}.',test,vcf'],
     quiet => 1,
     warning_file => 'STDERR',
   });
@@ -1829,8 +1829,7 @@ SKIP: {
 
   $runner = get_annotated_buffer_runner({
     input_file => $test_cfg->create_input_file([qw(21 25606454 test G C . . .)]),
-    custom => ['file=' . $test_cfg->{custom_vcf} . ',short_name=test,format=vcf',
-               'file=' . $test_cfg->{custom_vcf_2} . ',short_name=test,format=vcf'],
+    custom => [$test_cfg->{custom_vcf}.',test,vcf', $test_cfg->{custom_vcf_2}.',test,vcf'],
     quiet => 1,
     warning_file => 'STDERR',
   });

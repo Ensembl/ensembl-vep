@@ -1,4 +1,4 @@
-# Copyright [2016-2022] EMBL-European Bioinformatics Institute
+# Copyright [2016-2023] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -372,7 +372,7 @@ SKIP: {
 
   $runner = get_runner({
     input_file => $test_cfg->{test_vcf},
-    custom => ['file=' . $test_cfg->{custom_vcf} . ',short_name=test,format=vcf,type=exact,fields=FOO'],
+    custom => [$test_cfg->{custom_vcf}.',test,vcf,exact,,FOO'],
     output_format => 'vcf',
   });
   $of = $runner->get_OutputFactory;
@@ -389,7 +389,7 @@ SKIP: {
 
   $runner = get_runner({
     input_data => "21\t25585733\t.\tCATG\tTACG",
-    custom => ['file=' . $test_cfg->{custom_vcf}.',short_name=test,format=vcf,type=overlap'],
+    custom => [$test_cfg->{custom_vcf}.',test,vcf,overlap'],
     output_format => 'vcf',
   });
   $of = $runner->get_OutputFactory;
