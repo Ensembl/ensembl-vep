@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2023] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ our %DEFAULTS = (
   failed            => 0,
   core_type         => 'core',
   polyphen_analysis => 'humvar',
-  pick_order        => [qw(mane canonical appris tsl biotype ccds rank length ensembl refseq )],
+  pick_order        => [qw(canonical appris tsl biotype ccds rank length ensembl refseq mane)],
   terminal_width    => 48,
   vcf_info_field    => 'CSQ',
   ucsc_data_root    => 'http://hgdownload.cse.ucsc.edu/goldenpath/',
@@ -303,14 +303,14 @@ our @OPTION_SETS = (
   {
     flags => ['gff'],
     set   => {
-      custom => '%gff%,,gff'
+      custom => 'file=%gff%,format=gff'
     }
   },
   
   {
     flags => ['gtf'],
     set   => {
-      custom => '%gtf%,,gtf'
+      custom => 'file=%gtf%,format=gtf'
     }
   },
   
@@ -380,7 +380,8 @@ our %REQUIRES = (
   original  => [qw(filters)],
   phyloP    => [qw(ucsc_assembly)],
   phastCons => [qw(ucsc_assembly)],
-  custom_multi_allelic => [qw(custom)]
+  custom_multi_allelic => [qw(custom)],
+  ga4gh_vrs => [qw(json)]
 );
 
 # incompatible options
@@ -396,8 +397,7 @@ our %INCOMPATIBLE = (
   tab         => [qw(vcf json)],
   individual  => [qw(minimal)],
   check_ref   => [qw(lookup_ref)],
-  check_svs   => [qw(offline)],
-  ga4gh_vrs   => [qw(vcf)]
+  check_svs   => [qw(offline)]
 );
 
 # deprecated/replaced flags
@@ -487,7 +487,7 @@ sub new {
     $config->{cache} = 1;
   }
 
-  my $config_command = "";
+  my $config_command;
 
   my @skip_opts = qw(web_output host port stats_file user warning_file input_data);
 

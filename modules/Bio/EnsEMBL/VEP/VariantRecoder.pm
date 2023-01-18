@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2023] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -296,7 +296,7 @@ sub _get_all_results {
 
   my $ga4gh_vrs = 0;
   if ($want_keys{'ga4gh_vrs'}) {
-    $want_keys{'spdi'} = 1;
+    $want_keys{'ga4gh_spdi'} = 1;
     $ga4gh_vrs = 1;
   }
 
@@ -470,14 +470,17 @@ sub _get_all_results {
       add_to_output($mane_by_allele{$allele}, \%key_mane, $results->{$line_id}->{$allele} ||= {input => $line_id});
     }
 
-    # Adding GA4GH VRS allele objects based on SPDI
+    # Adding GA4GH VRS allele objects
+    # The genomic refseq SPDI are stored in 'ga4gh_spdi'
+    # The find_in_ref calls make the ga4gh_spdi unique
     if ($ga4gh_vrs) {
       for my $allele (keys %{$results->{$line_id}}) {
-        next if (! exists $results->{$line_id}->{$allele}->{'spdi'});
-        my @spdis = @{$results->{$line_id}->{$allele}->{'spdi'}};
-        for my $spdi (@spdis) {
-          push @{$results->{$line_id}->{$allele}->{'ga4gh_vrs'}}, ga4gh_vrs_from_spdi($spdi);
+        next if (! exists $results->{$line_id}->{$allele}->{'ga4gh_spdi'});
+        my @ga4gh_spdis = @{$results->{$line_id}->{$allele}->{'ga4gh_spdi'}};
+        for my $ga4gh_spdi (@ga4gh_spdis) {
+          push @{$results->{$line_id}->{$allele}->{'ga4gh_vrs'}}, ga4gh_vrs_from_spdi($ga4gh_spdi);
         }
+        delete($results->{$line_id}->{$allele}->{'ga4gh_spdi'});
       }
     }
 

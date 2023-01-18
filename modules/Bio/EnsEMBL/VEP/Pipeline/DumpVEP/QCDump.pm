@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2023] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -272,8 +272,6 @@ sub check_dirs {
         or $file eq 'all_vars.gz'
         or $file eq 'all_vars.gz.tbi'
         or $file eq 'all_vars.gz.csi';
-        
-      die("ERROR: File size of $file does not look right\n") if -z $file;
 
       if($file =~ /var/) {
         die("ERROR: Cache should not contain var files, found $file in $dir/$chr\n") unless $has_var;

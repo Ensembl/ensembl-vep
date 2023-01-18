@@ -1,4 +1,4 @@
-# Copyright [2016-2023] EMBL-European Bioinformatics Institute
+# Copyright [2016-2022] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -602,7 +602,7 @@ SKIP: {
       input_file => $test_cfg->{test_vcf},
       everything => 1,
       dir => $test_cfg->{cache_root_dir},
-      custom => [$test_cfg->{custom_vcf}.',test,vcf,exact,,FOO'],
+      custom => ['file=' . $test_cfg->{custom_vcf}.',short_name=test,format=vcf,type=exact,fields=FOO'],
     });
     $of = Bio::EnsEMBL::VEP::OutputFactory::JSON->new({config => $ib->config});
     @lines = @{$of->get_all_lines_by_InputBuffer($ib)};
@@ -628,7 +628,7 @@ SKIP: {
       input_data => "21\t25585733\t.\tCATG\tTACG",
       everything => 1,
       dir => $test_cfg->{cache_root_dir},
-      custom => [$test_cfg->{custom_vcf}.',test,vcf,overlap'],
+      custom => ['file=' . $test_cfg->{custom_vcf} . ',short_name=test,format=vcf,type=overlap'],
     });
     $of = Bio::EnsEMBL::VEP::OutputFactory::JSON->new({config => $ib->config});
     @lines = @{$of->get_all_lines_by_InputBuffer($ib)};

@@ -1,4 +1,4 @@
-# Copyright [2016-2023] EMBL-European Bioinformatics Institute
+# Copyright [2016-2022] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ $cfg = Bio::EnsEMBL::VEP::Config->new({check_frequency => 1});
 is($cfg->param('check_existing'), 1, 'option sets, multiple in same out 2');
 
 $cfg = Bio::EnsEMBL::VEP::Config->new({gff => 'test'});
-is_deeply($cfg->param('custom'), ['test,,gff'], 'option sets, substitution');
+is_deeply($cfg->param('custom'), ['file=test,format=gff'], 'option sets, substitution');
 
 $cfg = Bio::EnsEMBL::VEP::Config->new({ucsc_assembly => 'hg38', phyloP => [7, 100], custom => []});
 is_deeply(

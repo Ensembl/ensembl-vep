@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2023] EMBL-European Bioinformatics Institute
+Copyright [2016-2022] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -481,9 +481,7 @@ sub create_StructuralVariationFeatures {
       DEL  => 'deletion',
       TDUP => 'tandem_duplication',
       DUP  => 'duplication',
-      CNV  => 'copy_number_variation',
-      INV  => 'inversion',
-      BND  => 'breakpoint'
+      CNV  => 'copy_number_variation'
     );
 
     $so_term = defined $terms{$type} ? $terms{$type} : $type;
