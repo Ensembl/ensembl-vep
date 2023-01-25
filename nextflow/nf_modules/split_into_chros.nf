@@ -28,13 +28,28 @@ process splitVCF {
   val(chr)
   path(vcf)
   path(vcf_index)
+  val(split_by_region)
+  val(region_size)
 
   output:
-  tuple path("${prefix}.${chr}.vcf.gz"), path("${prefix}.${chr}.vcf.gz.tbi")
+  tuple path("${prefix}.${chr}.*vcf.gz"), path("${prefix}.${chr}.*vcf.gz.tbi"), emit: files
 
   script:
   """
   bcftools view -r ${chr} ${vcf} -o ${prefix}.${chr}.vcf.gz -O z
   bcftools index -t ${prefix}.${chr}.vcf.gz
+  
+  if [[ ${split_by_region} ]]; then 
+    bcftools query -f'%CHROM\t%POS\n' ${prefix}.${chr}.vcf.gz | split -l ${region_size}
+    
+    for file in x*; do 
+      bcftools view -T \${file} -Oz ${prefix}.${chr}.vcf.gz > ${prefix}.${chr}.\${file}.vcf.gz
+      bcftools index -t ${prefix}.${chr}.\${file}.vcf.gz
+    done
+    
+    rm ${prefix}.${chr}.vcf.gz
+    rm ${prefix}.${chr}.vcf.gz.tbi
+    rm x*
+  fi
   """
 }

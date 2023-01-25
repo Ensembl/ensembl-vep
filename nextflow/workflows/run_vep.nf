@@ -97,7 +97,7 @@ log.info params.chros
     readChrVCF(params.vcf, vcf_index)
     chr = readChrVCF.out.splitText().map{it -> it.trim()}
   }
-  splitVCF(chr, params.vcf, vcf_index)
-  chrosVEP(splitVCF.out, params.vep_config)
+  splitVCF(chr, params.vcf, vcf_index, params.split_by_region, params.region_size)
+  chrosVEP(splitVCF.out.files.transpose(), params.vep_config)
   mergeVCF(chrosVEP.out.vcfFile.collect(), chrosVEP.out.indexFile.collect())
 }  
