@@ -10,17 +10,23 @@
 * **Variant Recoder** translates between different variant encodings.
 
 ##### Table of contents
-* [Installation and requirements](#install)
-* [VEP](#vep)
-  * [Usage](#vepusage)
-* [Haplosaurus](#haplo)
-  * [Usage](#haplousage)
-  * [Output](#haplooutput)
-  * [REST](#haploREST)
-  * [Flags](#haploflags)
-* [Variant Recoder](#recoder)
-  * [Usage](#recoderusage)
-  * [Output](#recoderoutput) 
+- [ensembl-vep](#ensembl-vep)
+        - [Table of contents](#table-of-contents)
+    - [Installation and requirements](#installation-and-requirements)
+      - [Additional CPAN modules](#additional-cpan-modules)
+      - [Docker](#docker)
+  - [VEP](#vep)
+    - [Usage](#usage)
+  - [Haplosaurus](#haplosaurus)
+    - [Usage](#usage-1)
+    - [Output](#output)
+    - [REST service](#rest-service)
+    - [Flags](#flags)
+    - [bioperl-ext](#bioperl-ext)
+  - [Variant Recoder](#variant-recoder)
+    - [Usage](#usage-2)
+    - [Output](#output-1)
+    - [Options](#options)
 
 ---
 <a name="install"></a>
