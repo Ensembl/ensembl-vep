@@ -1470,7 +1470,7 @@ $vfoa = $of->get_all_StructuralVariationOverlapAlleles($ib->buffer->[0])->[1];
 is_deeply(
   $of->BaseStructuralVariationOverlapAllele_to_output_hash($vfoa),
   {
-    'IMPACT' => 'MODIFIER',
+    'IMPACT' => 'HIGH',
     'Consequence' => [
       'coding_sequence_variant',
       'feature_elongation'
@@ -1500,7 +1500,7 @@ $vfoa = $of->get_all_StructuralVariationOverlapAlleles($ib->buffer->[0])->[1];
 is_deeply(
   $of->StructuralVariationOverlapAllele_to_output_hash($vfoa),
   {
-    'IMPACT' => 'MODIFIER',
+    'IMPACT' => 'HIGH',
     'Consequence' => [
       'coding_sequence_variant',
       'feature_elongation'
@@ -1518,7 +1518,7 @@ $of->{allele_number} = 1;
 is_deeply(
   $of->StructuralVariationOverlapAllele_to_output_hash($vfoa),
   {
-    'IMPACT' => 'MODIFIER',
+    'IMPACT' => 'HIGH',
     'Consequence' => [
       'coding_sequence_variant',
       'feature_elongation'
@@ -1540,7 +1540,7 @@ $of->{flag_pick} = 1;
 is_deeply(
   $of->StructuralVariationOverlapAllele_to_output_hash($vfoa),  
   {
-    'IMPACT' => 'MODIFIER',
+    'IMPACT' => 'HIGH',
     'Consequence' => [
       '3_prime_UTR_variant',
       'feature_elongation'
@@ -1644,7 +1644,7 @@ is_deeply(
   $of->TranscriptStructuralVariationAllele_to_output_hash($vfoa, {}),
   {
     'STRAND' => -1,
-    'IMPACT' => 'MODIFIER',
+    'IMPACT' => 'HIGH',
     'Consequence' => [
       'coding_sequence_variant',
       'feature_elongation'
