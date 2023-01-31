@@ -1470,10 +1470,10 @@ $vfoa = $of->get_all_StructuralVariationOverlapAlleles($ib->buffer->[0])->[1];
 is_deeply(
   $of->BaseStructuralVariationOverlapAllele_to_output_hash($vfoa),
   {
-    'IMPACT' => 'MODIFIER',
+    'IMPACT' => 'HIGH',
     'Consequence' => [
-      'coding_sequence_variant',
-      'feature_elongation'
+      'feature_elongation',
+      'coding_sequence_variant'
     ],
     'Allele' => 'duplication'
   },
@@ -1500,10 +1500,10 @@ $vfoa = $of->get_all_StructuralVariationOverlapAlleles($ib->buffer->[0])->[1];
 is_deeply(
   $of->StructuralVariationOverlapAllele_to_output_hash($vfoa),
   {
-    'IMPACT' => 'MODIFIER',
+    'IMPACT' => 'HIGH',
     'Consequence' => [
-      'coding_sequence_variant',
-      'feature_elongation'
+      'feature_elongation',
+      'coding_sequence_variant'
     ],
     'OverlapPC' => '0.01',
     'Feature_type' => 'Transcript',
@@ -1518,10 +1518,10 @@ $of->{allele_number} = 1;
 is_deeply(
   $of->StructuralVariationOverlapAllele_to_output_hash($vfoa),
   {
-    'IMPACT' => 'MODIFIER',
+    'IMPACT' => 'HIGH',
     'Consequence' => [
-      'coding_sequence_variant',
-      'feature_elongation'
+      'feature_elongation',
+      'coding_sequence_variant'
     ],
     'OverlapPC' => '0.01',
     'Feature_type' => 'Transcript',
@@ -1540,10 +1540,10 @@ $of->{flag_pick} = 1;
 is_deeply(
   $of->StructuralVariationOverlapAllele_to_output_hash($vfoa),  
   {
-    'IMPACT' => 'MODIFIER',
+    'IMPACT' => 'HIGH',
     'Consequence' => [
-      '3_prime_UTR_variant',
-      'feature_elongation'
+      'feature_elongation',
+      '3_prime_UTR_variant'
     ],
     'OverlapPC' => '0.01',
     'Feature_type' => 'Transcript',
@@ -1644,10 +1644,10 @@ is_deeply(
   $of->TranscriptStructuralVariationAllele_to_output_hash($vfoa, {}),
   {
     'STRAND' => -1,
-    'IMPACT' => 'MODIFIER',
+    'IMPACT' => 'HIGH',
     'Consequence' => [
-      'coding_sequence_variant',
-      'feature_elongation'
+      'feature_elongation',
+      'coding_sequence_variant'
     ],
     'OverlapPC' => '0.01',
     'Feature_type' => 'Transcript',
@@ -1800,7 +1800,7 @@ SKIP: {
 
   $runner = get_annotated_buffer_runner({
     input_file => $test_cfg->create_input_file([qw(21 25606454 test G C . . .)]),
-    custom => [$test_cfg->{custom_vcf}.',test,vcf'],
+    custom => ['file=' . $test_cfg->{custom_vcf} . ',short_name=test,format=vcf'],
     quiet => 1,
     warning_file => 'STDERR',
   });
@@ -1829,7 +1829,8 @@ SKIP: {
 
   $runner = get_annotated_buffer_runner({
     input_file => $test_cfg->create_input_file([qw(21 25606454 test G C . . .)]),
-    custom => [$test_cfg->{custom_vcf}.',test,vcf', $test_cfg->{custom_vcf_2}.',test,vcf'],
+    custom => ['file=' . $test_cfg->{custom_vcf} . ',short_name=test,format=vcf',
+               'file=' . $test_cfg->{custom_vcf_2} . ',short_name=test,format=vcf'],
     quiet => 1,
     warning_file => 'STDERR',
   });
