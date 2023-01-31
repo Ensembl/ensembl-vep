@@ -1472,8 +1472,8 @@ is_deeply(
   {
     'IMPACT' => 'HIGH',
     'Consequence' => [
-      'coding_sequence_variant',
-      'feature_elongation'
+      'feature_elongation',
+      'coding_sequence_variant'
     ],
     'Allele' => 'duplication'
   },
@@ -1502,8 +1502,8 @@ is_deeply(
   {
     'IMPACT' => 'HIGH',
     'Consequence' => [
-      'coding_sequence_variant',
-      'feature_elongation'
+      'feature_elongation',
+      'coding_sequence_variant'
     ],
     'OverlapPC' => '0.01',
     'Feature_type' => 'Transcript',
@@ -1520,8 +1520,8 @@ is_deeply(
   {
     'IMPACT' => 'HIGH',
     'Consequence' => [
-      'coding_sequence_variant',
-      'feature_elongation'
+      'feature_elongation',
+      'coding_sequence_variant'
     ],
     'OverlapPC' => '0.01',
     'Feature_type' => 'Transcript',
@@ -1542,8 +1542,8 @@ is_deeply(
   {
     'IMPACT' => 'HIGH',
     'Consequence' => [
-      '3_prime_UTR_variant',
-      'feature_elongation'
+      'feature_elongation',
+      '3_prime_UTR_variant'
     ],
     'OverlapPC' => '0.01',
     'Feature_type' => 'Transcript',
@@ -1646,8 +1646,8 @@ is_deeply(
     'STRAND' => -1,
     'IMPACT' => 'HIGH',
     'Consequence' => [
-      'coding_sequence_variant',
-      'feature_elongation'
+      'feature_elongation',
+      'coding_sequence_variant'
     ],
     'OverlapPC' => '0.01',
     'Feature_type' => 'Transcript',
