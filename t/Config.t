@@ -90,7 +90,7 @@ $cfg = Bio::EnsEMBL::VEP::Config->new({check_frequency => 1});
 is($cfg->param('check_existing'), 1, 'option sets, multiple in same out 2');
 
 $cfg = Bio::EnsEMBL::VEP::Config->new({gff => 'test'});
-is_deeply($cfg->param('custom'), ['test,,gff'], 'option sets, substitution');
+is_deeply($cfg->param('custom'), ['file=test,format=gff'], 'option sets, substitution');
 
 $cfg = Bio::EnsEMBL::VEP::Config->new({ucsc_assembly => 'hg38', phyloP => [7, 100], custom => []});
 is_deeply(
