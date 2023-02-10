@@ -115,6 +115,7 @@ ENV MACHTYPE x86_64
 ENV DEPS $OPT_SRC
 ENV PATH $OPT_SRC/ensembl-vep:$OPT_SRC/var_c_code:$PATH
 ENV LANG_VAR en_US.UTF-8
+ENV BRANCH main
 
 # Create vep user
 RUN useradd -r -m -U -d "$OPT" -s /bin/bash -c "VEP User" -p '' vep && usermod -a -G sudo vep && mkdir -p $OPT_SRC
