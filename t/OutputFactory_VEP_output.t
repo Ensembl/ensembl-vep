@@ -17,6 +17,7 @@ use warnings;
 
 use Test::More;
 use Test::Exception;
+use Test::Deep;
 use FindBin qw($Bin);
 
 use lib $Bin;
@@ -75,7 +76,7 @@ $of->param('custom', 0);
 delete($of->{field_order});
 delete($of->{fields});
 
-is_deeply(
+cmp_deeply(
   $of->headers(),
   [
     '## ENSEMBL VARIANT EFFECT PREDICTOR v1',
@@ -101,7 +102,7 @@ is_deeply(
     '## STRAND : Strand of the feature (1/-1)',
     '## FLAGS : Transcript quality flags',
     '## custom_test : test.vcf.gz',
-    '## VEP command-line: vep',
+    re('\#\# VEP command-line: vep'),
     "#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tExisting_variation\tExtra"
   ],
   'headers'
@@ -112,10 +113,10 @@ my $runner = get_annotated_buffer_runner({
   plugin => ['TestPlugin'],
   quiet => 1,
 });
-is(
+like(
   $runner->get_OutputFactory->headers->[-2].$runner->get_OutputFactory->headers->[-1],
-  "## VEP command-line: vep --assembly GRCh38 --cache_version 84 --database 0 --dir [PATH]/ --input_file [PATH]/test.vcf --no_stats --offline --plugin TestPlugin --quiet".
-  "#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tExisting_variation\tExtra",
+  '/\#\# VEP command-line: vep --assembly GRCh38 --cache_version 84 --database 0 --dir \[PATH\]/ (--dir_plugins /plugins )*--input_file \[PATH\]/test.vcf (--no_htslib --no_plugins )*--no_stats (--no_update )*'.
+  '--offline --plugin TestPlugin (--pluginsdir /plugins )*--quiet\#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tExisting_variation\tExtra/',
   'headers - plugin'
 );
 
