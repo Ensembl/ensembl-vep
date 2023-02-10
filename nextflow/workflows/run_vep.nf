@@ -59,12 +59,14 @@ if(check_bgzipped.exitValue()){
   exit 1, "The specified VCF file is not bgzipped: ${params.vcf}"
 }
 
-def sout = new StringBuilder(), serr = new StringBuilder()
-check_parsing = "$params.singularity_dir/vep.sif tabix -p vcf -f $params.vcf".execute()
-check_parsing.consumeProcessOutput(sout, serr)
-check_parsing.waitFor()
-if( serr ){
-  exit 1, "The specified VCF file has issues in parsing: $serr"
+if ( !params.skip_check ){
+  def sout = new StringBuilder(), serr = new StringBuilder()
+  check_parsing = "$params.singularity_dir/vep.sif tabix -p vcf -f $params.vcf".execute()
+  check_parsing.consumeProcessOutput(sout, serr)
+  check_parsing.waitFor()
+  if( serr ){
+    exit 1, "The specified VCF file has issues in parsing: $serr"
+  }
 }
 vcf_index = "${params.vcf}.tbi"
 
@@ -86,7 +88,7 @@ log.info params.chros
   if (params.chros){
     log.info 'Reading chromosome names from list'
     chr_str = params.chros.toString()
-    chr = Channel.of(chr_str.split(','))
+    chr = Channel.of(chr_str.split(',')).toSortedList()
   }
   else if (params.chros_file) {
     log.info 'Reading chromosome names from file'
@@ -97,7 +99,10 @@ log.info params.chros
     readChrVCF(params.vcf, vcf_index)
     chr = readChrVCF.out.splitText().map{it -> it.trim()}
   }
+  chr.view()
   splitVCF(chr, params.vcf, vcf_index, params.split_by_region, params.region_size)
-  chrosVEP(splitVCF.out.files.transpose(), params.vep_config)
+  chan = splitVCF.out.files.transpose()
+  chan.view()
+  chrosVEP(chan, params.vep_config)
   mergeVCF(chrosVEP.out.vcfFile.collect(), chrosVEP.out.indexFile.collect())
 }  

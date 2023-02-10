@@ -32,6 +32,8 @@ process mergeVCF {
     
   cpus params.cpus
   container "${params.singularity_dir}/bcftools.sif"
+  
+  cache 'lenient'
 
    
   input:
