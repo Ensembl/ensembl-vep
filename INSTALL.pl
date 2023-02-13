@@ -385,25 +385,6 @@ sub update() {
 
   my $current_branch = $CURRENT_VERSION_DATA->{'ensembl-vep'}->{release};
 
-  my $api_branch  = $API_VERSION;
-     $api_branch  =~ s/release\///;
-
-  # branch provided by the "--VERSION" flag
-  if ($api_branch != $current_branch) {
-    print "The 'VERSION' installation flag has been deprecated.\n\n";
-    my $branch = looks_like_number($API_VERSION) ? 'release/'.$API_VERSION : $API_VERSION;
-    if(`which git` && -d $RealBin.'/.git') {
-      print "Please, use git to update '$module' using the commands:\n\n";
-      print "\tgit pull\n";
-      print "\tgit checkout $branch\n\n";
-    }
-    else {
-      print "Please, re-download '$module' with the desired version.\n\n";
-    }
-    print "Exit VEP install script\n";
-    exit(0);
-  }
-
   my $message;
 
   # don't have latest
