@@ -151,7 +151,6 @@ my $config = {};
 GetOptions(
   $config,
   'DESTDIR|d=s',
-  'VERSION|v=i', # Deprecated
   'CACHE_VERSION|e=i',
   'ASSEMBLY|y=s',
   'BIOPERL|b=s',
@@ -198,7 +197,6 @@ $config = read_config_from_environment($config);
 
 # Quick fix: this script should use $config instead of multiple global variables
 $DEST_DIR     ||=  $config->{DESTDIR};
-$API_VERSION  ||=  $config->{VERSION};
 $DATA_VERSION ||=  $config->{CACHE_VERSION};
 $ASSEMBLY     ||=  $config->{ASSEMBLY};
 $BIOPERL_URL  ||=  $config->{BIOPERL};
@@ -387,7 +385,6 @@ sub update() {
 
   my $current_branch = $CURRENT_VERSION_DATA->{'ensembl-vep'}->{release};
 
-  # Check if the $API_VERSION has been set by the deprecated "--VERSION" flag
   my $api_branch  = $API_VERSION;
      $api_branch  =~ s/release\///;
 
