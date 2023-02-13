@@ -319,14 +319,14 @@ if($AUTO) {
 
 else {
   my $api_msg = 
-      "  - Install v$API_VERSION of the Ensembl API for use by the VEP. " .
+      " - Install v$API_VERSION of the Ensembl API for use by the VEP. " .
       "It will not affect any existing installations of the Ensembl API that you may have.\n";
 
   print "Hello! This installer will help you set up VEP v$API_VERSION, including:\n" .
     ($NO_UPDATE ? "" : $api_msg) .
-    "  - Download and install cache files from Ensembl's FTP server.\n" .
-    "  - Download FASTA files from Ensembl's FTP server.\n" .
-    ($NO_PLUGINS ? "" : "  - Download VEP plugins.\n") . "\n"
+    " - Download and install cache files from Ensembl's FTP server.\n" .
+    " - Download FASTA files from Ensembl's FTP server.\n" .
+    ($NO_PLUGINS ? "" : " - Download VEP plugins.\n") . "\n"
     unless $QUIET;
 
   # run subs
