@@ -1911,7 +1911,7 @@ Options
 -h | --help        Display this message and quit
 
 -d | --DESTDIR     Set destination directory for API install (default = './')
---CACHE_VERSION    Set data (cache, FASTA) version to install if different from --VERSION (default = $VERSION)
+--CACHE_VERSION    Set data (cache, FASTA) version to install (default = $VERSION)
 -c | --CACHEDIR    Set destination directory for cache files (default = '$ENV{HOME}/.vep/')
 
 -a | --AUTO        Run installer without user prompts. Use "a" (API + Faidx/htslib),
