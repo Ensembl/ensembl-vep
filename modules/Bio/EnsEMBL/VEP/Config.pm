@@ -498,7 +498,14 @@ sub new {
     next if !defined($value) || (ref($value) eq "ARRAY" && @{$value} == 0) || grep { /$flag/ } @skip_opts;
 
     $value = join(" --$flag ", @{$value}) if ref($value) eq "ARRAY";
-    $value =~ s/(\/[\w-]+?)+\//\[PATH\]\//g;
+    
+    if ($^O eq "MSWin32"){
+      $value =~ s/.+(?=\\)/\[PATH\]/g;
+    }
+    else {
+      $value =~ s/.+(?=\/)/\[PATH\]/g;
+    }
+    
     $config_command .= $value eq 1? "--$flag "  : "--$flag $value ";
   }
 
