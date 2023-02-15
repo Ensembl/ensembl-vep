@@ -24,8 +24,7 @@ my $config = {};
 
 my $arg_count = scalar @ARGV;
 
-GetOptions(
-  $config,
+my @valid_params = (
   'help',                    # displays help message
 
   # input options,
@@ -214,7 +213,9 @@ GetOptions(
 
   # debug
   'debug',                   # print out debug info
-) or die "ERROR: Failed to parse command-line flags\n";
+);
+GetOptions($config, @valid_params) or die "ERROR: Failed to parse command-line flags\n";
+$config->{_valid_params} = \@valid_params;
 
 die("ERROR: Unexpected extra command-line parameter(s): " . join(", ", @ARGV)) if scalar @ARGV;
 

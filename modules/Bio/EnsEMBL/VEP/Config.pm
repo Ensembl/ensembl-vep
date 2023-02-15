@@ -57,6 +57,9 @@ use warnings;
 
 package Bio::EnsEMBL::VEP::Config;
 
+use File::Spec;
+use Getopt::Long;
+
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Variation::Utils::VariationEffect;
 
@@ -487,6 +490,9 @@ sub new {
     $config->{cache} = 1;
   }
 
+  # remove list of valid params as not needed anymore
+  $config->{_valid_params} = undef;
+
   my $config_command = "";
 
   my @skip_opts = qw(web_output host port stats_file user warning_file input_data);
@@ -751,11 +757,51 @@ Cache: http://www.ensembl.org/info/docs/tools/vep/script/index.html#cache
 }
 
 
+=head2 is_valid_param
+
+  Arg 1      : hashref $config
+  Arg 2      : string $key
+  Arg 3      : string $value
+  Example    : $is_valid = is_valid_param($config, "assembly", "GRCh38")
+  Description: Check if a param is valid using GetOptions and a list of VEP's
+               valid commad-line arguments from $config->{_valid_params}.
+  Returntype : bool
+  Caller     : read_config_from_environment(), read_config_from_file()
+  Status     : Stable
+
+=cut
+
+sub is_valid_param {
+  my $config = shift;
+  my $key = shift;
+  my $value = shift;
+
+  # Prepare variable as command-line arguments
+  my @original_ARGV = @ARGV;
+  @ARGV = ( "--" . $key, $value );
+
+  # Run GetOptions to check validity of parameter
+  my $res = {};
+  my @valid_args = @{ $config->{_valid_params} };
+
+  # Ignore STDERR from GetOptions to avoid warnings about invalid params
+  open TMP, '>', File::Spec->devnull() and *STDERR = *TMP;
+  GetOptions($res, @valid_args);
+  close(TMP);
+
+  my $is_valid = %$res ? 1 : 0;
+
+  # Restore command-line arguments
+  @ARGV = @original_ARGV;
+  return $is_valid;
+}
+
+
 =head2 read_config_from_file
 
   Arg 1      : string $config_file
   Arg 2      : hashref $config
-  Example    : $config_hash = $config->read_config_from_file($config_file, $config)
+  Example    : $config_hash = $self->read_config_from_file($config_file, $config)
   Description: Read config params from a flat file and add them to config hash
   Returntype : none
   Exceptions : throws if cannot read from file
@@ -789,6 +835,8 @@ sub read_config_from_file {
     # remove quotes
     s/[\"\']//g for @split;
 
+    next unless is_valid_param($config, $key, $split[0]);
+
     if(grep {$key eq $_} @ALLOW_MULTIPLE) {
       push @{$config->{$key}}, join(' ', @split);
     }
@@ -808,7 +856,7 @@ sub read_config_from_file {
 =head2 read_config_from_environment
 
   Arg 1      : hashref $config
-  Example    : $config_hash = $config->read_config_from_environment($config)
+  Example    : $config_hash = $self->read_config_from_environment($config)
   Description: Read config params from environment variables prefixed by VEP_
                and add them to config hash; e.g., dir_plugins is set to
                VEP_DIR_PLUGINS, if defined. NB: VEP arguments are assumed to
@@ -834,6 +882,8 @@ sub read_config_from_environment {
     # Assumption: VEP arguments are always lowercase
     $key = lc $key;
     $key =~ s/^VEP_//ig;
+
+    next unless is_valid_param($config, $key, $value);
 
     if (grep {$key eq $_} @ALLOW_MULTIPLE) {
       # Properly set flags that can be specified more than once
