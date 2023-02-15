@@ -1,3 +1,5 @@
+ARG BRANCH=release/110
+
 ###################################################
 # Stage 1 - docker container to build ensembl-vep #
 ###################################################
@@ -22,7 +24,7 @@ RUN apt-get update && apt-get -y install \
 ENV OPT /opt/vep
 ENV OPT_SRC $OPT/src
 ENV HTSLIB_DIR $OPT_SRC/htslib
-ENV BRANCH release/110
+ARG BRANCH
 
 # Working directory
 WORKDIR $OPT_SRC
@@ -115,6 +117,7 @@ ENV MACHTYPE x86_64
 ENV DEPS $OPT_SRC
 ENV PATH $OPT_SRC/ensembl-vep:$OPT_SRC/var_c_code:$PATH
 ENV LANG_VAR en_US.UTF-8
+ARG BRANCH
 
 # Create vep user
 RUN useradd -r -m -U -d "$OPT" -s /bin/bash -c "VEP User" -p '' vep && usermod -a -G sudo vep && mkdir -p $OPT_SRC
