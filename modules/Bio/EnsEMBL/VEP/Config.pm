@@ -823,14 +823,14 @@ sub read_config_from_file {
     next if /^\#/;
 
     # preserve spaces between quotes
-    s/([\"\'].*)(\s)(.*[\"\'])/$1\_\_\_SPACE\_\_\_$3/g;
+    s/\s+(?=(?:(?:[^"]*"){2})*[^"]*"[^"]*$)/___SPACE___/g;
 
     my @split = split /\s+/;
     my $key = shift @split;
     $key =~ s/^\-//g;
 
     # restore spaces
-    s/\_\_\_SPACE\_\_\_/ /g for @split;
+    s/___SPACE___/ /g for @split;
 
     # remove quotes
     s/[\"\']//g for @split;
