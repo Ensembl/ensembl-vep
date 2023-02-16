@@ -1026,12 +1026,13 @@ sub read_config_from_file {
     # remove quotes
     s/[\"\']//g for @split;
 
-    next unless is_valid_param($config, $key, $split[0]);
-
     if(grep {$key eq $_} @ALLOW_MULTIPLE) {
-      push @{$config->{$key}}, join(' ', @split);
+      my $value = join(' ', @split);
+      next unless is_valid_param($config, $key, $value);
+      push @{$config->{$key}}, $value;
     }
     else {
+      next unless is_valid_param($config, $key, $split[0]);
       $config->{$key} ||= $split[0];
     }
   }
