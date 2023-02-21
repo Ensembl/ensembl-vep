@@ -992,6 +992,12 @@ sub is_valid_param {
   # Run GetOptions to check validity of parameter
   my $res = {};
   GetOptions($res, @VEP_PARAMS);
+
+  # Ignore STDERR from GetOptions to avoid warnings about invalid params
+  open TMP, '>', File::Spec->devnull() and *STDERR = *TMP;
+  GetOptions($res, @VEP_PARAMS);
+  close(TMP);
+
   my $is_valid = %$res ? 1 : 0;
 
   # Restore command-line arguments
@@ -1094,6 +1100,8 @@ sub read_config_from_environment {
         if $config->{verbose};
       next;
     }
+
+    next unless is_valid_param($config, $key, $value);
 
     if (grep {$key eq $_} @ALLOW_MULTIPLE) {
       # Properly set flags that can be specified more than once
