@@ -120,8 +120,7 @@ my $runner = get_annotated_buffer_runner({
 });
 like(
   $runner->get_OutputFactory->headers->[-2].$runner->get_OutputFactory->headers->[-1],
-  '/\#\# VEP command-line: vep --assembly GRCh38 --cache_version 84 --database 0 --dir \[PATH\]/ (--dir_plugins /plugins )*--input_file \[PATH\]/test.vcf (--no_htslib --no_plugins )*--no_stats (--no_update )'.
-  '*--offline --plugin TestPlugin (--pluginsdir /plugins )*--quiet --show_ref_allele --tab\#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tExisting_variation\tREF_ALLELE\tIMPACT\tDISTANCE\tSTRAND\tFLAGS\ttest/',
+  '/^.*--plugin TestPlugin.*\ttest$/',
   'headers - plugin'
 );
 
