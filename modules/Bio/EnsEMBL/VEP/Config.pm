@@ -983,9 +983,11 @@ sub is_valid_param {
   my $res = {};
 
   # Ignore STDERR from GetOptions to avoid warnings about invalid params
-  open TMP, '>', File::Spec->devnull() and *STDERR = *TMP;
+  open OLDERR, '>&STDERR' or die "ERROR: Cannot duplicate STDERR: $!";
+  open STDERR, '>', File::Spec->devnull();
   GetOptions($res, @VEP_PARAMS);
-  close(TMP);
+  open STDERR, '>&OLDERR' or die "ERROR: Cannot restore stdout: $!";
+  close OLDERR or die "ERROR: Cannot close OLDERR: $!";
 
   my $is_valid = %$res ? 1 : 0;
 
