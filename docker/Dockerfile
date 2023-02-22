@@ -37,7 +37,7 @@ RUN if [ "$BRANCH" = "main" ]; \
     # Get ensembl cpanfile in order to get the list of the required Perl libraries
     wget -q "https://raw.githubusercontent.com/Ensembl/ensembl/$BRANCH/cpanfile" -O "ensembl_cpanfile" && \
     # Clone ensembl-vep git repository
-    git clone fix_docker --depth 1 https://github.com/Ensembl/ensembl-vep.git && chmod u+x ensembl-vep/*.pl && \
+    git clone -b fix_docker --depth 1 https://github.com/Ensembl/ensembl-vep.git && chmod u+x ensembl-vep/*.pl && \
     # Clone ensembl-variation git repository and compile C code
     git clone $BRANCH_OPT --depth 1 https://github.com/Ensembl/ensembl-variation.git && \
     mkdir var_c_code && \
