@@ -983,9 +983,8 @@ sub is_valid_param {
   my $res = {};
 
   # Ignore STDERR from GetOptions to avoid warnings about invalid params
-  open TMP, '>', File::Spec->devnull() and *STDERR = *TMP;
-  GetOptions($res, @VEP_PARAMS);
-  close(TMP);
+  GetOptions($res, @VEP_PARAMS) or
+    warn("Ignoring unsupported option '${key}' found via ENV variable or INI file\n");
 
   my $is_valid = %$res ? 1 : 0;
 
