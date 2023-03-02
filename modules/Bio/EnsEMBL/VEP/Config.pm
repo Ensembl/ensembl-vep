@@ -59,6 +59,7 @@ package Bio::EnsEMBL::VEP::Config;
 
 use File::Spec;
 use Getopt::Long;
+Getopt::Long::Configure("pass_through");
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Variation::Utils::VariationEffect;
@@ -981,11 +982,7 @@ sub is_valid_param {
 
   # Run GetOptions to check validity of parameter
   my $res = {};
-
-  # Ignore STDERR from GetOptions to avoid warnings about invalid params
-  GetOptions($res, @VEP_PARAMS) or
-    warn("Ignoring unsupported option '${key}' found via ENV variable or INI file\n");
-
+  GetOptions($res, @VEP_PARAMS);
   my $is_valid = %$res ? 1 : 0;
 
   # Restore command-line arguments
