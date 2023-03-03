@@ -206,19 +206,8 @@ sub create_VariationFeatures {
   my $vf;
   
   # sv?
-  if($allele =~ /^(INS|DEL|DUP)$/) {
-    my $so_term;
-
-    # convert to SO term
-    my %terms = (
-      INS  => 'insertion',
-      DEL  => 'deletion',
-      TDUP => 'tandem_duplication',
-      DUP  => 'duplication'
-    );
-
-    $so_term = defined $terms{$allele} ? $terms{$allele} : $allele;
-
+  my $so_term = $self->get_SO_term($allele);
+  if(defined($so_term)) {
     $vf = Bio::EnsEMBL::Variation::StructuralVariationFeature->new_fast({
       start          => $start,
       end            => $end,

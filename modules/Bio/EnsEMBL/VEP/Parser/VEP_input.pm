@@ -90,7 +90,7 @@ sub validate_line {
     $line[0] =~ /\w+/ &&
       $line[1] =~ /^\d+$/ &&
       $line[2] && $line[2] =~ /^\d+$/ &&
-      $line[3] && $line[3] =~ /([a-z]{2,})|([ACGTN-]+\/[ACGTN-]+)/i
+      $line[3] && $line[3] =~ /([a-z]{3,})|([ACGTN-]+\/[ACGTN-]+)/i
   );
 }
 
@@ -158,17 +158,7 @@ sub create_VariationFeatures {
 
   # sv?
   if($allele_string !~ /\//) {
-    my $so_term;
-
-    # convert to SO term
-    my %terms = (
-      INS  => 'insertion',
-      DEL  => 'deletion',
-      TDUP => 'tandem_duplication',
-      DUP  => 'duplication'
-    );
-
-    $so_term = defined $terms{$allele_string} ? $terms{$allele_string} : $allele_string;
+    my $so_term = $self->get_SO_term($allele_string) || $allele_string;
 
     $vf = Bio::EnsEMBL::Variation::StructuralVariationFeature->new_fast({
       start          => $start,
