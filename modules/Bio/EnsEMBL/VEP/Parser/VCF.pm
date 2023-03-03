@@ -108,6 +108,53 @@ sub new {
 }
 
 
+=head2 validate_line
+
+  Example    : $valid = $self->validate_line();
+  Description: Check if input line can be read using this format.
+  Returntype : bool
+  Exceptions : none
+  Caller     : $self->SUPER::detect_format()
+  Status     : Stable
+
+=cut
+
+sub validate_line {
+  my $self = shift;
+  my @line = @_;
+
+  return (
+    $line[0] =~ /(chr)?\w+/ &&
+      $line[1] =~ /^\d+$/ &&
+      $line[3] && $line[3] =~ /^[ACGTN\-\.]+$/i &&
+      $line[4]
+  );
+}
+
+
+=head2 validate_alts
+
+  Example    : $valid = $self->validate_alts('A,T,C');
+  Description: Check if alternative alleles are valid.
+  Returntype : bool
+  Exceptions : none
+  Caller     : $self->SUPER::detect_format()
+  Status     : Stable
+
+=cut
+
+sub validate_alts {
+  my $self = shift;
+  my $alts = shift;
+
+  my $ok = 1;
+  foreach my $alt(split(',', $alts)) {
+    $ok = 0 unless $alt =~ /^[\.ACGTN\-\*]+$|^(\<[\w\:\*]+\>)$/i;
+  }
+  return $ok;
+}
+
+
 =head2 parser
 
   Example    : $io_parser = $parser->parser();

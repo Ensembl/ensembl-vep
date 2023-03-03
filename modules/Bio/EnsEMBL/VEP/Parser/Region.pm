@@ -124,6 +124,28 @@ sub new {
 }
 
 
+=head2 validate_line
+
+  Example    : $valid = $self->validate_line();
+  Description: Check if input line can be read using this format.
+  Returntype : bool
+  Exceptions : none
+  Caller     : $self->SUPER::detect_format()
+  Status     : Stable
+
+=cut
+
+sub validate_line {
+  my $self = shift;
+  my @line = @_;
+
+  return (
+    scalar @line == 1 &&
+      $line[0] =~ /^[^\:]+\:\d+\-\d+(\:[\-\+]?1)?[\/\:]([a-z]{3,}|[ACGTN-]+)$/i
+  );
+}
+
+
 =head2 parser
 
   Example    : $io_parser = $parser->parser();
@@ -167,7 +189,7 @@ sub create_VariationFeatures {
 
   my $region = $parser->get_value();
 
-  return [] unless $region =~ /^([^\:]+)\:(\d+)\-(\d+)(\:[\-\+]?1)?[\/\:](ins|dup|del|[ACGTN-]+)$/i;
+  return [] unless validate_line($region);
   my ($chr, $start, $end) = ($1, $2, $3);
 
   my ($strand, $allele);

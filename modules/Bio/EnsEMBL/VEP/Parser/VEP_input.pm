@@ -71,6 +71,30 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::IO::Parser::VEP_input;
 
 
+=head2 validate_line
+
+  Example    : $valid = $self->validate_line();
+  Description: Check if input line can be read using this format.
+  Returntype : bool
+  Exceptions : none
+  Caller     : $self->SUPER::detect_format()
+  Status     : Stable
+
+=cut
+
+sub validate_line {
+  my $self = shift;
+  my @line = @_;
+
+  return (
+    $line[0] =~ /\w+/ &&
+      $line[1] =~ /^\d+$/ &&
+      $line[2] && $line[2] =~ /^\d+$/ &&
+      $line[3] && $line[3] =~ /([a-z]{2,})|([ACGTN-]+\/[ACGTN-]+)/i
+  );
+}
+
+
 =head2 parser
 
   Example    : $io_parser = $parser->parser();

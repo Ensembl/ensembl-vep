@@ -412,69 +412,38 @@ sub detect_format {
     next unless @data;
 
     # region chr21:10-10:1/A
-    if (
-      scalar @data == 1 &&
-      $data[0] =~ /^[^\:]+\:\d+\-\d+(\:[\-\+]?1)?[\/\:](ins|dup|del|[ACGTN-]+)$/i
-    ) {
+    if ( $self->Bio::EnsEMBL::VEP::Parser::Region::validate_line(@data) ) {
       $format = 'region';
     }
 
     # SPDI: NC_000016.10:68684738:G:A
-    elsif (
-      scalar @data == 1 &&
-      $data[0] =~ /^(.*?\:){2}([^\:]+|)$/i
-    ) {
+    elsif ($self->Bio::EnsEMBL::VEP::Parser::SPDI::validate_line(@data) ) {
       $format = 'spdi';
     }
 
     # CAID: CA9985736
-    elsif (
-      scalar @data == 1 &&
-      $data[0] =~ /^CA\d{1,}$/i
-    ) {
+    elsif ( $self->Bio::EnsEMBL::VEP::Parser::CAID::validate_line(@data) ) {
       $format = 'caid';
     }
 
     # HGVS: ENST00000285667.3:c.1047_1048insC
-    elsif (
-      scalar @data == 1 &&
-      $data[0] =~ /^([^\:]+)\:.*?([cgmrp]?)\.?([\*\-0-9]+.*)$/i
-    ) {
+    elsif ( $self->Bio::EnsEMBL::VEP::Parser::HGVS::validate_line(@data) ) {
       $format = 'hgvs';
     }
 
     # variant identifier: rs123456
-    elsif (
-      scalar @data == 1
-    ) {
+    elsif ( $self->Bio::EnsEMBL::VEP::Parser::ID::validate_line(@data) ) {
       $format = 'id';
     }
 
     # VCF: 20  14370  rs6054257  G  A  29  0  NS=58;DP=258;AF=0.786;DB;H2  GT:GQ:DP:HQ
-    elsif (
-      $data[0] =~ /(chr)?\w+/ &&
-      $data[1] =~ /^\d+$/ &&
-      $data[3] && $data[3] =~ /^[ACGTN\-\.]+$/i &&
-      $data[4]
-    ) {
-
+    elsif ( $self->Bio::EnsEMBL::VEP::Parser::VCF::validate_line(@data) ) {
       # do some more thorough checking on the ALTs
-      my $ok = 1;
-
-      foreach my $alt(split(',', $data[4])) {
-        $ok = 0 unless $alt =~ /^[\.ACGTN\-\*]+$|^(\<[\w\:\*]+\>)$/i;
-      }
-
-      $format = 'vcf' if $ok;
+      $format = 'vcf' if $self->Bio::EnsEMBL::VEP::Parser::VCF::validate_alts($data[4]);
     }
 
     # ensembl: 20  14370  14370  A/G  +
-    elsif (
-      $data[0] =~ /\w+/ &&
-      $data[1] =~ /^\d+$/ &&
-      $data[2] && $data[2] =~ /^\d+$/ &&
-      $data[3] && $data[3] =~ /(ins|dup|del)|([ACGTN-]+\/[ACGTN-]+)/i
-    ) {
+    elsif ( $self->Bio::EnsEMBL::VEP::Parser::VEP_input::validate_line(@data) ) {
       $format = 'ensembl';
     }
 
