@@ -501,7 +501,7 @@ sub create_StructuralVariationFeatures {
   my $so_term = $self->get_SO_term($type) || $type;
   if($start >= $end && $so_term =~ /del/i) {
     my $line = join("\t", @$record);
-      $self->warning_msg("WARNING: line " . $self->line_number . " looks incomplete, skipping:\n$line\n");
+    $self->warning_msg("WARNING: VCF line " . $self->line_number . " looks incomplete, skipping:\n$line\n");
     $skip = 1;
   }
 
