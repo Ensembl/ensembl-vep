@@ -124,6 +124,11 @@ sub new {
 }
 
 
+sub _valid_line_regex {
+  return qr/^([^:]+):(\d+)-(\d+)(:[-\+]?1)?[\/:]([a-z]{3,}|[ACGTN-]+)$/i;
+}
+
+
 =head2 validate_line
 
   Example    : $valid = $self->validate_line();
@@ -139,10 +144,7 @@ sub validate_line {
   my $self = shift;
   my @line = @_;
 
-  return (
-    scalar @line == 1 &&
-      $line[0] =~ /^[^\:]+\:\d+\-\d+(\:[\-\+]?1)?[\/\:]([a-z]{3,}|[ACGTN-]+)$/i
-  );
+  return ( scalar @line == 1 && $line[0] =~ _valid_line_regex() );
 }
 
 
@@ -189,7 +191,7 @@ sub create_VariationFeatures {
 
   my $region = $parser->get_value();
 
-  return [] unless validate_line($region);
+  return [] unless $region =~ _valid_line_regex();
   my ($chr, $start, $end) = ($1, $2, $3);
 
   my ($strand, $allele);
