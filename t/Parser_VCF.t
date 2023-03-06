@@ -468,11 +468,7 @@ is_deeply($vf, bless( {
   'seq_region_start' => 25587759
 }, 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature fuzzy');
 
-no warnings 'once';
-open(SAVE, ">&STDERR") or die "Can't save STDERR\n"; 
-
-close STDERR;
-open STDERR, '>', \$tmp;
+## test deletion and deletion warnings
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
@@ -494,6 +490,12 @@ is_deeply($vf, bless( {
   'start' => 25587759,
   'seq_region_start' => 25587759
 }, 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature del');
+
+no warnings 'once';
+open(SAVE, ">&STDERR") or die "Can't save STDERR\n"; 
+
+close STDERR;
+open STDERR, '>', \$tmp;
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, warning_file => 'STDERR'}),
