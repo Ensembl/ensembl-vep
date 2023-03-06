@@ -90,7 +90,7 @@ sub validate_line {
     $line[0] =~ /\w+/ &&
       $line[1] =~ /^\d+$/ &&
       $line[2] && $line[2] =~ /^\d+$/ &&
-      $line[3] && $line[3] =~ /([a-z]{3,})|([ACGTN-]+\/[ACGTN-]+)/i
+      $line[3] && $line[3] =~ /([a-z]{2,})|([ACGTN-]+\/[ACGTN-]+)/i
   );
 }
 
