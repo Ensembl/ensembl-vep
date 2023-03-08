@@ -1042,7 +1042,7 @@ sub read_config_from_file {
 
   close CONFIG;
 
-  $self->status_msg("Read configuration from $file") if $self->param('verbose');
+  $self->status_msg("Read configuration from $file") if $config->{verbose};
 
   return $config;
 }
@@ -1066,30 +1066,41 @@ sub read_config_from_environment {
   my $self = shift;
   my $config = shift;
 
-  for my $key (keys %ENV) {
+  for my $var (keys %ENV) {
     # Look for environment variables that start with VEP_
-    next unless $key =~ "^VEP_";
+    next unless $var =~ "^VEP_";
 
     # Avoid setting empty strings
-    my $value = $ENV{$key};
+    my $value = $ENV{$var};
     next if $value eq "";
 
     # Assumption: VEP arguments are always lowercase
-    $key = lc $key;
-    $key =~ s/^VEP_//ig;
+    my $key = lc $var;
+       $key =~ s/^VEP_//ig;
 
-    next unless is_valid_param($config, $key, $value);
+    my $valid = is_valid_param($config, $key, $value);
+    unless ($valid) {
+      $self->status_msg("Ignored unsupported option '${key}=${value}' from environment variable $var\n")
+        if $config->{verbose};
+      next;
+    }
 
     if (grep {$key eq $_} @ALLOW_MULTIPLE) {
       # Properly set flags that can be specified more than once
       push @{$config->{$key}}, $value;
+
+      my $msg = "Appended '${key}=${value}' from environment variable $var (full value of ${key}: ['" .
+                join("', '", @{ $config->{$key} }) . "'])\n";
+      $self->status_msg($msg) if $config->{verbose};
     } else {
       $config->{$key} ||= $value;
+      $self->status_msg("Set '${key}=${value}' from environment variable $var\n")
+        if $config->{verbose};
     }
   }
 
   $self->status_msg("Read configuration from environment variables")
-    if $self->param('verbose');
+    if $config->{verbose};
 
   return $config;
 }
