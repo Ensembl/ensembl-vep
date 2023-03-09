@@ -139,7 +139,7 @@ sub new {
     # detect format
     if(lc($format) eq 'guess' || lc($format) eq 'detect' || lc($format) eq 'auto') {
       $format = $self->detect_format();
-      $self->warning_msg("No input file format specified - detected $format format") if $self->param('verbose') && defined $format;
+      $self->status_msg("No input file format specified - detected $format format") if $self->param('verbose') && defined $format;
     }
 
     die("ERROR: Can't detect input format\n") unless $format;
