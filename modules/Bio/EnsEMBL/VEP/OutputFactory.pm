@@ -1612,7 +1612,7 @@ sub TranscriptVariationAllele_to_output_hash {
     # HGVS
     if($self->{hgvsc}) {
       my $hgvs_t = $vfoa->hgvs_transcript(undef, !$self->param('shift_3prime'));
-      my $offset = defined($vfoa->{shift_hash}) ? $vfoa->{shift_hash}->{_hgvs_offset} : 0;
+      my $offset = $vfoa->hgvs_offset;
 
       $hash->{HGVSc} = $hgvs_t if $hgvs_t;
       $hash->{HGVS_OFFSET} = $offset * $strand if $offset && $hgvs_t;
