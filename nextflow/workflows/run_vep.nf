@@ -17,10 +17,10 @@ params.chros=""
 params.chros_file=""
 
 // module imports
-include { splitVCF } from '../nf_modules/split_into_chros.nf' 
-include { mergeVCF } from '../nf_modules/merge_chros_VCF.nf'  
-include { chrosVEP } from '../nf_modules/run_vep_chros.nf'
-include { readChrVCF } from '../nf_modules/read_chros_VCF.nf'
+include { splitVCF } from '../nf_modules/split_VCF.nf' 
+include { mergeVCF } from '../nf_modules/merge_VCF.nf'  
+include { chrosVEP } from '../nf_modules/run_vep.nf'
+include { readChrVCF } from '../nf_modules/read_VCF.nf'
 
  // print usage
 if (params.help) {
