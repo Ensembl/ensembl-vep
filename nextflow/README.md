@@ -75,6 +75,8 @@ The following config files are used and can be modified depending on user requir
   --chros_file LIST_OF_CHROS_FILE   Path to file containing list of chromosomes
   --cpus INT                        Number of CPUs to use. Default 1.
   --output_prefix FILENAME_PREFIX   Output filename prefix. The generated output file will have name <output_prefix>.vcf.gz
+  --skip_check [0,1]                If set will skip checking of tabix index file for input VCF, we can do this if there a index file already exist. It enables the first module to load from cache if -resume is used. Default: 0
+  --bin_size SIZE                 If given there will be further split and each file will contain exactly SIZE number of variants. Enables faster run in expense of more jobs. By default the input file is only split by chromosome (SIZE=0). Default: 0
 ```
 NB: File paths are expected to be absolute paths.
 
