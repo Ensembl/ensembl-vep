@@ -28,8 +28,7 @@ process splitVCF {
   val(chr)
   path(vcf)
   path(vcf_index)
-  val(split_by_region)
-  val(region_size)
+  val(bin_size)
 
   output:
   tuple path("${prefix}.${chr}.*vcf.gz"), path("${prefix}.${chr}.*vcf.gz.tbi"), emit: files
@@ -39,8 +38,8 @@ process splitVCF {
   bcftools view -r ${chr} ${vcf} -o ${prefix}.${chr}.vcf.gz -O z
   bcftools index -t ${prefix}.${chr}.vcf.gz
   
-  if [[ ${split_by_region} ]]; then 
-    bcftools query -f'%CHROM\t%POS\n' ${prefix}.${chr}.vcf.gz | split -l ${region_size}
+  if [[ ${bin_size} ]]; then 
+    bcftools query -f'%CHROM\t%POS\n' ${prefix}.${chr}.vcf.gz | split -l ${bin_size}
     
     for file in x*; do 
       bcftools view -T \${file} -Oz ${prefix}.${chr}.vcf.gz > ${prefix}.${chr}.\${file}.vcf.gz

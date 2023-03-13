@@ -88,7 +88,7 @@ log.info params.chros
   if (params.chros){
     log.info 'Reading chromosome names from list'
     chr_str = params.chros.toString()
-    chr = Channel.of(chr_str.split(',')).toSortedList()
+    chr = Channel.of(chr_str.split(','))
   }
   else if (params.chros_file) {
     log.info 'Reading chromosome names from file'
@@ -99,10 +99,7 @@ log.info params.chros
     readChrVCF(params.vcf, vcf_index)
     chr = readChrVCF.out.splitText().map{it -> it.trim()}
   }
-  chr.view()
-  splitVCF(chr, params.vcf, vcf_index, params.split_by_region, params.region_size)
-  chan = splitVCF.out.files.transpose()
-  chan.view()
-  chrosVEP(chan, params.vep_config)
+  splitVCF(chr, params.vcf, vcf_index, params.bin_size)
+  chrosVEP(splitVCF.out.files.transpose(), params.vep_config)
   mergeVCF(chrosVEP.out.vcfFile.collect(), chrosVEP.out.indexFile.collect())
 }  
