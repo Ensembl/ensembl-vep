@@ -312,6 +312,69 @@ sub dump_stats {
 }
 
 
+=head2 get_skipped_variants_file_handle
+
+  Example    : $handle = $runner->get_skipped_variants_file_handle();
+  Description: Gets file handle to write skipped variants data.
+  Returntype : glob
+  Exceptions : throws if file exists or cannot write
+  Caller     : dump_skipped_variants()
+  Status     : Stable
+
+=cut
+
+sub get_skipped_variants_file_handle {
+  my $self = shift;
+
+  my $file_name = $self->param('skipped_variants_file');
+  if( $file_name ) {
+    # check if file exists
+    if(-e $file_name && !$self->param('force_overwrite')) {
+      throw(
+        "ERROR: Skipped variants file $file_name already exists. " .
+        "Specify a different output file using --skipped_variants_file or overwrite existing file with --force_overwrite");
+    }
+
+    my $fh = FileHandle->new();
+    $fh->open(">$file_name") or
+      throw("ERROR: Could not write to skipped variants file $file_name\n");
+
+    $self->{skipped_variants_file_handle} = $fh;
+  }
+
+  return $self->{skipped_variants_file_handle};
+}
+
+=head2 dump_skipped_variants
+
+  Example    : $runner->dump_skipped_variants();
+  Description: Writes all skipped variants to skipped variants file
+  Returntype : none
+  Exceptions : none
+  Caller     : finish()
+  Status     : Stable
+
+=cut
+
+sub dump_skipped_variants {
+  my $self = shift;
+
+  my $skipped = $self->skipped_variants();
+  if ( $self->param('skipped_variants_file') && defined $skipped ) {
+    my $fh = $self->get_skipped_variants_file_handle();
+
+    printf $fh "[VEP skipped the following variants from input file %s]\n",
+           $self->param('input_file');
+
+    for my $var (@$skipped) {
+      printf $fh "Line %-5s\t%-40.40s\t%s\n",
+             $var->{line_number}, $var->{line}, $var->{description};
+    }
+    close $fh;
+  }
+}
+
+
 =head2 get_output_header_info
 
   Example    : $info = $runner->get_output_header_info();
