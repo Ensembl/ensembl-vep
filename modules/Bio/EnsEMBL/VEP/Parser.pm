@@ -597,6 +597,8 @@ sub validate_vf {
   return $self->validate_svf($vf) if ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature';
 
   # uppercase allele string
+  $vf->{allele_string} =~ tr/[a-z]/[A-Z]/;
+
   unless($vf->{allele_string} =~ /([ACGT-]+\/*)+/) {
     $self->skipped_variant_msg(
       "Invalid allele string " . $vf->{allele_string} . " or possible parsing error"
