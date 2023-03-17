@@ -781,7 +781,7 @@ sub skipped_variant_msg {
   my $line_number = shift || $self->line_number;
 
   my $msg = $description;
-  my $line = $self->parser->{current_block};
+  my $line = $self->{parser}->{current_block} if defined $self->{parser};
   if (defined $line) {
     my $maxChar = 50;
     $line =~ s/\t/ /g; # replace tabs with spaces to improve readability
