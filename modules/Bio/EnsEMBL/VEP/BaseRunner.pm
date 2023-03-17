@@ -363,7 +363,7 @@ sub dump_skipped_variants {
   if ( $self->param('skipped_variants_file') && defined $skipped ) {
     my $fh = $self->get_skipped_variants_file_handle();
 
-    printf $fh "[VEP skipped the following variants from input file %s]\n",
+    printf $fh "[VEP skipped the following variants from %s]\n",
            $self->param('input_file');
 
     for my $var (@$skipped) {
