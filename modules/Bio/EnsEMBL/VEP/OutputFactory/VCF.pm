@@ -97,6 +97,7 @@ use Bio::EnsEMBL::VEP::Constants;
 
 my @VCF_COLS = qw(
   Allele
+  Original_allele
   Consequence
   IMPACT
   SYMBOL

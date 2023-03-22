@@ -159,8 +159,8 @@ sub create_VariationFeatures {
 
   # normal vf
   else {
-    my $is_indel = 0;
-    $is_indel = 1 unless $allele_string =~ /[ATGC]{n}\/[ATGC]{n}/ or $allele_string =~ /-/;
+    my $is_in_del = 0;
+    $is_in_del = 1 unless $allele_string =~ /[ATGC]{n}\/[ATGC]{n}/ or $allele_string =~ /-/;
 
     $vf = Bio::EnsEMBL::Variation::VariationFeature->new_fast({
       start          => $start,
@@ -173,7 +173,7 @@ sub create_VariationFeatures {
       chr            => $chr,
     });
 
-    if ($is_indel) {
+    if ($is_in_del) {
       $vf = ${Bio::EnsEMBL::VEP::Parser->minimise_alleles([$vf])}[0];
     }
   }
