@@ -33,6 +33,7 @@ use strict;
 use warnings;
 
 use FileHandle;
+use File::Path qw(mkpath);
 
 use Bio::EnsEMBL::VEP::Config;
 use Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation;
@@ -109,7 +110,7 @@ sub run {
     my $tmp_dir = $self->param('tmp_dir');
     
     unless(-e $tmp_dir){
-      mkdir($tmp_dir) or die "Cannot create temp_dir - $!";
+      mkpath($tmp_dir) or die "Cannot create temp_dir - $!";
     }
    
     foreach my $chr(keys %{{map {$_->{chr} => 1} @{$self->param('regions')}}}) {
