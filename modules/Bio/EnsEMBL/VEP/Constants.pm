@@ -136,6 +136,7 @@ our @FLAG_FIELDS = (
 # field descriptions for output headers
 our %FIELD_DESCRIPTIONS = (
   'Uploaded_variation' => 'Identifier of uploaded variant',
+  'Original_allele'    => 'The variant allele uploaded',
   'ID'                 => 'Identifier of uploaded variant',
   'Location'           => 'Location of variant in standard coordinate format (chr:start or chr:start-end)',
   'Allele'             => 'The variant allele used to calculate the consequence',

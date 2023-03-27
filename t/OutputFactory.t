@@ -192,6 +192,7 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'rs142513484',
+    'Original_allele' => 'C/T',
     'Location' => '21:25585733'
   },
   'VariationFeature_to_output_hash'
@@ -202,6 +203,7 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'rs142513484',
+    'Original_allele' => 'C/T',
     'Location' => '21:25585733',
     'VARIANT_CLASS' => 'SNV',
   },
@@ -214,6 +216,7 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'rs142513484',
+    'Original_allele' => 'C/T',
     'Location' => '21:25585733',
     'SV' => ['sv1', 'sv2'],
   },
@@ -237,6 +240,7 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'indtest',
+    'Original_allele' => 'A/G',
     'Location' => '21:25607429',
     'IND' => 'dave',
     'ZYG' => 'HET',
@@ -255,6 +259,7 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'indtest',
+    'Original_allele' => 'A/G',
     'Location' => '21:25607429',
     'IND' => 'dave',
     'ZYG' => 'HET',
@@ -270,6 +275,7 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'indtest',
+    'Original_allele' => 'A/G',
     'Location' => '21:25607429',
     'IND' => 'dave',
     'ZYG' => 'HET',
@@ -284,6 +290,7 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'indtest',
+    'Original_allele' => 'A/G',
     'Location' => '21:25607429',
     'AMBIGUITY' => 'R',
     'IND' => 'dave',
