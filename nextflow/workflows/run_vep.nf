@@ -11,9 +11,10 @@ nextflow.enable.dsl=2
 params.help = false
 params.cpus = 1
 params.outdir = "outdir"
-params.vep_config=""
-params.chros=""
-params.chros_file=""
+params.vep_config = ""
+params.chros = ""
+params.chros_file = ""
+params.skip_check = 0
 
 // module imports
 include { splitVCF } from '../nf_modules/split_VCF.nf' 
