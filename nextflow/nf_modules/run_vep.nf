@@ -45,7 +45,7 @@ process chrosVEP {
   }
   else {
     """
-    vep -i ${vcfFile} -o ${prefix}-${vcfFile} --vcf --compress_output bgzip --format vcf --config ${vep_config} 
+    vep -i ${vcfFile} -o ${prefix}-${vcfFile} --vcf --compress_output bgzip --format vcf --config ${vep_config}
     tabix -p vcf ${prefix}-${vcfFile}
     """	
   }

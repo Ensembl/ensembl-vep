@@ -17,10 +17,10 @@ params.chros=""
 params.chros_file=""
 
 // module imports
-include { splitVCF } from '../nf_modules/split_into_chros.nf' 
-include { mergeVCF } from '../nf_modules/merge_chros_VCF.nf'  
-include { chrosVEP } from '../nf_modules/run_vep_chros.nf'
-include { readChrVCF } from '../nf_modules/read_chros_VCF.nf'
+include { splitVCF } from '../nf_modules/split_VCF.nf' 
+include { mergeVCF } from '../nf_modules/merge_VCF.nf'  
+include { chrosVEP } from '../nf_modules/run_vep.nf'
+include { readChrVCF } from '../nf_modules/read_VCF.nf'
 
  // print usage
 if (params.help) {
@@ -59,12 +59,14 @@ if(check_bgzipped.exitValue()){
   exit 1, "The specified VCF file is not bgzipped: ${params.vcf}"
 }
 
-def sout = new StringBuilder(), serr = new StringBuilder()
-check_parsing = "$params.singularity_dir/vep.sif tabix -p vcf -f $params.vcf".execute()
-check_parsing.consumeProcessOutput(sout, serr)
-check_parsing.waitFor()
-if( serr ){
-  exit 1, "The specified VCF file has issues in parsing: $serr"
+if ( !params.skip_check ){
+  def sout = new StringBuilder(), serr = new StringBuilder()
+  check_parsing = "$params.singularity_dir/vep.sif tabix -p vcf -f $params.vcf".execute()
+  check_parsing.consumeProcessOutput(sout, serr)
+  check_parsing.waitFor()
+  if( serr ){
+    exit 1, "The specified VCF file has issues in parsing: $serr"
+  }
 }
 vcf_index = "${params.vcf}.tbi"
 
@@ -97,7 +99,7 @@ log.info params.chros
     readChrVCF(params.vcf, vcf_index)
     chr = readChrVCF.out.splitText().map{it -> it.trim()}
   }
-  splitVCF(chr, params.vcf, vcf_index)
-  chrosVEP(splitVCF.out, params.vep_config)
+  splitVCF(chr, params.vcf, vcf_index, params.bin_size)
+  chrosVEP(splitVCF.out.files.transpose(), params.vep_config)
   mergeVCF(chrosVEP.out.vcfFile.collect(), chrosVEP.out.indexFile.collect())
 }  
