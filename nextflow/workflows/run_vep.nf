@@ -24,21 +24,24 @@ include { readChrVCF } from '../nf_modules/read_VCF.nf'
 
  // print usage
 if (params.help) {
-  log.info ''
-  log.info 'Pipeline to run VEP chromosome-wise'
-  log.info '-------------------------------------------------------'
-  log.info ''
-  log.info 'Usage: '
-  log.info '  nextflow run workflows/run_vep.nf --vcf <path-to-vcf> --chros 1,2 --vep_config vep_config/vep.ini'
-  log.info ''
-  log.info 'Options:'
-  log.info '  --vcf VCF                 VCF that will be split. Currently supports sorted and bgzipped file'
-  log.info '  --outdir DIRNAME          Name of output dir. Default: outdir'
-  log.info '  --vep_config FILENAME     VEP config file. Default: vep_config/vep.ini'
-  log.info '  --chros LIST_OF_CHROS	Comma-separated list of chromosomes to generate. i.e. 1,2,... Default: 1,2,...,X,Y,MT'
-  log.info '  --chros_file LIST_OF_CHROS_FILE Path to file containing list of chromosomes' 
-  log.info '  --cpus INT	        Number of CPUs to use. Default 1.'
-  log.info '  --output_prefix FILENAME_PREFIX   Output filename prefix. The generated output file will have name <output_prefix>.vcf.gz'
+  log.info """
+Pipeline to run VEP
+-------------------
+
+Usage:
+  nextflow run workflows/run_vep.nf --vcf <path-to-vcf> --vep_config vep_config/vep.ini
+
+Options:
+  --vcf VCF                 VCF that will be split. Currently supports sorted and bgzipped file
+  --outdir DIRNAME          Name of output dir. Default: outdir
+  --vep_config FILENAME     VEP config file. Default: vep_config/vep.ini
+  --chros LIST_OF_CHROS     Comma-separated list of chromosomes to generate. i.e. 1,2,..., Default: 1,2,...X,Y,MT
+  --chros_file FILE         Path to file containing list of chromosomes
+  --cpus INT                Number of CPUs to use. Default 1.
+  --output_prefix PREFIX    Output filename prefix. The generated output file will have name <output_prefix>.vcf.gz
+  --skip_check [0,1]        Skip checking for tabix index file of input VCF. Enables the first module to load from cache if -resume is used. Default: 0
+  --bin_size SIZE           Each chromosome file will contain at most SIZE number of variants. Enables faster run in expense of more jobs. By default, the input is only split by chromosome (SIZE=0). Default: 0
+"""
   exit 1
 }
 
