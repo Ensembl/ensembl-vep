@@ -2,8 +2,8 @@
 
 The nextflow pipeline aims to run VEP faster utilising simple parallelisation. It is deployable on an individual Linux machine or on computing clusters running lsf or slurm (not tested). The process can be summarised briefly by the following steps:
 
- * Splitting the VCF chromosome-wise
- * Running VEP on chromosome-wise VCFs in parallel
+ * Splitting the VCF in a given number of bins (100 variants by default)
+ * Running VEP on the split VCFs in parallel
  * Merging VEP outputs into a single file
 
 ##### Table of contents
@@ -46,22 +46,19 @@ The following config files are used and can be modified depending on user requir
 ```bash
   nextflow run workflows/run_vep.nf \
   --vcf <path-to-vcf> \
-  --chros 1,2 \
   -profile <standard or lsf or slurm>
 ```
 
 #### Options
 
 ```bash
-  --vcf VCF                         VCF that will be split. Currently supports sorted and bgzipped file
-  --outdir DIRNAME                  Name of output dir. Default: outdir
-  --vep_config FILENAME             VEP config file. Default: vep_config/vep.ini
-  --chros LIST_OF_CHROS             Comma-separated list of chromosomes to generate. i.e. 1,2,..., Default: 1,2,...X,Y,MT
-  --chros_file LIST_OF_CHROS_FILE   Path to file containing list of chromosomes
-  --cpus INT                        Number of CPUs to use. Default 1.
-  --output_prefix FILENAME_PREFIX   Output filename prefix. The generated output file will have name <output_prefix>.vcf.gz
-  --skip_check [0,1]                If set will skip checking of tabix index file for input VCF, we can do this if there a index file already exist. It enables the first module to load from cache if -resume is used. Default: 0
-  --bin_size SIZE                 If given there will be further split and each file will contain exactly SIZE number of variants. Enables faster run in expense of more jobs. By default the input file is only split by chromosome (SIZE=0). Default: 0
+  --vcf VCF                 VCF that will be split. Currently supports sorted and bgzipped file
+  --bin_size INT            Input file is split into multiple files with a given number of variants. Enables faster run in expense of more jobs. Default: 100
+  --vep_config FILENAME     VEP config file. Default: vep_config/vep.ini
+  --cpus INT                Number of CPUs to use. Default: 1
+  --outdir DIRNAME          Name of output dir. Default: outdir
+  --output_prefix PREFIX    Output filename prefix. The generated output file will have name <output_prefix>.vcf.gz
+  --skip_check [0,1]        Skip checking for tabix index file of input VCF. Enables the first module to load from cache if -resume is used. Default: 0
 ```
 NB: File paths are expected to be absolute paths.
 

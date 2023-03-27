@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 
 /* 
- * Script to run VEP on chromosome-wise split VCF files
+ * Script to run VEP on split VCF files
  */
 
 nextflow.enable.dsl=2
@@ -11,14 +11,14 @@ prefix = "vep"
 params.outdir = ""
 params.cpus = 1
 
-process chrosVEP {
+process runVEP {
   /*
-  Function to run VEP on chromosome-wise split VCF files
+  Run VEP on VCF files
 
   Returns
   -------
-  Returns 2 files per chromosome:
-      1) VEP output file for each chromosome-wise split VCF
+  Returns 2 files:
+      1) VEP output file in VCF format
       2) A tabix index for that VCF output file
   */
   publishDir "${params.outdir}/vep-summary",
