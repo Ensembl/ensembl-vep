@@ -11,7 +11,6 @@ nextflow.enable.dsl=2
 params.help = false
 params.cpus = 1
 params.outdir = "outdir"
-params.singularity_dir=""
 params.vep_config=""
 params.chros=""
 params.chros_file=""
@@ -61,7 +60,7 @@ if(check_bgzipped.exitValue()){
 
 if ( !params.skip_check ){
   def sout = new StringBuilder(), serr = new StringBuilder()
-  check_parsing = "$params.singularity_dir/vep.sif tabix -p vcf -f $params.vcf".execute()
+  check_parsing = "tabix -p vcf -f $params.vcf".execute()
   check_parsing.consumeProcessOutput(sout, serr)
   check_parsing.waitFor()
   if( serr ){

@@ -17,24 +17,10 @@ The nextflow pipeline aims to run VEP faster utilising simple parallelisation. I
 <a id="install"></a>
 ### Installation and requirements
 
-The nextflow pipeline requires the following dependencies:
-
-  * **[Nextflow](https://www.nextflow.io)** (tested on 21.10.0)
-  * **[Singularity](https://sylabs.io/guides/3.7/admin-guide/installation.html)** (tested on 3.7)
+The nextflow pipeline requires **[Nextflow](https://www.nextflow.io)** (tested on 21.10.0).
 
 <a id="setup"></a>
 ### Pipeline setup
-
-#### Singularity images
-Singularity images are required in order to run the following tools:
-
-  * bcftools
-  * VEP
-
-The singularity images can be fetched by running:
-```bash
-   ./setup-images.sh
-```
 
 #### Config files
 
@@ -45,7 +31,6 @@ The following config files are used and can be modified depending on user requir
       cp vep_config/vep.ini.template vep_config/vep.ini
   ```
 
-
   * Nextflow config file
 
     `nextflow.config` has the default options for running the pipeline. The file can be modified to change the default options or override them using command line options.
@@ -55,6 +40,7 @@ The following config files are used and can be modified depending on user requir
 
 ---
 <a id="usage"></a>
+
 ### Usage
 
 ```bash
@@ -81,6 +67,7 @@ NB: File paths are expected to be absolute paths.
 
 ---
 <a id="example"></a>
+
 ### Example
 
 ```bash
@@ -96,7 +83,7 @@ The above commands start the pipeline and generate the output file upon completi
 #### Output validation
 
 ```bash
-  singularity-images/bcftools.sif bcftools view \
+  work/singularity/quay.io-biocontainers-bcftools-*.img bcftools view \
     -H outdir/merged-file.vcf.gz \
     -r 1
 ```

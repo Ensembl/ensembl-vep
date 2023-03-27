@@ -22,7 +22,7 @@ process splitVCF {
       2) A tabix index for that VCF
   */
   cpus params.cpus
-  container "${params.singularity_dir}/bcftools.sif"
+  label 'bcftools'
 
   input:
   val(chr)
