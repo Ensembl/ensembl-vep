@@ -69,24 +69,34 @@ else if ( params.vcf && params.vcf_dir) {
   exit 1, "Please specify one input, --vcf or --vcf_dir"
 }
 
-vcfInput = file(params.vcf)
-if( !vcfInput.exists() ) {
-  exit 1, "The specified VCF input does not exist: ${vcfInput}"
-}
-
 log.info 'Starting workflow.....'
 
+workflow vep {
+  take:
+    vcf
+    vep_config
+  main:
+    vcfInput = file(vcf)
+    if( !vcfInput.exists() ) {
+      exit 1, "The specified VCF input does not exist: ${vcfInput}"
+    }
+
+    if (vcfInput.isDirectory()) {
+      checkVCF(Channel.fromPath("${vcfInput}/*.gz"))
+    } else {
+      checkVCF(vcfInput)
+    }
+
+    splitVCF(checkVCF.out, params.bin_size)
+
+    vep_config = Channel.fromPath(vep_config, relative: true).first()
+    runVEP(splitVCF.out.files.transpose(), vep_config)
+
+    mergeVCF(runVEP.out.vcf.groupTuple())
+  emit:
+    mergeVCF.out
+}
+
 workflow {
-  if (vcfInput.isDirectory()) {
-    checkVCF(Channel.fromPath("${params.vcf}/*.gz"))
-  } else {
-    checkVCF(vcfInput)
-  }
-
-  splitVCF(checkVCF.out, params.bin_size)
-
-  vep_config = Channel.fromPath(params.vep_config, relative: true).first()
-  runVEP(splitVCF.out.files.transpose(), vep_config)
-
-  mergeVCF(runVEP.out.vcf.groupTuple())
+  vep(params.vcf, params.vep_config)
 }
