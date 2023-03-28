@@ -22,7 +22,7 @@ process runVEP {
       2) A tabix index for that VCF output file
   */
   publishDir "${params.outdir}/vep-summary",
-    pattern: "${prefix}-*.vcf.gz_summary.*",
+    pattern: "${original}-${prefix}-*.vcf.gz_summary.*",
     mode:'move'
   cpus params.cpus
   label 'vep'
@@ -32,8 +32,8 @@ process runVEP {
   path(vep_config)
   
   output:
-  tuple val(original), path("${prefix}-*.vcf.gz"), path("${prefix}-*.vcf.gz.tbi"), emit: vcf
-  path("${prefix}-*.vcf.gz_summary.*")
+  tuple val(original), path("${original}-${prefix}-*.vcf.gz"), path("${original}-${prefix}-*.vcf.gz.tbi"), emit: vcf
+  path("${original}-${prefix}-*.vcf.gz_summary.*")
 
   script:
   if( !vcfFile.exists() ) {
@@ -44,8 +44,9 @@ process runVEP {
   }
   else {
     """
-    vep -i ${vcfFile} -o ${prefix}-${vcfFile} --vcf --compress_output bgzip --format vcf --config ${vep_config}
-    tabix -p vcf ${prefix}-${vcfFile}
+    out=${original}-${prefix}-${vcfFile}
+    vep -i ${vcfFile} -o \${out} --vcf --compress_output bgzip --format vcf --config ${vep_config}
+    tabix -p vcf \${out}
     """	
   }
 }
