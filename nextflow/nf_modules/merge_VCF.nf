@@ -35,8 +35,7 @@ process mergeVCF {
   cache 'lenient'
    
   input:
-  path(vcfFiles)
-  path(indexFiles)
+  tuple val(original), path(vcfFiles), path(indexFiles)
 
   output:
   path("${ mergedVCF }.vcf.gz*")

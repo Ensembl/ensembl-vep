@@ -28,12 +28,11 @@ process runVEP {
   label 'vep'
 
   input:
-  tuple path(vcfFile), path(indexFile)
+  tuple val(original), path(vcfFile), path(indexFile)
   path(vep_config)
   
   output:
-  path("${prefix}-*.vcf.gz"), emit: vcfFile
-  path("${prefix}-*.vcf.gz.tbi"), emit: indexFile
+  tuple val(original), path("${prefix}-*.vcf.gz"), path("${prefix}-*.vcf.gz.tbi"), emit: vcf
   path("${prefix}-*.vcf.gz_summary.*")
 
   script:

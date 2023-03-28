@@ -20,21 +20,19 @@ process checkVCF {
   */
 
   cpus params.cpus
-  container "${params.singularity_dir}/vep.sif"
+  label 'vep'
   errorStrategy 'ignore'
 
   input:
   path(input_vcf)
-  path(vep_config)
   
   output:
-  tuple (path("${input_vcf}"), path ("${input_vcf}.tbi"),path("${vep_config}") )
+  tuple path("${input_vcf}"), path ("${input_vcf}.tbi")
 
   script:
   """
   bgzip -t ${ input_vcf}
   tabix -p vcf -f ${ input_vcf}
-
   """
 
 }

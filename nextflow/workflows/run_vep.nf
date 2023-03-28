@@ -36,8 +36,7 @@ Usage:
   nextflow run workflows/run_vep.nf --vcf <path-to-vcf> --vep_config vep_config/vep.ini
 
 Options:
-  --vcf VCF                 VCF that will be split. Currently supports sorted and bgzipped file
-  --vcf_dir                 VCF directory Directory containing input VCF files
+  --vcf VCF                 Sorted and bgzipped VCF. Alternatively, can also be a direcotry containing VCF files
   --bin_size INT            Input file is split into multiple files with a given number of variants. Enables faster run in expense of more jobs. Default: 100
   --vep_config FILENAME     VEP config file. Default: vep_config/vep.ini
   --cpus INT                Number of CPUs to use. Default: 1
@@ -70,16 +69,24 @@ else if ( params.vcf && params.vcf_dir) {
   exit 1, "Please specify one input, --vcf or --vcf_dir"
 }
 
+vcfInput = file(params.vcf)
+if( !vcfInput.exists() ) {
+  exit 1, "The specified VCF input does not exist: ${vcfInput}"
+}
+
 log.info 'Starting workflow.....'
 
 workflow {
-  input = params.vcf ? params.vcf : params.vcf_dir 
-  vcfInput = file(input)
-  if( !vcfInput.exists() ) {
-    exit 1, "The specified VCF input does not exist: ${vcfInput}"
+  if (vcfInput.isDirectory()) {
+    checkVCF(Channel.fromPath("${params.vcf}/*.gz"))
+  } else {
+    checkVCF(vcfInput)
   }
-  checkVCF(Channel.fromPath("${input}*.gz"), params.vep_config)
-  splitVCF(checkVCF.out)
-  runVEP(splitVCF.out.files.transpose(), params.vep_config)
-  mergeVCF(chrosVEP.out.vcfFile.collect(), chrosVEP.out.indexFile.collect())
-}  
+
+  splitVCF(checkVCF.out, params.bin_size)
+
+  vep_config = Channel.fromPath(params.vep_config, relative: true).first()
+  runVEP(splitVCF.out.files.transpose(), vep_config)
+
+  mergeVCF(runVEP.out.vcf.groupTuple())
+}

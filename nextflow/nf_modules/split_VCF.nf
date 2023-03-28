@@ -25,12 +25,11 @@ process splitVCF {
   label 'bcftools'
 
   input:
-  path(vcf)
-  path(vcf_index)
+  tuple path(vcf), path(vcf_index)
   val(bin_size)
 
   output:
-  tuple path("${prefix}*.vcf.gz"), path("${prefix}*.vcf.gz.tbi"), emit: files
+  tuple val("${vcf}"), path("${prefix}*.vcf.gz"), path("${prefix}*.vcf.gz.tbi"), emit: files
 
   afterScript 'rm x*'
 

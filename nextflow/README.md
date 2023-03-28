@@ -52,7 +52,7 @@ The following config files are used and can be modified depending on user requir
 #### Options
 
 ```bash
-  --vcf VCF                 VCF that will be split. Currently supports sorted and bgzipped file
+  --vcf VCF                 Sorted and bgzipped VCF. Alternatively, can also be a direcotry containing VCF files.
   --bin_size INT            Input file is split into multiple files with a given number of variants. Enables faster run in expense of more jobs. Default: 100
   --vep_config FILENAME     VEP config file. Default: vep_config/vep.ini
   --cpus INT                Number of CPUs to use. Default: 1
@@ -60,7 +60,6 @@ The following config files are used and can be modified depending on user requir
   --output_prefix PREFIX    Output filename prefix. The generated output file will have name <output_prefix>.vcf.gz
   --skip_check [0,1]        Skip checking for tabix index file of input VCF. Enables the first module to load from cache if -resume is used. Default: 0
 ```
-NB: File paths are expected to be absolute paths.
 
 ---
 <a id="example"></a>
