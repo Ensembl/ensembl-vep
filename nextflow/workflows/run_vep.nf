@@ -11,10 +11,10 @@ nextflow.enable.dsl=2
 params.help = false
 params.cpus = 1
 params.outdir = "outdir"
-params.singularity_dir=""
-params.vep_config=""
-params.chros=""
-params.chros_file=""
+params.vep_config = ""
+params.chros = ""
+params.chros_file = ""
+params.skip_check = 0
 
 // module imports
 include { splitVCF } from '../nf_modules/split_VCF.nf' 
@@ -29,12 +29,12 @@ if (params.help) {
   log.info '-------------------------------------------------------'
   log.info ''
   log.info 'Usage: '
-  log.info '  nextflow -C nf_config/nextflow.config run workflows/run_vep.nf --vcf <path-to-vcf> --chros 1,2 --vep_config'
+  log.info '  nextflow run workflows/run_vep.nf --vcf <path-to-vcf> --chros 1,2 --vep_config vep_config/vep.ini'
   log.info ''
   log.info 'Options:'
   log.info '  --vcf VCF                 VCF that will be split. Currently supports sorted and bgzipped file'
   log.info '  --outdir DIRNAME          Name of output dir. Default: outdir'
-  log.info '  --vep_config FILENAME     VEP config file. Default: nf_config/vep.ini'
+  log.info '  --vep_config FILENAME     VEP config file. Default: vep_config/vep.ini'
   log.info '  --chros LIST_OF_CHROS	Comma-separated list of chromosomes to generate. i.e. 1,2,... Default: 1,2,...,X,Y,MT'
   log.info '  --chros_file LIST_OF_CHROS_FILE Path to file containing list of chromosomes' 
   log.info '  --cpus INT	        Number of CPUs to use. Default 1.'
@@ -61,7 +61,7 @@ if(check_bgzipped.exitValue()){
 
 if ( !params.skip_check ){
   def sout = new StringBuilder(), serr = new StringBuilder()
-  check_parsing = "$params.singularity_dir/vep.sif tabix -p vcf -f $params.vcf".execute()
+  check_parsing = "tabix -p vcf -f $params.vcf".execute()
   check_parsing.consumeProcessOutput(sout, serr)
   check_parsing.waitFor()
   if( serr ){

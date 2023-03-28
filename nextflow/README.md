@@ -17,24 +17,10 @@ The nextflow pipeline aims to run VEP faster utilising simple parallelisation. I
 <a id="install"></a>
 ### Installation and requirements
 
-The nextflow pipeline requires the following dependencies:
-
-  * **[Nextflow](https://www.nextflow.io)** (tested on 21.10.0)
-  * **[Singularity](https://sylabs.io/guides/3.7/admin-guide/installation.html)** (tested on 3.7)
+The nextflow pipeline requires **[Nextflow](https://www.nextflow.io)** (tested on 21.10.0).
 
 <a id="setup"></a>
 ### Pipeline setup
-
-#### Singularity images
-Singularity images are required in order to run the following tools:
-
-  * bcftools
-  * VEP
-
-The singularity images can be fetched by running:
-```bash
-   ./setup-images.sh
-```
 
 #### Config files
 
@@ -42,24 +28,23 @@ The following config files are used and can be modified depending on user requir
 
   * VEP config file
   ``` bash
-      cp nf_config/vep.ini.template nf_config/vep.ini
+      cp vep_config/vep.ini.template vep_config/vep.ini
   ```
-
 
   * Nextflow config file
 
-    `nf_config/nextflow.config` has the default options for running the pipeline. The file can be modified to change the default options or override them using command line options
+    `nextflow.config` has the default options for running the pipeline. The file can be modified to change the default options or override them using command line options.
 
  Currently supported profiles for executors are standard (local), LSF and SLURM (untested!). As mentioned SLURM is untested at present, if you are running this pipeline on a slurm compute cluster and encounter problems, please contact us with details (raise a ticket on the github) and we can investigate.
  NB: If no profile is mentioned, the pipeline takes the standard profile.
 
 ---
 <a id="usage"></a>
+
 ### Usage
 
 ```bash
   nextflow run workflows/run_vep.nf \
-  -C nf_config/nextflow.config \
   --vcf <path-to-vcf> \
   --chros 1,2 \
   -profile <standard or lsf or slurm>
@@ -70,7 +55,7 @@ The following config files are used and can be modified depending on user requir
 ```bash
   --vcf VCF                         VCF that will be split. Currently supports sorted and bgzipped file
   --outdir DIRNAME                  Name of output dir. Default: outdir
-  --vep_config FILENAME             VEP config file. Default: nf_config/vep.ini
+  --vep_config FILENAME             VEP config file. Default: vep_config/vep.ini
   --chros LIST_OF_CHROS             Comma-separated list of chromosomes to generate. i.e. 1,2,..., Default: 1,2,...X,Y,MT
   --chros_file LIST_OF_CHROS_FILE   Path to file containing list of chromosomes
   --cpus INT                        Number of CPUs to use. Default 1.
@@ -82,12 +67,13 @@ NB: File paths are expected to be absolute paths.
 
 ---
 <a id="example"></a>
+
 ### Example
 
 ```bash
   bgzip -c $PWD/examples/clinvar-testset/input.vcf > $PWD/examples/clinvar-testset/input.vcf.gz
 
-  nextflow -C nf_config/nextflow.config \
+  nextflow \
     run workflows/run_vep.nf \
     --vcf $PWD/examples/clinvar-testset/input.vcf.gz \
     -profile lsf
@@ -97,7 +83,7 @@ The above commands start the pipeline and generate the output file upon completi
 #### Output validation
 
 ```bash
-  singularity-images/bcftools.sif bcftools view \
+  work/singularity/quay.io-biocontainers-bcftools-*.img bcftools view \
     -H outdir/merged-file.vcf.gz \
     -r 1
 ```

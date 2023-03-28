@@ -21,7 +21,7 @@ process readChrVCF {
   Returns list of chromosomes
   */
   cpus params.cpus
-  container "${params.singularity_dir}/bcftools.sif"
+  label 'bcftools'
 
   input:
   path(vcf)

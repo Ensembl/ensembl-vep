@@ -25,7 +25,7 @@ process chrosVEP {
     pattern: "${prefix}-*.vcf.gz_summary.*",
     mode:'move'
   cpus params.cpus
-  container "${params.singularity_dir}/vep.sif"
+  label 'vep'
 
   input:
   tuple path(vcfFile), path(indexFile)
