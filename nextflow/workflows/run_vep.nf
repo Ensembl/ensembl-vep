@@ -13,7 +13,6 @@ params.vep_config = "$PWD/vep_config/vep.ini"
 params.outdir = "outdir"
 
 params.vcf = null
-params.vcf_dir = null
 
 params.output_prefix = "out"
 params.bin_size = 100
