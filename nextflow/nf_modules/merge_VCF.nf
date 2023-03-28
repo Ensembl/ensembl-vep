@@ -40,6 +40,8 @@ process mergeVCF {
   output:
   path("${ original }_vep_${ mergedVCF }.vcf.gz*")
 
+  afterScript "rm temp*.vcf.gz"
+
   script: 
   """
   mkdir -p temp

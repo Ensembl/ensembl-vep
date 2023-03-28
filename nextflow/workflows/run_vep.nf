@@ -60,13 +60,8 @@ else
 }
 
 // Input required
-if( !params.vcf && !params.vcf_dir) {
-  exit 1, "Undefined input parameters. Please provide the path to a VCF file or the directory containing VCF files"
-}
-
-// Cannot use both --vcf and --vcf_dir
-else if ( params.vcf && params.vcf_dir) {
-  exit 1, "Please specify one input, --vcf or --vcf_dir"
+if( !params.vcf) {
+  exit 1, "Undefined --vcf parameter. Please provide the path to a VCF file"
 }
 
 log.info 'Starting workflow.....'
