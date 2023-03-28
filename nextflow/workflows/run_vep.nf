@@ -12,7 +12,7 @@ params.cpus = 1
 params.vep_config = "$PWD/vep_config/vep.ini"
 params.outdir = "outdir"
 params.output_prefix = "out"
-params.bin_size = 0
+params.bin_size = 100
 params.skip_check = 0
 params.help = false
 
