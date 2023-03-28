@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 
 /* 
- * Script to merge chromosome-wise VCF files into single VCF file
+ * Script to merge VCF files into a single file
  */
 
 nextflow.enable.dsl=2
@@ -17,7 +17,7 @@ params.cpus = 1
 
 process mergeVCF {
   /*
-  Function to merge chromosome-wise VCF files into single VCF file
+  Merge VCF files into a single file
 
   Returns
   -------
