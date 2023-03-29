@@ -35,17 +35,20 @@ process mergeVCF {
   cache 'lenient'
    
   input:
-  path(vcfFiles)
-  path(indexFiles)
+  tuple val(original), path(vcfFiles), path(indexFiles)
 
   output:
-  path("${ mergedVCF }.vcf.gz*")
+  path("${ original }_vep_${ mergedVCF }.vcf.gz*")
+
+  afterScript "rm temp*.vcf.gz"
 
   script: 
   """
   mkdir -p temp
   bcftools concat --no-version -a ${ vcfFiles } -Oz -o temp-${ mergedVCF}.vcf.gz
-  bcftools sort -T temp -Oz temp-${ mergedVCF}.vcf.gz -o ${ mergedVCF}.vcf.gz 
-  bcftools index -t ${ mergedVCF}.vcf.gz
+
+  out=${ original }_vep_${ mergedVCF }.vcf.gz
+  bcftools sort -T temp -Oz temp-${ mergedVCF }.vcf.gz -o \${out}
+  bcftools index -t \${out}
   """
 }

@@ -11,12 +11,16 @@ nextflow.enable.dsl=2
 params.cpus = 1
 params.vep_config = "$PWD/vep_config/vep.ini"
 params.outdir = "outdir"
+
+params.vcf = null
+
 params.output_prefix = "out"
 params.bin_size = 100
 params.skip_check = 0
 params.help = false
 
 // module imports
+include { checkVCF } from '../nf_modules/check_VCF.nf'
 include { splitVCF } from '../nf_modules/split_VCF.nf' 
 include { mergeVCF } from '../nf_modules/merge_VCF.nf'  
 include { runVEP } from '../nf_modules/run_vep.nf'
@@ -31,7 +35,7 @@ Usage:
   nextflow run workflows/run_vep.nf --vcf <path-to-vcf> --vep_config vep_config/vep.ini
 
 Options:
-  --vcf VCF                 VCF that will be split. Currently supports sorted and bgzipped file
+  --vcf VCF                 Sorted and bgzipped VCF. Alternatively, can also be a direcotry containing VCF files
   --bin_size INT            Input file is split into multiple files with a given number of variants. Enables faster run in expense of more jobs. Default: 100
   --vep_config FILENAME     VEP config file. Default: vep_config/vep.ini
   --cpus INT                Number of CPUs to use. Default: 1
@@ -42,34 +46,7 @@ Options:
   exit 1
 }
 
-// Input validation
-
-if( !params.vcf) {
-  exit 1, "Undefined --vcf parameter. Please provide the path to a VCF file"
-}
-
-vcfFile = file(params.vcf)
-if( !vcfFile.exists() ) {
-  exit 1, "The specified VCF file does not exist: ${params.vcf}"
-}
-
-check_bgzipped = "bgzip -t $params.vcf".execute()
-check_bgzipped.waitFor()
-if(check_bgzipped.exitValue()){
-  exit 1, "The specified VCF file is not bgzipped: ${params.vcf}"
-}
-
-if ( !params.skip_check ){
-  def sout = new StringBuilder(), serr = new StringBuilder()
-  check_parsing = "tabix -p vcf -f $params.vcf".execute()
-  check_parsing.consumeProcessOutput(sout, serr)
-  check_parsing.waitFor()
-  if( serr ){
-    exit 1, "The specified VCF file has issues in parsing: $serr"
-  }
-}
-vcf_index = "${params.vcf}.tbi"
-
+// VEP config required
 if ( params.vep_config ){
   vepFile = file(params.vep_config)
   if( !vepFile.exists() ){
@@ -81,10 +58,44 @@ else
   exit 1, "Undefined --vep_config parameter. Please provide a VEP config file"
 }
 
+// Input required
+if( !params.vcf) {
+  exit 1, "Undefined --vcf parameter. Please provide the path to a VCF file"
+}
+
 log.info 'Starting workflow.....'
 
+workflow vep {
+  take:
+    vcf
+    vep_config
+  main:
+    if(vcf instanceof String){
+      vcfInput = file(vcf)
+      if( !vcfInput.exists() ) {
+        exit 1, "The specified VCF input does not exist: ${vcfInput}"
+      }
+
+      if (vcfInput.isDirectory()) {
+        checkVCF(Channel.fromPath("${vcfInput}/*.gz"))
+      } else {
+        checkVCF(vcfInput)
+      }
+    }
+    else {
+      checkVCF(vcf)
+    }
+
+    splitVCF(checkVCF.out, params.bin_size)
+
+    vep_config = Channel.fromPath(vep_config, relative: true).first()
+    runVEP(splitVCF.out.files.transpose(), vep_config)
+
+    mergeVCF(runVEP.out.vcf.groupTuple())
+  emit:
+    mergeVCF.out
+}
+
 workflow {
-  splitVCF(params.vcf, vcf_index, params.bin_size)
-  runVEP(splitVCF.out.files.transpose(), params.vep_config)
-  mergeVCF(runVEP.out.vcfFile.collect(), runVEP.out.indexFile.collect())
-}  
+  vep(params.vcf, params.vep_config)
+}
