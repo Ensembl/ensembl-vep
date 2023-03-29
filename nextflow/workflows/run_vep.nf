@@ -55,10 +55,10 @@ workflow vep {
     vep_config
   main:
     // VEP config required
-    if ( params.vep_config ){
-      vepFile = file(params.vep_config)
+    if ( vep_config ){
+      vepFile = file(vep_config)
       if( !vepFile.exists() ){
-        exit 1, "The specified VEP config does not exist: ${params.vep_config}"
+        exit 1, "The specified VEP config does not exist: ${vep_config}"
       }
     }
     else
@@ -67,7 +67,7 @@ workflow vep {
     }
 
     // Input required
-    if( !params.vcf) {
+    if( !vcf) {
       exit 1, "Undefined --vcf parameter. Please provide the path to a VCF file"
     }
 
