@@ -46,22 +46,6 @@ Options:
   exit 1
 }
 
-// VEP config required
-if ( params.vep_config ){
-  vepFile = file(params.vep_config)
-  if( !vepFile.exists() ){
-    exit 1, "The specified VEP config does not exist: ${params.vep_config}"
-  }
-}
-else
-{
-  exit 1, "Undefined --vep_config parameter. Please provide a VEP config file"
-}
-
-// Input required
-if( !params.vcf) {
-  exit 1, "Undefined --vcf parameter. Please provide the path to a VCF file"
-}
 
 log.info 'Starting workflow.....'
 
@@ -70,6 +54,23 @@ workflow vep {
     vcf
     vep_config
   main:
+    // VEP config required
+    if ( params.vep_config ){
+      vepFile = file(params.vep_config)
+      if( !vepFile.exists() ){
+        exit 1, "The specified VEP config does not exist: ${params.vep_config}"
+      }
+    }
+    else
+    {
+      exit 1, "Undefined --vep_config parameter. Please provide a VEP config file"
+    }
+
+    // Input required
+    if( !params.vcf) {
+      exit 1, "Undefined --vcf parameter. Please provide the path to a VCF file"
+    }
+
     if(vcf instanceof String){
       vcfInput = file(vcf)
       if( !vcfInput.exists() ) {
