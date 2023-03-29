@@ -40,15 +40,13 @@ process mergeVCF {
   output:
   path("${ original }_vep_${ mergedVCF }.vcf.gz*")
 
-  afterScript "rm temp*.vcf.gz"
 
   script: 
   """
   mkdir -p temp
-  bcftools concat --no-version -a ${ vcfFiles } -Oz -o temp-${ mergedVCF}.vcf.gz
-
   out=${ original }_vep_${ mergedVCF }.vcf.gz
-  bcftools sort -T temp -Oz temp-${ mergedVCF }.vcf.gz -o \${out}
+  sorted_vcf=\$(echo ${vcfFiles} | xargs -n1 | sort | xargs)
+  bcftools concat --no-version -a \${sorted_vcf} -Oz -o \${out}
   bcftools index -t \${out}
   """
 }

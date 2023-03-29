@@ -35,7 +35,7 @@ process splitVCF {
 
   script:
   """
-  bcftools query -f'%CHROM\t%POS\n' ${vcf} | split -l ${bin_size}
+  bcftools query -f'%CHROM\t%POS\n' ${vcf} | uniq | split -l ${bin_size}
   for file in x*; do
     bcftools view --no-version -T \${file} -Oz ${vcf} > ${prefix}.\${file}.vcf.gz
     bcftools index -t ${prefix}.\${file}.vcf.gz
