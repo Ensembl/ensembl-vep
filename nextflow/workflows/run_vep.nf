@@ -49,7 +49,7 @@ Options:
 
 def processInput (input, pattern, is_vcf) {
   if (input instanceof String) {
-    // If vcf is a String, process as file or directory
+    // if input is a String, process as file or directory
     files = file(input)
     if ( !files.exists() ) {
       exit 1, "The specified input does not exist: ${input}"
@@ -65,7 +65,7 @@ def processInput (input, pattern, is_vcf) {
       }
     }
   } else {
-    // If vcf is a Channel, just pass along
+    // if input is a Channel, just pass along
     files = input
   }
   return files
