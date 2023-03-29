@@ -46,33 +46,23 @@ Options:
   exit 1
 }
 
-// VEP config required
-if ( params.vep_config ){
-  vepFile = file(params.vep_config)
-  if( !vepFile.exists() ){
-    exit 1, "The specified VEP config does not exist: ${params.vep_config}"
-  }
-}
-else
-{
-  exit 1, "Undefined --vep_config parameter. Please provide a VEP config file"
-}
 
-// Input required
-if( !params.vcf) {
-  exit 1, "Undefined --vcf parameter. Please provide the path to a VCF file"
-}
-
-def processInput (input, pattern) {
+def processInput (input, pattern, is_vcf) {
   if (input instanceof String) {
     // If vcf is a String, process as file or directory
     files = file(input)
     if ( !files.exists() ) {
-      exit 1, "The specified VCF input does not exist: ${files}"
+      exit 1, "The specified input does not exist: ${input}"
     }
 
     if (files.isDirectory()) {
       files = Channel.fromPath("${files}/${pattern}")
+    }
+    if (is_vcf) {
+      files = files.multiMap {
+        vcf: it
+        vcf_index: "${it}.tbi"
+      }
     }
   } else {
     // If vcf is a Channel, just pass along
@@ -86,10 +76,18 @@ workflow vep {
     vcf
     vep_config
   main:
+    if (!vep_config) {
+      exit 1, "Undefined --vep_config parameter. Please provide a VEP config file"
+    }
+    
+    if (!vcf) {
+      exit 1, "Undefined --vcf parameter. Please provide the path to a VCF file"
+    }
+  
     // Raise error if we have multiple VCF files and VEP config files as input
     // This would require mapping the VCF to the config files
-    vcf = processInput(vcf, pattern="*.gz")
-    vep_config = processInput(vep_config, pattern="*.ini")
+    vcf = processInput(vcf, pattern="*.{vcf,gz}", true)
+    vep_config = processInput(vep_config, pattern="*.ini", false)
     checkInput(vcf.count(), vep_config.count())
 
     // Prepare input VCF files (bgzip + tabix)
