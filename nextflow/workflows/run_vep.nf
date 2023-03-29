@@ -78,13 +78,18 @@ workflow vep {
       }
 
       if (vcfInput.isDirectory()) {
-        checkVCF(Channel.fromPath("${vcfInput}/{*.gz,*.vcf}"))
+        t=Channel.fromPath("${vcfInput}/{*.gz,*.vcf}").multiMap{ it ->
+        vcf: it 
+        vcf_index: "${it}.tbi"
+        }
+        checkVCF(t)
       } else {
-        checkVCF(vcfInput)
+        checkVCF(vcfInput,"${vcfInput}.tbi")
       }
     }
     else {
-      checkVCF(vcf)
+      //TODO 
+      // checkVCF(vcf)
     }
 
     splitVCF(checkVCF.out, params.bin_size)

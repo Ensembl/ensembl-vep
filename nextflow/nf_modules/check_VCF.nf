@@ -24,17 +24,18 @@ process checkVCF {
   errorStrategy 'ignore'
 
   input:
-  path(input_vcf)
+  path input_vcf
+  path input_vcf_index
   
   output:
-  tuple path("*.gz", includeInputs: true), path ("${input_vcf}*.tbi")
+  tuple path("*.gz", includeInputs: true), path ("*.gz.tbi", includeInputs: true)
 
-  afterScript "rm *.vcf"
+  afterScript "rm *.vcf *.vcf.tbi"
 
   script:
   """
   bgzip -t ${input_vcf} || bgzip -c ${input_vcf} > ${input_vcf}.gz
-  tabix -p vcf -f *.gz
+  [ -f *gz.tbi ] || tabix -p vcf -f *.gz
   """
 
 }
