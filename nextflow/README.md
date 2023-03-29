@@ -52,7 +52,7 @@ The following config files are used and can be modified depending on user requir
 #### Options
 
 ```bash
-  --vcf VCF                 Sorted and bgzipped VCF. Alternatively, can also be a direcotry containing VCF files.
+  --vcf VCF                 Sorted and bgzipped VCF. Alternatively, can also be a directory containing VCF files.
   --bin_size INT            Input file is split into multiple files with a given number of variants. Enables faster run in expense of more jobs. Default: 100
   --vep_config FILENAME     VEP config file. Default: vep_config/vep.ini
   --cpus INT                Number of CPUs to use. Default: 1
