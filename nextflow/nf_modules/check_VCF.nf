@@ -27,12 +27,14 @@ process checkVCF {
   path(input_vcf)
   
   output:
-  tuple path("${input_vcf}"), path ("${input_vcf}.tbi")
+  tuple path("*.gz", includeInputs: true), path ("${input_vcf}*.tbi")
+
+  afterScript "rm *.vcf"
 
   script:
   """
-  bgzip -t ${ input_vcf}
-  tabix -p vcf -f ${ input_vcf}
+  bgzip -t ${input_vcf} || bgzip -c ${input_vcf} > ${input_vcf}.gz
+  tabix -p vcf -f *.gz
   """
 
 }
