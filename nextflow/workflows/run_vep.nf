@@ -70,15 +70,20 @@ workflow vep {
     vcf
     vep_config
   main:
-    vcfInput = file(vcf)
-    if( !vcfInput.exists() ) {
-      exit 1, "The specified VCF input does not exist: ${vcfInput}"
-    }
+    if(vcf instanceof String){
+      vcfInput = file(vcf)
+      if( !vcfInput.exists() ) {
+        exit 1, "The specified VCF input does not exist: ${vcfInput}"
+      }
 
-    if (vcfInput.isDirectory()) {
-      checkVCF(Channel.fromPath("${vcfInput}/*.gz"))
-    } else {
-      checkVCF(vcfInput)
+      if (vcfInput.isDirectory()) {
+        checkVCF(Channel.fromPath("${vcfInput}/*.gz"))
+      } else {
+        checkVCF(vcfInput)
+      }
+    }
+    else {
+      checkVCF(vcf)
     }
 
     splitVCF(checkVCF.out, params.bin_size)
