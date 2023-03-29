@@ -20,7 +20,7 @@ params.skip_check = 0
 params.help = false
 
 // module imports
-include { checkVCF } from '../nf_modules/check_VCF.nf'
+include { checkInput; checkVCF } from '../nf_modules/check_VCF.nf'
 include { splitVCF } from '../nf_modules/split_VCF.nf' 
 include { mergeVCF } from '../nf_modules/merge_VCF.nf'  
 include { runVEP } from '../nf_modules/run_vep.nf'
@@ -86,8 +86,11 @@ workflow vep {
     vcf
     vep_config
   main:
+    // Raise error if we have multiple VCF files and VEP config files as input
+    // This would require mapping the VCF to the config files
     vcf = processInput(vcf, pattern="*.gz")
     vep_config = processInput(vep_config, pattern="*.ini")
+    checkInput(vcf.count(), vep_config.count())
 
     // Prepare input VCF files (bgzip + tabix)
     checkVCF(vcf)
