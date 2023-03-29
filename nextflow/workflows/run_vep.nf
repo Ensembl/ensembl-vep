@@ -78,7 +78,7 @@ workflow vep {
       }
 
       if (vcfInput.isDirectory()) {
-        checkVCF(Channel.fromPath("${vcfInput}/*.gz"))
+        checkVCF(Channel.fromPath("${vcfInput}/{*.gz,*.vcf}"))
       } else {
         checkVCF(vcfInput)
       }
@@ -88,10 +88,8 @@ workflow vep {
     }
 
     splitVCF(checkVCF.out, params.bin_size)
-
     vep_config = Channel.fromPath(vep_config, relative: true).first()
     runVEP(splitVCF.out.files.transpose(), vep_config)
-
     mergeVCF(runVEP.out.vcf.groupTuple())
   emit:
     mergeVCF.out
