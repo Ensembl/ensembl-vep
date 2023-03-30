@@ -34,7 +34,11 @@ process checkVCF {
 
   script:
   """
-  bgzip -t ${input_vcf} || bgzip -c ${input_vcf} > ${input_vcf}.gz
+  [ -f *gz ] || bgzip -c ${input_vcf} > ${input_vcf}.gz
   [ -f *gz.tbi ] || tabix -p vcf -f *.gz
+
+  # quickly test tabix -- ensures both bgzip and tabix are okay
+  chr=\$(tabix -l *.gz | head -n1)
+  tabix *.gz \${chr}:1-10001
   """
 }
