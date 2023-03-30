@@ -38,20 +38,3 @@ process checkVCF {
   [ -f *gz.tbi ] || tabix -p vcf -f *.gz
   """
 }
-
-process checkInput {
-  /*
-  Function to check input files
-  */
-  input:
-  val vcf_count
-  val config_count
-
-  """
-  if [ "${vcf_count}" -gt "1" ] && [ "${config_count}" -gt "1" ]
-  then
-    echo "Multiple VCF and VEP config files are currently not supported"
-    exit 1
-  fi
-  """
-}
