@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 
 /* 
- * Script to run VEP on chromosome-wise split VCF files
+ * Script to run VEP on split VCF files
  */
 
 nextflow.enable.dsl=2
@@ -11,30 +11,29 @@ prefix = "vep"
 params.outdir = ""
 params.cpus = 1
 
-process chrosVEP {
+process runVEP {
   /*
-  Function to run VEP on chromosome-wise split VCF files
+  Run VEP on VCF files
 
   Returns
   -------
-  Returns 2 files per chromosome:
-      1) VEP output file for each chromosome-wise split VCF
+  Returns 2 files:
+      1) VEP output file in VCF format
       2) A tabix index for that VCF output file
   */
   publishDir "${params.outdir}/vep-summary",
-    pattern: "${prefix}-*.vcf.gz_summary.*",
+    pattern: "${original}-${prefix}-*.vcf.gz_summary.*",
     mode:'move'
   cpus params.cpus
-  container "${params.singularity_dir}/vep.sif"
+  label 'vep'
 
   input:
-  tuple path(vcfFile), path(indexFile)
+  tuple val(original), path(vcfFile), path(indexFile)
   path(vep_config)
   
   output:
-  path("${prefix}-*.vcf.gz"), emit: vcfFile
-  path("${prefix}-*.vcf.gz.tbi"), emit: indexFile
-  path("${prefix}-*.vcf.gz_summary.*")
+  tuple val(original), path("${original}-${prefix}-*.vcf.gz"), path("${original}-${prefix}-*.vcf.gz.tbi"), emit: vcf
+  path("${original}-${prefix}-*.vcf.gz_summary.*")
 
   script:
   if( !vcfFile.exists() ) {
@@ -45,8 +44,9 @@ process chrosVEP {
   }
   else {
     """
-    vep -i ${vcfFile} -o ${prefix}-${vcfFile} --vcf --compress_output bgzip --format vcf --config ${vep_config}
-    tabix -p vcf ${prefix}-${vcfFile}
+    out=${original}-${prefix}-${vcfFile}
+    vep -i ${vcfFile} -o \${out} --vcf --compress_output bgzip --format vcf --config ${vep_config}
+    tabix -p vcf \${out}
     """	
   }
 }

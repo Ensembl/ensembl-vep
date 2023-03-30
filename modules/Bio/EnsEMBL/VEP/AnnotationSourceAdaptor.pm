@@ -204,18 +204,26 @@ sub get_all_custom {
   my @as;
 
   foreach my $custom_string(@{$self->param('custom') || []}) {
-    my (@params) = split /\,/, $custom_string;
-
+    
     my %hash = ();
+    my (@params, @fields);
 
-    foreach my $param(@params) {
-      my ($key, $val) = split('=', $param);
-      die("ERROR: Failed to parse parameter $param; Please add $param=<VALUE_OF_PARAMETER>\n") unless defined($key) && defined($val);
-      $hash{$key} = $val;
+    if (grep(/=/, $custom_string)){
+      @params = split /\,/, $custom_string;
+    } else {
+      ($hash{"file"}, $hash{"short_name"}, $hash{"format"}, $hash{"type"}, $hash{"coords"}, @fields) = split /\,/, $custom_string;
     }
 
-    throw("ERROR: No 'file=' was added for custom annotation source.\nLINE: --custom $custom_string\n") unless defined($hash{"file"});
-    throw("ERROR: No 'format=' specified for custom annotation source.\nLINE: --custom $custom_string\n") unless defined($hash{"format"});
+    if (@params){
+      foreach my $param(@params) {
+        my ($key, $val) = split('=', $param);
+        die("ERROR: Failed to parse parameter $param; Please add <VALUE_OF_PARAMETER>=$param\n") unless defined($key) && defined($val);
+        $hash{$key} = $val;
+      };
+    };
+
+    throw("ERROR: No file was added for custom annotation source.\nLINE: --custom $custom_string\n") unless defined($hash{"file"});
+    throw("ERROR: No format specified for custom annotation source.\nLINE: --custom $custom_string\n") unless defined($hash{"format"});
     throw("ERROR: Access to remote data files disabled\n") if $self->param('no_remote') && $hash{"file"} =~ /^(ht|f)tp:\/\/.+/;
 
     my $opts = {
@@ -233,6 +241,7 @@ sub get_all_custom {
     }
 
     $opts->{fields} = [split /%/, $hash{"fields"}] if $hash{"fields"};
+    $opts->{fields} = \@fields if @fields;
 
     if (grep { /\#\#\#CHR\#\#\#/ } $hash{"file"}){
 
