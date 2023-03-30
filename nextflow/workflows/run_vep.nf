@@ -56,18 +56,22 @@ def processInput (input, pattern, is_vcf) {
     }
 
     if (files.isDirectory()) {
-      files = Channel.fromPath("${files}/${pattern}")
+      files = "${files}/${pattern}"
     }
-    if (is_vcf) {
-      files = files.multiMap {
-        vcf: it
-        vcf_index: "${it}.tbi"
-      }
-    }
+    files = Channel.fromPath(files)
   } else {
     // if input is a Channel, just pass along
     files = input
   }
+
+  if (is_vcf) {
+    // add tabix-index files for VCF input (to be checked if they exist later)
+    files = files.multiMap { it ->
+      vcf: it
+      vcf_index: "${it}.tbi"
+    }
+  }
+
   return files
 }
 
