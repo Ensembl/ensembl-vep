@@ -80,14 +80,14 @@ workflow vep {
     vcf
     vep_config
   main:
-    if (!vep_config) {
-      exit 1, "Undefined --vep_config parameter. Please provide a VEP config file"
-    }
-    
     if (!vcf) {
       exit 1, "Undefined --vcf parameter. Please provide the path to a VCF file"
     }
-  
+
+    if (!vep_config) {
+      exit 1, "Undefined --vep_config parameter. Please provide a VEP config file"
+    }
+
     // Raise error if we have multiple VCF files and VEP config files as input
     // This would require mapping the VCF to the config files
     vcf = processInput(vcf, pattern="*.{vcf,gz}", true)
