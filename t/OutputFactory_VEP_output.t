@@ -172,7 +172,7 @@ is(
     3_prime_UTR_variant
     1122
     - - - - -
-    REF_ALLELE=C;IMPACT=MODIFIER;STRAND=-1
+    REF_ALLELE=C;IMPACT=MODIFIER;STRAND=-1;Original_allele=C/T
   )),
   'get_all_lines_by_InputBuffer - check first'
 );
@@ -193,7 +193,7 @@ is(
     V/I
     Gtt/Att
     -
-    REF_ALLELE=C;IMPACT=MODERATE;STRAND=-1;FLAGS=cds_start_NF
+    REF_ALLELE=C;IMPACT=MODERATE;STRAND=-1;FLAGS=cds_start_NF;Original_allele=C/T
   )),
   'get_all_lines_by_InputBuffer - check last'
 );
@@ -216,7 +216,7 @@ is(
   'HGVSc=ENST00000307301.11:c.*18G>A;'.
   'AF=0.0010;AFR_AF=0.003;AMR_AF=0.0014;EAS_AF=0;EUR_AF=0;SAS_AF=0;'.
   'gnomADe_AF=0.0003478;gnomADe_AFR_AF=0.004643;gnomADe_AMR_AF=0.0003236;gnomADe_ASJ_AF=0;'.
-  'gnomADe_EAS_AF=0;gnomADe_FIN_AF=0;gnomADe_NFE_AF=1.886e-05;gnomADe_OTH_AF=0;gnomADe_SAS_AF=0;MAX_AF=0.004643;MAX_AF_POPS=gnomADe_AFR',
+  'gnomADe_EAS_AF=0;gnomADe_FIN_AF=0;gnomADe_NFE_AF=1.886e-05;gnomADe_OTH_AF=0;gnomADe_SAS_AF=0;MAX_AF=0.004643;MAX_AF_POPS=gnomADe_AFR;Original_allele=C/T',
   'get_all_lines_by_InputBuffer - everything'
 );
 
@@ -251,7 +251,7 @@ SKIP: {
       3_prime_UTR_variant
       1122
       - - - - -
-      IMPACT=MODIFIER;STRAND=-1;test=test1;test_FILTER=PASS;test_FOO=BAR
+      IMPACT=MODIFIER;STRAND=-1;Original_allele=C/T;test=test1;test_FILTER=PASS;test_FOO=BAR
     )),
     'get_all_lines_by_InputBuffer - custom'
   );

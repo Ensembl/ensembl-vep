@@ -234,6 +234,7 @@ SKIP: {
       'end' => 25585733,
       'seq_region_name' => '21',
       'strand' => 1,
+      'original_allele' => 'C/T',
       'transcript_consequences' => [
         {
           'gene_id' => 'ENSG00000154719',
@@ -434,6 +435,7 @@ SKIP: {
       ],
       'strand' => 1,
       'id' => 'rs142513484',
+      'original_allele' => 'C/T',
       'allele_string' => 'C/T',
       'most_severe_consequence' => 'missense_variant',
       'start' => 25585733,
