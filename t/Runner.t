@@ -1214,6 +1214,7 @@ SKIP: {
          "allele_string" => "C/A",
          "assembly_name" => "GRCh38",
          "end" => 10524654,
+         "original_allele" => 'C/A',
          "id" => ".",
          "input" =>  "21 10524654 . C A",
          "intergenic_consequences" => [
