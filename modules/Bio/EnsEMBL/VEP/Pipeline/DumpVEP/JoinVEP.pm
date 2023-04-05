@@ -31,7 +31,7 @@ package Bio::EnsEMBL::VEP::Pipeline::DumpVEP::JoinVEP;
 
 use strict;
 use warnings;
-use File::Path qw(rmtree);
+use File::Path qw(make_path rmtree);
 
 use base qw(Bio::EnsEMBL::VEP::Pipeline::DumpVEP::BaseVEP);
 
@@ -52,10 +52,10 @@ sub run {
   
   # create vep and indexed_vep_cache dir 
   unless (-d $vep_dir) {
-    mkdir($vep_dir) or die ("Failed to create dir - $vep_dir");
+    make_path($vep_dir) or die ("Failed to create dir - $vep_dir");
   }
   if ($self->param('convert') && $self->param('variation') && !(-d $indexed_vep_cache_dir)) {
-    mkdir($indexed_vep_cache_dir) or die ("Failed to create dir - $indexed_vep_cache_dir");
+    make_path($indexed_vep_cache_dir) or die ("Failed to create dir - $indexed_vep_cache_dir");
   }
   
   my $type = $self->param('type');
