@@ -46,7 +46,18 @@ sub param_defaults {
 
 sub run {
   my $self = shift;
-
+  
+  my $vep_dir = $self->dump_dir."/vep";
+  my $indexed_vep_cache_dir = $self->dump_dir."/indexed_vep_cache";
+  
+  # create vep and indexed_vep_cache dir 
+  unless -d $vep_dir {
+    mkdir($vep_dir) or die ("Failed to create dir - $vep_dir");
+  }
+  if $self->param('convert') && $var && !(-d $indexed_vep_cache_dir) {
+    mkdir($vep_dir) or die ("Failed to create dir - $vep_dir");
+  }
+  
   my $type = $self->param('type');
 
   $self->$type();
@@ -227,7 +238,7 @@ sub create_converted_version {
     $species,
     $self->param('assembly'),
     $suffix,
-    '_tabixconverted'
+    'indexed_vep_cache'
   );
 }
 
