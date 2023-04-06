@@ -97,7 +97,7 @@ sub DistributeWeb{
   my %copied; ## save list of tabix'ed tar balls copied
 
   make_path("$dir/web") if (!-d "$dir/web");
-  opendir (my $dh, $dir/"indexed_vep_cache") or die $!;
+  opendir (my $dh, "$dir/indexed_vep_cache") or die $!;
   while (my $content = readdir($dh)) {
     if ($content =~ /collection$/)
     {
@@ -119,7 +119,7 @@ sub DistributeWeb{
   $dh->close();
 
   ## only copy non- tabixed set if tabixed set not already copied  
-  opendir ($dh, $dir/"vep") or die $!;
+  opendir ($dh, "$dir/vep") or die $!;
   while (my $content = readdir($dh)) {
     if ($content =~ /collection$/)
     {
