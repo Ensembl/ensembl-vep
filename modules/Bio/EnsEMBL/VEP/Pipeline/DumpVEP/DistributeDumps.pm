@@ -63,22 +63,28 @@ sub run {
 sub DistributeProduction {
   my ($self,$dir) = @_;
   make_path("$dir/production") if (!-d "$dir/production");
-  opendir (my $dh, "$dir/vep") or die $!;
+  opendir (my $dh, $dir) or die $!;
   while (my $content = readdir($dh)) {
     if ($content =~ /collection$/)
     {
       make_path("$dir/production/$content") if (!-d "$dir/production/$content");
-      opendir (my $dh_collection, "$dir/vep/$content") or die $!;
+      opendir (my $dh_collection, "$dir/$content/vep") or die $!;
       while (my $file_collection = readdir($dh_collection)) {
         if ($file_collection =~ /gz$/) {
-          $self->link_file("$dir/$content/$file_collection", "$dir/production/$content/$file_collection");
+          $self->link_file("$dir/$content/vep/$file_collection", "$dir/production/$content/$file_collection");
         }
       }
       $dh_collection->close();
       $self->compute_checksums("$dir/production/$content/");
     }
-    elsif ($content =~ /gz$/) {
-      $self->link_file("$dir/vep/$content", "$dir/production/$content");
+    elsif ($content =~ /^vep$/) {
+      opendir (my $dh_collection, "$dir/vep") or die $!;
+      while (my $file_collection = readdir($dh_collection)) {
+        if ($file_collection =~ /gz$/) {
+          $self->link_file("$dir/vep/$file_collection", "$dir/production/$file_collection");
+        }
+      }
+      $dh_collection->close();
     }
   }
   $dh->close();
@@ -97,43 +103,47 @@ sub DistributeWeb{
   my %copied; ## save list of tabix'ed tar balls copied
 
   make_path("$dir/web") if (!-d "$dir/web");
-  opendir (my $dh, "$dir/indexed_vep_cache") or die $!;
+  opendir (my $dh, $dir) or die $!;
   while (my $content = readdir($dh)) {
     if ($content =~ /collection$/)
     {
       make_path("$dir/web/$content") if (!-d "$dir/web/$content");
-      opendir (my $dh_collection, "$dir/indexed_vep_cache/$content") or die $!;
+      if (-d  "$dir/$content/indexed_vep_cache"){
+        opendir (my $dh_collection, "$dir/$content/indexed_vep_cache") or die $!;
+        while (my $file_collection = readdir($dh_collection)) {
+          if ($file_collection =~ /gz$/) {
+            $copied{$file_collection} = 1;
+            $self->link_file("$dir/$content/indexed_vep_cache/$file_collection", "$dir/web/$content/$file_collection");
+          }
+        }
+        $dh_collection->close();
+      }
+      opendir (my $dh_collection, "$dir/$content/vep") or die $!;
       while (my $file_collection = readdir($dh_collection)) {
-        if ($file_collection =~ /gz/) {
+        if ($file_collection =~ /gz$/ && ! $copied{$file_collection}) {
+          $self->link_file("$dir/$content/vep/$file_collection", "$dir/web/$content/$file_collection");
+        }
+      }
+      $dh_collection->close();
+    }
+    elsif ($content =~ /^indexed_vep_cache$/) {
+      opendir (my $dh_collection, "$dir/indexed_vep_cache") or die $!;
+      while (my $file_collection = readdir($dh_collection)) {
+        if ($file_collection =~ /gz$/) {
           $copied{$file_collection} = 1;
-          $self->link_file("$dir/indexed_vep_cache/$content/$file_collection", "$dir/web/$content/$file_collection");
+          $self->link_file("$dir/indexed_vep_cache/$file_collection", "$dir/web/$file_collection");
         }
       }
       $dh_collection->close();
     }
-    elsif ($content =~ /gz$/) {
-      $copied{$content} = 1;
-      $self->link_file("$dir/indexed_vep_cache/$content", "$dir/web/$content");
-    }
-  }
-  $dh->close();
-
-  ## only copy non- tabixed set if tabixed set not already copied  
-  opendir ($dh, "$dir/vep") or die $!;
-  while (my $content = readdir($dh)) {
-    if ($content =~ /collection$/)
-    {
-      make_path("$dir/web/$content") if (!-d "$dir/web/$content");
-      opendir (my $dh_collection, "$dir/vep/$content") or die $!;
+    elsif ($content =~ /^vep$/) {
+      opendir (my $dh_collection, "$dir/vep") or die $!;
       while (my $file_collection = readdir($dh_collection)) {
-        if ($file_collection =~ /gz/ && ! $copied{$file_collection}) {
-          $self->link_file("$dir/vep/$content/$file_collection", "$dir/web/$content/$file_collection");
+        if ($file_collection =~ /gz$/ && ! $copied{$file_collection}) {
+          $self->link_file("$dir/vep/$file_collection", "$dir/web/$content/$file_collection");
         }
       }
       $dh_collection->close();
-    }
-    elsif ($content =~ /gz$/ && ! $copied{$content}) {
-      $self->link_file("$dir/vep/$content", "$dir/web/$content");
     }
   }
   $dh->close();
