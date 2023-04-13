@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2022] EMBL-European Bioinformatics Institute
+Copyright [2016-2023] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -209,8 +209,6 @@ sub next {
   if(my $parser = $self->parser) {
     while(@$buffer < $buffer_size && (my $vf = $parser->next)) {
 
-      # skip long and unsupported types of SV; doing this here to avoid stopping looping
-      next if $vf->{vep_skip};
 
       # exit the program if the maximum number of variants not ordered in the input file is reached
       if (!$self->param('no_check_variants_order') &&

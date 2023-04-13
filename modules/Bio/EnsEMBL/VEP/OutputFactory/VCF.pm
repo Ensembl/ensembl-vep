@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2022] EMBL-European Bioinformatics Institute
+Copyright [2016-2023] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -279,6 +279,12 @@ sub get_all_lines_by_InputBuffer {
   $self->rejoin_variants_in_InputBuffer($buffer) if $buffer->rejoin_required;
 
   foreach my $vf(@{$buffer->buffer}) {
+
+    # Include non-annotated line
+    if ($vf->{vep_skip}){
+      push @return, join("\t", @{$vf->{_line}}) if $vf->{vep_skip};
+      next;  
+    }
 
     my $line;
     my $fieldname = $self->{vcf_info_field} || 'CSQ';

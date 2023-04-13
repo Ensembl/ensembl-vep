@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2022] EMBL-European Bioinformatics Institute
+Copyright [2016-2023] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -185,7 +185,7 @@ sub get_regions_from_coords {
 
   # log min/max
   $min = $start if $start < $min;
-  $max = $end if $end > $max;
+  $max = $end   if   $end > $max;
 
   # convert to region-size
   my ($r_s, $r_e) = map {int(($_ - 1) / $cache_region_size)} ($start - $up_down_size, $end + $up_down_size);
@@ -228,6 +228,9 @@ sub get_all_regions_by_InputBuffer {
   my ($min, $max) = (1e10, 0);
 
   foreach my $vf(@{$buffer->buffer}) {
+    # skip long and unsupported types of SV; doing this here to avoid stopping looping
+    # next if $vf->{vep_skip};
+    
     # process alternative alleles for breakend structural variants
     if (ref $vf->{allele_string} eq "ARRAY") {
       foreach my $alt(@{$vf->{allele_string}}) {

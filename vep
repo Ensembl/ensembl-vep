@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Copyright [2016-2022] EMBL-European Bioinformatics Institute
+# Copyright [2016-2023] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -173,7 +173,7 @@ GetOptions(
   'ambiguity',               # Add allele ambiguity code
   'var_synonyms', 	     # include variation synonyms in output
   'shift_3prime=i',          # enables shifting of all variants to 3prime
-  'shift_genomic',           # adds genomic shifting to output, and provides shifting of intergenic variants
+  'shift_genomic=i',         # adds genomic shifting to output, and provides shifting of intergenic variants
   'shift_length',	     # adds the length of the transcript directional shift to output
 
   # cache stuff

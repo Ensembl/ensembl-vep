@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2022] EMBL-European Bioinformatics Institute
+Copyright [2016-2023] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -76,6 +76,7 @@ our @FLAG_FIELDS = (
   { flag => 'variant_class',   fields => ['VARIANT_CLASS']},
   { flag => 'minimal',         fields => ['MINIMISED']},
   { flag => 'spdi',            fields => ['SPDI']},
+  { flag => 'ga4gh_vrs',       fields => ['GA4GH_VRS']},
 
   # gene-related
   { flag => 'symbol',          fields => ['SYMBOL','SYMBOL_SOURCE','HGNC_ID'] },
@@ -172,6 +173,7 @@ our %FIELD_DESCRIPTIONS = (
   'HGVSp'              => 'HGVS protein sequence name',
   'HGVSg'              => 'HGVS genomic sequence name',
   'SPDI'               => 'Genomic SPDI notation',
+  'GA4GH_VRS'          => 'GA4GH Variation Representation Specification',
   'SIFT'               => 'SIFT prediction and/or score',
   'PolyPhen'           => 'PolyPhen prediction and/or score',
   'EXON'               => 'Exon number(s) / total',
