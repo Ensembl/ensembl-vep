@@ -446,20 +446,20 @@ sub create_StructuralVariationFeatures {
       $min_end = $min_start;
       $max_end = $max_start;
     }
-    
+
     my $new_alts = [];
     # Support multiple mates from a breakend variant
     for my $alt_string (split ",", $alt) {
       my ($alt_allele) = ($alt_string =~ '[\[\]]?([A-Za-z]+)[\[\]]?');
       my ($alt_chr, $alt_pos) = ($alt_string =~ '([A-Za-z0-9]+) ?: ?([0-9]+)');
-      
+
       # Mate orientation:
       #   C[2:321682[  - normal
       #   G]17:198982] - inverted
       #   ]13:123456]T - normal
       #   [17:198983[A - inverted
       my $inverted = ($alt_string =~ '^\[|\]$') || 0;
-      
+
       # Mate placement:
       #   C[2:321682[  - left
       #   [17:198983[A - right
