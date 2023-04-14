@@ -314,7 +314,7 @@ sub get_overlapping_vfs {
         push(@vfs, $vf);
       }
     }
-    # check overlap with complex alleles (e.g., breakend structural variants)
+    # check overlap with complex alleles (such as breakend structural variants)
     if (ref $vf->{allele_string} eq 'ARRAY') {
       for my $alt (@{ $vf->{allele_string} }) {
         push(@vfs, $vf) if overlap($alt->{pos}, $alt->{pos}, $start, $end);
@@ -350,9 +350,9 @@ sub interval_tree {
       my ($s, $e) = ($vf->{start}, $vf->{end});
       ($s, $e) = ($e, $s) if $s > $e;
       $tree->insert($vf, $s - 1, $e);
-      
+
       # add same variation feature to alternative allele coordinates
-      # (e.g., breakend structural variants)
+      # (such as breakend structural variants)
       if (ref $vf->{allele_string} eq 'ARRAY') {
         for my $alt (@{ $vf->{allele_string} }) {
           $s = $e = $alt->{pos};
