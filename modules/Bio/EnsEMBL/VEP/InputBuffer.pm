@@ -421,10 +421,10 @@ sub hash_tree {
 
 =head2 min_max
   
-  Example    : my ($min, $max) = @{$ib->min_max()};
-  Description: Gets the minimum and maximum coordinates spanned
+  Example    : my %min_max = %{$ib->min_max()};
+  Description: Gets the chromosome and minimum and maximum coordinates spanned
                by variants in the buffer.
-  Returntype : arrayref [$min, $max]
+  Returntype : hash of array [$min, $max] by $chr
   Exceptions : none
   Caller     : AnnotationSource
   Status     : Stable
@@ -437,9 +437,17 @@ sub min_max {
   if(!exists($self->{temp}->{min_max})) {
     return $self->{temp}->{min_max} = shift if @_;
 
-    my ($min, $max) = (1e10, 0);
+    my %min_max;
+    my $chr;
+    my $min;
+    my $max;
 
     foreach my $vf(@{$self->buffer}) {
+      $chr = $vf->{chr} || $vf->slice->seq_region_name;
+      throw("ERROR: Cannot get chromosome $chr from VariationFeature") unless $chr;
+
+      ($min, $max) = defined $min_max{$chr} ? @{$min_max{$chr}} : (1e10, 0);
+
       my ($vf_s, $vf_e) = ($vf->{start}, $vf->{end});
 
       if($vf_s > $vf_e) {
@@ -450,9 +458,11 @@ sub min_max {
         $min = $vf_s if $vf_s < $min;
         $max = $vf_e if $vf_e > $max;
       }
+
+      $min_max{$chr} = [$min, $max]
     }
 
-    $self->{temp}->{min_max} = [$min, $max];
+    $self->{temp}->{min_max} = \%min_max;
   }
 
   return $self->{temp}->{min_max};
