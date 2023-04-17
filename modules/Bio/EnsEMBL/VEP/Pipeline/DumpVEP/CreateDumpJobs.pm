@@ -244,6 +244,7 @@ sub get_chr_jobs {
   } @slices;
 
   delete($self->{_var_dba}) if $self->{_var_dba};
+  delete($self->{_rfa}) if $self->{_rfa};
 
   # now distribute the slices into jobs
   # jobs can contain multiple slices
