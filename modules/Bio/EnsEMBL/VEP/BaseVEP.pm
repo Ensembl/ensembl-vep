@@ -638,7 +638,11 @@ sub get_source_chr_name {
   if(!exists($chr_name_map->{$chr})) {
     my $mapped_name = $chr;
 
-    @$valids = @{$self->can('valid_chromosomes') ? $self->valid_chromosomes : []} unless @$valids;
+    unless (@$valids) {
+      my $valid_chr = $self->valid_chromosomes;
+      $valid_chr = ref($valid_chr) eq 'HASH' ? [ keys $valid_chr ] : $valid_chr;
+      @$valids = @{$self->can('valid_chromosomes') ? $valid_chr : []};
+    }
     my %valid = map {$_ => 1} @$valids;
 
     unless($valid{$chr}) {
