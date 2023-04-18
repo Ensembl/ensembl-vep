@@ -1881,7 +1881,7 @@ sub BaseStructuralVariationOverlapAllele_to_output_hash {
 
   my $svf = $vfoa->base_variation_feature;
 
-  $hash->{Allele} = $svf->class_SO_term;
+  $hash->{Allele} = $svf->{allele_string} || $svf->class_SO_term;
 
   # allele number
   $hash->{ALLELE_NUM} = $vfoa->allele_number if $self->{allele_number};
