@@ -24,11 +24,10 @@ process checkVCF {
   errorStrategy 'ignore'
 
   input:
-  path input_vcf
-  path input_vcf_index
+  tuple path(input_vcf), path(input_vcf_index), path(vep_config)
   
   output:
-  tuple path("*.gz", includeInputs: true), path ("*.gz.tbi", includeInputs: true)
+  tuple path("*.gz", includeInputs: true), path ("*.gz.tbi", includeInputs: true), path(vep_config)
 
   afterScript "rm *.vcf *.vcf.tbi"
 
