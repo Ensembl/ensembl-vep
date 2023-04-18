@@ -462,7 +462,7 @@ sub detect_format {
       my $ok = 1;
 
       foreach my $alt(split(',', $data[4])) {
-        $ok = 0 unless $alt =~ /^[\.ACGTN\-\*]+$|^(\<[\w\:\*]+\>)$/i;
+        $ok = 0 unless $alt =~ /^[\.ACGTN\-\*]+$|^(\<[\w\:\*]+\>)$|^[\[\]A-Z:0-9]+$/i;
       }
 
       $format = 'vcf' if $ok;
