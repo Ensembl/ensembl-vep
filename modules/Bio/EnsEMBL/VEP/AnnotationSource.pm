@@ -233,19 +233,9 @@ sub get_all_regions_by_InputBuffer {
   my $max;
 
   foreach my $vf(@{$buffer->buffer}) {
-    # skip long and unsupported types of SV; doing this here to avoid stopping looping
-    # next if $vf->{vep_skip};
 
-    # process alternative alleles from breakend structural variants
-    if (ref $vf->{allele_string} eq "ARRAY") {
-      foreach my $alt(@{$vf->{allele_string}}) {
-        ($chr, $min, $max, $seen, @new_regions) = $self->get_regions_from_coords(
-          $alt->{chr}, $alt->{pos}, $alt->{pos},
-          $min_max, $cache_region_size, $up_down_size, $seen);
-        push @regions, @new_regions;
-        $min_max->{$chr} = [$min, $max];
-      }
-    }
+    # skip long and unsupported types of SV; doing this here to avoid stopping looping
+    next if $vf->{vep_skip};
 
     $chr = $vf->{chr} || $vf->slice->seq_region_name;
     throw("ERROR: Cannot get chromosome $chr from VariationFeature") unless $chr;
@@ -255,6 +245,15 @@ sub get_all_regions_by_InputBuffer {
       $min_max, $cache_region_size, $up_down_size, $seen);
     push @regions, @new_regions;
     $min_max->{$chr} = [$min, $max];
+
+    # process alternative alleles from breakend structural variants
+    foreach my $alt (@{$vf->{_parsed_allele}}) {
+      ($chr, $min, $max, $seen, @new_regions) = $self->get_regions_from_coords(
+        $alt->{chr}, $alt->{pos}, $alt->{pos},
+        $min_max, $cache_region_size, $up_down_size, $seen);
+      push @regions, @new_regions;
+      $min_max->{$chr} = [$min, $max];
+    }
   }
 
   $buffer->min_max($min_max);

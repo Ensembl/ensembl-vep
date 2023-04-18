@@ -374,6 +374,93 @@ sub create_VariationFeatures {
 }
 
 
+=head2 _parse_breakend_alt_alleles
+
+  Arg 1      : string $alt (ALT field from VCF)
+  Arg 2      : hashref $info (INFO field from VCF)
+  Example    : $parsed_alleles = $self->_parse_breakend_alt_alleles($alt, $info);
+  Description: Parse alternative alleles from breakend structural variants
+  Returntype : Arrayref of hashrefs containing information of the parsed alleles
+  Exceptions : none
+  Caller     : create_StructuralVariationFeatures()
+  Status     : Stable
+
+=cut
+
+sub _parse_breakend_alt_alleles {
+  my $self = shift;
+  my $alt = shift;
+  my $info = shift;
+
+  my $parsed_allele = [];
+
+  # Support multiple breakends from ALT in the format C[2:321682[,]17:198982]G
+  for my $alt_string (split ",", $alt) {
+    my ($alt_allele) = ($alt_string =~ '[\[\]]?([A-Za-z]+)[\[\]]?');
+    my ($alt_chr, $alt_pos) = ($alt_string =~ '([A-Za-z0-9]+) ?: ?([0-9]+)');
+
+    next if !defined $alt_allele or !defined $alt_chr or !defined $alt_pos;
+    $alt_chr = $self->get_source_chr_name($alt_chr);
+
+    # Mate orientation:
+    #   C[2:321682[  - normal
+    #   G]17:198982] - inverted
+    #   ]13:123456]T - normal
+    #   [17:198983[A - inverted
+    my $inverted = ($alt_string =~ '^\[|\]$') || 0;
+
+    # Mate placement:
+    #   C[2:321682[  - left
+    #   [17:198983[A - right
+    my $placement = ($alt_string =~ '^(\[|\])') ? 'left' : 'right';
+
+    my $slice = Bio::EnsEMBL::Slice->new_fast({
+      seq_region_name => $alt_chr,
+      start => $alt_pos,
+      end => $alt_pos,
+    });
+
+    push $parsed_allele, {
+      string    => $alt_string,
+      allele    => $alt_allele,
+      pos       => $alt_pos,
+      start     => $alt_pos,
+      end       => $alt_pos,
+      chr       => $alt_chr,
+      inverted  => $inverted,
+      placement => $placement,
+      slice     => $slice
+    };
+  }
+
+  # Support breakend described in INFO field
+  if (defined $info->{CHR2} && scalar @$parsed_allele == 0) {
+    my $alt_chr = $self->get_source_chr_name($info->{CHR2});
+    my $alt_pos = $info->{END2};
+
+    if (defined $alt_chr && defined $alt_pos) {
+      my $slice = Bio::EnsEMBL::Slice->new_fast({
+        seq_region_name => $alt_chr,
+        start => $alt_pos,
+        end => $alt_pos,
+      });
+
+      push $parsed_allele, {
+        string    => $alt,
+        allele    => $alt,
+        pos       => $alt_pos,
+        start     => $alt_pos,
+        end       => $alt_pos,
+        chr       => $alt_chr,
+        slice     => $slice
+      };
+    }
+  }
+
+  return $parsed_allele;
+}
+
+
 =head2 create_StructuralVariationFeatures
 
   Example    : $vfs = $parser->create_StructuralVariationFeatures();
@@ -402,7 +489,7 @@ sub create_StructuralVariationFeatures {
     $parser->get_IDs,
   );
 
-  ## long and complex SVs cannot be handle
+  ## long and complex SVs cannot be handled
   ## we have to return something here else we stop reading input, so flag it as not to be processed
   my $skip ;
 
@@ -438,45 +525,11 @@ sub create_StructuralVariationFeatures {
     $parser->get_outer_end,
   );
 
-  if($info->{SVTYPE} && $info->{SVTYPE} =~/BND/ ){
-    ## break ends are not currently annotated as fusions between different regions/chromosomes
-    ## only report 'reference' breakpoint if multiple chromosomes are involved
-    unless (defined $info->{CHR2} && $info->{CHR2} eq $chr) {
-      $end     = $start;
-      $min_end = $min_start;
-      $max_end = $max_start;
-    }
-
-    my $new_alts = [];
-    # Support multiple mates from a breakend variant
-    for my $alt_string (split ",", $alt) {
-      my ($alt_allele) = ($alt_string =~ '[\[\]]?([A-Za-z]+)[\[\]]?');
-      my ($alt_chr, $alt_pos) = ($alt_string =~ '([A-Za-z0-9]+) ?: ?([0-9]+)');
-
-      # Mate orientation:
-      #   C[2:321682[  - normal
-      #   G]17:198982] - inverted
-      #   ]13:123456]T - normal
-      #   [17:198983[A - inverted
-      my $inverted = ($alt_string =~ '^\[|\]$') || 0;
-
-      # Mate placement:
-      #   C[2:321682[  - left
-      #   [17:198983[A - right
-      my $placement = ($alt_string =~ '^(\[|\])') ? 'left' : 'right';
-      push $new_alts, {
-        string    => $alt_string,
-        allele    => $alt_allele,
-        pos       => $alt_pos,
-        chr       => $alt_chr,
-        inverted  => $inverted,
-        placement => $placement
-      };
-    }
-    $alts = $new_alts;
-    #$end += length($ref) - 1;
+  # parse alternative alleles from breakends
+  my $parsed_allele = undef;
+  if ($info->{SVTYPE} && $info->{SVTYPE} =~/BND/ ){
+    $parsed_allele = $self->_parse_breakend_alt_alleles($alt, $info);
   }
-
 
   # get type
   my $type;
@@ -512,7 +565,7 @@ sub create_StructuralVariationFeatures {
       DUP  => 'duplication',
       CNV  => 'copy_number_variation',
       INV  => 'inversion',
-      BND  => $alt
+      BND  => 'breakend'
     );
 
     $so_term = defined $terms{$type} ? $terms{$type} : $type;
@@ -528,12 +581,13 @@ sub create_StructuralVariationFeatures {
     strand         => 1,
     adaptor        => $self->get_adaptor('variation', 'StructuralVariationFeature'),
     variation_name => @$ids ? $ids->[0] : undef,
-    chr            => $chr,
+    chr            => $self->get_source_chr_name($chr),
     class_SO_term  => $so_term,
     _line          => $record,
-    allele_string  => $alts
+    allele_string  => $alt
   });
 
+  $svf->{_parsed_allele} = $parsed_allele if defined $parsed_allele;
   $svf->{vep_skip} = $skip if defined $skip;
 
   return $self->post_process_vfs([$svf]);
