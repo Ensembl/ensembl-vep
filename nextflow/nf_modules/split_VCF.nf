@@ -25,20 +25,16 @@ process splitVCF {
   label 'bcftools'
 
   input:
-  tuple path(vcf), path(vcf_index)
-  val(bin_size)
+  tuple path(vcf), path(vcf_index), path(split_file), path(vep_config)
 
   output:
-  tuple val("${vcf}"), path("${prefix}*.vcf.gz"), path("${prefix}*.vcf.gz.tbi"), emit: files
+  tuple val("${vcf}"), path("${prefix}*.vcf.gz"), path("${prefix}*.vcf.gz.tbi"), path(vep_config)
 
   afterScript 'rm x*'
 
   script:
   """
-  bcftools query -f'%CHROM\t%POS\n' ${vcf} | uniq | split -l ${bin_size}
-  for file in x*; do
-    bcftools view --no-version -T \${file} -Oz ${vcf} > ${prefix}.\${file}.vcf.gz
-    bcftools index -t ${prefix}.\${file}.vcf.gz
-  done
+  bcftools view --no-version -T ${split_file} -Oz ${vcf} > ${prefix}.${split_file}.vcf.gz
+  bcftools index -t ${prefix}.${split_file}.vcf.gz
   """
 }

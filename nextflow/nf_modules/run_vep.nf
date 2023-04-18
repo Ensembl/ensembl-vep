@@ -27,8 +27,7 @@ process runVEP {
   label 'vep'
 
   input:
-  tuple val(original), path(vcfFile), path(indexFile)
-  each path(vep_config)
+  tuple val(original), path(vcfFile), path(indexFile), path(vep_config)
   
   output:
   tuple val(original), path("*.vcf.gz"), path("*.vcf.gz.tbi"), emit: vcf
