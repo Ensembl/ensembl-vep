@@ -16,7 +16,7 @@ process checkVCF {
 
   Returns
   -------
-  Tuple of VCF, VCF index and GFF file
+  Tuple of VCF, VCF index, vep config file and a output dir
   */
 
   cpus params.cpus

@@ -14,15 +14,13 @@ params.cpus = 1
 
 process generateSplits {
   /*
-  Function to read variants from VCF file to split files
+  Function to read variants from VCF file and write them to separate to split files
 
   Returns
   -------
-  Returns:
-      1) A VCF file
-      2) A tabix index for that VCF
-      3) A list of split files
+  Tuple of VCF, VCF index, split files, vep config file and a output dir
   */
+  
   cpus params.cpus
   label 'bcftools'
 

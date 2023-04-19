@@ -11,14 +11,15 @@ params.cpus = 1
 
 process processInput {
   /*
-  Generate input for subsequent jobs. It works like merge operator and it helps creating one-to-one or many-to-one or many-to-one relationship between vcf file and vep_config
+  Generate input for subsequent jobs. It works like merge operator and it helps creating one-to-one or many-to-one or many-to-one relationship between vcf file, vep_config, and output_dir
 
   Returns
   -------
   Returns 2 files:
       1) A VCF file
       2) A tabix index for that VCF
-      3) A VEP config file to run VEP on that VCF
+      3) A VEP config file
+      4) A output dir
   */
   cpus params.cpus
 

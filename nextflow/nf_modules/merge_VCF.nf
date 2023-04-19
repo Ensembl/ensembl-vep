@@ -18,12 +18,6 @@ params.cpus = 1
 process mergeVCF {
   /*
   Merge VCF files into a single file
-
-  Returns
-  -------
-  Returns 2 files:
-      1) A VCF format file 
-      2) A tabix index for that VCF
   */
     
   cpus params.cpus
