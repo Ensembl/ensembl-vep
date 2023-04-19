@@ -17,10 +17,9 @@ process splitVCF {
 
   Returns
   -------
-  Returns 2 files:
-      1) A VCF file
-      2) A tabix index for that VCF
+  Tuple of original VCF, split VCFs, split VCF indexes, vep config file and a output dir
   */
+  
   cpus params.cpus
   label 'bcftools'
 

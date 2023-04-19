@@ -16,10 +16,9 @@ process runVEP {
 
   Returns
   -------
-  Returns 2 files:
-      1) VEP output file in VCF format
-      2) A tabix index for that VCF output file
+  Tuple of original VCF, split VCF file after running VEP, VCF index, vep config file and a output dir
   */
+  
   publishDir "${params.outdir}/vep-summary",
     pattern: "vep-${original}-${vep_config}-*.vcf.gz_summary.*",
     mode:'move'
