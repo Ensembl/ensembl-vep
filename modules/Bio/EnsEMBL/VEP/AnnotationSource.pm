@@ -346,7 +346,12 @@ sub filter_features_by_min_max {
   my $up_down_size = defined($self->{up_down_size}) ? $self->{up_down_size} : $self->up_down_size();
 
   return [
-    grep { $self->_check_overlap($_, $min_max, $up_down_size) } @$features
+    grep {
+      exists $min_max->{$_->{slice}->{seq_region_name}} &&
+      overlap($_->{start}, $_->{end},
+              @{$min_max->{$_->{slice}->{seq_region_name}}}[0] - $up_down_size,
+              @{$min_max->{$_->{slice}->{seq_region_name}}}[1] + $up_down_size)}
+    @$features
   ];
 }
 
