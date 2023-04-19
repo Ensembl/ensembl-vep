@@ -574,8 +574,10 @@ sub create_StructuralVariationFeatures {
 
   # parse alternative alleles from breakends
   my $parsed_allele = undef;
+  my $allele_string = undef;
   if ($info->{SVTYPE} && $info->{SVTYPE} =~/BND/ ){
     $parsed_allele = $self->_parse_breakend_alt_alleles($alt, $info);
+    $allele_string = $alt;
   }
 
   # avoid deriving type from alt if described by SVTYPE
@@ -600,10 +602,9 @@ sub create_StructuralVariationFeatures {
     variation_name => @$ids ? $ids->[0] : undef,
     chr            => $self->get_source_chr_name($chr),
     class_SO_term  => $so_term,
-    _line          => $record,
-    allele_string  => $alt
+    _line          => $record
   });
-
+  $svf->{allele_string}  = $allele_string if defined $allele_string;
   $svf->{_parsed_allele} = $parsed_allele if defined $parsed_allele;
   $svf->{vep_skip} = $skip if defined $skip;
 
