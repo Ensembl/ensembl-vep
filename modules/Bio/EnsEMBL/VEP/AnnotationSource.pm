@@ -237,7 +237,7 @@ sub get_all_regions_by_InputBuffer {
     # skip long and unsupported types of SV; doing this here to avoid stopping looping
     next if $vf->{vep_skip};
 
-    $chr = $vf->{chr} || $vf->slice->seq_region_name;
+    $chr = $vf->{chr} || $vf->{slice}->{seq_region_name};
     throw("ERROR: Cannot get chromosome $chr from VariationFeature") unless $chr;
 
     ($chr, $min, $max, $seen, @new_regions) = $self->get_regions_from_coords(
@@ -310,10 +310,10 @@ sub filter_features_by_min_max {
 
   return [
     grep {
-      exists $min_max->{$_->slice->seq_region_name} &&
+      exists $min_max->{$_->{slice}->{seq_region_name}} &&
       overlap($_->{start}, $_->{end},
-              @{$min_max->{$_->slice->seq_region_name}}[0] - $up_down_size,
-              @{$min_max->{$_->slice->seq_region_name}}[1] + $up_down_size)}
+              @{$min_max->{$_->{slice}->{seq_region_name}}}[0] - $up_down_size,
+              @{$min_max->{$_->{slice}->{seq_region_name}}}[1] + $up_down_size)}
     @$features
   ];
 }
