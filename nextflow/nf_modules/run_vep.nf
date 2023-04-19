@@ -7,7 +7,6 @@
 nextflow.enable.dsl=2
 
 // defaults
-prefix = "vep"
 params.outdir = ""
 params.cpus = 1
 
@@ -22,18 +21,18 @@ process runVEP {
       2) A tabix index for that VCF output file
   */
   publishDir "${params.outdir}/vep-summary",
-    pattern: "${original}-${prefix}-*.vcf.gz_summary.*",
+    pattern: "vep-${original}-${vep_config}-*.vcf.gz_summary.*",
     mode:'move'
   cpus params.cpus
   label 'vep'
 
   input:
   tuple val(original), path(vcfFile), path(indexFile)
-  path(vep_config)
+  each path(vep_config)
   
   output:
-  tuple val(original), path("${original}-${prefix}-*.vcf.gz"), path("${original}-${prefix}-*.vcf.gz.tbi"), emit: vcf
-  path("${original}-${prefix}-*.vcf.gz_summary.*")
+  tuple val(original), path("*.vcf.gz"), path("*.vcf.gz.tbi"), emit: vcf
+  path("*.vcf.gz_summary.*")
 
   script:
   if( !vcfFile.exists() ) {
@@ -44,7 +43,7 @@ process runVEP {
   }
   else {
     """
-    out=${original}-${prefix}-${vcfFile}
+    out=vep-${original}-${vep_config}-${vcfFile}
     vep -i ${vcfFile} -o \${out} --vcf --compress_output bgzip --format vcf --config ${vep_config}
     tabix -p vcf \${out}
     """	
