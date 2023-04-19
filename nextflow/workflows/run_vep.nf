@@ -73,6 +73,7 @@ workflow vep {
   take:
     vcf
     vep_config
+    output_dir
   main:
     if (!vcf) {
       exit 1, "Undefined --vcf parameter. Please provide the path to a VCF file"
@@ -94,7 +95,7 @@ workflow vep {
     // process input and create Channel
     // this works like 'merge' operator and thus might make the pipeline un-resumable
     // we might think of using 'toSortedList' and generate appropriate input from the 'processInput' module
-    processInput(vcf, vep_config)
+    processInput(vcf, vep_config, output_dir)
     
     // Prepare input VCF files (bgzip + tabix)
     checkVCF(processInput.out)
@@ -109,11 +110,9 @@ workflow vep {
     runVEP(splitVCF.out.transpose())
 
     // Merge split VCF files (creates one output VCF for each input VCF)
-    mergeVCF(runVEP.out.vcf.groupTuple())
-  emit:
-    mergeVCF.out
+    mergeVCF(runVEP.out.vcf.groupTuple(by: [0,3]))
 }
 
 workflow {
-  vep(params.vcf, params.vep_config)
+  vep(params.vcf, params.vep_config, params.outdir)
 }
