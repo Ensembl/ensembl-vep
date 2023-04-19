@@ -38,8 +38,7 @@ process mergeVCF {
   tuple val(original), path(vcfFiles), path(indexFiles)
 
   output:
-  path("${ original }_vep_${ mergedVCF }.vcf.gz*")
-
+  path("*.vcf.gz*")
 
   script: 
   """
