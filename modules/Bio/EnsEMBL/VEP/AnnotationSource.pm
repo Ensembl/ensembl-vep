@@ -337,10 +337,10 @@ sub filter_features_by_min_max {
 
   return [
     grep {
-      exists $min_max->{$_->slice->seq_region_name} &&
+      exists $min_max->{$_->{slice}->{seq_region_name}} &&
       overlap($_->{start}, $_->{end},
-              @{$min_max->{$_->slice->seq_region_name}}[0] - $up_down_size,
-              @{$min_max->{$_->slice->seq_region_name}}[1] + $up_down_size)}
+              @{$min_max->{$_->{slice}->{seq_region_name}}}[0] - $up_down_size,
+              @{$min_max->{$_->{slice}->{seq_region_name}}}[1] + $up_down_size)}
     @$features
   ];
 }
