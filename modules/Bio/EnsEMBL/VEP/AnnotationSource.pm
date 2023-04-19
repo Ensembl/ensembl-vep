@@ -236,34 +236,7 @@ sub get_all_regions_by_InputBuffer {
     # skip long and unsupported types of SV; doing this here to avoid stopping looping
     next if $vf->{vep_skip};
 
-    my $chr = $vf->{chr} || $vf->slice->seq_region_name;
-    throw("ERROR: Cannot get chromosome from VariationFeature") unless $chr;
-
-    # find actual chromosome name used by AnnotationSource
-    my $source_chr = $self->get_source_chr_name($chr);
-
-    my ($vf_s, $vf_e) = ($vf->{start}, $vf->{end});
-
-    # allow for indels
-    ($vf_s, $vf_e) = ($vf_e, $vf_s) if $vf_s > $vf_e;
-
-    # log min/max
-    $min = $vf_s if $vf_s < $min;
-    $max = $vf_e if $vf_e > $max;
-
-    # convert to region-size
-    my ($r_s, $r_e) = map {int(($_ - 1) / $cache_region_size)} ($vf_s - $up_down_size, $vf_e + $up_down_size);
-
-    # add all regions between r_s and r_e inclusive
-    for(my $s = $r_s; $s <= $r_e; $s++) {
-      my $key = join(':', ($source_chr, $s));
-      next if $seen{$key};
-
-      push @regions, [$source_chr, $s];
-      $seen{$key} = 1;
-    }
-
-    $chr = $vf->{chr} || $vf->slice->seq_region_name;
+    $chr = $vf->{chr} || $vf->{slice}->{seq_region_name};
     throw("ERROR: Cannot get chromosome $chr from VariationFeature") unless $chr;
 
     ($chr, $min, $max, $seen, @new_regions) = $self->get_regions_from_coords(
@@ -354,7 +327,12 @@ sub filter_features_by_min_max {
   my $up_down_size = defined($self->{up_down_size}) ? $self->{up_down_size} : $self->up_down_size();
 
   return [
-    grep { $self->_check_overlap($_, $min_max, $up_down_size) } @$features
+    grep {
+      exists $min_max->{$_->{slice}->{seq_region_name}} &&
+      overlap($_->{start}, $_->{end},
+              @{$min_max->{$_->{slice}->{seq_region_name}}}[0] - $up_down_size,
+              @{$min_max->{$_->{slice}->{seq_region_name}}}[1] + $up_down_size)}
+    @$features
   ];
 }
 
