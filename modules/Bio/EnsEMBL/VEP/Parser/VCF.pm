@@ -467,7 +467,7 @@ sub _parse_breakend_alt_alleles {
       end => $alt_pos,
     });
 
-    push $parsed_allele, {
+    push @$parsed_allele, {
       string    => $alt_string,
       allele    => $alt_allele,
       pos       => $alt_pos,
@@ -492,7 +492,7 @@ sub _parse_breakend_alt_alleles {
         end => $alt_pos,
       });
 
-      push $parsed_allele, {
+      push @$parsed_allele, {
         string    => $alt,
         allele    => $alt,
         pos       => $alt_pos,
