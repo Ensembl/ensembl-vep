@@ -111,6 +111,8 @@ workflow vep {
 
     // Merge split VCF files (creates one output VCF for each input VCF)
     mergeVCF(runVEP.out.vcf.groupTuple(by: [0,3]))
+  emit:
+    mergeVCF.out
 }
 
 workflow {
