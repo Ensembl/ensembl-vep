@@ -96,13 +96,14 @@ is_deeply($vfs->[0], bless( {
   'seq_region_start' => 25592911
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'next again first variant');
 
-is_deeply($ib->min_max, [25592911, 25603910], 'min_max');
+isa_ok($ib->min_max, 'HASH');
+is_deeply($ib->min_max->{'21'}, [25592911, 25603910], 'min_max');
 
 my %tmp = %{$vfs->[0]};
 $tmp{start}++;
 my $tmp_ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, variation_features => [\%tmp]});
 $tmp_ib->next();
-is_deeply($tmp_ib->min_max, [25592911, 25592912], 'min_max with insertion');
+is_deeply($tmp_ib->min_max->{'21'}, [25592911, 25592912], 'min_max with insertion');
 
 
 # modify a VF to create a fake huge SV
