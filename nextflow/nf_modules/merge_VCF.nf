@@ -25,20 +25,13 @@ process mergeVCF {
       1) A VCF format file 
       2) A tabix index for that VCF
   */
-
-  publishDir "${params.outdir}", 
-    enabled: "${params.outdir}" as Boolean,
-    mode:'move'
     
   cpus params.cpus
   label 'bcftools'
   cache 'lenient'
    
   input:
-  tuple val(original), path(vcfFiles), path(indexFiles)
-
-  output:
-  path("*.vcf.gz*")
+  tuple val(original), path(vcfFiles), path(indexFiles), val(output_dir)
 
   script: 
   """
@@ -47,5 +40,7 @@ process mergeVCF {
   sorted_vcf=\$(echo ${vcfFiles} | xargs -n1 | sort | xargs)
   bcftools concat --no-version -a \${sorted_vcf} -Oz -o \${out}
   bcftools index -t \${out}
+  
+  mv \${out}* ${ output_dir }
   """
 }

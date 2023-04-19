@@ -25,9 +25,10 @@ process processInput {
   input:
   path vcf
   path vep_config
+  val output_dir
 
   output:
-  tuple path(vcf), env(vcf_index), path(vep_config)
+  tuple path(vcf), env(vcf_index), path(vep_config), val(output_dir)
   
   script:
   """
