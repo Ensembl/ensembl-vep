@@ -69,7 +69,7 @@ is_deeply(
 );
 
 is_deeply(
-  $ib->min_max,
+  $ib->min_max->{21},
   [25585733, 25982445],
   'InputBuffer min_max'
 );
