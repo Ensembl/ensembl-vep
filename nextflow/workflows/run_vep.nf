@@ -14,7 +14,7 @@ params.outdir = "outdir"
 
 params.vcf = null
 
-params.output_prefix = "out"
+params.output_prefix = ""
 params.bin_size = 100
 params.skip_check = 0
 params.help = false
@@ -96,7 +96,7 @@ workflow vep {
     // this works like 'merge' operator and thus might make the pipeline un-resumable
     // we might think of using 'toSortedList' and generate appropriate input from the 'processInput' module
     processInput(vcf, vep_config, output_dir)
-    
+
     // Prepare input VCF files (bgzip + tabix)
     checkVCF(processInput.out)
     
@@ -110,7 +110,7 @@ workflow vep {
     runVEP(splitVCF.out.transpose())
 
     // Merge split VCF files (creates one output VCF for each input VCF)
-    mergeVCF(runVEP.out.vcf.groupTuple(by: [0,3]))
+    mergeVCF(runVEP.out.files.groupTuple(by: [0, 3, 4]))
   emit:
     mergeVCF.out
 }

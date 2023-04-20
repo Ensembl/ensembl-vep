@@ -7,10 +7,9 @@
 nextflow.enable.dsl=2
 
 // defaults
-prefix = "out"
-mergedVCF = "merged-file"
+merged_vcf = "none"
 if ( params.output_prefix != "" ){
-  mergedVCF = params.output_prefix
+  merged_vcf = params.output_prefix + "_VEP.vcf.gz"
 }
 params.outdir = ""
 params.cpus = 1
@@ -25,19 +24,24 @@ process mergeVCF {
   cache 'lenient'
    
   input:
-  tuple val(original), path(vcfFiles), path(indexFiles), val(output_dir)
+  tuple val(original_vcf), path(vcf_files), path(index_files), val(output_dir), val(index_type)
   
   output:
-  val("${output_dir}/${ original }_vep_${ mergedVCF }.vcf.gz")
+  val("${output_dir}/${merged_vcf}")
 
-  script: 
-  """
-  mkdir -p temp
-  out=${ original }_vep_${ mergedVCF }.vcf.gz
-  sorted_vcf=\$(echo ${vcfFiles} | xargs -n1 | sort | xargs)
-  bcftools concat --no-version -a \${sorted_vcf} -Oz -o \${out}
-  bcftools index -t \${out}
+  script:
+  merged_vcf = merged_vcf.equals("none") ? file(original_vcf).getSimpleName() + "_VEP.vcf.gz" : merged_vcf
   
-  mv \${out}* ${ output_dir }
+  """
+  sorted_vcfs=\$(echo ${vcf_files} | xargs -n1 | sort | xargs)
+  bcftools concat --no-version -a \${sorted_vcfs} -Oz -o ${merged_vcf}
+  
+  if [[ ${index_type} == "tbi" ]]; then
+    bcftools index -t ${merged_vcf}
+  else
+    bcftools index -c ${merged_vcf}  
+  fi
+  
+  mv ${merged_vcf}* ${output_dir}
   """
 }

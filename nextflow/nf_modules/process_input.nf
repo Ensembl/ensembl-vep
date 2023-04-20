@@ -15,11 +15,12 @@ process processInput {
 
   Returns
   -------
-  Returns 2 files:
+  Returns:
       1) A VCF file
       2) A tabix index for that VCF
       3) A VEP config file
       4) A output dir
+      5) The type of tabix index, either tbi or csi
   */
   cpus params.cpus
 
@@ -29,11 +30,22 @@ process processInput {
   val output_dir
 
   output:
-  tuple path(vcf), env(vcf_index), path(vep_config), val(output_dir)
+  tuple path(vcf), env(vcf_index), path(vep_config), val(output_dir), env(index_type)
   
   script:
   """
-  vcf_index=`readlink -f ${vcf}`
-  vcf_index=\${vcf_index}.tbi
+  vcf_filepath=`readlink -f ${vcf}`
+  vcf_index=""
+  
+  if [[ -f \${vcf_filepath}.tbi ]]; then
+    vcf_index=\${vcf_filepath}.tbi
+    index_type=tbi
+  elif [[ -f \${vcf_filepath}.csi  ]]; then
+    vcf_index=\${vcf_filepath}.csi
+    index_type=csi
+  else
+    vcf_index="none"
+    index_type="tbi"
+  fi
   """
 }
