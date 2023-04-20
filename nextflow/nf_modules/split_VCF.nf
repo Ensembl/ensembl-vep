@@ -27,7 +27,7 @@ process splitVCF {
   tuple path(vcf), path(vcf_index), path(split_file), path(vep_config), val(output_dir), val(index_type)
 
   output:
-  tuple val("${vcf}"), path("${prefix}*.vcf.gz"), path("${prefix}*.vcf.gz.*i"), path(vep_config), val(output_dir), val(index_type)
+  tuple val("${vcf}"), path("${prefix}*.vcf.gz"), path("${prefix}*.vcf.gz.{tbi,csi}"), path(vep_config), val(output_dir), val(index_type)
 
   afterScript 'rm x*'
 
