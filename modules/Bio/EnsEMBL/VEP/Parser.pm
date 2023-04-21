@@ -659,7 +659,8 @@ sub validate_vf {
 
 =head2 get_SO_term
 
-  Example    : $ref_allele = $parser->get_SO_term($vf);
+  Arg 1      : string $type
+  Example    : $ref_allele = $parser->get_SO_term($type);
   Description: Returns the Sequence Ontology term based on a given variant type.
                Returns undef if failed to fetch the appropriate term.
   Returntype : string
@@ -671,10 +672,9 @@ sub validate_vf {
 
 sub get_SO_term {
   my $self = shift;
-  # set a default that we do not expect to see
   my $type = shift;
-
   my $abbrev;
+
   if ($type =~ /\<CN/i) {
     # ALT: "<CN0>", "<CN0>,<CN2>,<CN3>" "<CN2>" => SVTYPE: DEL, CNV, DUP
     $abbrev = "CNV";
