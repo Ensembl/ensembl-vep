@@ -79,12 +79,16 @@ use base qw(Bio::EnsEMBL::VEP::AnnotationSource::File);
 
   Arg 1      : hashref $args
                {
-                 config        => Bio::EnsEMBL::VEP::Config $config,
-                 file          => string $filename,
-                 short_name    => (optional) string $short_name,
-                 type          => (optional) string $type (overlap (default), exact),
-                 report_coords => (optional) bool $report_coords,
-                 fields        => arrayref $INFO_fields_to_add
+                 config         => Bio::EnsEMBL::VEP::Config $config,
+                 file           => string $filename,
+                 short_name     => (optional) string $short_name,
+                 type           => (optional) string $type (overlap (default), within, surrounding, exact),
+                 report_coords  => (optional) bool $report_coords,
+                 fields         => arrayref $INFO_fields_to_add,
+                 overlap_cutoff => (optional) numeric $percentage_overlap_between_variants (0 by default),
+                 distance       => (optional) numeric $distance_to_overlapping_variant_ends (off by default),
+                 same_type      => (optional) bool $only_match_identical_variant_classes (off by default),
+                 reciprocal     => (optional) bool $calculate_reciprocal_overlap (off by default)
                }
   Example    : $as = Bio::EnsEMBL::VEP::AnnotationSource::File::VCF->new($args);
   Description: Create a new Bio::EnsEMBL::VEP::AnnotationSource::File::VCF object.
@@ -324,7 +328,7 @@ sub _record_overlaps_VF {
 
   # we can use the superclass method if overlap type
   return $self->SUPER::_record_overlaps_VF(@_)
-    if $self->type eq 'overlap' || ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature';
+    if $self->type ne 'exact' || ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature';
 
   # exact more difficult, we need to check each allele
   my $parser = $self->parser;
