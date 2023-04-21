@@ -119,6 +119,7 @@ my %VALID_TYPES = (
                  short_name     => (optional) string $short_name,
                  type           => (optional) string $type (overlap (default), within, surrounding, exact),
                  report_coords  => (optional) bool $report_coords,
+<<<<<<< HEAD
                  overlap_cutoff => (optional) numeric $minimum_percentage_overlap (0 by default),
                  distance       => (optional) numeric $distance_to_overlapping_variant_ends (off by default),
                  same_type      => (optional) bool $only_match_identical_variant_classes (off by default),
@@ -126,6 +127,12 @@ my %VALID_TYPES = (
                  overlap_def    => (optional) string $overlap_definition (based on reciprocal by default),
                  num_records    => (optional) maximum number of records to show (50 by default),
                  summary_stats  => (optional) summary statistics: max, min, mean, count, sum
+=======
+                 overlap_cutoff => (optional) numeric $percentage_overlap_between_variants (0 by default),
+                 distance       => (optional) numeric $distance_to_overlapping_variant_ends (off by default),
+                 same_type      => (optional) bool $only_match_identical_variant_classes (off by default),
+                 reciprocal     => (optional) bool $calculate_reciprocal_overlap (off by default)
+>>>>>>> f22db249 (Integrate SV Overlap plugin features)
                }
   Example    : $as = Bio::EnsEMBL::VEP::AnnotationSource::File->new($args);
   Description: Create a new Bio::EnsEMBL::VEP::AnnotationSource::File object. Will
@@ -156,13 +163,23 @@ sub new {
   $self->report_coords(defined($hashref->{report_coords}) ? $hashref->{report_coords} : 0);
 
   $self->{overlap_cutoff} = $hashref->{overlap_cutoff} || 0;
+<<<<<<< HEAD
   $self->{distance}       = $hashref->{distance};
   $self->{same_type}      = $hashref->{same_type}      || 0;
   $self->{reciprocal}     = $hashref->{reciprocal}     || 0;
   $self->{overlap_def}    = $hashref->{overlap_def};
   $self->{num_records}    = defined $hashref->{num_records} ? $hashref->{num_records} : 50;
+=======
+  $self->{distance}       = $hashref->{distance}       || undef;
+  $self->{same_type}      = $hashref->{same_type}      || 0;
+  $self->{reciprocal}     = $hashref->{reciprocal}     || 0;
+>>>>>>> f22db249 (Integrate SV Overlap plugin features)
 
   $self->{info} = { custom_info => $hashref };
+
+  # my $overlap_definition = $reciprocal == 1 ?
+  #                            "minimum reciprocal overlap as a percent" :
+  #                            "percent of input SV covered by reference SV";
 
   if(my $format = $hashref->{format}) {
 
@@ -400,6 +417,7 @@ sub annotate_VariationFeature {
           $matched_cosmic_record->{'fields'}{$key} = @{$record}[0]->{'fields'}->{$key};
         }   
       }
+<<<<<<< HEAD
     }
   }
 
@@ -427,6 +445,16 @@ sub annotate_VariationFeature {
     } elsif ( $record_count == $self->{num_records} ) {
       push @{$vf->{_custom_annotations}->{$self->short_name}}, { name => '...' };
     }
+=======
+    }
+  }
+
+  if (!$is_recorded) {
+    if (defined($self->{fields}) && grep {$_ eq "PC"} @{$self->{fields}}) {
+      $record->[0]->{"fields"}->{"PC"} = $overlap_percentage;
+    }
+    push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$record};
+>>>>>>> f22db249 (Integrate SV Overlap plugin features)
   }
   return 1;
 }
@@ -507,12 +535,28 @@ sub _record_overlaps_VF {
   my $type = $self->type();
   my $overlap_cutoff = $self->{overlap_cutoff};
   my $distance = $self->{distance};
+<<<<<<< HEAD
   my $reciprocal = $self->{reciprocal};
 
   my ($ref_start, $ref_end) = ($parser->get_start, $parser->get_end);
   $ref_start += 1 if defined $self->{_format} && $self->{_format} eq 'bigwig';
 
   if($type eq 'overlap' || $type eq 'within' || $type eq 'surrounding') {
+=======
+  my $same_type = $self->{same_type};
+  my $reciprocal = $self->{reciprocal};
+  my ($ref_start, $ref_end) = ($parser->get_start, $parser->get_end);
+
+  # match on variant class (if enabled)
+  # confounded by different descriptions for the same event
+  if ($same_type) {
+    my $vf_class = $vf->class_SO_term;
+    my $ref_class = $parser->get_SO_term(join(",", $parser->get_alternatives));
+    return 0 if defined $class && $ref_class ne $vf_class;
+  }
+
+  if($type ~~ [ 'overlap', 'within', 'surrounding' ]) {
+>>>>>>> f22db249 (Integrate SV Overlap plugin features)
     # account for insertions in Ensembl world where s = e+1
     my ($vs, $ve) = ($vf->{start}, $vf->{end});
     ($vs, $ve) = ($ve, $vs) if $vs > $ve;
@@ -523,6 +567,7 @@ sub _record_overlaps_VF {
 
     # check if reference variant completely surrounds the input variant (if enabled)
     return 0 if $type eq "surrounding" && ($vs < $ref_start || $ve > $ref_end);
+<<<<<<< HEAD
 
     if (defined $distance) {
       return 0 unless abs($vs - $ref_start) <= $distance;
@@ -548,6 +593,33 @@ sub _record_overlaps_VF {
       }
     }
 
+=======
+
+    if (defined $distance) {
+      return 0 unless abs($vs - $ref_start) <= $distance;
+      return 0 unless abs($ve - $ref_end  ) <= $distance;
+    }
+
+    # check overlap percentage
+    my @overlap_start = sort { $a <=> $b } ($vs, $ref_start);
+    my @overlap_end   = sort { $a <=> $b } ($ve, $ref_end);
+    my $overlap_percentage = 100 * (1 + $overlap_end[0] - $overlap_start[1]) / $length;
+
+    return 0 if $overlap_percentage < $overlap_cutoff;
+
+    if ($reciprocal) {
+      # check bi-directional overlap - percentage of reference variant covered
+      my $ref_length = $ref_end - $ref_start + 1;
+      my $ref_overlap_percentage = 100 * (1 + $overlap_end[0] - $overlap_start[1]) / $ref_length;
+      return 0 if $ref_overlap_percentage < $overlap_cutoff;
+
+      # report minimum overlap
+      if ($ref_overlap_percentage < $overlap_percentage) {
+        $overlap_percentage = $ref_overlap_percentage;
+      }
+    }
+    
+>>>>>>> f22db249 (Integrate SV Overlap plugin features)
     $overlap_percentage = sprintf("%.3f", $overlap_percentage);
     return overlap($ref_start, $ref_end, $vs, $ve), $overlap_percentage;
   }
