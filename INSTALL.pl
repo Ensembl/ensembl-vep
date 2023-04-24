@@ -1411,8 +1411,7 @@ sub fasta() {
     foreach my $sub(split /\//, $3) {
       $ftp->cwd($sub) or die "ERROR: Could not change directory to $sub\n$@\n";
     }
-
-    push @dirs, sort $ftp->ls;
+    push @dirs, grep { !/ancestral_alleles/i } sort $ftp->ls;
   }
   else {
     opendir DIR, $FASTA_URL;
