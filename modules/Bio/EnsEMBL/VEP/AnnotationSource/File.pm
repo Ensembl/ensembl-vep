@@ -465,7 +465,7 @@ sub _record_overlaps_VF {
   if ($same_type) {
     my $vf_class = $vf->class_SO_term;
     my $ref_class = $parser->get_SO_term(join(",", $parser->get_alternatives));
-    return 0 if defined $class && $ref_class ne $vf_class;
+    return 0 if defined $ref_class && defined $vf_class && $ref_class ne $vf_class;
   }
 
   if($type ~~ [ 'overlap', 'within', 'surrounding' ]) {
