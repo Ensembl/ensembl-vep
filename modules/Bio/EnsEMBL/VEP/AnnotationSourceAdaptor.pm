@@ -233,6 +233,10 @@ sub get_all_custom {
       format => $hash{"format"},
       type => $hash{"type"} || "overlap",
       report_coords => $hash{"coords"} || 0,
+      overlap_cutoff => $hash{"overlap_cutoff"} || 0,
+      distance => $hash{"distance"},
+      same_type => $hash{"same_type"} || 0,
+      reciprocal => $hash{"reciprocal"} || 0,
     };
 
     if(defined($hash{"format"}) && $hash{"format"} =~ /^G[TF]F$/i) {
