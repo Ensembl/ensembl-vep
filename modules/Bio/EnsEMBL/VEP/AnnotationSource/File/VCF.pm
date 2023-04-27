@@ -86,7 +86,7 @@ use base qw(Bio::EnsEMBL::VEP::AnnotationSource::File);
                  type           => (optional) string $type (overlap (default), within, surrounding, exact),
                  report_coords  => (optional) bool $report_coords,
                  fields         => arrayref $INFO_fields_to_add,
-                 overlap_cutoff => (optional) numeric $percentage_overlap_between_variants (0 by default),
+                 overlap_cutoff => (optional) numeric $minimum_percentage_overlap (0 by default),
                  distance       => (optional) numeric $distance_to_overlapping_variant_ends (off by default),
                  same_type      => (optional) bool $only_match_identical_variant_classes (off by default),
                  reciprocal     => (optional) bool $calculate_reciprocal_overlap (off by default)
