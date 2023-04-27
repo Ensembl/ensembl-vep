@@ -93,6 +93,8 @@ BEGIN {
   }
 }
 
+use Bio::EnsEMBL::VEP::Parser qw(get_SO_term);
+
 my %FORMAT_MAP = (
   'vcf'     => 'VCF',
   'gff'     => 'GFF',
@@ -153,7 +155,7 @@ sub new {
   $self->report_coords(defined($hashref->{report_coords}) ? $hashref->{report_coords} : 0);
 
   $self->{overlap_cutoff} = $hashref->{overlap_cutoff} || 0;
-  $self->{distance}       = $hashref->{distance}       || undef;
+  $self->{distance}       = $hashref->{distance};
   $self->{same_type}      = $hashref->{same_type}      || 0;
   $self->{reciprocal}     = $hashref->{reciprocal}     || 0;
 
@@ -464,7 +466,8 @@ sub _record_overlaps_VF {
   # confounded by different descriptions for the same event
   if ($same_type) {
     my $vf_class = $vf->class_SO_term;
-    my $ref_class = $parser->get_SO_term(join(",", $parser->get_alternatives));
+    my $ref_class = get_SO_term($parser);
+
     return 0 if defined $ref_class && defined $vf_class && $ref_class ne $vf_class;
   }
 
@@ -503,7 +506,7 @@ sub _record_overlaps_VF {
         $overlap_percentage = $ref_overlap_percentage;
       }
     }
-    
+
     $overlap_percentage = sprintf("%.3f", $overlap_percentage);
     return overlap($ref_start, $ref_end, $vs, $ve), $overlap_percentage;
   }

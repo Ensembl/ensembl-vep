@@ -79,6 +79,10 @@ use Bio::EnsEMBL::VEP::Parser::CAID;
 use Scalar::Util qw(openhandle looks_like_number);
 use FileHandle;
 
+use base qw(Exporter);
+
+our @EXPORT_OK = qw(get_SO_term);
+
 my %FORMAT_MAP = (
   'vcf'     => 'VCF',
   'ensembl' => 'VEP_input',
@@ -706,6 +710,49 @@ sub get_SO_term {
 
   return $terms{$abbrev};
 }
+
+=head2 get_SO_term
+  Arg 1      : string $type
+  Example    : $ref_allele = $parser->get_SO_term($type);
+  Description: Returns the Sequence Ontology term based on a given variant type.
+               Returns undef if failed to fetch the appropriate term.
+  Returntype : string
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+=cut
+
+sub get_SO_term {
+  my $self = shift;
+  my $type = shift || join(",", @{ $self->get_alternatives });
+  my $abbrev;
+
+  if ($type =~ /\<CN/i) {
+    # ALT: "<CN0>", "<CN0>,<CN2>,<CN3>" "<CN2>" => SVTYPE: DEL, CNV, DUP
+    $abbrev = "CNV";
+    $abbrev = "DEL" if $type =~ /\<CN=?0\>/;
+    $abbrev = "DUP" if $type =~ /\<CN=?2\>/;
+  } elsif ($type =~ /^\<|^\[|\]$|\>$/) {
+    $abbrev = $type;
+    $abbrev =~ s/\<|\>//g;
+    $abbrev =~ s/\:.+//g;
+  } else {
+    $abbrev = $type;
+  }
+
+  my %terms = (
+    INS  => 'insertion',
+    DEL  => 'deletion',
+    TDUP => 'tandem_duplication',
+    DUP  => 'duplication',
+    CNV  => 'copy_number_variation',
+    INV  => 'inversion',
+    BND  => 'breakpoint'
+  );
+
+  return $terms{$abbrev};
+}
+
 
 =head2 _get_ref_allele
 
