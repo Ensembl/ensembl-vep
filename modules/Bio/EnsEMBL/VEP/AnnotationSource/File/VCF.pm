@@ -87,19 +87,12 @@ use base qw(Bio::EnsEMBL::VEP::AnnotationSource::File);
                  type           => (optional) string $type (overlap (default), within, surrounding, exact),
                  report_coords  => (optional) bool $report_coords,
                  fields         => arrayref $INFO_fields_to_add,
-<<<<<<< HEAD
                  overlap_cutoff => (optional) numeric $minimum_percentage_overlap (0 by default),
                  distance       => (optional) numeric $distance_to_overlapping_variant_ends (off by default),
                  same_type      => (optional) bool $only_match_identical_variant_classes (off by default),
                  reciprocal     => (optional) bool $calculate_reciprocal_overlap (off by default),
                  overlap_def    => (optional) string $overlap_definition (based on reciprocal by default),
                  num_records    => (optional) maximum number of records to show (50 by default)
-=======
-                 overlap_cutoff => (optional) numeric $percentage_overlap_between_variants (0 by default),
-                 distance       => (optional) numeric $distance_to_overlapping_variant_ends (off by default),
-                 same_type      => (optional) bool $only_match_identical_variant_classes (off by default),
-                 reciprocal     => (optional) bool $calculate_reciprocal_overlap (off by default)
->>>>>>> f22db249 (Integrate SV Overlap plugin features)
                }
   Example    : $as = Bio::EnsEMBL::VEP::AnnotationSource::File::VCF->new($args);
   Description: Create a new Bio::EnsEMBL::VEP::AnnotationSource::File::VCF object.
@@ -382,12 +375,6 @@ sub _record_overlaps_VF {
   # we can use the superclass method if overlap type
   return $self->SUPER::_record_overlaps_VF(@_)
     if ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature';
-<<<<<<< HEAD
-=======
-  
-  my $type = $self->type();
-  my $parser = $self->parser;
->>>>>>> f22db249 (Integrate SV Overlap plugin features)
 
   if ($type eq 'overlap') {
     my $parser_start = $parser->get_raw_start;

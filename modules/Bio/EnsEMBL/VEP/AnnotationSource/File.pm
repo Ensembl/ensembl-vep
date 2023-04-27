@@ -93,6 +93,8 @@ BEGIN {
   }
 }
 
+use Bio::EnsEMBL::VEP::Parser qw(get_SO_term);
+
 my %FORMAT_MAP = (
   'vcf'     => 'VCF',
   'gff'     => 'GFF',
@@ -164,6 +166,7 @@ sub new {
 
   $self->{overlap_cutoff} = $hashref->{overlap_cutoff} || 0;
 <<<<<<< HEAD
+<<<<<<< HEAD
   $self->{distance}       = $hashref->{distance};
   $self->{same_type}      = $hashref->{same_type}      || 0;
   $self->{reciprocal}     = $hashref->{reciprocal}     || 0;
@@ -171,6 +174,9 @@ sub new {
   $self->{num_records}    = defined $hashref->{num_records} ? $hashref->{num_records} : 50;
 =======
   $self->{distance}       = $hashref->{distance}       || undef;
+=======
+  $self->{distance}       = $hashref->{distance};
+>>>>>>> 98578b30 (Fix SO term comparison)
   $self->{same_type}      = $hashref->{same_type}      || 0;
   $self->{reciprocal}     = $hashref->{reciprocal}     || 0;
 >>>>>>> f22db249 (Integrate SV Overlap plugin features)
@@ -551,8 +557,14 @@ sub _record_overlaps_VF {
   # confounded by different descriptions for the same event
   if ($same_type) {
     my $vf_class = $vf->class_SO_term;
+<<<<<<< HEAD
     my $ref_class = $parser->get_SO_term(join(",", $parser->get_alternatives));
     return 0 if defined $class && $ref_class ne $vf_class;
+=======
+    my $ref_class = get_SO_term($parser);
+
+    return 0 if defined $ref_class && defined $vf_class && $ref_class ne $vf_class;
+>>>>>>> 98578b30 (Fix SO term comparison)
   }
 
   if($type ~~ [ 'overlap', 'within', 'surrounding' ]) {
@@ -618,8 +630,12 @@ sub _record_overlaps_VF {
         $overlap_percentage = $ref_overlap_percentage;
       }
     }
+<<<<<<< HEAD
     
 >>>>>>> f22db249 (Integrate SV Overlap plugin features)
+=======
+
+>>>>>>> 98578b30 (Fix SO term comparison)
     $overlap_percentage = sprintf("%.3f", $overlap_percentage);
     return overlap($ref_start, $ref_end, $vs, $ve), $overlap_percentage;
   }
