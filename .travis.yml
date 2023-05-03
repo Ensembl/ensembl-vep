@@ -67,7 +67,7 @@ jobs:
   include:
     - stage: trigger_dependent_builds
       script: ./travisci/trigger-dependent-build.sh
-      if:  perl != "5.10"
+      if:  env(TRAVIS_PERL_VERSION) != "5.10"
 
 notifications:
   email:
