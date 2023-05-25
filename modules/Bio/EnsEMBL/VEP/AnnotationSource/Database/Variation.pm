@@ -188,16 +188,19 @@ sub get_features_by_regions_uncached {
       my $v_clinsigs = $attribs->{($chr_is_seq_region ? $chr : $sr_cache->{$chr}) . ':' . $v_copy{start} . '-' . $v_copy{end}};
       my @pfas_by_allele;
       my %clin_sigs;
+      my $clin_sig_ref_allele;
       foreach my $pfa(@{$v_clinsigs})
       {
-	if(defined($pfa->{clinvar_clin_sig}) && $v_copy{variation_name} eq $pfa->{id})
-	{
+        if(defined($pfa->{clinvar_clin_sig}) && $v_copy{variation_name} eq $pfa->{id})
+        {
           $pfa->{clinvar_clin_sig}=~s/ /_/g;
           $clin_sigs{$pfa->{risk_allele} . ':' .$pfa->{clinvar_clin_sig}} = 1;
+          $clin_sig_ref_allele = $pfa->{allele_symbol} if $pfa->{allele_symbol};
         }
       }
       my @array = keys(%clin_sigs);
       $v_copy{clin_sig_allele} = join ';', @array if scalar(@array);
+      $v_copy{clin_sig_ref_allele} = $clin_sig_ref_allele if $clin_sig_ref_allele;
       $v_copy{variation_id} = $var_id;
       ## fix for e!94 alleles
       $v_copy{allele_string} =~ s/\/$//g;
