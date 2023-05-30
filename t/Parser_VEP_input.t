@@ -65,10 +65,6 @@ is_deeply($vf, bless( {
   'start' => '25587759',
   'seq_region_end' => '25587759',
   'seq_region_start' => '25587759',
-  'original_allele_string' => 'C/A',
-  'original_start' => 25587759,
-  'original_end' => 25587759, 
-  'minimised' => 1,
   '_line' => [qw(21 25587759 25587759 C/A + test)]
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'basic next test');
 
@@ -87,10 +83,6 @@ is_deeply($vf, bless( {
   'start' => '25587759',
   'seq_region_end' => '25587759',
   'seq_region_start' => '25587759',
-  'original_allele_string' => 'C/A',
-  'original_start' => 25587759,
-  'original_end' => 25587759,
-  'minimised' => 1,
   '_line' => [qw(21 25587759 25587759 C/A - test)]
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'negative strand (-)');
 
@@ -109,10 +101,6 @@ is_deeply($vf, bless( {
   'start' => '25587759',
   'seq_region_end' => '25587759',
   'seq_region_start' => '25587759',
-  'original_allele_string' => 'C/A',
-  'original_start' => 25587759,
-  'original_end' => 25587759,
-  'minimised' => 1,
   '_line' => [qw(21 25587759 25587759 C/A -1 test)]
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'negative strand (-1)');
 
@@ -131,10 +119,6 @@ is_deeply($vf, bless( {
   'start' => '25587759',
   'seq_region_end' => '25587759',
   'seq_region_start' => '25587759',
-  'original_allele_string' => 'C/A',
-  'original_start' => 25587759,
-  'original_end' => 25587759,
-  'minimised' => 1,
   '_line' => [qw(21 25587759 25587759 C/A)]
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'stubby');
 
