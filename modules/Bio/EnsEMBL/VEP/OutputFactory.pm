@@ -874,6 +874,7 @@ sub VariationFeature_to_output_hash {
 
   my $hash = {
     Uploaded_variation  => $vf->variation_name ne '.' ? $vf->variation_name : ($vf->{original_chr} || $vf->{chr}).'_'.$vf->{start}.'_'.($vf->{allele_string} || $vf->{class_SO_term}),
+    Original_allele     => ($vf->{original_allele_string} || $vf->{allele_string}),
     Location            => ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start}, $vf->{end}),
   };
 

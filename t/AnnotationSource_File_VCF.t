@@ -294,7 +294,7 @@ SKIP: {
     $ib->buffer->[0]->{_custom_annotations},
     {
       'foo' => [
-        { name => 'ins1', allele => 'GC', fields => {'GOO' => 'YAR','FILTER' => 'PASS'} },
+        { name => 'ins1', allele => 'C', fields => {'GOO' => 'YAR','FILTER' => 'PASS'} },
       ]
     },
     'annotate_InputBuffer - trim input - insertion 1'
@@ -303,7 +303,7 @@ SKIP: {
     $ib->buffer->[1]->{_custom_annotations},
     {
       'foo' => [
-        { name => 'ins1', allele => 'AGC', fields => {'GOO' => 'YAR', 'FILTER' => 'PASS'} },
+        { name => 'ins1', allele => 'C', fields => {'GOO' => 'YAR', 'FILTER' => 'PASS'} },
       ]
     },
     'annotate_InputBuffer - trim input - insertion 2'
