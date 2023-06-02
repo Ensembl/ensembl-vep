@@ -20,7 +20,7 @@ fi
 
 rt=$?
 if [ $rt -eq 0 ]; then
-  if [ "$COVERALLS" = 'true' ]; then
+  if [[ "$COVERALLS" = 'true' && ! "${TRAVIS_PERL_VERSION}" =~ 5.10 ]]; then
     echo "Running Devel::Cover coveralls report"
     cover --nosummary -report coveralls
   fi

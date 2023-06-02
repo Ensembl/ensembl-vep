@@ -67,6 +67,7 @@ jobs:
   include:
     - stage: trigger_dependent_builds
       script: ./travisci/trigger-dependent-build.sh
+      perl: "5.14"
 
 notifications:
   email:
