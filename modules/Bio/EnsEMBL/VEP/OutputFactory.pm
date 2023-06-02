@@ -952,7 +952,16 @@ sub VariationFeature_to_output_hash {
   # check_ref tests
   $hash->{CHECK_REF} = 'failed' if defined($vf->{check_ref_failed});
 
-  $self->stats->log_VariationFeature($vf, $hash) unless $self->{no_stats};
+  unless ($self->{no_stats}) {
+    $self->stats->log_VariationFeature($vf, $hash);
+  } else {
+    # get overlap consequences to fix codon/nucleotide changes
+    for my $vfo (@{ $vf->get_all_VariationFeatureOverlaps }) {
+      for my $allele (@{ $vfo->get_all_alternate_VariationFeatureOverlapAlleles }) {
+        $allele->get_all_OverlapConsequences;
+      }
+    }
+  }
 
   return $hash;
 }
