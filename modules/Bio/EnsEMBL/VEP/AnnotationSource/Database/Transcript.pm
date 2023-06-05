@@ -257,7 +257,9 @@ sub get_features_by_regions_uncached {
         ## with the analysis logic_name 'refseq_import' or 'refseq_human_import'. 
         ## All new transcripts have the logic name 'refseq_import_grch38'
         next if $self->{core_type} eq 'otherfeatures' && $self->assembly =~ /GRCh37/i && $tr->analysis && $tr->analysis->logic_name =~ /^refseq.+import$/;
-        if($self->{core_type} eq 'otherfeatures' && defined($tr->display_xref)){
+
+        # Set stable_id to display_label from xref if stable_id not defined
+        if( !defined $tr->{stable_id} && $self->{core_type} eq 'otherfeatures' && defined($tr->display_xref)){
           $tr->{stable_id} = $tr->display_xref->{display_id};
         }
         
