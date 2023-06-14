@@ -170,6 +170,40 @@ is_deeply($vf, bless( {
   '_line' => [qw(21:25587759-25587769/DUP)]
 }, 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ), 'SV dup');
 
+$vf = Bio::EnsEMBL::VEP::Parser::Region->new({
+  config => $cfg, file => $test_cfg->create_input_file([qw(21:25587759-25587769/INV)]),
+  valid_chromosomes => [21]
+})->next();
+delete($vf->{adaptor}); delete($vf->{slice});
+is_deeply($vf, bless( {
+  'chr' => '21',
+  'strand' => '1',
+  'variation_name' => '21:25587759-25587769/INV',
+  'class_SO_term' => 'inversion',
+  'end' => '25587769',
+  'start' => '25587759',
+  'seq_region_end' => '25587769',
+  'seq_region_start' => '25587759',
+  '_line' => [qw(21:25587759-25587769/INV)]
+}, 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ), 'SV inv');
+
+$vf = Bio::EnsEMBL::VEP::Parser::Region->new({
+  config => $cfg, file => $test_cfg->create_input_file([qw(21:25587759-25587769/DEL)]),
+  valid_chromosomes => [21]
+})->next();
+delete($vf->{adaptor}); delete($vf->{slice});
+is_deeply($vf, bless( {
+  'chr' => '21',
+  'strand' => '1',
+  'variation_name' => '21:25587759-25587769/DEL',
+  'class_SO_term' => 'deletion',
+  'end' => '25587769',
+  'start' => '25587759',
+  'seq_region_end' => '25587769',
+  'seq_region_start' => '25587759',
+  '_line' => [qw(21:25587759-25587769/DEL)]
+}, 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ), 'SV del');
+
 
 # warning_msg prints to STDERR
 no warnings 'once';

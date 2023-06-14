@@ -412,69 +412,38 @@ sub detect_format {
     next unless @data;
 
     # region chr21:10-10:1/A
-    if (
-      scalar @data == 1 &&
-      $data[0] =~ /^[^\:]+\:\d+\-\d+(\:[\-\+]?1)?[\/\:](ins|dup|del|[ACGTN-]+)$/i
-    ) {
+    if ( $self->Bio::EnsEMBL::VEP::Parser::Region::validate_line(@data) ) {
       $format = 'region';
     }
 
     # SPDI: NC_000016.10:68684738:G:A
-    elsif (
-      scalar @data == 1 &&
-      $data[0] =~ /^(.*?\:){2}([^\:]+|)$/i
-    ) {
+    elsif ($self->Bio::EnsEMBL::VEP::Parser::SPDI::validate_line(@data) ) {
       $format = 'spdi';
     }
 
     # CAID: CA9985736
-    elsif (
-      scalar @data == 1 &&
-      $data[0] =~ /^CA\d{1,}$/i
-    ) {
+    elsif ( $self->Bio::EnsEMBL::VEP::Parser::CAID::validate_line(@data) ) {
       $format = 'caid';
     }
 
     # HGVS: ENST00000285667.3:c.1047_1048insC
-    elsif (
-      scalar @data == 1 &&
-      $data[0] =~ /^([^\:]+)\:.*?([cgmrp]?)\.?([\*\-0-9]+.*)$/i
-    ) {
+    elsif ( $self->Bio::EnsEMBL::VEP::Parser::HGVS::validate_line(@data) ) {
       $format = 'hgvs';
     }
 
     # variant identifier: rs123456
-    elsif (
-      scalar @data == 1
-    ) {
+    elsif ( $self->Bio::EnsEMBL::VEP::Parser::ID::validate_line(@data) ) {
       $format = 'id';
     }
 
     # VCF: 20  14370  rs6054257  G  A  29  0  NS=58;DP=258;AF=0.786;DB;H2  GT:GQ:DP:HQ
-    elsif (
-      $data[0] =~ /(chr)?\w+/ &&
-      $data[1] =~ /^\d+$/ &&
-      $data[3] && $data[3] =~ /^[ACGTN\-\.]+$/i &&
-      $data[4]
-    ) {
-
+    elsif ( $self->Bio::EnsEMBL::VEP::Parser::VCF::validate_line(@data) ) {
       # do some more thorough checking on the ALTs
-      my $ok = 1;
-
-      foreach my $alt(split(',', $data[4])) {
-        $ok = 0 unless $alt =~ /^[\.ACGTN\-\*]+$|^(\<[\w\:\*]+\>)$/i;
-      }
-
-      $format = 'vcf' if $ok;
+      $format = 'vcf' if $self->Bio::EnsEMBL::VEP::Parser::VCF::validate_alts($data[4]);
     }
 
     # ensembl: 20  14370  14370  A/G  +
-    elsif (
-      $data[0] =~ /\w+/ &&
-      $data[1] =~ /^\d+$/ &&
-      $data[2] && $data[2] =~ /^\d+$/ &&
-      $data[3] && $data[3] =~ /(ins|dup|del)|([ACGTN-]+\/[ACGTN-]+)/i
-    ) {
+    elsif ( $self->Bio::EnsEMBL::VEP::Parser::VEP_input::validate_line(@data) ) {
       $format = 'ensembl';
     }
 
@@ -688,6 +657,49 @@ sub validate_vf {
   return 1;
 }
 
+=head2 get_SO_term
+
+  Arg 1      : string $type
+  Example    : $ref_allele = $parser->get_SO_term($type);
+  Description: Returns the Sequence Ontology term based on a given variant type.
+               Returns undef if failed to fetch the appropriate term.
+  Returntype : string
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
+sub get_SO_term {
+  my $self = shift;
+  my $type = shift;
+  my $abbrev;
+
+  if ($type =~ /\<CN/i) {
+    # ALT: "<CN0>", "<CN0>,<CN2>,<CN3>" "<CN2>" => SVTYPE: DEL, CNV, DUP
+    $abbrev = "CNV";
+    $abbrev = "DEL" if $type =~ /\<CN=?0\>/;
+    $abbrev = "DUP" if $type =~ /\<CN=?2\>/;
+  } elsif ($type =~ /^\<|^\[|\]$|\>$/) {
+    $abbrev = $type;
+    $abbrev =~ s/\<|\>//g;
+    $abbrev =~ s/\:.+//g;
+  } else {
+    $abbrev = $type;
+  }
+
+  my %terms = (
+    INS  => 'insertion',
+    DEL  => 'deletion',
+    TDUP => 'tandem_duplication',
+    DUP  => 'duplication',
+    CNV  => 'copy_number_variation',
+    INV  => 'inversion',
+    BND  => 'breakpoint'
+  );
+
+  return $terms{$abbrev};
+}
 
 =head2 _get_ref_allele
 
