@@ -166,6 +166,7 @@ our @VEP_PARAMS = (
   'stats_html',              # write stats as html
   'no_stats',                # don't write stats file
   'warning_file=s',          # file to write warnings to
+  'skipped_variants_file=s', # file name to log skipped variants (not logged otherwise)
   'force_overwrite|force',   # force overwrite of output file if already exists
   'terms|t=s',               # consequence terms to use e.g. NCBI, SO
   'coding_only',             # only return results for consequences in coding regions

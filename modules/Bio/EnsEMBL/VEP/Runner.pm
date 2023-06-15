@@ -173,6 +173,7 @@ sub finish {
   }
 
   $self->dump_stats unless $self->param('no_stats');
+  $self->dump_skipped_variants if $self->param('skipped_variants_file');
 
   revert_fasta() if $self->fasta_db;
 

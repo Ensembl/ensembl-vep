@@ -241,6 +241,23 @@ open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 is($bv->get_database_assembly, undef, 'get_database_assembly - no DB');
 
 
+## skipped_variant_msg tests
+############################
+
+open(SAVE, ">&STDERR") or die "Can't save STDERR\n";
+
+close STDERR;
+open STDERR, '>', \$tmp;
+
+$bv->skipped_variant_msg("Invalid variant", 3);
+like($tmp, qr/Invalid variant/, 'skipped_variant_msg - warning about invalid variant');
+
+my $skipped = $bv->skipped_variants();
+like($skipped->[0]->{description}, qr/Invalid variant/, 'skipped_variant_msg - description');
+ok($skipped->[0]->{line_number} == 3, 'skipped_variant_msg - line number');
+is($skipped->[0]->{line}, undef, 'skipped_variant_msg - line content');
+
+open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
 ## DATABASE TESTS
 #################
