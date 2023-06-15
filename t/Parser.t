@@ -160,10 +160,10 @@ is($p->validate_vf(get_vf({allele_string => 'A/C', chr => 2})), 0, 'validate_vf 
 ok($tmp =~ /Chromosome .* not found/, 'validate_vf - chromosome not in valid list 2');
 
 is($p->validate_vf(get_vf({allele_string => 'G/C', start => 'foo'})), 0, 'validate_vf - start is not number 1');
-ok($tmp =~ /coordinate invalid/, 'validate_vf - start is not number 2');
+like($tmp, qr/Invalid start 'foo' .* coordinate/, 'validate_vf - start is not number 2');
 
 is($p->validate_vf(get_vf({allele_string => 'G/C', end => 'foo'})), 0, 'validate_vf - end is not number 1');
-ok($tmp =~ /coordinate invalid/, 'validate_vf - end is not number 2');
+like($tmp, qr/Invalid .* end '1' coordinate/, 'validate_vf - end is not number 2');
 
 is($p->validate_vf(get_vf({allele_string => 'G/C', start => 3, end => 1})), 0, 'validate_vf - start > end+1 1');
 ok($tmp =~ /start \> end\+1/, 'validate_vf - start > end+1 2');
