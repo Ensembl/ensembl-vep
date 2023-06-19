@@ -147,8 +147,7 @@ sub validate_alts {
   my $self = shift;
   my $alts = shift;
 
-  my 
-  = 1;
+  my $ok = 1;
   foreach my $alt(split(',', $alts)) {
     $ok = 0 unless $alt =~ /^[\.ACGTN\-\*]+$|^(\<[\w\:\*]+\>)$|^[\[\]A-Z:0-9]+$/i;
   }
