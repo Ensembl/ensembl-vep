@@ -2293,14 +2293,17 @@ sub get_custom_headers {
     
     my @flatten_header = get_flatten(\@headers);
     my %pos = map { $flatten_header[$_]=~/o/?($flatten_header[$_]=>$_):() } 0..$#flatten_header if @flatten_header;
-
+    
+    my $masked_file = $custom->{file};
+    $masked_file =~ s/(\/[\w-]+?)+\//\[PATH\]\//g;
+    
     if (grep { /^$custom->{short_name}$/ }  @flatten_header){
       my $pos = $pos{$custom->{short_name}} / 2;
-      $headers[$pos][1] .= ",$custom->{file}";
+      $headers[$pos][1] .= ",$masked_file";
     } else {
       push @headers, [
         $custom->{short_name},
-        sprintf("%s", $custom->{file})
+        sprintf("%s", $masked_file)
       ];
     }
 
@@ -2308,16 +2311,16 @@ sub get_custom_headers {
       my $sub_id = sprintf("%s_%s", $custom->{short_name}, $field);
       if (grep { /^$sub_id$/ } @flatten_header){
         my $pos = $pos{$sub_id} / 2;
-        $headers[$pos][1] .= ",$custom->{file}";
+        $headers[$pos][1] .= ",$masked_file";
       } elsif ($field eq "PC") {
         push @headers, [
           $sub_id,
-          sprintf("Percentage of input variant covered by reference variant from %s", $custom->{file})
+          sprintf("Percentage of input variant covered by reference variant from %s", $masked_file)
         ];
       } else {
         push @headers, [
           $sub_id,
-          sprintf("%s field from %s", $field, $custom->{file})
+          sprintf("%s field from %s", $field, $masked_file)
         ];
       }
     }
