@@ -124,6 +124,30 @@ sub new {
 }
 
 
+sub _valid_line_regex {
+  return qr/^([^:]+):(\d+)-(\d+)(:[-\+]?1)?[\/:]([a-z]{3,}|[ACGTN-]+)$/i;
+}
+
+
+=head2 validate_line
+
+  Example    : $valid = $self->validate_line();
+  Description: Check if input line can be read using this format.
+  Returntype : bool
+  Exceptions : none
+  Caller     : $self->SUPER::detect_format()
+  Status     : Stable
+
+=cut
+
+sub validate_line {
+  my $self = shift;
+  my @line = @_;
+
+  return ( scalar @line == 1 && $line[0] =~ _valid_line_regex() );
+}
+
+
 =head2 parser
 
   Example    : $io_parser = $parser->parser();
@@ -167,7 +191,7 @@ sub create_VariationFeatures {
 
   my $region = $parser->get_value();
 
-  return [] unless $region =~ /^([^\:]+)\:(\d+)\-(\d+)(\:[\-\+]?1)?[\/\:](ins|dup|del|[ACGTN-]+)$/i;
+  return [] unless $region =~ _valid_line_regex();
   my ($chr, $start, $end) = ($1, $2, $3);
 
   my ($strand, $allele);
@@ -184,19 +208,8 @@ sub create_VariationFeatures {
   my $vf;
   
   # sv?
-  if($allele =~ /^(INS|DEL|DUP)$/) {
-    my $so_term;
-
-    # convert to SO term
-    my %terms = (
-      INS  => 'insertion',
-      DEL  => 'deletion',
-      TDUP => 'tandem_duplication',
-      DUP  => 'duplication'
-    );
-
-    $so_term = defined $terms{$allele} ? $terms{$allele} : $allele;
-
+  my $so_term = $self->get_SO_term($allele);
+  if(defined($so_term)) {
     $vf = Bio::EnsEMBL::Variation::StructuralVariationFeature->new_fast({
       start          => $start,
       end            => $end,

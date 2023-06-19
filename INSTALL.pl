@@ -151,7 +151,6 @@ my $config = {};
 GetOptions(
   $config,
   'DESTDIR|d=s',
-  'VERSION|v=i', # Deprecated
   'CACHE_VERSION|e=i',
   'ASSEMBLY|y=s',
   'BIOPERL|b=s',
@@ -198,7 +197,6 @@ $config = read_config_from_environment($config);
 
 # Quick fix: this script should use $config instead of multiple global variables
 $DEST_DIR     ||=  $config->{DESTDIR};
-$API_VERSION  ||=  $config->{VERSION};
 $DATA_VERSION ||=  $config->{CACHE_VERSION};
 $ASSEMBLY     ||=  $config->{ASSEMBLY};
 $BIOPERL_URL  ||=  $config->{BIOPERL};
@@ -321,14 +319,14 @@ if($AUTO) {
 
 else {
   my $api_msg = 
-      "  - Install v$API_VERSION of the Ensembl API for use by the VEP. " .
+      " - Install v$API_VERSION of the Ensembl API for use by the VEP. " .
       "It will not affect any existing installations of the Ensembl API that you may have.\n";
 
   print "Hello! This installer will help you set up VEP v$API_VERSION, including:\n" .
     ($NO_UPDATE ? "" : $api_msg) .
-    "  - Download and install cache files from Ensembl's FTP server.\n" .
-    "  - Download FASTA files from Ensembl's FTP server.\n" .
-    ($NO_PLUGINS ? "" : "  - Download VEP plugins.\n") . "\n"
+    " - Download and install cache files from Ensembl's FTP server.\n" .
+    " - Download FASTA files from Ensembl's FTP server.\n" .
+    ($NO_PLUGINS ? "" : " - Download VEP plugins.\n") . "\n"
     unless $QUIET;
 
   # run subs
@@ -387,26 +385,6 @@ sub update() {
 
   my $current_branch = $CURRENT_VERSION_DATA->{'ensembl-vep'}->{release};
 
-  # Check if the $API_VERSION has been set by the deprecated "--VERSION" flag
-  my $api_branch  = $API_VERSION;
-     $api_branch  =~ s/release\///;
-
-  # branch provided by the "--VERSION" flag
-  if ($api_branch != $current_branch) {
-    print "The 'VERSION' installation flag has been deprecated.\n\n";
-    my $branch = looks_like_number($API_VERSION) ? 'release/'.$API_VERSION : $API_VERSION;
-    if(`which git` && -d $RealBin.'/.git') {
-      print "Please, use git to update '$module' using the commands:\n\n";
-      print "\tgit pull\n";
-      print "\tgit checkout $branch\n\n";
-    }
-    else {
-      print "Please, re-download '$module' with the desired version.\n\n";
-    }
-    print "Exit VEP install script\n";
-    exit(0);
-  }
-
   my $message;
 
   # don't have latest
@@ -463,7 +441,7 @@ sub update() {
 
 sub is_url {
   my $url = shift;
-  return $url =~ /^http/i;
+  return $url =~ /^(http|ftp)/i;
 }
 
 sub check_default_dir {
@@ -1433,8 +1411,7 @@ sub fasta() {
     foreach my $sub(split /\//, $3) {
       $ftp->cwd($sub) or die "ERROR: Could not change directory to $sub\n$@\n";
     }
-
-    push @dirs, sort $ftp->ls;
+    push @dirs, grep { !/ancestral_alleles/i } sort $ftp->ls;
   }
   else {
     opendir DIR, $FASTA_URL;
@@ -1825,8 +1802,6 @@ sub plugins() {
 sub download_to_file {
   my ($url, $file) = @_;
 
-  $url =~ s/([a-z])\//$1\:21\// if $url =~ /ftp/ && $url !~ /\:21/;
-
   if($CAN_USE_CURL) {
     my $response = `curl -s -o $file -w '%{http_code}' --location "$url" `;
     if ( $response != 200 && $response != 226) {
@@ -1933,7 +1908,7 @@ Options
 -h | --help        Display this message and quit
 
 -d | --DESTDIR     Set destination directory for API install (default = './')
---CACHE_VERSION    Set data (cache, FASTA) version to install if different from --VERSION (default = $VERSION)
+--CACHE_VERSION    Set data (cache, FASTA) version to install (default = $VERSION)
 -c | --CACHEDIR    Set destination directory for cache files (default = '$ENV{HOME}/.vep/')
 
 -a | --AUTO        Run installer without user prompts. Use "a" (API + Faidx/htslib),

@@ -71,6 +71,30 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::IO::Parser::VEP_input;
 
 
+=head2 validate_line
+
+  Example    : $valid = $self->validate_line();
+  Description: Check if input line can be read using this format.
+  Returntype : bool
+  Exceptions : none
+  Caller     : $self->SUPER::detect_format()
+  Status     : Stable
+
+=cut
+
+sub validate_line {
+  my $self = shift;
+  my @line = @_;
+
+  return (
+    $line[0] =~ /\w+/ &&
+      $line[1] =~ /^\d+$/ &&
+      $line[2] && $line[2] =~ /^\d+$/ &&
+      $line[3] && $line[3] =~ /([a-z]{2,})|([ACGTN-]+\/[ACGTN-]+)/i
+  );
+}
+
+
 =head2 parser
 
   Example    : $io_parser = $parser->parser();
@@ -134,17 +158,7 @@ sub create_VariationFeatures {
 
   # sv?
   if($allele_string !~ /\//) {
-    my $so_term;
-
-    # convert to SO term
-    my %terms = (
-      INS  => 'insertion',
-      DEL  => 'deletion',
-      TDUP => 'tandem_duplication',
-      DUP  => 'duplication'
-    );
-
-    $so_term = defined $terms{$allele_string} ? $terms{$allele_string} : $allele_string;
+    my $so_term = $self->get_SO_term($allele_string) || $allele_string;
 
     $vf = Bio::EnsEMBL::Variation::StructuralVariationFeature->new_fast({
       start          => $start,
@@ -159,6 +173,11 @@ sub create_VariationFeatures {
 
   # normal vf
   else {
+    my $is_indel = 0;
+    # Checks if the allele string is insertion or/and deletion
+    my ($ref_allele_string,$alt_allele_string) = split(/\//, $allele_string);
+    $is_indel = 1 unless length($ref_allele_string) == length($alt_allele_string) or $allele_string =~ /-/;
+
     $vf = Bio::EnsEMBL::Variation::VariationFeature->new_fast({
       start          => $start,
       end            => $end,
@@ -169,8 +188,11 @@ sub create_VariationFeatures {
       variation_name => $var_name,
       chr            => $chr,
     });
-  }
 
+    if ($is_indel) {
+      $vf = ${Bio::EnsEMBL::VEP::Parser->minimise_alleles([$vf])}[0];
+    }
+  }
   $vf->{_line} = $parser->{record};
 
   return $self->post_process_vfs([$vf]);

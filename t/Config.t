@@ -55,14 +55,14 @@ throws_ok { $cfg->read_config_from_file() } qr/Could not open config file/, 'rea
 throws_ok { $cfg->read_config_from_file('does_not_exist') } qr/Could not open config file/, 'read_config_from_file invalid file given';
 ok(my $tmp = $cfg->read_config_from_file($test_cfg->{test_ini_file}), 'read_config_from_file ok');
 
-is($tmp->{test1}, 'hello', 'read_config_from_file basic');
-is($tmp->{test2}, 'foo bar', 'quoted string with spaces');
-is($tmp->{test3}, 'foo', 'read_config_from_file flag not allowed multiple');
-is($tmp->{individual}, 'dave,barry', 'read_config_from_file flag list preserved comma-separated');
-is_deeply($tmp->{plugin}, [qw(hello,foo=bar too)], 'read_config_from_file flag allowed multiple');
+is($tmp->{format}, 'ensembl', 'read_config_from_file basic');
+is($tmp->{dir}, '/this/is/a path with spaces', 'quoted string with spaces');
+is($tmp->{terms}, 'display', 'read_config_from_file flag not allowed multiple');
+is($tmp->{fields}, 'Allele,Consequence,Feature_type,Feature', 'read_config_from_file flag list preserved comma-separated');
+is_deeply($tmp->{plugin}, ['test.pm,file=/path/to/test.txt', 'anotherPlugin.pm'], 'read_config_from_file flag allowed multiple');
 
 $cfg->read_config_from_file($test_cfg->{test_ini_file}, $tmp);
-is_deeply($tmp->{plugin}, [qw(hello,foo=bar too hello,foo=bar too)], 'read_config_from_file flag multiples added not overwritten');
+is_deeply($tmp->{plugin}, [('test.pm,file=/path/to/test.txt', 'anotherPlugin.pm', 'test.pm,file=/path/to/test.txt', 'anotherPlugin.pm')], 'read_config_from_file flag multiples added not overwritten');
 
 
 
@@ -90,7 +90,7 @@ $cfg = Bio::EnsEMBL::VEP::Config->new({check_frequency => 1});
 is($cfg->param('check_existing'), 1, 'option sets, multiple in same out 2');
 
 $cfg = Bio::EnsEMBL::VEP::Config->new({gff => 'test'});
-is_deeply($cfg->param('custom'), ['test,,gff'], 'option sets, substitution');
+is_deeply($cfg->param('custom'), ['file=test,format=gff'], 'option sets, substitution');
 
 $cfg = Bio::EnsEMBL::VEP::Config->new({ucsc_assembly => 'hg38', phyloP => [7, 100], custom => []});
 is_deeply(
@@ -104,11 +104,11 @@ is_deeply(
 
 # give config file
 $cfg = Bio::EnsEMBL::VEP::Config->new({config => $test_cfg->{test_ini_file}});
-is($cfg->param('test1'), 'hello', 'config file');
+is($cfg->param('format'), 'ensembl', 'config file');
 
 # give config file auto-detected as $config->{dir}.'/vep.ini'
 $cfg = Bio::EnsEMBL::VEP::Config->new({dir => $test_cfg->{cache_root_dir}.'/../'});
-is($cfg->param('test1'), 'hello', 'ini file');
+is($cfg->param('format'), 'ensembl', 'ini file');
 
 # list conversion
 $cfg = Bio::EnsEMBL::VEP::Config->new({individual => 'dave,barry,keith'});

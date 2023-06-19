@@ -201,6 +201,7 @@ sub new {
     hgvsp
     hgvsg
     hgvsg_use_accession
+    hgvsp_use_prediction
     spdi
     sift
     ga4gh_vrs
@@ -874,6 +875,7 @@ sub VariationFeature_to_output_hash {
 
   my $hash = {
     Uploaded_variation  => $vf->variation_name ne '.' ? $vf->variation_name : ($vf->{original_chr} || $vf->{chr}).'_'.$vf->{start}.'_'.($vf->{allele_string} || $vf->{class_SO_term}),
+    Original_allele     => ($vf->{original_allele_string} || $vf->{allele_string}),
     Location            => ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start}, $vf->{end}),
   };
 
@@ -1612,7 +1614,7 @@ sub TranscriptVariationAllele_to_output_hash {
     # HGVS
     if($self->{hgvsc}) {
       my $hgvs_t = $vfoa->hgvs_transcript(undef, !$self->param('shift_3prime'));
-      my $offset = defined($vfoa->{shift_hash}) ? $vfoa->{shift_hash}->{_hgvs_offset} : 0;
+      my $offset = $vfoa->hgvs_offset;
 
       $hash->{HGVSc} = $hgvs_t if $hgvs_t;
       $hash->{HGVS_OFFSET} = $offset * $strand if $offset && $hgvs_t;
@@ -1620,7 +1622,7 @@ sub TranscriptVariationAllele_to_output_hash {
 
     if($self->{hgvsp}) {
       $vfoa->{remove_hgvsp_version} = 1 if $self->{remove_hgvsp_version};
-      my $hgvs_p = $vfoa->hgvs_protein;
+      my $hgvs_p = $vfoa->hgvs_protein(undef, $self->{hgvsp_use_prediction});
       my $offset = $vfoa->hgvs_offset;
 
       # URI encode "="

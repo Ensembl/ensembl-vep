@@ -234,6 +234,7 @@ SKIP: {
       'end' => 25585733,
       'seq_region_name' => '21',
       'strand' => 1,
+      'original_allele' => 'C/T',
       'transcript_consequences' => [
         {
           'gene_id' => 'ENSG00000154719',
@@ -434,6 +435,7 @@ SKIP: {
       ],
       'strand' => 1,
       'id' => 'rs142513484',
+      'original_allele' => 'C/T',
       'allele_string' => 'C/T',
       'most_severe_consequence' => 'missense_variant',
       'start' => 25585733,
@@ -602,7 +604,7 @@ SKIP: {
       input_file => $test_cfg->{test_vcf},
       everything => 1,
       dir => $test_cfg->{cache_root_dir},
-      custom => [$test_cfg->{custom_vcf}.',test,vcf,exact,,FOO'],
+      custom => ['file=' . $test_cfg->{custom_vcf}.',short_name=test,format=vcf,type=exact,fields=FOO'],
     });
     $of = Bio::EnsEMBL::VEP::OutputFactory::JSON->new({config => $ib->config});
     @lines = @{$of->get_all_lines_by_InputBuffer($ib)};
@@ -628,7 +630,7 @@ SKIP: {
       input_data => "21\t25585733\t.\tCATG\tTACG",
       everything => 1,
       dir => $test_cfg->{cache_root_dir},
-      custom => [$test_cfg->{custom_vcf}.',test,vcf,overlap'],
+      custom => ['file=' . $test_cfg->{custom_vcf} . ',short_name=test,format=vcf,type=overlap'],
     });
     $of = Bio::EnsEMBL::VEP::OutputFactory::JSON->new({config => $ib->config});
     @lines = @{$of->get_all_lines_by_InputBuffer($ib)};

@@ -173,6 +173,37 @@ sub stats {
 }
 
 
+=head2 skipped_variants
+
+  Arg 1      : (optional) hash $value with line, line_number and description
+  Example    : $skipped_variants = $obj->skipped_variants()
+  Description: Get/set skipped variants for this VEP run. Cached on shared
+               config object so all derived objects will share.
+  Returntype : Arrayref
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
+sub skipped_variants {
+  my $self = shift;
+  my $value = shift;
+
+  my $config = $self->config;
+
+  if (!exists($config->{_skipped_variants})) {
+    $config->{_skipped_variants} = [];
+  }
+
+  if (defined $value) {
+    push @{ $config->{_skipped_variants} }, $value;
+  }
+
+  return $config->{_skipped_variants};
+}
+
+
 =head2 species
 
   Example    : $species = $obj->species()
@@ -729,6 +760,46 @@ sub warning_msg {
   print $fh $text;
 
   warn($text) unless $self->param('quiet');
+}
+
+
+=head2 skipped_variant_msg
+
+  Arg 1      : string $description
+  Arg 2      : (optional) int $line_number
+  Example    : $obj->skipped_variant_msg("Cannot parse variant location", 451)
+  Description: Prints a given skipped variant as a warning message (based on
+               handle given by $self->warning_fh) and writes to file if
+               $self->param->{skipped_variants_file} is defined.
+  Returntype : none
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
+sub skipped_variant_msg {
+  my $self = shift;
+  my $description = shift;
+  my $line_number = shift || $self->line_number;
+
+  my $msg = $description;
+  my $line = $self->{parser}->{current_block} if defined $self->{parser};
+  if (defined $line) {
+    my $maxChar = 50;
+    $line =~ s/\t/ /g; # replace tabs with spaces to improve readability
+    $line = substr($line, 0, $maxChar - 4) . "..." if length($line) > $maxChar;
+    $msg = "(" . $line . "): " . $msg;
+  }
+
+  $msg = "Line $line_number skipped " . $msg if defined $line_number;
+  $self->warning_msg("WARNING: " . $msg . "\n");
+
+  $self->skipped_variants({
+    line => $line,
+    line_number => $line_number,
+    description => $description
+  });
 }
 
 

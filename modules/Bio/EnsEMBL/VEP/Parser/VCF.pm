@@ -108,6 +108,54 @@ sub new {
 }
 
 
+=head2 validate_line
+
+  Example    : $valid = $self->validate_line();
+  Description: Check if input line can be read using this format.
+  Returntype : bool
+  Exceptions : none
+  Caller     : $self->SUPER::detect_format()
+  Status     : Stable
+
+=cut
+
+sub validate_line {
+  my $self = shift;
+  my @line = @_;
+
+  return (
+    $line[0] =~ /(chr)?\w+/ &&
+      $line[1] =~ /^\d+$/ &&
+      $line[3] && $line[3] =~ /^[ACGTN\-\.]+$/i &&
+      $line[4]
+  );
+}
+
+
+=head2 validate_alts
+
+  Example    : $valid = $self->validate_alts('A,T,C');
+  Description: Check if alternative alleles are valid.
+  Returntype : bool
+  Exceptions : none
+  Caller     : $self->SUPER::detect_format()
+  Status     : Stable
+
+=cut
+
+sub validate_alts {
+  my $self = shift;
+  my $alts = shift;
+
+  my 
+  = 1;
+  foreach my $alt(split(',', $alts)) {
+    $ok = 0 unless $alt =~ /^[\.ACGTN\-\*]+$|^(\<[\w\:\*]+\>)$|^[\[\]A-Z:0-9]+$/i;
+  }
+  return $ok;
+}
+
+
 =head2 parser
 
   Example    : $io_parser = $parser->parser();
@@ -533,44 +581,14 @@ sub create_StructuralVariationFeatures {
     $allele_string = $alt;
   }
 
-  # get type
-  my $type;
+  # avoid deriving type from alt if described by SVTYPE
+  my $type = $info->{SVTYPE} || $alt;
 
-  ## avoid deriving type from alt for CNVs more precisely described by SVTYPE
-  ## ALT: "<CN0>", "<CN0>,<CN2>,<CN3>" "<CN2>" => SVTYPE: DEL, CNV, DUP
-  if ($info->{SVTYPE}) {
-    $type = $info->{SVTYPE};
-  } elsif ($alt =~ /\<CN/i) {
-    $type = "CNV";
-    $type = "DEL" if $alt =~ /\<CN=?0\>/;
-    $type = "DUP" if $alt =~ /\<CN=?2\>/;
-  } elsif ($alt =~ /^\<|^\[|\]$|\>$/) {
-    $type = $alt;
-    $type =~ s/\<|\>//g;
-    $type =~ s/\:.+//g;
-    if($start >= $end && $type =~ /del/i) {
-      my $line = join("\t", @$record);
-      $self->warning_msg("WARNING: VCF line on line ".$self->line_number." looks incomplete, skipping:\n$line\n");
-      $skip = 1;
-    }
-  }
-
-  # set a default which we do not expect to see
-  my $so_term = 'sequence_variant';
-
-  if(defined($type)) {
-    # convert to SO term
-    my %terms = (
-      INS  => 'insertion',
-      DEL  => 'deletion',
-      TDUP => 'tandem_duplication',
-      DUP  => 'duplication',
-      CNV  => 'copy_number_variation',
-      INV  => 'inversion',
-      BND  => 'breakend'
-    );
-
-    $so_term = defined $terms{$type} ? $terms{$type} : $type;
+  my $so_term = $self->get_SO_term($type) || $type;
+  if($start >= $end && $so_term =~ /del/i) {
+    my $line = join("\t", @$record);
+    $self->warning_msg("WARNING: VCF line " . $self->line_number . " looks incomplete, skipping:\n$line\n");
+    $skip = 1;
   }
 
   my $svf = Bio::EnsEMBL::Variation::StructuralVariationFeature->new_fast({

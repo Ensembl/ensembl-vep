@@ -17,6 +17,7 @@ use warnings;
 
 use Test::More;
 use Test::Exception;
+use Test::Deep;
 use FindBin qw($Bin);
 
 use lib $Bin;
@@ -75,7 +76,7 @@ $of->param('custom', 0);
 delete($of->{field_order});
 delete($of->{fields});
 
-is_deeply(
+cmp_deeply(
   $of->headers(),
   [
     '## ENSEMBL VARIANT EFFECT PREDICTOR v1',
@@ -101,7 +102,7 @@ is_deeply(
     '## STRAND : Strand of the feature (1/-1)',
     '## FLAGS : Transcript quality flags',
     '## custom_test : test.vcf.gz',
-    '## VEP command-line: vep',
+    re('\#\# VEP command-line: vep'),
     "#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tExisting_variation\tExtra"
   ],
   'headers'
@@ -112,10 +113,9 @@ my $runner = get_annotated_buffer_runner({
   plugin => ['TestPlugin'],
   quiet => 1,
 });
-is(
+like(
   $runner->get_OutputFactory->headers->[-2].$runner->get_OutputFactory->headers->[-1],
-  "## VEP command-line: vep --assembly GRCh38 --cache_version 84 --database 0 --dir [PATH]/ --input_file [PATH]/test.vcf --no_stats --offline --plugin TestPlugin --quiet".
-  "#Uploaded_variation\tLocation\tAllele\tGene\tFeature\tFeature_type\tConsequence\tcDNA_position\tCDS_position\tProtein_position\tAmino_acids\tCodons\tExisting_variation\tExtra",
+  '/^.*--plugin TestPlugin.*\tExtra$/',
   'headers - plugin'
 );
 
@@ -172,7 +172,7 @@ is(
     3_prime_UTR_variant
     1122
     - - - - -
-    REF_ALLELE=C;IMPACT=MODIFIER;STRAND=-1
+    REF_ALLELE=C;IMPACT=MODIFIER;STRAND=-1;Original_allele=C/T
   )),
   'get_all_lines_by_InputBuffer - check first'
 );
@@ -193,7 +193,7 @@ is(
     V/I
     Gtt/Att
     -
-    REF_ALLELE=C;IMPACT=MODERATE;STRAND=-1;FLAGS=cds_start_NF
+    REF_ALLELE=C;IMPACT=MODERATE;STRAND=-1;FLAGS=cds_start_NF;Original_allele=C/T
   )),
   'get_all_lines_by_InputBuffer - check last'
 );
@@ -216,7 +216,7 @@ is(
   'HGVSc=ENST00000307301.11:c.*18G>A;'.
   'AF=0.0010;AFR_AF=0.003;AMR_AF=0.0014;EAS_AF=0;EUR_AF=0;SAS_AF=0;'.
   'gnomADe_AF=0.0003478;gnomADe_AFR_AF=0.004643;gnomADe_AMR_AF=0.0003236;gnomADe_ASJ_AF=0;'.
-  'gnomADe_EAS_AF=0;gnomADe_FIN_AF=0;gnomADe_NFE_AF=1.886e-05;gnomADe_OTH_AF=0;gnomADe_SAS_AF=0;MAX_AF=0.004643;MAX_AF_POPS=gnomADe_AFR',
+  'gnomADe_EAS_AF=0;gnomADe_FIN_AF=0;gnomADe_NFE_AF=1.886e-05;gnomADe_OTH_AF=0;gnomADe_SAS_AF=0;MAX_AF=0.004643;MAX_AF_POPS=gnomADe_AFR;Original_allele=C/T',
   'get_all_lines_by_InputBuffer - everything'
 );
 
@@ -232,7 +232,7 @@ SKIP: {
 
   $runner = get_annotated_buffer_runner({
     input_file => $test_cfg->{test_vcf},
-    custom => [$test_cfg->{custom_vcf}.',test,vcf,exact,,FOO'],
+    custom => ['file=' . $test_cfg->{custom_vcf} . ',short_name=test,format=vcf,type=exact,fields=FOO'],
     output_format => 'vep',
   });
   $of = $runner->get_OutputFactory;
@@ -251,7 +251,7 @@ SKIP: {
       3_prime_UTR_variant
       1122
       - - - - -
-      IMPACT=MODIFIER;STRAND=-1;test=test1;test_FILTER=PASS;test_FOO=BAR
+      IMPACT=MODIFIER;STRAND=-1;Original_allele=C/T;test=test1;test_FILTER=PASS;test_FOO=BAR
     )),
     'get_all_lines_by_InputBuffer - custom'
   );

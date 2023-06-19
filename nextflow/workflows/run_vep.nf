@@ -1,5 +1,5 @@
 /* 
- * Workflow to run VEP on chromosome based VCF files
+ * Workflow to run VEP on VCF files
  *
  * This workflow relies on Nextflow (see https://www.nextflow.io/tags/workflow.html)
  *
@@ -8,96 +8,110 @@
 nextflow.enable.dsl=2
 
  // params default
-params.help = false
 params.cpus = 1
+params.vep_config = "$PWD/vep_config/vep.ini"
 params.outdir = "outdir"
-params.singularity_dir=""
-params.vep_config=""
-params.chros=""
-params.chros_file=""
+
+params.vcf = null
+
+params.output_prefix = "out"
+params.bin_size = 100
+params.skip_check = 0
+params.help = false
 
 // module imports
-include { splitVCF } from '../nf_modules/split_into_chros.nf' 
-include { mergeVCF } from '../nf_modules/merge_chros_VCF.nf'  
-include { chrosVEP } from '../nf_modules/run_vep_chros.nf'
-include { readChrVCF } from '../nf_modules/read_chros_VCF.nf'
+include { checkVCF } from '../nf_modules/check_VCF.nf'
+include { splitVCF } from '../nf_modules/split_VCF.nf' 
+include { mergeVCF } from '../nf_modules/merge_VCF.nf'  
+include { runVEP } from '../nf_modules/run_vep.nf'
 
- // print usage
+// print usage
 if (params.help) {
-  log.info ''
-  log.info 'Pipeline to run VEP chromosome-wise'
-  log.info '-------------------------------------------------------'
-  log.info ''
-  log.info 'Usage: '
-  log.info '  nextflow -C nf_config/nextflow.config run workflows/run_vep.nf --vcf <path-to-vcf> --chros 1,2 --vep_config'
-  log.info ''
-  log.info 'Options:'
-  log.info '  --vcf VCF                 VCF that will be split. Currently supports sorted and bgzipped file'
-  log.info '  --outdir DIRNAME          Name of output dir. Default: outdir'
-  log.info '  --vep_config FILENAME     VEP config file. Default: nf_config/vep.ini'
-  log.info '  --chros LIST_OF_CHROS	Comma-separated list of chromosomes to generate. i.e. 1,2,... Default: 1,2,...,X,Y,MT'
-  log.info '  --chros_file LIST_OF_CHROS_FILE Path to file containing list of chromosomes' 
-  log.info '  --cpus INT	        Number of CPUs to use. Default 1.'
-  log.info '  --output_prefix FILENAME_PREFIX   Output filename prefix. The generated output file will have name <output_prefix>.vcf.gz'
+  log.info """
+Pipeline to run VEP
+-------------------
+
+Usage:
+  nextflow run workflows/run_vep.nf --vcf <path-to-vcf> --vep_config vep_config/vep.ini
+
+Options:
+  --vcf VCF                 Sorted and bgzipped VCF. Alternatively, can also be a directory containing VCF files
+  --bin_size INT            Number of variants used to split input VCF into multiple jobs. Default: 100
+  --vep_config FILENAME     VEP config file. Alternatively, can also be a directory containing VEP INI files. Default: vep_config/vep.ini
+  --cpus INT                Number of CPUs to use. Default: 1
+  --outdir DIRNAME          Name of output directory. Default: outdir
+  --output_prefix PREFIX    Output filename prefix. The generated output file will have name <vcf>-<output_prefix>.vcf.gz
+  --skip_check [0,1]        Skip check for tabix index file of input VCF. Enables use of cache with -resume. Default: 0
+  """
   exit 1
 }
 
-// Input validation
 
-if( !params.vcf) {
-  exit 1, "Undefined --vcf parameter. Please provide the path to a VCF file"
-}
+def processInput (input, pattern, is_vcf) {
+  if (input instanceof String) {
+    // if input is a String, process as file or directory
+    files = file(input)
+    if ( !files.exists() ) {
+      exit 1, "The specified input does not exist: ${input}"
+    }
 
-vcfFile = file(params.vcf)
-if( !vcfFile.exists() ) {
-  exit 1, "The specified VCF file does not exist: ${params.vcf}"
-}
-
-check_bgzipped = "bgzip -t $params.vcf".execute()
-check_bgzipped.waitFor()
-if(check_bgzipped.exitValue()){
-  exit 1, "The specified VCF file is not bgzipped: ${params.vcf}"
-}
-
-def sout = new StringBuilder(), serr = new StringBuilder()
-check_parsing = "$params.singularity_dir/vep.sif tabix -p vcf -f $params.vcf".execute()
-check_parsing.consumeProcessOutput(sout, serr)
-check_parsing.waitFor()
-if( serr ){
-  exit 1, "The specified VCF file has issues in parsing: $serr"
-}
-vcf_index = "${params.vcf}.tbi"
-
-if ( params.vep_config ){
-  vepFile = file(params.vep_config)
-  if( !vepFile.exists() ){
-    exit 1, "The specified VEP config does not exist: ${params.vep_config}"
+    if (files.isDirectory()) {
+      files = "${files}/${pattern}"
+    }
+    files = Channel.fromPath(files)
+  } else {
+    // if input is a Channel, just pass along
+    files = input
   }
-}
-else
-{
-  exit 1, "Undefined --vep_config parameter. Please provide a VEP config file"
+
+  if (is_vcf) {
+    // add tabix-index files for VCF input (to be checked if they exist later)
+    files = files.multiMap { it ->
+      vcf: it
+      vcf_index: "${it}.tbi"
+    }
+  }
+
+  return files
 }
 
-log.info 'Starting workflow.....'
+workflow vep {
+  take:
+    vcf
+    vep_config
+  main:
+    if (!vcf) {
+      exit 1, "Undefined --vcf parameter. Please provide the path to a VCF file"
+    }
+
+    if (!vep_config) {
+      exit 1, "Undefined --vep_config parameter. Please provide a VEP config file"
+    }
+
+    // Raise error if we have multiple VCF files and VEP config files as input
+    // This would require mapping the VCF to the config files
+    vcf = processInput(vcf, pattern="*.{vcf,gz}", true)
+    vep_config = processInput(vep_config, pattern="*.ini", false)
+    vcf.vcf.count()
+      .concat( vep_config.count() )
+      .map { it > 1 ? 1 : 0 }.sum()
+      .subscribe { if ( it == 2 ) exit 1, "Multiple VCF and VEP config files are currently not supported" }
+
+    // Prepare input VCF files (bgzip + tabix)
+    checkVCF(vcf)
+
+    // Split VCF by bin size
+    splitVCF(checkVCF.out, params.bin_size)
+
+    // Run VEP for each split VCF file and for each VEP config
+    runVEP(splitVCF.out.files.transpose(), vep_config)
+
+    // Merge split VCF files (creates one output VCF for each input VCF)
+    mergeVCF(runVEP.out.vcf.groupTuple())
+  emit:
+    mergeVCF.out
+}
 
 workflow {
-log.info params.chros
-  if (params.chros){
-    log.info 'Reading chromosome names from list'
-    chr_str = params.chros.toString()
-    chr = Channel.of(chr_str.split(','))
-  }
-  else if (params.chros_file) {
-    log.info 'Reading chromosome names from file'
-    chr = Channel.fromPath(params.chros_file).splitText().map{it -> it.trim()}
-  }
-  else {
-    log.info 'Computing chromosome names from input'
-    readChrVCF(params.vcf, vcf_index)
-    chr = readChrVCF.out.splitText().map{it -> it.trim()}
-  }
-  splitVCF(chr, params.vcf, vcf_index)
-  chrosVEP(splitVCF.out, params.vep_config)
-  mergeVCF(chrosVEP.out.vcfFile.collect(), chrosVEP.out.indexFile.collect())
-}  
+  vep(params.vcf, params.vep_config)
+}

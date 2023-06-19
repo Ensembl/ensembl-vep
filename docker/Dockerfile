@@ -1,3 +1,5 @@
+ARG BRANCH=release/110
+
 ###################################################
 # Stage 1 - docker container to build ensembl-vep #
 ###################################################
@@ -22,7 +24,7 @@ RUN apt-get update && apt-get -y install \
 ENV OPT /opt/vep
 ENV OPT_SRC $OPT/src
 ENV HTSLIB_DIR $OPT_SRC/htslib
-ENV BRANCH main
+ARG BRANCH
 
 # Working directory
 WORKDIR $OPT_SRC
@@ -111,10 +113,10 @@ ENV PERL5LIB_TMP $PERL5LIB:$OPT_SRC/ensembl-vep:$OPT_SRC/ensembl-vep/modules
 ENV PERL5LIB $PERL5LIB_TMP:$OPT_SRC/bioperl-live
 ENV KENT_SRC $OPT/src/kent-335_base/src
 ENV HTSLIB_DIR $OPT_SRC/htslib
-ENV MACHTYPE x86_64
 ENV DEPS $OPT_SRC
 ENV PATH $OPT_SRC/ensembl-vep:$OPT_SRC/var_c_code:$PATH
 ENV LANG_VAR en_US.UTF-8
+ARG BRANCH
 
 # Create vep user
 RUN useradd -r -m -U -d "$OPT" -s /bin/bash -c "VEP User" -p '' vep && usermod -a -G sudo vep && mkdir -p $OPT_SRC
@@ -137,7 +139,8 @@ RUN perl Makefile.PL && make && make install && rm -f Makefile* cpanfile
 
 WORKDIR $OPT_SRC
 # Install/compile more libraries
-RUN ensembl-vep/travisci/build_c.sh && \
+RUN export MACHTYPE=$(uname -m) &&\
+    ensembl-vep/travisci/build_c.sh && \
     # Remove unused Bio-DB-HTS files
     rm -rf Bio-HTS/cpanfile Bio-HTS/Build.PL Bio-HTS/Build Bio-HTS/_build Bio-HTS/INSTALL.pl && \
     # Install ensembl perl dependencies (cpanm)

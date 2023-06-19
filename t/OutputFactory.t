@@ -192,6 +192,7 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'rs142513484',
+    'Original_allele' => 'C/T',
     'Location' => '21:25585733'
   },
   'VariationFeature_to_output_hash'
@@ -202,6 +203,7 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'rs142513484',
+    'Original_allele' => 'C/T',
     'Location' => '21:25585733',
     'VARIANT_CLASS' => 'SNV',
   },
@@ -214,6 +216,7 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'rs142513484',
+    'Original_allele' => 'C/T',
     'Location' => '21:25585733',
     'SV' => ['sv1', 'sv2'],
   },
@@ -237,6 +240,7 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'indtest',
+    'Original_allele' => 'A/G',
     'Location' => '21:25607429',
     'IND' => 'dave',
     'ZYG' => 'HET',
@@ -255,6 +259,7 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'indtest',
+    'Original_allele' => 'A/G',
     'Location' => '21:25607429',
     'IND' => 'dave',
     'ZYG' => 'HET',
@@ -270,6 +275,7 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'indtest',
+    'Original_allele' => 'A/G',
     'Location' => '21:25607429',
     'IND' => 'dave',
     'ZYG' => 'HET',
@@ -284,6 +290,7 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'indtest',
+    'Original_allele' => 'A/G',
     'Location' => '21:25607429',
     'AMBIGUITY' => 'R',
     'IND' => 'dave',
@@ -1317,6 +1324,7 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'sv_dup',
+    'Original_allele' => undef,
     'Location' => '21:25606615-25606616'
   },
   'SV - VariationFeature_to_output_hash'
@@ -1470,10 +1478,10 @@ $vfoa = $of->get_all_StructuralVariationOverlapAlleles($ib->buffer->[0])->[1];
 is_deeply(
   $of->BaseStructuralVariationOverlapAllele_to_output_hash($vfoa),
   {
-    'IMPACT' => 'MODIFIER',
+    'IMPACT' => 'HIGH',
     'Consequence' => [
-      'coding_sequence_variant',
-      'feature_elongation'
+      'feature_elongation',
+      'coding_sequence_variant'
     ],
     'Allele' => 'duplication'
   },
@@ -1500,10 +1508,10 @@ $vfoa = $of->get_all_StructuralVariationOverlapAlleles($ib->buffer->[0])->[1];
 is_deeply(
   $of->StructuralVariationOverlapAllele_to_output_hash($vfoa),
   {
-    'IMPACT' => 'MODIFIER',
+    'IMPACT' => 'HIGH',
     'Consequence' => [
-      'coding_sequence_variant',
-      'feature_elongation'
+      'feature_elongation',
+      'coding_sequence_variant'
     ],
     'OverlapPC' => '0.01',
     'Feature_type' => 'Transcript',
@@ -1518,10 +1526,10 @@ $of->{allele_number} = 1;
 is_deeply(
   $of->StructuralVariationOverlapAllele_to_output_hash($vfoa),
   {
-    'IMPACT' => 'MODIFIER',
+    'IMPACT' => 'HIGH',
     'Consequence' => [
-      'coding_sequence_variant',
-      'feature_elongation'
+      'feature_elongation',
+      'coding_sequence_variant'
     ],
     'OverlapPC' => '0.01',
     'Feature_type' => 'Transcript',
@@ -1540,10 +1548,10 @@ $of->{flag_pick} = 1;
 is_deeply(
   $of->StructuralVariationOverlapAllele_to_output_hash($vfoa),  
   {
-    'IMPACT' => 'MODIFIER',
+    'IMPACT' => 'HIGH',
     'Consequence' => [
-      '3_prime_UTR_variant',
-      'feature_elongation'
+      'feature_elongation',
+      '3_prime_UTR_variant'
     ],
     'OverlapPC' => '0.01',
     'Feature_type' => 'Transcript',
@@ -1644,10 +1652,10 @@ is_deeply(
   $of->TranscriptStructuralVariationAllele_to_output_hash($vfoa, {}),
   {
     'STRAND' => -1,
-    'IMPACT' => 'MODIFIER',
+    'IMPACT' => 'HIGH',
     'Consequence' => [
-      'coding_sequence_variant',
-      'feature_elongation'
+      'feature_elongation',
+      'coding_sequence_variant'
     ],
     'OverlapPC' => '0.01',
     'Feature_type' => 'Transcript',
@@ -1698,6 +1706,7 @@ is_deeply(
       'MINIMISED' => 1,
       'Feature_type' => 'Transcript',
       'Uploaded_variation' => '21_25741665_CAGAAGAAAG/TAGAAGAAAG/C',
+      'Original_allele' => 'CAGAAGAAAG/TAGAAGAAAG/C',
       'Allele' => '-',
       'CDS_position' => '68-76',
       'Gene' => 'ENSG00000154727',
@@ -1718,6 +1727,7 @@ is_deeply(
       'MINIMISED' => 1,
       'Feature_type' => 'Transcript',
       'Uploaded_variation' => '21_25741665_CAGAAGAAAG/TAGAAGAAAG/C',
+      'Original_allele' => 'CAGAAGAAAG/TAGAAGAAAG/C',
       'Allele' => 'T',
       'CDS_position' => 67,
       'Gene' => 'ENSG00000154727',
@@ -1800,7 +1810,7 @@ SKIP: {
 
   $runner = get_annotated_buffer_runner({
     input_file => $test_cfg->create_input_file([qw(21 25606454 test G C . . .)]),
-    custom => [$test_cfg->{custom_vcf}.',test,vcf'],
+    custom => ['file=' . $test_cfg->{custom_vcf} . ',short_name=test,format=vcf'],
     quiet => 1,
     warning_file => 'STDERR',
   });
@@ -1829,7 +1839,8 @@ SKIP: {
 
   $runner = get_annotated_buffer_runner({
     input_file => $test_cfg->create_input_file([qw(21 25606454 test G C . . .)]),
-    custom => [$test_cfg->{custom_vcf}.',test,vcf', $test_cfg->{custom_vcf_2}.',test,vcf'],
+    custom => ['file=' . $test_cfg->{custom_vcf} . ',short_name=test,format=vcf',
+               'file=' . $test_cfg->{custom_vcf_2} . ',short_name=test,format=vcf'],
     quiet => 1,
     warning_file => 'STDERR',
   });

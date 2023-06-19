@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 
 /* 
- * Script to merge chromosome-wise VCF files into single VCF file
+ * Script to merge VCF files into a single file
  */
 
 nextflow.enable.dsl=2
@@ -17,7 +17,7 @@ params.cpus = 1
 
 process mergeVCF {
   /*
-  Function to merge chromosome-wise VCF files into single VCF file
+  Merge VCF files into a single file
 
   Returns
   -------
@@ -31,20 +31,21 @@ process mergeVCF {
     mode:'move'
     
   cpus params.cpus
-  container "${params.singularity_dir}/bcftools.sif"
-
+  label 'bcftools'
+  cache 'lenient'
    
   input:
-  path(vcfFiles)
-  path(indexFiles)
+  tuple val(original), path(vcfFiles), path(indexFiles)
 
   output:
-  path("${ mergedVCF }.vcf.gz*")
+  path("*.vcf.gz*")
 
   script: 
   """
-  bcftools concat ${ vcfFiles } -Oz -o temp-${ mergedVCF}.vcf.gz
-  bcftools sort -Oz temp-${ mergedVCF}.vcf.gz -o ${ mergedVCF}.vcf.gz 
-  bcftools  index -t ${ mergedVCF}.vcf.gz
+  mkdir -p temp
+  out=${ original }_vep_${ mergedVCF }.vcf.gz
+  sorted_vcf=\$(echo ${vcfFiles} | xargs -n1 | sort | xargs)
+  bcftools concat --no-version -a \${sorted_vcf} -Oz -o \${out}
+  bcftools index -t \${out}
   """
 }

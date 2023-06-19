@@ -71,7 +71,8 @@ sub default_options {
     dump_vep_data_dir       => $self->o('data_dir') . '/dump_vep',
     
     # temporary space
-    tmp_dir                 => catdir('/hps/nobackup/flicek/ensembl', $ENV{'USER'}, $self->o('pipeline_name'), 'vepdump'),
+    tmp_base_dir            => '/hps/nobackup/flicek/ensembl/variation',
+    tmp_dir                 => catdir($self->o('tmp_base_dir'), $ENV{'USER'}, $self->o('pipeline_name'), 'vepdump'),
         
     # dump databases of this version number
     ensembl_release => undef,

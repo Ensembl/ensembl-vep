@@ -468,6 +468,29 @@ is_deeply($vf, bless( {
   'seq_region_start' => 25587759
 }, 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature fuzzy');
 
+## test deletion and deletion warnings
+
+$vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $cfg,
+  file => $test_cfg->create_input_file([qw(21 25587758 sv_del T <DEL> . . SVLEN=11)]),
+  valid_chromosomes => [21]
+})->next();
+delete($vf->{adaptor}); delete($vf->{_line});
+is_deeply($vf, bless( {
+  'outer_end' => 25587769,
+  'chr' => '21',
+  'inner_end' => 25587769,
+  'outer_start' => 25587759,
+  'end' => 25587769,
+  'seq_region_end' => 25587769,
+  'inner_start' => 25587759,
+  'strand' => 1,
+  'class_SO_term' => 'deletion',
+  'variation_name' => 'sv_del',
+  'start' => 25587759,
+  'seq_region_start' => 25587759
+}, 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature del');
+
 no warnings 'once';
 open(SAVE, ">&STDERR") or die "Can't save STDERR\n"; 
 
@@ -476,10 +499,10 @@ open STDERR, '>', \$tmp;
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, warning_file => 'STDERR'}),
-  file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DEL> . . .)]),
+  file => $test_cfg->create_input_file([qw(21 25587758 sv_del T <DEL> . . .)]),
   valid_chromosomes => [21]
 })->next();
-ok($tmp =~ /VCF line.+looks incomplete/, 'StructuralVariationFeature del without end or length');
+like($tmp, qr/VCF line.+looks incomplete/, 'StructuralVariationFeature del without end or length');
 
 open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
