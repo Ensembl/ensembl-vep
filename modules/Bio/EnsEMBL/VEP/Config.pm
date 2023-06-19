@@ -190,6 +190,7 @@ our @VEP_PARAMS = (
   'hgvs',                    # add HGVS names to extra column
   'hgvsg',                   # add HGVS g. also
   'hgvsg_use_accession',     # force HGVSg to return on chromosome accession instead of input chr name
+  'hgvsp_use_prediction',    # force HGVSp to return the notation in predicted format
   'shift_hgvs=i',            # disable/enable 3-prime shifting of HGVS indels to comply with standard
   'ambiguous_hgvs',          # allow input HGVSp. to resolve to many input variants
   'sift=s',                  # SIFT predictions
