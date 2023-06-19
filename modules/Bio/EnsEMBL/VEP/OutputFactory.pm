@@ -201,6 +201,7 @@ sub new {
     hgvsp
     hgvsg
     hgvsg_use_accession
+    hgvsp_use_prediction
     spdi
     sift
     ga4gh_vrs
@@ -1621,7 +1622,7 @@ sub TranscriptVariationAllele_to_output_hash {
 
     if($self->{hgvsp}) {
       $vfoa->{remove_hgvsp_version} = 1 if $self->{remove_hgvsp_version};
-      my $hgvs_p = $vfoa->hgvs_protein;
+      my $hgvs_p = $vfoa->hgvs_protein(undef, $self->{hgvsp_use_prediction});
       my $offset = $vfoa->hgvs_offset;
 
       # URI encode "="
