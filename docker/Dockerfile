@@ -1,4 +1,4 @@
-ARG BRANCH=main
+ARG BRANCH=release/110
 
 ###################################################
 # Stage 1 - docker container to build ensembl-vep #
