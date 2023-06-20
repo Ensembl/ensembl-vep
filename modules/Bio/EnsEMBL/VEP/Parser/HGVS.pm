@@ -109,6 +109,28 @@ sub new {
 }
 
 
+=head2 validate_line
+
+  Example    : $valid = $self->validate_line();
+  Description: Check if input line can be read using this format.
+  Returntype : bool
+  Exceptions : none
+  Caller     : $self->SUPER::detect_format()
+  Status     : Stable
+
+=cut
+
+sub validate_line {
+  my $self = shift;
+  my @line = @_;
+
+  return (
+    scalar @line == 1 &&
+      $line[0] =~ /^([^\:]+)\:.*?([cgmrp]?)\.?([\*\-0-9]+.*)$/i
+  );
+}
+
+
 =head2 parser
 
   Example    : $io_parser = $parser->parser();
@@ -166,6 +188,7 @@ sub create_VariationFeatures {
   my $vfa = $self->get_adaptor('variation', 'VariationFeature');
   my $vfs = [];
   my @errors;
+  my $max_size = $self->param('max_sv_size') || 5000;
 
   foreach my $core_group(@core_groups) {
     next if (($hgvs =~ /NM_/ || $hgvs =~ /XM_/) && $core_group eq 'core');
@@ -180,6 +203,7 @@ sub create_VariationFeatures {
           -slice_adaptor      => $sa,
           -transcript_adaptor => $ta,
           -replace_ref        => $self->{lookup_ref} || 0,
+          -max_size           => $max_size,
         );
       }
       else {
@@ -188,6 +212,7 @@ sub create_VariationFeatures {
           -slice_adaptor      => $sa,
           -transcript_adaptor => $ta,
           -replace_ref        => $self->{lookup_ref} || 0,
+          -max_size           => $max_size,
         );
       }
     };
@@ -199,10 +224,14 @@ sub create_VariationFeatures {
   }
 
   unless(@$vfs || scalar(@errors) == 0) {
-    my %known_messages_hash = ('MSG: Region requested must be smaller than 5kb' => 0);
+    my %known_messages_hash = ("MSG: Region requested must be smaller than $max_size" => 0);
     
     my @grep_names = grep(/^MSG:/, split(/\n/, $errors[0]));
-    my @error_message = exists( $known_messages_hash{$grep_names[0]}) ? @grep_names : @errors;
+    my @error_message = @errors;
+    if (exists( $known_messages_hash{$grep_names[0]})) {
+      $grep_names[0] .= ". This value can be adjusted with --max_sv_size.";
+      @error_message = @grep_names;
+    }
     
     $self->warning_msg("WARNING: Unable to parse HGVS notation \'$hgvs\'\n".join("\n", @error_message));
     return $self->create_VariationFeatures;

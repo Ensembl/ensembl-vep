@@ -70,6 +70,7 @@ package Bio::EnsEMBL::VEP::AnnotationSource::File::VCF;
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
+use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
 use Bio::EnsEMBL::Variation::Utils::Sequence qw(get_matched_variant_alleles);
 use Bio::EnsEMBL::IO::Parser::VCF4Tabix;
 
@@ -328,26 +329,44 @@ sub _record_overlaps_VF {
 
   # we can use the superclass method if overlap type
   return $self->SUPER::_record_overlaps_VF(@_)
-    if $self->type ne 'exact' || ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature';
-
-  # exact more difficult, we need to check each allele
+    if ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature';
+  
+  my $type = $self->type();
   my $parser = $self->parser;
 
-  my $matches = get_matched_variant_alleles(
-    {
-      ref    => $vf->ref_allele_string,
-      alts   => $vf->alt_alleles,
-      pos    => $vf->{start},
-      strand => $vf->strand
-    },
-    {
-      ref  => $parser->get_reference,
-      alts => $parser->get_alternatives,
-      pos  => $parser->get_raw_start,
-    }
-  );
+  if ($type eq 'overlap') {
+    my $parser_start = $parser->get_raw_start;
+    my $parser_end = $parser_start + length($parser->get_raw_reference) - 1;
 
-  return @$matches ? $matches : 0;
+    # account for insertions in Ensembl world where s = e+1
+    my ($vs, $ve) = ($vf->{start}, $vf->{end});
+    ($vs, $ve) = ($ve, $vs) if $vs > $ve;
+    my $length = $ve - $vs + 1;
+  
+    my @overlap_start = sort { $a <=> $b } ($vs, $parser_start);
+    my @overlap_end   = sort { $a <=> $b } ($ve, $parser_end);
+  
+    my $overlap_percentage = sprintf("%.3f", 100 * (1+ $overlap_end[0]  - $overlap_start[1])/ $length);
+  
+    return overlap($parser_start, $parser_end, $vs, $ve), $overlap_percentage;
+  }
+  elsif($type eq 'exact') {
+    my $matches = get_matched_variant_alleles(
+      {
+        ref    => $vf->ref_allele_string,
+        alts   => $vf->alt_alleles,
+        pos    => $vf->{start},
+        strand => $vf->strand
+      },
+      {
+        ref  => $parser->get_reference,
+        alts => $parser->get_alternatives,
+        pos  => $parser->get_raw_start,
+      }
+    );
+
+    return @$matches ? $matches : 0;
+  }
 }
 
 

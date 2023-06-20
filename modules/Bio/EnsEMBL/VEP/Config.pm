@@ -166,6 +166,7 @@ our @VEP_PARAMS = (
   'stats_html',              # write stats as html
   'no_stats',                # don't write stats file
   'warning_file=s',          # file to write warnings to
+  'skipped_variants_file=s', # file name to log skipped variants (not logged otherwise)
   'force_overwrite|force',   # force overwrite of output file if already exists
   'terms|t=s',               # consequence terms to use e.g. NCBI, SO
   'coding_only',             # only return results for consequences in coding regions
@@ -189,6 +190,7 @@ our @VEP_PARAMS = (
   'hgvs',                    # add HGVS names to extra column
   'hgvsg',                   # add HGVS g. also
   'hgvsg_use_accession',     # force HGVSg to return on chromosome accession instead of input chr name
+  'hgvsp_use_prediction',    # force HGVSp to return the notation in predicted format
   'shift_hgvs=i',            # disable/enable 3-prime shifting of HGVS indels to comply with standard
   'ambiguous_hgvs',          # allow input HGVSp. to resolve to many input variants
   'sift=s',                  # SIFT predictions

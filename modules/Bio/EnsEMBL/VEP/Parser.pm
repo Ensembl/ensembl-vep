@@ -416,69 +416,38 @@ sub detect_format {
     next unless @data;
 
     # region chr21:10-10:1/A
-    if (
-      scalar @data == 1 &&
-      $data[0] =~ /^[^\:]+\:\d+\-\d+(\:[\-\+]?1)?[\/\:](ins|dup|del|[ACGTN-]+)$/i
-    ) {
+    if ( $self->Bio::EnsEMBL::VEP::Parser::Region::validate_line(@data) ) {
       $format = 'region';
     }
 
     # SPDI: NC_000016.10:68684738:G:A
-    elsif (
-      scalar @data == 1 &&
-      $data[0] =~ /^(.*?\:){2}([^\:]+|)$/i
-    ) {
+    elsif ($self->Bio::EnsEMBL::VEP::Parser::SPDI::validate_line(@data) ) {
       $format = 'spdi';
     }
 
     # CAID: CA9985736
-    elsif (
-      scalar @data == 1 &&
-      $data[0] =~ /^CA\d{1,}$/i
-    ) {
+    elsif ( $self->Bio::EnsEMBL::VEP::Parser::CAID::validate_line(@data) ) {
       $format = 'caid';
     }
 
     # HGVS: ENST00000285667.3:c.1047_1048insC
-    elsif (
-      scalar @data == 1 &&
-      $data[0] =~ /^([^\:]+)\:.*?([cgmrp]?)\.?([\*\-0-9]+.*)$/i
-    ) {
+    elsif ( $self->Bio::EnsEMBL::VEP::Parser::HGVS::validate_line(@data) ) {
       $format = 'hgvs';
     }
 
     # variant identifier: rs123456
-    elsif (
-      scalar @data == 1
-    ) {
+    elsif ( $self->Bio::EnsEMBL::VEP::Parser::ID::validate_line(@data) ) {
       $format = 'id';
     }
 
     # VCF: 20  14370  rs6054257  G  A  29  0  NS=58;DP=258;AF=0.786;DB;H2  GT:GQ:DP:HQ
-    elsif (
-      $data[0] =~ /(chr)?\w+/ &&
-      $data[1] =~ /^\d+$/ &&
-      $data[3] && $data[3] =~ /^[ACGTN\-\.]+$/i &&
-      $data[4]
-    ) {
-
+    elsif ( $self->Bio::EnsEMBL::VEP::Parser::VCF::validate_line(@data) ) {
       # do some more thorough checking on the ALTs
-      my $ok = 1;
-
-      foreach my $alt(split(',', $data[4])) {
-        $ok = 0 unless $alt =~ /^[\.ACGTN\-\*]+$|^(\<[\w\:\*]+\>)$/i;
-      }
-
-      $format = 'vcf' if $ok;
+      $format = 'vcf' if $self->Bio::EnsEMBL::VEP::Parser::VCF::validate_alts($data[4]);
     }
 
     # ensembl: 20  14370  14370  A/G  +
-    elsif (
-      $data[0] =~ /\w+/ &&
-      $data[1] =~ /^\d+$/ &&
-      $data[2] && $data[2] =~ /^\d+$/ &&
-      $data[3] && $data[3] =~ /(ins|dup|del)|([ACGTN-]+\/[ACGTN-]+)/i
-    ) {
+    elsif ( $self->Bio::EnsEMBL::VEP::Parser::VEP_input::validate_line(@data) ) {
       $format = 'ensembl';
     }
 
@@ -536,16 +505,16 @@ sub validate_vf {
 
   # sanity checks
   unless(looks_like_number($vf->{start}) && looks_like_number($vf->{end})) {
-    $self->warning_msg("WARNING: Start ".$vf->{start}." or end ".$vf->{end}." coordinate invalid on line ".$self->line_number);
+    $self->skipped_variant_msg(
+      "Invalid start '" . $vf->{start} . "' or end '" . $vf->{end} . "' coordinate"
+    );
     return 0;
   }
 
   # check start <= end + 1
   if($vf->{start} > $vf->{end} + 1) {
-    $self->warning_msg(
-      "WARNING: start > end+1 : (START=".$vf->{start}.
-      ", END=".$vf->{end}.
-      ") on line ".$self->line_number."\n"
+    $self->skipped_variant_msg(
+      "start > end+1 : (START=" . $vf->{start} . ", END=" . $vf->{end} . ")"
     );
     return 0;
   }
@@ -570,8 +539,9 @@ sub validate_vf {
 
         # could not transform
         else {
-          $self->warning_msg(
-            "WARNING: Chromosome ".$vf->{chr}." not found in annotation sources or synonyms and could not transform to toplevel on line ".$self->line_number
+          $self->skipped_variant_msg(
+            "Chromosome " . $vf->{chr} . 
+              " not found in annotation sources or synonyms and could not transform to toplevel"
           );
           return 0;
         }
@@ -579,8 +549,8 @@ sub validate_vf {
 
       # no slice
       else {
-        $self->warning_msg(
-          "WARNING: Could not fetch slice for chromosome ".$vf->{chr}." on line ".$self->line_number
+        $self->skipped_variant_msg(
+          "Could not fetch slice for chromosome " . $vf->{chr}
         );
         return 0;
       }
@@ -588,8 +558,9 @@ sub validate_vf {
 
     # offline, can't transform
     else {
-      $self->warning_msg(
-        "WARNING: Chromosome ".$vf->{chr}." not found in annotation sources or synonyms on line ".$self->line_number.". \nChromosome ".$vf->{chr}. " does not overlap any features"
+      $self->skipped_variant_msg(
+        "Chromosome " . $vf->{chr} . " not found in annotation sources or synonyms; " .
+          "chromosome " . $vf->{chr} . " does not overlap any features"
       );
       return 0;
     }
@@ -602,19 +573,19 @@ sub validate_vf {
   $vf->{allele_string} =~ tr/[a-z]/[A-Z]/;
 
   unless($vf->{allele_string} =~ /([ACGT-]+\/*)+/) {
-    $self->warning_msg("WARNING: Invalid allele string ".$vf->{allele_string}." on line ".$self->line_number." or possible parsing error\n");
+    $self->skipped_variant_msg(
+      "Invalid allele string " . $vf->{allele_string} . " or possible parsing error"
+    );
     return 0;
   }
 
   # insertion should have start = end + 1
   if($vf->{allele_string} =~ /^\-\// && $vf->{start} != $vf->{end} + 1) {
     my $variant_name = (defined $vf->name) ? "for variant (".$vf->name.") " : "";
-    $self->warning_msg(
-      "WARNING: Alleles look like an insertion (".
-      $vf->{allele_string}.
+    $self->skipped_variant_msg(
+      "Alleles look like an insertion (" . $vf->{allele_string} .
       ") but coordinates are not start = end + 1 (START=".
-      $vf->{start}.", END=".$vf->{end}.
-      ") ".$variant_name."on line ".$self->line_number."\n"
+      $vf->{start} . ", END=" . $vf->{end} . ") " . $variant_name
     );
     return 0;
   }
@@ -631,10 +602,10 @@ sub validate_vf {
   my $alt_allele = $alleles[-1];
 
   if($ref_allele =~ /^[ACGT]*$/ && ($vf->{end} - $vf->{start}) + 1 != length($ref_allele)) {
-    $self->warning_msg(
-       "WARNING: Length of reference allele (".$ref_allele.
-       " length ".length($ref_allele).") does not match co-ordinates ".$vf->{start}."-".$vf->{end}.
-       " on line ".$self->line_number
+    $self->skipped_variant_msg(
+       "Length of reference allele (" . $ref_allele . " length " .
+         length($ref_allele) . ") does not match coordinates " .
+         $vf->{start} . "-" . $vf->{end}
     );
     return 0;
   }
@@ -653,7 +624,10 @@ sub validate_vf {
       my $slice_ref_allele = $self->_get_ref_allele($vf);
 
       if(!defined($slice_ref_allele)) {
-        $self->warning_msg("WARNING: Could not fetch sub-slice from ".$vf->{chr}.":".$vf->{start}."\-".$vf->{end}."\(".$vf->{strand}."\) on line ".$self->line_number);
+        $self->skipped_variant_msg(
+          "Could not fetch sub-slice from " . $vf->{chr} . ":" . $vf->{start} .
+            "\-" . $vf->{end} . "\(" . $vf->{strand} . "\)"
+        );
       }
       if(defined($slice_ref_allele)) {
         if (uc($slice_ref_allele) ne uc($ref_allele)){
@@ -668,11 +642,10 @@ sub validate_vf {
 
     if(!$ok) {
       $vf->{check_ref_failed} = 1;
-      $self->warning_msg(
-        "WARNING: Specified reference allele $ref_allele ".
-        "does not match Ensembl reference allele".
-        ($slice_ref_allele ? " $slice_ref_allele" : "").
-        " on line ".$self->line_number
+      $self->skipped_variant_msg(
+        "Specified reference allele $ref_allele " .
+        "does not match Ensembl reference allele" .
+        ($slice_ref_allele ? " $slice_ref_allele" : "")
       );
       return 0;
     }
@@ -682,7 +655,9 @@ sub validate_vf {
     my $slice_ref_allele = $ref_allele eq '' ? '' : $self->_get_ref_allele($vf);
 
     if(!defined($slice_ref_allele)) {
-      $self->warning_msg("WARNING: Could not reference allele for ".$vf->{chr}.":".$vf->{start}."\-".$vf->{end}."\(".$vf->{strand}."\) on line ".$self->line_number);
+      $self->skipped_variant_msg(
+        "Could not fetch reference allele for " . $vf->{chr} . ":" .
+          $vf->{start} . "\-" . $vf->{end} . "\(" . $vf->{strand} . "\)");
       return 0;
     }
 
@@ -692,6 +667,49 @@ sub validate_vf {
   return 1;
 }
 
+=head2 get_SO_term
+
+  Arg 1      : string $type
+  Example    : $ref_allele = $parser->get_SO_term($type);
+  Description: Returns the Sequence Ontology term based on a given variant type.
+               Returns undef if failed to fetch the appropriate term.
+  Returntype : string
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
+sub get_SO_term {
+  my $self = shift;
+  my $type = shift;
+  my $abbrev;
+
+  if ($type =~ /\<CN/i) {
+    # ALT: "<CN0>", "<CN0>,<CN2>,<CN3>" "<CN2>" => SVTYPE: DEL, CNV, DUP
+    $abbrev = "CNV";
+    $abbrev = "DEL" if $type =~ /\<CN=?0\>/;
+    $abbrev = "DUP" if $type =~ /\<CN=?2\>/;
+  } elsif ($type =~ /^\<|^\[|\]$|\>$/) {
+    $abbrev = $type;
+    $abbrev =~ s/\<|\>//g;
+    $abbrev =~ s/\:.+//g;
+  } else {
+    $abbrev = $type;
+  }
+
+  my %terms = (
+    INS  => 'insertion',
+    DEL  => 'deletion',
+    TDUP => 'tandem_duplication',
+    DUP  => 'duplication',
+    CNV  => 'copy_number_variation',
+    INV  => 'inversion',
+    BND  => 'breakpoint'
+  );
+
+  return $terms{$abbrev};
+}
 
 =head2 get_SO_term
   Arg 1      : string $type

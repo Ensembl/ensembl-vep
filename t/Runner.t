@@ -198,6 +198,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'hgvsp' => undef,
   'hgvsg' => undef,
   'hgvsg_use_accession' => undef,
+  'hgvsp_use_prediction' => undef,
   'remove_hgvsp_version' => undef,
   'spdi' => undef,
   'merged' => undef,
@@ -246,7 +247,7 @@ is_deeply(
       3_prime_UTR_variant
       1122
       - - - - -
-      IMPACT=MODIFIER;STRAND=-1
+      IMPACT=MODIFIER;STRAND=-1;Original_allele=C/T
     )),
     join("\t", qw(
       rs142513484
@@ -262,7 +263,7 @@ is_deeply(
       A/T
       Gca/Aca
       -
-      IMPACT=MODERATE;STRAND=-1
+      IMPACT=MODERATE;STRAND=-1;Original_allele=C/T
     )),
     join("\t", qw(
       rs142513484
@@ -278,7 +279,7 @@ is_deeply(
       -
       -
       -
-      IMPACT=MODIFIER;DISTANCE=2407;STRAND=-1
+      IMPACT=MODIFIER;DISTANCE=2407;STRAND=-1;Original_allele=C/T
     )),
   ],
   '_buffer_to_output'
@@ -298,7 +299,7 @@ is(
     3_prime_UTR_variant
     1122
     - - - - -
-    IMPACT=MODIFIER;STRAND=-1
+    IMPACT=MODIFIER;STRAND=-1;Original_allele=C/T
   )),
   'next_output_line'
 );
@@ -379,7 +380,9 @@ SKIP: {
   ok($stdout, 'get_output_file_handle - compressed stdout - wrote OK');
 }
 
-# stats file
+## stats file
+#############
+
 $runner = Bio::EnsEMBL::VEP::Runner->new({%$cfg_hash, output_file => $test_cfg->{user_file}.'.out'});
 is(ref($runner->get_stats_file_handle('txt')), 'FileHandle', 'get_stats_file_handle - txt ref');
 ok(-e $test_cfg->{user_file}.'.out_summary.txt', 'get_stats_file_handle - txt file exists');
@@ -417,8 +420,81 @@ unlink($test_cfg->{user_file}.'.html');
 unlink($test_cfg->{user_file}.'_stats.txt');
 
 
+## skipped variants file handle
+###############################
 
-# run method
+my $skipped_input = qq{21\t2642609\t.\tG\tA
+21\t2827694\trs2376870\tCGTGGATGCGGGGAC\tC\tSVTYPE=DEL;END=2827708
+21\tpos123\t.\tG\tA
+21\t230710048\trs699\tA\tG
+chr402\t89828156\trs201106962\tA\tC
+21\t23873048\trs867018739\tZ\tY
+21\t23873048\trs867018739\tC\tT
+21\t804947\trs569478349\tG\tC
+21\t39735004\t.\tA\tC
+21\t39735057\trs752685201\tG\tT
+21\t39735057\trs752685201\tX\tT
+21\t39737938\trs753930790\tG\tA
+21\t45687010\trs1964272\tG\tA};
+
+my $skipped_variants_file = $test_cfg->{user_file} . '_skipped.txt';
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  skipped_variants_file => $skipped_variants_file,
+  input_data => $skipped_input
+});
+is(ref($runner->get_skipped_variants_file_handle()), 'FileHandle', 'get_skipped_variants_file_handle');
+ok(-e $skipped_variants_file, 'get_skipped_variants_file_handle - file created');
+
+# throw error if file already exists
+throws_ok {$runner->get_skipped_variants_file_handle()} qr/Skipped variants file .+ already exists/,
+          'get_skipped_variants_file_handle - fail if files already exists';
+
+# overwrite existing file
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  format => 'vcf',
+  skipped_variants_file => $skipped_variants_file,
+  force_overwrite => 1,
+  input_data => $skipped_input
+});
+ok(-e $skipped_variants_file, 'get_skipped_variants_file_handle - force overwrite');
+
+# test run
+no warnings 'once';
+open(SAVE, ">&STDERR") or die "Can't save STDERR\n";
+
+my $tmp;
+close STDERR;
+open STDERR, '>', \$tmp;
+ok($runner->run, 'skipped_variants_file - run');
+
+like($tmp, qr/WARNING/, 'skipped_variants_file - warnings');
+open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
+
+open IN, $skipped_variants_file;
+my @skipped_variants_lines = <IN>;
+close IN;
+is(scalar @skipped_variants_lines, 4, 'skipped_variants_file - count lines');
+
+is_deeply(
+  [grep {!/^\#/} @skipped_variants_lines],
+  [
+    "[VEP skipped the following variants from *Bio::EnsEMBL::VEP::Runner::IN]\n",
+    "Line 3    	21 pos123 . G A                         	Invalid start 'pos123' or end '0' coordinate\n",
+    "Line 5    	chr402 89828156 rs201106962 A C         	Chromosome chr402 not found in annotation sources or synonyms; chromosome chr402 does not overlap any features\n",
+    "Line 6    	21 23873048 rs867018739 Z Y             	Invalid allele string Z/Y or possible parsing error\n"
+  ],
+  'skipped_variants_file - lines content'
+);
+
+# clean up
+unlink($skipped_variants_file);
+
+
+## run method
+#############
+
 $runner = Bio::EnsEMBL::VEP::Runner->new({
   %$cfg_hash,
   output_file => $test_cfg->{user_file}.'.out',
@@ -438,9 +514,9 @@ is(scalar @tmp_lines, 41, 'run - count lines');
 is_deeply(
   [grep {!/^\#/} @tmp_lines],
   [
-    "rs142513484\t21:25585733\tT\tENSG00000154719\tENST00000307301\tTranscript\t3_prime_UTR_variant\t1122\t-\t-\t-\t-\t-\tIMPACT=MODIFIER;STRAND=-1\n",
-    "rs142513484\t21:25585733\tT\tENSG00000154719\tENST00000352957\tTranscript\tmissense_variant\t1033\t991\t331\tA/T\tGca/Aca\t-\tIMPACT=MODERATE;STRAND=-1\n",
-    "rs142513484\t21:25585733\tT\tENSG00000260583\tENST00000567517\tTranscript\tupstream_gene_variant\t-\t-\t-\t-\t-\t-\tIMPACT=MODIFIER;DISTANCE=2407;STRAND=-1\n",
+    "rs142513484\t21:25585733\tT\tENSG00000154719\tENST00000307301\tTranscript\t3_prime_UTR_variant\t1122\t-\t-\t-\t-\t-\tIMPACT=MODIFIER;STRAND=-1;Original_allele=C/T\n",
+    "rs142513484\t21:25585733\tT\tENSG00000154719\tENST00000352957\tTranscript\tmissense_variant\t1033\t991\t331\tA/T\tGca/Aca\t-\tIMPACT=MODERATE;STRAND=-1;Original_allele=C/T\n",
+    "rs142513484\t21:25585733\tT\tENSG00000260583\tENST00000567517\tTranscript\tupstream_gene_variant\t-\t-\t-\t-\t-\t-\tIMPACT=MODIFIER;DISTANCE=2407;STRAND=-1;Original_allele=C/T\n",
   ],
   'run - lines content'
 );
@@ -591,7 +667,6 @@ is_deeply(
 no warnings 'once';
 open(SAVE, ">&STDERR") or die "Can't save STDERR\n"; 
 
-my $tmp;
 close STDERR;
 open STDERR, '>', \$tmp;
 
@@ -1091,6 +1166,7 @@ SKIP: {
         'end' => 25585733,
         'seq_region_name' => '21',
         'strand' => 1,
+        'original_allele' => 'C/T',
         'transcript_consequences' => [
           {
             'gene_id' => 'ENSG00000154719',
@@ -1213,6 +1289,7 @@ SKIP: {
          "allele_string" => "C/A",
          "assembly_name" => "GRCh38",
          "end" => 10524654,
+         "original_allele" => 'C/A',
          "id" => ".",
          "input" =>  "21 10524654 . C A",
          "intergenic_consequences" => [
