@@ -69,6 +69,7 @@ package Bio::EnsEMBL::VEP::OutputFactory;
 
 use base qw(Bio::EnsEMBL::VEP::BaseVEP);
 
+use File::Basename;
 use Scalar::Util qw(looks_like_number);
 use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
@@ -2294,8 +2295,8 @@ sub get_custom_headers {
     my @flatten_header = get_flatten(\@headers);
     my %pos = map { $flatten_header[$_]=~/o/?($flatten_header[$_]=>$_):() } 0..$#flatten_header if @flatten_header;
     
-    my $masked_file = $custom->{file};
-    $masked_file =~ s/(\/[\w-]+?)+\//\[PATH\]\//g;
+    my $masked_file = "[PATH]/" . (basename $custom->{file});
+    # $masked_file =~ s/(\/[\w-]+?)+\//\[PATH\]\//g;
     
     if (grep { /^$custom->{short_name}$/ }  @flatten_header){
       my $pos = $pos{$custom->{short_name}} / 2;
