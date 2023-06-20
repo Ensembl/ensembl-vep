@@ -17,6 +17,7 @@ use warnings;
 
 use Test::More;
 use Test::Exception;
+use File::Basename;
 use FindBin qw($Bin);
 use lib $Bin;
 use VEPTestingConfig;
@@ -1823,7 +1824,7 @@ SKIP: {
     [
       [
         'test',
-        $test_cfg->{custom_vcf}
+        "[PATH]/" . (basename $test_cfg->{custom_vcf})
       ]
     ],
     'get_custom_headers'
@@ -1853,7 +1854,7 @@ SKIP: {
     [
       [
         'test',
-        $test_cfg->{custom_vcf} . ',' . $test_cfg->{custom_vcf_2}
+        "[PATH]/" . (basename $test_cfg->{custom_vcf}) . ',' . "[PATH]/" . (basename $test_cfg->{custom_vcf_2})
       ]
     ],
     'get_multiple_custom_headers'
