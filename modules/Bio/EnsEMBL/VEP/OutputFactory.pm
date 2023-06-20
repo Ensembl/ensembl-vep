@@ -2295,8 +2295,8 @@ sub get_custom_headers {
     my @flatten_header = get_flatten(\@headers);
     my %pos = map { $flatten_header[$_]=~/o/?($flatten_header[$_]=>$_):() } 0..$#flatten_header if @flatten_header;
     
-    my $masked_file = "[PATH]/" . (basename $custom->{file});
-    # $masked_file =~ s/(\/[\w-]+?)+\//\[PATH\]\//g;
+    # To prevent printing internal directory mask filepath
+    my $masked_file = $custom->{file} =~ /\// ? "[PATH]/" . (basename $custom->{file}) : $custom->{file};
     
     if (grep { /^$custom->{short_name}$/ }  @flatten_header){
       my $pos = $pos{$custom->{short_name}} / 2;
