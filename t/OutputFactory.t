@@ -1325,7 +1325,7 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'sv_dup',
-    'Original_allele' => undef,
+    'Original_allele' => "duplication",
     'Location' => '21:25606615-25606616'
   },
   'SV - VariationFeature_to_output_hash'
