@@ -311,6 +311,25 @@ sub get_features_by_regions_cached {
 }
 
 
+sub _check_overlap {
+  # Check overlap of $elem around $min_max region 
+  my $self = shift;
+  my $elem = shift;
+  my $min_max = shift;
+  my $up_down_size = shift;
+
+  # if there is no chromosome info, return first key of $min_max
+  my $chr = exists $elem->{slice} ? $elem->{slice}->{seq_region_name} : $elem->{chr};
+  $chr = defined $chr ? $self->get_source_chr_name($chr) : (keys %$min_max)[0];
+
+  my $check = exists $min_max->{$chr} &&
+    overlap($elem->{start}, $elem->{end},
+            @{$min_max->{$chr}}[0] - $up_down_size,
+            @{$min_max->{$chr}}[1] + $up_down_size);
+  return $check;
+}
+
+
 =head2 filter_features_by_min_max
 
   Arg 1      : arrayref $features
@@ -334,23 +353,6 @@ sub filter_features_by_min_max {
   my $min_max = shift;
 
   my $up_down_size = defined($self->{up_down_size}) ? $self->{up_down_size} : $self->up_down_size();
-
-  sub _check_overlap {
-    my $self = shift;
-    my $elem = shift;
-    my $min_max = shift;
-    my $up_down_size = shift;
-
-    # if there is no chromosome info, return first key of $min_max
-    my $chr = exists $elem->{slice} ? $elem->{slice}->{seq_region_name} : $elem->{chr};
-    $chr = defined $chr ? $self->get_source_chr_name($chr) : (keys %$min_max)[0];
-
-    my $check = exists $min_max->{$chr} &&
-      overlap($elem->{start}, $elem->{end},
-              @{$min_max->{$chr}}[0] - $up_down_size,
-              @{$min_max->{$chr}}[1] + $up_down_size);
-    return $check;
-  }
 
   return [
     grep { $self->_check_overlap($_, $min_max, $up_down_size) } @$features
