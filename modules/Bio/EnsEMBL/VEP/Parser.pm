@@ -701,7 +701,7 @@ sub get_SO_term {
     DUP  => 'duplication',
     CNV  => 'copy_number_variation',
     INV  => 'inversion',
-    BND  => 'breakend'
+    BND  => 'chromosome_breakpoint'
   );
 
   return $terms{$abbrev};
