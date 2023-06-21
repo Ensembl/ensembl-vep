@@ -149,7 +149,7 @@ sub validate_alts {
 
   my $ok = 1;
   foreach my $alt(split(',', $alts)) {
-    $ok = 0 unless $alt =~ /^[\.ACGTN\-\*]+$|^(\<[\w\:\*]+\>)$/i;
+    $ok = 0 unless $alt =~ /^[\.ACGTN\-\*]+$|^(\<[\w\:\*\=]+\>)$|^[\[\w\:\]]+$/i;
   }
   return $ok;
 }
