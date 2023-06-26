@@ -511,11 +511,9 @@ sub _record_overlaps_VF {
     return overlap($ref_start, $ref_end, $vs, $ve), $overlap_percentage;
   }
   elsif($type eq 'exact') {
-    my $overlap_percentage = 100;
-    return (
-      $parser->get_start == $vf->{start} && $parser->get_end == $vf->{end},
-      $overlap_percentage
-    );
+    my $match = $parser->get_start == $vf->{start} && $parser->get_end == $vf->{end};
+    my $overlap_percentage = $match ? 100 : 0;
+    return ( $match, $overlap_percentage );
   }
 }
 
