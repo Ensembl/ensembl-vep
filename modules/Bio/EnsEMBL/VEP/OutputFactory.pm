@@ -876,7 +876,6 @@ sub VariationFeature_to_output_hash {
 
   my $hash = {
     Uploaded_variation  => $vf->variation_name ne '.' ? $vf->variation_name : ($vf->{original_chr} || $vf->{chr}).'_'.$vf->{start}.'_'.($vf->{allele_string} || $vf->{class_SO_term}),
-    Original_allele     => ($vf->{original_allele_string} || $vf->{allele_string}),
     Location            => ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start}, $vf->{end}),
   };
 
@@ -928,6 +927,7 @@ sub VariationFeature_to_output_hash {
 
   # minimised?
   $hash->{MINIMISED} = 1 if $vf->{minimised};
+  
   
   if(ref($vf) eq 'Bio::EnsEMBL::Variation::VariationFeature') {
     my $ambiguity_code = $vf->ambig_code();
@@ -1283,6 +1283,8 @@ sub VariationFeatureOverlapAllele_to_output_hash {
 
   # reference allele
   $hash->{REF_ALLELE} = $vf->ref_allele_string if $self->{show_ref_allele};
+ 
+  $hash->{UPLOADED_ALLELE} = ($vf->{original_allele_string} || $vf->{allele_string} || $vf->{class_SO_term} || "" ) if $self->param('uploaded_allele');
 
   # picked?
   $hash->{PICK} = 1 if defined($vfoa->{PICK});

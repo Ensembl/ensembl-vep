@@ -114,8 +114,6 @@ my @VCF_COLS = qw(
   Amino_acids
   Codons
   Existing_variation
-  MINIMISED
-  Original_allele
 );
 
 
