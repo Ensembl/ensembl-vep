@@ -239,11 +239,9 @@ sub get_all_custom {
       reciprocal => $hash{"reciprocal"} || 0,
     };
 
-    if ( $hash{"reciprocal"} == 1 ) {
-      $opts->{overlap_def} = "Percent of minimum reciprocal overlap between input variant and reference variant";
-    } else {
-      $opts->{overlap_def} = "Percentage of input variant covered by reference variant";
-    }
+    $opts->{overlap_def} = $opts->{reciprocal} ?
+      "Percent of minimum reciprocal overlap between input variant and reference variant" :
+      "Percentage of input variant covered by reference variant";
 
     if(defined($hash{"format"}) && $hash{"format"} =~ /^G[TF]F$/i) {
       $opts->{filter} = $self->param('transcript_filter');

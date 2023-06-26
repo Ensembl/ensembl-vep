@@ -129,6 +129,7 @@ SKIP: {
         'reciprocal' => 0,
         'overlap_cutoff' => 0,
         'reciprocal' => 0,
+        'overlap_def' => "Percentage of input variant covered by reference variant",
         'distance' => undef,
         'same_type' => 0,
         'info' => {
@@ -139,6 +140,7 @@ SKIP: {
             'type' => 'exact',
             'overlap_cutoff' => 0,
             'reciprocal' => 0,
+            'overlap_def' => "Percentage of input variant covered by reference variant",
             'distance' => undef,
             'same_type' => 0,
           }
@@ -161,6 +163,7 @@ SKIP: {
         'custom_multi_allelic' => undef,
         'overlap_cutoff' => 0,
         'reciprocal' => 0,
+        'overlap_def' => "Percentage of input variant covered by reference variant",
         'distance' => undef,
         'same_type' => 0,
         'info' => {
@@ -171,6 +174,7 @@ SKIP: {
             'type' => 'overlap',
             'overlap_cutoff' => 0,
             'reciprocal' => 0,
+            'overlap_def' => "Percentage of input variant covered by reference variant",
             'distance' => undef,
             'same_type' => 0,
           }
@@ -193,6 +197,7 @@ SKIP: {
         'custom_multi_allelic' => undef,
         'overlap_cutoff' => 0,
         'reciprocal' => 0,
+        'overlap_def' => "Percentage of input variant covered by reference variant",
         'distance' => undef,
         'same_type' => 0,
         'info' => {
@@ -203,6 +208,7 @@ SKIP: {
             'type' => 'overlap',
             'overlap_cutoff' => 0,
             'reciprocal' => 0,
+            'overlap_def' => "Percentage of input variant covered by reference variant",
             'distance' => undef,
             'same_type' => 0,
           }
@@ -226,6 +232,7 @@ SKIP: {
         'custom_multi_allelic' => undef,
         'overlap_cutoff' => 0,
         'reciprocal' => 0,
+        'overlap_def' => "Percentage of input variant covered by reference variant",
         'distance' => undef,
         'same_type' => 0,
         'info' => {
@@ -237,6 +244,7 @@ SKIP: {
             'type' => 'overlap',
             'overlap_cutoff' => 0,
             'reciprocal' => 0,
+            'overlap_def' => "Percentage of input variant covered by reference variant",
             'distance' => undef,
             'same_type' => 0,
           }
@@ -262,6 +270,7 @@ SKIP: {
         'type' => 'overlap',
         'overlap_cutoff' => 0,
         'reciprocal' => 0,
+        'overlap_def' => "Percentage of input variant covered by reference variant",
         'distance' => undef,
         'same_type' => 0,
       }
@@ -275,6 +284,7 @@ SKIP: {
     'type' => 'overlap',
     'overlap_cutoff' => 0,
     'reciprocal' => 0,
+    'overlap_def' => "Percentage of input variant covered by reference variant",
     'distance' => undef,
     'same_type' => 0,
   }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' ),
@@ -288,6 +298,7 @@ SKIP: {
         'type' => 'overlap',
         'overlap_cutoff' => 0,
         'reciprocal' => 0,
+        'overlap_def' => "Percentage of input variant covered by reference variant",
         'distance' => undef,
         'same_type' => 0,
       }
@@ -301,6 +312,7 @@ SKIP: {
     'type' => 'overlap',
     'overlap_cutoff' => 0,
     'reciprocal' => 0,
+    'overlap_def' => "Percentage of input variant covered by reference variant",
     'distance' => undef,
     'same_type' => 0,
   }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
