@@ -68,17 +68,23 @@ sub DistributeProduction {
     if ($content =~ /collection$/)
     {
       make_path("$dir/production/$content") if (!-d "$dir/production/$content");
-      opendir (my $dh_collection, "$dir/$content") or die $!;
+      opendir (my $dh_collection, "$dir/$content/vep") or die $!;
       while (my $file_collection = readdir($dh_collection)) {
-        if ($file_collection =~ /gz$/ && $file_collection !~ /tabix/) {
-          $self->link_file("$dir/$content/$file_collection", "$dir/production/$content/$file_collection");
+        if ($file_collection =~ /gz$/) {
+          $self->link_file("$dir/$content/vep/$file_collection", "$dir/production/$content/$file_collection");
         }
       }
       $dh_collection->close();
       $self->compute_checksums("$dir/production/$content/");
     }
-    elsif ($content =~ /gz$/ && $content !~ /tabix/) {
-      $self->link_file("$dir/$content", "$dir/production/$content");
+    elsif ($content =~ /^vep$/) {
+      opendir (my $dh_collection, "$dir/vep") or die $!;
+      while (my $file_collection = readdir($dh_collection)) {
+        if ($file_collection =~ /gz$/) {
+          $self->link_file("$dir/vep/$file_collection", "$dir/production/$file_collection");
+        }
+      }
+      $dh_collection->close();
     }
   }
   $dh->close();
@@ -102,29 +108,42 @@ sub DistributeWeb{
     if ($content =~ /collection$/)
     {
       make_path("$dir/web/$content") if (!-d "$dir/web/$content");
-      opendir (my $dh_collection, "$dir/$content") or die $!;
-      while (my $file_collection = readdir($dh_collection)) {
-        ## only copy non- tabixed set if tabixed set not already copied
-        if ($file_collection =~ /gz$/ && $file_collection !~ /tabix/ && ! $copied{$file_collection}) {
-          $self->link_file("$dir/$content/$file_collection", "$dir/web/$content/$file_collection");
+      if (-d  "$dir/$content/indexed_vep_cache"){
+        opendir (my $dh_collection, "$dir/$content/indexed_vep_cache") or die $!;
+        while (my $file_collection = readdir($dh_collection)) {
+          if ($file_collection =~ /gz$/) {
+            $copied{$file_collection} = 1;
+            $self->link_file("$dir/$content/indexed_vep_cache/$file_collection", "$dir/web/$content/$file_collection");
+          }
         }
-        elsif ($file_collection =~ /tabix/) {
-          my $file_collection_no_tabix = $file_collection;
-          $file_collection_no_tabix =~ s/\_tabixconverted//;
-          $copied{$file_collection_no_tabix} = 1;
-          $self->link_file("$dir/$content/$file_collection", "$dir/web/$content/$file_collection_no_tabix");
+        $dh_collection->close();
+      }
+      opendir (my $dh_collection, "$dir/$content/vep") or die $!;
+      while (my $file_collection = readdir($dh_collection)) {
+        if ($file_collection =~ /gz$/ && ! $copied{$file_collection}) {
+          $self->link_file("$dir/$content/vep/$file_collection", "$dir/web/$content/$file_collection");
         }
       }
       $dh_collection->close();
     }
-    elsif ($content =~ /gz$/ && $content !~ /tabix/ && ! $copied{$content}) {
-      $self->link_file("$dir/$content", "$dir/web/$content");
+    elsif ($content =~ /^indexed_vep_cache$/) {
+      opendir (my $dh_collection, "$dir/indexed_vep_cache") or die $!;
+      while (my $file_collection = readdir($dh_collection)) {
+        if ($file_collection =~ /gz$/) {
+          $copied{$file_collection} = 1;
+          $self->link_file("$dir/indexed_vep_cache/$file_collection", "$dir/web/$file_collection");
+        }
+      }
+      $dh_collection->close();
     }
-    elsif ($content =~ /tabix/) {
-      my $file_no_tabix = $content;
-      $file_no_tabix =~ s/\_tabixconverted//;
-      $copied{$file_no_tabix} = 1;
-      $self->link_file("$dir/$content", "$dir/web/$file_no_tabix");
+    elsif ($content =~ /^vep$/) {
+      opendir (my $dh_collection, "$dir/vep") or die $!;
+      while (my $file_collection = readdir($dh_collection)) {
+        if ($file_collection =~ /gz$/ && ! $copied{$file_collection}) {
+          $self->link_file("$dir/vep/$file_collection", "$dir/web/$content/$file_collection");
+        }
+      }
+      $dh_collection->close();
     }
   }
   $dh->close();

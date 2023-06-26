@@ -229,7 +229,7 @@ sub get_all_custom {
     my $opts = {
       config => $self->config,
       file => $hash{"file"},
-      short_name => $hash{"short_name"} || $hash{"file"},
+      short_name => $hash{"short_name"},
       format => $hash{"format"},
       type => $hash{"type"} || "overlap",
       report_coords => $hash{"coords"} || 0,
