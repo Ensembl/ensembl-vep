@@ -834,7 +834,7 @@ sub post_process_vfs {
     $vf->seq_region_end($vf->{end});
   
     # Checks if the allele string is insertion or/and deletion
-    if(defined($vf->{allele_string})){
+    if(defined($vf->{allele_string}) && $vf->{allele_string} !~ /\//){
       my $is_indel = 0;
       my ($ref_allele_string,$alt_allele_string) = split(/\//, $vf->{allele_string});
       $is_indel = 1 unless length($ref_allele_string) == length($alt_allele_string) or $vf->{allele_string} =~ /-/;
