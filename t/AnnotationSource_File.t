@@ -54,6 +54,7 @@ is_deeply(
         type => 'exact',
         short_name => 'bar',
         report_coords => 1,
+        overlap_def => "Percentage of input variant covered by reference variant",
       }
     }
   }, 'Bio::EnsEMBL::VEP::AnnotationSource::File'),
