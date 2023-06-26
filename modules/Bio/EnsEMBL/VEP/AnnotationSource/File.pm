@@ -159,6 +159,7 @@ sub new {
   $self->{distance}       = $hashref->{distance};
   $self->{same_type}      = $hashref->{same_type}      || 0;
   $self->{reciprocal}     = $hashref->{reciprocal}     || 0;
+  $self->{overlap_def}    = $hashref->{overlap_def};
 
   $self->{info} = { custom_info => $hashref };
 
