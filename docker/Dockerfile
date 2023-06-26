@@ -1,4 +1,4 @@
-ARG BRANCH=main
+ARG BRANCH=release/111
 
 ###################################################
 # Stage 1 - docker container to build ensembl-vep #
@@ -193,7 +193,7 @@ RUN curl -O "$PLUGIN_DEPS/ubuntu-packages.txt" && \
     apt-get update && apt-get install -y --no-install-recommends \
     $(sed s/\#.*//g ubuntu-packages.txt) && \
     rm -rf /var/lib/apt/lists/* ubuntu-packages.txt
-#   - Perl modules
+#   - Perl modules
 RUN curl -O "$PLUGIN_DEPS/cpanfile" && \
     cpanm --installdeps --with-recommends . && \
     rm -rf /root/.cpanm cpanfile
