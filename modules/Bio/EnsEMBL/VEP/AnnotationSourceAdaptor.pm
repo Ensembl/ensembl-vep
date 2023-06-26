@@ -240,7 +240,7 @@ sub get_all_custom {
     };
 
     $opts->{overlap_def} = $opts->{reciprocal} ?
-      "Percent of minimum reciprocal overlap between input variant and reference variant" :
+      "Percentage of minimum reciprocal overlap between input variant and reference variant" :
       "Percentage of input variant covered by reference variant";
 
     if(defined($hash{"format"}) && $hash{"format"} =~ /^G[TF]F$/i) {
