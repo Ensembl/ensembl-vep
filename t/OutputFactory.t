@@ -193,7 +193,6 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'rs142513484',
-    'Original_allele' => 'C/T',
     'Location' => '21:25585733'
   },
   'VariationFeature_to_output_hash'
@@ -204,7 +203,6 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'rs142513484',
-    'Original_allele' => 'C/T',
     'Location' => '21:25585733',
     'VARIANT_CLASS' => 'SNV',
   },
@@ -217,7 +215,6 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'rs142513484',
-    'Original_allele' => 'C/T',
     'Location' => '21:25585733',
     'SV' => ['sv1', 'sv2'],
   },
@@ -241,7 +238,6 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'indtest',
-    'Original_allele' => 'A/G',
     'Location' => '21:25607429',
     'IND' => 'dave',
     'ZYG' => 'HET',
@@ -260,7 +256,6 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'indtest',
-    'Original_allele' => 'A/G',
     'Location' => '21:25607429',
     'IND' => 'dave',
     'ZYG' => 'HET',
@@ -276,7 +271,6 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'indtest',
-    'Original_allele' => 'A/G',
     'Location' => '21:25607429',
     'IND' => 'dave',
     'ZYG' => 'HET',
@@ -291,7 +285,6 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'indtest',
-    'Original_allele' => 'A/G',
     'Location' => '21:25607429',
     'AMBIGUITY' => 'R',
     'IND' => 'dave',
@@ -1325,7 +1318,6 @@ is_deeply(
   $of->VariationFeature_to_output_hash($ib->buffer->[0]),
   {
     'Uploaded_variation' => 'sv_dup',
-    'Original_allele' => undef,
     'Location' => '21:25606615-25606616'
   },
   'SV - VariationFeature_to_output_hash'
@@ -1707,7 +1699,6 @@ is_deeply(
       'MINIMISED' => 1,
       'Feature_type' => 'Transcript',
       'Uploaded_variation' => '21_25741665_CAGAAGAAAG/TAGAAGAAAG/C',
-      'Original_allele' => 'CAGAAGAAAG/TAGAAGAAAG/C',
       'Allele' => '-',
       'CDS_position' => '68-76',
       'Gene' => 'ENSG00000154727',
@@ -1728,7 +1719,6 @@ is_deeply(
       'MINIMISED' => 1,
       'Feature_type' => 'Transcript',
       'Uploaded_variation' => '21_25741665_CAGAAGAAAG/TAGAAGAAAG/C',
-      'Original_allele' => 'CAGAAGAAAG/TAGAAGAAAG/C',
       'Allele' => 'T',
       'CDS_position' => 67,
       'Gene' => 'ENSG00000154727',
