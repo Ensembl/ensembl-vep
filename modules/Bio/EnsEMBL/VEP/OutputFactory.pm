@@ -2318,7 +2318,7 @@ sub get_custom_headers {
       } elsif ($field eq "PC") {
         push @headers, [
           $sub_id,
-          sprintf("Percentage of input variant covered by reference variant from %s", $masked_file)
+          sprintf($custom->{overlap_def} . " from %s", $masked_file)
         ];
       } else {
         push @headers, [

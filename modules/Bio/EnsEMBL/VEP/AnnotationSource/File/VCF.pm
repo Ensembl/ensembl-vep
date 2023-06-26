@@ -89,7 +89,8 @@ use base qw(Bio::EnsEMBL::VEP::AnnotationSource::File);
                  overlap_cutoff => (optional) numeric $minimum_percentage_overlap (0 by default),
                  distance       => (optional) numeric $distance_to_overlapping_variant_ends (off by default),
                  same_type      => (optional) bool $only_match_identical_variant_classes (off by default),
-                 reciprocal     => (optional) bool $calculate_reciprocal_overlap (off by default)
+                 reciprocal     => (optional) bool $calculate_reciprocal_overlap (off by default),
+                 overlap_def    => (optional) string $overlap_definition (based on reciprocal by default)
                }
   Example    : $as = Bio::EnsEMBL::VEP::AnnotationSource::File::VCF->new($args);
   Description: Create a new Bio::EnsEMBL::VEP::AnnotationSource::File::VCF object.
