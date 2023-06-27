@@ -4,8 +4,9 @@
  * Read chromosomes 
  */
 
-prefix = ""
+nextflow.enable.dsl=2
 
+prefix = ""
 
 process generateSplits {
   /*

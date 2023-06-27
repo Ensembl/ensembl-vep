@@ -6,10 +6,6 @@
 
 nextflow.enable.dsl=2
 
-// defaults
-
-params.cpus = 1
-
 process checkVCF {
   /*
   Function to check input VCF files

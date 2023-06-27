@@ -3,9 +3,8 @@
 /* 
  * Script to process inputs channels
  */
-
-// defaults
-params.cpus = 1
+ 
+nextflow.enable.dsl=2
 
 process processInput {
   /*
