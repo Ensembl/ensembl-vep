@@ -6,10 +6,6 @@
 
 nextflow.enable.dsl=2
 
-// defaults
-params.outdir = ""
-params.cpus = 1
-
 process runVEP {
   /*
   Run VEP on VCF files

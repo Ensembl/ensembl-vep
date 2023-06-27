@@ -8,8 +8,6 @@ nextflow.enable.dsl=2
 
 // defaults
 prefix = "out"
-params.outdir = ""
-params.cpus = 1
 
 process splitVCF {
   /*
@@ -32,7 +30,7 @@ process splitVCF {
   afterScript 'rm x*'
 
   script:
-  def index_flag = index_type == "tbi" ? "-t" : "-c"
+  index_flag = index_type == "tbi" ? "-t" : "-c"
   
   """
   bcftools view --no-version -T ${split_file} -Oz ${vcf} > ${prefix}.${split_file}.vcf.gz
