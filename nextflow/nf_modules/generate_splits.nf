@@ -4,10 +4,7 @@
  * Read chromosomes 
  */
 
-// defaults
 prefix = ""
-params.outdir = ""
-params.cpus = 1
 
 
 process generateSplits {
