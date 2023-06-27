@@ -69,6 +69,16 @@ def createChannels (input, pattern, is_vcf) {
   return files;
 }
 
+def toAbsolute (dir_path) {
+  def dir = new File(dir_path)
+  
+  if (!dir.isAbsolute()) {
+      dir_path = "${launchDir}/${dir_path}";
+  }
+  
+  return dir_path;
+}
+
 workflow vep {
   take:
     vcf
@@ -91,6 +101,9 @@ workflow vep {
       .subscribe{ if ( it[0] != 1 && it[1] != 1 ) 
         exit 1, "Detected many-to-many scenario between VCF and VEP config files - currently not supported" 
       }
+      
+    // convert ouput dir to absolute path if necessary
+    output_dir = toAbsolute(output_dir)
         
     // process input and create Channel
     // this works like 'merge' operator and thus might make the pipeline un-resumable
