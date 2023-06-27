@@ -149,10 +149,11 @@ is(
   'output_hash_to_line - test extra 2'
 );
 
-# Include reference allele in output
+# Include reference allele and uploaded allele in output
 my $ib = get_annotated_buffer({
   input_file => $test_cfg->{test_vcf},
-  show_ref_allele => 1
+  show_ref_allele => 1,
+  uploaded_allele => 1
 });
 $of = Bio::EnsEMBL::VEP::OutputFactory::VEP_output->new({config => $ib->config});
 
@@ -172,7 +173,7 @@ is(
     3_prime_UTR_variant
     1122
     - - - - -
-    REF_ALLELE=C;IMPACT=MODIFIER;STRAND=-1
+    REF_ALLELE=C;UPLOADED_ALLELE=C/T;IMPACT=MODIFIER;STRAND=-1
   )),
   'get_all_lines_by_InputBuffer - check first'
 );
@@ -193,7 +194,7 @@ is(
     V/I
     Gtt/Att
     -
-    REF_ALLELE=C;IMPACT=MODERATE;STRAND=-1;FLAGS=cds_start_NF
+    REF_ALLELE=C;UPLOADED_ALLELE=C/T;IMPACT=MODERATE;STRAND=-1;FLAGS=cds_start_NF
   )),
   'get_all_lines_by_InputBuffer - check last'
 );
