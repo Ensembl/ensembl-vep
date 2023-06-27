@@ -43,6 +43,7 @@ process mergeVCF {
     bcftools index -c ${merged_vcf}  
   fi
   
+  mkdir -p ${output_dir}
   mv ${merged_vcf}* ${output_dir}
   """
 }
