@@ -2295,13 +2295,13 @@ sub get_custom_headers {
   foreach my $custom(@{$self->header_info->{custom_info} || []}) {
     
     my @flatten_header = get_flatten(\@headers);
-    my %pos = map { $flatten_header[$_]=~/o/?($flatten_header[$_]=>$_):() } 0..$#flatten_header if @flatten_header;
+    my %pos = map { $flatten_header[$_]=~/o/ ? ($flatten_header[$_]=>$_) : () } 0..$#flatten_header if @flatten_header;
     
     # To prevent printing internal directory mask filepath
     my $masked_file = $custom->{file} =~ /\// ? "[PATH]/" . (basename $custom->{file}) : $custom->{file};
-    
+
     if (grep { /^$custom->{short_name}$/ }  @flatten_header){
-      my $pos = $pos{$custom->{short_name}} / 2;
+      my $pos = ($pos{$custom->{short_name}} || 0) / 2;
       $headers[$pos][1] .= ",$masked_file";
     } else {
       push @headers, [
