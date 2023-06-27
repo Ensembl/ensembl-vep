@@ -29,7 +29,7 @@ process mergeVCF {
 
   script:
   merged_vcf = merged_vcf ?: file(original_vcf).getName().replace(".vcf", "_VEP.vcf")
-  index_flag = ${index_type} == "tbi" ? "-t" : "-c:
+  index_flag = index_type == "tbi" ? "-t" : "-c"
   
   """
   sorted_vcfs=\$(echo ${vcf_files} | xargs -n1 | sort | xargs)
