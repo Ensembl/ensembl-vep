@@ -1942,7 +1942,7 @@ sub StructuralVariationOverlapAllele_to_output_hash {
   $hash->{Feature}      = $feature->stable_id;
 
   # work out overlap amounts (except for breakpoints)
-  if ($self->param('overlaps') && $svf->class_SO_term !~ /breakpoint/) {
+  if ($svf->class_SO_term !~ /breakpoint/) {
     my $overlap_start  = (sort {$a <=> $b} ($svf->start, $feature->start))[-1];
     my $overlap_end    = (sort {$a <=> $b} ($svf->end, $feature->end))[0];
     my $overlap_length = ($overlap_end - $overlap_start) + 1;
