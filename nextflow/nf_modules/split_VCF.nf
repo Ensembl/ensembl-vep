@@ -32,13 +32,10 @@ process splitVCF {
   afterScript 'rm x*'
 
   script:
+  def index_flag = index_type == "tbi" ? "-t" : "-c"
+  
   """
   bcftools view --no-version -T ${split_file} -Oz ${vcf} > ${prefix}.${split_file}.vcf.gz
-  
-  if [[ "${index_type}" == "tbi" ]]; then
-    bcftools index -t ${prefix}.${split_file}.vcf.gz
-  else 
-    bcftools index -c ${prefix}.${split_file}.vcf.gz
-  fi
+  bcftools index ${index_flag} ${prefix}.${split_file}.vcf.gz
   """
 }
