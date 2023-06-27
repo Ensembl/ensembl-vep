@@ -88,8 +88,8 @@ workflow vep {
     
     vcf.count()
       .combine( vep_config.count() )
-      .subscribe{ if ( it[0] != it[1] && it[0] != 1 && it[1] != 1 ) 
-        exit 1, "Cannot map VCF and VEP config files to one-to-one, many-to-one, or, one-to-many scenario" 
+      .subscribe{ if ( it[0] != 1 && it[1] != 1 ) 
+        exit 1, "Detected many-to-many scenario between VCF and VEP config files - currently not supported" 
       }
         
     // process input and create Channel
