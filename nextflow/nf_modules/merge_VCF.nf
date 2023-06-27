@@ -30,7 +30,8 @@ process mergeVCF {
   val("${output_dir}/${merged_vcf}")
 
   script:
-  merged_vcf = merged_vcf.equals("none") ? file(original_vcf).getName().replace(".vcf", "_VEP.vcf") : merged_vcf
+  merged_vcf = merged_vcf ?: file(original_vcf).getName().replace(".vcf", "_VEP.vcf")
+
   
   """
   sorted_vcfs=\$(echo ${vcf_files} | xargs -n1 | sort | xargs)
