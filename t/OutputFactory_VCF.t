@@ -405,6 +405,22 @@ SKIP: {
   );
 }
 
+
+# test for uploaded allele
+$ib = get_runner({
+  input_file => $test_cfg->create_input_file([qw(21 25585733 25585734 CT/CTT 1)]),
+  dir => $test_cfg->{cache_root_dir},
+  uploaded_allele => 1,
+})->get_InputBuffer;
+$of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({config => $ib->config});
+
+is_deeply(
+  $of->get_all_lines_by_InputBuffer($ib)->[0],
+  "21\t25585734\t21_25585735_-/T\tT\tTT\t.\t.\t".
+  'CSQ=T|3_prime_UTR_variant|MODIFIER||ENSG00000154719|Transcript|ENST00000307301||||||1120-1121||||||CT/CTT||-1|,T|frameshift_variant|HIGH||ENSG00000154719|Transcript|ENST00000352957||||||1031-1032|989-990|330|K/KX|aaa/aaAa||CT/CTT||-1|,T|upstream_gene_variant|MODIFIER||ENSG00000260583|Transcript|ENST00000567517||||||||||||CT/CTT|2408|-1|',
+  "test uploaded_allele flag"
+);
+
 # test converting to VCF from different input
 $ib = get_runner({
   input_file => $test_cfg->create_input_file([qw(21 25585733 25585733 C/T 1)]),
