@@ -35,17 +35,12 @@ process processInput {
   script:
   """
   vcf_filepath=`readlink -f ${vcf}`
-  vcf_index=""
-  
-  if [[ -f \${vcf_filepath}.tbi ]]; then
-    vcf_index=\${vcf_filepath}.tbi
-    index_type=tbi
-  elif [[ -f \${vcf_filepath}.csi  ]]; then
+  if [[ -f \${vcf_filepath}.csi ]]; then
     vcf_index=\${vcf_filepath}.csi
     index_type=csi
   else
-    vcf_index="none"
-    index_type="tbi"
+    vcf_index=\${vcf_filepath}.tbi
+    index_type=tbi
   fi
   """
 }
