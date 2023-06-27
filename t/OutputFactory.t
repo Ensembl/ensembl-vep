@@ -1499,6 +1499,8 @@ $of->{allele_number} = 0;
 ## StructuralVariationOverlapAllele_to_output_hash
 ##################################################
 
+$of->config->{_params}->{overlaps} = 1;
+
 $ib = get_annotated_buffer({
   input_file => $test_cfg->create_input_file([qw(21 25585733 sv_dup T . . . SVTYPE=DUP;END=25585735)]),
 });
