@@ -1807,7 +1807,7 @@ SKIP: {
   no warnings 'once';
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'Bio::DB::HTS::Tabix module not available', 1 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+  skip 'Bio::DB::HTS::Tabix module not available', 3 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
 
   $runner = get_annotated_buffer_runner({
     input_file => $test_cfg->create_input_file([qw(21 25606454 test G C . . .)]),
@@ -1817,7 +1817,6 @@ SKIP: {
   });
 
   $of = $runner->get_OutputFactory();
-  $ib = $runner->get_InputBuffer();
 
   is_deeply(
     $of->get_custom_headers,
@@ -1829,14 +1828,31 @@ SKIP: {
     ],
     'get_custom_headers'
   );
-}
 
+  $runner = get_annotated_buffer_runner({
+    input_file => $test_cfg->create_input_file([qw(21 25606454 test G C . . .)]),
+    custom => ['file=' . $test_cfg->{custom_vcf} . ',short_name=test,format=vcf',
+               'file=' . $test_cfg->{custom_vcf_2} . ',short_name=sample,format=vcf'],
+    quiet => 1,
+    warning_file => 'STDERR',
+  });
 
-SKIP: {
-  no warnings 'once';
+  $of = $runner->get_OutputFactory();
 
-  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'Bio::DB::HTS::Tabix module not available', 1 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+  is_deeply(
+    $of->get_custom_headers,
+    [
+      [
+        'test',
+        "[PATH]/" . (basename $test_cfg->{custom_vcf})
+      ],
+      [
+        'sample',
+        "[PATH]/" . (basename $test_cfg->{custom_vcf_2})
+      ]
+    ],
+    'get_multiple_custom_headers - different short_name'
+  );
 
   $runner = get_annotated_buffer_runner({
     input_file => $test_cfg->create_input_file([qw(21 25606454 test G C . . .)]),
@@ -1847,7 +1863,6 @@ SKIP: {
   });
 
   $of = $runner->get_OutputFactory();
-  $ib = $runner->get_InputBuffer();
 
   is_deeply(
     $of->get_custom_headers,
@@ -1857,7 +1872,7 @@ SKIP: {
         "[PATH]/" . (basename $test_cfg->{custom_vcf}) . ',' . "[PATH]/" . (basename $test_cfg->{custom_vcf_2})
       ]
     ],
-    'get_multiple_custom_headers'
+    'get_multiple_custom_headers - same short_name'
   );
 }
 
