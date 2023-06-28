@@ -69,6 +69,7 @@ our @FLAG_FIELDS = (
   { flag => 'individual',      fields => ['IND','ZYG'] },
   { flag => 'allele_number',   fields => ['ALLELE_NUM'] },
   { flag => 'show_ref_allele', fields => ['REF_ALLELE'] },
+  { flag => 'uploaded_allele', fields => ['UPLOADED_ALLELE'] },
   { flag => 'user',            fields => ['IMPACT','DISTANCE','STRAND','FLAGS'] },
   { flag => 'flag_pick',       fields => ['PICK'] },
   { flag => 'flag_pick_allele',fields => ['PICK'] },
@@ -137,7 +138,6 @@ our @FLAG_FIELDS = (
 # field descriptions for output headers
 our %FIELD_DESCRIPTIONS = (
   'Uploaded_variation' => 'Identifier of uploaded variant',
-  'Original_allele'    => 'The variant allele uploaded',
   'ID'                 => 'Identifier of uploaded variant',
   'Location'           => 'Location of variant in standard coordinate format (chr:start or chr:start-end)',
   'Allele'             => 'The variant allele used to calculate the consequence',
@@ -254,6 +254,7 @@ our %FIELD_DESCRIPTIONS = (
   'OverlapBP'          => 'Number of base pairs overlapping with the corresponding structural variation feature',
   'OverlapPC'          => 'Percentage of corresponding structural variation feature overlapped by the given input',
   'CHECK_REF'	       => 'Reports variants where the input reference does not match the expected reference',
+  'UPLOADED_ALLELE'    => 'The variant allele uploaded',
   'SHIFT_LENGTH'       => 'Reports the number of bases the insertion or deletion has been shifted relative to the underlying transcript due to right alignment before consequence calculation'
 );
 

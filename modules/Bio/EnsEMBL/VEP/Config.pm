@@ -222,6 +222,7 @@ our @VEP_PARAMS = (
   'shift_3prime=i',          # enables shifting of all variants to 3prime
   'shift_genomic=i',         # adds genomic shifting to output, and provides shifting of intergenic variants
   'shift_length',	           # adds the length of the transcript directional shift to output
+  'uploaded_allele',         # output allele string given in input 
 
   # cache stuff
   'database',                # must specify this to use DB now

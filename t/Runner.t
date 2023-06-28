@@ -247,7 +247,7 @@ is_deeply(
       3_prime_UTR_variant
       1122
       - - - - -
-      IMPACT=MODIFIER;STRAND=-1;Original_allele=C/T
+      IMPACT=MODIFIER;STRAND=-1
     )),
     join("\t", qw(
       rs142513484
@@ -263,7 +263,7 @@ is_deeply(
       A/T
       Gca/Aca
       -
-      IMPACT=MODERATE;STRAND=-1;Original_allele=C/T
+      IMPACT=MODERATE;STRAND=-1
     )),
     join("\t", qw(
       rs142513484
@@ -279,7 +279,7 @@ is_deeply(
       -
       -
       -
-      IMPACT=MODIFIER;DISTANCE=2407;STRAND=-1;Original_allele=C/T
+      IMPACT=MODIFIER;DISTANCE=2407;STRAND=-1
     )),
   ],
   '_buffer_to_output'
@@ -299,7 +299,7 @@ is(
     3_prime_UTR_variant
     1122
     - - - - -
-    IMPACT=MODIFIER;STRAND=-1;Original_allele=C/T
+    IMPACT=MODIFIER;STRAND=-1
   )),
   'next_output_line'
 );
@@ -514,9 +514,9 @@ is(scalar @tmp_lines, 41, 'run - count lines');
 is_deeply(
   [grep {!/^\#/} @tmp_lines],
   [
-    "rs142513484\t21:25585733\tT\tENSG00000154719\tENST00000307301\tTranscript\t3_prime_UTR_variant\t1122\t-\t-\t-\t-\t-\tIMPACT=MODIFIER;STRAND=-1;Original_allele=C/T\n",
-    "rs142513484\t21:25585733\tT\tENSG00000154719\tENST00000352957\tTranscript\tmissense_variant\t1033\t991\t331\tA/T\tGca/Aca\t-\tIMPACT=MODERATE;STRAND=-1;Original_allele=C/T\n",
-    "rs142513484\t21:25585733\tT\tENSG00000260583\tENST00000567517\tTranscript\tupstream_gene_variant\t-\t-\t-\t-\t-\t-\tIMPACT=MODIFIER;DISTANCE=2407;STRAND=-1;Original_allele=C/T\n",
+    "rs142513484\t21:25585733\tT\tENSG00000154719\tENST00000307301\tTranscript\t3_prime_UTR_variant\t1122\t-\t-\t-\t-\t-\tIMPACT=MODIFIER;STRAND=-1\n",
+    "rs142513484\t21:25585733\tT\tENSG00000154719\tENST00000352957\tTranscript\tmissense_variant\t1033\t991\t331\tA/T\tGca/Aca\t-\tIMPACT=MODERATE;STRAND=-1\n",
+    "rs142513484\t21:25585733\tT\tENSG00000260583\tENST00000567517\tTranscript\tupstream_gene_variant\t-\t-\t-\t-\t-\t-\tIMPACT=MODIFIER;DISTANCE=2407;STRAND=-1\n",
   ],
   'run - lines content'
 );
@@ -1166,7 +1166,6 @@ SKIP: {
         'end' => 25585733,
         'seq_region_name' => '21',
         'strand' => 1,
-        'original_allele' => 'C/T',
         'transcript_consequences' => [
           {
             'gene_id' => 'ENSG00000154719',
@@ -1289,7 +1288,6 @@ SKIP: {
          "allele_string" => "C/A",
          "assembly_name" => "GRCh38",
          "end" => 10524654,
-         "original_allele" => 'C/A',
          "id" => ".",
          "input" =>  "21 10524654 . C A",
          "intergenic_consequences" => [

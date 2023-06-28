@@ -431,7 +431,7 @@ is_deeply(
   [
     {
       'a_index' => 0,
-      'a_allele' => 'AGCGT',
+      'a_allele' => 'GCG',
       'b_allele' => 'GCG',
       'b_index' => 0
     }
