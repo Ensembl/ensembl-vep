@@ -9,18 +9,20 @@ nextflow.enable.dsl=2
 
  // params default
 params.cpus = 1
-params.vep_config = "$PWD/vep_config/vep.ini"
-params.outdir = "outdir"
 
 params.vcf = null
+params.vep_config = null
+params.outdir = "outdir"
 
-params.output_prefix = "out"
+params.output_prefix = ""
 params.bin_size = 100
 params.skip_check = 0
 params.help = false
 
 // module imports
+include { processInput } from '../nf_modules/process_input.nf'
 include { checkVCF } from '../nf_modules/check_VCF.nf'
+include { generateSplits } from '../nf_modules/generate_splits.nf'
 include { splitVCF } from '../nf_modules/split_VCF.nf' 
 include { mergeVCF } from '../nf_modules/merge_VCF.nf'  
 include { runVEP } from '../nf_modules/run_vep.nf'
@@ -47,7 +49,7 @@ Options:
 }
 
 
-def processInput (input, pattern, is_vcf) {
+def createChannels (input, pattern, is_vcf) {
   if (input instanceof String) {
     // if input is a String, process as file or directory
     files = file(input)
@@ -63,55 +65,69 @@ def processInput (input, pattern, is_vcf) {
     // if input is a Channel, just pass along
     files = input
   }
+  
+  return files;
+}
 
-  if (is_vcf) {
-    // add tabix-index files for VCF input (to be checked if they exist later)
-    files = files.multiMap { it ->
-      vcf: it
-      vcf_index: "${it}.tbi"
-    }
+def toAbsolute (dir_path) {
+  def dir = new File(dir_path)
+  
+  if (!dir.isAbsolute()) {
+      dir_path = "${launchDir}/${dir_path}";
   }
-
-  return files
+  
+  return dir_path;
 }
 
 workflow vep {
   take:
     vcf
     vep_config
+    output_dir
   main:
     if (!vcf) {
-      exit 1, "Undefined --vcf parameter. Please provide the path to a VCF file"
+      exit 1, "Undefined --vcf parameter. Please provide the path to a VCF file."
     }
 
     if (!vep_config) {
-      exit 1, "Undefined --vep_config parameter. Please provide a VEP config file"
+      exit 1, "Undefined --vep_config parameter. Please provide a VEP config file."
     }
+    
+    vcf = createChannels(vcf, pattern="*.{vcf,gz}", true)
+    vep_config = createChannels(vep_config, pattern="*.ini", false)
 
-    // Raise error if we have multiple VCF files and VEP config files as input
-    // This would require mapping the VCF to the config files
-    vcf = processInput(vcf, pattern="*.{vcf,gz}", true)
-    vep_config = processInput(vep_config, pattern="*.ini", false)
-    vcf.vcf.count()
-      .concat( vep_config.count() )
-      .map { it > 1 ? 1 : 0 }.sum()
-      .subscribe { if ( it == 2 ) exit 1, "Multiple VCF and VEP config files are currently not supported" }
+    vcf.count()
+      .combine( vep_config.count() )
+      .subscribe{ if ( it[0] != 1 && it[1] != 1 ) 
+        exit 1, "Detected many-to-many scenario between VCF and VEP config files - currently not supported" 
+      }
+
+    // convert ouput dir to absolute path if necessary
+    output_dir = toAbsolute(output_dir)
+
+    // process input and create Channel
+    // this works like 'merge' operator and thus might make the pipeline un-resumable
+    // we might think of using 'toSortedList' and generate appropriate input from the 'processInput' module
+    processInput(vcf, vep_config, output_dir)
 
     // Prepare input VCF files (bgzip + tabix)
-    checkVCF(vcf)
+    checkVCF(processInput.out)
+    
+    // Generate split files that each contain bin_size number of variants from VCF
+    generateSplits(checkVCF.out, params.bin_size)
 
-    // Split VCF by bin size
-    splitVCF(checkVCF.out, params.bin_size)
+    // Split VCF using split files
+    splitVCF(generateSplits.out.transpose())
 
     // Run VEP for each split VCF file and for each VEP config
-    runVEP(splitVCF.out.files.transpose(), vep_config)
+    runVEP(splitVCF.out.transpose())
 
     // Merge split VCF files (creates one output VCF for each input VCF)
-    mergeVCF(runVEP.out.vcf.groupTuple())
+    mergeVCF(runVEP.out.files.groupTuple(by: [0, 3, 4]))
   emit:
     mergeVCF.out
 }
 
 workflow {
-  vep(params.vcf, params.vep_config)
+  vep(params.vcf, params.vep_config, params.outdir)
 }

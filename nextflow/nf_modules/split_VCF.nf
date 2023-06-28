@@ -8,8 +8,6 @@ nextflow.enable.dsl=2
 
 // defaults
 prefix = "out"
-params.outdir = ""
-params.cpus = 1
 
 process splitVCF {
   /*
@@ -17,28 +15,25 @@ process splitVCF {
 
   Returns
   -------
-  Returns 2 files:
-      1) A VCF file
-      2) A tabix index for that VCF
+  Tuple of original VCF, split VCF files, split VCF index files, vep config file, a output dir, and the index type of VCF file
   */
+  
   cpus params.cpus
   label 'bcftools'
 
   input:
-  tuple path(vcf), path(vcf_index)
-  val(bin_size)
+  tuple path(vcf), path(vcf_index), path(split_file), path(vep_config), val(output_dir), val(index_type)
 
   output:
-  tuple val("${vcf}"), path("${prefix}*.vcf.gz"), path("${prefix}*.vcf.gz.tbi"), emit: files
+  tuple val("${vcf}"), path("${prefix}*.vcf.gz"), path("${prefix}*.vcf.gz.{tbi,csi}"), path(vep_config), val(output_dir), val(index_type)
 
   afterScript 'rm x*'
 
   script:
+  index_flag = index_type == "tbi" ? "-t" : "-c"
+  
   """
-  bcftools query -f'%CHROM\t%POS\n' ${vcf} | uniq | split -l ${bin_size}
-  for file in x*; do
-    bcftools view --no-version -T \${file} -Oz ${vcf} > ${prefix}.\${file}.vcf.gz
-    bcftools index -t ${prefix}.\${file}.vcf.gz
-  done
+  bcftools view --no-version -T ${split_file} -Oz ${vcf} > ${prefix}.${split_file}.vcf.gz
+  bcftools index ${index_flag} ${prefix}.${split_file}.vcf.gz
   """
 }
