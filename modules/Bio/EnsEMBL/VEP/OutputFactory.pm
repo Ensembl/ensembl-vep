@@ -1896,7 +1896,7 @@ sub BaseStructuralVariationOverlapAllele_to_output_hash {
 
   my $svf = $vfoa->base_variation_feature;
 
-  $hash->{Allele} = $svf->class_SO_term;
+  $hash->{Allele} = $svf->{allele_string} || $svf->class_SO_term;
 
   # allele number
   $hash->{ALLELE_NUM} = $vfoa->allele_number if $self->{allele_number};
@@ -1953,14 +1953,16 @@ sub StructuralVariationOverlapAllele_to_output_hash {
   $hash->{Feature_type} = $feature_type;
   $hash->{Feature}      = $feature->stable_id;
 
-  # work out overlap amounts
-  my $overlap_start  = (sort {$a <=> $b} ($svf->start, $feature->start))[-1];
-  my $overlap_end    = (sort {$a <=> $b} ($svf->end, $feature->end))[0];
-  my $overlap_length = ($overlap_end - $overlap_start) + 1;
-  my $overlap_pc     = 100 * ($overlap_length / (($feature->end - $feature->start) + 1));
+  # work out overlap amounts (except for breakpoints)
+  if ($svf->class_SO_term !~ /breakpoint/) {
+    my $overlap_start  = (sort {$a <=> $b} ($svf->start, $feature->start))[-1];
+    my $overlap_end    = (sort {$a <=> $b} ($svf->end, $feature->end))[0];
+    my $overlap_length = ($overlap_end - $overlap_start) + 1;
+    my $overlap_pc     = 100 * ($overlap_length / (($feature->end - $feature->start) + 1));
 
-  $hash->{OverlapBP} = $overlap_length if $overlap_length > 0;
-  $hash->{OverlapPC} = sprintf("%.2f", $overlap_pc) if $overlap_pc > 0;
+    $hash->{OverlapBP} = $overlap_length if $overlap_length > 0;
+    $hash->{OverlapPC} = sprintf("%.2f", $overlap_pc) if $overlap_pc > 0;
+  }
 
   # cell types
   $hash->{CELL_TYPE} = $self->get_cell_types($feature)
