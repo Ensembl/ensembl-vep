@@ -9,10 +9,10 @@ nextflow.enable.dsl=2
 
  // params default
 params.cpus = 1
-params.vep_config = "$PWD/vep_config/vep.ini"
-params.outdir = "outdir"
 
 params.vcf = null
+params.vep_config = null
+params.outdir = "outdir"
 
 params.output_prefix = ""
 params.bin_size = 100
@@ -86,25 +86,25 @@ workflow vep {
     output_dir
   main:
     if (!vcf) {
-      exit 1, "Undefined --vcf parameter. Please provide the path to a VCF file"
+      exit 1, "Undefined --vcf parameter. Please provide the path to a VCF file."
     }
 
     if (!vep_config) {
-      exit 1, "Undefined --vep_config parameter. Please provide a VEP config file"
+      exit 1, "Undefined --vep_config parameter. Please provide a VEP config file."
     }
     
     vcf = createChannels(vcf, pattern="*.{vcf,gz}", true)
     vep_config = createChannels(vep_config, pattern="*.ini", false)
-    
+
     vcf.count()
       .combine( vep_config.count() )
       .subscribe{ if ( it[0] != 1 && it[1] != 1 ) 
         exit 1, "Detected many-to-many scenario between VCF and VEP config files - currently not supported" 
       }
-      
+
     // convert ouput dir to absolute path if necessary
     output_dir = toAbsolute(output_dir)
-        
+
     // process input and create Channel
     // this works like 'merge' operator and thus might make the pipeline un-resumable
     // we might think of using 'toSortedList' and generate appropriate input from the 'processInput' module
