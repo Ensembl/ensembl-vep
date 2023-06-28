@@ -7,45 +7,37 @@
 nextflow.enable.dsl=2
 
 // defaults
-prefix = "out"
-mergedVCF = "merged-file"
+merged_vcf = null
 if ( params.output_prefix != "" ){
-  mergedVCF = params.output_prefix
+  merged_vcf = params.output_prefix + "_VEP.vcf.gz"
 }
-params.outdir = ""
-params.cpus = 1
 
 process mergeVCF {
   /*
   Merge VCF files into a single file
-
-  Returns
-  -------
-  Returns 2 files:
-      1) A VCF format file 
-      2) A tabix index for that VCF
   */
-
-  publishDir "${params.outdir}", 
-    enabled: "${params.outdir}" as Boolean,
-    mode:'move'
     
   cpus params.cpus
   label 'bcftools'
   cache 'lenient'
    
   input:
-  tuple val(original), path(vcfFiles), path(indexFiles)
-
+  tuple val(original_vcf), path(vcf_files), path(index_files), val(output_dir), val(index_type)
+  
   output:
-  path("*.vcf.gz*")
+  val("${output_dir}/${merged_vcf}")
 
-  script: 
+  script:
+  merged_vcf = merged_vcf ?: file(original_vcf).getName().replace(".vcf", "_VEP.vcf")
+  index_flag = index_type == "tbi" ? "-t" : "-c"
+  
   """
-  mkdir -p temp
-  out=${ original }_vep_${ mergedVCF }.vcf.gz
-  sorted_vcf=\$(echo ${vcfFiles} | xargs -n1 | sort | xargs)
-  bcftools concat --no-version -a \${sorted_vcf} -Oz -o \${out}
-  bcftools index -t \${out}
+  sorted_vcfs=\$(echo ${vcf_files} | xargs -n1 | sort | xargs)
+  bcftools concat --no-version -a \${sorted_vcfs} -Oz -o ${merged_vcf}
+  bcftools index ${index_flag} ${merged_vcf}
+  
+  # move the output file
+  mkdir -p ${output_dir}
+  mv ${merged_vcf}* ${output_dir}
   """
 }

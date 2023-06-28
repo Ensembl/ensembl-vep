@@ -6,20 +6,15 @@
 
 nextflow.enable.dsl=2
 
-// defaults
-params.outdir = ""
-params.cpus = 1
-
 process runVEP {
   /*
   Run VEP on VCF files
 
   Returns
   -------
-  Returns 2 files:
-      1) VEP output file in VCF format
-      2) A tabix index for that VCF output file
+  Tuple of original VCF, split VCF file after running VEP, tabix index of that file, vep config file, a output dir, and the index type of VCF file
   */
+  
   publishDir "${params.outdir}/vep-summary",
     pattern: "vep-${original}-${vep_config}-*.vcf.gz_summary.*",
     mode:'move'
@@ -27,25 +22,30 @@ process runVEP {
   label 'vep'
 
   input:
-  tuple val(original), path(vcfFile), path(indexFile)
-  each path(vep_config)
+  tuple val(original_vcf), path(vcf), path(vcf_index), path(vep_config), val(output_dir), val(index_type)
   
   output:
-  tuple val(original), path("*.vcf.gz"), path("*.vcf.gz.tbi"), emit: vcf
+  tuple val(original_vcf), path(out_vcf), path("${out_vcf}.{tbi,csi}"), val(output_dir), val(index_type), emit: files
   path("*.vcf.gz_summary.*")
 
   script:
-  if( !vcfFile.exists() ) {
-    exit 1, "VCF file is not generated: ${vcfFile}"
+  out_vcf = "vep" + "-" + file(original_vcf).getSimpleName() + "-" + vep_config.getSimpleName() + "-" + vcf
+  
+  if( !vcf.exists() ) {
+    exit 1, "VCF file is not generated: ${vcf}"
   }
-  else if ( !indexFile.exists() ){
-    exit 1, "VCF index file is not generated: ${indexFile}"
+  else if ( !vcf_index.exists() ){
+    exit 1, "VCF index file is not generated: ${vcf_index}"
   }
   else {
     """
-    out=vep-${original}-${vep_config}-${vcfFile}
-    vep -i ${vcfFile} -o \${out} --vcf --compress_output bgzip --format vcf --config ${vep_config}
-    tabix -p vcf \${out}
-    """	
+    vep -i ${vcf} -o ${out_vcf} --vcf --compress_output bgzip --format vcf --config ${vep_config}
+    
+    if [[ "${index_type}" == "tbi" ]]; then
+      tabix -p vcf ${out_vcf}
+    else
+      tabix -C -p vcf ${out_vcf}
+    fi
+    """
   }
 }
