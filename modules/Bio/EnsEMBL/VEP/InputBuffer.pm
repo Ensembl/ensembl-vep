@@ -292,7 +292,7 @@ sub get_overlapping_vfs {
     @all_vfs = @{$tree->fetch($start - 1, $end)};
   }
   else{
-    $tree = $self->hash_tree unless($tree);  
+    $tree = $self->hash_tree unless($tree);
     @all_vfs = values %{{
       map {$_->{_hash_tree_id} => $_}   # use _hash_tree_id to uniquify
       map {@{$tree->{$_} || []}} # tree might be empty
@@ -302,17 +302,23 @@ sub get_overlapping_vfs {
         (int($end / $HASH_TREE_SIZE) + 1) # end of range
       )
     }};
-  }      
-  
+  }
+
   my @vfs;
   foreach my $vf (@all_vfs)  {
     if (overlap($vf->{start}, $vf->{end}, $start, $end)){
       push(@vfs, $vf);
     }
-    if((defined($vf->{unshifted_end}) && (defined($vf->{unshifted_start})))) {
+
+    if ((defined($vf->{unshifted_end}) && (defined($vf->{unshifted_start})))) {
       if (overlap($vf->{unshifted_start}, $vf->{unshifted_end}, $start, $end)) {
         push(@vfs, $vf);
       }
+    }
+
+    # check overlap with complex alternative alleles (such as breakend structural variants)
+    for my $alt (@{ $vf->{_parsed_allele} }) {
+      push(@vfs, $vf) if overlap($alt->{pos}, $alt->{pos}, $start, $end);
     }
   }
   return [@vfs];
@@ -344,6 +350,13 @@ sub interval_tree {
       my ($s, $e) = ($vf->{start}, $vf->{end});
       ($s, $e) = ($e, $s) if $s > $e;
       $tree->insert($vf, $s - 1, $e);
+
+      # add same variation feature to alternative allele coordinates
+      # (such as breakend structural variants)
+      for my $alt (@{ $vf->{_parsed_allele} }) {
+        $s = $e = $alt->{pos};
+        $tree->insert($vf, $s - 1, $e);
+      }
     }
 
     $self->{temp}->{interval_tree} = $tree;
@@ -406,10 +419,10 @@ sub hash_tree {
 
 =head2 min_max
   
-  Example    : my ($min, $max) = @{$ib->min_max()};
-  Description: Gets the minimum and maximum coordinates spanned
+  Example    : my %min_max = %{$ib->min_max()};
+  Description: Gets the chromosome and minimum and maximum coordinates spanned
                by variants in the buffer.
-  Returntype : arrayref [$min, $max]
+  Returntype : hash of array [$min, $max] by $chr
   Exceptions : none
   Caller     : AnnotationSource
   Status     : Stable
@@ -422,9 +435,17 @@ sub min_max {
   if(!exists($self->{temp}->{min_max})) {
     return $self->{temp}->{min_max} = shift if @_;
 
-    my ($min, $max) = (1e10, 0);
+    my %min_max;
+    my $chr;
+    my $min;
+    my $max;
 
     foreach my $vf(@{$self->buffer}) {
+      $chr = $vf->{chr} || $vf->slice->seq_region_name;
+      throw("ERROR: Cannot get chromosome $chr from VariationFeature") unless $chr;
+
+      ($min, $max) = defined $min_max{$chr} ? @{$min_max{$chr}} : (1e10, 0);
+
       my ($vf_s, $vf_e) = ($vf->{start}, $vf->{end});
 
       if($vf_s > $vf_e) {
@@ -435,9 +456,11 @@ sub min_max {
         $min = $vf_s if $vf_s < $min;
         $max = $vf_e if $vf_e > $max;
       }
+
+      $min_max{$chr} = [$min, $max]
     }
 
-    $self->{temp}->{min_max} = [$min, $max];
+    $self->{temp}->{min_max} = \%min_max;
   }
 
   return $self->{temp}->{min_max};

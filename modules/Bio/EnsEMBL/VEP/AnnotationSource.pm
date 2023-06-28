@@ -140,18 +140,75 @@ sub get_all_features_by_InputBuffer {
 
     # use filter_by_min_max to filter out features we know are not overlapped
     # do it here so we're not affecting the cache
-    $self->filter_features_by_min_max(\@features, @{$buffer->min_max})
+    $self->filter_features_by_min_max(\@features, $buffer->min_max)
   );
 }
 
+=head2 get_regions_from_coords
+
+  Arg 1      : string $chr
+  Arg 2      : int $start
+  Arg 3      : int $end
+  Arg 4      : hashref $min_max of array [$min, $max] by $chr
+  Arg 5      : int $cache_region_size
+  Arg 6      : int $up_down_size
+  Arg 7      : hashref $seen
+  Example    : $regions = $as->get_regions_from_coords($chr, $start, $end, $min,
+                 $max, $cache_region_size, $up_down_size, $seen)
+  Description: Fetches all regions that overlap the given coordinates. Regions
+               are a simple arrayref [$chr, $start], corresponding to bins of
+               genomic coordinates whose size is cache_region_size.
+  Returntype : arrayref of region arrayrefs and min_max coordinates
+  Exceptions : none
+  Caller     : get_all_regions_by_InputBuffer()
+  Status     : Stable
+
+=cut
+
+sub get_regions_from_coords {
+  my $self              = shift;
+  my $chr               = shift;
+  my $start             = shift;
+  my $end               = shift;
+  my $min_max           = shift;
+  my $cache_region_size = shift;
+  my $up_down_size      = shift;
+  my $seen              = shift;
+
+  # find actual chromosome name used by AnnotationSource
+  my $source_chr = $self->get_source_chr_name($chr);
+
+  # allow for indels
+  ($start, $end) = ($end, $start) if $start > $end;
+
+  # log min/max
+  my ($min, $max) = defined $min_max->{$source_chr} ? @{$min_max->{$source_chr}} : (1e10, 0);
+  $min = $start if $start < $min;
+  $max = $end   if   $end > $max;
+
+  # convert to region-size
+  my ($r_s, $r_e) = map {int(($_ - 1) / $cache_region_size)} ($start - $up_down_size, $end + $up_down_size);
+
+  # add all regions between r_s and r_e inclusive (if not previously returned)
+  my @regions;
+  for(my $s = $r_s; $s <= $r_e; $s++) {
+    my $key = join(':', ($source_chr, $s));
+    next if $seen->{$key};
+
+    push @regions, [$source_chr, $s];
+    $seen->{$key} = 1;
+  }
+  return ($source_chr, $min, $max, $seen, @regions);
+}
 
 =head2 get_all_regions_by_InputBuffer
 
   Arg 1      : Bio::EnsEMBL::VEP::InputBuffer $ib
   Example    : $regions = $as->get_all_regions_by_InputBuffer($ib)
-  Description: Fetches all non-overlapping regions that overlap the variants currently
-               in the input buffer. Regions are a simple arrayref [$chr, $start],
-               corresponding to bins of genomic coordinates, size cache_region_size
+  Description: Fetches all regions that overlap the variants currently in the
+               input buffer. Regions are a simple arrayref [$chr, $start],
+               corresponding to bins of genomic coordinates with a size of
+               cache_region_size.
   Returntype : arrayref of region arrayrefs
   Exceptions : none
   Caller     : get_all_features_by_InputBuffer()
@@ -164,46 +221,42 @@ sub get_all_regions_by_InputBuffer {
   my $buffer = shift;
   my $cache_region_size = shift || $self->{cache_region_size};
 
+  my $seen;
   my @regions = ();
-  my %seen = ();
+  my @new_regions;
+
   my $up_down_size = defined($self->{up_down_size}) ? $self->{up_down_size} : $self->up_down_size();
 
-  my ($min, $max) = (1e10, 0);
+  my $min_max;
+  my $chr;
+  my $min;
+  my $max;
 
   foreach my $vf(@{$buffer->buffer}) {
 
     # skip long and unsupported types of SV; doing this here to avoid stopping looping
     next if $vf->{vep_skip};
 
-    my $chr = $vf->{chr} || $vf->slice->seq_region_name;
-    throw("ERROR: Cannot get chromosome from VariationFeature") unless $chr;
+    $chr = $vf->{chr} || $vf->{slice}->{seq_region_name};
+    throw("ERROR: Cannot get chromosome $chr from VariationFeature") unless $chr;
 
-    # find actual chromosome name used by AnnotationSource
-    my $source_chr = $self->get_source_chr_name($chr);
+    ($chr, $min, $max, $seen, @new_regions) = $self->get_regions_from_coords(
+      $chr, $vf->{start}, $vf->{end},
+      $min_max, $cache_region_size, $up_down_size, $seen);
+    push @regions, @new_regions;
+    $min_max->{$chr} = [$min, $max];
 
-    my ($vf_s, $vf_e) = ($vf->{start}, $vf->{end});
-
-    # allow for indels
-    ($vf_s, $vf_e) = ($vf_e, $vf_s) if $vf_s > $vf_e;
-
-    # log min/max
-    $min = $vf_s if $vf_s < $min;
-    $max = $vf_e if $vf_e > $max;
-
-    # convert to region-size
-    my ($r_s, $r_e) = map {int(($_ - 1) / $cache_region_size)} ($vf_s - $up_down_size, $vf_e + $up_down_size);
-
-    # add all regions between r_s and r_e inclusive
-    for(my $s = $r_s; $s <= $r_e; $s++) {
-      my $key = join(':', ($source_chr, $s));
-      next if $seen{$key};
-
-      push @regions, [$source_chr, $s];
-      $seen{$key} = 1;
+    # process alternative alleles from breakend structural variants
+    foreach my $alt (@{$vf->{_parsed_allele}}) {
+      ($chr, $min, $max, $seen, @new_regions) = $self->get_regions_from_coords(
+        $alt->{chr}, $alt->{pos}, $alt->{pos},
+        $min_max, $cache_region_size, $up_down_size, $seen);
+      push @regions, @new_regions;
+      $min_max->{$chr} = [$min, $max];
     }
   }
 
-  $buffer->min_max([$min, $max]);
+  $buffer->min_max($min_max);
 
   return \@regions;
 }
@@ -231,6 +284,25 @@ sub get_features_by_regions_cached {
 }
 
 
+sub _check_overlap {
+  # Check overlap of $elem around $min_max region 
+  my $self = shift;
+  my $elem = shift;
+  my $min_max = shift;
+  my $up_down_size = shift;
+
+  # if there is no chromosome info, return first key of $min_max
+  my $chr = exists $elem->{slice} ? $elem->{slice}->{seq_region_name} : $elem->{chr};
+  $chr = defined $chr ? $self->get_source_chr_name($chr) : (keys %$min_max)[0];
+
+  my $check = exists $min_max->{$chr} &&
+    overlap($elem->{start}, $elem->{end},
+            @{$min_max->{$chr}}[0] - $up_down_size,
+            @{$min_max->{$chr}}[1] + $up_down_size);
+  return $check;
+}
+
+
 =head2 filter_features_by_min_max
 
   Arg 1      : arrayref $features
@@ -251,16 +323,12 @@ sub get_features_by_regions_cached {
 sub filter_features_by_min_max {
   my $self = shift;
   my $features = shift;
-  my $min = shift;
-  my $max = shift;
+  my $min_max = shift;
 
   my $up_down_size = defined($self->{up_down_size}) ? $self->{up_down_size} : $self->up_down_size();
-  $min -= $up_down_size;
-  $max += $up_down_size;
-  
+
   return [
-    grep {overlap($_->{start}, $_->{end}, $min, $max)}
-    @$features
+    grep { $self->_check_overlap($_, $min_max, $up_down_size) } @$features
   ];
 }
 
