@@ -126,12 +126,23 @@ SKIP: {
         'file' => $test_cfg->{custom_vcf},
         'type' => 'exact',
         'custom_multi_allelic' => undef,
+        'reciprocal' => 0,
+        'overlap_cutoff' => 0,
+        'reciprocal' => 0,
+        'overlap_def' => "Percentage of input variant covered by reference variant",
+        'distance' => undef,
+        'same_type' => 0,
         'info' => {
           'custom_info' => {
             'short_name' => 'test',
             'report_coords' => 0,
             'file' => $test_cfg->{custom_vcf},
-            'type' => 'exact'
+            'type' => 'exact',
+            'overlap_cutoff' => 0,
+            'reciprocal' => 0,
+            'overlap_def' => "Percentage of input variant covered by reference variant",
+            'distance' => undef,
+            'same_type' => 0,
           }
         }
       }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
@@ -150,12 +161,22 @@ SKIP: {
         'file' => $test_cfg->{custom_vcf},
         'type' => 'overlap',
         'custom_multi_allelic' => undef,
+        'overlap_cutoff' => 0,
+        'reciprocal' => 0,
+        'overlap_def' => "Percentage of input variant covered by reference variant",
+        'distance' => undef,
+        'same_type' => 0,
         'info' => {
           'custom_info' => {
             'short_name' => 'test',
             'report_coords' => 0,
             'file' => $test_cfg->{custom_vcf},
-            'type' => 'overlap'
+            'type' => 'overlap',
+            'overlap_cutoff' => 0,
+            'reciprocal' => 0,
+            'overlap_def' => "Percentage of input variant covered by reference variant",
+            'distance' => undef,
+            'same_type' => 0,
           }
         }
       }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
@@ -174,12 +195,22 @@ SKIP: {
         'file' => $test_cfg->{custom_vcf},
         'type' => 'overlap',
         'custom_multi_allelic' => undef,
+        'overlap_cutoff' => 0,
+        'reciprocal' => 0,
+        'overlap_def' => "Percentage of input variant covered by reference variant",
+        'distance' => undef,
+        'same_type' => 0,
         'info' => {
           'custom_info' => {
             'short_name' => 'test',
             'report_coords' => 1,
             'file' => $test_cfg->{custom_vcf},
             'type' => 'overlap',
+            'overlap_cutoff' => 0,
+            'reciprocal' => 0,
+            'overlap_def' => "Percentage of input variant covered by reference variant",
+            'distance' => undef,
+            'same_type' => 0,
           }
         }
       }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
@@ -199,6 +230,11 @@ SKIP: {
         'file' => $test_cfg->{custom_vcf},
         'type' => 'overlap',
         'custom_multi_allelic' => undef,
+        'overlap_cutoff' => 0,
+        'reciprocal' => 0,
+        'overlap_def' => "Percentage of input variant covered by reference variant",
+        'distance' => undef,
+        'same_type' => 0,
         'info' => {
           'custom_info' => {
             'short_name' => 'test',
@@ -206,6 +242,11 @@ SKIP: {
             'fields' => ['FOO', 'BAR'],
             'file' => $test_cfg->{custom_vcf},
             'type' => 'overlap',
+            'overlap_cutoff' => 0,
+            'reciprocal' => 0,
+            'overlap_def' => "Percentage of input variant covered by reference variant",
+            'distance' => undef,
+            'same_type' => 0,
           }
         }
       }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
@@ -226,7 +267,12 @@ SKIP: {
         'short_name' => 'test',
         'report_coords' => '1',
         'file' => $test_cfg->{test_vcf21},
-        'type' => 'overlap'
+        'type' => 'overlap',
+        'overlap_cutoff' => 0,
+        'reciprocal' => 0,
+        'overlap_def' => "Percentage of input variant covered by reference variant",
+        'distance' => undef,
+        'same_type' => 0,
       }
     },
     'short_name' => 'test',
@@ -235,7 +281,12 @@ SKIP: {
     'file' => $test_cfg->{test_vcf21},
     'fields' => ['FOO', 'BAR'],
     'custom_multi_allelic' => undef,
-    'type' => 'overlap'
+    'type' => 'overlap',
+    'overlap_cutoff' => 0,
+    'reciprocal' => 0,
+    'overlap_def' => "Percentage of input variant covered by reference variant",
+    'distance' => undef,
+    'same_type' => 0,
   }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' ),
   bless( {
     'info' => {
@@ -244,7 +295,12 @@ SKIP: {
         'short_name' => 'test',
         'report_coords' => '1',
         'file' => $test_cfg->{test_vcf_MT},
-        'type' => 'overlap'
+        'type' => 'overlap',
+        'overlap_cutoff' => 0,
+        'reciprocal' => 0,
+        'overlap_def' => "Percentage of input variant covered by reference variant",
+        'distance' => undef,
+        'same_type' => 0,
       }
     },
     'short_name' => 'test',
@@ -253,7 +309,12 @@ SKIP: {
     'file' => $test_cfg->{test_vcf_MT},
     'fields' => ['FOO', 'BAR'],
     'custom_multi_allelic' => undef,
-    'type' => 'overlap'
+    'type' => 'overlap',
+    'overlap_cutoff' => 0,
+    'reciprocal' => 0,
+    'overlap_def' => "Percentage of input variant covered by reference variant",
+    'distance' => undef,
+    'same_type' => 0,
   }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
     ],
     'get_all_custom - automated ###CHR###'

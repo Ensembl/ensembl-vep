@@ -43,6 +43,11 @@ is_deeply(
     type => 'exact',
     short_name => 'bar',
     report_coords => 1,
+    reciprocal => 0,
+    overlap_def => undef,
+    overlap_cutoff => 0,
+    distance => undef,
+    same_type => 0,
     info => {
       custom_info => {
         file => 'foo/bar',
