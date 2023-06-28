@@ -461,7 +461,7 @@ SKIP: {
     [
       {
         'a_index' => 0,
-        'a_allele' => 'AGCGT',
+        'a_allele' => 'GCG',
         'b_allele' => 'GCG',
         'b_index' => 0
       }
@@ -491,12 +491,11 @@ SKIP: {
   );
 
   # Test frequency match for 'matched alleles'
-  my $ib_freq = get_ib([qw(21 25005812 . CA CAAA . . .)]);
+  my $ib_freq = get_ib([qw(21 25005812 . CA CAAA,CAAA . . .)]);
   $c->{freq_pop} = '1KG_AMR';
   $c->annotate_InputBuffer($ib_freq);
   $vf = $ib_freq->buffer->[0];
   $c->get_frequency_data($vf);
-
   is_deeply(
     $vf->{_freq_check_freqs},
     {
@@ -623,7 +622,7 @@ SKIP: {
     [
       {
         'a_index' => 0,
-        'a_allele' => 'AGCGT',
+        'a_allele' => 'GCG',
         'b_allele' => 'GCG',
         'b_index' => 0
       }

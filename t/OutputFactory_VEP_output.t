@@ -149,10 +149,11 @@ is(
   'output_hash_to_line - test extra 2'
 );
 
-# Include reference allele in output
+# Include reference allele and uploaded allele in output
 my $ib = get_annotated_buffer({
   input_file => $test_cfg->{test_vcf},
-  show_ref_allele => 1
+  show_ref_allele => 1,
+  uploaded_allele => 1
 });
 $of = Bio::EnsEMBL::VEP::OutputFactory::VEP_output->new({config => $ib->config});
 
@@ -172,7 +173,7 @@ is(
     3_prime_UTR_variant
     1122
     - - - - -
-    REF_ALLELE=C;IMPACT=MODIFIER;STRAND=-1;Original_allele=C/T
+    REF_ALLELE=C;UPLOADED_ALLELE=C/T;IMPACT=MODIFIER;STRAND=-1
   )),
   'get_all_lines_by_InputBuffer - check first'
 );
@@ -193,7 +194,7 @@ is(
     V/I
     Gtt/Att
     -
-    REF_ALLELE=C;IMPACT=MODERATE;STRAND=-1;FLAGS=cds_start_NF;Original_allele=C/T
+    REF_ALLELE=C;UPLOADED_ALLELE=C/T;IMPACT=MODERATE;STRAND=-1;FLAGS=cds_start_NF
   )),
   'get_all_lines_by_InputBuffer - check last'
 );
@@ -216,7 +217,7 @@ is(
   'HGVSc=ENST00000307301.11:c.*18G>A;'.
   'AF=0.0010;AFR_AF=0.003;AMR_AF=0.0014;EAS_AF=0;EUR_AF=0;SAS_AF=0;'.
   'gnomADe_AF=0.0003478;gnomADe_AFR_AF=0.004643;gnomADe_AMR_AF=0.0003236;gnomADe_ASJ_AF=0;'.
-  'gnomADe_EAS_AF=0;gnomADe_FIN_AF=0;gnomADe_NFE_AF=1.886e-05;gnomADe_OTH_AF=0;gnomADe_SAS_AF=0;MAX_AF=0.004643;MAX_AF_POPS=gnomADe_AFR;Original_allele=C/T',
+  'gnomADe_EAS_AF=0;gnomADe_FIN_AF=0;gnomADe_NFE_AF=1.886e-05;gnomADe_OTH_AF=0;gnomADe_SAS_AF=0;MAX_AF=0.004643;MAX_AF_POPS=gnomADe_AFR',
   'get_all_lines_by_InputBuffer - everything'
 );
 
@@ -251,7 +252,7 @@ SKIP: {
       3_prime_UTR_variant
       1122
       - - - - -
-      IMPACT=MODIFIER;STRAND=-1;Original_allele=C/T;test=test1;test_FILTER=PASS;test_FOO=BAR
+      IMPACT=MODIFIER;STRAND=-1;test=test1;test_FILTER=PASS;test_FOO=BAR
     )),
     'get_all_lines_by_InputBuffer - custom'
   );

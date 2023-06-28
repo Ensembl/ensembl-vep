@@ -141,7 +141,8 @@ is(
 # Include reference allele in output
 my $ib = get_annotated_buffer({
   input_file => $test_cfg->{test_vcf},
-  'show_ref_allele' => 1
+  'show_ref_allele' => 1,
+  'uploaded_allele' => 1
 });
 $of = Bio::EnsEMBL::VEP::OutputFactory::Tab->new({config => $ib->config});
 
@@ -162,6 +163,7 @@ is(
     1122
     - - - - -
     C
+    C/T
     MODIFIER
     -
     -1
@@ -187,6 +189,7 @@ is(
     Gtt/Att
     -
     C
+    C/T
     MODERATE
     -
     -1

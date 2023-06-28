@@ -234,7 +234,6 @@ SKIP: {
       'end' => 25585733,
       'seq_region_name' => '21',
       'strand' => 1,
-      'original_allele' => 'C/T',
       'transcript_consequences' => [
         {
           'gene_id' => 'ENSG00000154719',
@@ -435,7 +434,6 @@ SKIP: {
       ],
       'strand' => 1,
       'id' => 'rs142513484',
-      'original_allele' => 'C/T',
       'allele_string' => 'C/T',
       'most_severe_consequence' => 'missense_variant',
       'start' => 25585733,
@@ -507,9 +505,11 @@ SKIP: {
   );
 
   # test refseq keys: used_ref and given_ref
+  # test uploaded_allele flag
   $ib = get_annotated_buffer({
     input_file => $test_cfg->create_input_file([qw(21 25891785 . G GA . . .)]),
     refseq => 1,
+    uploaded_allele => 1,
     fasta => $test_cfg->{fasta},
   });
   $of = Bio::EnsEMBL::VEP::OutputFactory::JSON->new({config => $ib->config});
@@ -529,6 +529,7 @@ SKIP: {
       'cdna_start' => 2347,
       'transcript_id' => 'NM_000484.3',
       'gene_id' => '351',
+      'uploaded_allele' => '-/A',
       'cds_start' => 2147,
       'protein_start' => 716,
       'refseq_match' => [
