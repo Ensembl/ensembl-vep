@@ -93,6 +93,8 @@ BEGIN {
   }
 }
 
+use Bio::EnsEMBL::VEP::Parser qw(get_SO_term);
+
 my %FORMAT_MAP = (
   'vcf'     => 'VCF',
   'gff'     => 'GFF',
@@ -103,6 +105,8 @@ my %FORMAT_MAP = (
 
 my %VALID_TYPES = (
   'overlap' => 1,
+  'within' => 1,
+  'surrounding' => 1,
   'exact' => 1,
 );
 
@@ -111,12 +115,17 @@ my %VALID_TYPES = (
 
   Arg 1      : hashref $args
                {
-                 config        => Bio::EnsEMBL::VEP::Config $config,
-                 file          => string $filename,
-                 format        => string $format (bed,bigwig,gff,gtf,vcf),
-                 short_name    => (optional) string $short_name,
-                 type          => (optional) string $type (overlap (default), exact),
-                 report_coords => (optional) bool $report_coords,
+                 config         => Bio::EnsEMBL::VEP::Config $config,
+                 file           => string $filename,
+                 format         => string $format (bed,bigwig,gff,gtf,vcf),
+                 short_name     => (optional) string $short_name,
+                 type           => (optional) string $type (overlap (default), within, surrounding, exact),
+                 report_coords  => (optional) bool $report_coords,
+                 overlap_cutoff => (optional) numeric $minimum_percentage_overlap (0 by default),
+                 distance       => (optional) numeric $distance_to_overlapping_variant_ends (off by default),
+                 same_type      => (optional) bool $only_match_identical_variant_classes (off by default),
+                 reciprocal     => (optional) bool $calculate_reciprocal_overlap (off by default),
+                 overlap_def    => (optional) string $overlap_definition (based on reciprocal by default)
                }
   Example    : $as = Bio::EnsEMBL::VEP::AnnotationSource::File->new($args);
   Description: Create a new Bio::EnsEMBL::VEP::AnnotationSource::File object. Will
@@ -145,6 +154,12 @@ sub new {
   $hashref->{short_name} = $self->short_name($hashref->{short_name} || (split '/', $self->file)[-1]);
   $hashref->{type} = $self->type($hashref->{type} || 'overlap');
   $self->report_coords(defined($hashref->{report_coords}) ? $hashref->{report_coords} : 0);
+
+  $self->{overlap_cutoff} = $hashref->{overlap_cutoff} || 0;
+  $self->{distance}       = $hashref->{distance};
+  $self->{same_type}      = $hashref->{same_type}      || 0;
+  $self->{reciprocal}     = $hashref->{reciprocal}     || 0;
+  $self->{overlap_def}    = $hashref->{overlap_def};
 
   $self->{info} = { custom_info => $hashref };
 
@@ -214,10 +229,11 @@ sub short_name {
 
   Arg 1      : (optional) string $type
   Example    : $type = $as->type()
-  Description: Getter/setter for type of this source, either "overlap"
-               or "exact".
-                - overlap returns any source features that overlap input variants
-                - exact requires that source features' coordinates match input variants exactly
+  Description: Getter/setter for type of this source:
+                - "overlap" returns source features that overlap input variants
+                - "within" returns source features that are within the input variants
+                - "surrounding" returns source features that completely surround the input variants
+                - "exact" requires that source features' coordinates match input variants exactly
   Returntype : string
   Exceptions : none
   Caller     : general
@@ -350,20 +366,23 @@ sub annotate_VariationFeature {
 
   my $record = $self->_create_records($overlap_result);
 
+  my $is_recorded = 0;
   if (@{$record}[0]->{'name'} =~  /^COSV/) {
     my ($matched_cosmic_record) = grep{$_->{'name'} eq @{$record}[0]->{'name'}} @{$vf->{_custom_annotations}->{$self->short_name}};
     if ($matched_cosmic_record){
+      $is_recorded = 1;
       foreach my $key (keys %{@{$record}[0]->{'fields'}}) {
         unless (exists $matched_cosmic_record->{'fields'}->{$key}) {
           $matched_cosmic_record->{'fields'}{$key} = @{$record}[0]->{'fields'}->{$key};
         }   
       }
-    } else {
-      $record->[0]->{"fields"}->{"PC"} = $overlap_percentage if (defined($self->{fields}) && grep {$_ eq "PC"} @{$self->{fields}});
-      push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$record};
     }
-  } else {
-    $record->[0]->{"fields"}->{"PC"} = $overlap_percentage if (defined($self->{fields}) && grep {$_ eq "PC"} @{$self->{fields}});
+  }
+
+  if (!$is_recorded) {
+    if (defined($self->{fields}) && grep {$_ eq "PC"} @{$self->{fields}}) {
+      $record->[0]->{"fields"}->{"PC"} = $overlap_percentage;
+    }
     push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$record};
   }
   
@@ -435,23 +454,64 @@ sub _record_overlaps_VF {
 
   my $parser = $self->parser();
   my $type = $self->type();
+  my $overlap_cutoff = $self->{overlap_cutoff};
+  my $distance = $self->{distance};
+  my $same_type = $self->{same_type};
+  my $reciprocal = $self->{reciprocal};
+  my ($ref_start, $ref_end) = ($parser->get_start, $parser->get_end);
 
-  if($type eq 'overlap') {
+  # match on variant class (if enabled)
+  # confounded by different descriptions for the same event
+  if ($same_type) {
+    my $vf_class = $vf->class_SO_term;
+    my $ref_class = get_SO_term($parser);
 
+    return 0 if defined $ref_class && defined $vf_class && $ref_class ne $vf_class;
+  }
+
+  if($type ~~ [ 'overlap', 'within', 'surrounding' ]) {
     # account for insertions in Ensembl world where s = e+1
     my ($vs, $ve) = ($vf->{start}, $vf->{end});
     ($vs, $ve) = ($ve, $vs) if $vs > $ve;
     my $length = $ve - $vs + 1;
 
-    my @overlap_start = sort { $a <=> $b } ($vs, $parser->get_start);
-    my @overlap_end   = sort { $a <=> $b } ($ve, $parser->get_end);
+    # check if reference variant is within the input variant (if enabled)
+    return 0 if $type eq "within" && ($vs > $ref_start || $ve < $ref_end);
 
-    my $overlap_percentage = sprintf("%.3f", 100 * (1+ $overlap_end[0]  - $overlap_start[1])/ $length);
-    
-    return overlap($parser->get_start, $parser->get_end, $vs, $ve), $overlap_percentage;
+    # check if reference variant completely surrounds the input variant (if enabled)
+    return 0 if $type eq "surrounding" && ($vs < $ref_start || $ve > $ref_end);
+
+    if (defined $distance) {
+      return 0 unless abs($vs - $ref_start) <= $distance;
+      return 0 unless abs($ve - $ref_end  ) <= $distance;
+    }
+
+    # check overlap percentage
+    my @overlap_start = sort { $a <=> $b } ($vs, $ref_start);
+    my @overlap_end   = sort { $a <=> $b } ($ve, $ref_end);
+    my $overlap_percentage = 100 * (1 + $overlap_end[0] - $overlap_start[1]) / $length;
+
+    return 0 if $overlap_percentage < $overlap_cutoff;
+
+    if ($reciprocal) {
+      # check bi-directional overlap - percentage of reference variant covered
+      my $ref_length = $ref_end - $ref_start + 1;
+      my $ref_overlap_percentage = 100 * (1 + $overlap_end[0] - $overlap_start[1]) / $ref_length;
+      return 0 if $ref_overlap_percentage < $overlap_cutoff;
+
+      # report minimum overlap
+      if ($ref_overlap_percentage < $overlap_percentage) {
+        $overlap_percentage = $ref_overlap_percentage;
+      }
+    }
+
+    $overlap_percentage = sprintf("%.3f", $overlap_percentage);
+    return overlap($ref_start, $ref_end, $vs, $ve), $overlap_percentage;
   }
   elsif($type eq 'exact') {
-    return ($parser->get_start == $vf->{start} && $parser->get_end == $vf->{end});
+    my $match = $parser->get_start == $vf->{start} && $parser->get_end == $vf->{end};
+    my $overlap_percentage = $match ? 100 : 0;
+    return ( $match, $overlap_percentage );
   }
 }
 

@@ -79,6 +79,10 @@ use Bio::EnsEMBL::VEP::Parser::CAID;
 use Scalar::Util qw(openhandle looks_like_number);
 use FileHandle;
 
+use base qw(Exporter);
+
+our @EXPORT_OK = qw(get_SO_term);
+
 my %FORMAT_MAP = (
   'vcf'     => 'VCF',
   'ensembl' => 'VEP_input',
@@ -663,8 +667,8 @@ sub validate_vf {
   return 1;
 }
 
-=head2 get_SO_term
 
+=head2 get_SO_term
   Arg 1      : string $type
   Example    : $ref_allele = $parser->get_SO_term($type);
   Description: Returns the Sequence Ontology term based on a given variant type.
@@ -673,12 +677,11 @@ sub validate_vf {
   Exceptions : none
   Caller     : general
   Status     : Stable
-
 =cut
 
 sub get_SO_term {
   my $self = shift;
-  my $type = shift;
+  my $type = shift || join(",", @{ $self->get_alternatives });
   my $abbrev;
 
   if ($type =~ /\<CN/i) {
@@ -706,6 +709,7 @@ sub get_SO_term {
 
   return $terms{$abbrev};
 }
+
 
 =head2 _get_ref_allele
 

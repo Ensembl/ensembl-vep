@@ -233,7 +233,15 @@ sub get_all_custom {
       format => $hash{"format"},
       type => $hash{"type"} || "overlap",
       report_coords => $hash{"coords"} || 0,
+      overlap_cutoff => $hash{"overlap_cutoff"} || 0,
+      distance => $hash{"distance"},
+      same_type => $hash{"same_type"} || 0,
+      reciprocal => $hash{"reciprocal"} || 0,
     };
+
+    $opts->{overlap_def} = $opts->{reciprocal} ?
+      "Percentage of minimum reciprocal overlap between input variant and reference variant" :
+      "Percentage of input variant covered by reference variant";
 
     if(defined($hash{"format"}) && $hash{"format"} =~ /^G[TF]F$/i) {
       $opts->{filter} = $self->param('transcript_filter');
