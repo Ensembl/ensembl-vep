@@ -25,7 +25,7 @@ process runVEP {
   tuple val(original_vcf), path(vcf), path(vcf_index), path(vep_config), val(index_type)
   
   output:
-  tuple val(original_vcf), path(out_vcf), path("${out_vcf}.{tbi,csi}"), val(index_type), emit: files
+  tuple val(original_vcf), path(out_vcf), path("${out_vcf}.{tbi,csi}"), path(vep_config), val(index_type), emit: files
   path("*.vcf.gz_summary.*")
 
   script:
