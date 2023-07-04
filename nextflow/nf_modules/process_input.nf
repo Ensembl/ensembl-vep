@@ -8,7 +8,7 @@ nextflow.enable.dsl=2
 
 process processInput {
   /*
-  Generate input for subsequent jobs. It works like merge operator and it helps creating one-to-one or many-to-one or many-to-one relationship between vcf file, vep_config, and output_dir
+  Generate input for subsequent jobs.
 
   Returns
   -------
@@ -22,12 +22,10 @@ process processInput {
   cpus params.cpus
 
   input:
-  path vcf
-  path vep_config
-  val output_dir
+  tuple path(vcf), path(vep_config)
 
   output:
-  tuple path(vcf), env(vcf_index), path(vep_config), val(output_dir), env(index_type)
+  tuple path(vcf), env(vcf_index), path(vep_config), env(index_type)
   
   script:
   """

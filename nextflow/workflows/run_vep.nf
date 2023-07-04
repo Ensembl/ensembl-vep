@@ -49,7 +49,7 @@ Options:
 }
 
 
-def createChannels (input, pattern, is_vcf) {
+def createChannels (input, pattern) {
   if (input instanceof String) {
     // if input is a String, process as file or directory
     files = file(input)
@@ -93,23 +93,29 @@ workflow vep {
       exit 1, "Undefined --vep_config parameter. Please provide a VEP config file."
     }
     
-    vcf = createChannels(vcf, pattern="*.{vcf,gz}", true)
-    vep_config = createChannels(vep_config, pattern="*.ini", false)
+    vcf = createChannels(vcf, pattern="*.{vcf,gz}")
+    vep_config = createChannels(vep_config, pattern="*.ini")
 
     vcf.count()
       .combine( vep_config.count() )
       .subscribe{ if ( it[0] != 1 && it[1] != 1 ) 
         exit 1, "Detected many-to-many scenario between VCF and VEP config files - currently not supported" 
       }
-
-    // convert ouput dir to absolute path if necessary
-    output_dir = toAbsolute(output_dir)
+      
+    // convert output dir to absolute path if necessary
+    output_dir = Channel.fromPath(toAbsolute(output_dir))
+    
+    // set if it is a one_to_many situation (single VCF and multiple ini file)
+    // in this situation we produce output files with different names
+    one_to_many = vcf.count()
+      .combine( vep_config.count() )
+      .map{ it[0] == 1 && it[1] != 1 }
 
     // process input and create Channel
     // this works like 'merge' operator and thus might make the pipeline un-resumable
     // we might think of using 'toSortedList' and generate appropriate input from the 'processInput' module
-    processInput(vcf, vep_config, output_dir)
-
+    processInput(vcf.combine(vep_config))
+    
     // Prepare input VCF files (bgzip + tabix)
     checkVCF(processInput.out)
     
@@ -121,9 +127,12 @@ workflow vep {
 
     // Run VEP for each split VCF file and for each VEP config
     runVEP(splitVCF.out.transpose())
-
+    
     // Merge split VCF files (creates one output VCF for each input VCF)
-    mergeVCF(runVEP.out.files.groupTuple(by: [0, 3, 4]))
+    mergeVCF(runVEP.out.files.groupTuple(by: [0, 3, 4])
+      .combine(one_to_many
+      .combine(output_dir))
+    )
   emit:
     mergeVCF.out
 }
