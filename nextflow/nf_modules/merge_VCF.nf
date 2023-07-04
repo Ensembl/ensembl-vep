@@ -22,13 +22,19 @@ process mergeVCF {
   cache 'lenient'
    
   input:
-  tuple val(original_vcf), path(vcf_files), path(index_files), val(output_dir), val(index_type)
+  tuple val(original_vcf), path(vcf_files), path(index_files), val(vep_config), val(index_type),
+    val(one_to_many),
+    val(output_dir)
   
   output:
   val("${output_dir}/${merged_vcf}")
 
   script:
   merged_vcf = merged_vcf ?: file(original_vcf).getName().replace(".vcf", "_VEP.vcf")
+  merged_vcf = one_to_many ? merged_vcf.replace(
+    "_VEP.vcf", 
+    "_" + file(vep_config).getName().replace(".ini", "") + "_VEP.vcf"
+  ) : merged_vcf
   index_flag = index_type == "tbi" ? "-t" : "-c"
   
   """

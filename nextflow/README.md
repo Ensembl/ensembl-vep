@@ -57,7 +57,8 @@ The following config files are used and can be modified depending on user requir
   --vep_config FILENAME     VEP config file. Alternatively, can also be a directory containing VEP INI files. Default: vep_config/vep.ini
   --cpus INT                Number of CPUs to use. Default: 1
   --outdir DIRNAME          Name of output directory. Default: outdir
-  --output_prefix PREFIX    Output filename prefix. The generated output file will have name <vcf>-<output_prefix>.vcf.gz
+  --output_prefix PREFIX    Output filename prefix. The generated output file will have name <output_prefix>_VEP.vcf.gz.
+                            NOTE: Do not use this parameter if you are expecting multiple output files.
   --skip_check [0,1]        Skip check for tabix index file of input VCF. Enables use of cache with -resume. Default: 0
 ```
 
