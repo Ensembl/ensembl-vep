@@ -571,7 +571,7 @@ sub validate_vf {
   # uppercase allele string
   $vf->{allele_string} =~ tr/[a-z]/[A-Z]/;
 
-  unless($vf->{allele_string} =~ /([ACGT-]+\/*)+/) {
+  unless($vf->{allele_string} =~ /([ACGTN-]+\/*)+/) {
     $self->skipped_variant_msg(
       "Invalid allele string " . $vf->{allele_string} . " or possible parsing error"
     );
