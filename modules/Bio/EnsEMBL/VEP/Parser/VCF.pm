@@ -132,29 +132,6 @@ sub validate_line {
 }
 
 
-=head2 validate_alts
-
-  Example    : $valid = $self->validate_alts('A,T,C');
-  Description: Check if alternative alleles are valid.
-  Returntype : bool
-  Exceptions : none
-  Caller     : $self->SUPER::detect_format()
-  Status     : Stable
-
-=cut
-
-sub validate_alts {
-  my $self = shift;
-  my $alts = shift;
-
-  my $ok = 1;
-  foreach my $alt(split(',', $alts)) {
-    $ok = 0 unless $alt =~ /^[\.ACGTN\-\*]+$|^(\<[\w\:\*\=]+\>)$|^[\[\w\:\]]+$/i;
-  }
-  return $ok;
-}
-
-
 =head2 parser
 
   Example    : $io_parser = $parser->parser();

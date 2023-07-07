@@ -442,8 +442,7 @@ sub detect_format {
 
     # VCF: 20  14370  rs6054257  G  A  29  0  NS=58;DP=258;AF=0.786;DB;H2  GT:GQ:DP:HQ
     elsif ( $self->Bio::EnsEMBL::VEP::Parser::VCF::validate_line(@data) ) {
-      # do some more thorough checking on the ALTs
-      $format = 'vcf' if $self->Bio::EnsEMBL::VEP::Parser::VCF::validate_alts($data[4]);
+      $format = 'vcf';
     }
 
     # ensembl: 20  14370  14370  A/G  +
