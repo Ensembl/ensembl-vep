@@ -502,7 +502,7 @@ $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   file => $test_cfg->create_input_file([qw(21 25587758 sv_del T <DEL> . . .)]),
   valid_chromosomes => [21]
 })->next();
-like($tmp, qr/VCF line.+looks incomplete/, 'StructuralVariationFeature del without end or length');
+like($tmp, qr/deletion looks incomplete/, 'StructuralVariationFeature del without end or length');
 
 open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
@@ -520,7 +520,7 @@ my $vf_del = Bio::EnsEMBL::VEP::Parser::VCF->new({
 });
 
 my $sv = $vf_del->next();
-ok($tmp =~ /VCF line.+looks incomplete/, 'StructuralVariationFeature del without end or length (2 variants)');
+ok($tmp =~ /deletion looks incomplete/, 'StructuralVariationFeature del without end or length (2 variants)');
 open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
 delete($sv->{adaptor});
@@ -620,7 +620,7 @@ is_deeply($cvf, bless( {
                 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature - CPX skipped');
 
 
-ok($tmp =~ /variant CPX is of a non-supported type/, 'StructuralVariationFeature - skip CPX warning');
+like($tmp, qr/CPX type is not supported/, 'StructuralVariationFeature - skip CPX warning');
 
 open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 

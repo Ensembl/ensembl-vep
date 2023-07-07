@@ -683,18 +683,29 @@ sub get_SO_term {
   my $type = shift || join(",", @{ $self->get_alternatives });
   my $abbrev;
 
-  if ($type =~ /\<CN/i) {
+  if ($type =~ /DUP:TANDEM|CNV:TR/) {
+    # including <CNV:TR>,<CNV:TR>
+    $abbrev = "TDUP";
+  } elsif ($type =~ /CNV/) {
+    # including <CNV>,<CNV>
+    $abbrev = "CNV";
+  } elsif ($type =~ /CN=?[0-9]/i) {
     # ALT: "<CN0>", "<CN0>,<CN2>,<CN3>" "<CN2>" => SVTYPE: DEL, CNV, DUP
     $abbrev = "CNV";
     $abbrev = "DEL" if $type =~ /\<CN=?0\>/;
     $abbrev = "DUP" if $type =~ /\<CN=?2\>/;
-  } elsif ($type =~ /^\<|^\[|\]$|\>$/) {
+  } elsif ($type =~ /[\[\]]/) {
+    $abbrev = "BND";
+  } elsif ($type =~ /^\<|\>$/) {
     $abbrev = $type;
     $abbrev =~ s/\<|\>//g;
     $abbrev =~ s/\:.+//g;
   } else {
     $abbrev = $type;
   }
+
+  ## unsupported SV types
+  $self->skipped_variant_msg("$abbrev type is not supported") if $abbrev eq "CPX";
 
   my %terms = (
     INS  => 'insertion',

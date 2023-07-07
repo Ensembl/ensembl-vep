@@ -260,7 +260,7 @@ sub create_VariationFeatures {
     join("", $ref, @$alts) !~ /^[ACGT]+$/ &&
     (
       $info->{SVTYPE} ||
-      join(",", @$alts) =~ /[<\[][^\*]+[>\]]/
+      join(",", @$alts) =~ /[<\[\]][^\*]+[>\]\[]/
     )
   ) {
     return $self->create_StructuralVariationFeatures();
@@ -300,7 +300,7 @@ sub create_VariationFeatures {
     }
 
     unless(defined($chr) and defined($start)) {
-      $self->warning_msg("No GP flag found in INFO column on line ".$self->line_number);
+      $self->skipped_variant_msg("No GP flag found in INFO column");
       $parser->next();
       return $self->create_VariationFeatures;
     }
@@ -512,26 +512,17 @@ sub create_StructuralVariationFeatures {
     $parser->get_info,
     $parser->get_IDs,
   );
-
-  ## long and complex SVs cannot be handled
-  ## we have to return something here else we stop reading input, so flag it as not to be processed
-  my $skip ;
-
-  ## we cannot currently handle some SV
-  if($info->{SVTYPE} && $info->{SVTYPE} =~/CPX/ ){
-    my $line =join("\t", @$record);
-    $self->warning_msg("WARNING: variant " . $info->{SVTYPE}. " is of a non-supported type, skipping:\n$line\n");
-    $skip = 1;
-  }
+  
+  ## get structural variant type from SVTYPE tag (deprecated in VCF 4.4) or ALT
+  my $alt = join(",", @$alts);
+  my $type = $info->{SVTYPE} || $alt;
+  my $so_term = $self->get_SO_term($type) || $type;
 
   ## check against size upperlimit to avoid memory problems
   my $len = $end - $start;
   if( $len > $self->{max_sv_size} ){
-    $self->warning_msg("WARNING: variant $ids->[0] on line ".$self->line_number." is too long to annotate: ($len)\n");
-    $skip = 1;
+    $self->skipped_variant_msg("variant size ($len) is bigger than --max_sv_size (" . $self->{max_sv_size} . ")");
   }
-
-  my $alt = join(",", @$alts);
 
   # work out the end coord
   if(defined($info->{END})) {
@@ -550,21 +541,15 @@ sub create_StructuralVariationFeatures {
   );
 
   # parse alternative alleles from breakends
-  my $parsed_allele = undef;
-  my $allele_string = undef;
-  if ($info->{SVTYPE} && $info->{SVTYPE} =~/BND/ ){
+  my $parsed_allele;
+  my $allele_string;
+  if ($so_term =~ /break/ ){
     $parsed_allele = $self->_parse_breakend_alt_alleles($alt, $info);
     $allele_string = $alt;
   }
 
-  # avoid deriving type from alt if described by SVTYPE
-  my $type = $info->{SVTYPE} || $alt;
-
-  my $so_term = $self->get_SO_term($type) || $type;
   if($start >= $end && $so_term =~ /del/i) {
-    my $line = join("\t", @$record);
-    $self->warning_msg("WARNING: VCF line " . $self->line_number . " looks incomplete, skipping:\n$line\n");
-    $skip = 1;
+    $self->skipped_variant_msg("deletion looks incomplete");
   }
 
   my $svf = Bio::EnsEMBL::Variation::StructuralVariationFeature->new_fast({
@@ -583,7 +568,7 @@ sub create_StructuralVariationFeatures {
   });
   $svf->{allele_string}  = $allele_string if defined $allele_string;
   $svf->{_parsed_allele} = $parsed_allele if defined $parsed_allele;
-  $svf->{vep_skip} = $skip if defined $skip;
+  $svf->{vep_skip}       = $self->{skip_line} if defined $self->{skip_line};
 
   return $self->post_process_vfs([$svf]);
 }
