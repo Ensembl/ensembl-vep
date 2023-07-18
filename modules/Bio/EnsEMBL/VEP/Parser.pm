@@ -442,8 +442,7 @@ sub detect_format {
 
     # VCF: 20  14370  rs6054257  G  A  29  0  NS=58;DP=258;AF=0.786;DB;H2  GT:GQ:DP:HQ
     elsif ( $self->Bio::EnsEMBL::VEP::Parser::VCF::validate_line(@data) ) {
-      # do some more thorough checking on the ALTs
-      $format = 'vcf' if $self->Bio::EnsEMBL::VEP::Parser::VCF::validate_alts($data[4]);
+      $format = 'vcf';
     }
 
     # ensembl: 20  14370  14370  A/G  +
@@ -572,7 +571,7 @@ sub validate_vf {
   # uppercase allele string
   $vf->{allele_string} =~ tr/[a-z]/[A-Z]/;
 
-  unless($vf->{allele_string} =~ /([ACGT-]+\/*)+/) {
+  unless($vf->{allele_string} =~ /([ACGTN-]+\/*)+/) {
     $self->skipped_variant_msg(
       "Invalid allele string " . $vf->{allele_string} . " or possible parsing error"
     );
@@ -684,18 +683,29 @@ sub get_SO_term {
   my $type = shift || join(",", @{ $self->get_alternatives });
   my $abbrev;
 
-  if ($type =~ /\<CN/i) {
+  if ($type =~ /DUP:TANDEM|CNV:TR/) {
+    # including <CNV:TR>,<CNV:TR>
+    $abbrev = "TDUP";
+  } elsif ($type =~ /CNV/) {
+    # including <CNV>,<CNV>
+    $abbrev = "CNV";
+  } elsif ($type =~ /CN=?[0-9]/i) {
     # ALT: "<CN0>", "<CN0>,<CN2>,<CN3>" "<CN2>" => SVTYPE: DEL, CNV, DUP
     $abbrev = "CNV";
     $abbrev = "DEL" if $type =~ /\<CN=?0\>/;
     $abbrev = "DUP" if $type =~ /\<CN=?2\>/;
-  } elsif ($type =~ /^\<|^\[|\]$|\>$/) {
+  } elsif ($type =~ /[\[\]]/) {
+    $abbrev = "BND";
+  } elsif ($type =~ /^\<|\>$/) {
     $abbrev = $type;
     $abbrev =~ s/\<|\>//g;
     $abbrev =~ s/\:.+//g;
   } else {
     $abbrev = $type;
   }
+
+  ## unsupported SV types
+  $self->skipped_variant_msg("$abbrev type is not supported") if $abbrev eq "CPX";
 
   my %terms = (
     INS  => 'insertion',

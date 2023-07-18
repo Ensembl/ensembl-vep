@@ -595,7 +595,7 @@ ok(
 ## rejoin on minimal
 
 $ib = get_runner({
-  input_file => $test_cfg->create_input_file([qw(21 25741665 . CAGAAGAAAG TAGAAGAAAG,C . . .)]),
+  input_file => $test_cfg->create_input_file([('21', '25741665', '.', 'CAGAAGAAAG', 'TAGAAGAAAG,C', '.', '.', '.')]),
   minimal => 1,
 })->get_InputBuffer;
 $of = Bio::EnsEMBL::VEP::OutputFactory::VCF->new({config => $ib->config});
