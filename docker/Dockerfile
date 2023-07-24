@@ -191,7 +191,7 @@ ENV PLUGIN_DEPS "https://raw.githubusercontent.com/Ensembl/VEP_plugins/$BRANCH/c
 #   - Ubuntu packages
 RUN curl -O "$PLUGIN_DEPS/ubuntu-packages.txt" && \
     apt-get update && apt-get install -y --no-install-recommends \
-    $(sed -e s/\#.*//g -e s/^python$/python2/ -e s/^python-dev$/python2-dev/ ubuntu-packages.txt) && \
+    $(sed -e s/\#.*//g ubuntu-packages.txt) && \
     rm -rf /var/lib/apt/lists/* ubuntu-packages.txt
 #   - Perl modules
 RUN curl -O "$PLUGIN_DEPS/cpanfile" && \
