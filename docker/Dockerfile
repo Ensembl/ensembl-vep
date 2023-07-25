@@ -193,6 +193,8 @@ RUN curl -O "$PLUGIN_DEPS/ubuntu-packages.txt" && \
     apt-get update && apt-get install -y --no-install-recommends \
     $(sed -e s/\#.*//g ubuntu-packages.txt) && \
     rm -rf /var/lib/apt/lists/* ubuntu-packages.txt
+#   - Symlink python to python2
+RUN ln -s /usr/bin/python2 /usr/bin/python
 #   - Perl modules
 RUN curl -O "$PLUGIN_DEPS/cpanfile" && \
     cpanm --installdeps --with-recommends . && \
