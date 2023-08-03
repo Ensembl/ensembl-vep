@@ -469,7 +469,7 @@ sub _record_overlaps_VF {
     return 0 if defined $ref_class && defined $vf_class && $ref_class ne $vf_class;
   }
 
-  if($type ~~ [ 'overlap', 'within', 'surrounding' ]) {
+  if($type eq 'overlap' || $type eq 'within' || $type eq 'surrounding') {
     # account for insertions in Ensembl world where s = e+1
     my ($vs, $ve) = ($vf->{start}, $vf->{end});
     ($vs, $ve) = ($ve, $vs) if $vs > $ve;
