@@ -237,19 +237,52 @@ sub get_all_custom {
       distance => $hash{"distance"},
       same_type => $hash{"same_type"} || 0,
       reciprocal => $hash{"reciprocal"} || 0,
+      num_records => $hash{"num_records"}
     };
 
     $opts->{overlap_def} = $opts->{reciprocal} ?
       "Percentage of minimum reciprocal overlap between input variant and reference variant" :
       "Percentage of input variant covered by reference variant";
 
-    if(defined($hash{"format"}) && $hash{"format"} =~ /^G[TF]F$/i) {
+    my $format = $hash{"format"};
+    if(defined($format) && $format =~ /^G[TF]F$/i) {
       $opts->{filter} = $self->param('transcript_filter');
       $opts->{bam} = $self->param('bam');
     }
 
     $opts->{fields} = [split /%/, $hash{"fields"}] if $hash{"fields"};
     $opts->{fields} = \@fields if @fields;
+
+    if (!defined $opts->{num_records}) {
+      $opts->{num_records} = 50; # by default, show all values for non-SVs
+    } elsif ($opts->{num_records} eq 'all') {
+      $opts->{num_records} = 'inf';
+    }
+
+    $opts->{summary_stats} = $hash{"summary_stats"} || 'min%mean%max%count%sum';
+    if (
+      $opts->{report_coords} ||
+      $format !~ /^(bigwig|bed)$/ ||
+      $opts->{summary_stats} eq 'none'
+    ) {
+      delete $opts->{summary_stats};
+    } else {
+      $opts->{summary_stats} = [split /%/, $opts->{summary_stats}];
+
+      my @invalid;
+      my @stats = ('min', 'max', 'mean', 'count', 'sum');
+      for my $k (@{ $opts->{summary_stats} }) {
+        push @invalid, $k unless grep { $_ eq $k } @stats;
+      }
+      if (@invalid) {
+        my $invalid_opts = join(", ", @invalid);
+        my $valid_opts   = join(", ", @stats);
+        throw("ERROR: The following summary statistics for custom annotations ".
+              "are not supported: $invalid_opts. ".
+              "Available options are: $valid_opts.\n".
+              "LINE: --custom $custom_string\n");
+      }
+    }
 
     if (grep { /\#\#\#CHR\#\#\#/ } $hash{"file"}){
 

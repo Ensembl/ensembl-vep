@@ -125,7 +125,9 @@ my %VALID_TYPES = (
                  distance       => (optional) numeric $distance_to_overlapping_variant_ends (off by default),
                  same_type      => (optional) bool $only_match_identical_variant_classes (off by default),
                  reciprocal     => (optional) bool $calculate_reciprocal_overlap (off by default),
-                 overlap_def    => (optional) string $overlap_definition (based on reciprocal by default)
+                 overlap_def    => (optional) string $overlap_definition (based on reciprocal by default),
+                 num_records    => (optional) maximum number of records to show (50 by default),
+                 summary_stats  => (optional) summary statistics: max, min, mean, count, sum
                }
   Example    : $as = Bio::EnsEMBL::VEP::AnnotationSource::File->new($args);
   Description: Create a new Bio::EnsEMBL::VEP::AnnotationSource::File object. Will
@@ -176,6 +178,7 @@ sub new {
     else {
       throw("ERROR: Cannot use format $format without Bio::DB::HTS::Tabix module installed\n") unless $CAN_USE_TABIX_PM;
     }
+    $hashref->{_format} = $format;
 
     my $class = $self->module_prefix.'::AnnotationSource::File::'.$FORMAT_MAP{$format};
     eval "require $class";
@@ -309,17 +312,33 @@ sub annotate_InputBuffer {
         $parser->next();
       }
 
+      my $stats = $self->{summary_stats};
       # Different checks before annotating the VF:
       # - Check a record exist
       # - Check that the chromosomes names match between the input VF entry and the custom annotation file.
       #   There is a special case for the custom annotation file with chromosome names like 'chr1',
       #   as they are not present in the cache (chr_synonym.txt): we also check the 'raw' seqname with the source_chr_name.
       # - Check that the start of the custom annotation record is lower that the end of the input VF entry
+      my $record_count = 0;
       while($parser->{record} &&
             ($parser->get_seqname eq $self->get_source_chr_name($chr) || $parser->${get_raw_seqname} eq $self->get_source_chr_name($chr)) &&
             $parser->get_start <= $vf_end + 1) {
-        $self->annotate_VariationFeature($vf);
+        # stop if exceeding the desired number of records and not calculating stats
+        last if !defined $stats && $record_count >= $self->{num_records};
+
+        $self->annotate_VariationFeature($vf, $record_count++);
         $parser->next();
+      }
+
+      # prepare statistics
+      if (defined $stats) {
+        my $annot_stats = $vf->{_custom_annotations_stats}->{$self->short_name};
+        $annot_stats->{count} = $record_count if grep(/^count$/, @$stats);
+        if ( grep(/^(mean)$/, @$stats) && defined $annot_stats->{sum} ) {
+          $annot_stats->{mean} = $annot_stats->{sum} / $record_count;
+        }
+        delete $annot_stats->{sum} unless grep(/^sum$/, @$stats);
+        $vf->{_custom_annotations_stats}->{$self->short_name} = $annot_stats;
       }
     }
   }
@@ -346,6 +365,7 @@ sub valid_chromosomes {
 =head2 annotate_VariationFeature
  
   Arg 1      : Bio::EnsEMBL::Variation::VariationFeature
+  Arg 2      : $record_count
   Example    : $as->annotate_VariationFeature($vf);
   Description: Add custom annotations to the given variant using the
                current record as read from the annotation source.
@@ -359,6 +379,7 @@ sub valid_chromosomes {
 sub annotate_VariationFeature {
   my $self = shift;
   my $vf = shift;
+  my $record_count = shift;
 
   my ($overlap_result, $overlap_percentage) = $self->_record_overlaps_VF($vf);
 
@@ -383,7 +404,28 @@ sub annotate_VariationFeature {
     if (defined($self->{fields}) && grep {$_ eq "PC"} @{$self->{fields}}) {
       $record->[0]->{"fields"}->{"PC"} = $overlap_percentage;
     }
-    push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$record};
+
+    # calculate summary statistics for custom annotation
+    my $annot_stats = $vf->{_custom_annotations_stats}->{$self->short_name};
+    my $stats = $self->{summary_stats};
+    if (defined $stats) {
+      my $value = $record->[0]->{name};
+
+      if ( grep(/^min$/, @$stats) ) {
+        $annot_stats->{min} = $value if $value < ($annot_stats->{min} || '+inf');
+      }
+      if ( grep(/^max$/, @$stats) ) {
+        $annot_stats->{max} = $value if $value > ($annot_stats->{max} || '-inf');
+      }
+      $annot_stats->{sum} += $value if grep(/^(sum|mean)$/, @$stats);
+      $vf->{_custom_annotations_stats}->{$self->short_name} = $annot_stats;
+    }
+
+    if ( $record_count < $self->{num_records} ) {
+      push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$record};
+    } elsif ( $record_count == $self->{num_records} ) {
+      push @{$vf->{_custom_annotations}->{$self->short_name}}, { name => '...' };
+    }
   }
   
 }
