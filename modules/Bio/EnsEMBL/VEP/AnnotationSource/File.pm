@@ -458,7 +458,9 @@ sub _record_overlaps_VF {
   my $distance = $self->{distance};
   my $same_type = $self->{same_type};
   my $reciprocal = $self->{reciprocal};
+
   my ($ref_start, $ref_end) = ($parser->get_start, $parser->get_end);
+  $ref_start += 1 if $self->{_format} eq 'bigwig';
 
   # match on variant class (if enabled)
   # confounded by different descriptions for the same event
@@ -509,7 +511,7 @@ sub _record_overlaps_VF {
     return overlap($ref_start, $ref_end, $vs, $ve), $overlap_percentage;
   }
   elsif($type eq 'exact') {
-    my $match = $parser->get_start == $vf->{start} && $parser->get_end == $vf->{end};
+    my $match = $ref_start == $vf->{start} && $ref_end == $vf->{end};
     my $overlap_percentage = $match ? 100 : 0;
     return ( $match, $overlap_percentage );
   }
