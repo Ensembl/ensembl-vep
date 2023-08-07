@@ -325,8 +325,8 @@ sub annotate_InputBuffer {
             $parser->get_start <= $vf_end + 1) {
         # stop if exceeding the desired number of records and not calculating stats
         last if !defined $stats && $record_count >= $self->{num_records};
-
-        $self->annotate_VariationFeature($vf, $record_count++);
+        my $res = $self->annotate_VariationFeature($vf, $record_count);
+        $record_count++ if $res;
         $parser->next();
       }
 
@@ -427,7 +427,7 @@ sub annotate_VariationFeature {
       push @{$vf->{_custom_annotations}->{$self->short_name}}, { name => '...' };
     }
   }
-  
+  return 1;
 }
 
 
