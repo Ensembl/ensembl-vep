@@ -614,40 +614,27 @@ sub create_individual_VariationFeatures {
     my @bits = map { $allele_map->{$_} } split /\||\/|\\/, $gt;
     my $phased = ($gt =~ /\|/ ? 1 : 0);
 
-    # shallow copy VF
-    my $vf_copy = { %$vf };
-    bless $vf_copy, ref($vf);
-
     # get non-refs, remembering to exclude "*"-types
     my %non_ref = map {$_ => 1} grep {$_ ne $ref && $_ !~ /\*/} @bits;
 
-    # construct allele_string
-    if(scalar keys %non_ref) {
-      $vf_copy->{allele_string} = $ref."/".(join "/", keys %non_ref);
-    }
-    else {
-      $vf_copy->{allele_string} = $ref;
-      $vf_copy->{hom_ref} = 1;
-
-      if($self->{process_ref_homs}) {
-        $vf_copy->{allele_string} .= "/".$ref;
-      }
-      else {
-        $vf_copy->{non_variant} = 1;
+    if(!scalar keys %non_ref) {
+      $vf->{hom_ref}->{$ind} = 1;
+      if(!$self->{process_ref_homs}) {
+        $vf->{non_variant}->{$ind} = 1;
       }
     }
 
     # store phasing info
-    $vf_copy->{phased} = $self->{phased} ? 1 : $phased;
+    $vf->{phased}->{$ind} = $self->{phased} ? 1 : $phased;
 
     # store GT
-    $vf_copy->{genotype} = \@bits;
+    $vf->{genotype}->{$ind} = \@bits;
 
     # store individual name
-    $vf_copy->{individual} = $ind;
-
-    push @return, $vf_copy;
+    $vf->{individual}->{$ind} = $ind;
   }
+
+  push @return, $vf;
 
   return \@return;
 }

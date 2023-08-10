@@ -84,6 +84,7 @@ use Bio::EnsEMBL::VEP::OutputFactory::VEP_output;
 use Bio::EnsEMBL::VEP::OutputFactory::VCF;
 use Bio::EnsEMBL::VEP::OutputFactory::Tab;
 
+
 our $CAN_USE_JSON;
 
 BEGIN {
@@ -916,13 +917,17 @@ sub VariationFeature_to_output_hash {
 
   # individual?
   if(defined($vf->{individual})) {
-    $hash->{IND} = $vf->{individual};
-
+    my @ind_ids = keys %{$vf->{individual}};
+    my @tmp;
     # zygosity
     if(defined($vf->{genotype})) {
-    my %unique = map {$_ => 1} @{$vf->{genotype}};
-    $hash->{ZYG} = (scalar keys %unique > 1 ? 'HET' : 'HOM').(defined($vf->{hom_ref}) ? 'REF' : '');
+      foreach my $geno_ind (keys %{$vf->{genotype}}) {
+        my %unique = map {$_ => 1} @{$vf->{genotype}->{$geno_ind}};
+        push @tmp, $geno_ind.":".(scalar keys %unique > 1 ? 'HET' : 'HOM').(defined($vf->{hom_ref}->{$geno_ind}) ? 'REF' : '');
+      }
     }
+    $hash->{IND} = \@ind_ids;
+    $hash->{ZYG} = \@tmp;
   }
 
   # minimised?

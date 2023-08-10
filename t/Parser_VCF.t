@@ -24,6 +24,7 @@ use VEPTestingConfig;
 my $test_cfg = VEPTestingConfig->new();
 my $base_testing_cfg = $test_cfg->base_testing_cfg;
 
+
 my ($vf, $tmp, $expected);
 
 ## BASIC TESTS
@@ -830,46 +831,12 @@ is_deeply($vf, bless( {
   'start' => 25587759,
   'seq_region_end' => 25587759,
   'seq_region_start' => 25587759,
-  'genotype' => ['A', 'G'],
-  'individual' => 'dave',
-  'phased' => 1,
-}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'individual 1');
-
-$vf = $p->next;
-delete($vf->{adaptor}); delete($vf->{_line});
-is_deeply($vf, bless( {
-  'chr' => '21',
-  'strand' => 1,
-  'variation_name' => 'indtest',
-  'map_weight' => 1,
-  'allele_string' => 'A/G',
-  'end' => 25587759,
-  'start' => 25587759,
-  'seq_region_end' => 25587759,
-  'seq_region_start' => 25587759,
-  'genotype' => ['G', 'G'],
-  'individual' => 'barry',
-  'phased' => 0,
-}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'individual 2');
-
-$vf = $p->next;
-delete($vf->{adaptor}); delete($vf->{_line});
-is_deeply($vf, bless( {
-  'chr' => '21',
-  'strand' => 1,
-  'variation_name' => 'indtest',
-  'map_weight' => 1,
-  'allele_string' => 'A',
-  'end' => 25587759,
-  'start' => 25587759,
-  'seq_region_end' => 25587759,
-  'seq_region_start' => 25587759,
-  'genotype' => ['A', 'A'],
-  'individual' => 'jeff',
-  'phased' => 0,
-  'non_variant' => 1,
-  'hom_ref' => 1,
-}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'individual 3');
+  'genotype' => {'jeff' => ['A', 'A'], 'barry' => ['G', 'G'], 'dave' => ['A', 'G']},
+  'individual' => {'jeff' => 'jeff', 'barry' => 'barry', 'dave' => 'dave'},
+  'phased' => {'jeff' => 0, 'barry' => 0, 'dave' => 1},
+  'hom_ref' => {'jeff' => 1},
+  'non_variant' => {'jeff' => 1},
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'individuals');
 
 
 $p = Bio::EnsEMBL::VEP::Parser::VCF->new({
@@ -894,10 +861,10 @@ is_deeply($vf, bless( {
   'start' => 25587759,
   'seq_region_end' => 25587759,
   'seq_region_start' => 25587759,
-  'genotype' => ['A', 'A'],
-  'individual' => 'jeff',
-  'phased' => 0,
-  'hom_ref' => 1,
+  'genotype' => {'jeff' => ['A', 'A']},
+  'individual' => {'jeff' => 'jeff'},
+  'phased' => {'jeff' => 0},
+  'hom_ref' => {'jeff' => 1},
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'individual - process_ref_homs');
 
 
