@@ -606,6 +606,8 @@ sub create_individual_VariationFeatures {
   my $include = lc($self->{individual}->[0]) eq 'all' ? $parser->get_samples : $self->{individual};
   my $ind_gts = $parser->get_samples_genotypes($include, 1 - ($self->{allow_non_variant} || 0));
 
+  my $n_individuals = scalar(@{$include});
+
   foreach my $ind(@$include) {
 
     # get alleles present in this individual
@@ -619,9 +621,8 @@ sub create_individual_VariationFeatures {
 
     if(!scalar keys %non_ref) {
       $vf->{hom_ref}->{$ind} = 1;
-      if(!$self->{process_ref_homs}) {
-        $vf->{non_variant}->{$ind} = 1;
-      }
+      $vf->{non_variant}->{$ind} = 1;
+      # $vf->{allele_string} = $ref."/".$ref if($n_individuals == 1);
     }
 
     # store phasing info
