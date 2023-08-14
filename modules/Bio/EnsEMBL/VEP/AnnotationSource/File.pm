@@ -162,6 +162,7 @@ sub new {
   $self->{same_type}      = $hashref->{same_type}      || 0;
   $self->{reciprocal}     = $hashref->{reciprocal}     || 0;
   $self->{overlap_def}    = $hashref->{overlap_def};
+  $self->{num_records}    = $hashref->{num_records}    || 50;
 
   $self->{info} = { custom_info => $hashref };
 
@@ -502,7 +503,7 @@ sub _record_overlaps_VF {
   my $reciprocal = $self->{reciprocal};
 
   my ($ref_start, $ref_end) = ($parser->get_start, $parser->get_end);
-  $ref_start += 1 if $self->{_format} eq 'bigwig';
+  $ref_start += 1 if defined $self->{_format} && $self->{_format} eq 'bigwig';
 
   # match on variant class (if enabled)
   # confounded by different descriptions for the same event
