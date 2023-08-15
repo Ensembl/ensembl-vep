@@ -108,31 +108,6 @@ sub new {
 }
 
 
-=head2 validate_line
-
-  Example    : $valid = validate_line("20", "14370", "rs6054257", "G", "A");
-  Description: Check if input line can be read using this format.
-  Returntype : bool
-  Exceptions : none
-  Caller     : $self->SUPER::detect_format()
-  Status     : Stable
-
-=cut
-
-sub validate_line {
-  my @line = @_;
-
-  # any changes here should be added to the JavaScript code for web VEP:
-  # public-plugins/tools/htdocs/components/20_VEPForm.js
-  return (
-    $line[0] =~ /(chr)?\w+/ &&
-      $line[1] =~ /^\d+$/ &&
-      $line[3] && $line[3] =~ /^[ACGTN\-\.]+$/i &&
-      $line[4]
-  );
-}
-
-
 =head2 parser
 
   Example    : $io_parser = $parser->parser();
