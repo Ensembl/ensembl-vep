@@ -619,10 +619,15 @@ sub create_individual_VariationFeatures {
     # get non-refs, remembering to exclude "*"-types
     my %non_ref = map {$_ => 1} grep {$_ ne $ref && $_ !~ /\*/} @bits;
 
+    # Genotype is reference
     if(!scalar keys %non_ref) {
       $vf->{hom_ref}->{$ind} = 1;
       $vf->{non_variant}->{$ind} = 1;
-      # $vf->{allele_string} = $ref."/".$ref if($n_individuals == 1);
+
+      if($n_individuals == 1) {
+        $vf->{allele_string} = $ref."/".$ref ;
+        $vf->{unique_ind} = 1;
+      }
     }
 
     # store phasing info

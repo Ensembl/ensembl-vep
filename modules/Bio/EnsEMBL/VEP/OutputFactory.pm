@@ -475,8 +475,6 @@ sub get_all_VariationFeatureOverlapAlleles {
   my $self = shift;
   my $vf = shift;
 
-  print "(get_all_VariationFeatureOverlapAlleles)\n";
-
   # no intergenic?
   return [] if $self->{no_intergenic} && defined($vf->{intergenic_variation});
 
@@ -501,11 +499,12 @@ sub get_all_VariationFeatureOverlapAlleles {
     $vfos = \@new;
   }
 
-  # method name stub for getting *VariationAlleles
-  my $allele_method = 'get_all_alternate_';
-  my $method = $allele_method.'VariationFeatureOverlapAlleles';
-
-  return $self->filter_VariationFeatureOverlapAlleles([map {@{$_->$method}} @{$vfos}]);
+  if($vf->{unique_ind}) {
+    return $self->filter_VariationFeatureOverlapAlleles([map {$_->get_reference_VariationFeatureOverlapAllele} @{$vfos}]);
+  }
+  else {
+    return $self->filter_VariationFeatureOverlapAlleles([map {@{$_->get_all_alternate_VariationFeatureOverlapAlleles}} @{$vfos}]);
+  }
 }
 
 
