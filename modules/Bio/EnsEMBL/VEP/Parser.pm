@@ -81,7 +81,7 @@ use FileHandle;
 
 use base qw(Exporter);
 
-our @EXPORT_OK = qw(get_SO_term);
+our @EXPORT_OK = qw(detect_line_format get_SO_term);
 
 my %FORMAT_MAP = (
   'vcf'     => 'VCF',
@@ -349,6 +349,81 @@ sub delimiter {
   return $self->{delimiter};
 }
 
+=head2 check_string_format
+
+  Arg 1      : array @data
+  Example    : $format = check_string_format("rs699");
+  Description: Returns the format from a given string (or 'undef' if no format
+               is valid).
+  Returntype : string
+  Caller     : new()
+  Status     : Stable
+
+=cut
+
+sub check_string_format {
+  my @data = @_;
+  my $format;
+
+  # region: chr21:10-10:1/A
+  if ( Bio::EnsEMBL::VEP::Parser::Region::validate_line(@data) ) {
+    $format = 'region';
+  }
+
+  # SPDI: NC_000016.10:68684738:G:A
+  elsif (Bio::EnsEMBL::VEP::Parser::SPDI::validate_line(@data) ) {
+    $format = 'spdi';
+  }
+
+  # CAID: CA9985736
+  elsif ( Bio::EnsEMBL::VEP::Parser::CAID::validate_line(@data) ) {
+    $format = 'caid';
+  }
+
+  # HGVS: ENST00000285667.3:c.1047_1048insC
+  elsif ( Bio::EnsEMBL::VEP::Parser::HGVS::validate_line(@data) ) {
+    $format = 'hgvs';
+  }
+
+  # variant identifier: rs123456
+  elsif ( Bio::EnsEMBL::VEP::Parser::ID::validate_line(@data) ) {
+    $format = 'id';
+  }
+
+  # VCF: 20  14370  rs6054257  G  A  29  0  NS=58;DP=258;AF=0.786;DB;H2  GT:GQ:DP:HQ
+  elsif ( Bio::EnsEMBL::VEP::Parser::VCF::validate_line(@data) ) {
+    $format = 'vcf';
+  }
+
+  # ensembl: 20  14370  14370  A/G  +
+  elsif ( Bio::EnsEMBL::VEP::Parser::VEP_input::validate_line(@data) ) {
+    $format = 'ensembl';
+  }
+  return $format;
+}
+
+
+=head2 detect_line_format
+
+  Arg 1      : string $line
+  Example    : $format = $parser->detect_line_format("rs699");
+  Description: Attempts to detect the format from a given string.
+  Returntype : string
+  Exceptions : throws if format is not detected
+  Caller     : new()
+  Status     : Stable
+
+=cut
+
+sub detect_line_format {
+  my $line = shift;
+  my @data = split /\s+/, $line;
+
+  my $format = check_string_format(@data);
+  die "ERROR: Could not detect input file format\n" unless $format;
+  return $format;
+}
+
 
 =head2 detect_format
 
@@ -415,41 +490,7 @@ sub detect_format {
     my @data = split $delimiter, $_;
     next unless @data;
 
-    # region chr21:10-10:1/A
-    if ( $self->Bio::EnsEMBL::VEP::Parser::Region::validate_line(@data) ) {
-      $format = 'region';
-    }
-
-    # SPDI: NC_000016.10:68684738:G:A
-    elsif ($self->Bio::EnsEMBL::VEP::Parser::SPDI::validate_line(@data) ) {
-      $format = 'spdi';
-    }
-
-    # CAID: CA9985736
-    elsif ( $self->Bio::EnsEMBL::VEP::Parser::CAID::validate_line(@data) ) {
-      $format = 'caid';
-    }
-
-    # HGVS: ENST00000285667.3:c.1047_1048insC
-    elsif ( $self->Bio::EnsEMBL::VEP::Parser::HGVS::validate_line(@data) ) {
-      $format = 'hgvs';
-    }
-
-    # variant identifier: rs123456
-    elsif ( $self->Bio::EnsEMBL::VEP::Parser::ID::validate_line(@data) ) {
-      $format = 'id';
-    }
-
-    # VCF: 20  14370  rs6054257  G  A  29  0  NS=58;DP=258;AF=0.786;DB;H2  GT:GQ:DP:HQ
-    elsif ( $self->Bio::EnsEMBL::VEP::Parser::VCF::validate_line(@data) ) {
-      $format = 'vcf';
-    }
-
-    # ensembl: 20  14370  14370  A/G  +
-    elsif ( $self->Bio::EnsEMBL::VEP::Parser::VEP_input::validate_line(@data) ) {
-      $format = 'ensembl';
-    }
-
+    $format = check_string_format(@data);
     # reset file handle if it was a handle
     eval {
       seek $fh, 0, 0 if $file_was_fh;

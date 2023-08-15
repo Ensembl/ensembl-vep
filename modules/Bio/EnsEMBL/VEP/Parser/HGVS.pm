@@ -111,7 +111,7 @@ sub new {
 
 =head2 validate_line
 
-  Example    : $valid = $self->validate_line();
+  Example    : $valid = validate_line("ENST00000285667.3:c.1047_1048insC");
   Description: Check if input line can be read using this format.
   Returntype : bool
   Exceptions : none
@@ -121,9 +121,7 @@ sub new {
 =cut
 
 sub validate_line {
-  my $self = shift;
   my @line = @_;
-
   return (
     scalar @line == 1 &&
       $line[0] =~ /^([^\:]+)\:.*?([cgmrp]?)\.?([\*\-0-9]+.*)$/i

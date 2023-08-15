@@ -73,7 +73,7 @@ use Bio::EnsEMBL::IO::Parser::VEP_input;
 
 =head2 validate_line
 
-  Example    : $valid = $self->validate_line();
+  Example    : $valid = validate_line("20", "14370", "14370", "A/G", "+");
   Description: Check if input line can be read using this format.
   Returntype : bool
   Exceptions : none
@@ -83,7 +83,6 @@ use Bio::EnsEMBL::IO::Parser::VEP_input;
 =cut
 
 sub validate_line {
-  my $self = shift;
   my @line = @_;
 
   return (

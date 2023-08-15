@@ -103,7 +103,7 @@ sub new {
 
 =head2 validate_line
 
-  Example    : $valid = $self->validate_line();
+  Example    : $valid = validate_line("NC_000016.10:68684738:G:A");
   Description: Check if input line can be read using this format.
   Returntype : bool
   Exceptions : none
@@ -113,9 +113,7 @@ sub new {
 =cut
 
 sub validate_line {
-  my $self = shift;
   my @line = @_;
-
   return ( scalar @line == 1 && $line[0] =~ /^(.*?\:){2}([^\:]+|)$/i );
 }
 
