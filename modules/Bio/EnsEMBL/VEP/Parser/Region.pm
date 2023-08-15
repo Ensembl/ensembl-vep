@@ -142,6 +142,9 @@ sub _valid_line_regex {
 
 sub validate_line {
   my @line = @_;
+
+  # any changes here should be added to the JavaScript code for web VEP:
+  # public-plugins/tools/htdocs/components/20_VEPForm.js
   return ( scalar @line == 1 && $line[0] =~ _valid_line_regex() );
 }
 

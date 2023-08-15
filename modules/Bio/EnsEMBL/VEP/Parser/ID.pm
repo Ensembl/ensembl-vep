@@ -118,6 +118,9 @@ sub new {
 
 sub validate_line {
   my @line = @_;
+
+  # any changes here should be added to the JavaScript code for web VEP:
+  # public-plugins/tools/htdocs/components/20_VEPForm.js
   return ( scalar @line == 1 );
 }
 
