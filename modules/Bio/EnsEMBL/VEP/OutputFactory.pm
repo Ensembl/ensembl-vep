@@ -145,7 +145,6 @@ sub new {
   $self->add_shortcuts([qw(
     no_stats
     no_intergenic
-    process_ref_homs
     coding_only
     terms
     output_format

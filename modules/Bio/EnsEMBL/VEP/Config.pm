@@ -138,7 +138,6 @@ our @VEP_PARAMS = (
   'freq_pop=s',              # population to filter on
   'filter_common',           # shortcut to MAF filtering
   'allow_non_variant',       # allow non-variant VCF lines through
-  'process_ref_homs',        # force processing of individuals with homozygous ref genotype
   'individual=s',            # give results by genotype for individuals
   'phased',                  # force VCF genotypes to be interpreted as phased
   'fork=i',                  # fork into N processes
