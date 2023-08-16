@@ -304,6 +304,8 @@ sub annotate_InputBuffer {
 
   foreach my $chr(keys %by_chr) {
     foreach my $vf(@{$by_chr{$chr}}) {
+      next if $vf->{vep_skip}; # avoid annotating previously skipped variants
+
       my ($vf_start, $vf_end) = ($vf->{start}, $vf->{end});
       if ($parser->seek($self->get_source_chr_name($chr), $vf_start - 1, $vf_end + 1)) {
         $parser->next();
