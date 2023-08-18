@@ -683,10 +683,16 @@ sub get_SO_term {
   my $type = shift || join(",", @{ $self->get_alternatives });
   my $abbrev;
 
-  if ($type =~ /DUP:TANDEM|CNV:TR/) {
+  my @mobile_elements = ("ALU", "HERV", "LINE1", "SVA");
+
+  if ($type =~ /(INS|DEL):(ME):?([A-Z]+)?/i) {
+    ($abbrev, my $subtype, my $element) = (uc $1, uc $2, uc $3);
+    $subtype = $element if defined $element && grep /^$element$/i, @mobile_elements;
+    $abbrev .= '_' . $subtype;
+  } elsif ($type =~ /DUP:TANDEM|CNV:TR/i) {
     # including <CNV:TR>,<CNV:TR>
     $abbrev = "TDUP";
-  } elsif ($type =~ /CNV/) {
+  } elsif ($type =~ /CNV/i) {
     # including <CNV>,<CNV>
     $abbrev = "CNV";
   } elsif ($type =~ /CN=?[0-9]/i) {
@@ -708,8 +714,20 @@ sub get_SO_term {
   $self->skipped_variant_msg("$abbrev type is not supported") if $abbrev eq "CPX";
 
   my %terms = (
-    INS  => 'insertion',
-    DEL  => 'deletion',
+    INS       => 'insertion',
+    INS_ME    => 'mobile_element_insertion',
+    INS_ALU   => 'Alu_insertion',
+    INS_HERV  => 'HERV_insertion',
+    INS_LINE1 => 'LINE1_insertion',
+    INS_SVA   => 'SVA_insertion',
+
+    DEL       => 'deletion',
+    DEL_ME    => 'mobile_element_deletion',
+    DEL_ALU   => 'Alu_deletion',
+    DEL_HERV  => 'HERV_deletion',
+    DEL_LINE1 => 'LINE1_deletion',
+    DEL_SVA   => 'SVA_deletion',
+
     TDUP => 'tandem_duplication',
     DUP  => 'duplication',
     CNV  => 'copy_number_variation',
