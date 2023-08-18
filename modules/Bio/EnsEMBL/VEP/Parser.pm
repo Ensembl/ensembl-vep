@@ -685,9 +685,15 @@ sub get_SO_term {
 
   my @mobile_elements = ("ALU", "HERV", "LINE1", "SVA");
 
-  if ($type =~ /(INS|DEL):(ME):?([A-Z]+)?/i) {
-    ($abbrev, my $subtype, my $element) = (uc $1, uc $2, uc $3);
-    $subtype = $element if defined $element && grep /^$element$/i, @mobile_elements;
+  if ($type =~ /(INS|DEL):(ME):?([A-Z0-9]+)?/i) {
+    $abbrev     = uc $1;
+    my $subtype = uc $2;
+    my $element = uc $3 if defined $3;
+
+    if (defined $element) {
+      $element = 'LINE1' if $element eq 'L1';
+      $subtype = $element if grep /^$element$/i, @mobile_elements;
+    }
     $abbrev .= '_' . $subtype;
   } elsif ($type =~ /DUP:TANDEM|CNV:TR/i) {
     # including <CNV:TR>,<CNV:TR>
