@@ -140,6 +140,7 @@ our @VEP_PARAMS = (
   'allow_non_variant',       # allow non-variant VCF lines through
   'process_ref_homs',        # force processing of individuals with homozygous ref genotype
   'individual=s',            # give results by genotype for individuals
+  'individual_zyg=s',        # reports genotypes for individuals
   'phased',                  # force VCF genotypes to be interpreted as phased
   'fork=i',                  # fork into N processes
   'dont_skip',               # don't skip vars that fail validation

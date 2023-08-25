@@ -374,12 +374,14 @@ sub create_VariationFeatures {
   $vf->{non_variant} = 1 if $non_variant;
 
   # individual data?
-  if($self->{individual}) {
+  if($self->{individual} || $self->{individual_zyg}) {
     my @changed_alleles = ($ref, @$alts);
     my %allele_map = map {$original_alleles[$_] => $changed_alleles[$_]} 0..$#original_alleles;
+    
+    my $method = $self->{individual} ? 'create_individual_VariationFeatures' : 'create_individuals_zyg_VariationFeature';
 
-    my @return = 
-      map {@{$self->create_individual_VariationFeatures($_, \%allele_map)}}
+    my @return =
+      map {@{$self->$method($_, \%allele_map)}}
       @{$self->post_process_vfs([$vf])};
 
     # if all selected individuals had REF or missing genotypes @return will be empty
@@ -648,6 +650,77 @@ sub create_individual_VariationFeatures {
 
     push @return, $vf_copy;
   }
+
+  return \@return;
+}
+
+=head2 create_individuals_zyg_VariationFeature
+ 
+  Arg 1      : Bio::EnsEMBL::VariationFeature $vf
+  Arg 2      : hashref $allele_map
+  Example    : $vfs = $parser->create_individuals_zyg_VariationFeature($vf, $map);
+  Description: Create one VariationFeature object with
+               individual/sample info. Arg 2 $allele_map is a hashref mapping the
+               allele index to the actual ALT string it represents.
+  Returntype : arrayref of Bio::EnsEMBL::VariationFeature
+  Exceptions : none
+  Caller     : create_VariationFeatures()
+  Status     : Stable
+
+=cut
+
+sub create_individuals_zyg_VariationFeature {
+  my $self = shift;
+  my $vf = shift;
+  my $allele_map = shift;
+
+  my $parser = $self->parser();
+  my $record = $parser->{record};
+
+  my @alleles = split '\/', $vf->{allele_string};
+  my $ref = $alleles[0];
+
+  my @return;
+
+  # get genotypes from parser
+  my $include = lc($self->{individual_zyg}->[0]) eq 'all' ? $parser->get_samples : $self->{individual_zyg};
+  my $ind_gts = $parser->get_samples_genotypes($include, 1 - ($self->{allow_non_variant} || 0));
+
+  my $n_individuals = scalar(@{$include});
+
+  foreach my $ind(@$include) {
+
+    # get alleles present in this individual
+    my $gt = $ind_gts->{$ind};
+    next if (!$gt);
+    my @bits = map { $allele_map->{$_} } split /\||\/|\\/, $gt;
+    my $phased = ($gt =~ /\|/ ? 1 : 0);
+
+    # get non-refs, remembering to exclude "*"-types
+    my %non_ref = map {$_ => 1} grep {$_ ne $ref && $_ !~ /\*/} @bits;
+
+    # Genotype is reference
+    if(!scalar keys %non_ref) {
+      $vf->{hom_ref}->{$ind} = 1;
+      $vf->{non_variant}->{$ind} = 1;
+
+      if($n_individuals == 1) {
+        $vf->{allele_string} = $ref."/".$ref ;
+        $vf->{unique_ind} = 1;
+      }
+    }
+
+    # store phasing info
+    $vf->{phased}->{$ind} = $self->{phased} ? 1 : $phased;
+
+    # store GT
+    $vf->{genotype}->{$ind} = \@bits;
+
+    # store individual name
+    $vf->{individual}->{$ind} = $ind;
+  }
+
+  push @return, $vf;
 
   return \@return;
 }
