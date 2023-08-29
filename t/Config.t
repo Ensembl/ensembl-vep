@@ -114,6 +114,9 @@ is($cfg->param('format'), 'ensembl', 'ini file');
 $cfg = Bio::EnsEMBL::VEP::Config->new({individual => 'dave,barry,keith'});
 is_deeply($cfg->param('individual'), [qw(dave barry keith)], 'list conversion');
 
+$cfg = Bio::EnsEMBL::VEP::Config->new({individual_zyg => 'dave,barry,keith'});
+is_deeply($cfg->param('individual_zyg'), [qw(dave barry keith)], 'individual_zyg - list conversion');
+
 # deprecated
 throws_ok { Bio::EnsEMBL::VEP::Config->new({convert => 1}) } qr/deprecated/, 'deprecated no replacement';
 #throws_ok { Bio::EnsEMBL::VEP::Config->new({gmaf => 1}) } qr/deprecated.+\-\-af/, 'deprecated with replacement';
@@ -150,4 +153,3 @@ is($cfg->param($_), undef, 'everything with database turns off '.$_) for qw(af_1
 ## DONE
 #######
 done_testing();
-

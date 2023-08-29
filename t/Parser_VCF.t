@@ -936,6 +936,38 @@ $vf = $p->next;
 is($vf->{allele_string}, 'C/-', 'individual - deletion alleles mapped');
 
 
+# individual_zyg data
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, allow_non_variant => 1, individual_zyg => 'all'}),
+  file => $test_cfg->create_input_file([
+    ['##fileformat=VCFv4.1'],
+    [qw(#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT dave barry jeff)],
+    [qw(21 25587759 indtest A G . . . GT 0|1 1/1 0/0)],
+  ]),
+  valid_chromosomes => [21]
+});
+
+$vf = $p->next;
+delete($vf->{adaptor}); delete($vf->{_line});
+
+is_deeply($vf, bless( {
+  'chr' => '21',
+  'strand' => 1,
+  'variation_name' => 'indtest',
+  'map_weight' => 1,
+  'allele_string' => 'A/G',
+  'end' => 25587759,
+  'start' => 25587759,
+  'seq_region_end' => 25587759,
+  'seq_region_start' => 25587759,
+  'genotype_ind' => {'jeff' => ['A', 'A'], 'barry' => ['G', 'G'], 'dave' => ['A', 'G']},
+  'non_variant' => { 'jeff' => 1 },
+  'phased' => {'jeff' => 0, 'barry' => 0, 'dave' => 1},
+  'hom_ref' => { 'jeff' => 1 },
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'individual_zyg');
+
+
+
 
 
 
