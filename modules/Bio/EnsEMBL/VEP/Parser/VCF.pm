@@ -102,7 +102,7 @@ sub new {
   my $self = $class->SUPER::new(@_);
 
   # add shortcuts to these params
-  $self->add_shortcuts([qw(allow_non_variant gp individual process_ref_homs phased max_sv_size)]);
+  $self->add_shortcuts([qw(allow_non_variant gp individual individual_zyg process_ref_homs phased max_sv_size)]);
 
   return $self;
 }
@@ -689,7 +689,6 @@ sub create_individuals_zyg_VariationFeature {
   my $n_individuals = scalar(@{$include});
 
   foreach my $ind(@$include) {
-
     # get alleles present in this individual
     my $gt = $ind_gts->{$ind};
     next if (!$gt);
@@ -714,10 +713,7 @@ sub create_individuals_zyg_VariationFeature {
     $vf->{phased}->{$ind} = $self->{phased} ? 1 : $phased;
 
     # store GT
-    $vf->{genotype}->{$ind} = \@bits;
-
-    # store individual name
-    $vf->{individual}->{$ind} = $ind;
+    $vf->{genotype_ind}->{$ind} = \@bits;
   }
 
   push @return, $vf;
