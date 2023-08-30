@@ -704,8 +704,8 @@ sub get_SO_term {
   } elsif ($type =~ /CN=?[0-9]/i) {
     # ALT: "<CN0>", "<CN0>,<CN2>,<CN3>" "<CN2>" => SVTYPE: DEL, CNV, DUP
     $abbrev = "CNV";
-    $abbrev = "DEL" if $type =~ /\<CN=?0\>/;
-    $abbrev = "DUP" if $type =~ /\<CN=?2\>/;
+    $abbrev = "DEL" if $type =~ /^<?CN=?0>?$/;
+    $abbrev = "DUP" if $type =~ /^<?CN=?2>?$/;
   } elsif ($type =~ /[\[\]]/) {
     $abbrev = "BND";
   } elsif ($type =~ /^\<|\>$/) {

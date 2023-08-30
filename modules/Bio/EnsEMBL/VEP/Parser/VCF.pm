@@ -515,7 +515,7 @@ sub create_StructuralVariationFeatures {
   
   ## get structural variant type from SVTYPE tag (deprecated in VCF 4.4) or ALT
   my $alt = join(",", @$alts);
-  my $type = $alt || $info->{SVTYPE};
+  my $type = $alt ne '.' ? $alt : $info->{SVTYPE};
   my $so_term = $self->get_SO_term($type) || $type;
 
   ## check against size upperlimit to avoid memory problems
