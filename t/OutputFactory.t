@@ -1996,6 +1996,28 @@ $of->reset_shifted_positions($vfoa->variation_feature);
 ok(defined($new_cds_start) && !defined($vfoa->transcript_variation->{cds_start}), 'reset_shifted_positions');
 
 
+### individual_zyg
+$ib = get_annotated_buffer({
+  input_file => $test_cfg->create_input_file([
+    ['##fileformat=VCFv4.1'],
+    [qw(#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT dave barry jeff)],
+    [qw(21 25607429 indtest A G . . . GT 0|1 1/1 0/0)],
+  ]),
+  individual_zyg => 'all',
+});
+
+$of->{individual_zyg} = ['all'];
+is_deeply(
+  $of->VariationFeature_to_output_hash($ib->buffer->[0]),
+  {
+    'Uploaded_variation' => 'indtest',
+    'Location' => '21:25607429',
+    'ZYG' => [ 'jeff:HOMREF', 'barry:HOM', 'dave:HET' ],
+  },
+  'VariationFeature_to_output_hash - individual_zyg'
+);
+delete($of->{individual_zyg});
+
 
 # done
 done_testing();
