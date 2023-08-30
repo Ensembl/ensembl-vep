@@ -518,18 +518,19 @@ sub create_StructuralVariationFeatures {
   my $type = $info->{SVTYPE} || $alt;
   my $so_term = $self->get_SO_term($type) || $type;
 
+  ## Illumina Manta (SV caller) may use INFO/END to identify the position of the
+  ## breakend mate (unsupported based on VCF 4.4 specifications)
+  if ($so_term =~ /break/ && $parser->get_info->{END}) {
+    # INFO/END2 is used to identify the position of the breakend mate
+    $parser->get_info->{END2} ||= $parser->get_info->{END};
+    delete $parser->get_info->{END};
+    $end = $parser->get_end;
+  }
+
   ## check against size upperlimit to avoid memory problems
   my $len = $end - $start;
   if( $len > $self->{max_sv_size} ){
     $self->skipped_variant_msg("variant size ($len) is bigger than --max_sv_size (" . $self->{max_sv_size} . ")");
-  }
-
-  # work out the end coord
-  if(defined($info->{END})) {
-    $end = $info->{END};
-  }
-  elsif(defined($info->{SVLEN})) {
-    $end = $start + abs($info->{SVLEN}) - 1;
   }
 
   # check for imprecise breakpoints
