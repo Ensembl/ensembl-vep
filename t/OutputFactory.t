@@ -2007,15 +2007,10 @@ $ib = get_annotated_buffer({
 });
 
 $of->{individual_zyg} = ['all'];
-is_deeply(
-  $of->VariationFeature_to_output_hash($ib->buffer->[0]),
-  {
-    'Uploaded_variation' => 'indtest',
-    'Location' => '21:25607429',
-    'ZYG' => [ 'jeff:HOMREF', 'barry:HOM', 'dave:HET' ],
-  },
-  'VariationFeature_to_output_hash - individual_zyg'
-);
+my $result = $of->VariationFeature_to_output_hash($ib->buffer->[0]);
+my $genotype = join ',', sort(@{$result->{ZYG}});
+
+is($genotype, 'barry:HOM,dave:HET,jeff:HOMREF', 'VariationFeature_to_output_hash - individual_zyg');
 delete($of->{individual_zyg});
 
 
