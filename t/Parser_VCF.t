@@ -624,6 +624,40 @@ like($tmp, qr/CPX type is not supported/, 'StructuralVariationFeature - skip CPX
 
 open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
+## Mobile element insertion/deletion
+my $config = Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1});
+my $svf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $config,
+  file => $test_cfg->create_input_file([qw(1 774569 svf N	<INS:ME:ALU> 1 PASS SVTYPE=INS)]),
+  valid_chromosomes => [1]
+})->next();
+is_deeply($svf->{class_SO_term}, 'Alu_insertion',
+          'StructuralVariationFeature - Alu insertion');
+
+$svf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $config,
+  file => $test_cfg->create_input_file([qw(1 774569 svf N	<INS:ME> 1 PASS SVTYPE=INS)]),
+  valid_chromosomes => [1]
+})->next();
+is_deeply($svf->{class_SO_term}, 'mobile_element_insertion',
+          'StructuralVariationFeature - Mobile element insertion');
+
+$svf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $config,
+  file => $test_cfg->create_input_file([qw(1 774569 svf N	<DEL:ME> 1 PASS SVTYPE=DEL;SVLEN=23)]),
+  valid_chromosomes => [1]
+})->next();
+is_deeply($svf->{class_SO_term}, 'mobile_element_deletion',
+          'StructuralVariationFeature - Mobile element deletion');
+
+$svf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $config,
+  file => $test_cfg->create_input_file([qw(1 774569 svf N	<DEL:ME:L1> 1 PASS SVTYPE=DEL;SVLEN=278)]),
+  valid_chromosomes => [1]
+})->next();
+is_deeply($svf->{class_SO_term}, 'LINE1_deletion',
+          'StructuralVariationFeature - LINE1 deletion');
+
 ## CNV: deletion
 my $cnv_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1,  warning_file => 'STDERR'}),
