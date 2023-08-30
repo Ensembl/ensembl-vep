@@ -53,7 +53,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg && !$@;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 4 unless $can_use_db;
+  skip 'No local database configured', 5 unless $can_use_db;
 
   my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens') if $can_use_db;
   
@@ -107,6 +107,47 @@ SKIP: {
   delete($vf->{$_}) for qw(adaptor variation slice variation_name);
 
   is_deeply($vf, $expected, 'basic input test');
+
+  ## structural variant ID test
+  $p = Bio::EnsEMBL::VEP::Parser::ID->new({
+    config => $cfg,
+    file => $test_cfg->create_input_file('nsv917902'),
+    valid_chromosomes => [21],
+  });
+
+  is(ref($p), 'Bio::EnsEMBL::VEP::Parser::ID', 'class ref');
+
+  my $expected_sv = bless( {
+    'is_somatic' => '0',
+    'class_attrib_id' => 7,
+    'allele_freq' => undef,
+    'outer_start' => undef,
+    'seq_region_start' => 7749532,
+    '_study_id' => 5123,
+    'strand' => 1,
+    'seq_region_end' => 46568202,
+    'class_SO_term' => 'copy_number_variation',
+    'allele_string' => undef,
+    '_line' => [
+      'nsv917902'
+    ],
+    'outer_end' => undef,
+    'chr' => '21',
+    'inner_end' => 46568202,
+    '_source_id' => 11,
+    'allele_count' => undef,
+    'end' => 46568202,
+    'length' => undef,
+    'breakpoint_order' => undef,
+    'inner_start' => 7749532,
+    'start' => 7749532,
+    '_structural_variation_id' => 55104096  
+  }, 'Bio::EnsEMBL::Variation::StructuralVariationFeature' );
+
+  $vf = $p->next();
+  delete($vf->{$_}) for qw(adaptor variation slice variation_name);
+
+  is_deeply($vf, $expected_sv, 'sv input test');
 
 
   my $tmp;
