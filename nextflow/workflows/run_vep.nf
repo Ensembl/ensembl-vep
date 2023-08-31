@@ -70,6 +70,10 @@ def createChannels (input, pattern) {
 }
 
 def toAbsolute (dir_path) {
+  if (! (dir_path instanceof String)){
+    dir_path = dir_path.toString();
+  }
+
   def dir = new File(dir_path)
   
   if (!dir.isAbsolute()) {
