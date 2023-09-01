@@ -49,7 +49,7 @@ Options:
 }
 
 
-def createChannels (input, pattern) {
+def createInputChannels (input, pattern) {
   if (input instanceof String) {
     // if input is a String, process as file or directory
     files = file(input)
@@ -69,18 +69,18 @@ def createChannels (input, pattern) {
   return files;
 }
 
-def toAbsolute (dir_path) {
-  if (! (dir_path instanceof String)){
-    dir_path = dir_path.toString();
-  }
-
-  def dir = new File(dir_path)
+def createOutputChannel (output) {
+  if (output instanceof String){
+    def dir = new File(output)
   
-  if (!dir.isAbsolute()) {
-      dir_path = "${launchDir}/${dir_path}";
+    // convert output dir to absolute path if necessary
+    if (!dir.isAbsolute()) {
+        output = "${launchDir}/${output}";
+    }
+    return Channel.fromPath(toAbsolute(output))
   }
   
-  return dir_path;
+  return output;
 }
 
 workflow vep {
@@ -97,8 +97,8 @@ workflow vep {
       exit 1, "Undefined --vep_config parameter. Please provide a VEP config file."
     }
     
-    vcf = createChannels(vcf, pattern="*.{vcf,gz}")
-    vep_config = createChannels(vep_config, pattern="*.ini")
+    vcf = createInputChannels(vcf, pattern="*.{vcf,gz}")
+    vep_config = createInputChannels(vep_config, pattern="*.ini")
 
     vcf.count()
       .combine( vep_config.count() )
@@ -106,8 +106,7 @@ workflow vep {
         exit 1, "Detected many-to-many scenario between VCF and VEP config files - currently not supported" 
       }
       
-    // convert output dir to absolute path if necessary
-    output_dir = Channel.fromPath(toAbsolute(output_dir))
+    output_dir = createOutputChannel(output_dir)
     
     // set if it is a one_to_many situation (single VCF and multiple ini file)
     // in this situation we produce output files with different names
