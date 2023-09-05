@@ -417,6 +417,7 @@ sub detect_format {
     next unless @data;
 
     $format = &check_format(@data);
+
     # reset file handle if it was a handle
     eval {
       seek $fh, 0, 0 if $file_was_fh;
