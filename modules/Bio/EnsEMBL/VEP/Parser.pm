@@ -67,6 +67,7 @@ use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::Utils qw(get_compressed_filehandle);
 use Bio::EnsEMBL::Variation::Utils::Sequence qw(trim_sequences);
+use Bio::EnsEMBL::Variation::Utils::VEP qw(&check_format);
 
 use Bio::EnsEMBL::VEP::Parser::VCF;
 use Bio::EnsEMBL::VEP::Parser::VEP_input;
@@ -415,40 +416,7 @@ sub detect_format {
     my @data = split $delimiter, $_;
     next unless @data;
 
-    # region chr21:10-10:1/A
-    if ( $self->Bio::EnsEMBL::VEP::Parser::Region::validate_line(@data) ) {
-      $format = 'region';
-    }
-
-    # SPDI: NC_000016.10:68684738:G:A
-    elsif ($self->Bio::EnsEMBL::VEP::Parser::SPDI::validate_line(@data) ) {
-      $format = 'spdi';
-    }
-
-    # CAID: CA9985736
-    elsif ( $self->Bio::EnsEMBL::VEP::Parser::CAID::validate_line(@data) ) {
-      $format = 'caid';
-    }
-
-    # HGVS: ENST00000285667.3:c.1047_1048insC
-    elsif ( $self->Bio::EnsEMBL::VEP::Parser::HGVS::validate_line(@data) ) {
-      $format = 'hgvs';
-    }
-
-    # variant identifier: rs123456
-    elsif ( $self->Bio::EnsEMBL::VEP::Parser::ID::validate_line(@data) ) {
-      $format = 'id';
-    }
-
-    # VCF: 20  14370  rs6054257  G  A  29  0  NS=58;DP=258;AF=0.786;DB;H2  GT:GQ:DP:HQ
-    elsif ( $self->Bio::EnsEMBL::VEP::Parser::VCF::validate_line(@data) ) {
-      $format = 'vcf';
-    }
-
-    # ensembl: 20  14370  14370  A/G  +
-    elsif ( $self->Bio::EnsEMBL::VEP::Parser::VEP_input::validate_line(@data) ) {
-      $format = 'ensembl';
-    }
+    $format = &check_format(@data);
 
     # reset file handle if it was a handle
     eval {
