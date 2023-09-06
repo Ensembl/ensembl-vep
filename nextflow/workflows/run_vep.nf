@@ -77,7 +77,7 @@ def createOutputChannel (output) {
     if (!dir.isAbsolute()) {
         output = "${launchDir}/${output}";
     }
-    return Channel.fromPath(toAbsolute(output))
+    return Channel.fromPath(output)
   }
   
   return output;
