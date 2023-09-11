@@ -247,7 +247,7 @@ sub get_all_regions_by_InputBuffer {
     $min_max->{$chr} = [$min, $max];
 
     # process alternative alleles from breakend structural variants
-    foreach my $alt (@{$vf->{_parsed_allele}}) {
+    foreach my $alt (@{$vf->get_breakends}) {
       ($chr, $min, $max, $seen, @new_regions) = $self->get_regions_from_coords(
         $alt->{chr}, $alt->{pos}, $alt->{pos},
         $min_max, $cache_region_size, $up_down_size, $seen);

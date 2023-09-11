@@ -382,7 +382,6 @@ sub get_all_VariationFeatureOverlapAllele_output_hashes {
   return $self->summary_only($vf, $hash, $vfoas) if $self->{summary} || $self->{most_severe};
 
   foreach my $vfoa(@$vfoas) {
-
     # copy the initial VF-based hash so we're not overwriting
     my %copy = %$hash;
 
@@ -1898,7 +1897,7 @@ sub BaseStructuralVariationOverlapAllele_to_output_hash {
 
   my $svf = $vfoa->base_variation_feature;
 
-  $hash->{Allele} = $svf->{allele_string} || $svf->class_SO_term;
+  $hash->{Allele} = $vfoa->{breakend}->{string} || $svf->class_SO_term;
 
   # allele number
   $hash->{ALLELE_NUM} = $vfoa->allele_number if $self->{allele_number};

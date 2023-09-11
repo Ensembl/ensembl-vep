@@ -217,7 +217,7 @@ sub next {
 
   my $vf = shift @$cache;
   return $vf unless $vf;
-  
+
   unless($self->validate_vf($vf) || $self->{dont_skip}) {
     return $self->next();
   }
