@@ -403,6 +403,7 @@ is_deeply($vf, bless( {
 $expected = bless( {
   'outer_end' => 25587769,
   'chr' => '21',
+  'allele_string' => '<DUP>',
   'inner_end' => 25587769,
   'outer_start' => 25587759,
   'end' => 25587769,
@@ -429,6 +430,7 @@ $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   valid_chromosomes => [21]
 })->next();
 delete($vf->{adaptor}); delete($vf->{_line});
+$expected->{allele_string} = '.';
 is_deeply($vf, $expected, 'StructuralVariationFeature 2');
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
@@ -437,6 +439,7 @@ $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   valid_chromosomes => [21]
 })->next();
 delete($vf->{adaptor}); delete($vf->{_line});
+$expected->{allele_string} = '<DUP>';
 is_deeply($vf, $expected , 'StructuralVariationFeature no SVTYPE');
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
@@ -445,7 +448,7 @@ $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   valid_chromosomes => [21]
 })->next();
 delete($vf->{adaptor}); delete($vf->{_line});
-is_deeply($vf, $expected , 'StructuralVariationFeature SVLEN');
+is_deeply($vf, $expected, 'StructuralVariationFeature SVLEN');
 
 $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => $cfg,
@@ -456,6 +459,7 @@ delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, bless( {
   'outer_end' => 25587774,
   'chr' => '21',
+  'allele_string' => '<DUP>',
   'inner_end' => 25587765,
   'outer_start' => 25587756,
   'end' => 25587769,
@@ -479,6 +483,7 @@ delete($vf->{adaptor}); delete($vf->{_line});
 is_deeply($vf, bless( {
   'outer_end' => 25587769,
   'chr' => '21',
+  'allele_string' => '<DEL>',
   'inner_end' => 25587769,
   'outer_start' => 25587759,
   'end' => 25587769,
@@ -529,6 +534,7 @@ delete($sv->{_line});
 is_deeply($sv, bless( {
   'outer_end' => 25587759,
   'chr' => '21',
+  'allele_string' => '<DEL>',
   'inner_end' => 25587759,
   'outer_start' => 25587759,
   'end' => 25587759,
@@ -574,6 +580,7 @@ delete($lvf->{adaptor}); delete($lvf->{_line});
 is_deeply($lvf, bless( {
   'outer_end' => 25597764,
   'chr' => '21',
+  'allele_string' => '<DUP>',
   'inner_end' => 25597755,
   'outer_start' => 25587756,
   'end' => 25597759,
@@ -605,6 +612,7 @@ delete($cvf->{adaptor}); delete($cvf->{_line});
 is_deeply($cvf, bless( {
                  'outer_end' => '828435',
                  'chr' => '1',
+                 'allele_string' => '<CPX>',
                  'inner_end' => '828435',
                  'outer_start' => '774570',
                  'end' => 828435,
@@ -636,6 +644,7 @@ delete($cnv_vf->{adaptor}); delete($cnv_vf->{_line});
 is_deeply($cnv_vf, bless( {
                  'outer_end' => '828435',
                  'chr' => '1',
+                 'allele_string' => '<CN0>',
                  'inner_end' => '828435',
                  'outer_start' => '774570',
                  'end' => 828435,
@@ -659,6 +668,7 @@ delete($cnv_vf->{adaptor}); delete($cnv_vf->{_line});
 is_deeply($cnv_vf, bless( {
                  'outer_end' => '828435',
                  'chr' => '1',
+                 'allele_string' => '<CN0>/<CN2>',
                  'inner_end' => '828435',
                  'outer_start' => '774570',
                  'end' => 828435,
@@ -675,7 +685,7 @@ is_deeply($cnv_vf, bless( {
 ## test breakend variant with unsupported END information in INFO field
 my $bnd_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1,  warning_file => 'STDERR'}),
-  file => $test_cfg->create_input_file([qw(2	68914092	BND00001121	A	]1:37938377]A	.	PASS	SVTYPE=BND;CHR2=1;END=37938377   )]),
+  file => $test_cfg->create_input_file([qw(2	68914092	BND00001121	A	]1:37938377]A	.	PASS	SVTYPE=BND;END=37938377   )]),
   valid_chromosomes => [1,2]
 })->next();
 
@@ -693,22 +703,7 @@ is_deeply($bnd_vf, bless( {
                  'inner_end' => 68914093,
                  'outer_end' => 68914093,
                  'seq_region_start' => 68914093,
-                 'seq_region_end' => 68914093,
-                 '_parsed_allele' => [{
-                   'placement' => 'left',
-                   'string' => ']1:37938377]A',
-                   'chr' => '1',
-                   'pos' => 37938377,
-                   'start' => 37938377,
-                   'end' => 37938377,
-                   'allele' => 'A',
-                   'inverted' => 0,
-                   'slice' => Bio::EnsEMBL::Slice->new_fast({
-                     seq_region_name => '1',
-                     start => 37938377,
-                     end => 37938377
-                    })
-                  }]
+                 'seq_region_end' => 68914093
                },
                'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) ,
                'StructuralVariationFeature - BND with unsupported INFO/END field');
@@ -716,7 +711,7 @@ is_deeply($bnd_vf, bless( {
 ## test breakend variant with multiple mates and information in ALT field
 my $bnd2_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1,  warning_file => 'STDERR'}),
-  file => $test_cfg->create_input_file([qw(2	68914092	BND00001121	A	]1:37938377]A,C]2:68920000]	.	PASS	SVTYPE=BND;CHR2=1;END2=37938377   )]),
+  file => $test_cfg->create_input_file([qw(2	68914092	BND00001121	A	]1:37938377]A,C]2:68920000]	.	PASS	SVTYPE=BND   )]),
   valid_chromosomes => [1,2]
 })->next();
 
@@ -726,7 +721,7 @@ is_deeply($bnd2_vf, bless( {
                  'strand' => '1',
                  'variation_name' => 'BND00001121',
                  'class_SO_term' => 'chromosome_breakpoint',
-                 'allele_string' => ']1:37938377]A,C]2:68920000]',
+                 'allele_string' => ']1:37938377]A/C]2:68920000]',
                  'start' => 68914093,
                  'inner_start' => 68914093,
                  'outer_start' => 68914093,
@@ -735,35 +730,6 @@ is_deeply($bnd2_vf, bless( {
                  'outer_end' => 68914093,
                  'seq_region_start' => 68914093,
                  'seq_region_end' => 68914093,
-                 '_parsed_allele' => [{
-                   'placement' => 'left',
-                   'string' => ']1:37938377]A',
-                   'chr' => '1',
-                   'pos' => 37938377,
-                   'start' => 37938377,
-                   'end' => 37938377,
-                   'allele' => 'A',
-                   'inverted' => 0,
-                   'slice' => Bio::EnsEMBL::Slice->new_fast({
-                     seq_region_name => '1',
-                     start => 37938377,
-                     end => 37938377
-                    })
-                  }, {
-                   'string' => 'C]2:68920000]',
-                   'placement' => 'right',
-                   'chr' => '2',
-                   'pos' => 68920000,
-                   'start' => 68920000,
-                   'end' => 68920000,
-                   'allele' => 'C',
-                   'inverted' => 1,
-                   'slice' => Bio::EnsEMBL::Slice->new_fast({
-                     seq_region_name => '2',
-                     start => 68920000,
-                     end => 68920000
-                    })
-                  }]
                },
                'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) ,
                'StructuralVariationFeature - BND with information in ALT field');
@@ -780,7 +746,7 @@ is_deeply($bnd3_vf, bless( {
                  'strand' => '1',
                  'variation_name' => 'BND00001121',
                  'class_SO_term' => 'chromosome_breakpoint',
-                 'allele_string' => '<BND>',
+                 'allele_string' => 'N[2:68920000[',
                  'start' => 68914093,
                  'inner_start' => 68914093,
                  'outer_start' => 68914093,
@@ -789,19 +755,6 @@ is_deeply($bnd3_vf, bless( {
                  'outer_end' => 68914093,
                  'seq_region_start' => 68914093,
                  'seq_region_end' => 68914093,
-                 '_parsed_allele' => [{
-                   'string' => '<BND>',
-                   'chr' => '2',
-                   'pos' => 68920000,
-                   'start' => 68920000,
-                   'end' => 68920000,
-                   'allele' => '<BND>',
-                   'slice' => Bio::EnsEMBL::Slice->new_fast({
-                     seq_region_name => '2',
-                     start => 68920000,
-                     end => 68920000
-                    })
-                  }]
                },
                'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) ,
                'StructuralVariationFeature - BND with information in INFO field');
@@ -818,7 +771,7 @@ is_deeply($bnd4_vf, bless( {
                  'strand' => '1',
                  'variation_name' => 'BND00001121',
                  'class_SO_term' => 'chromosome_breakpoint',
-                 'allele_string' => '<BND>',
+                 'allele_string' => 'N[2:68920000[',
                  'start' => 68914093,
                  'inner_start' => 68914093,
                  'outer_start' => 68914093,
@@ -827,19 +780,6 @@ is_deeply($bnd4_vf, bless( {
                  'outer_end' => 68914093,
                  'seq_region_start' => 68914093,
                  'seq_region_end' => 68914093,
-                 '_parsed_allele' => [{
-                   'string' => '<BND>',
-                   'chr' => '2',
-                   'pos' => 68920000,
-                   'start' => 68920000,
-                   'end' => 68920000,
-                   'allele' => '<BND>',
-                   'slice' => Bio::EnsEMBL::Slice->new_fast({
-                     seq_region_name => '2',
-                     start => 68920000,
-                     end => 68920000
-                    })
-                  }]
                },
                'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) ,
                'StructuralVariationFeature - BND with incorrect INFO/END field');
