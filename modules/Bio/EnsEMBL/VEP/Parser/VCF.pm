@@ -425,25 +425,27 @@ sub create_StructuralVariationFeatures {
     $parser->get_info,
     $parser->get_IDs,
   );
-  
+
   ## get structural variant type from SVTYPE tag (deprecated in VCF 4.4) or ALT
   my $alt = join("/", @$alts);
   my $type = $info->{SVTYPE} || $alt;
   my $so_term = $self->get_SO_term($type) || $type;
 
   ## get breakends from INFO field (from Illumina Manta, for instance)
-  if ($so_term =~ /breakpoint/ and $info->{CHR2}) {
-    my $breakend_pos = $info->{END2};
-    my $breakend_chr = $self->get_source_chr_name($info->{CHR2});
-    if ($info->{END}) {
-      ## Illumina Manta (SV caller) may use INFO/END to identify the position of
-      ## the breakend mate (this is not supported by VCF 4.4 specifications)
-      $breakend_pos ||= $info->{END};
-      delete $parser->get_info->{END};
-      $end = $parser->get_end;
-    }
-    if (defined $breakend_pos and defined $breakend_chr) {
-      $alt = sprintf('%s[%s:%s[', $alt, $breakend_chr, $breakend_pos);
+  if ($so_term =~ /breakpoint/) {
+    ## Illumina Manta (SV caller) may use INFO/END to identify the position of
+    ## the breakend mate (this is not supported by VCF 4.4 specifications)
+    my $incorrect_end = $info->{END};
+    delete $parser->get_info->{END};
+    $end = $parser->get_end if $incorrect_end;
+
+    if (defined $info->{CHR2}) {
+      my $breakend_chr = $self->get_source_chr_name($info->{CHR2});
+      my $breakend_pos = $info->{END2} || $incorrect_end;
+      if (defined $breakend_chr and defined $breakend_pos) {
+        $alt = 'N' if $alt =~ /<?BND>?/i;
+        $alt = sprintf('%s[%s:%s[', $alt, $breakend_chr, $breakend_pos);
+      }
     }
   }
 
