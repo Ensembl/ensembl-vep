@@ -46,11 +46,11 @@ SKIP: {
   my $cfg = Bio::EnsEMBL::VEP::Config->new($test_cfg->base_testing_cfg);
   ok($cfg, 'get new config object');
 
-  my $as = Bio::EnsEMBL::VEP::AnnotationSource::File::BigWig->new({file => $file, config => $cfg});
+  my $as = Bio::EnsEMBL::VEP::AnnotationSource::File::BigWig->new({file => $file, format => 'bigwig', config => $cfg});
   ok($as, 'new is defined');
   
 
-  throws_ok {Bio::EnsEMBL::VEP::AnnotationSource::File::BigWig->new({file => 'foo', config => $cfg})->parser} qr/Failed to open/, 'new with invalid file throws';
+  throws_ok {Bio::EnsEMBL::VEP::AnnotationSource::File::BigWig->new({file => 'foo', format => 'bigwig', config => $cfg})->parser} qr/Failed to open/, 'new with invalid file throws';
 
 
   ## TESTS WITH INPUT BUFFER
