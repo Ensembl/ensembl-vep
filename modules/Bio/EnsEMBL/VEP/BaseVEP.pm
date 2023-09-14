@@ -787,7 +787,7 @@ sub skipped_variant_msg {
   my $line = $self->{parser}->{current_block} if defined $self->{parser};
   if (defined $line) {
     my $maxChar = 50;
-    $line =~ s/\t/ /g; # replace tabs with spaces to improve readability
+    $line =~ s/\s+/ /g; # trim tabs and extra spaces to improve readability
     $line = substr($line, 0, $maxChar - 4) . "..." if length($line) > $maxChar;
     $msg = "(" . $line . "): " . $msg;
   }
