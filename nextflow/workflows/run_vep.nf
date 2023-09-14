@@ -81,8 +81,6 @@ workflow vep {
     one_to_many
   main:
     // process input and create Channel
-    // this works like 'merge' operator and thus might make the pipeline un-resumable
-    // we might think of using 'toSortedList' and generate appropriate input from the 'processInput' module
     processInput(inputs)
     
     // Prepare input VCF files (bgzip + tabix)
@@ -130,6 +128,8 @@ workflow {
     .combine( vep_config.count() )
     .map{ it[0] == 1 && it[1] != 1 }
   
+  // this works like 'merge' operator and thus might make the pipeline un-resumable
+  // we might think of using 'toSortedList' and generate appropriate input from the 'processInput' module
   inputs = vcf.combine( vep_config )
   output_dir = createOutputChannel(params.outdir)
   
