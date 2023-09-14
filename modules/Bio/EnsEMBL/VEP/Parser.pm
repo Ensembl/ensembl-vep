@@ -672,9 +672,6 @@ sub get_SO_term {
     $abbrev = $type;
   }
 
-  ## unsupported SV types
-  $self->skipped_variant_msg("$abbrev type is not supported") if $abbrev eq "CPX";
-
   my %terms = (
     INS  => 'insertion',
     DEL  => 'deletion',
@@ -685,7 +682,12 @@ sub get_SO_term {
     BND  => 'chromosome_breakpoint'
   );
 
-  return $terms{$abbrev};
+  my $res = $terms{$abbrev};
+  ## unsupported SV types
+  if ($self->isa('Bio::EnsEMBL::VEP::Parser')) {
+    $self->skipped_variant_msg("$abbrev type is not supported") unless $res;
+  }
+  return $res;
 }
 
 
