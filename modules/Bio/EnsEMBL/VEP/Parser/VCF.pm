@@ -478,6 +478,7 @@ sub create_StructuralVariationFeatures {
 
   my $parser = $self->parser();
   my $record = $parser->{record};
+  my $skip_line;
 
   # get relevant data
   my ($chr, $start, $end, $alts, $info, $ids) = (
@@ -492,12 +493,17 @@ sub create_StructuralVariationFeatures {
   ## get structural variant type from SVTYPE tag (deprecated in VCF 4.4) or ALT
   my $alt = join(",", @$alts);
   my $type = $info->{SVTYPE} || $alt;
-  my $so_term = $self->get_SO_term($type) || $type;
+  my $so_term = $self->get_SO_term($type);
+  unless ($so_term) {
+    $skip_line = 1;
+    $so_term   = $type;
+  }
 
   ## check against size upperlimit to avoid memory problems
   my $len = $end - $start;
   if( $len > $self->{max_sv_size} ){
     $self->skipped_variant_msg("variant size ($len) is bigger than --max_sv_size (" . $self->{max_sv_size} . ")");
+    $skip_line = 1;
   }
 
   # work out the end coord
@@ -526,6 +532,7 @@ sub create_StructuralVariationFeatures {
 
   if($start >= $end && $so_term =~ /del/i) {
     $self->skipped_variant_msg("deletion looks incomplete");
+    $skip_line = 1;
   }
 
   my $svf = Bio::EnsEMBL::Variation::StructuralVariationFeature->new_fast({
@@ -544,7 +551,7 @@ sub create_StructuralVariationFeatures {
   });
   $svf->{allele_string}  = $allele_string if defined $allele_string;
   $svf->{_parsed_allele} = $parsed_allele if defined $parsed_allele;
-  $svf->{vep_skip}       = $self->{skip_line} if defined $self->{skip_line};
+  $svf->{vep_skip}       = $skip_line     if defined $skip_line;
 
   return $self->post_process_vfs([$svf]);
 }
