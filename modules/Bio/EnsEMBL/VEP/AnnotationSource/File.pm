@@ -462,12 +462,18 @@ sub _record_overlaps_VF {
   my $reciprocal = $self->{reciprocal};
   my ($ref_start, $ref_end) = ($parser->get_start, $parser->get_end);
 
-  # match on variant class (if enabled)
-  # confounded by different descriptions for the same event
-  if ($same_type) {
-    my $vf_class = $vf->class_SO_term;
-    my $ref_class = get_SO_term($parser);
+  # match based on variant class (if enabled)
+  my $vf_class  = $vf->class_SO_term;
+  my $ref_class = get_SO_term($parser);
 
+  # avoid matching breakpoints (start == end) with SNPs in exact mode
+  my $is_exact_breakpoint = $type eq 'exact' && defined $vf_class && $vf_class =~ /breakpoint/;
+
+  if ($same_type || $is_exact_breakpoint) {
+    # do not match if only one of the types is defined
+    return 0 if defined $ref_class xor defined $vf_class;
+
+    # do not match if both types are not the same
     return 0 if defined $ref_class && defined $vf_class && $ref_class ne $vf_class;
   }
 
