@@ -93,8 +93,6 @@ BEGIN {
   }
 }
 
-use Bio::EnsEMBL::VEP::Parser qw(get_SO_term);
-
 my %FORMAT_MAP = (
   'vcf'     => 'VCF',
   'gff'     => 'GFF',
@@ -458,24 +456,8 @@ sub _record_overlaps_VF {
   my $type = $self->type();
   my $overlap_cutoff = $self->{overlap_cutoff};
   my $distance = $self->{distance};
-  my $same_type = $self->{same_type};
   my $reciprocal = $self->{reciprocal};
   my ($ref_start, $ref_end) = ($parser->get_start, $parser->get_end);
-
-  # match based on variant class (if enabled)
-  my $vf_class  = $vf->class_SO_term;
-  my $ref_class = get_SO_term($parser);
-
-  # avoid matching breakpoints (start == end) with SNPs in exact mode
-  my $is_exact_breakpoint = $type eq 'exact' && defined $vf_class && $vf_class =~ /breakpoint/;
-
-  if ($same_type || $is_exact_breakpoint) {
-    # do not match if only one of the types is defined
-    return 0 if defined $ref_class xor defined $vf_class;
-
-    # do not match if both types are not the same
-    return 0 if defined $ref_class && defined $vf_class && $ref_class ne $vf_class;
-  }
 
   if($type eq 'overlap' || $type eq 'within' || $type eq 'surrounding') {
     # account for insertions in Ensembl world where s = e+1

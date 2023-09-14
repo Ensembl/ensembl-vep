@@ -72,6 +72,7 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
 use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
 use Bio::EnsEMBL::Variation::Utils::Sequence qw(get_matched_variant_alleles);
+use Bio::EnsEMBL::VEP::Parser qw(get_SO_term);
 use Bio::EnsEMBL::IO::Parser::VCF4Tabix;
 
 use base qw(Bio::EnsEMBL::VEP::AnnotationSource::File);
@@ -328,12 +329,28 @@ sub _record_overlaps_VF {
   my $self = shift;
   my ($vf) = @_;
 
+  my $same_type = $self->{same_type};
+  my $type = $self->type();
+  my $parser = $self->parser;
+
+  # match records based on variant class (if enabled)
+  my $ref_class = get_SO_term($parser);
+
+  # avoid matching breakpoints (start == end) with SNPs in exact mode
+  my $vf_class  = $vf->class_SO_term;
+  my $is_exact_breakpoint = $type eq 'exact' && defined $vf_class && $vf_class =~ /breakpoint/;
+
+  if ($same_type || $is_exact_breakpoint) {
+    # do not match if only one of the types is defined
+    return 0 if defined $ref_class xor defined $vf_class;
+
+    # do not match if both types are not the same
+    return 0 if defined $ref_class && defined $vf_class && $ref_class ne $vf_class;
+  }
+
   # we can use the superclass method if overlap type
   return $self->SUPER::_record_overlaps_VF(@_)
     if ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature';
-  
-  my $type = $self->type();
-  my $parser = $self->parser;
 
   if ($type eq 'overlap') {
     my $parser_start = $parser->get_raw_start;
