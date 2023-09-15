@@ -96,10 +96,7 @@ workflow vep {
     runVEP(splitVCF.out.transpose())
     
     // Merge split VCF files (creates one output VCF for each input VCF)
-    mergeVCF(runVEP.out.files.groupTuple(by: [0, 3, 4])
-      .combine(one_to_many
-      .combine(output_dir))
-    )
+    mergeVCF(runVEP.out.files.groupTuple(by: [0, 3, 4]), one_to_many, combine(output_dir))
   emit:
     mergeVCF.out
 }
