@@ -22,9 +22,9 @@ process mergeVCF {
   cache 'lenient'
    
   input:
-  tuple val(original_vcf), path(vcf_files), path(index_files), val(vep_config), val(index_type),
-    val(one_to_many),
-    val(output_dir)
+  tuple val(original_vcf), path(vcf_files), path(index_files), val(vep_config), val(index_type)
+  val(one_to_many)
+  val(output_dir)
   
   output:
   val("${output_dir}/${merged_vcf}")
