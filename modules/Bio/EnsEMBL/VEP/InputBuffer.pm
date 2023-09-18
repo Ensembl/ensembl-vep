@@ -317,6 +317,7 @@ sub get_overlapping_vfs {
     }
 
     # check overlap with complex alternative alleles (such as breakend structural variants)
+    next unless $vf->can('get_breakends');
     for my $alt (@{ $vf->get_breakends }) {
       push(@vfs, $vf) if overlap($alt->{pos}, $alt->{pos}, $start, $end);
     }
@@ -352,6 +353,7 @@ sub interval_tree {
       $tree->insert($vf, $s - 1, $e);
 
       # breakends: add same variation feature to alternative allele coordinates
+      next unless $vf->can('get_breakends');
       for my $alt (@{ $vf->get_breakends }) {
         $s = $e = $alt->{pos};
         $tree->insert($vf, $s - 1, $e);
