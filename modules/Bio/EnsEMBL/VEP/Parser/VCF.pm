@@ -443,7 +443,7 @@ sub create_StructuralVariationFeatures {
       my $breakend_chr = $self->get_source_chr_name($info->{CHR2});
       my $breakend_pos = $info->{END2} || $incorrect_end;
       if (defined $breakend_chr and defined $breakend_pos) {
-        $alt = 'N' if $alt =~ /<?BND>?/i;
+        $alt = $alt =~ /^<?BND>?$/i ? "N" : "$alt/N";
         $alt = sprintf('%s[%s:%s[', $alt, $breakend_chr, $breakend_pos);
       }
     }
