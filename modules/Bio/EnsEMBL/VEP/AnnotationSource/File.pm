@@ -410,10 +410,8 @@ sub annotate_VariationFeature {
 
     # calculate summary statistics for custom annotation
     my $annot_stats = $vf->{_custom_annotations_stats}->{$self->short_name};
-    if (defined $stats) {
-      my $value = $record->[0]->{score};
-      return 1 unless $value;
-
+    my $value = $record->[0]->{score} if defined $stats;
+    if (defined $value) {
       if ( grep(/^min$/, @$stats) ) {
         $annot_stats->{min} = $value if $value < ($annot_stats->{min} || '+inf');
       }
