@@ -386,7 +386,9 @@ sub annotate_VariationFeature {
 
   return unless ($overlap_result);
 
-  my $record = $self->_create_records($overlap_result);
+  my $stats      = $self->{summary_stats};
+  my $get_scores = defined $stats;
+  my $record = $self->_create_records($get_scores);
 
   my $is_recorded = 0;
   if (@{$record}[0]->{'name'} =~  /^COSV/) {
@@ -408,9 +410,9 @@ sub annotate_VariationFeature {
 
     # calculate summary statistics for custom annotation
     my $annot_stats = $vf->{_custom_annotations_stats}->{$self->short_name};
-    my $stats = $self->{summary_stats};
     if (defined $stats) {
-      my $value = $record->[0]->{name};
+      my $value = $record->[0]->{score};
+      return 1 unless $value;
 
       if ( grep(/^min$/, @$stats) ) {
         $annot_stats->{min} = $value if $value < ($annot_stats->{min} || '+inf');
@@ -445,7 +447,12 @@ sub annotate_VariationFeature {
 =cut
 
 sub _create_records {
-  return [{name => $_[0]->_get_record_name}];
+  my $self = shift;
+  my $get_scores = shift;
+
+  my $record = [{ name  => $self->_get_record_name }];
+  $record->[0]->{score} =  $self->parser->get_score if $get_scores;
+  return $record;
 }
 
 

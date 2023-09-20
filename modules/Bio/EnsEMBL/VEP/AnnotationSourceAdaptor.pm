@@ -284,7 +284,6 @@ sub get_all_custom {
 
     $opts->{summary_stats} = $hash{"summary_stats"} || 'min%mean%max%count%sum';
     if (
-      $opts->{report_coords} ||
       $format !~ /^(bigwig|bed)$/ ||
       $opts->{summary_stats} eq 'none'
     ) {
