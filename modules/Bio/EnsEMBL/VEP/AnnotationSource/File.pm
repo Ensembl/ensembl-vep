@@ -162,7 +162,7 @@ sub new {
   $self->{same_type}      = $hashref->{same_type}      || 0;
   $self->{reciprocal}     = $hashref->{reciprocal}     || 0;
   $self->{overlap_def}    = $hashref->{overlap_def};
-  $self->{num_records}    = $hashref->{num_records}    || 50;
+  $self->{num_records}    = defined $hashref->{num_records} ? $hashref->{num_records} : 50;
 
   $self->{info} = { custom_info => $hashref };
 
