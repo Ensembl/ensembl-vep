@@ -325,7 +325,7 @@ sub annotate_InputBuffer {
             ($parser->get_seqname eq $self->get_source_chr_name($chr) || $parser->${get_raw_seqname} eq $self->get_source_chr_name($chr)) &&
             $parser->get_start <= $vf_end + 1) {
         # stop if exceeding the desired number of records and not calculating stats
-        last if !defined $stats && $record_count >= $self->{num_records};
+        last if !defined $stats && $record_count > $self->{num_records};
         my $res = $self->annotate_VariationFeature($vf, $record_count);
         $record_count++ if $res;
         $parser->next();
