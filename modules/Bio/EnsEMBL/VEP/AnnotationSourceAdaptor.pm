@@ -203,6 +203,21 @@ sub get_all_custom {
 
   my @as;
 
+  my @VALID_OPTIONS = (
+    'file',
+    'format',
+    'short_name',
+    'fields',
+    'type',
+    'overlap_cutoff',
+    'reciprocal',
+    'distance',
+    'coords',
+    'same_type',
+    'num_records',
+    'summary_stats'
+  );
+
   foreach my $custom_string(@{$self->param('custom') || []}) {
     
     my %hash = ();
@@ -220,6 +235,14 @@ sub get_all_custom {
         die("ERROR: Failed to parse parameter $param; Please add <VALUE_OF_PARAMETER>=$param\n") unless defined($key) && defined($val);
         $hash{$key} = $val;
       };
+
+      # warn about invalid options
+      my @invalid_opts;
+      for my $opt (keys %hash) {
+        push @invalid_opts, $opt unless grep { $opt eq $_ } @VALID_OPTIONS;
+      }
+      throw("ERROR: The following options are not supported for custom annotations: "
+            . join(", ", @invalid_opts) . "\n") if @invalid_opts;
     };
 
     throw("ERROR: No file was added for custom annotation source.\nLINE: --custom $custom_string\n") unless defined($hash{"file"});
