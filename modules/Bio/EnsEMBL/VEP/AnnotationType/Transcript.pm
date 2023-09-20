@@ -210,7 +210,7 @@ sub filter_transcript {
     (
       # we only want RefSeq transcripts e.g. NM_12930,
       # or 4540 for MT transcripts
-      # or TRNP (or, rna-TRNP for e105 cahce or before) for MT transcripts
+      # or TRNP (or, rna-TRNP for e105 cache or before) for MT transcripts
       (
         $self->{source_type} eq 'refseq' &&
         !(($t->stable_id || '') =~ /^[A-Z]{2}\_\d+/ || 
