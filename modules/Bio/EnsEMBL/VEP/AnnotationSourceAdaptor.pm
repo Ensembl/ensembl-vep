@@ -242,7 +242,8 @@ sub get_all_custom {
         push @invalid_opts, $opt unless grep { $opt eq $_ } @VALID_OPTIONS;
       }
       throw("ERROR: The following options are not supported for custom annotations: "
-            . join(", ", @invalid_opts) . "\n") if @invalid_opts;
+            . join(", ", @invalid_opts) . "\n" .
+            "LINE: --custom $custom_string\n") if @invalid_opts;
     };
 
     throw("ERROR: No file was added for custom annotation source.\nLINE: --custom $custom_string\n") unless defined($hash{"file"});
