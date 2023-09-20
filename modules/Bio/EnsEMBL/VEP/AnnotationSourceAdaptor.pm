@@ -282,20 +282,21 @@ sub get_all_custom {
       $opts->{num_records} = 'inf';
     }
 
-    $opts->{summary_stats} = $hash{"summary_stats"} || 'min%mean%max%count%sum';
-    if (
-      $format !~ /^(bigwig|bed)$/ ||
-      $opts->{summary_stats} eq 'none'
-    ) {
-      delete $opts->{summary_stats};
-    } else {
+    # Default summary statistics: only show for BED/bigwig custom files
+    $opts->{summary_stats} = $hash{"summary_stats"} ||
+      $format !~ /^(bigwig|bed)$/ ? 'min%mean%max%count%sum' : 'none';
+    delete $opts->{summary_stats} if $opts->{summary_stats} eq 'none';
+
+    if ( $opts->{summary_stats} ) {
       $opts->{summary_stats} = [split /%/, $opts->{summary_stats}];
 
+      # Check invalid summary statistics
       my @invalid;
       my @stats = ('min', 'max', 'mean', 'count', 'sum');
       for my $k (@{ $opts->{summary_stats} }) {
         push @invalid, $k unless grep { $_ eq $k } @stats;
       }
+
       if (@invalid) {
         my $invalid_opts = join(", ", @invalid);
         my $valid_opts   = join(", ", @stats);
