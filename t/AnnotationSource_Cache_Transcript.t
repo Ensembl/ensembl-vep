@@ -156,41 +156,21 @@ $c->{valid_chromosomes} = ["21", "MT"];
 $c->{source_type} = 'refseq';
 
 $c->{dir} = $Bin.'/testdata/cache/homo_sapiens_refseq/84_GRCh38';
-my $obj_refseq = $c->deserialize_from_file(
-  $c->get_dump_file_name(
-    "21",
-    "25000001-26000000"
-  )
-);
+my $obj_refseq = $c->deserialize_from_file($c->get_dump_file_name("21", "25000001-26000000"));
 my $features_refseq = $c->deserialized_obj_to_features($obj_refseq);
 is($c->filter_transcript($features_refseq->[0]), 1, 'filter_transcript pass all_refseq - feature NR_046198.3');
 
-$obj_refseq = $c->deserialize_from_file(
-  $c->get_dump_file_name(
-    "MT",
-    "1-1000000"
-  )
-);
+$obj_refseq = $c->deserialize_from_file( $c->get_dump_file_name("MT", "1-1000000"));
 $features_refseq = $c->deserialized_obj_to_features($obj_refseq);
 is($c->filter_transcript($features_refseq->[0]), 1, 'filter_transcript pass all_refseq - feature 4558');
 
 $c->{dir} = $Bin.'/testdata/cache/homo_sapiens_refseq/107_GRCh37';
-$obj_refseq = $c->deserialize_from_file(
-  $c->get_dump_file_name(
-    "MT",
-    "1-1000000"
-  )
-);
+$obj_refseq = $c->deserialize_from_file( $c->get_dump_file_name( "MT", "1-1000000"));
 $features_refseq = $c->deserialized_obj_to_features($obj_refseq);
 is($c->filter_transcript($features_refseq->[0]), 1, 'filter_transcript pass all_refseq - feature rna-TRNK');
 
 $c->{dir} = $Bin.'/testdata/cache/homo_sapiens_refseq/107_GRCh38';
-$obj_refseq = $c->deserialize_from_file(
-  $c->get_dump_file_name(
-    "MT",
-    "1-1000000"
-  )
-);
+$obj_refseq = $c->deserialize_from_file( $c->get_dump_file_name("MT", "1-1000000"));
 $features_refseq = $c->deserialized_obj_to_features($obj_refseq);
 is($c->filter_transcript($features_refseq->[0]), 1, 'filter_transcript pass all_refseq - feature COX3');
 
