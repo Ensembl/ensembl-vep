@@ -518,6 +518,14 @@ sub validate_vf {
     return 0;
   }
 
+  # check against size upperlimit to avoid memory problems
+  my $len = $vf->{end} - $vf->{start};
+  my $max_sv_size = $self->param('max_sv_size');
+  if( $len > $max_sv_size ){
+    $self->skipped_variant_msg("variant size ($len) is bigger than --max_sv_size ($max_sv_size)");
+    return 0;
+  }
+
   # check we have this chr in any of the annotation sources
   # otherwise try to map to toplevel if available
   unless($self->_have_chr($vf)) {
