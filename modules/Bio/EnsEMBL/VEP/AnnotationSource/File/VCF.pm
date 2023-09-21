@@ -229,7 +229,7 @@ sub _create_records {
         name   => $self->_get_record_name,
         allele => $result_hash->{a_allele},
       };
-      $record->{score} = $self->_get_score if $get_scores;
+      $record->{score} = $self->_get_score if $get_scores and $self->_get_score;
 
       foreach my $field(keys %$fields_data) {
         my $data = $fields_data->{$field};
@@ -241,7 +241,7 @@ sub _create_records {
   }
   else {
     my $record = { name => $self->_get_record_name };
-    $record->{score} = $self->_get_score if $get_scores;
+    $record->{score} = $self->_get_score if $get_scores and $self->_get_score;
 
     foreach my $field(keys %$fields_data) {
       my $data = $fields_data->{$field};

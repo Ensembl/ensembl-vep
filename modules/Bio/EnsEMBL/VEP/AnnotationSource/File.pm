@@ -452,7 +452,7 @@ sub _create_records {
   my $get_scores     = shift;
 
   my $record = [{ name  => $self->_get_record_name }];
-  $record->[0]->{score} =  $self->parser->get_score if $get_scores;
+  $record->[0]->{score} = $self->parser->get_score if $get_scores;
   return $record;
 }
 
