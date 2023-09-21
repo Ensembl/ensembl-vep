@@ -606,6 +606,17 @@ sub create_individual_VariationFeatures {
 
   # get genotypes from parser
   my $include = lc($self->{individual}->[0]) eq 'all' ? $parser->get_samples : $self->{individual};
+
+  # Compare sample names
+  if(lc($self->{individual}->[0]) ne 'all') {
+    my $samples = join(",", sort @{$parser->get_samples});
+    my $input_samples = join(",", sort @{$include});
+
+    if($samples ne $input_samples) {
+      die("ERROR: Sample IDs given ($input_samples) do not match samples from VCF ($samples)\n");
+    }
+  }
+
   my $ind_gts = $parser->get_samples_genotypes($include, 1 - ($self->{allow_non_variant} || 0));
 
   foreach my $ind(@$include) {
@@ -684,6 +695,17 @@ sub create_individuals_zyg_VariationFeature {
 
   # get genotypes from parser
   my $include = lc($self->{individual_zyg}->[0]) eq 'all' ? $parser->get_samples : $self->{individual_zyg};
+
+  # Compare sample names
+  if(lc($self->{individual_zyg}->[0]) ne 'all') {
+    my $samples = join(",", sort @{$parser->get_samples});
+    my $input_samples = join(",", sort @{$include});
+
+    if($samples ne $input_samples) {
+      die("ERROR: Sample IDs given ($input_samples) do not match samples from VCF ($samples)\n");
+    }
+  }
+
   my $ind_gts = $parser->get_samples_genotypes($include, 1 - ($self->{allow_non_variant} || 0));
 
   my $n_individuals = scalar(@{$include});
