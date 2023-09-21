@@ -29,7 +29,7 @@ SKIP: {
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
   no warnings 'once';
-  skip 'Bio::DB::BigFile module not available', 14 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_BIGWIG;
+  skip 'Bio::DB::BigFile module not available', 17 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_BIGWIG;
 
 
   ## BASIC TESTS
@@ -71,6 +71,7 @@ SKIP: {
   is(ref($ib->next()), 'ARRAY', 'check buffer next');
 
   $as->annotate_InputBuffer($ib);
+  $as->{summary_stats} = [ 'min', 'count' ];
 
   is_deeply(
     $ib->buffer->[0]->{_custom_annotations},
@@ -85,6 +86,7 @@ SKIP: {
   # exact type
   $as->type('exact');
   $as->short_name('foo');
+  $as->{summary_stats} = [ 'min', 'count' ];
   $as->annotate_InputBuffer($ib);
 
   is_deeply(
@@ -95,7 +97,7 @@ SKIP: {
         { name => 10 },
       ],
       'foo' => [
-        { name => 10 }
+        { name => 10, score => 10 },
       ]
     },
     'annotate_InputBuffer - exact, additive'
@@ -152,12 +154,41 @@ SKIP: {
     {
       'foo' => [
         {
-          'name' => '11'
+          'name' => '11',
+          'score' => '11',
         }
       ]
     },
     'overlap fixedStep'
   );
+
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
+    config => $cfg,
+    parser => Bio::EnsEMBL::VEP::Parser::VCF->new({
+      config => $cfg,
+      file => $test_cfg->create_input_file([qw(21 25592821 rs142513484 C T . . .)]),
+      valid_chromosomes => [21]
+    })
+  });
+  $ib->next();
+
+  $as->type('overlap');
+  $as->report_coords(1);
+  $as->annotate_InputBuffer($ib);
+
+  is_deeply(
+    $ib->buffer->[0]->{_custom_annotations},
+    {
+      'foo' => [
+        {
+          'name' => '21:25592820-25592822',
+          'score' => '11',
+        }
+      ]
+    },
+    'get scores even when reporting coords'
+  );
+
 }
 
 
