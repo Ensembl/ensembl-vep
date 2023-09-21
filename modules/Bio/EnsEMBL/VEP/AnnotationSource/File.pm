@@ -388,7 +388,7 @@ sub annotate_VariationFeature {
 
   my $stats      = $self->{summary_stats};
   my $get_scores = defined $stats;
-  my $record = $self->_create_records($get_scores);
+  my $record = $self->_create_records($overlap_result, $get_scores);
 
   my $is_recorded = 0;
   if (@{$record}[0]->{'name'} =~  /^COSV/) {
@@ -434,6 +434,8 @@ sub annotate_VariationFeature {
 
 =head2 _create_records
  
+  Arg 1      : bool or hashref $overlap_result
+  Arg 2      : bool $get_scores
   Example    : $records = $as->_create_records();
   Description: Create a custom annotation record from the current
                record as read from the annotation source.
@@ -445,8 +447,9 @@ sub annotate_VariationFeature {
 =cut
 
 sub _create_records {
-  my $self = shift;
-  my $get_scores = shift;
+  my $self           = shift;
+  my $overlap_result = shift;
+  my $get_scores     = shift;
 
   my $record = [{ name  => $self->_get_record_name }];
   $record->[0]->{score} =  $self->parser->get_score if $get_scores;

@@ -156,6 +156,7 @@ sub parser {
 =head2 _create_records
  
   Arg 1      : bool or hashref $overlap_result
+  Arg 2      : bool $get_scores
   Example    : $records = $as->_create_records($overlap_result);
   Description: Create a custom annotation record from the current
                record as read from the annotation source. Adds INFO field
@@ -170,6 +171,7 @@ sub parser {
 sub _create_records {
   my $self = shift;
   my $overlap_result = shift;
+  my $get_scores = shift;
 
   my @records;
 
@@ -224,9 +226,10 @@ sub _create_records {
       my $index  = $result_hash->{b_index};
 
       my $record = {
-        name => $self->_get_record_name,
-        allele => $result_hash->{a_allele}
+        name   => $self->_get_record_name,
+        allele => $result_hash->{a_allele},
       };
+      $record->{score} = $self->_get_score if $get_scores;
 
       foreach my $field(keys %$fields_data) {
         my $data = $fields_data->{$field};
@@ -237,9 +240,8 @@ sub _create_records {
     }
   }
   else {
-    my $record = {
-      name => $self->_get_record_name,
-    };
+    my $record = { name => $self->_get_record_name };
+    $record->{score} = $self->_get_score if $get_scores;
 
     foreach my $field(keys %$fields_data) {
       my $data = $fields_data->{$field};
@@ -287,6 +289,27 @@ sub _get_record_name {
       $parser->get_end
     ) :
     $id;
+}
+
+
+=head2 _get_record_name
+ 
+  Example    : $record_name = $as->_get_record_name();
+  Description: Get name for the current record using either ID as
+               found in the source or record coordinates. Defaults
+               to using first ID if multiple found, or coordinates
+               if none found.
+  Returntype : string
+  Exceptions : none
+  Caller     : _create_records()
+  Status     : Stable
+
+=cut
+
+sub _get_score {
+  my $self  = shift;
+  my $score = $self->parser->get_score;
+  return $score if $score ne '.';
 }
 
 
