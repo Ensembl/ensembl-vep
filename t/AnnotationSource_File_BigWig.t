@@ -29,7 +29,7 @@ SKIP: {
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
   no warnings 'once';
-  skip 'Bio::DB::BigFile module not available', 17 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_BIGWIG;
+  skip 'Bio::DB::BigFile module not available', 20 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_BIGWIG;
 
 
   ## BASIC TESTS
@@ -71,7 +71,7 @@ SKIP: {
   is(ref($ib->next()), 'ARRAY', 'check buffer next');
 
   $as->annotate_InputBuffer($ib);
-  $as->{summary_stats} = [ 'min', 'count' ];
+  $as->{summary_stats} = [ 'min', 'mean', 'max', 'sum', 'count' ];
 
   is_deeply(
     $ib->buffer->[0]->{_custom_annotations},
@@ -83,10 +83,15 @@ SKIP: {
     'annotate_InputBuffer - overlap'
   );
 
+  is_deeply(
+    $ib->buffer->[0]->{_custom_annotations_stats},
+    {},
+    'annotate_InputBuffer - no summary statistics'
+  );
+
   # exact type
   $as->type('exact');
   $as->short_name('foo');
-  $as->{summary_stats} = [ 'min', 'count' ];
   $as->annotate_InputBuffer($ib);
 
   is_deeply(
@@ -103,7 +108,65 @@ SKIP: {
     'annotate_InputBuffer - exact, additive'
   );
 
+  is_deeply(
+    $ib->buffer->[0]->{_custom_annotations_stats},
+    {
+      'foo' => {
+        'min'   => 10,
+        'max'   => 10,
+        'mean'  => 10,
+        'sum'   => 10,
+        'count' => 1,
+      },
+    },
+    'annotate_InputBuffer - single score, summary statistics'
+  );
+
   # out by one
+  delete($ib->buffer->[0]->{_custom_annotations});
+  
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
+    config => $cfg,
+    parser => Bio::EnsEMBL::VEP::Parser::VCF->new({
+      config => $cfg,
+      file => $test_cfg->create_input_file([qw(21 25585733 . . <DEL> . . END=25592852)]),
+      valid_chromosomes => [21]
+    })
+  });
+  $ib->next();
+  
+  # overlap multiple scores
+  $as->type('overlap');
+  $as->short_name('foo');
+  $as->annotate_InputBuffer($ib);
+
+  is_deeply(
+    $ib->buffer->[0]->{_custom_annotations},
+    {
+      'foo' => [
+        { name => 20, score => 20 },
+        { name => 30, score => 30 },
+        { name => 11, score => 11 },
+        { name => 21, score => 21 },
+      ]
+    },
+    'annotate_InputBuffer - overlap, multiple scores'
+  );
+
+  is_deeply(
+    $ib->buffer->[0]->{_custom_annotations_stats},
+    {
+      'foo' => {
+        'min'   => 11,
+        'max'   => 30,
+        'mean'  => 20.5,
+        'sum'   => 82,
+        'count' => 4,
+      },
+    },
+    'annotate_InputBuffer - multiple scores, summary statistics'
+  );
+
   delete($ib->buffer->[0]->{_custom_annotations});
 
   $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
