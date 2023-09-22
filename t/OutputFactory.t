@@ -2013,6 +2013,34 @@ my $genotype = join ',', sort(@{$result->{ZYG}});
 is($genotype, 'barry:HOM,dave:HET,jeff:HOMREF', 'VariationFeature_to_output_hash - individual_zyg');
 delete($of->{individual_zyg});
 
+### individual_zyg wrong sample name
+dies_ok { get_annotated_buffer({
+  input_file => $test_cfg->create_input_file([
+    ['##fileformat=VCFv4.1'],
+    [qw(#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT dave barry jeff)],
+    [qw(21 25607429 indtest A G . . . GT 0|1 1/1 0/0)],
+  ]),
+  individual_zyg => 'john',
+});
+} 'VariationFeature_to_output_hash - individual_zyg wrong sample name';
+
+### individual_zyg correct sample name
+$ib = get_annotated_buffer({
+  input_file => $test_cfg->create_input_file([
+    ['##fileformat=VCFv4.1'],
+    [qw(#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT dave barry jeff)],
+    [qw(21 25607429 indtest A G . . . GT 0|1 1/1 0/0)],
+  ]),
+  individual_zyg => 'dave,barry',
+});
+
+$of->{individual_zyg} = ['dave,barry'];
+my $result = $of->VariationFeature_to_output_hash($ib->buffer->[0]);
+my $genotype = join ',', sort(@{$result->{ZYG}});
+
+is($genotype, 'barry:HOM,dave:HET', 'VariationFeature_to_output_hash - individual_zyg correct sample name');
+delete($of->{individual_zyg});
+
 
 # done
 done_testing();

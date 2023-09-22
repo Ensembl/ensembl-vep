@@ -609,11 +609,10 @@ sub create_individual_VariationFeatures {
 
   # Compare sample names
   if(lc($self->{individual}->[0]) ne 'all') {
-    my $samples = join(",", sort @{$parser->get_samples});
-    my $input_samples = join(",", sort @{$include});
+    my $found = _find_in_array($parser->get_samples, $include);
 
-    if($samples ne $input_samples) {
-      die("ERROR: Sample IDs given ($input_samples) do not match samples from VCF ($samples)\n");
+    if(!$found) {
+      die("ERROR: Sample IDs given (", join(",", @{$include}), ") do not match samples from VCF (", join(",", @{$parser->get_samples}), ")\n");
     }
   }
 
@@ -698,11 +697,10 @@ sub create_individuals_zyg_VariationFeature {
 
   # Compare sample names
   if(lc($self->{individual_zyg}->[0]) ne 'all') {
-    my $samples = join(",", sort @{$parser->get_samples});
-    my $input_samples = join(",", sort @{$include});
+    my $found = _find_in_array($parser->get_samples, $include);
 
-    if($samples ne $input_samples) {
-      die("ERROR: Sample IDs given ($input_samples) do not match samples from VCF ($samples)\n");
+    if(!$found) {
+      die("ERROR: Sample IDs given (", join(",", @{$include}), ") do not match samples from VCF (", join(",", @{$parser->get_samples}), ")\n");
     }
   }
 
@@ -741,6 +739,22 @@ sub create_individuals_zyg_VariationFeature {
   push @return, $vf;
 
   return \@return;
+}
+
+sub _find_in_array {
+  my $all_samples = shift;
+  my $samples = shift;
+
+  my %all = map { $_ => 1 } @{$all_samples};
+  my %input_samples = map { $_ => 1 } @{$samples};
+
+  foreach my $sample (keys %input_samples) {
+    if(!$all{$sample}) {
+      return 0;
+    }
+  }
+
+  return 1;
 }
 
 1;
