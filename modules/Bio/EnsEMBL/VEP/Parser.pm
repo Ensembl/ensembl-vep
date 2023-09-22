@@ -526,6 +526,7 @@ sub validate_vf {
       "variant size ($len) is bigger than --max_sv_size ($max_sv_size)"
     );
     $vf->{vep_skip} = 1;
+    return 0 if $self->param('rest');
   }
 
   # check we have this chr in any of the annotation sources
