@@ -260,7 +260,7 @@ sub create_VariationFeatures {
     join("", $ref, @$alts) !~ /^[ACGT]+$/ &&
     (
       $info->{SVTYPE} ||
-      join(",", @$alts) =~ /[<\[\]][^\*]+[>\]\[]/
+      join(",", @$alts) =~ /[<\[\]][^\*]+[>\]\[]|^.|.$/
     )
   ) {
     return $self->create_StructuralVariationFeatures();
