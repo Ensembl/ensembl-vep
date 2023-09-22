@@ -53,7 +53,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg && !$@;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 5 unless $can_use_db;
+  skip 'No local database configured', 11 unless $can_use_db;
 
   my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens') if $can_use_db;
   
@@ -111,7 +111,7 @@ SKIP: {
   ## structural variant ID test
   $p = Bio::EnsEMBL::VEP::Parser::ID->new({
     config => $cfg,
-    file => $test_cfg->create_input_file('nsv917902'),
+    file => $test_cfg->create_input_file('nsv183342'),
     valid_chromosomes => [21],
   });
 
@@ -119,36 +119,35 @@ SKIP: {
 
   my $expected_sv = bless( {
     'is_somatic' => '0',
-    'class_attrib_id' => 7,
+    'class_attrib_id' => 10,
     'allele_freq' => undef,
     'outer_start' => undef,
-    'seq_region_start' => 7749532,
-    '_study_id' => 5123,
+    'seq_region_start' => 25002717,
+    '_study_id' => 4279,
     'strand' => 1,
-    'seq_region_end' => 46568202,
-    'class_SO_term' => 'copy_number_variation',
+    'seq_region_end' => 25002717,
+    'class_SO_term' => 'insertion',
     'allele_string' => undef,
     '_line' => [
-      'nsv917902'
+      'nsv183342'
     ],
     'outer_end' => undef,
     'chr' => '21',
-    'inner_end' => 46568202,
+    'inner_end' => undef,
     '_source_id' => 11,
     'allele_count' => undef,
-    'end' => 46568202,
+    'end' => 25002717,
     'length' => undef,
     'breakpoint_order' => undef,
-    'inner_start' => 7749532,
-    'start' => 7749532,
-    '_structural_variation_id' => 55104096  
+    'inner_start' => undef,
+    'start' => 25002717,
+    '_structural_variation_id' => 56669931  
   }, 'Bio::EnsEMBL::Variation::StructuralVariationFeature' );
 
   $vf = $p->next();
   delete($vf->{$_}) for qw(adaptor variation slice variation_name);
 
   is_deeply($vf, $expected_sv, 'sv input test');
-
 
   my $tmp;
   no warnings 'once';
@@ -193,6 +192,16 @@ SKIP: {
   is_deeply($vf, $expected, 'parse input file with empty lines');
 
   ok($tmp =~ /Skipped 2 empty lines/, 'empty line warning');
+
+  # sv max size limit
+  $tmp = '';
+  $p = Bio::EnsEMBL::VEP::Parser::ID->new({
+    config => $cfg,
+    file => $test_cfg->create_input_file('nsv917902'),
+    valid_chromosomes => [21],
+  });
+  $p->next();
+  like($tmp, qr/nsv917902.* variant size .* is bigger than --max_sv_size/, 'SV bigger than max_sv_size warning');
 
   # restore STDERR
   open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
