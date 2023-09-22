@@ -417,10 +417,11 @@ sub create_StructuralVariationFeatures {
   my $record = $parser->{record};
 
   # get relevant data
-  my ($chr, $start, $end, $alts, $info, $ids) = (
+  my ($chr, $start, $end, $ref, $alts, $info, $ids) = (
     $parser->get_seqname,
     $parser->get_start,
     $parser->get_end,
+    $parser->get_reference,
     $parser->get_alternatives,
     $parser->get_info,
     $parser->get_IDs,
@@ -447,6 +448,7 @@ sub create_StructuralVariationFeatures {
         $alt = sprintf('%s[%s:%s[', $alt, $breakend_chr, $breakend_pos);
       }
     }
+    $alt = $ref . "./$alt" unless $alt =~ /^\.|\.$/;
   }
 
   ## check against size upperlimit to avoid memory problems
