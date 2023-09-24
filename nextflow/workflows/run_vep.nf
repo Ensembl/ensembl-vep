@@ -135,7 +135,9 @@ workflow {
         // NOTE: csi is default unless a tbi index already exists
         meta.index_type = file(vcf + ".tbi").exists() ? "tbi" : "csi"
 
-        [ meta, vcf, vep_config ]
+        vcf_index = vcf + ".${meta.index_type}"
+
+        [ meta, vcf, vcf_index, vep_config ]
     }
     .set{ ch_input }
   

@@ -20,7 +20,7 @@ process checkVCF {
   errorStrategy 'ignore'
 
   input:
-  tuple val(meta), path(vcf), path(vep_config)
+  tuple val(meta), path(vcf), path(vcf_index), path(vep_config)
   
   output:
   tuple val(meta), path("*.gz", includeInputs: true), path ("*.gz.{tbi,csi}", includeInputs: true), path(vep_config)
