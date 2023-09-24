@@ -22,14 +22,16 @@ process mergeVCF {
   cache 'lenient'
    
   input:
-  tuple val(original_vcf), path(vcf_files), path(index_files), val(vep_config), val(index_type)
-  val(one_to_many)
-  val(output_dir)
+  tuple val(meta), val(original_vcf), path(vcf_files), path(index_files), val(vep_config)
   
   output:
   val("${output_dir}/${merged_vcf}")
 
   script:
+  index_type = meta.index_type
+  one_to_many = meta.one_to_many
+  output_dir = meta.output_dir
+  
   merged_vcf = merged_vcf ?: file(original_vcf).getName().replace(".vcf", "_VEP.vcf")
   merged_vcf = one_to_many ? merged_vcf.replace(
     "_VEP.vcf", 

@@ -20,14 +20,16 @@ process checkVCF {
   errorStrategy 'ignore'
 
   input:
-  tuple path(vcf), path(vcf_index), path(vep_config), val(index_type)
+  tuple val(meta), path(vcf), path(vep_config)
   
   output:
-  tuple path("*.gz", includeInputs: true), path ("*.gz.{tbi,csi}", includeInputs: true), path(vep_config), val(index_type)
+  tuple val(meta), path("*.gz", includeInputs: true), path ("*.gz.{tbi,csi}", includeInputs: true), path(vep_config)
 
   afterScript "rm *.vcf *.vcf.tbi *.vcf.csi"
 
   script:
+  index_type = meta.index_type
+
   """
   [ -f *gz ] || bgzip -c ${vcf} > ${vcf}.gz
   

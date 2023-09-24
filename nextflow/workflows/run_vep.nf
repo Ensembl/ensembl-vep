@@ -20,7 +20,6 @@ params.skip_check = 0
 params.help = false
 
 // module imports
-include { processInput } from '../nf_modules/process_input.nf'
 include { checkVCF } from '../nf_modules/check_VCF.nf'
 include { generateSplits } from '../nf_modules/generate_splits.nf'
 include { splitVCF } from '../nf_modules/split_VCF.nf' 
@@ -77,14 +76,9 @@ def createOutputChannel (output) {
 workflow vep {
   take:
     inputs
-    output_dir
-    one_to_many
   main:
-    // process input and create Channel
-    processInput(inputs)
-    
     // Prepare input VCF files (bgzip + tabix)
-    checkVCF(processInput.out)
+    checkVCF(inputs)
     
     // Generate split files that each contain bin_size number of variants from VCF
     generateSplits(checkVCF.out, params.bin_size)
@@ -96,7 +90,7 @@ workflow vep {
     runVEP(splitVCF.out.transpose())
     
     // Merge split VCF files (creates one output VCF for each input VCF)
-    mergeVCF(runVEP.out.files.groupTuple(by: [0, 3, 4]), one_to_many, output_dir)
+    mergeVCF(runVEP.out.files.groupTuple(by: [0, 1, 4]))
   emit:
     mergeVCF.out
 }
@@ -124,11 +118,26 @@ workflow {
   one_to_many = vcf.count()
     .combine( vep_config.count() )
     .map{ it[0] == 1 && it[1] != 1 }
+
+  output_dir = createOutputChannel(params.outdir)
   
   // this works like 'merge' operator and thus might make the pipeline un-resumable
   // we might think of using 'toSortedList' and generate appropriate input from the 'processInput' module
-  inputs = vcf.combine( vep_config )
-  output_dir = createOutputChannel(params.outdir)
+  vcf
+    .combine( vep_config )
+    .combine( one_to_many )
+    .combine( output_dir )
+    .map {
+      vcf, vep_config, one_to_many, output_dir ->
+        meta = [:]
+        meta.one_to_many = one_to_many
+        meta.output_dir = output_dir
+        // NOTE: csi is default unless a tbi index already exists
+        meta.index_type = file(vcf + ".tbi").exists() ? "tbi" : "csi"
+
+        [ meta, vcf, vep_config ]
+    }
+    .set{ ch_input }
   
-  vep(inputs, output_dir, one_to_many)
+  vep(ch_input)
 }

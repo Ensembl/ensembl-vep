@@ -22,13 +22,14 @@ process runVEP {
   label 'vep'
 
   input:
-  tuple val(original_vcf), path(vcf), path(vcf_index), path(vep_config), val(index_type)
+  tuple val(meta), val(original_vcf), path(vcf), path(vcf_index), path(vep_config)
   
   output:
-  tuple val(original_vcf), path(out_vcf), path("${out_vcf}.{tbi,csi}"), val("${vep_config}"), val(index_type), emit: files
+  tuple val(meta), val(original_vcf), path(out_vcf), path("${out_vcf}.{tbi,csi}"), val("${vep_config}"), emit: files
   path("*.vcf.gz_summary.*")
 
   script:
+  index_type = meta.index_type
   out_vcf = "vep" + "-" + file(original_vcf).getSimpleName() + "-" + vep_config.getSimpleName() + "-" + vcf
   
   if( !vcf.exists() ) {
