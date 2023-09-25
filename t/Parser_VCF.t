@@ -685,7 +685,7 @@ is_deeply($cnv_vf, bless( {
 ## test breakend variant with unsupported END information in INFO field
 my $bnd_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1,  warning_file => 'STDERR'}),
-  file => $test_cfg->create_input_file([qw(2	68914092	BND00001121	A	]1:37938377]A	.	PASS	SVTYPE=BND;END=37938377   )]),
+  file => $test_cfg->create_input_file([qw(2	68914092	BND00001121	TCA	]1:37938377]A	.	PASS	SVTYPE=BND;END=37938377   )]),
   valid_chromosomes => [1,2]
 })->next();
 
@@ -695,15 +695,15 @@ is_deeply($bnd_vf, bless( {
                  'strand' => '1',
                  'variation_name' => 'BND00001121',
                  'class_SO_term' => 'chromosome_breakpoint',
-                 'allele_string' => ']1:37938377]A',
+                 'allele_string' => 'TCA/]1:37938377]A',
                  'start' => 68914093,
                  'inner_start' => 68914093,
                  'outer_start' => 68914093,
-                 'end' => 68914093,
-                 'inner_end' => 68914093,
-                 'outer_end' => 68914093,
+                 'end' => 68914095,
+                 'inner_end' => 68914095,
+                 'outer_end' => 68914095,
                  'seq_region_start' => 68914093,
-                 'seq_region_end' => 68914093
+                 'seq_region_end' => 68914095
                },
                'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) ,
                'StructuralVariationFeature - BND with unsupported INFO/END field');
@@ -721,7 +721,7 @@ is_deeply($bnd2_vf, bless( {
                  'strand' => '1',
                  'variation_name' => 'BND00001121',
                  'class_SO_term' => 'chromosome_breakpoint',
-                 'allele_string' => ']1:37938377]A/C]2:68920000]',
+                 'allele_string' => 'A/]1:37938377]A/C]2:68920000]',
                  'start' => 68914093,
                  'inner_start' => 68914093,
                  'outer_start' => 68914093,
@@ -737,7 +737,7 @@ is_deeply($bnd2_vf, bless( {
 ## test breakend variant with information in INFO field
 my $bnd3_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1,  warning_file => 'STDERR'}),
-  file => $test_cfg->create_input_file([qw(2    68914092     BND00001121     A       <BND>    .   PASS    SVTYPE=BND;CHR2=2;END2=68920000)]),
+  file => $test_cfg->create_input_file([qw(2    68914092     BND00001121     G       <BND>    .   PASS    SVTYPE=BND;CHR2=2;END2=68920000)]),
   valid_chromosomes => [1,2]
 })->next();
 delete($bnd3_vf->{adaptor}); delete($bnd3_vf->{_line});
@@ -746,7 +746,7 @@ is_deeply($bnd3_vf, bless( {
                  'strand' => '1',
                  'variation_name' => 'BND00001121',
                  'class_SO_term' => 'chromosome_breakpoint',
-                 'allele_string' => 'N[2:68920000[',
+                 'allele_string' => 'G/N[2:68920000[',
                  'start' => 68914093,
                  'inner_start' => 68914093,
                  'outer_start' => 68914093,
@@ -771,7 +771,7 @@ is_deeply($bnd4_vf, bless( {
                  'strand' => '1',
                  'variation_name' => 'BND00001121',
                  'class_SO_term' => 'chromosome_breakpoint',
-                 'allele_string' => 'N[2:68920000[',
+                 'allele_string' => 'A/N[2:68920000[',
                  'start' => 68914093,
                  'inner_start' => 68914093,
                  'outer_start' => 68914093,
@@ -784,6 +784,31 @@ is_deeply($bnd4_vf, bless( {
                'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) ,
                'StructuralVariationFeature - BND with incorrect INFO/END field');
 
+## test single breakend variant
+my $bnd5_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1,  warning_file => 'STDERR'}),
+  file => $test_cfg->create_input_file([qw(2	68914092	single_BND	TCA	TCA.	.	PASS	.   )]),
+  valid_chromosomes => [1,2]
+})->next();
+
+delete($bnd5_vf->{adaptor}); delete($bnd5_vf->{_line});
+is_deeply($bnd5_vf, bless( {
+                 'chr' => '2',
+                 'strand' => '1',
+                 'variation_name' => 'single_BND',
+                 'class_SO_term' => 'chromosome_breakpoint',
+                 'allele_string' => 'TCA.',
+                 'start' => 68914093,
+                 'inner_start' => 68914093,
+                 'outer_start' => 68914093,
+                 'end' => 68914095,
+                 'inner_end' => 68914095,
+                 'outer_end' => 68914095,
+                 'seq_region_start' => 68914093,
+                 'seq_region_end' => 68914095
+               },
+               'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) ,
+               'StructuralVariationFeature - BND with unsupported INFO/END field');
 
 ## OTHER TESTS
 ##############

@@ -260,7 +260,7 @@ sub create_VariationFeatures {
     join("", $ref, @$alts) !~ /^[ACGT]+$/ &&
     (
       $info->{SVTYPE} ||
-      join(",", @$alts) =~ /[<\[\]][^\*]+[>\]\[]|^.|.$/
+      join(",", @$alts) =~ /[<\[\]][^\*]+[>\]\[]|^\.\w+|\w+\.$/
     )
   ) {
     return $self->create_StructuralVariationFeatures();
@@ -448,7 +448,7 @@ sub create_StructuralVariationFeatures {
         $alt = sprintf('%s[%s:%s[', $alt, $breakend_chr, $breakend_pos);
       }
     }
-    $alt = $ref . "./$alt" unless $alt =~ /^\.|\.$/;
+    $alt = $ref . "/$alt" unless $alt =~ /^\.|\.$/;
   }
 
   ## check against size upperlimit to avoid memory problems
