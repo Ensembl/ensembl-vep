@@ -1149,6 +1149,25 @@ is(scalar (grep {/^var5_chr22/} @tmp_lines), 5, 'run - ref and alt are the same'
 
 unlink($test_cfg->{user_file}.'.out');
 
+### Test individual_zyg
+$runner = Bio::EnsEMBL::VEP::Runner->new({
+  %$cfg_hash,
+  input_data => undef,
+  input_file => $test_cfg->{test_vcf5},
+  dir => $test_cfg->{cache_root_dir},
+  output_file => $test_cfg->{user_file}.'.out',
+  individual_zyg => 'all',
+});
+ok($runner->run, 'run - ok');
+open IN, $test_cfg->{user_file}.'.out';
+@tmp_lines = <IN>;
+close IN;
+
+is(scalar (grep {/^rs142513484/} @tmp_lines), 3, 'run - individual_zyg all (homozygous)');
+is(scalar (grep {/^var5_chr22/} @tmp_lines), 5, 'run - individual_zyg all (heterozygous)');
+
+unlink($test_cfg->{user_file}.'.out');
+
 ## run_rest
 ###########
 
