@@ -193,7 +193,7 @@ sub next {
 
   my $vf = shift @$cache;
   return $vf unless $vf;
-  
+
   unless($self->validate_vf($vf) || $self->{dont_skip}) {
     return $self->next();
   }
@@ -236,7 +236,7 @@ sub create_VariationFeatures {
     join("", $ref, @$alts) !~ /^[ACGT]+$/ &&
     (
       $info->{SVTYPE} ||
-      join(",", @$alts) =~ /[<\[\]][^\*]+[>\]\[]/
+      join(",", @$alts) =~ /[<\[\]][^\*]+[>\]\[]|^\.\w+|\w+\.$/
     )
   ) {
     return $self->create_StructuralVariationFeatures();
@@ -376,93 +376,6 @@ sub create_VariationFeatures {
 }
 
 
-=head2 _parse_breakend_alt_alleles
-
-  Arg 1      : string $alt (ALT field from VCF)
-  Arg 2      : hashref $info (INFO field from VCF)
-  Example    : $parsed_alleles = $self->_parse_breakend_alt_alleles($alt, $info);
-  Description: Parse alternative alleles from breakend structural variants
-  Returntype : Arrayref of hashrefs containing information of the parsed alleles
-  Exceptions : none
-  Caller     : create_StructuralVariationFeatures()
-  Status     : Stable
-
-=cut
-
-sub _parse_breakend_alt_alleles {
-  my $self = shift;
-  my $alt = shift;
-  my $info = shift;
-
-  my $parsed_allele = [];
-
-  # Support multiple breakends from ALT in the format C[2:321682[,]17:198982]G
-  for my $alt_string (split ",", $alt) {
-    my ($alt_allele) = ($alt_string =~ '[\[\]]?([A-Za-z]+)[\[\]]?');
-    my ($alt_chr, $alt_pos) = ($alt_string =~ '([A-Za-z0-9]+) ?: ?([0-9]+)');
-
-    next if !defined $alt_allele or !defined $alt_chr or !defined $alt_pos;
-    $alt_chr = $self->get_source_chr_name($alt_chr);
-
-    # Mate orientation:
-    #   C[2:321682[  - normal
-    #   G]17:198982] - inverted
-    #   ]13:123456]T - normal
-    #   [17:198983[A - inverted
-    my $inverted = ($alt_string =~ '^\[|\]$') || 0;
-
-    # Mate placement:
-    #   C[2:321682[  - left
-    #   [17:198983[A - right
-    my $placement = ($alt_string =~ '^(\[|\])') ? 'left' : 'right';
-
-    my $slice = Bio::EnsEMBL::Slice->new_fast({
-      seq_region_name => $alt_chr,
-      start => $alt_pos,
-      end => $alt_pos,
-    });
-
-    push @$parsed_allele, {
-      string    => $alt_string,
-      allele    => $alt_allele,
-      pos       => $alt_pos,
-      start     => $alt_pos,
-      end       => $alt_pos,
-      chr       => $alt_chr,
-      inverted  => $inverted,
-      placement => $placement,
-      slice     => $slice
-    };
-  }
-
-  # Support breakend described in INFO field
-  if (defined $info->{CHR2} && scalar @$parsed_allele == 0) {
-    my $alt_chr = $self->get_source_chr_name($info->{CHR2});
-    my $alt_pos = $info->{END2};
-
-    if (defined $alt_chr && defined $alt_pos) {
-      my $slice = Bio::EnsEMBL::Slice->new_fast({
-        seq_region_name => $alt_chr,
-        start => $alt_pos,
-        end => $alt_pos,
-      });
-
-      push @$parsed_allele, {
-        string    => $alt,
-        allele    => $alt,
-        pos       => $alt_pos,
-        start     => $alt_pos,
-        end       => $alt_pos,
-        chr       => $alt_chr,
-        slice     => $slice
-      };
-    }
-  }
-
-  return $parsed_allele;
-}
-
-
 =head2 create_StructuralVariationFeatures
 
   Example    : $vfs = $parser->create_StructuralVariationFeatures();
@@ -482,32 +395,44 @@ sub create_StructuralVariationFeatures {
   my $record = $parser->{record};
 
   # get relevant data
-  my ($chr, $start, $end, $alts, $info, $ids) = (
+  my ($chr, $start, $end, $ref, $alts, $info, $ids) = (
     $parser->get_seqname,
     $parser->get_start,
     $parser->get_end,
+    $parser->get_reference,
     $parser->get_alternatives,
     $parser->get_info,
     $parser->get_IDs,
   );
-  
+
   ## get structural variant type from SVTYPE tag (deprecated in VCF 4.4) or ALT
-  my $alt = join(",", @$alts);
+  my $alt = join("/", @$alts);
   my $type = $info->{SVTYPE} || $alt;
   my $so_term = $self->get_SO_term($type) || $type;
+
+  ## get breakends from INFO field (from Illumina Manta, for instance)
+  if ($so_term =~ /breakpoint/) {
+    ## Illumina Manta (SV caller) may use INFO/END to identify the position of
+    ## the breakend mate (this is not supported by VCF 4.4 specifications)
+    my $incorrect_end = $info->{END};
+    delete $parser->get_info->{END};
+    $end = $parser->get_end if $incorrect_end;
+
+    if (defined $info->{CHR2}) {
+      my $breakend_chr = $self->get_source_chr_name($info->{CHR2});
+      my $breakend_pos = $info->{END2} || $incorrect_end;
+      if (defined $breakend_chr and defined $breakend_pos) {
+        $alt = $alt =~ /^<?BND>?$/i ? "N" : "$alt/N";
+        $alt = sprintf('%s[%s:%s[', $alt, $breakend_chr, $breakend_pos);
+      }
+    }
+    $alt = $ref . "/$alt" unless $alt =~ /^\.|\.$/;
+  }
 
   ## check against size upperlimit to avoid memory problems
   my $len = $end - $start;
   if( $len > $self->{max_sv_size} ){
     $self->skipped_variant_msg("variant size ($len) is bigger than --max_sv_size (" . $self->{max_sv_size} . ")");
-  }
-
-  # work out the end coord
-  if(defined($info->{END})) {
-    $end = $info->{END};
-  }
-  elsif(defined($info->{SVLEN})) {
-    $end = $start + abs($info->{SVLEN}) - 1;
   }
 
   # check for imprecise breakpoints
@@ -517,14 +442,6 @@ sub create_StructuralVariationFeatures {
     $parser->get_inner_end,
     $parser->get_outer_end,
   );
-
-  # parse alternative alleles from breakends
-  my $parsed_allele;
-  my $allele_string;
-  if ($so_term =~ /break/ ){
-    $parsed_allele = $self->_parse_breakend_alt_alleles($alt, $info);
-    $allele_string = $alt;
-  }
 
   if($start >= $end && $so_term =~ /del/i) {
     $self->skipped_variant_msg("deletion looks incomplete");
@@ -542,13 +459,12 @@ sub create_StructuralVariationFeatures {
     variation_name => @$ids ? $ids->[0] : undef,
     chr            => $self->get_source_chr_name($chr),
     class_SO_term  => $so_term,
+    allele_string  => $alt,
     _line          => $record
   });
-  $svf->{allele_string}  = $allele_string if defined $allele_string;
-  $svf->{_parsed_allele} = $parsed_allele if defined $parsed_allele;
-  $svf->{vep_skip}       = $self->{skip_line} if defined $self->{skip_line};
+  $svf->{vep_skip} = $self->{skip_line} if defined $self->{skip_line};
 
-  return $self->post_process_vfs([$svf]);
+  return $self->post_process_vfs([$svf]);;
 }
 
 
