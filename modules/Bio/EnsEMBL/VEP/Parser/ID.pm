@@ -161,12 +161,21 @@ sub create_VariationFeatures {
 
   my $v_obj = $ad->fetch_by_name($id);
 
-  unless($v_obj) {
-    $self->warning_msg("WARNING: No variant found with ID \'$id\'");
-    return $self->create_VariationFeatures();
-  }
+  my @vfs;
+  if ($v_obj) {
+    @vfs = @{$v_obj->get_all_VariationFeatures};
+  } else {
+    # search for ID in structural variants
+    my $sva = $self->get_adaptor('variation', 'StructuralVariation');
+    $v_obj  = $sva->fetch_by_name($id);
 
-  my @vfs = @{$v_obj->get_all_VariationFeatures};
+    if ($v_obj) {
+      @vfs = @{$v_obj->get_all_StructuralVariationFeatures};
+    } else {
+      $self->warning_msg("WARNING: No variant found with ID \'$id\'");
+      return $self->create_VariationFeatures();
+    }
+  }
 
   unless(@vfs) {
     $self->warning_msg("WARNING: No mappings found for variant \'$id\'");

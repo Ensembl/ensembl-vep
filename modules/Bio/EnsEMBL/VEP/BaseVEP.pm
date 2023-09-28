@@ -792,7 +792,8 @@ sub skipped_variant_msg {
     $msg = "(" . $line . "): " . $msg;
   }
 
-  $msg = "Line $line_number skipped " . $msg if defined $line_number;
+  $msg = (defined $line_number and not defined $self->param('input_data')) ?
+    "line $line_number skipped " . $msg : "variant skipped " . $msg;
   $self->warning_msg("WARNING: " . $msg . "\n");
 
   $self->skipped_variants({

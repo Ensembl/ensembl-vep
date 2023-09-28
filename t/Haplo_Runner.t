@@ -114,6 +114,7 @@ SKIP: {
     'allow_non_variant' => undef,
     'gp' => undef,
     'individual' => undef,
+    'individual_zyg' => undef,
     'phased' => undef,
      'max_sv_size' => 10000000,
   }, 'Bio::EnsEMBL::VEP::Haplo::Parser::VCF' ), 'get_Parser');
