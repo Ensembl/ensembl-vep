@@ -237,7 +237,9 @@ sub _get_records_by_coords {
       push @records, $self->_record_to_hash();
     }
     else {
-      $self->warning_msg("The feature_type ".$parser->get_type." is being skipped\n");
+      my $type = $parser->get_type;
+      my $file = $self->{file};
+      $self->warning_msg("Ignoring non-supported '$type' feature_type from $file\n");
     }
 
     $parser->next();
