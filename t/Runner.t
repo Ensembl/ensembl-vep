@@ -108,6 +108,7 @@ is_deeply($runner->get_Parser, bless({
   'minimal' => undef,
   'lrg' => undef,
   'delimiter' => ' ',
+  'max_sv_size' => 10000000,
 }, 'Bio::EnsEMBL::VEP::Parser::VEP_input' ), 'get_Parser');
 
 is_deeply($runner->get_InputBuffer, bless({
@@ -125,6 +126,7 @@ is_deeply($runner->get_InputBuffer, bless({
     'minimal' => undef,
     'lrg' => undef,
     'delimiter' => ' ',
+    'max_sv_size' => 10000000,
   }, 'Bio::EnsEMBL::VEP::Parser::VEP_input' ),
   'buffer_size' => $runner->param('buffer_size'),
   'minimal' => undef,
