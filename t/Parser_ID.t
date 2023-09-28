@@ -53,7 +53,7 @@ SKIP: {
   my $can_use_db = $db_cfg && scalar keys %$db_cfg && !$@;
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'No local database configured', 4 unless $can_use_db;
+  skip 'No local database configured', 11 unless $can_use_db;
 
   my $multi = Bio::EnsEMBL::Test::MultiTestDB->new('homo_vepiens') if $can_use_db;
   
@@ -108,6 +108,46 @@ SKIP: {
 
   is_deeply($vf, $expected, 'basic input test');
 
+  ## structural variant ID test
+  $p = Bio::EnsEMBL::VEP::Parser::ID->new({
+    config => $cfg,
+    file => $test_cfg->create_input_file('nsv183342'),
+    valid_chromosomes => [21],
+  });
+
+  is(ref($p), 'Bio::EnsEMBL::VEP::Parser::ID', 'class ref');
+
+  my $expected_sv = bless( {
+    'is_somatic' => '0',
+    'class_attrib_id' => 10,
+    'allele_freq' => undef,
+    'outer_start' => undef,
+    'seq_region_start' => 25002717,
+    '_study_id' => 4279,
+    'strand' => 1,
+    'seq_region_end' => 25002717,
+    'class_SO_term' => 'insertion',
+    'allele_string' => undef,
+    '_line' => [
+      'nsv183342'
+    ],
+    'outer_end' => undef,
+    'chr' => '21',
+    'inner_end' => undef,
+    '_source_id' => 11,
+    'allele_count' => undef,
+    'end' => 25002717,
+    'length' => undef,
+    'breakpoint_order' => undef,
+    'inner_start' => undef,
+    'start' => 25002717,
+    '_structural_variation_id' => 56669931  
+  }, 'Bio::EnsEMBL::Variation::StructuralVariationFeature' );
+
+  $vf = $p->next();
+  delete($vf->{$_}) for qw(adaptor variation slice variation_name);
+
+  is_deeply($vf, $expected_sv, 'sv input test');
 
   my $tmp;
   no warnings 'once';
@@ -152,6 +192,16 @@ SKIP: {
   is_deeply($vf, $expected, 'parse input file with empty lines');
 
   ok($tmp =~ /Skipped 2 empty lines/, 'empty line warning');
+
+  # sv max size limit
+  $tmp = '';
+  $p = Bio::EnsEMBL::VEP::Parser::ID->new({
+    config => $cfg,
+    file => $test_cfg->create_input_file('nsv917902'),
+    valid_chromosomes => [21],
+  });
+  $p->next();
+  like($tmp, qr/nsv917902.* variant size .* is bigger than --max_sv_size/, 'SV bigger than max_sv_size warning');
 
   # restore STDERR
   open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";

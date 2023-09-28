@@ -124,7 +124,7 @@ sub new {
 
   my $self = $class->SUPER::new(@_);
 
-  $self->add_shortcuts([qw(dont_skip check_ref chr lrg minimal delimiter lookup_ref)]);
+  $self->add_shortcuts([qw(dont_skip check_ref chr lrg minimal delimiter lookup_ref max_sv_size)]);
 
   my $hashref = $_[0];
 
@@ -484,6 +484,17 @@ sub validate_vf {
       "start > end+1 : (START=" . $vf->{start} . ", END=" . $vf->{end} . ")"
     );
     return 0;
+  }
+
+  # check against size upperlimit to avoid memory problems
+  my $len = $vf->{end} - $vf->{start};
+  my $max_sv_size = $self->{max_sv_size};
+  if( $len > $max_sv_size ){
+    $self->skipped_variant_msg(
+      "variant size ($len) is bigger than --max_sv_size ($max_sv_size)"
+    );
+    $vf->{vep_skip} = 1;
+    return 0 if $self->param('rest');
   }
 
   # check we have this chr in any of the annotation sources

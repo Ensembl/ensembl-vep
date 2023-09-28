@@ -102,7 +102,7 @@ sub new {
   my $self = $class->SUPER::new(@_);
 
   # add shortcuts to these params
-  $self->add_shortcuts([qw(allow_non_variant gp individual individual_zyg process_ref_homs phased max_sv_size)]);
+  $self->add_shortcuts([qw(allow_non_variant gp individual individual_zyg process_ref_homs phased)]);
 
   return $self;
 }
@@ -427,12 +427,6 @@ sub create_StructuralVariationFeatures {
       }
     }
     $alt = $ref . "/$alt" unless $alt =~ /^\.|\.$/;
-  }
-
-  ## check against size upperlimit to avoid memory problems
-  my $len = $end - $start;
-  if( $len > $self->{max_sv_size} ){
-    $self->skipped_variant_msg("variant size ($len) is bigger than --max_sv_size (" . $self->{max_sv_size} . ")");
   }
 
   # check for imprecise breakpoints
