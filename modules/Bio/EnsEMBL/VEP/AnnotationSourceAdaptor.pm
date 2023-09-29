@@ -284,8 +284,7 @@ sub get_all_custom {
     }
 
     # Default summary statistics: only show for BED/bigwig custom files
-    $opts->{summary_stats} = $hash{"summary_stats"} ||
-      ($format =~ /^(bigwig|bed)$/ ? 'min%mean%max%count%sum' : 'none');
+    $opts->{summary_stats} = $hash{"summary_stats"} || 'none';
     delete $opts->{summary_stats} if $opts->{summary_stats} eq 'none';
 
     if ( $opts->{summary_stats} ) {
