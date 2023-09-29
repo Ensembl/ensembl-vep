@@ -140,6 +140,7 @@ our @VEP_PARAMS = (
   'allow_non_variant',       # allow non-variant VCF lines through
   'process_ref_homs',        # force processing of individuals with homozygous ref genotype
   'individual=s',            # give results by genotype for individuals
+  'individual_zyg=s',        # reports genotypes for individuals
   'phased',                  # force VCF genotypes to be interpreted as phased
   'fork=i',                  # fork into N processes
   'dont_skip',               # don't skip vars that fail validation
@@ -315,6 +316,7 @@ our %DEFAULTS = (
 # and so need to be converted to listrefs
 our @LIST_FLAGS = qw(
   individual
+  individual_zyg
   cell_type
   pick_order
   fields
@@ -400,6 +402,13 @@ our @OPTION_SETS = (
   
   {
     flags => ['individual'],
+    set   => {
+      allow_non_variant => 1,
+    },
+  },
+  
+  {
+    flags => ['individual_zyg'],
     set   => {
       allow_non_variant => 1,
     },
@@ -596,7 +605,7 @@ our %INCOMPATIBLE = (
   json        => [qw(vcf tab)],
   vcf         => [qw(json tab)],
   tab         => [qw(vcf json)],
-  individual  => [qw(minimal)],
+  individual  => [qw(minimal individual_zyg)],
   check_ref   => [qw(lookup_ref)],
   check_svs   => [qw(offline)],
   ga4gh_vrs   => [qw(vcf)]
