@@ -498,11 +498,17 @@ sub get_all_VariationFeatureOverlapAlleles {
     $vfos = \@new;
   }
 
-  # method name stub for getting *VariationAlleles
-  my $allele_method = $self->{process_ref_homs} ? 'get_all_' : 'get_all_alternate_';  
-  my $method = $allele_method.'VariationFeatureOverlapAlleles';
+  # the option individual_zyg has to run a specific method if there is only one individual (unique_ind)
+  if($vf->{unique_ind}) {
+    return $self->filter_VariationFeatureOverlapAlleles([map {$_->get_reference_VariationFeatureOverlapAllele} @{$vfos}]);
+  }
+  else {
+    # method name stub for getting *VariationAlleles
+    my $allele_method = $self->{process_ref_homs} ? 'get_all_' : 'get_all_alternate_';  
+    my $method = $allele_method.'VariationFeatureOverlapAlleles';
 
-  return $self->filter_VariationFeatureOverlapAlleles([map {@{$_->$method}} @{$vfos}]);
+    return $self->filter_VariationFeatureOverlapAlleles([map {@{$_->$method}} @{$vfos}]);
+  }
 }
 
 
@@ -923,6 +929,16 @@ sub VariationFeature_to_output_hash {
     my %unique = map {$_ => 1} @{$vf->{genotype}};
     $hash->{ZYG} = (scalar keys %unique > 1 ? 'HET' : 'HOM').(defined($vf->{hom_ref}) ? 'REF' : '');
     }
+  }
+  
+  # individual_zig
+  if(defined($vf->{genotype_ind})) {
+    my @tmp;
+    foreach my $geno_ind (keys %{$vf->{genotype_ind}}) {
+      my %unique = map {$_ => 1} @{$vf->{genotype_ind}->{$geno_ind}};
+      push @tmp, $geno_ind.":".(scalar keys %unique > 1 ? 'HET' : 'HOM').(defined($vf->{hom_ref}->{$geno_ind}) ? 'REF' : '');
+    }
+    $hash->{ZYG} = \@tmp;
   }
 
   # minimised?

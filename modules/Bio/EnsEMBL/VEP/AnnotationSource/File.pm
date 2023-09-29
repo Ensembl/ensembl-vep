@@ -93,8 +93,6 @@ BEGIN {
   }
 }
 
-use Bio::EnsEMBL::VEP::Parser qw(get_SO_term);
-
 my %FORMAT_MAP = (
   'vcf'     => 'VCF',
   'gff'     => 'GFF',
@@ -458,18 +456,8 @@ sub _record_overlaps_VF {
   my $type = $self->type();
   my $overlap_cutoff = $self->{overlap_cutoff};
   my $distance = $self->{distance};
-  my $same_type = $self->{same_type};
   my $reciprocal = $self->{reciprocal};
   my ($ref_start, $ref_end) = ($parser->get_start, $parser->get_end);
-
-  # match on variant class (if enabled)
-  # confounded by different descriptions for the same event
-  if ($same_type) {
-    my $vf_class = $vf->class_SO_term;
-    my $ref_class = get_SO_term($parser);
-
-    return 0 if defined $ref_class && defined $vf_class && $ref_class ne $vf_class;
-  }
 
   if($type eq 'overlap' || $type eq 'within' || $type eq 'surrounding') {
     # account for insertions in Ensembl world where s = e+1

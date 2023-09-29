@@ -279,13 +279,6 @@ sub get_all_lines_by_InputBuffer {
   $self->rejoin_variants_in_InputBuffer($buffer) if $buffer->rejoin_required;
 
   foreach my $vf(@{$buffer->buffer}) {
-
-    # Include non-annotated line
-    if ($vf->{vep_skip}){
-      push @return, join("\t", @{$vf->{_line}}) if $vf->{vep_skip};
-      next;  
-    }
-
     my $line;
     my $fieldname = $self->{vcf_info_field} || 'CSQ';
 
@@ -309,16 +302,18 @@ sub get_all_lines_by_InputBuffer {
       }
     }
 
-    # we have to create one if input wasnt VCF
+    # create VCF line if input was not VCF
     else {
       $vf->{slice} ||= $self->get_slice($vf->{chr});
       $line = $vf->to_VCF_record();
       $line->[7] = '' if ($line->[7] || '') eq '.';
     }
 
+    # get consequences (except for non-annotated lines)
     my @chunks =
       map {$self->output_hash_to_vcf_info_chunk($_, $vf->strand)} 
-      @{$self->get_all_output_hashes_by_VariationFeature($vf)};
+      @{$self->get_all_output_hashes_by_VariationFeature($vf)}
+      unless $vf->{vep_skip};
 
     if(@chunks) {
       $line->[7] .= ';' if $line->[7];

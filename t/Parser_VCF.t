@@ -1013,6 +1013,77 @@ $vf = $p->next;
 is($vf->{allele_string}, 'C/-', 'individual - deletion alleles mapped');
 
 
+### individual_zyg data
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, allow_non_variant => 1, individual_zyg => 'all'}),
+  file => $test_cfg->create_input_file([
+    ['##fileformat=VCFv4.1'],
+    [qw(#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT dave barry jeff)],
+    [qw(21 25587759 indtest A G . . . GT 0|1 1/1 0/0)],
+  ]),
+  valid_chromosomes => [21]
+});
+
+$vf = $p->next;
+delete($vf->{adaptor}); delete($vf->{_line});
+
+is_deeply($vf, bless( {
+  'chr' => '21',
+  'strand' => 1,
+  'variation_name' => 'indtest',
+  'map_weight' => 1,
+  'allele_string' => 'A/G',
+  'end' => 25587759,
+  'start' => 25587759,
+  'seq_region_end' => 25587759,
+  'seq_region_start' => 25587759,
+  'genotype_ind' => {'jeff' => ['A', 'A'], 'barry' => ['G', 'G'], 'dave' => ['A', 'G']},
+  'non_variant' => { 'jeff' => 1 },
+  'phased' => {'jeff' => 0, 'barry' => 0, 'dave' => 1},
+  'hom_ref' => { 'jeff' => 1 },
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'individual_zyg');
+
+### individual_zyg data - test situation where a line has no valid ALT genotypes
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, individual_zyg => 'all'}),
+  file => $test_cfg->create_input_file([
+    ['##fileformat=VCFv4.1'],
+    [qw(#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT jeff)],
+    [qw(21 25587759 indtest1 A G . . . GT ./.)],
+    [qw(21 25587760 indtest2 C T . . . GT 1/1)],
+  ]),
+  valid_chromosomes => [21]
+});
+
+$vf = $p->next;
+is($vf->{variation_name}, 'indtest1', 'individual_zyg - return output even for lines with no valid GTs');
+
+$vf = $p->next;
+is($vf->{variation_name}, 'indtest2', 'individual_zyg - return output for lines with valid GTs');
+
+is_deeply($vf->{genotype_ind}, ( {
+  'jeff' => ['T', 'T'],
+}), 'individual_zyg - return genotype_ind for lines with valid GTs');
+
+### individual_zyg data - test situation where a line has homozygous ref genotype
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, individual_zyg => 'all'}),
+  file => $test_cfg->create_input_file([
+    ['##fileformat=VCFv4.1'],
+    [qw(#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT jeff)],
+    [qw(21 25587759 indtest1 A G . . . GT 0|0)],
+  ]),
+  valid_chromosomes => [21]
+});
+
+$vf = $p->next;
+is_deeply($vf->{genotype_ind}, ( {
+  'jeff' => ['A', 'A'],
+}), 'individual_zyg - return genotype_ind for lines with homozygous ref GTs');
+
+
+
+
 
 
 
