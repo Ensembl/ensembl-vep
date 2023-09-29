@@ -251,7 +251,7 @@ sub get_all_output_hashes_by_InputBuffer {
       # add custom statistics
       if ($vf->{_custom_annotations_stats}) {
         my $stats = delete($vf->{_custom_annotations_stats});
-        unshift($hash->{custom_annotations}->{$_}, $stats->{$_}) for keys %$stats;
+        unshift(@{$hash->{custom_annotations}->{$_}}, $stats->{$_}) for keys %{$stats};
       }
     }
 
