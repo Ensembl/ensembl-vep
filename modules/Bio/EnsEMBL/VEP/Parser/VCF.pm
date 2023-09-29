@@ -393,6 +393,7 @@ sub create_StructuralVariationFeatures {
 
   my $parser = $self->parser();
   my $record = $parser->{record};
+  my $skip_line;
 
   # get relevant data
   my ($chr, $start, $end, $ref, $alts, $info, $ids) = (
@@ -408,7 +409,11 @@ sub create_StructuralVariationFeatures {
   ## get structural variant type from SVTYPE tag (deprecated in VCF 4.4) or ALT
   my $alt = join("/", @$alts);
   my $type = $info->{SVTYPE} || $alt;
-  my $so_term = $self->get_SO_term($type) || $type;
+  my $so_term = $self->get_SO_term($type);
+  unless ($so_term) {
+    $skip_line = 1;
+    $so_term   = $type;
+  }
 
   ## get breakends from INFO field (from Illumina Manta, for instance)
   if ($so_term =~ /breakpoint/) {
@@ -439,6 +444,7 @@ sub create_StructuralVariationFeatures {
 
   if($start >= $end && $so_term =~ /del/i) {
     $self->skipped_variant_msg("deletion looks incomplete");
+    $skip_line = 1;
   }
 
   my $svf = Bio::EnsEMBL::Variation::StructuralVariationFeature->new_fast({
