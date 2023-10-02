@@ -30,7 +30,7 @@ SKIP: {
   no warnings 'once';
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'Bio::DB::HTS::Tabix module not available', 13 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+  skip 'Bio::DB::HTS::Tabix module not available', 15 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
 
   ## BASIC TESTS
   ##############
@@ -157,6 +157,42 @@ SKIP: {
 
   $as->annotate_InputBuffer($ib);
   ok(!$ib->buffer->[0]->{_custom_annotations}, 'annotate_InputBuffer - out by 1 (3\')');
+
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
+    config => $cfg,
+    parser => Bio::EnsEMBL::VEP::Parser::VCF->new({
+      config => $cfg,
+      file => $test_cfg->create_input_file([qw(21 25585735 rs142513484 C T . . .)]),
+      valid_chromosomes => [21]
+    })
+  });
+  $ib->next();
+
+  # 0 is a valid "name" field in BED
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
+    config => $cfg,
+    parser => Bio::EnsEMBL::VEP::Parser::VCF->new({
+      config => $cfg,
+      file => $test_cfg->create_input_file([qw(21 25585741 rs142513484 C T . . .)]),
+      valid_chromosomes => [21]
+    })
+  });
+  $ib->next();
+  $as->type('overlap');
+  $as->{summary_stats} = [ 'min', 'count' ];
+  $as->annotate_InputBuffer($ib);
+
+  is_deeply(
+    $ib->buffer->[0]->{_custom_annotations},
+    {
+      'foo' => [
+        { name => 'test1', score => '90' },
+        { name => '0', score => '10' },
+      ]
+    },
+    'annotate_InputBuffer - get scores'
+  );
+  $as->type('exact');
 }
 
 

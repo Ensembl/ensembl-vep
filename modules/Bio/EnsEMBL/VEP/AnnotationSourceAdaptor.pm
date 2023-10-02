@@ -203,6 +203,21 @@ sub get_all_custom {
 
   my @as;
 
+  my @VALID_OPTIONS = (
+    'file',
+    'format',
+    'short_name',
+    'fields',
+    'type',
+    'overlap_cutoff',
+    'reciprocal',
+    'distance',
+    'coords',
+    'same_type',
+    'num_records',
+    'summary_stats'
+  );
+
   foreach my $custom_string(@{$self->param('custom') || []}) {
     
     my %hash = ();
@@ -220,6 +235,15 @@ sub get_all_custom {
         die("ERROR: Failed to parse parameter $param; Please add <VALUE_OF_PARAMETER>=$param\n") unless defined($key) && defined($val);
         $hash{$key} = $val;
       };
+
+      # warn about invalid options
+      my @invalid_opts;
+      for my $opt (keys %hash) {
+        push @invalid_opts, $opt unless grep { $opt eq $_ } @VALID_OPTIONS;
+      }
+      throw("ERROR: The following options are not supported for custom annotations: "
+            . join(", ", @invalid_opts) . "\n" .
+            "LINE: --custom $custom_string\n") if @invalid_opts;
     };
 
     throw("ERROR: No file was added for custom annotation source.\nLINE: --custom $custom_string\n") unless defined($hash{"file"});
@@ -237,19 +261,51 @@ sub get_all_custom {
       distance => $hash{"distance"},
       same_type => $hash{"same_type"} || 0,
       reciprocal => $hash{"reciprocal"} || 0,
+      num_records => $hash{"num_records"}
     };
 
     $opts->{overlap_def} = $opts->{reciprocal} ?
       "Percentage of minimum reciprocal overlap between input variant and reference variant" :
       "Percentage of input variant covered by reference variant";
 
-    if(defined($hash{"format"}) && $hash{"format"} =~ /^G[TF]F$/i) {
+    my $format = $hash{"format"};
+    if(defined($format) && $format =~ /^G[TF]F$/i) {
       $opts->{filter} = $self->param('transcript_filter');
       $opts->{bam} = $self->param('bam');
     }
 
     $opts->{fields} = [split /%/, $hash{"fields"}] if $hash{"fields"};
     $opts->{fields} = \@fields if @fields;
+
+    if (!defined $opts->{num_records}) {
+      $opts->{num_records} = 50; # by default, show all values for non-SVs
+    } elsif ($opts->{num_records} eq 'all') {
+      $opts->{num_records} = 'inf';
+    }
+
+    # Default summary statistics: only show for BED/bigwig custom files
+    $opts->{summary_stats} = $hash{"summary_stats"} || 'none';
+    delete $opts->{summary_stats} if $opts->{summary_stats} eq 'none';
+
+    if ( $opts->{summary_stats} ) {
+      $opts->{summary_stats} = [split /%/, $opts->{summary_stats}];
+
+      # Check invalid summary statistics
+      my @invalid;
+      my @stats = ('min', 'max', 'mean', 'count', 'sum');
+      for my $k (@{ $opts->{summary_stats} }) {
+        push @invalid, $k unless grep { $_ eq $k } @stats;
+      }
+
+      if (@invalid) {
+        my $invalid_opts = join(", ", @invalid);
+        my $valid_opts   = join(", ", @stats);
+        throw("ERROR: The following summary statistics for custom annotations ".
+              "are not supported: $invalid_opts. ".
+              "Available options are: $valid_opts.\n".
+              "LINE: --custom $custom_string\n");
+      }
+    }
 
     if (grep { /\#\#\#CHR\#\#\#/ } $hash{"file"}){
 
