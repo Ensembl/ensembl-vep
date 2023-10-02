@@ -67,6 +67,7 @@ our @FLAG_FIELDS = (
 
   # general
   { flag => 'individual',      fields => ['IND','ZYG'] },
+  { flag => 'individual_zyg',  fields => ['ZYG'] },
   { flag => 'allele_number',   fields => ['ALLELE_NUM'] },
   { flag => 'show_ref_allele', fields => ['REF_ALLELE'] },
   { flag => 'uploaded_allele', fields => ['UPLOADED_ALLELE'] },

@@ -67,6 +67,7 @@ use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::Utils qw(get_compressed_filehandle);
 use Bio::EnsEMBL::Variation::Utils::Sequence qw(trim_sequences);
+use Bio::EnsEMBL::Variation::Utils::VEP qw(&check_format);
 
 use Bio::EnsEMBL::VEP::Parser::VCF;
 use Bio::EnsEMBL::VEP::Parser::VEP_input;
@@ -123,7 +124,7 @@ sub new {
 
   my $self = $class->SUPER::new(@_);
 
-  $self->add_shortcuts([qw(dont_skip check_ref chr lrg minimal delimiter lookup_ref)]);
+  $self->add_shortcuts([qw(dont_skip check_ref chr lrg minimal delimiter lookup_ref max_sv_size)]);
 
   my $hashref = $_[0];
 
@@ -415,40 +416,7 @@ sub detect_format {
     my @data = split $delimiter, $_;
     next unless @data;
 
-    # region chr21:10-10:1/A
-    if ( $self->Bio::EnsEMBL::VEP::Parser::Region::validate_line(@data) ) {
-      $format = 'region';
-    }
-
-    # SPDI: NC_000016.10:68684738:G:A
-    elsif ($self->Bio::EnsEMBL::VEP::Parser::SPDI::validate_line(@data) ) {
-      $format = 'spdi';
-    }
-
-    # CAID: CA9985736
-    elsif ( $self->Bio::EnsEMBL::VEP::Parser::CAID::validate_line(@data) ) {
-      $format = 'caid';
-    }
-
-    # HGVS: ENST00000285667.3:c.1047_1048insC
-    elsif ( $self->Bio::EnsEMBL::VEP::Parser::HGVS::validate_line(@data) ) {
-      $format = 'hgvs';
-    }
-
-    # variant identifier: rs123456
-    elsif ( $self->Bio::EnsEMBL::VEP::Parser::ID::validate_line(@data) ) {
-      $format = 'id';
-    }
-
-    # VCF: 20  14370  rs6054257  G  A  29  0  NS=58;DP=258;AF=0.786;DB;H2  GT:GQ:DP:HQ
-    elsif ( $self->Bio::EnsEMBL::VEP::Parser::VCF::validate_line(@data) ) {
-      $format = 'vcf';
-    }
-
-    # ensembl: 20  14370  14370  A/G  +
-    elsif ( $self->Bio::EnsEMBL::VEP::Parser::VEP_input::validate_line(@data) ) {
-      $format = 'ensembl';
-    }
+    $format = &check_format(@data);
 
     # reset file handle if it was a handle
     eval {
@@ -516,6 +484,17 @@ sub validate_vf {
       "start > end+1 : (START=" . $vf->{start} . ", END=" . $vf->{end} . ")"
     );
     return 0;
+  }
+
+  # check against size upperlimit to avoid memory problems
+  my $len = $vf->{end} - $vf->{start};
+  my $max_sv_size = $self->{max_sv_size};
+  if( $len > $max_sv_size ){
+    $self->skipped_variant_msg(
+      "variant size ($len) is bigger than --max_sv_size ($max_sv_size)"
+    );
+    $vf->{vep_skip} = 1;
+    return 0 if $self->param('rest');
   }
 
   # check we have this chr in any of the annotation sources
@@ -704,9 +683,6 @@ sub get_SO_term {
     $abbrev = $type;
   }
 
-  ## unsupported SV types
-  $self->skipped_variant_msg("$abbrev type is not supported") if $abbrev eq "CPX";
-
   my %terms = (
     INS  => 'insertion',
     DEL  => 'deletion',
@@ -717,7 +693,12 @@ sub get_SO_term {
     BND  => 'chromosome_breakpoint'
   );
 
-  return $terms{$abbrev};
+  my $res = $terms{$abbrev};
+  ## unsupported SV types
+  if ($self->isa('Bio::EnsEMBL::VEP::Parser')) {
+    $self->skipped_variant_msg("$abbrev type is not supported") unless $res;
+  }
+  return $res;
 }
 
 

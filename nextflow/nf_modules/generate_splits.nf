@@ -29,6 +29,6 @@ process generateSplits {
 
   shell:
   """
-  bcftools query -f'%CHROM\t%POS\n' ${vcf} | uniq | split -l ${bin_size}
+  bcftools query -f'%CHROM\t%POS\n' ${vcf} | uniq | split -a 3 -l ${bin_size}
   """
 }

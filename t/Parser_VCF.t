@@ -672,15 +672,56 @@ is_deeply($cnv_vf, bless( {
                },
                 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature - CNV with multiple alleles');
 
-## test breakend variant with multiple mates and information in ALT field
+## test breakend variant with unsupported END information in INFO field
 my $bnd_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1,  warning_file => 'STDERR'}),
-  file => $test_cfg->create_input_file([qw(2	68914092	BND00001121	A	]1:37938377]A,C]2:68920000]	.	PASS	SVTYPE=BND;CHR2=1;END2=37938377   )]),
+  file => $test_cfg->create_input_file([qw(2	68914092	BND00001121	A	]1:37938377]A	.	PASS	SVTYPE=BND;CHR2=1;END=37938377   )]),
   valid_chromosomes => [1,2]
 })->next();
 
 delete($bnd_vf->{adaptor}); delete($bnd_vf->{_line});
 is_deeply($bnd_vf, bless( {
+                 'chr' => '2',
+                 'strand' => '1',
+                 'variation_name' => 'BND00001121',
+                 'class_SO_term' => 'chromosome_breakpoint',
+                 'allele_string' => ']1:37938377]A',
+                 'start' => 68914093,
+                 'inner_start' => 68914093,
+                 'outer_start' => 68914093,
+                 'end' => 68914093,
+                 'inner_end' => 68914093,
+                 'outer_end' => 68914093,
+                 'seq_region_start' => 68914093,
+                 'seq_region_end' => 68914093,
+                 '_parsed_allele' => [{
+                   'placement' => 'left',
+                   'string' => ']1:37938377]A',
+                   'chr' => '1',
+                   'pos' => 37938377,
+                   'start' => 37938377,
+                   'end' => 37938377,
+                   'allele' => 'A',
+                   'inverted' => 0,
+                   'slice' => Bio::EnsEMBL::Slice->new_fast({
+                     seq_region_name => '1',
+                     start => 37938377,
+                     end => 37938377
+                    })
+                  }]
+               },
+               'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) ,
+               'StructuralVariationFeature - BND with unsupported INFO/END field');
+
+## test breakend variant with multiple mates and information in ALT field
+my $bnd2_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1,  warning_file => 'STDERR'}),
+  file => $test_cfg->create_input_file([qw(2	68914092	BND00001121	A	]1:37938377]A,C]2:68920000]	.	PASS	SVTYPE=BND;CHR2=1;END2=37938377   )]),
+  valid_chromosomes => [1,2]
+})->next();
+
+delete($bnd2_vf->{adaptor}); delete($bnd2_vf->{_line});
+is_deeply($bnd2_vf, bless( {
                  'chr' => '2',
                  'strand' => '1',
                  'variation_name' => 'BND00001121',
@@ -728,13 +769,13 @@ is_deeply($bnd_vf, bless( {
                'StructuralVariationFeature - BND with information in ALT field');
 
 ## test breakend variant with information in INFO field
-my $bnd2_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+my $bnd3_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1,  warning_file => 'STDERR'}),
   file => $test_cfg->create_input_file([qw(2    68914092     BND00001121     A       <BND>    .   PASS    SVTYPE=BND;CHR2=2;END2=68920000)]),
   valid_chromosomes => [1,2]
 })->next();
-delete($bnd2_vf->{adaptor}); delete($bnd2_vf->{_line});
-is_deeply($bnd2_vf, bless( {
+delete($bnd3_vf->{adaptor}); delete($bnd3_vf->{_line});
+is_deeply($bnd3_vf, bless( {
                  'chr' => '2',
                  'strand' => '1',
                  'variation_name' => 'BND00001121',
@@ -765,7 +806,43 @@ is_deeply($bnd2_vf, bless( {
                'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) ,
                'StructuralVariationFeature - BND with information in INFO field');
 
-
+## test breakend variant with incorrect information in INFO field
+my $bnd4_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1,  warning_file => 'STDERR'}),
+  file => $test_cfg->create_input_file([qw(2    68914092     BND00001121     A       <BND>    .   PASS    SVTYPE=BND;CHR2=2;END=68920000)]),
+  valid_chromosomes => [1,2]
+})->next();
+delete($bnd4_vf->{adaptor}); delete($bnd4_vf->{_line});
+is_deeply($bnd4_vf, bless( {
+                 'chr' => '2',
+                 'strand' => '1',
+                 'variation_name' => 'BND00001121',
+                 'class_SO_term' => 'chromosome_breakpoint',
+                 'allele_string' => '<BND>',
+                 'start' => 68914093,
+                 'inner_start' => 68914093,
+                 'outer_start' => 68914093,
+                 'end' => 68914093,
+                 'inner_end' => 68914093,
+                 'outer_end' => 68914093,
+                 'seq_region_start' => 68914093,
+                 'seq_region_end' => 68914093,
+                 '_parsed_allele' => [{
+                   'string' => '<BND>',
+                   'chr' => '2',
+                   'pos' => 68920000,
+                   'start' => 68920000,
+                   'end' => 68920000,
+                   'allele' => '<BND>',
+                   'slice' => Bio::EnsEMBL::Slice->new_fast({
+                     seq_region_name => '2',
+                     start => 68920000,
+                     end => 68920000
+                    })
+                  }]
+               },
+               'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) ,
+               'StructuralVariationFeature - BND with incorrect INFO/END field');
 
 
 ## OTHER TESTS
@@ -934,6 +1011,77 @@ is($vf->{allele_string}, '-/T', 'individual - insertion alleles mapped');
 
 $vf = $p->next;
 is($vf->{allele_string}, 'C/-', 'individual - deletion alleles mapped');
+
+
+### individual_zyg data
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, allow_non_variant => 1, individual_zyg => 'all'}),
+  file => $test_cfg->create_input_file([
+    ['##fileformat=VCFv4.1'],
+    [qw(#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT dave barry jeff)],
+    [qw(21 25587759 indtest A G . . . GT 0|1 1/1 0/0)],
+  ]),
+  valid_chromosomes => [21]
+});
+
+$vf = $p->next;
+delete($vf->{adaptor}); delete($vf->{_line});
+
+is_deeply($vf, bless( {
+  'chr' => '21',
+  'strand' => 1,
+  'variation_name' => 'indtest',
+  'map_weight' => 1,
+  'allele_string' => 'A/G',
+  'end' => 25587759,
+  'start' => 25587759,
+  'seq_region_end' => 25587759,
+  'seq_region_start' => 25587759,
+  'genotype_ind' => {'jeff' => ['A', 'A'], 'barry' => ['G', 'G'], 'dave' => ['A', 'G']},
+  'non_variant' => { 'jeff' => 1 },
+  'phased' => {'jeff' => 0, 'barry' => 0, 'dave' => 1},
+  'hom_ref' => { 'jeff' => 1 },
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'individual_zyg');
+
+### individual_zyg data - test situation where a line has no valid ALT genotypes
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, individual_zyg => 'all'}),
+  file => $test_cfg->create_input_file([
+    ['##fileformat=VCFv4.1'],
+    [qw(#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT jeff)],
+    [qw(21 25587759 indtest1 A G . . . GT ./.)],
+    [qw(21 25587760 indtest2 C T . . . GT 1/1)],
+  ]),
+  valid_chromosomes => [21]
+});
+
+$vf = $p->next;
+is($vf->{variation_name}, 'indtest1', 'individual_zyg - return output even for lines with no valid GTs');
+
+$vf = $p->next;
+is($vf->{variation_name}, 'indtest2', 'individual_zyg - return output for lines with valid GTs');
+
+is_deeply($vf->{genotype_ind}, ( {
+  'jeff' => ['T', 'T'],
+}), 'individual_zyg - return genotype_ind for lines with valid GTs');
+
+### individual_zyg data - test situation where a line has homozygous ref genotype
+$p = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, individual_zyg => 'all'}),
+  file => $test_cfg->create_input_file([
+    ['##fileformat=VCFv4.1'],
+    [qw(#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT jeff)],
+    [qw(21 25587759 indtest1 A G . . . GT 0|0)],
+  ]),
+  valid_chromosomes => [21]
+});
+
+$vf = $p->next;
+is_deeply($vf->{genotype_ind}, ( {
+  'jeff' => ['A', 'A'],
+}), 'individual_zyg - return genotype_ind for lines with homozygous ref GTs');
+
+
 
 
 

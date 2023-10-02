@@ -3,7 +3,7 @@ ARG BRANCH=main
 ###################################################
 # Stage 1 - docker container to build ensembl-vep #
 ###################################################
-FROM ubuntu:18.04 as builder
+FROM ubuntu:22.04 as builder
 
 # Update aptitude and install some required packages
 # a lot of them are required for Bio::DB::BigFile
@@ -82,7 +82,7 @@ RUN make && rm -f Makefile *.c
 ###################################################
 # Stage 2 - docker container to build ensembl-vep #
 ###################################################
-FROM ubuntu:18.04
+FROM ubuntu:22.04
 
 # Update aptitude and install some required packages
 # a lot of them are required for Bio::DB::BigFile
@@ -191,15 +191,19 @@ ENV PLUGIN_DEPS "https://raw.githubusercontent.com/Ensembl/VEP_plugins/$BRANCH/c
 #   - Ubuntu packages
 RUN curl -O "$PLUGIN_DEPS/ubuntu-packages.txt" && \
     apt-get update && apt-get install -y --no-install-recommends \
-    $(sed s/\#.*//g ubuntu-packages.txt) && \
+    $(sed -e s/\#.*//g ubuntu-packages.txt) && \
     rm -rf /var/lib/apt/lists/* ubuntu-packages.txt
+#   - Symlink python to python2
+RUN ln -s /usr/bin/python2 /usr/bin/python
 #   - Perl modules
 RUN curl -O "$PLUGIN_DEPS/cpanfile" && \
     cpanm --installdeps --with-recommends . && \
     rm -rf /root/.cpanm cpanfile
 #   - Python packages
+RUN curl -O https://raw.githubusercontent.com/paulfitz/mysql-connector-c/master/include/my_config.h && \
+    mv my_config.h /usr/include/mysql/my_config.h
 RUN curl -O "$PLUGIN_DEPS/requirements.txt" && \
-    python -m pip install --no-cache-dir -r requirements.txt && \
+    python2 -m pip install --no-cache-dir -r requirements.txt && \
     rm requirements.txt
 
 # Set working directory as symlink to $OPT/.vep (containing VEP cache and data)

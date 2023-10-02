@@ -93,8 +93,6 @@ BEGIN {
   }
 }
 
-use Bio::EnsEMBL::VEP::Parser qw(get_SO_term);
-
 my %FORMAT_MAP = (
   'vcf'     => 'VCF',
   'gff'     => 'GFF',
@@ -308,6 +306,8 @@ sub annotate_InputBuffer {
 
   foreach my $chr(keys %by_chr) {
     foreach my $vf(@{$by_chr{$chr}}) {
+      next if $vf->{vep_skip}; # avoid annotating previously skipped variants
+
       my ($vf_start, $vf_end) = ($vf->{start}, $vf->{end});
       if ($parser->seek($self->get_source_chr_name($chr), $vf_start - 1, $vf_end + 1)) {
         $parser->next();
@@ -507,22 +507,12 @@ sub _record_overlaps_VF {
   my $type = $self->type();
   my $overlap_cutoff = $self->{overlap_cutoff};
   my $distance = $self->{distance};
-  my $same_type = $self->{same_type};
   my $reciprocal = $self->{reciprocal};
 
   my ($ref_start, $ref_end) = ($parser->get_start, $parser->get_end);
   $ref_start += 1 if defined $self->{_format} && $self->{_format} eq 'bigwig';
 
-  # match on variant class (if enabled)
-  # confounded by different descriptions for the same event
-  if ($same_type) {
-    my $vf_class = $vf->class_SO_term;
-    my $ref_class = get_SO_term($parser);
-
-    return 0 if defined $ref_class && defined $vf_class && $ref_class ne $vf_class;
-  }
-
-  if($type ~~ [ 'overlap', 'within', 'surrounding' ]) {
+  if($type eq 'overlap' || $type eq 'within' || $type eq 'surrounding') {
     # account for insertions in Ensembl world where s = e+1
     my ($vs, $ve) = ($vf->{start}, $vf->{end});
     ($vs, $ve) = ($ve, $vs) if $vs > $ve;
