@@ -123,7 +123,9 @@ my %VALID_TYPES = (
                  distance       => (optional) numeric $distance_to_overlapping_variant_ends (off by default),
                  same_type      => (optional) bool $only_match_identical_variant_classes (off by default),
                  reciprocal     => (optional) bool $calculate_reciprocal_overlap (off by default),
-                 overlap_def    => (optional) string $overlap_definition (based on reciprocal by default)
+                 overlap_def    => (optional) string $overlap_definition (based on reciprocal by default),
+                 num_records    => (optional) maximum number of records to show (50 by default),
+                 summary_stats  => (optional) summary statistics: max, min, mean, count, sum
                }
   Example    : $as = Bio::EnsEMBL::VEP::AnnotationSource::File->new($args);
   Description: Create a new Bio::EnsEMBL::VEP::AnnotationSource::File object. Will
@@ -158,6 +160,7 @@ sub new {
   $self->{same_type}      = $hashref->{same_type}      || 0;
   $self->{reciprocal}     = $hashref->{reciprocal}     || 0;
   $self->{overlap_def}    = $hashref->{overlap_def};
+  $self->{num_records}    = defined $hashref->{num_records} ? $hashref->{num_records} : 50;
 
   $self->{info} = { custom_info => $hashref };
 
@@ -174,6 +177,7 @@ sub new {
     else {
       throw("ERROR: Cannot use format $format without Bio::DB::HTS::Tabix module installed\n") unless $CAN_USE_TABIX_PM;
     }
+    $hashref->{_format} = $format;
 
     my $class = $self->module_prefix.'::AnnotationSource::File::'.$FORMAT_MAP{$format};
     eval "require $class";
@@ -309,17 +313,33 @@ sub annotate_InputBuffer {
         $parser->next();
       }
 
+      my $stats = $self->{summary_stats};
       # Different checks before annotating the VF:
       # - Check a record exist
       # - Check that the chromosomes names match between the input VF entry and the custom annotation file.
       #   There is a special case for the custom annotation file with chromosome names like 'chr1',
       #   as they are not present in the cache (chr_synonym.txt): we also check the 'raw' seqname with the source_chr_name.
       # - Check that the start of the custom annotation record is lower that the end of the input VF entry
+      my $record_count = 0;
       while($parser->{record} &&
             ($parser->get_seqname eq $self->get_source_chr_name($chr) || $parser->${get_raw_seqname} eq $self->get_source_chr_name($chr)) &&
             $parser->get_start <= $vf_end + 1) {
-        $self->annotate_VariationFeature($vf);
+        # stop if exceeding the desired number of records and not calculating stats
+        last if !defined $stats && $record_count > $self->{num_records};
+        my $res = $self->annotate_VariationFeature($vf, $record_count);
+        $record_count++ if $res;
         $parser->next();
+      }
+
+      # prepare statistics
+      if (defined $stats) {
+        my $annot_stats = $vf->{_custom_annotations_stats}->{$self->short_name};
+        $annot_stats->{count} = $record_count if grep(/^count$/, @$stats);
+        if ( grep(/^(mean)$/, @$stats) && defined $annot_stats->{sum} ) {
+          $annot_stats->{mean} = $annot_stats->{sum} / $record_count;
+        }
+        delete $annot_stats->{sum} unless grep(/^sum$/, @$stats);
+        $vf->{_custom_annotations_stats}->{$self->short_name} = $annot_stats;
       }
     }
   }
@@ -346,6 +366,7 @@ sub valid_chromosomes {
 =head2 annotate_VariationFeature
  
   Arg 1      : Bio::EnsEMBL::Variation::VariationFeature
+  Arg 2      : $record_count
   Example    : $as->annotate_VariationFeature($vf);
   Description: Add custom annotations to the given variant using the
                current record as read from the annotation source.
@@ -359,12 +380,15 @@ sub valid_chromosomes {
 sub annotate_VariationFeature {
   my $self = shift;
   my $vf = shift;
+  my $record_count = shift;
 
   my ($overlap_result, $overlap_percentage) = $self->_record_overlaps_VF($vf);
 
   return unless ($overlap_result);
 
-  my $record = $self->_create_records($overlap_result);
+  my $stats      = $self->{summary_stats};
+  my $get_scores = defined $stats;
+  my $record = $self->_create_records($overlap_result, $get_scores);
 
   my $is_recorded = 0;
   if (@{$record}[0]->{'name'} =~  /^COSV/) {
@@ -383,14 +407,35 @@ sub annotate_VariationFeature {
     if (defined($self->{fields}) && grep {$_ eq "PC"} @{$self->{fields}}) {
       $record->[0]->{"fields"}->{"PC"} = $overlap_percentage;
     }
-    push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$record};
+
+    # calculate summary statistics for custom annotation
+    my $annot_stats = $vf->{_custom_annotations_stats}->{$self->short_name};
+    my $value = $record->[0]->{score} if defined $stats;
+    if (defined $value) {
+      if ( grep(/^min$/, @$stats) ) {
+        $annot_stats->{min} = $value if $value < ($annot_stats->{min} || '+inf');
+      }
+      if ( grep(/^max$/, @$stats) ) {
+        $annot_stats->{max} = $value if $value > ($annot_stats->{max} || '-inf');
+      }
+      $annot_stats->{sum} += $value if grep(/^(sum|mean)$/, @$stats);
+      $vf->{_custom_annotations_stats}->{$self->short_name} = $annot_stats;
+    }
+
+    if ( $record_count < $self->{num_records} ) {
+      push @{$vf->{_custom_annotations}->{$self->short_name}}, @{$record};
+    } elsif ( $record_count == $self->{num_records} ) {
+      push @{$vf->{_custom_annotations}->{$self->short_name}}, { name => '...' };
+    }
   }
-  
+  return 1;
 }
 
 
 =head2 _create_records
  
+  Arg 1      : bool or hashref $overlap_result
+  Arg 2      : bool $get_scores
   Example    : $records = $as->_create_records();
   Description: Create a custom annotation record from the current
                record as read from the annotation source.
@@ -402,7 +447,13 @@ sub annotate_VariationFeature {
 =cut
 
 sub _create_records {
-  return [{name => $_[0]->_get_record_name}];
+  my $self           = shift;
+  my $overlap_result = shift;
+  my $get_scores     = shift;
+
+  my $record = [{ name  => $self->_get_record_name }];
+  $record->[0]->{score} = $self->parser->get_score if $get_scores;
+  return $record;
 }
 
 
@@ -457,7 +508,9 @@ sub _record_overlaps_VF {
   my $overlap_cutoff = $self->{overlap_cutoff};
   my $distance = $self->{distance};
   my $reciprocal = $self->{reciprocal};
+
   my ($ref_start, $ref_end) = ($parser->get_start, $parser->get_end);
+  $ref_start += 1 if defined $self->{_format} && $self->{_format} eq 'bigwig';
 
   if($type eq 'overlap' || $type eq 'within' || $type eq 'surrounding') {
     # account for insertions in Ensembl world where s = e+1
@@ -499,7 +552,7 @@ sub _record_overlaps_VF {
     return overlap($ref_start, $ref_end, $vs, $ve), $overlap_percentage;
   }
   elsif($type eq 'exact') {
-    my $match = $parser->get_start == $vf->{start} && $parser->get_end == $vf->{end};
+    my $match = $ref_start == $vf->{start} && $ref_end == $vf->{end};
     my $overlap_percentage = $match ? 100 : 0;
     return ( $match, $overlap_percentage );
   }
