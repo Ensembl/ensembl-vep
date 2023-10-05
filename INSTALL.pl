@@ -221,7 +221,6 @@ $NO_BIOPERL   ||=  $config->{NO_BIOPERL};
 
 # load version data
 our $CURRENT_VERSION_DATA = get_version_data($RealBin.'/.version');
-
 $VERSION =~ s/release\///;
 
 if($HELP) {
