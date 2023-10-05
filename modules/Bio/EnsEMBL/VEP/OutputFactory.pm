@@ -961,7 +961,8 @@ sub VariationFeature_to_output_hash {
       [
         grep {!exists($_->{allele})}
         @{$vf->{_custom_annotations}->{$custom_name}}
-      ]
+      ],
+      $vf->{_custom_annotations_stats}->{$custom_name}
     );
   }
 
@@ -998,7 +999,6 @@ sub add_colocated_variant_info {
   return unless $vf->{existing} && scalar @{$vf->{existing}};
 
   my $this_allele = $hash->{Allele};
-  my $ref_allele = $vf->ref_allele_string;
 
   my $shifted_allele = $vf->{shifted_allele_string};
   $shifted_allele ||= "";
@@ -1044,20 +1044,11 @@ sub add_colocated_variant_info {
     # Find allele specific clin_sig data if it exists
     if(defined($ex->{clin_sig_allele}) && $self->{clin_sig_allele} )
     {
-      # Check if reference alleles match between clinical significance and vf
-      my $allele_match = 1;
-      if($ex->{clin_sig_ref_allele} && $ex->{clin_sig_ref_allele} ne $ref_allele) {
-        $allele_match = 0;
-      }
 
       my %cs_hash;
       my @clin_sig_array = split(';', $ex->{clin_sig_allele});
       foreach my $cs(@clin_sig_array){
         my @cs_split = split(':', $cs);
-
-        if(!$allele_match) {
-          reverse_comp(\$cs_split[0]);
-        }
 
         $cs_hash{$cs_split[0]} = '' if !defined($cs_hash{$cs_split[0]});
         $cs_hash{$cs_split[0]} .= ',' if $cs_hash{$cs_split[0]} ne ''; 
@@ -1231,6 +1222,7 @@ sub add_colocated_frequency_data {
   Arg 1      : hashref $vf_hash
   Arg 2      : string $custom_name
   Arg 3      : listref $annotations
+  Arg 4      : listref $annotations_statistics
   Example    : $hashref = $of->_add_custom_annotations_to_hash($vf, $vf_hash, $ex);
   Description: Adds custom annotation data to hash
   Returntype : hashref
@@ -1242,14 +1234,17 @@ sub add_colocated_frequency_data {
 =cut
 
 sub _add_custom_annotations_to_hash {
-  my ($self, $hash, $custom_name, $annots) = @_;
+  my ($self, $hash, $custom_name, $annots, $annots_stats) = @_;
 
   foreach my $annot(@$annots) {
     push @{$hash->{$custom_name}}, $annot->{name};
-
     foreach my $field(keys %{$annot->{fields} || {}}) {
       push @{$hash->{$custom_name.'_'.$field}}, $annot->{fields}->{$field};
     }
+  }
+
+  foreach my $stat(keys %{$annots_stats || {}}) {
+    $hash->{$custom_name.'_'.$stat} = $annots_stats->{$stat};
   }
 
   return $hash;
@@ -2356,6 +2351,19 @@ sub get_custom_headers {
         push @headers, [
           $sub_id,
           sprintf("%s field from %s", $field, $masked_file)
+        ];
+      }
+    }
+
+    foreach my $stat(@{$custom->{summary_stats} || []}) {
+      my $sub_id = sprintf("%s_%s", $custom->{short_name}, $stat);
+      if (grep { /^$sub_id$/ } @flatten_header){
+        my $pos = $pos{$sub_id} / 2;
+        $headers[$pos][1] .= ",$masked_file";
+      } else {
+        push @headers, [
+          $sub_id,
+          sprintf("%s data from %s", $stat, $masked_file)
         ];
       }
     }

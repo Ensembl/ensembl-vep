@@ -496,17 +496,19 @@ sub create_StructuralVariationFeatures {
   my $alt = join(",", @$alts);
   my $type = $alt ne '.' ? $alt : $info->{SVTYPE};
   my $so_term = $self->get_SO_term($type);
+
   unless ($so_term) {
     $skip_line = 1;
     $so_term   = $type;
   }
 
-  # work out the end coord
-  if(defined($info->{END})) {
-    $end = $info->{END};
-  }
-  elsif(defined($info->{SVLEN})) {
-    $end = $start + abs($info->{SVLEN}) - 1;
+  ## Illumina Manta (SV caller) may use INFO/END to identify the position of the
+  ## breakend mate (unsupported based on VCF 4.4 specifications)
+  if ($so_term =~ /break/ && $parser->get_info->{END}) {
+    # INFO/END2 is used to identify the position of the breakend mate
+    $parser->get_info->{END2} ||= $parser->get_info->{END};
+    delete $parser->get_info->{END};
+    $end = $parser->get_end;
   }
 
   # check for imprecise breakpoints

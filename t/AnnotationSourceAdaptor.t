@@ -92,14 +92,17 @@ $asa->param('check_existing', 1);
 is_deeply(ref($asa->get_all()->[0]), 'Bio::EnsEMBL::VEP::AnnotationSource::Cache::Variation', 'get_all - var comes first');
 $asa->param('check_existing', 0);
 
-$asa->param('custom', ['test=' . $test_cfg->{custom_vcf} . ',format=vcf,short_name=foo,type=exact']);
+$asa->param('custom', ['format=vcf,short_name=foo,type=exact']);
 throws_ok {$asa->get_all_custom} qr/No file was added for custom annotation source./, 'get_all_custom - invalid file';
 
-$asa->param('custom', ['file=' . $test_cfg->{custom_vcf} . ',test=vcf,short_name=foo,type=exact']);
+$asa->param('custom', ['file=' . $test_cfg->{custom_vcf} . ',short_name=foo,type=exact']);
 throws_ok {$asa->get_all_custom} qr/No format specified for custom annotation source./, 'get_all_custom - invalid format';
 
 $asa->param('custom', ['file=' . $test_cfg->{custom_vcf} . ',format=foo,short_name=test,type=exact']);
 throws_ok {$asa->get_all_custom} qr/Unknown or unsupported format foo/, 'get_all_custom - invalid format value';
+
+$asa->param('custom', ['file=' . $test_cfg->{custom_vcf} . ',format=foo,random=2,type=exact']);
+throws_ok {$asa->get_all_custom} qr/The following options are not supported for custom annotations: random/, 'get_all_custom - invalid options';
 
 $asa->param('no_remote', 1);
 $asa->param('custom', ['file=http://foo.bar.com/file,format=test,short_name=foo,type=exact']);
@@ -132,6 +135,8 @@ SKIP: {
         'overlap_def' => "Percentage of input variant covered by reference variant",
         'distance' => undef,
         'same_type' => 0,
+        'num_records' => 50,
+        '_format' => 'vcf',
         'info' => {
           'custom_info' => {
             'short_name' => 'test',
@@ -143,6 +148,8 @@ SKIP: {
             'overlap_def' => "Percentage of input variant covered by reference variant",
             'distance' => undef,
             'same_type' => 0,
+            'num_records' => 50,
+            '_format' => 'vcf',
           }
         }
       }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
@@ -166,6 +173,8 @@ SKIP: {
         'overlap_def' => "Percentage of input variant covered by reference variant",
         'distance' => undef,
         'same_type' => 0,
+        'num_records' => 50,
+        '_format' => 'vcf',
         'info' => {
           'custom_info' => {
             'short_name' => 'test',
@@ -177,6 +186,8 @@ SKIP: {
             'overlap_def' => "Percentage of input variant covered by reference variant",
             'distance' => undef,
             'same_type' => 0,
+            'num_records' => 50,
+            '_format' => 'vcf',
           }
         }
       }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
@@ -200,6 +211,8 @@ SKIP: {
         'overlap_def' => "Percentage of input variant covered by reference variant",
         'distance' => undef,
         'same_type' => 0,
+        'num_records' => 50,
+        '_format' => 'vcf',
         'info' => {
           'custom_info' => {
             'short_name' => 'test',
@@ -211,6 +224,8 @@ SKIP: {
             'overlap_def' => "Percentage of input variant covered by reference variant",
             'distance' => undef,
             'same_type' => 0,
+            'num_records' => 50,
+            '_format' => 'vcf',
           }
         }
       }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
@@ -235,6 +250,8 @@ SKIP: {
         'overlap_def' => "Percentage of input variant covered by reference variant",
         'distance' => undef,
         'same_type' => 0,
+        'num_records' => 50,
+        '_format' => 'vcf',
         'info' => {
           'custom_info' => {
             'short_name' => 'test',
@@ -247,6 +264,8 @@ SKIP: {
             'overlap_def' => "Percentage of input variant covered by reference variant",
             'distance' => undef,
             'same_type' => 0,
+            'num_records' => 50,
+            '_format' => 'vcf',
           }
         }
       }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
@@ -273,6 +292,8 @@ SKIP: {
         'overlap_def' => "Percentage of input variant covered by reference variant",
         'distance' => undef,
         'same_type' => 0,
+        'num_records' => 50,
+        '_format' => 'vcf',
       }
     },
     'short_name' => 'test',
@@ -287,6 +308,8 @@ SKIP: {
     'overlap_def' => "Percentage of input variant covered by reference variant",
     'distance' => undef,
     'same_type' => 0,
+    'num_records' => 50,
+    '_format' => 'vcf',
   }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' ),
   bless( {
     'info' => {
@@ -301,6 +324,8 @@ SKIP: {
         'overlap_def' => "Percentage of input variant covered by reference variant",
         'distance' => undef,
         'same_type' => 0,
+        'num_records' => 50,
+        '_format' => 'vcf',
       }
     },
     'short_name' => 'test',
@@ -315,6 +340,8 @@ SKIP: {
     'overlap_def' => "Percentage of input variant covered by reference variant",
     'distance' => undef,
     'same_type' => 0,
+    'num_records' => 50,
+    '_format' => 'vcf',
   }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
     ],
     'get_all_custom - automated ###CHR###'
