@@ -150,20 +150,20 @@ our (@store_species, @indexes, @files, $ftp, $dirname);
 my $config = {};
 GetOptions(
   $config,
-  'DESTDIR|d=s',
+  'DESTDIR|DEST_DIR|d=s',
   'CACHE_VERSION|e=i',
   'ASSEMBLY|y=s',
-  'BIOPERL|b=s',
-  'CACHEURL|u=s',
-  'CACHEDIR|c=s',
-  'FASTAURL|f=s',
+  'BIOPERL|BIOPERL_URL|b=s',
+  'CACHEURL|CACHE_URL|u=s',
+  'CACHEDIR|CACHE_DIR|c=s',
+  'FASTAURL|FASTA_URL|f=s',
   'HELP|h',
   'NO_UPDATE|n',
   'SPECIES|s=s',
   'NO_PLUGINS',
   'PLUGINS|g=s',
-  'PLUGINSDIR|r=s',
-  'PLUGINURL=s',
+  'PLUGINSDIR|PLUGINS_DIR|r=s',
+  'PLUGINURL|PLUGIN_URL=s',
   'AUTO|a=s',
   'QUIET|q',
   'PREFER_BIN|p',
@@ -221,7 +221,7 @@ $NO_BIOPERL   ||=  $config->{NO_BIOPERL};
 
 # load version data
 our $CURRENT_VERSION_DATA = get_version_data($RealBin.'/.version');
-our $VERSION = $CURRENT_VERSION_DATA->{$VEP_MODULE_NAME}->{release};
+
 $VERSION =~ s/release\///;
 
 if($HELP) {
