@@ -221,6 +221,7 @@ $NO_BIOPERL   ||=  $config->{NO_BIOPERL};
 
 # load version data
 our $CURRENT_VERSION_DATA = get_version_data($RealBin.'/.version');
+our $VERSION = $CURRENT_VERSION_DATA->{$VEP_MODULE_NAME}->{release};
 $VERSION =~ s/release\///;
 
 if($HELP) {
