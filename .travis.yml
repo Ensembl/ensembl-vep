@@ -69,6 +69,9 @@ jobs:
       script: ./travisci/trigger-dependent-build.sh
       perl: "5.14"
 
+after_failure:
+  - cat /home/travis/.cpanm/work/*/build.log
+
 notifications:
   email:
     on_success: always
