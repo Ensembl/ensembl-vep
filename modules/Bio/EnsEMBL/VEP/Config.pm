@@ -1018,6 +1018,7 @@ sub read_config_from_file {
 
   while(<CONFIG>) {
     next if /^\#/;
+    next if /^\s*$/;
 
     # preserve spaces between quotes
     s/\s+(?=(?:(?:[^"]*"){2})*[^"]*"[^"]*$)/___SPACE___/g;
