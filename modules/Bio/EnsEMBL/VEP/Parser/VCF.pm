@@ -462,9 +462,8 @@ sub create_StructuralVariationFeatures {
     allele_string  => $alt,
     _line          => $record
   });
-  $svf->{vep_skip} = $self->{skip_line} if defined $self->{skip_line};
-
-  return $self->post_process_vfs([$svf]);;
+  $svf->{vep_skip} = $skip_line if defined $skip_line;
+  return $self->post_process_vfs([$svf]);
 }
 
 
