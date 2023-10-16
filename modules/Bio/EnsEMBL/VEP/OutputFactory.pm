@@ -1301,7 +1301,15 @@ sub VariationFeatureOverlapAllele_to_output_hash {
 
   # hgvs g.
   if($self->{hgvsg}) {
-    $vf->{_hgvs_genomic} ||= $vf->hgvs_genomic($vf->slice, $self->{hgvsg_use_accession} ? undef : $vf->{chr});
+    # if offline mode then hgvsg_use_accession has to access chromosome synonyms from cache
+    if(!$vf->slice->adaptor && $self->{hgvsg_use_accession}) {
+      my $chr_syn = $self->config->{_chromosome_synonyms}->{($vf->{chr})};
+      my @new_chr_array = grep(/NC_/, keys %{$chr_syn});
+      $vf->{_hgvs_genomic} ||= $vf->hgvs_genomic($vf->slice, $new_chr_array[0]);
+    }
+    else {
+      $vf->{_hgvs_genomic} ||= $vf->hgvs_genomic($vf->slice, $self->{hgvsg_use_accession} ? undef : $vf->{chr});
+    }
 
     if(my $hgvsg = $vf->{_hgvs_genomic}->{$vfoa->variation_feature_seq}) {
       $hash->{HGVSg} = $hgvsg; 
