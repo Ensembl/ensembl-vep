@@ -140,7 +140,7 @@ sub DistributeWeb{
       opendir (my $dh_collection, "$dir/vep") or die $!;
       while (my $file_collection = readdir($dh_collection)) {
         if ($file_collection =~ /gz$/ && ! $copied{$file_collection}) {
-          $self->link_file("$dir/vep/$file_collection", "$dir/web/$content/$file_collection");
+          $self->link_file("$dir/vep/$file_collection", "$dir/web/$file_collection");
         }
       }
       $dh_collection->close();
