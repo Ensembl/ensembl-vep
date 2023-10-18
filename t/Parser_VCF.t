@@ -613,7 +613,7 @@ is_deeply($cvf, bless( {
                  'inner_start' => '774570',
                  'strand' => 1,
                  'seq_region_end' => 828435,
-                 'class_SO_term' => 'CPX',
+                 'class_SO_term' => '<CPX>',
                  'variation_name' => 'gnomAD_v2_CPX_1_1',
                  'start' => 774570
                },
@@ -624,11 +624,68 @@ like($tmp, qr/CPX type is not supported/, 'StructuralVariationFeature - skip CPX
 
 open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
+## Mobile element insertion/deletion
+my $config = Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1});
+my $svf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $config,
+  file => $test_cfg->create_input_file([qw(1 774569 svf N	<INS:ME:ALU> 1 PASS SVTYPE=INS)]),
+  valid_chromosomes => [1]
+})->next();
+is_deeply($svf->{class_SO_term}, 'Alu_insertion',
+          'StructuralVariationFeature - Alu insertion');
 
+$svf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $config,
+  file => $test_cfg->create_input_file([qw(1 774569 svf N	<INS:ME> 1 PASS SVTYPE=INS)]),
+  valid_chromosomes => [1]
+})->next();
+is_deeply($svf->{class_SO_term}, 'mobile_element_insertion',
+          'StructuralVariationFeature - Mobile element insertion');
 
+$svf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $config,
+  file => $test_cfg->create_input_file([qw(1 774569 svf N	<DEL:ME> 1 PASS SVTYPE=DEL;SVLEN=23)]),
+  valid_chromosomes => [1]
+})->next();
+is_deeply($svf->{class_SO_term}, 'mobile_element_deletion',
+          'StructuralVariationFeature - Mobile element deletion');
+
+$svf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => $config,
+  file => $test_cfg->create_input_file([qw(1 774569 svf N	<DEL:ME:L1> 1 PASS SVTYPE=DEL;SVLEN=278)]),
+  valid_chromosomes => [1]
+})->next();
+is_deeply($svf->{class_SO_term}, 'LINE1_deletion',
+          'StructuralVariationFeature - LINE1 deletion');
+
+## CNV: deletion
 my $cnv_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1,  warning_file => 'STDERR'}),
-  file => $test_cfg->create_input_file([qw(1 774569 gnomAD_v2_DEL_1_1 N <CN0> 1 PASS END=828435;SVTYPE=DUP;CHR2=1;SVLEN=53959)]),
+  file => $test_cfg->create_input_file([qw(1 774569 gnomAD_v2_DEL_1_1 N <CN=0> 1 PASS END=828435;SVTYPE=DEL;CHR2=1;SVLEN=53959)]),
+  valid_chromosomes => [1]
+})->next();
+delete($cnv_vf->{adaptor}); delete($cnv_vf->{_line});
+
+is_deeply($cnv_vf, bless( {
+                 'outer_end' => '828435',
+                 'chr' => '1',
+                 'inner_end' => '828435',
+                 'outer_start' => '774570',
+                 'end' => 828435,
+                 'seq_region_start' => 774570,
+                 'inner_start' => '774570',
+                 'strand' => 1,
+                 'seq_region_end' => 828435,
+                 'class_SO_term' => 'deletion',
+                 'variation_name' => 'gnomAD_v2_DEL_1_1',
+                 'start' => 774570
+               },
+                'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature - CNV with only deletion allele');
+
+## CNV: duplication
+$cnv_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1,  warning_file => 'STDERR'}),
+  file => $test_cfg->create_input_file([qw(1 774569 gnomAD_v2_DEL_1_1 N <CN2> 1 PASS END=828435;SVTYPE=DUP;CHR2=1;SVLEN=53959)]),
   valid_chromosomes => [1]
 })->next();
 delete($cnv_vf->{adaptor}); delete($cnv_vf->{_line});
@@ -649,9 +706,10 @@ is_deeply($cnv_vf, bless( {
                },
                 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature - CNV with only duplication allele');
 
+## CNV: generic
 $cnv_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1,  warning_file => 'STDERR'}),
-  file => $test_cfg->create_input_file([qw(1 774569 gnomAD_v2_DEL_1_1 N <CN0>,<CN2> 1 PASS END=828435;SVTYPE=CNV;CHR2=1;SVLEN=53959)]),
+  file => $test_cfg->create_input_file([qw(1 774569 gnomAD_v2_DEL_1_1 N <CN0>,<CN=2> 1 PASS END=828435;SVTYPE=CNV;CHR2=1;SVLEN=53959)]),
   valid_chromosomes => [1]
 })->next();
 delete($cnv_vf->{adaptor}); delete($cnv_vf->{_line});
@@ -672,7 +730,15 @@ is_deeply($cnv_vf, bless( {
                },
                 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature - CNV with multiple alleles');
 
-## test breakend variant with unsupported END information in INFO field
+my $cnv2_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1,  warning_file => 'STDERR'}),
+  file => $test_cfg->create_input_file([qw(1 774569 gnomAD_v2_DEL_1_1 N <CNV> 1 PASS END=828435;SVTYPE=CNV;CHR2=1;SVLEN=53959)]),
+  valid_chromosomes => [1]
+})->next();
+delete($cnv2_vf->{adaptor}); delete($cnv2_vf->{_line});
+is_deeply($cnv_vf, $cnv2_vf, 'StructuralVariationFeature - generic CNV');
+
+## BND: test breakend variant with multiple mates and information in ALT field
 my $bnd_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1,  warning_file => 'STDERR'}),
   file => $test_cfg->create_input_file([qw(2	68914092	BND00001121	A	]1:37938377]A	.	PASS	SVTYPE=BND;CHR2=1;END=37938377   )]),

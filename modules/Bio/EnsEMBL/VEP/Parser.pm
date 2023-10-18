@@ -662,17 +662,29 @@ sub get_SO_term {
   my $type = shift || join(",", @{ $self->get_alternatives });
   my $abbrev;
 
-  if ($type =~ /DUP:TANDEM|CNV:TR/) {
+  my @mobile_elements = ("ALU", "HERV", "LINE1", "SVA");
+
+  if ($type =~ /(INS|DEL):(ME):?([A-Z0-9]+)?/i) {
+    $abbrev     = uc $1;
+    my $subtype = uc $2;
+    my $element = uc $3 if defined $3;
+
+    if (defined $element) {
+      $element = 'LINE1' if $element eq 'L1';
+      $subtype = $element if grep /^$element$/i, @mobile_elements;
+    }
+    $abbrev .= '_' . $subtype;
+  } elsif ($type =~ /DUP:TANDEM|CNV:TR/i) {
     # including <CNV:TR>,<CNV:TR>
     $abbrev = "TDUP";
-  } elsif ($type =~ /CNV/) {
+  } elsif ($type =~ /CNV/i) {
     # including <CNV>,<CNV>
     $abbrev = "CNV";
   } elsif ($type =~ /CN=?[0-9]/i) {
     # ALT: "<CN0>", "<CN0>,<CN2>,<CN3>" "<CN2>" => SVTYPE: DEL, CNV, DUP
     $abbrev = "CNV";
-    $abbrev = "DEL" if $type =~ /\<CN=?0\>/;
-    $abbrev = "DUP" if $type =~ /\<CN=?2\>/;
+    $abbrev = "DEL" if $type =~ /^<?CN=?0>?$/;
+    $abbrev = "DUP" if $type =~ /^<?CN=?2>?$/;
   } elsif ($type =~ /[\[\]]/) {
     $abbrev = "BND";
   } elsif ($type =~ /^\<|\>$/) {
@@ -684,8 +696,20 @@ sub get_SO_term {
   }
 
   my %terms = (
-    INS  => 'insertion',
-    DEL  => 'deletion',
+    INS       => 'insertion',
+    INS_ME    => 'mobile_element_insertion',
+    INS_ALU   => 'Alu_insertion',
+    INS_HERV  => 'HERV_insertion',
+    INS_LINE1 => 'LINE1_insertion',
+    INS_SVA   => 'SVA_insertion',
+
+    DEL       => 'deletion',
+    DEL_ME    => 'mobile_element_deletion',
+    DEL_ALU   => 'Alu_deletion',
+    DEL_HERV  => 'HERV_deletion',
+    DEL_LINE1 => 'LINE1_deletion',
+    DEL_SVA   => 'SVA_deletion',
+
     TDUP => 'tandem_duplication',
     DUP  => 'duplication',
     CNV  => 'copy_number_variation',
