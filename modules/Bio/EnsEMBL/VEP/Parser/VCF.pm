@@ -235,13 +235,8 @@ sub create_VariationFeatures {
   if(
     join("", $ref, @$alts) !~ /^[ACGT]+$/ &&
     (
-<<<<<<< HEAD
-      $info->{SVTYPE} ||
-      join(",", @$alts) =~ /[<\[\]][^\*]+[>\]\[]|^\.\w+|\w+\.$/
-=======
       $info->{SVTYPE} || # deprecated in VCF 4.4
       join(",", @$alts) =~ /[<\[\]][^\*]+[>\]\[]/
->>>>>>> postreleasefix/111
     )
   ) {
     return $self->create_StructuralVariationFeatures();
@@ -412,13 +407,8 @@ sub create_StructuralVariationFeatures {
   );
 
   ## get structural variant type from SVTYPE tag (deprecated in VCF 4.4) or ALT
-<<<<<<< HEAD
-  my $alt = join("/", @$alts);
-  my $type = $info->{SVTYPE} || $alt;
-=======
   my $alt = join(",", @$alts);
   my $type = $alt ne '.' ? $alt : $info->{SVTYPE};
->>>>>>> postreleasefix/111
   my $so_term = $self->get_SO_term($type);
   unless ($so_term) {
     $skip_line = 1;
