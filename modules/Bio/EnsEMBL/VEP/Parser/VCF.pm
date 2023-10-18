@@ -235,7 +235,7 @@ sub create_VariationFeatures {
   if(
     join("", $ref, @$alts) !~ /^[ACGT]+$/ &&
     (
-      $info->{SVTYPE} ||
+      $info->{SVTYPE} || # deprecated in VCF 4.4
       join(",", @$alts) =~ /[<\[\]][^\*]+[>\]\[]/
     )
   ) {
@@ -494,7 +494,7 @@ sub create_StructuralVariationFeatures {
   
   ## get structural variant type from SVTYPE tag (deprecated in VCF 4.4) or ALT
   my $alt = join(",", @$alts);
-  my $type = $info->{SVTYPE} || $alt;
+  my $type = $alt ne '.' ? $alt : $info->{SVTYPE};
   my $so_term = $self->get_SO_term($type);
 
   unless ($so_term) {
