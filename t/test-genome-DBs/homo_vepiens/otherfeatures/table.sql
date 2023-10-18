@@ -1,11 +1,11 @@
 CREATE TABLE `alt_allele` (
-  `alt_allele_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `alt_allele_group_id` int(10) unsigned NOT NULL,
-  `gene_id` int(10) unsigned NOT NULL,
+  `alt_allele_id` INT UNSIGNED AUTO_INCREMENT,
+  `alt_allele_group_id` INT UNSIGNED NOT NULL,
+  `gene_id` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`alt_allele_id`),
-  UNIQUE KEY `gene_idx` (`gene_id`),
-  KEY `gene_id` (`gene_id`,`alt_allele_group_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+  KEY (`gene_id`,`alt_allele_group_id`),
+	KEY `gene_idx` (`gene_id`)
+) COLLATE=latin1_swedish_ci ENGINE=MyISAM;
 
 CREATE TABLE `alt_allele_attrib` (
   `alt_allele_id` int(10) unsigned DEFAULT NULL,
