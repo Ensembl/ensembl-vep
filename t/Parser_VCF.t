@@ -677,6 +677,7 @@ delete($cnv_vf->{adaptor}); delete($cnv_vf->{_line});
 is_deeply($cnv_vf, bless( {
                  'outer_end' => '828435',
                  'chr' => '1',
+                 'allele_string' => '<CN=0>',
                  'inner_end' => '828435',
                  'outer_start' => '774570',
                  'end' => 828435,
@@ -701,7 +702,7 @@ delete($cnv_vf->{adaptor}); delete($cnv_vf->{_line});
 is_deeply($cnv_vf, bless( {
                  'outer_end' => '828435',
                  'chr' => '1',
-                 'allele_string' => '<CN0>',
+                 'allele_string' => '<CN2>',
                  'inner_end' => '828435',
                  'outer_start' => '774570',
                  'end' => 828435,
@@ -726,7 +727,7 @@ delete($cnv_vf->{adaptor}); delete($cnv_vf->{_line});
 is_deeply($cnv_vf, bless( {
                  'outer_end' => '828435',
                  'chr' => '1',
-                 'allele_string' => '<CN0>/<CN2>',
+                 'allele_string' => '<CN0>/<CN=2>',
                  'inner_end' => '828435',
                  'outer_start' => '774570',
                  'end' => 828435,
@@ -746,6 +747,7 @@ my $cnv2_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   valid_chromosomes => [1]
 })->next();
 delete($cnv2_vf->{adaptor}); delete($cnv2_vf->{_line});
+$cnv2_vf->{allele_string} = '<CN0>/<CN=2>';
 is_deeply($cnv_vf, $cnv2_vf, 'StructuralVariationFeature - generic CNV');
 
 ## BND: test breakend variant with multiple mates and information in ALT field

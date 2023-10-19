@@ -685,7 +685,7 @@ sub get_SO_term {
     $abbrev = "CNV";
     $abbrev = "DEL" if $type =~ /^<?CN=?0>?$/;
     $abbrev = "DUP" if $type =~ /^<?CN=?2>?$/;
-  } elsif ($type =~ /[\[\]]/) {
+  } elsif ($type =~ /[\[\]]|^\.|\.$/) {
     $abbrev = "BND";
   } elsif ($type =~ /^\<|\>$/) {
     $abbrev = $type;
