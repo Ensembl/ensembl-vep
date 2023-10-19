@@ -1,15 +1,15 @@
 CREATE TABLE `alt_allele` (
-  `alt_allele_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `alt_allele_group_id` int(10) unsigned NOT NULL,
-  `gene_id` int(10) unsigned NOT NULL,
+  `alt_allele_id` INT UNSIGNED AUTO_INCREMENT,
+  `alt_allele_group_id` INT UNSIGNED NOT NULL,
+  `gene_id` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`alt_allele_id`),
-  UNIQUE KEY `gene_idx` (`gene_id`),
-  KEY `gene_id` (`gene_id`,`alt_allele_group_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+  KEY (`gene_id`,`alt_allele_group_id`),
+    KEY `gene_idx` (`gene_id`)
+) COLLATE=latin1_swedish_ci ENGINE=MyISAM;
 
 CREATE TABLE `alt_allele_attrib` (
   `alt_allele_id` int(10) unsigned DEFAULT NULL,
-  `attrib` enum('IS_REPRESENTATIVE','IS_MOST_COMMON_ALLELE','IN_CORRECTED_ASSEMBLY','HAS_CODING_POTENTIAL','IN_ARTIFICIALLY_DUPLICATED_ASSEMBLY','IN_SYNTENIC_REGION','HAS_SAME_UNDERLYING_DNA_SEQUENCE','IN_BROKEN_ASSEMBLY_REGION','IS_VALID_ALTERNATE','SAME_AS_REPRESENTATIVE','SAME_AS_ANOTHER_ALLELE','MANUALLY_ASSIGNED','AUTOMATICALLY_ASSIGNED') DEFAULT NULL,
+  `attrib` enum('IS_REPRESENTATIVE','IS_MOST_COMMON_ALLELE','IN_CORRECTED_ASSEMBLY','HAS_CODING_POTENTIAL','IN_ARTIFICIALLY_DUPLICATED_ASSEMBLY','IN_SYNTENIC_REGION','HAS_SAME_UNDERLYING_DNA_SEQUENCE','IN_BROKEN_ASSEMBLY_REGION','IS_VALID_ALTERNATE','SAME_AS_REPRESENTATIVE','SAME_AS_ANOTHER_ALLELE','MANUALLY_ASSIGNED','AUTOMATICALLY_ASSIGNED','IS_PAR') DEFAULT NULL,
   KEY `aa_idx` (`alt_allele_id`,`attrib`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
@@ -486,7 +486,7 @@ CREATE TABLE `meta` (
   `meta_id` int(11) NOT NULL AUTO_INCREMENT,
   `species_id` int(10) unsigned DEFAULT '1',
   `meta_key` varchar(40) NOT NULL,
-  `meta_value` varchar(255) NOT NULL,
+  `meta_value` varchar(255),
   PRIMARY KEY (`meta_id`),
   UNIQUE KEY `species_key_value_idx` (`species_id`,`meta_key`,`meta_value`),
   KEY `species_value_idx` (`species_id`,`meta_value`)
