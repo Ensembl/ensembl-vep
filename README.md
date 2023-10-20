@@ -1,7 +1,7 @@
 # ensembl-vep
 
-[![GitHub](https://img.shields.io/github/license/Ensembl/ensembl-vep.svg)](https://github.com/Ensembl/ensembl-vep/blob/main/LICENSE)
-[![Coverage Status](https://coveralls.io/repos/github/Ensembl/ensembl-vep/badge.svg?branch=main)](https://coveralls.io/github/Ensembl/ensembl-vep?branch=main)
+[![GitHub](https://img.shields.io/github/license/Ensembl/ensembl-vep.svg)](https://github.com/Ensembl/ensembl-vep/blob/release/112/LICENSE)
+[![Coverage Status](https://coveralls.io/repos/github/Ensembl/ensembl-vep/badge.svg?branch=main)](https://coveralls.io/github/Ensembl/ensembl-vep?branch=release/112)
 [![Docker Build Status](https://img.shields.io/docker/cloud/build/ensemblorg/ensembl-vep.svg)](https://hub.docker.com/r/ensemblorg/ensembl-vep)
 [![Docker Hub Pulls](https://img.shields.io/docker/pulls/ensemblorg/ensembl-vep.svg)](https://hub.docker.com/r/ensemblorg/ensembl-vep)
 
