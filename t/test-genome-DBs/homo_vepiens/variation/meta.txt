@@ -133,3 +133,8 @@
 164	\N	patch	patch_107_108_a.sql|schema version
 165	\N	patch	patch_107_108_b.sql|fix SAS population description
 166	\N	patch	patch_108_109_a.sql|schema version
+167 \N  patch   patch_109_110_a.sql|schema version
+168 \N  patch   patch_109_110_b.sql|Add DDG2P data_source_attrib to variation_citation
+169 \N  patch   patch_109_110_c.sql|Add new clinical_significance values to variation, variation_feature and structural_variation
+170 \N  patch   patch_110_111_a.sql|schema version
+171 \N  patch   patch_110_111_b.sql|Update transcript_variation primary key
