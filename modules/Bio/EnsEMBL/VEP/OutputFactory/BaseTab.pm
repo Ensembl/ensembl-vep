@@ -96,7 +96,7 @@ sub headers {
         (defined($software_version_data->{$_}->{sub}) ? '.'.substr($software_version_data->{$_}->{sub}, 0, 7) : '')
       )
     }
-    grep {$_ ne 'ensembl-vep'} keys %{$software_version_data};
+    grep {$_ ne 'ensembl-vep'} sort keys %{$software_version_data};
 
   push @headers, "## $_ version ".$info->{version_data}->{$_} for keys %{$info->{version_data} || {}};
 
