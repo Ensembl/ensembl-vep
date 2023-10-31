@@ -98,7 +98,7 @@ sub headers {
     }
     grep {$_ ne 'ensembl-vep'} sort keys %{$software_version_data};
 
-  push @headers, "## $_ version ".$info->{version_data}->{$_} for keys %{$info->{version_data} || {}};
+  push @headers, "## $_ version ".$info->{version_data}->{$_} for sort keys %{$info->{version_data} || {}};
 
   push @headers, @{$self->description_headers};
 
