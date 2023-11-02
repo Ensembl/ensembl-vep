@@ -709,14 +709,11 @@ sub new {
     next if !defined($value) || (ref($value) eq "ARRAY" && @{$value} == 0) || grep { /$flag/ } @skip_opts;
 
     $value = join(" --$flag ", @{$value}) if ref($value) eq "ARRAY";
-    
-    if ($^O eq "MSWin32"){
-      $value =~ s/.+(?=\\)/\[PATH\]/g;
-    }
-    else {
-      $value =~ s/.+(?=\/)/\[PATH\]/g;
-    }
-    
+
+    # replace most of the provided path with [PATH]/
+    my $delim = $^O eq "MSWin32" ? '\\' : '/';
+    $value =~ s|[^,=]+$delim(?! )(?!,)(?!$)|[PATH]$delim|g;
+
     $config_command .= $value eq 1? "--$flag "  : "--$flag $value ";
   }
 
