@@ -222,7 +222,7 @@ sub headers {
         (defined($software_version_data->{$_}->{sub}) ? '.'.substr($software_version_data->{$_}->{sub}, 0, 7) : '')
       )
     }
-    grep {$_ ne 'ensembl-vep'} keys %{$software_version_data}
+    grep {$_ ne 'ensembl-vep'} sort keys %{$software_version_data}
   );
   $headers[-1] .= ' '.$software_version_string if $software_version_string;
 
