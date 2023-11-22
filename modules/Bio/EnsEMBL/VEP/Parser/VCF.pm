@@ -439,7 +439,7 @@ sub create_StructuralVariationFeatures {
     $self->warning_msg("CIRUC and CIRB INFO fields are ignored when calculating alternative alleles in tandem repeats")
       if $info->{CIRUC} or $info->{CIRB};
 
-    if ($info->{RUS}) {
+    if ($info->{RUS} && ($info->{RUC} || $info->{RB}) ) {
       # RN  : Total number of repeat sequences in this allele
       # RUS : Repeat unit sequence of the corresponding repeat sequence
       # RUC : Repeat unit count of corresponding repeat sequence
@@ -451,12 +451,10 @@ sub create_StructuralVariationFeatures {
       my @RUS = split /,/,  $info->{RUS};
       my @RUC = split /,/, ($info->{RUC} || ''); # undefined if no RUC
       my @RB  = split /,/, ($info->{RB}  || ''); # undefined if no RB
-
       my $is_RUC_defined = scalar @RUC;
 
-      # consider tandem repeats as non-SVs to properly calculate consequences
-      # based on alternative allele sequence
-      my $is_sv = 0;
+      my $max_sv_size = $self->param('max_sv_size') || 5000;
+      my $is_oversized = 0;
 
       # build sequence of tandem repeat based on INFO fields
       my @repeats;
@@ -467,19 +465,23 @@ sub create_StructuralVariationFeatures {
           my $seq  = shift(@RUS);
              $seq  = 'N' if $seq eq '.'; # missing sequence
           my $num  = $is_RUC_defined ? shift(@RUC) : shift(@RB) / length($seq);
+
+          # avoid calculating really large repeats
+          $is_oversized = length($seq) * $num > $max_sv_size;
+          last if $is_oversized;
           $repeat .= $seq x $num;
         }
 
-        # keep tandem repeats as SVs if larger than max_sv_size
-        $is_sv = 1 if length($repeat) > ($self->param('max_sv_size') || 5000);
-
+        last if $is_oversized;
         # prepend reference allele
         push @repeats, $ref . $repeat;
       }
-      $alt = $ref.'/'.join('/', @repeats);
+      # avoid storing alternative allele for tandem repeats with large repeats
+      $alt = $ref.'/'.join('/', @repeats) unless $is_oversized;
 
-      if (!$is_sv) {
-        # convert to VariationFeature
+      if (!$is_oversized) {
+        # convert tandem repeats to VariationFeature in order to properly
+        # calculate consequences based on alternative allele sequence
         my $vf = Bio::EnsEMBL::Variation::VariationFeature->new_fast({
           start          => $start,
           end            => $start + length($ref) - 1,
