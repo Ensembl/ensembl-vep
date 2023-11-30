@@ -815,7 +815,7 @@ sub install_biodbhts() {
   print " - unpacking $biodbhts_zip_download_file to $DEST_DIR/tmp/\n" unless $QUIET;
   unpack_arch($biodbhts_zip_download_file, "$DEST_DIR/tmp/");
 
-  my $tmp_name = -d "$DEST_DIR/tmp/Bio-HTS-master" ? 'Bio-HTS-master' : 'Bio-DB-HTS-master';
+  my $tmp_name = -d "$DEST_DIR/tmp/Bio-HTS-main" ? 'Bio-HTS-main' : 'Bio-DB-HTS-main';
 
   print "$DEST_DIR/tmp/$tmp_name - moving files to $BIODBHTS_DIR\n" unless $QUIET;
   rmtree($BIODBHTS_DIR);
