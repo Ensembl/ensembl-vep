@@ -140,6 +140,7 @@ our @VEP_PARAMS = (
   'allow_non_variant',       # allow non-variant VCF lines through
   'process_ref_homs',        # force processing of individuals with homozygous ref genotype
   'individual=s',            # give results by genotype for individuals
+  'individual_zyg=s',        # reports genotypes for individuals
   'phased',                  # force VCF genotypes to be interpreted as phased
   'fork=i',                  # fork into N processes
   'dont_skip',               # don't skip vars that fail validation
@@ -315,6 +316,7 @@ our %DEFAULTS = (
 # and so need to be converted to listrefs
 our @LIST_FLAGS = qw(
   individual
+  individual_zyg
   cell_type
   pick_order
   fields
@@ -400,6 +402,13 @@ our @OPTION_SETS = (
   
   {
     flags => ['individual'],
+    set   => {
+      allow_non_variant => 1,
+    },
+  },
+  
+  {
+    flags => ['individual_zyg'],
     set   => {
       allow_non_variant => 1,
     },
@@ -596,7 +605,7 @@ our %INCOMPATIBLE = (
   json        => [qw(vcf tab)],
   vcf         => [qw(json tab)],
   tab         => [qw(vcf json)],
-  individual  => [qw(minimal)],
+  individual  => [qw(minimal individual_zyg)],
   check_ref   => [qw(lookup_ref)],
   check_svs   => [qw(offline)],
   ga4gh_vrs   => [qw(vcf)]
@@ -700,14 +709,11 @@ sub new {
     next if !defined($value) || (ref($value) eq "ARRAY" && @{$value} == 0) || grep { /$flag/ } @skip_opts;
 
     $value = join(" --$flag ", @{$value}) if ref($value) eq "ARRAY";
-    
-    if ($^O eq "MSWin32"){
-      $value =~ s/.+(?=\\)/\[PATH\]/g;
-    }
-    else {
-      $value =~ s/.+(?=\/)/\[PATH\]/g;
-    }
-    
+
+    # replace most of the provided path with [PATH]/
+    my $delim = $^O eq "MSWin32" ? '\\' : '/';
+    $value =~ s|[^,=]+$delim(?! )(?!,)(?!$)|[PATH]$delim|g;
+
     $config_command .= $value eq 1? "--$flag "  : "--$flag $value ";
   }
 
@@ -986,6 +992,12 @@ sub is_valid_param {
   # Run GetOptions to check validity of parameter
   my $res = {};
   GetOptions($res, @VEP_PARAMS);
+
+  # Ignore STDERR from GetOptions to avoid warnings about invalid params
+  open TMP, '>', File::Spec->devnull() and *STDERR = *TMP;
+  GetOptions($res, @VEP_PARAMS);
+  close(TMP);
+
   my $is_valid = %$res ? 1 : 0;
 
   # Restore command-line arguments
@@ -1018,6 +1030,7 @@ sub read_config_from_file {
 
   while(<CONFIG>) {
     next if /^\#/;
+    next if /^\s*$/;
 
     # preserve spaces between quotes
     s/\s+(?=(?:(?:[^"]*"){2})*[^"]*"[^"]*$)/___SPACE___/g;
@@ -1087,6 +1100,8 @@ sub read_config_from_environment {
         if $config->{verbose};
       next;
     }
+
+    next unless is_valid_param($config, $key, $value);
 
     if (grep {$key eq $_} @ALLOW_MULTIPLE) {
       # Properly set flags that can be specified more than once

@@ -160,33 +160,4 @@ sub _get_record_name {
     $parser->get_score;
 }
 
-
-=head2 _record_overlaps_VF
- 
-  Arg 1      : Bio::EnsEMBL::Variation::VariationFeature
-  Example    : $overlap_ok = $as->_record_overlaps_VF($vf);
-  Description: Determine whether the given VariationFeature overlaps
-               the current record, depending on the set type()
-  Returntype : bool
-  Exceptions : none
-  Caller     : annotate_VariationFeature()
-  Status     : Stable
-
-=cut
-
-sub _record_overlaps_VF {
-  my $self = shift;
-  my $vf = shift;
-
-  my $parser = $self->parser();
-  my $type = $self->type();
-
-  if($type eq 'overlap') {
-    return overlap($parser->get_start + 1, $parser->get_end, $vf->{start}, $vf->{end});
-  }
-  elsif($type eq 'exact') {
-    return $parser->get_start + 1 == $vf->{start} && $parser->get_end == $vf->{end};
-  }
-}
-
 1;

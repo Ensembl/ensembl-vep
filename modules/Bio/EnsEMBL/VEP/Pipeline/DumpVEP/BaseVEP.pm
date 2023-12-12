@@ -100,12 +100,12 @@ sub get_tar_file_name {
   my ($self, $dir, $species, $assembly, $mod) = @_;
   
   return sprintf(
-    '%s/%s_vep_%i_%s%s.tar.gz',
+    '%s/%s/%s_vep_%i_%s.tar.gz',
     $dir,
+    $mod || 'vep',
     $species,
     $self->param('eg_version') || $self->param('ensembl_release'),
     $assembly,
-    $mod || '',
   );
 }
 

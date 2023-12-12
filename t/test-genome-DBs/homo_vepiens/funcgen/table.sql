@@ -181,7 +181,7 @@ CREATE TABLE `chance` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE `data_file` (
-  `data_file_id` int(11) NOT NULL AUTO_INCREMENT,
+  `data_file_id` int(10) NOT NULL AUTO_INCREMENT,
   `table_id` int(10) unsigned NOT NULL,
   `table_name` varchar(32) NOT NULL,
   `path` varchar(255) NOT NULL,
@@ -210,7 +210,7 @@ CREATE TABLE `epigenome_track` (
   `epigenome_track_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `epigenome_id` int(10) unsigned NOT NULL,
   `feature_type_id` int(10) unsigned NOT NULL,
-  `data_file_id` int(11) unsigned NOT NULL,
+  `data_file_id` int(10) unsigned NOT NULL,
   `track_type` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`epigenome_track_id`),
   KEY `et_index` (`epigenome_id`,`feature_type_id`)

@@ -17,6 +17,7 @@ use warnings;
 
 use Test::More;
 use Test::Exception;
+use Test::Warnings qw(warning :no_end_test);
 use FindBin qw($Bin);
 use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
 
@@ -60,7 +61,8 @@ SKIP: {
   ###############
 
   # _get_records_by_coords
-  my $records = $as->_get_records_by_coords(21, 25585733, 25585733);
+  my $records;
+  warning { $records = $as->_get_records_by_coords(21, 25585733, 25585733) };
   is(scalar @$records, 77, '_get_records_by_coords - count');
 
   is_deeply(
@@ -223,7 +225,7 @@ SKIP: {
   my $ib_mt = Bio::EnsEMBL::VEP::InputBuffer->new({config => $runner_mt->config, parser => $p_mt});
   is(ref($ib_mt->next()), 'ARRAY', 'check buffer next (MT)');
 
-  $gtf_mt->annotate_InputBuffer($ib_mt);
+  warning { $gtf_mt->annotate_InputBuffer($ib_mt) };
   $ib_mt->finish_annotation();
   is ($ib_mt->buffer->[0]->get_all_TranscriptVariations->[0]->_codon_table, 2, 'codon table for MT chromosome is correct');
   is ($ib_mt->buffer->[0]->get_all_TranscriptVariations->[0]->pep_allele_string, 'I/M', 'codon table for MT chromosome - check allele');

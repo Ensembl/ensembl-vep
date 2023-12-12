@@ -430,7 +430,7 @@ CREATE TABLE `structural_variation` (
   `source_id` int(10) unsigned NOT NULL,
   `study_id` int(10) unsigned DEFAULT NULL,
   `class_attrib_id` int(10) unsigned NOT NULL DEFAULT '0',
-  `clinical_significance` set('uncertain significance','not provided','benign','likely benign','likely pathogenic','pathogenic','drug response','histocompatibility','other','confers sensitivity','risk factor','association','protective','affects') DEFAULT NULL,
+  `clinical_significance` set('uncertain significance','not provided','benign','likely benign','likely pathogenic','pathogenic','drug response','histocompatibility','other','confers sensitivity','risk factor','association','protective','affects','likely pathogenic low penetrance','pathogenic low penetrance','uncertain risk allele','likely risk allele','established risk allele') DEFAULT NULL,
   `validation_status` enum('validated','not validated','high quality') DEFAULT NULL,
   `is_evidence` tinyint(4) DEFAULT '0',
   `somatic` tinyint(1) NOT NULL DEFAULT '0',
@@ -544,7 +544,7 @@ CREATE TABLE `tmp_individual_genotype_single_bp` (
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `transcript_variation` (
-  `transcript_variation_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `transcript_variation_id` BIGINT unsigned NOT NULL AUTO_INCREMENT,
   `variation_feature_id` int(11) unsigned NOT NULL,
   `feature_stable_id` varchar(128) DEFAULT NULL,
   `allele_string` text,
@@ -590,7 +590,7 @@ CREATE TABLE `variation` (
   `minor_allele` varchar(50) DEFAULT NULL,
   `minor_allele_freq` float DEFAULT NULL,
   `minor_allele_count` int(10) unsigned DEFAULT NULL,
-  `clinical_significance` set('uncertain significance','not provided','benign','likely benign','likely pathogenic','pathogenic','drug response','histocompatibility','other','confers sensitivity','risk factor','association','protective','affects') DEFAULT NULL,
+  `clinical_significance` set('uncertain significance','not provided','benign','likely benign','likely pathogenic','pathogenic','drug response','histocompatibility','other','confers sensitivity','risk factor','association','protective','affects','likely pathogenic low penetrance','pathogenic low penetrance','uncertain risk allele','likely risk allele','established risk allele') DEFAULT NULL,
   `evidence_attribs` set('367','368','369','370','371','372','418','421','573','585') DEFAULT NULL,
   `display` int(1) DEFAULT '1',
   PRIMARY KEY (`variation_id`),
@@ -609,7 +609,7 @@ CREATE TABLE `variation_attrib` (
 CREATE TABLE `variation_citation` (
   `variation_id` int(10) unsigned NOT NULL,
   `publication_id` int(10) unsigned NOT NULL,
-  `data_source_attrib` set('615','616','617','618','619','620') DEFAULT NULL,
+  `data_source_attrib` set('615','616','617','618','619','620','678') DEFAULT NULL,
   PRIMARY KEY (`variation_id`,`publication_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
@@ -634,7 +634,7 @@ CREATE TABLE `variation_feature` (
   `minor_allele_freq` float DEFAULT NULL,
   `minor_allele_count` int(10) unsigned DEFAULT NULL,
   `alignment_quality` double DEFAULT NULL,
-  `clinical_significance` set('uncertain significance','not provided','benign','likely benign','likely pathogenic','pathogenic','drug response','histocompatibility','other','confers sensitivity','risk factor','association','protective','affects') DEFAULT NULL,
+  `clinical_significance` set('uncertain significance','not provided','benign','likely benign','likely pathogenic','pathogenic','drug response','histocompatibility','other','confers sensitivity','risk factor','association','protective','affects','likely pathogenic low penetrance','pathogenic low penetrance','uncertain risk allele','likely risk allele','established risk allele') DEFAULT NULL,
   `evidence_attribs` set('367','368','369','370','371','372','418','421','573','585') DEFAULT NULL,
   `display` int(1) DEFAULT '1',
   PRIMARY KEY (`variation_feature_id`),

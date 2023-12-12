@@ -102,56 +102,9 @@ sub new {
   my $self = $class->SUPER::new(@_);
 
   # add shortcuts to these params
-  $self->add_shortcuts([qw(allow_non_variant gp individual process_ref_homs phased max_sv_size)]);
+  $self->add_shortcuts([qw(allow_non_variant gp individual individual_zyg process_ref_homs phased)]);
 
   return $self;
-}
-
-
-=head2 validate_line
-
-  Example    : $valid = $self->validate_line();
-  Description: Check if input line can be read using this format.
-  Returntype : bool
-  Exceptions : none
-  Caller     : $self->SUPER::detect_format()
-  Status     : Stable
-
-=cut
-
-sub validate_line {
-  my $self = shift;
-  my @line = @_;
-
-  return (
-    $line[0] =~ /(chr)?\w+/ &&
-      $line[1] =~ /^\d+$/ &&
-      $line[3] && $line[3] =~ /^[ACGTN\-\.]+$/i &&
-      $line[4]
-  );
-}
-
-
-=head2 validate_alts
-
-  Example    : $valid = $self->validate_alts('A,T,C');
-  Description: Check if alternative alleles are valid.
-  Returntype : bool
-  Exceptions : none
-  Caller     : $self->SUPER::detect_format()
-  Status     : Stable
-
-=cut
-
-sub validate_alts {
-  my $self = shift;
-  my $alts = shift;
-
-  my $ok = 1;
-  foreach my $alt(split(',', $alts)) {
-    $ok = 0 unless $alt =~ /^[\.ACGTN\-\*]+$|^(\<[\w\:\*\=]+\>)$|^[\[\w\:\]]+$/i;
-  }
-  return $ok;
 }
 
 
@@ -240,7 +193,7 @@ sub next {
 
   my $vf = shift @$cache;
   return $vf unless $vf;
-  
+
   unless($self->validate_vf($vf) || $self->{dont_skip}) {
     return $self->next();
   }
@@ -282,8 +235,8 @@ sub create_VariationFeatures {
   if(
     join("", $ref, @$alts) !~ /^[ACGT]+$/ &&
     (
-      $info->{SVTYPE} ||
-      join(",", @$alts) =~ /[<\[][^\*]+[>\]]/
+      $info->{SVTYPE} || # deprecated in VCF 4.4
+      join(",", @$alts) =~ /[<\[\]][^\*]+[>\]\[]|^\.\w+|\w+\.$/
     )
   ) {
     return $self->create_StructuralVariationFeatures();
@@ -323,7 +276,7 @@ sub create_VariationFeatures {
     }
 
     unless(defined($chr) and defined($start)) {
-      $self->warning_msg("No GP flag found in INFO column on line ".$self->line_number);
+      $self->skipped_variant_msg("No GP flag found in INFO column");
       $parser->next();
       return $self->create_VariationFeatures;
     }
@@ -397,12 +350,14 @@ sub create_VariationFeatures {
   $vf->{non_variant} = 1 if $non_variant;
 
   # individual data?
-  if($self->{individual}) {
+  if($self->{individual} || $self->{individual_zyg}) {
     my @changed_alleles = ($ref, @$alts);
     my %allele_map = map {$original_alleles[$_] => $changed_alleles[$_]} 0..$#original_alleles;
+    
+    my $method = $self->{individual} ? 'create_individual_VariationFeatures' : 'create_individuals_zyg_VariationFeature';
 
-    my @return = 
-      map {@{$self->create_individual_VariationFeatures($_, \%allele_map)}}
+    my @return =
+      map {@{$self->$method($_, \%allele_map)}}
       @{$self->post_process_vfs([$vf])};
 
     # if all selected individuals had REF or missing genotypes @return will be empty
@@ -467,7 +422,7 @@ sub _parse_breakend_alt_alleles {
       end => $alt_pos,
     });
 
-    push @$parsed_allele, {
+    push $parsed_allele, {
       string    => $alt_string,
       allele    => $alt_allele,
       pos       => $alt_pos,
@@ -492,7 +447,7 @@ sub _parse_breakend_alt_alleles {
         end => $alt_pos,
       });
 
-      push @$parsed_allele, {
+      push $parsed_allele, {
         string    => $alt,
         allele    => $alt,
         pos       => $alt_pos,
@@ -525,43 +480,45 @@ sub create_StructuralVariationFeatures {
 
   my $parser = $self->parser();
   my $record = $parser->{record};
+  my $skip_line;
 
   # get relevant data
-  my ($chr, $start, $end, $alts, $info, $ids) = (
+  my ($chr, $start, $end, $ref, $alts, $info, $ids) = (
     $parser->get_seqname,
     $parser->get_start,
     $parser->get_end,
+    $parser->get_reference,
     $parser->get_alternatives,
     $parser->get_info,
     $parser->get_IDs,
   );
 
-  ## long and complex SVs cannot be handled
-  ## we have to return something here else we stop reading input, so flag it as not to be processed
-  my $skip ;
-
-  ## we cannot currently handle some SV
-  if($info->{SVTYPE} && $info->{SVTYPE} =~/CPX/ ){
-    my $line =join("\t", @$record);
-    $self->warning_msg("WARNING: variant " . $info->{SVTYPE}. " is of a non-supported type, skipping:\n$line\n");
-    $skip = 1;
+  ## get structural variant type from SVTYPE tag (deprecated in VCF 4.4) or ALT
+  my $alt = join("/", @$alts);
+  my $type = $alt ne '.' ? $alt : $info->{SVTYPE};
+  my $so_term = $self->get_SO_term($type);
+  unless ($so_term) {
+    $skip_line = 1;
+    $so_term   = $type;
   }
 
-  ## check against size upperlimit to avoid memory problems
-  my $len = $end - $start;
-  if( $len > $self->{max_sv_size} ){
-    $self->warning_msg("WARNING: variant $ids->[0] on line ".$self->line_number." is too long to annotate: ($len)\n");
-    $skip = 1;
-  }
+  ## get breakends from INFO field (from Illumina Manta, for instance)
+  if ($so_term =~ /breakpoint/) {
+    ## Illumina Manta (SV caller) may use INFO/END to identify the position of
+    ## the breakend mate (this is not supported by VCF 4.4 specifications)
+    my $incorrect_end = $info->{END};
+    delete $parser->get_info->{END};
+    $end = $parser->get_end if $incorrect_end;
 
-  my $alt = join(",", @$alts);
-
-  # work out the end coord
-  if(defined($info->{END})) {
-    $end = $info->{END};
-  }
-  elsif(defined($info->{SVLEN})) {
-    $end = $start + abs($info->{SVLEN}) - 1;
+    if (defined $info->{CHR2}) {
+      my $breakend_chr = $self->get_source_chr_name($info->{CHR2});
+      my $breakend_pos = $info->{END2} || $incorrect_end;
+      if (defined $breakend_chr and defined $breakend_pos) {
+        $alt = $alt =~ /^<?BND>?$/i ? "N" : "$alt/N";
+        $alt = sprintf('%s[%s:%s[', $alt, $breakend_chr, $breakend_pos);
+      }
+    }
+    $alt = $ref . "/$alt" unless $alt =~ /^\.|\.$/;
   }
 
   # check for imprecise breakpoints
@@ -572,22 +529,9 @@ sub create_StructuralVariationFeatures {
     $parser->get_outer_end,
   );
 
-  # parse alternative alleles from breakends
-  my $parsed_allele = undef;
-  my $allele_string = undef;
-  if ($info->{SVTYPE} && $info->{SVTYPE} =~/BND/ ){
-    $parsed_allele = $self->_parse_breakend_alt_alleles($alt, $info);
-    $allele_string = $alt;
-  }
-
-  # avoid deriving type from alt if described by SVTYPE
-  my $type = $info->{SVTYPE} || $alt;
-
-  my $so_term = $self->get_SO_term($type) || $type;
   if($start >= $end && $so_term =~ /del/i) {
-    my $line = join("\t", @$record);
-    $self->warning_msg("WARNING: VCF line " . $self->line_number . " looks incomplete, skipping:\n$line\n");
-    $skip = 1;
+    $self->skipped_variant_msg("deletion looks incomplete");
+    $skip_line = 1;
   }
 
   my $svf = Bio::EnsEMBL::Variation::StructuralVariationFeature->new_fast({
@@ -602,12 +546,10 @@ sub create_StructuralVariationFeatures {
     variation_name => @$ids ? $ids->[0] : undef,
     chr            => $self->get_source_chr_name($chr),
     class_SO_term  => $so_term,
+    allele_string  => $alt,
     _line          => $record
   });
-  $svf->{allele_string}  = $allele_string if defined $allele_string;
-  $svf->{_parsed_allele} = $parsed_allele if defined $parsed_allele;
-  $svf->{vep_skip} = $skip if defined $skip;
-
+  $svf->{vep_skip} = $skip_line if defined $skip_line;
   return $self->post_process_vfs([$svf]);
 }
 
@@ -642,6 +584,16 @@ sub create_individual_VariationFeatures {
 
   # get genotypes from parser
   my $include = lc($self->{individual}->[0]) eq 'all' ? $parser->get_samples : $self->{individual};
+
+  # Compare sample names
+  if(lc($self->{individual}->[0]) ne 'all') {
+    my $found = _find_in_array($parser->get_samples, $include);
+
+    if(!$found) {
+      die("ERROR: Sample IDs given (", join(",", @{$include}), ") do not match samples from VCF (", join(",", @{$parser->get_samples}), ")\n");
+    }
+  }
+
   my $ind_gts = $parser->get_samples_genotypes($include, 1 - ($self->{allow_non_variant} || 0));
 
   foreach my $ind(@$include) {
@@ -688,6 +640,99 @@ sub create_individual_VariationFeatures {
   }
 
   return \@return;
+}
+
+=head2 create_individuals_zyg_VariationFeature
+ 
+  Arg 1      : Bio::EnsEMBL::VariationFeature $vf
+  Arg 2      : hashref $allele_map
+  Example    : $vfs = $parser->create_individuals_zyg_VariationFeature($vf, $map);
+  Description: Create one VariationFeature object with
+               individual/sample info. Arg 2 $allele_map is a hashref mapping the
+               allele index to the actual ALT string it represents.
+  Returntype : arrayref of Bio::EnsEMBL::VariationFeature
+  Exceptions : none
+  Caller     : create_VariationFeatures()
+  Status     : Stable
+
+=cut
+
+sub create_individuals_zyg_VariationFeature {
+  my $self = shift;
+  my $vf = shift;
+  my $allele_map = shift;
+
+  my $parser = $self->parser();
+  my $record = $parser->{record};
+
+  my @alleles = split '\/', $vf->{allele_string};
+  my $ref = $alleles[0];
+
+  my @return;
+
+  # get genotypes from parser
+  my $include = lc($self->{individual_zyg}->[0]) eq 'all' ? $parser->get_samples : $self->{individual_zyg};
+
+  # Compare sample names
+  if(lc($self->{individual_zyg}->[0]) ne 'all') {
+    my $found = _find_in_array($parser->get_samples, $include);
+
+    if(!$found) {
+      die("ERROR: Sample IDs given (", join(",", @{$include}), ") do not match samples from VCF (", join(",", @{$parser->get_samples}), ")\n");
+    }
+  }
+
+  my $ind_gts = $parser->get_samples_genotypes($include, 1 - ($self->{allow_non_variant} || 0));
+
+  my $n_individuals = scalar(@{$include});
+
+  foreach my $ind(@$include) {
+    # get alleles present in this individual
+    my $gt = $ind_gts->{$ind};
+    next if (!$gt);
+    my @bits = map { $allele_map->{$_} } split /\||\/|\\/, $gt;
+    my $phased = ($gt =~ /\|/ ? 1 : 0);
+
+    # get non-refs, remembering to exclude "*"-types
+    my %non_ref = map {$_ => 1} grep {$_ ne $ref && $_ !~ /\*/} @bits;
+
+    # Genotype is reference
+    if(!scalar keys %non_ref) {
+      $vf->{hom_ref}->{$ind} = 1;
+      $vf->{non_variant}->{$ind} = 1;
+
+      if($n_individuals == 1) {
+        $vf->{allele_string} = $ref."/".$ref ;
+        $vf->{unique_ind} = 1;
+      }
+    }
+
+    # store phasing info
+    $vf->{phased}->{$ind} = $self->{phased} ? 1 : $phased;
+
+    # store GT
+    $vf->{genotype_ind}->{$ind} = \@bits;
+  }
+
+  push @return, $vf;
+
+  return \@return;
+}
+
+sub _find_in_array {
+  my $all_samples = shift;
+  my $samples = shift;
+
+  my %all = map { $_ => 1 } @{$all_samples};
+  my %input_samples = map { $_ => 1 } @{$samples};
+
+  foreach my $sample (keys %input_samples) {
+    if(!$all{$sample}) {
+      return 0;
+    }
+  }
+
+  return 1;
 }
 
 1;

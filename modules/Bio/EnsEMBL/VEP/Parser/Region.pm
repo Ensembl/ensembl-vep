@@ -86,6 +86,7 @@ use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::IO::ListBasedParser;
 
+use Bio::EnsEMBL::Variation::Utils::VEP qw(&_valid_region_regex);
 
 =head2 new
 
@@ -121,30 +122,6 @@ sub new {
   $self->{lookup_ref} = 1;
 
   return $self;
-}
-
-
-sub _valid_line_regex {
-  return qr/^([^:]+):(\d+)-(\d+)(:[-\+]?1)?[\/:]([a-z]{3,}|[ACGTN-]+)$/i;
-}
-
-
-=head2 validate_line
-
-  Example    : $valid = $self->validate_line();
-  Description: Check if input line can be read using this format.
-  Returntype : bool
-  Exceptions : none
-  Caller     : $self->SUPER::detect_format()
-  Status     : Stable
-
-=cut
-
-sub validate_line {
-  my $self = shift;
-  my @line = @_;
-
-  return ( scalar @line == 1 && $line[0] =~ _valid_line_regex() );
 }
 
 
@@ -191,7 +168,7 @@ sub create_VariationFeatures {
 
   my $region = $parser->get_value();
 
-  return [] unless $region =~ _valid_line_regex();
+  return [] unless $region =~ &_valid_region_regex();
   my ($chr, $start, $end) = ($1, $2, $3);
 
   my ($strand, $allele);

@@ -1,4 +1,5 @@
 1	\N	schema_type	variation
+2	\N	schema_version	112
 3	\N	patch	patch_73_74_a.sql|schema version
 4	\N	patch	patch_73_74_b.sql|Add doi and UCSC id to publication table
 5	\N	patch	patch_73_74_c.sql|Add clinical_significance to variation_feature table
@@ -49,7 +50,6 @@
 57	\N	patch	patch_77_78_c.sql|Drop the table study_variation
 58	\N	patch	patch_77_78_d.sql|Extend the index type_val_idx in the table attrib
 59	\N	patch	patch_77_78_e.sql|add indexes on father_ and mother_individual_id and population name
-2	\N	schema_version	109
 60	\N	patch	patch_78_79_a.sql|schema version
 61	\N	patch	patch_78_79_b.sql|change the column attrib_type_id by attrib_id in the variation_attrib table
 62	\N	patch	patch_78_79_c.sql|Store more detailed Sift information
@@ -133,3 +133,9 @@
 164	\N	patch	patch_107_108_a.sql|schema version
 165	\N	patch	patch_107_108_b.sql|fix SAS population description
 166	\N	patch	patch_108_109_a.sql|schema version
+167 \N  patch   patch_109_110_a.sql|schema version
+168 \N  patch   patch_109_110_b.sql|Add DDG2P data_source_attrib to variation_citation
+169 \N  patch   patch_109_110_c.sql|Add new clinical_significance values to variation, variation_feature and structural_variation
+170 \N  patch   patch_110_111_a.sql|schema version
+171 \N  patch   patch_110_111_b.sql|Update transcript_variation primary key
+172 \N  patch   patch_111_112_a.sql|schema version

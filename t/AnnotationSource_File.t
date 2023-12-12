@@ -45,6 +45,7 @@ is_deeply(
     report_coords => 1,
     reciprocal => 0,
     overlap_def => undef,
+    num_records => 50,
     overlap_cutoff => 0,
     distance => undef,
     same_type => 0,

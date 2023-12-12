@@ -67,6 +67,7 @@ use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::Utils qw(get_compressed_filehandle);
 use Bio::EnsEMBL::Variation::Utils::Sequence qw(trim_sequences);
+use Bio::EnsEMBL::Variation::Utils::VEP qw(&check_format);
 
 use Bio::EnsEMBL::VEP::Parser::VCF;
 use Bio::EnsEMBL::VEP::Parser::VEP_input;
@@ -123,7 +124,7 @@ sub new {
 
   my $self = $class->SUPER::new(@_);
 
-  $self->add_shortcuts([qw(dont_skip check_ref chr lrg minimal delimiter lookup_ref)]);
+  $self->add_shortcuts([qw(dont_skip check_ref chr lrg minimal delimiter lookup_ref max_sv_size)]);
 
   my $hashref = $_[0];
 
@@ -415,41 +416,7 @@ sub detect_format {
     my @data = split $delimiter, $_;
     next unless @data;
 
-    # region chr21:10-10:1/A
-    if ( $self->Bio::EnsEMBL::VEP::Parser::Region::validate_line(@data) ) {
-      $format = 'region';
-    }
-
-    # SPDI: NC_000016.10:68684738:G:A
-    elsif ($self->Bio::EnsEMBL::VEP::Parser::SPDI::validate_line(@data) ) {
-      $format = 'spdi';
-    }
-
-    # CAID: CA9985736
-    elsif ( $self->Bio::EnsEMBL::VEP::Parser::CAID::validate_line(@data) ) {
-      $format = 'caid';
-    }
-
-    # HGVS: ENST00000285667.3:c.1047_1048insC
-    elsif ( $self->Bio::EnsEMBL::VEP::Parser::HGVS::validate_line(@data) ) {
-      $format = 'hgvs';
-    }
-
-    # variant identifier: rs123456
-    elsif ( $self->Bio::EnsEMBL::VEP::Parser::ID::validate_line(@data) ) {
-      $format = 'id';
-    }
-
-    # VCF: 20  14370  rs6054257  G  A  29  0  NS=58;DP=258;AF=0.786;DB;H2  GT:GQ:DP:HQ
-    elsif ( $self->Bio::EnsEMBL::VEP::Parser::VCF::validate_line(@data) ) {
-      # do some more thorough checking on the ALTs
-      $format = 'vcf' if $self->Bio::EnsEMBL::VEP::Parser::VCF::validate_alts($data[4]);
-    }
-
-    # ensembl: 20  14370  14370  A/G  +
-    elsif ( $self->Bio::EnsEMBL::VEP::Parser::VEP_input::validate_line(@data) ) {
-      $format = 'ensembl';
-    }
+    $format = &check_format(@data);
 
     # reset file handle if it was a handle
     eval {
@@ -519,6 +486,17 @@ sub validate_vf {
     return 0;
   }
 
+  # check against size upperlimit to avoid memory problems
+  my $len = $vf->{end} - $vf->{start};
+  my $max_sv_size = $self->{max_sv_size};
+  if( $len > $max_sv_size ){
+    $self->skipped_variant_msg(
+      "variant size ($len) is bigger than --max_sv_size ($max_sv_size)"
+    );
+    $vf->{vep_skip} = 1;
+    return 0 if $self->param('rest');
+  }
+
   # check we have this chr in any of the annotation sources
   # otherwise try to map to toplevel if available
   unless($self->_have_chr($vf)) {
@@ -572,7 +550,7 @@ sub validate_vf {
   # uppercase allele string
   $vf->{allele_string} =~ tr/[a-z]/[A-Z]/;
 
-  unless($vf->{allele_string} =~ /([ACGT-]+\/*)+/) {
+  unless($vf->{allele_string} =~ /([ACGTN-]+\/*)+/) {
     $self->skipped_variant_msg(
       "Invalid allele string " . $vf->{allele_string} . " or possible parsing error"
     );
@@ -684,12 +662,32 @@ sub get_SO_term {
   my $type = shift || join(",", @{ $self->get_alternatives });
   my $abbrev;
 
-  if ($type =~ /\<CN/i) {
+  my @mobile_elements = ("ALU", "HERV", "LINE1", "SVA");
+
+  if ($type =~ /(INS|DEL):(ME):?([A-Z0-9]+)?/i) {
+    $abbrev     = uc $1;
+    my $subtype = uc $2;
+    my $element = uc $3 if defined $3;
+
+    if (defined $element) {
+      $element = 'LINE1' if $element eq 'L1';
+      $subtype = $element if grep /^$element$/i, @mobile_elements;
+    }
+    $abbrev .= '_' . $subtype;
+  } elsif ($type =~ /DUP:TANDEM|CNV:TR/i) {
+    # including <CNV:TR>,<CNV:TR>
+    $abbrev = "TDUP";
+  } elsif ($type =~ /CNV/i) {
+    # including <CNV>,<CNV>
+    $abbrev = "CNV";
+  } elsif ($type =~ /CN=?[0-9]/i) {
     # ALT: "<CN0>", "<CN0>,<CN2>,<CN3>" "<CN2>" => SVTYPE: DEL, CNV, DUP
     $abbrev = "CNV";
-    $abbrev = "DEL" if $type =~ /\<CN=?0\>/;
-    $abbrev = "DUP" if $type =~ /\<CN=?2\>/;
-  } elsif ($type =~ /^\<|^\[|\]$|\>$/) {
+    $abbrev = "DEL" if $type =~ /^<?CN=?0>?$/;
+    $abbrev = "DUP" if $type =~ /^<?CN=?2>?$/;
+  } elsif ($type =~ /[\[\]]|^\.|\.$/) {
+    $abbrev = "BND";
+  } elsif ($type =~ /^\<|\>$/) {
     $abbrev = $type;
     $abbrev =~ s/\<|\>//g;
     $abbrev =~ s/\:.+//g;
@@ -698,8 +696,20 @@ sub get_SO_term {
   }
 
   my %terms = (
-    INS  => 'insertion',
-    DEL  => 'deletion',
+    INS       => 'insertion',
+    INS_ME    => 'mobile_element_insertion',
+    INS_ALU   => 'Alu_insertion',
+    INS_HERV  => 'HERV_insertion',
+    INS_LINE1 => 'LINE1_insertion',
+    INS_SVA   => 'SVA_insertion',
+
+    DEL       => 'deletion',
+    DEL_ME    => 'mobile_element_deletion',
+    DEL_ALU   => 'Alu_deletion',
+    DEL_HERV  => 'HERV_deletion',
+    DEL_LINE1 => 'LINE1_deletion',
+    DEL_SVA   => 'SVA_deletion',
+
     TDUP => 'tandem_duplication',
     DUP  => 'duplication',
     CNV  => 'copy_number_variation',
@@ -707,7 +717,12 @@ sub get_SO_term {
     BND  => 'chromosome_breakpoint'
   );
 
-  return $terms{$abbrev};
+  my $res = $terms{$abbrev};
+  ## unsupported SV types
+  if ($self->isa('Bio::EnsEMBL::VEP::Parser')) {
+    $self->skipped_variant_msg("$abbrev type is not supported") unless $res;
+  }
+  return $res;
 }
 
 
@@ -832,9 +847,10 @@ sub post_process_vfs {
   foreach my $vf(@$vfs) {
     $vf->seq_region_start($vf->{start});
     $vf->seq_region_end($vf->{end});
-  
+
     # Checks if the allele string is insertion or/and deletion
-    if(defined($vf->{allele_string}) && $vf->{allele_string} =~ /\//){
+    my $is_sv = ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature';
+    if(!$is_sv && defined($vf->{allele_string}) && $vf->{allele_string} =~ /\//){
       my $is_indel = 0;
       my ($ref_allele_string,$alt_allele_string) = split(/\//, $vf->{allele_string});
       $is_indel = 1 unless length($ref_allele_string) == length($alt_allele_string) or $vf->{allele_string} =~ /-/;

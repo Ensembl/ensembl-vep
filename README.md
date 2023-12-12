@@ -1,7 +1,7 @@
 # ensembl-vep
 
-[![GitHub](https://img.shields.io/github/license/Ensembl/ensembl-vep.svg)](https://github.com/Ensembl/ensembl-vep/blob/release/110/LICENSE)
-[![Coverage Status](https://coveralls.io/repos/github/Ensembl/ensembl-vep/badge.svg?branch=release/110)](https://coveralls.io/github/Ensembl/ensembl-vep?branch=release/110)
+[![GitHub](https://img.shields.io/github/license/Ensembl/ensembl-vep.svg)](https://github.com/Ensembl/ensembl-vep/blob/main/LICENSE)
+[![Coverage Status](https://coveralls.io/repos/github/Ensembl/ensembl-vep/badge.svg?branch=main)](https://coveralls.io/github/Ensembl/ensembl-vep?branch=main)
 [![Docker Build Status](https://img.shields.io/github/actions/workflow/status/Ensembl/ensembl-vep/docker.yml?label=docker%20build)](https://hub.docker.com/r/ensemblorg/ensembl-vep)
 [![Docker Hub Pulls](https://img.shields.io/docker/pulls/ensemblorg/ensembl-vep.svg)](https://hub.docker.com/r/ensemblorg/ensembl-vep)
 
@@ -10,17 +10,23 @@
 * **Variant Recoder** translates between different variant encodings.
 
 ##### Table of contents
-* [Installation and requirements](#install)
-* [VEP](#vep)
-  * [Usage](#vepusage)
-* [Haplosaurus](#haplo)
-  * [Usage](#haplousage)
-  * [Output](#haplooutput)
-  * [REST](#haploREST)
-  * [Flags](#haploflags)
-* [Variant Recoder](#recoder)
-  * [Usage](#recoderusage)
-  * [Output](#recoderoutput) 
+- [ensembl-vep](#ensembl-vep)
+        - [Table of contents](#table-of-contents)
+    - [Installation and requirements](#installation-and-requirements)
+      - [Additional CPAN modules](#additional-cpan-modules)
+      - [Docker](#docker)
+  - [VEP](#vep)
+    - [Usage](#usage)
+  - [Haplosaurus](#haplosaurus)
+    - [Usage](#usage-1)
+    - [Output](#output)
+    - [REST service](#rest-service)
+    - [Flags](#flags)
+    - [bioperl-ext](#bioperl-ext)
+  - [Variant Recoder](#variant-recoder)
+    - [Usage](#usage-2)
+    - [Output](#output-1)
+    - [Options](#options)
 
 ---
 <a name="install"></a>

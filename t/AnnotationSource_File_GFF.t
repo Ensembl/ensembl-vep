@@ -17,6 +17,7 @@ use warnings;
 
 use Test::More;
 use Test::Exception;
+use Test::Warnings qw(warning :no_end_test);
 use FindBin qw($Bin);
 use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
 
@@ -64,7 +65,8 @@ SKIP: {
   ###############
 
   # _get_records_by_coords
-  my $records = $as->_get_records_by_coords(21, 25585733, 25585733);
+  my $records;
+  warning { $records = $as->_get_records_by_coords(21, 25585733, 25585733) };
   is(scalar @$records, 75, '_get_records_by_coords - count');
 
   is_deeply(
@@ -322,7 +324,7 @@ SKIP: {
   $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $as->config, parser => $p});
   $ib->next();
 
-  $as->annotate_InputBuffer($ib);
+  warning { $as->annotate_InputBuffer($ib) };
   my $vf = $ib->buffer->[0];
   $vf->_finish_annotation;
   is(scalar (grep {$_->transcript->stable_id eq 'ENST00000352957'} @{$vf->get_all_TranscriptVariations}), 0, 'with filter - filtered transcript absent');
@@ -350,7 +352,7 @@ SKIP: {
   ok($as->chromosome_synonyms($test_cfg->{chr_synonyms}), 'load synonyms');
 
   # _get_records_by_coords
-  $records = $as->_get_records_by_coords('NC_000021.9', 25585733, 25585733);
+  warning { $records = $as->_get_records_by_coords('NC_000021.9', 25585733, 25585733) };
   is(scalar @$records, 104, '_get_records_by_coords - refseq - count');
 
   is_deeply(

@@ -184,7 +184,7 @@ sub get_regions_from_coords {
   # log min/max
   my ($min, $max) = defined $min_max->{$source_chr} ? @{$min_max->{$source_chr}} : (1e10, 0);
   $min = $start if $start < $min;
-  $max = $end if $end > $max;
+  $max = $end   if   $end > $max;
 
   # convert to region-size
   my ($r_s, $r_e) = map {int(($_ - 1) / $cache_region_size)} ($start - $up_down_size, $end + $up_down_size);
@@ -237,6 +237,25 @@ sub get_all_regions_by_InputBuffer {
     next if $vf->{vep_skip};
 
     $chr = $vf->{chr} || $vf->{slice}->{seq_region_name};
+    throw("ERROR: Cannot get chromosome $chr from VariationFeature") unless $chr;
+
+    ($chr, $min, $max, $seen, @new_regions) = $self->get_regions_from_coords(
+      $chr, $vf->{start}, $vf->{end},
+      $min_max, $cache_region_size, $up_down_size, $seen);
+    push @regions, @new_regions;
+    $min_max->{$chr} = [$min, $max];
+
+    # process alternative alleles from breakend structural variants
+    next unless Scalar::Util::blessed($vf) and $vf->can('get_breakends');
+    foreach my $alt (@{$vf->get_breakends}) {
+      ($chr, $min, $max, $seen, @new_regions) = $self->get_regions_from_coords(
+        $alt->{chr}, $alt->{pos}, $alt->{pos},
+        $min_max, $cache_region_size, $up_down_size, $seen);
+      push @regions, @new_regions;
+      $min_max->{$chr} = [$min, $max];
+    }
+
+    $chr = $vf->{chr} || $vf->slice->seq_region_name;
     throw("ERROR: Cannot get chromosome $chr from VariationFeature") unless $chr;
 
     ($chr, $min, $max, $seen, @new_regions) = $self->get_regions_from_coords(
@@ -327,7 +346,12 @@ sub filter_features_by_min_max {
   my $up_down_size = defined($self->{up_down_size}) ? $self->{up_down_size} : $self->up_down_size();
 
   return [
-    grep { $self->_check_overlap($_, $min_max, $up_down_size) } @$features
+    grep {
+      exists $min_max->{$_->{slice}->{seq_region_name}} &&
+      overlap($_->{start}, $_->{end},
+              @{$min_max->{$_->{slice}->{seq_region_name}}}[0] - $up_down_size,
+              @{$min_max->{$_->{slice}->{seq_region_name}}}[1] + $up_down_size)}
+    @$features
   ];
 }
 

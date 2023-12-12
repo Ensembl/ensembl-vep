@@ -382,7 +382,6 @@ sub get_all_VariationFeatureOverlapAllele_output_hashes {
   return $self->summary_only($vf, $hash, $vfoas) if $self->{summary} || $self->{most_severe};
 
   foreach my $vfoa(@$vfoas) {
-
     # copy the initial VF-based hash so we're not overwriting
     my %copy = %$hash;
 
@@ -498,11 +497,17 @@ sub get_all_VariationFeatureOverlapAlleles {
     $vfos = \@new;
   }
 
-  # method name stub for getting *VariationAlleles
-  my $allele_method = $self->{process_ref_homs} ? 'get_all_' : 'get_all_alternate_';  
-  my $method = $allele_method.'VariationFeatureOverlapAlleles';
+  # the option individual_zyg has to run a specific method if there is only one individual (unique_ind)
+  if($vf->{unique_ind}) {
+    return $self->filter_VariationFeatureOverlapAlleles([map {$_->get_reference_VariationFeatureOverlapAllele} @{$vfos}]);
+  }
+  else {
+    # method name stub for getting *VariationAlleles
+    my $allele_method = $self->{process_ref_homs} ? 'get_all_' : 'get_all_alternate_';  
+    my $method = $allele_method.'VariationFeatureOverlapAlleles';
 
-  return $self->filter_VariationFeatureOverlapAlleles([map {@{$_->$method}} @{$vfos}]);
+    return $self->filter_VariationFeatureOverlapAlleles([map {@{$_->$method}} @{$vfos}]);
+  }
 }
 
 
@@ -924,6 +929,16 @@ sub VariationFeature_to_output_hash {
     $hash->{ZYG} = (scalar keys %unique > 1 ? 'HET' : 'HOM').(defined($vf->{hom_ref}) ? 'REF' : '');
     }
   }
+  
+  # individual_zig
+  if(defined($vf->{genotype_ind})) {
+    my @tmp;
+    foreach my $geno_ind (keys %{$vf->{genotype_ind}}) {
+      my %unique = map {$_ => 1} @{$vf->{genotype_ind}->{$geno_ind}};
+      push @tmp, $geno_ind.":".(scalar keys %unique > 1 ? 'HET' : 'HOM').(defined($vf->{hom_ref}->{$geno_ind}) ? 'REF' : '');
+    }
+    $hash->{ZYG} = \@tmp;
+  }
 
   # minimised?
   $hash->{MINIMISED} = 1 if $vf->{minimised};
@@ -945,7 +960,8 @@ sub VariationFeature_to_output_hash {
       [
         grep {!exists($_->{allele})}
         @{$vf->{_custom_annotations}->{$custom_name}}
-      ]
+      ],
+      $vf->{_custom_annotations_stats}->{$custom_name}
     );
   }
 
@@ -1027,10 +1043,12 @@ sub add_colocated_variant_info {
     # Find allele specific clin_sig data if it exists
     if(defined($ex->{clin_sig_allele}) && $self->{clin_sig_allele} )
     {
+
       my %cs_hash;
-      my @clin_sig_array = split(';', $ex->{clin_sig_allele});       
+      my @clin_sig_array = split(';', $ex->{clin_sig_allele});
       foreach my $cs(@clin_sig_array){
         my @cs_split = split(':', $cs);
+
         $cs_hash{$cs_split[0]} = '' if !defined($cs_hash{$cs_split[0]});
         $cs_hash{$cs_split[0]} .= ',' if $cs_hash{$cs_split[0]} ne ''; 
         $cs_hash{$cs_split[0]} .= $cs_split[1];
@@ -1203,6 +1221,7 @@ sub add_colocated_frequency_data {
   Arg 1      : hashref $vf_hash
   Arg 2      : string $custom_name
   Arg 3      : listref $annotations
+  Arg 4      : listref $annotations_statistics
   Example    : $hashref = $of->_add_custom_annotations_to_hash($vf, $vf_hash, $ex);
   Description: Adds custom annotation data to hash
   Returntype : hashref
@@ -1214,14 +1233,17 @@ sub add_colocated_frequency_data {
 =cut
 
 sub _add_custom_annotations_to_hash {
-  my ($self, $hash, $custom_name, $annots) = @_;
+  my ($self, $hash, $custom_name, $annots, $annots_stats) = @_;
 
   foreach my $annot(@$annots) {
     push @{$hash->{$custom_name}}, $annot->{name};
-
     foreach my $field(keys %{$annot->{fields} || {}}) {
       push @{$hash->{$custom_name.'_'.$field}}, $annot->{fields}->{$field};
     }
+  }
+
+  foreach my $stat(keys %{$annots_stats || {}}) {
+    $hash->{$custom_name.'_'.$stat} = $annots_stats->{$stat};
   }
 
   return $hash;
@@ -1279,7 +1301,15 @@ sub VariationFeatureOverlapAllele_to_output_hash {
 
   # hgvs g.
   if($self->{hgvsg}) {
-    $vf->{_hgvs_genomic} ||= $vf->hgvs_genomic($vf->slice, $self->{hgvsg_use_accession} ? undef : $vf->{chr});
+    # if offline mode then hgvsg_use_accession has to access chromosome synonyms from cache
+    if(!$vf->slice->adaptor && $self->{hgvsg_use_accession}) {
+      my $chr_syn = $self->config->{_chromosome_synonyms}->{($vf->{chr})};
+      my @new_chr_array = grep(/NC_/, keys %{$chr_syn});
+      $vf->{_hgvs_genomic} ||= $vf->hgvs_genomic($vf->slice, $new_chr_array[0]);
+    }
+    else {
+      $vf->{_hgvs_genomic} ||= $vf->hgvs_genomic($vf->slice, $self->{hgvsg_use_accession} ? undef : $vf->{chr});
+    }
 
     if(my $hgvsg = $vf->{_hgvs_genomic}->{$vfoa->variation_feature_seq}) {
       $hash->{HGVSg} = $hgvsg; 
@@ -1886,7 +1916,7 @@ sub BaseStructuralVariationOverlapAllele_to_output_hash {
 
   my $svf = $vfoa->base_variation_feature;
 
-  $hash->{Allele} = $svf->{allele_string} || $svf->class_SO_term;
+  $hash->{Allele} = $vfoa->{breakend}->{string} || $svf->class_SO_term;
 
   # allele number
   $hash->{ALLELE_NUM} = $vfoa->allele_number if $self->{allele_number};
@@ -2328,6 +2358,19 @@ sub get_custom_headers {
         push @headers, [
           $sub_id,
           sprintf("%s field from %s", $field, $masked_file)
+        ];
+      }
+    }
+
+    foreach my $stat(@{$custom->{summary_stats} || []}) {
+      my $sub_id = sprintf("%s_%s", $custom->{short_name}, $stat);
+      if (grep { /^$sub_id$/ } @flatten_header){
+        my $pos = $pos{$sub_id} / 2;
+        $headers[$pos][1] .= ",$masked_file";
+      } else {
+        push @headers, [
+          $sub_id,
+          sprintf("%s data from %s", $stat, $masked_file)
         ];
       }
     }

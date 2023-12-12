@@ -64,7 +64,7 @@ sub run {
   my @report_files;
 
   push @report_files, @{$self->qc()};
-  push @report_files, @{$self->qc('_tabixconverted')} if $self->param('convert') && $self->param('variation');
+  push @report_files, @{$self->qc('indexed_vep_cache')} if $self->param('convert') && $self->param('variation');
 
   if(@report_files) {
     die(
@@ -82,7 +82,7 @@ sub qc {
   my $type      = $self->param('type');
   my $has_var   = $self->param('variation');
   my $has_reg   = $self->param('regulation');
-  my $converted = $mod && $mod =~ /tabix/;
+  my $converted = $mod && $mod =~ /indexed/;
   my $species   = $self->required_param('species');
   my $assembly  = $self->required_param('assembly');
 

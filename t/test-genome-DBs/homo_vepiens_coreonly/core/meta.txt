@@ -1,5 +1,5 @@
 1	\N	schema_type	core
-2	\N	schema_version	109
+2	\N	schema_version	112
 3	\N	patch	patch_73_74_a.sql|schema_version
 4	\N	patch	patch_73_74_b.sql|remove_dnac
 5	\N	patch	patch_73_74_c.sql|remove_unconventional_transcript_association
@@ -191,3 +191,9 @@
 939	\N	patch	patch_107_108_a.sql|schema_version
 940	\N	patch	patch_108_109_a.sql|schema_version
 941	\N	patch	patch_108_109_b.sql|Added xref source GeneCards into external_db
+942 \N  patch   patch_109_110_a.sql|schema_version
+943 \N  patch   patch_109_110_b.sql|Add IS_PAR relationship to link X- and Y-PAR genes
+944 \N  patch   patch_109_110_c.sql|Allow gene id to belong to multiple alt allele groups
+945 \N  patch   patch_110_111_a.sql|schema_version
+946 \N  patch   patch_111_112_a.sql|schema_version
+947 \N  patch   patch_111_112_b.sql|Allow meta_value to be null

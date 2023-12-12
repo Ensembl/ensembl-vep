@@ -72,6 +72,7 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
 use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
 use Bio::EnsEMBL::Variation::Utils::Sequence qw(get_matched_variant_alleles);
+use Bio::EnsEMBL::VEP::Parser qw(get_SO_term);
 use Bio::EnsEMBL::IO::Parser::VCF4Tabix;
 
 use base qw(Bio::EnsEMBL::VEP::AnnotationSource::File);
@@ -90,7 +91,8 @@ use base qw(Bio::EnsEMBL::VEP::AnnotationSource::File);
                  distance       => (optional) numeric $distance_to_overlapping_variant_ends (off by default),
                  same_type      => (optional) bool $only_match_identical_variant_classes (off by default),
                  reciprocal     => (optional) bool $calculate_reciprocal_overlap (off by default),
-                 overlap_def    => (optional) string $overlap_definition (based on reciprocal by default)
+                 overlap_def    => (optional) string $overlap_definition (based on reciprocal by default),
+                 num_records    => (optional) maximum number of records to show (50 by default)
                }
   Example    : $as = Bio::EnsEMBL::VEP::AnnotationSource::File::VCF->new($args);
   Description: Create a new Bio::EnsEMBL::VEP::AnnotationSource::File::VCF object.
@@ -155,6 +157,7 @@ sub parser {
 =head2 _create_records
  
   Arg 1      : bool or hashref $overlap_result
+  Arg 2      : bool $get_scores
   Example    : $records = $as->_create_records($overlap_result);
   Description: Create a custom annotation record from the current
                record as read from the annotation source. Adds INFO field
@@ -169,6 +172,7 @@ sub parser {
 sub _create_records {
   my $self = shift;
   my $overlap_result = shift;
+  my $get_scores = shift;
 
   my @records;
 
@@ -223,9 +227,10 @@ sub _create_records {
       my $index  = $result_hash->{b_index};
 
       my $record = {
-        name => $self->_get_record_name,
-        allele => $result_hash->{a_allele}
+        name   => $self->_get_record_name,
+        allele => $result_hash->{a_allele},
       };
+      $record->{score} = $self->_get_score if $get_scores and $self->_get_score;
 
       foreach my $field(keys %$fields_data) {
         my $data = $fields_data->{$field};
@@ -236,9 +241,8 @@ sub _create_records {
     }
   }
   else {
-    my $record = {
-      name => $self->_get_record_name,
-    };
+    my $record = { name => $self->_get_record_name };
+    $record->{score} = $self->_get_score if $get_scores and $self->_get_score;
 
     foreach my $field(keys %$fields_data) {
       my $data = $fields_data->{$field};
@@ -289,6 +293,27 @@ sub _get_record_name {
 }
 
 
+=head2 _get_record_name
+ 
+  Example    : $record_name = $as->_get_record_name();
+  Description: Get name for the current record using either ID as
+               found in the source or record coordinates. Defaults
+               to using first ID if multiple found, or coordinates
+               if none found.
+  Returntype : string
+  Exceptions : none
+  Caller     : _create_records()
+  Status     : Stable
+
+=cut
+
+sub _get_score {
+  my $self  = shift;
+  my $score = $self->parser->get_score;
+  return $score if $score ne '.';
+}
+
+
 =head2 _record_overlaps_VF
  
   Arg 1      : Bio::EnsEMBL::Variation::VariationFeature
@@ -328,12 +353,28 @@ sub _record_overlaps_VF {
   my $self = shift;
   my ($vf) = @_;
 
+  my $same_type = $self->{same_type};
+  my $type = $self->type();
+  my $parser = $self->parser;
+
+  # match records based on variant class (if enabled)
+  my $ref_class = get_SO_term($parser);
+
+  # avoid matching breakpoints (start == end) with SNPs in exact mode
+  my $vf_class  = $vf->class_SO_term;
+  my $is_exact_breakpoint = $type eq 'exact' && defined $vf_class && $vf_class =~ /breakpoint/;
+
+  if ($same_type || $is_exact_breakpoint) {
+    # do not match if only one of the types is defined
+    return 0 if defined $ref_class xor defined $vf_class;
+
+    # do not match if both types are not the same
+    return 0 if defined $ref_class && defined $vf_class && $ref_class ne $vf_class;
+  }
+
   # we can use the superclass method if overlap type
   return $self->SUPER::_record_overlaps_VF(@_)
     if ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature';
-  
-  my $type = $self->type();
-  my $parser = $self->parser;
 
   if ($type eq 'overlap') {
     my $parser_start = $parser->get_raw_start;

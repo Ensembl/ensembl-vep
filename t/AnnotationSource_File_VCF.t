@@ -31,7 +31,7 @@ SKIP: {
   no warnings 'once';
   
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'Bio::DB::HTS::Tabix module not available', 22 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+  skip 'Bio::DB::HTS::Tabix module not available', 32 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
 
   ## BASIC TESTS
   ##############
@@ -102,6 +102,59 @@ SKIP: {
     },
     'annotate_InputBuffer - overlap - insertion'
   );
+  
+  # ask for VCF scores
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
+    config => $cfg,
+    parser => Bio::EnsEMBL::VEP::Parser::VEP_input->new({
+      config => $cfg,
+      file => $test_cfg->create_input_file([qw(21 25585733 25585733 C/T)]),
+      valid_chromosomes => [21]
+    })
+  });
+  $ib->next;
+  $as->{summary_stats} = ['min'];
+  $as->annotate_InputBuffer($ib);
+
+  is_deeply(
+    $ib->buffer->[0]->{_custom_annotations},
+    {
+      'test.vcf.gz' => [
+        {
+          'name'  => 'test1',
+          'score' => '29',
+        }
+      ]
+    },
+    'annotate_InputBuffer - VCF score'
+  );
+  delete $as->{summary_stats};
+  
+  # ask for VCF scores - no score
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
+    config => $cfg,
+    parser => Bio::EnsEMBL::VEP::Parser::VEP_input->new({
+      config => $cfg,
+      file => $test_cfg->create_input_file([qw(21 25585746 25585745 -/C)]),
+      valid_chromosomes => [21]
+    })
+  });
+  $ib->next;
+  $as->{summary_stats} = ['min'];
+  $as->annotate_InputBuffer($ib);
+
+  is_deeply(
+    $ib->buffer->[0]->{_custom_annotations},
+    {
+      'test.vcf.gz' => [
+        {
+          'name'  => 'ins2',
+        }
+      ]
+    },
+    'annotate_InputBuffer - no VCF score'
+  );
+  delete $as->{summary_stats};
 
 
   # entry with no ID defaults to reporting coords

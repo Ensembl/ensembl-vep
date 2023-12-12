@@ -109,28 +109,6 @@ sub new {
 }
 
 
-=head2 validate_line
-
-  Example    : $valid = $self->validate_line();
-  Description: Check if input line can be read using this format.
-  Returntype : bool
-  Exceptions : none
-  Caller     : $self->SUPER::detect_format()
-  Status     : Stable
-
-=cut
-
-sub validate_line {
-  my $self = shift;
-  my @line = @_;
-
-  return (
-    scalar @line == 1 &&
-      $line[0] =~ /^([^\:]+)\:.*?([cgmrp]?)\.?([\*\-0-9]+.*)$/i
-  );
-}
-
-
 =head2 parser
 
   Example    : $io_parser = $parser->parser();

@@ -52,8 +52,8 @@ use warnings;
 
 use base qw(Exporter);
 
-our $VEP_VERSION     = 110;
-our $VEP_SUB_VERSION = 1;
+our $VEP_VERSION     = 112;
+our $VEP_SUB_VERSION = 0;
 
 our @EXPORT_OK = qw(
   @FLAG_FIELDS
@@ -67,6 +67,7 @@ our @FLAG_FIELDS = (
 
   # general
   { flag => 'individual',      fields => ['IND','ZYG'] },
+  { flag => 'individual_zyg',  fields => ['ZYG'] },
   { flag => 'allele_number',   fields => ['ALLELE_NUM'] },
   { flag => 'show_ref_allele', fields => ['REF_ALLELE'] },
   { flag => 'uploaded_allele', fields => ['UPLOADED_ALLELE'] },
