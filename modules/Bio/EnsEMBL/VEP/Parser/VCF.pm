@@ -78,6 +78,8 @@ use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::IO::Parser::VCF4;
 
+use List::Util qw(max);
+use List::MoreUtils qw(uniq);
 
 =head2 new
 
@@ -428,7 +430,6 @@ sub _expand_tandem_repeat_allele_string {
 }
 
 
-
 =head2 create_StructuralVariationFeatures
 
   Example    : $vfs = $parser->create_StructuralVariationFeatures();
@@ -488,6 +489,17 @@ sub create_StructuralVariationFeatures {
   }
   ## parse tandem repeats based on VCF INFO fields
   elsif ($so_term =~ /tandem/ ) {
+    # validate SVLEN
+    if (defined $info->{SVLEN}) {
+      my @svlen = uniq(split(/,/, $info->{SVLEN}));
+      # warn if there are different references per alternative allele
+      $self->warning_msg(
+        "found tandem repeats with different references per alternative allele: " .
+        "SVLEN=" . $info->{SVLEN} . "; only using reference with largest size"
+      ) if scalar @svlen > 1;
+      $end = $start + max(@svlen) - 1;
+    }
+
     # get reference allele and allele_string from tandem repeats
     my $allele_string;
     my $slice_ref = $self->get_slice($chr);
