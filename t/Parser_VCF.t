@@ -878,6 +878,125 @@ is_deeply($bnd5_vf, bless( {
                'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) ,
                'StructuralVariationFeature - BND with unsupported INFO/END field');
 
+## test tandem repeats
+
+sub parse_variant {
+  my $var = shift;
+  my $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
+    config => Bio::EnsEMBL::VEP::Config->new({
+      %$base_testing_cfg, gp => 1,  warning_file => 'STDERR',
+      fasta => $test_cfg->{fasta}
+    }),
+    file => $test_cfg->create_input_file($var),
+    valid_chromosomes => [21]
+  })->next();
+
+  delete($vf->{adaptor});
+  delete($vf->{_line});
+
+  return $vf;
+}
+
+my $tandem = parse_variant([qw(21	25587759	tr0	T	<CNV:TR>,<CNV:TR>	.	PASS	END=25587769)]);
+is_deeply($tandem, bless( {
+    'chr' => '21',
+    'strand' => '1',
+    'variation_name' => 'tr0',
+    'class_SO_term' => 'tandem_repeat',
+    'allele_string' => '<CNV:TR>/<CNV:TR>',
+    'start' => 25587760,
+    'inner_start' => 25587760,
+    'outer_start' => 25587760,
+    'end' => 25587769,
+    'inner_end' => 25587769,
+    'outer_end' => 25587769,
+    'seq_region_start' => 25587760,
+    'seq_region_end' => 25587769
+  },
+  'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) ,
+  'StructuralVariationFeature - generic tandem repeat');
+
+my $tandem_RUC = parse_variant([qw(21	25587759	tr0	T	<CNV:TR>,<CNV:TR>	.	PASS	END=25587769;RUS=CAT,GT,CA;RUC=2,5,4;RN=2,1)]);
+is_deeply($tandem_RUC, bless( {
+    'chr' => '21',
+    'strand' => '1',
+    'variation_name' => 'tr0',
+    'allele_string' => 'AGTAAATAGA/' . 'CAT' x 2 . 'GT' x 5 . '/' . 'CA' x 4,
+    'start' => 25587760,
+    'end' => 25587769,
+    'seq_region_start' => 25587760,
+    'seq_region_end' => 25587769,
+    'map_weight' => 1
+  },
+  'Bio::EnsEMBL::Variation::VariationFeature' ) ,
+  'VariationFeature - tandem repeat using RUC');
+
+my $tandem_RB = parse_variant([qw(21	25587759	tr0	T	<CNV:TR>,<CNV:TR>	.	PASS	END=25587769;RUS=CAT,GT,CA;RB=6,10,8;RN=2,1)]);
+is_deeply($tandem_RUC, $tandem_RB, 'VariationFeature - tandem repeat using RB');
+
+$tandem = parse_variant([qw(21	25587759	tr0	T	<CNV:TR>,<CNV:TR>	.	PASS	END=25587769;SVLEN=10,10;RUS=CAT,.,CA;RUC=2,5,4;RN=2,1)]);
+is_deeply($tandem, bless( {
+    'chr' => '21',
+    'strand' => '1',
+    'variation_name' => 'tr0',
+    'allele_string' => 'AGTAAATAGA/' . 'CAT' x 2 . 'N' x 5 . '/' . 'CA' x 4,
+    'start' => 25587760,
+    'end' => 25587769,
+    'seq_region_start' => 25587760,
+    'seq_region_end' => 25587769,
+    'map_weight' => 1
+  },
+  'Bio::EnsEMBL::Variation::VariationFeature' ) ,
+  'VariationFeature - tandem repeat with missing sequence');
+
+my $tandem_svlen_1 = parse_variant([qw(21	25587759	tr0	T	<CNV:TR>,<CNV:TR>	.	PASS	SVLEN=10,10;RUS=CAT,.,CA;RUC=2,5,4;RN=2,1)]);
+is_deeply($tandem, $tandem_svlen_1,
+  'VariationFeature - tandem repeat with missing END but with SVLEN');
+
+my $tandem_svlen_2 = parse_variant([qw(21	25587759	tr0	T	<CNV:TR>,<CNV:TR>	.	PASS	SVLEN=5,10;RUS=CAT,.,CA;RUC=2,5,4;RN=2,1)]);
+is_deeply($tandem_svlen_1, $tandem_svlen_2,
+  'VariationFeature - tandem repeat with missing END and multiple non-unique SVLEN');
+
+$tandem = parse_variant([qw(21	25587759	tr0	T	<CNV:TR>,<CNV:TR>	.	PASS	RUS=CAT,.,CA;RUC=2,5,4;RN=2,1)]);
+is_deeply($tandem, bless( {
+    'chr' => '21',
+    'strand' => '1',
+    'variation_name' => 'tr0',
+    'allele_string' => 'A/' . 'CAT' x 2 . 'N' x 5 . '/' . 'CA' x 4,
+    'start' => 25587760,
+    'end' => 25587760,
+    'seq_region_start' => 25587760,
+    'seq_region_end' => 25587760,
+    'map_weight' => 1
+  },
+  'Bio::EnsEMBL::Variation::VariationFeature' ) ,
+  'VariationFeature - tandem repeat with missing END and SVLEN');
+
+my $tandem_RN_0 = parse_variant([qw(21	25587759	tr0	T	<CNV:TR>,<CNV:TR>,<CNV:TR>	.	PASS	END=25587769;RUS=CAT,GT,CA;RB=6,10,8)]);
+my $tandem_RN_1 = parse_variant([qw(21	25587759	tr0	T	<CNV:TR>,<CNV:TR>,<CNV:TR>	.	PASS	END=25587769;RUS=CAT,GT,CA;RB=6,10,8;RN=1,1,1)]);
+
+is_deeply($tandem_RN_0, $tandem_RN_1,
+          'VariationFeature - tandem repeat omitting RN');
+
+$tandem = parse_variant([qw(21  25587759	tr0	T	<CNV:TR>,<CNV:TR>	.	PASS	END=25587769;RUS=CAT,.,CA;RUC=5,10000001,4;RN=2,1)]);
+is_deeply($tandem, bless( {
+    'chr' => '21',
+    'strand' => '1',
+    'variation_name' => 'tr0',
+    'class_SO_term' => 'tandem_repeat',
+    'allele_string' => '<CNV:TR>/<CNV:TR>',
+    'start' => 25587760,
+    'end' => 25587769,
+    'outer_start' => 25587760,
+    'outer_end' => 25587769,
+    'inner_start' => 25587760,
+    'inner_end' => 25587769,
+    'seq_region_start' => 25587760,
+    'seq_region_end' => 25587769
+  },
+  'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) ,
+  'StructuralVariationFeature - tandem repeat is too large');
+
 ## OTHER TESTS
 ##############
 

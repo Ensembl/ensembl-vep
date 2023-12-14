@@ -78,6 +78,8 @@ use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::IO::Parser::VCF4;
 
+use List::Util qw(max);
+use List::MoreUtils qw(uniq);
 
 =head2 new
 
@@ -376,6 +378,58 @@ sub create_VariationFeatures {
 }
 
 
+sub _expand_tandem_repeat_allele_string {
+  my ($self, $type, $info, $ref) = @_;
+
+  if ($info->{RUS} && ($info->{RUC} || $info->{RB}) ) {
+    # warn that CIRUC and CIRB INFO fields are ignored
+    $self->warning_msg("CIRUC and CIRB INFO fields are ignored when calculating alternative alleles in tandem repeats")
+      if $info->{CIRUC} or $info->{CIRB};
+
+    # RN  : Total number of repeat sequences in this allele
+    # RUS : Repeat unit sequence of the corresponding repeat sequence
+    # RUC : Repeat unit count of corresponding repeat sequence
+    # RB  : Total number of bases in the corresponding repeat sequence
+    my @RN = $info->{RN} ?
+      split(/,/, $info->{RN}) :
+      # if RN is missing, assume 1 repeat for each CNV:TR allele
+      (1) x ( () = $type =~ /CNV:TR/g );
+    my @RUS = split /,/,  $info->{RUS};
+    my @RUC = split /,/, ($info->{RUC} || ''); # undefined if no RUC
+    my @RB  = split /,/, ($info->{RB}  || ''); # undefined if no RB
+    my $is_RUC_defined = scalar @RUC;
+
+    my $max_sv_size = $self->param('max_sv_size') || 5000;
+    my $is_oversized = 0;
+
+    # build sequence of tandem repeat based on INFO fields
+    my @repeats;
+    for my $records (@RN) {
+      my $repeat;
+      next if $records eq '.'; # ignore missing values
+      for ( 1 .. $records ) {
+        my $seq  = shift(@RUS);
+           $seq  = 'N' if $seq eq '.'; # missing sequence
+        my $num  = $is_RUC_defined ? shift(@RUC) : shift(@RB) / length($seq);
+
+        # avoid calculating really large repeats
+        $is_oversized = length($seq) * $num > $max_sv_size;
+        last if $is_oversized;
+        $repeat .= $seq x $num;
+      }
+
+      last if $is_oversized;
+      # prepend reference allele
+      push @repeats, $repeat;
+    }
+
+    # avoid storing alternative allele for tandem repeats with large repeats
+    return $ref.'/'.join('/', @repeats) unless $is_oversized;
+  }
+  return undef;
+}
+
+
 =head2 create_StructuralVariationFeatures
 
   Example    : $vfs = $parser->create_StructuralVariationFeatures();
@@ -432,6 +486,51 @@ sub create_StructuralVariationFeatures {
       }
     }
     $alt = $ref . "/$alt" unless $alt =~ /^\.|\.$/;
+  }
+  ## parse tandem repeats based on VCF INFO fields
+  elsif ($so_term =~ /tandem/ ) {
+    # validate SVLEN
+    if (defined $info->{SVLEN}) {
+      my @svlen = uniq(split(/,/, $info->{SVLEN}));
+      # warn if there are different references per alternative allele
+      $self->warning_msg(
+        "found tandem repeats with different references per alternative allele: " .
+        "SVLEN=" . $info->{SVLEN} . "; only using reference with largest size"
+      ) if scalar @svlen > 1;
+      $end = $start + max(@svlen) - 1;
+    }
+
+    # get reference allele and allele_string from tandem repeats
+    my $allele_string;
+    my $slice_ref = $self->get_slice($chr);
+    if ($slice_ref) {
+      $slice_ref = $slice_ref->sub_Slice($start, $end, 1);
+      $ref = $slice_ref->seq if defined $slice_ref and defined $slice_ref->seq;
+      $allele_string = $self->_expand_tandem_repeat_allele_string($type, $info, $ref) if defined $ref;
+    } elsif (!defined($self->param('fasta')) && $self->param('offline')) {
+      $self->warning_msg(
+        "could not fetch sequence for tandem repeats; " .
+        "consequence calculation for tandem repeats is less precise when using --offline without --fasta\n");
+    } else {
+      $self->warning_msg("could not fetch sequence for tandem repeat");
+    }
+
+    if (defined $allele_string) {
+      # convert tandem repeats to VariationFeature in order to properly
+      # calculate consequences based on alternative allele sequence
+      my $vf = Bio::EnsEMBL::Variation::VariationFeature->new_fast({
+        start          => $start,
+        end            => $end,
+        allele_string  => $allele_string,
+        strand         => 1,
+        map_weight     => 1,
+        adaptor        => $self->get_adaptor('variation', 'VariationFeature'),
+        variation_name => @$ids ? $ids->[0] : undef,
+        chr            => $chr,
+        _line          => $record,
+      });
+      return $self->post_process_vfs([$vf]);
+    }
   }
 
   # check for imprecise breakpoints

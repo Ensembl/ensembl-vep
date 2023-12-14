@@ -674,17 +674,19 @@ sub get_SO_term {
       $subtype = $element if grep /^$element$/i, @mobile_elements;
     }
     $abbrev .= '_' . $subtype;
-  } elsif ($type =~ /DUP:TANDEM|CNV:TR/i) {
-    # including <CNV:TR>,<CNV:TR>
+  } elsif ($type =~ /DUP:TANDEM/i) {
     $abbrev = "TDUP";
-  } elsif ($type =~ /CNV/i) {
-    # including <CNV>,<CNV>
-    $abbrev = "CNV";
+  } elsif ($type =~ /CNV:TR/i) {
+    # including <CNV:TR>,<CNV:TR>
+    $abbrev = "TREP";
   } elsif ($type =~ /CN=?[0-9]/i) {
     # ALT: "<CN0>", "<CN0>,<CN2>,<CN3>" "<CN2>" => SVTYPE: DEL, CNV, DUP
     $abbrev = "CNV";
     $abbrev = "DEL" if $type =~ /^<?CN=?0>?$/;
     $abbrev = "DUP" if $type =~ /^<?CN=?2>?$/;
+  } elsif ($type =~ /CNV/i) {
+    # including <CNV>,<CNV>
+    $abbrev = "CNV";
   } elsif ($type =~ /[\[\]]|^\.|\.$/) {
     $abbrev = "BND";
   } elsif ($type =~ /^\<|\>$/) {
@@ -710,6 +712,7 @@ sub get_SO_term {
     DEL_LINE1 => 'LINE1_deletion',
     DEL_SVA   => 'SVA_deletion',
 
+    TREP => 'tandem_repeat',
     TDUP => 'tandem_duplication',
     DUP  => 'duplication',
     CNV  => 'copy_number_variation',
