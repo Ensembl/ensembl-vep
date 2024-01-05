@@ -22,14 +22,15 @@ process splitVCF {
   label 'bcftools'
 
   input:
-  tuple path(vcf), path(vcf_index), path(split_file), path(vep_config), val(index_type)
+  tuple val(meta), path(vcf), path(vcf_index), path(split_file), path(vep_config)
 
   output:
-  tuple val("${vcf}"), path("${prefix}*.vcf.gz"), path("${prefix}*.vcf.gz.{tbi,csi}"), path(vep_config), val(index_type)
+  tuple val(meta), val("${vcf}"), path("${prefix}*.vcf.gz"), path("${prefix}*.vcf.gz.{tbi,csi}"), path(vep_config)
 
   afterScript 'rm x*'
 
   script:
+  index_type = meta.index_type
   index_flag = index_type == "tbi" ? "-t" : "-c"
   
   """

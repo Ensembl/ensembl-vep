@@ -21,11 +21,11 @@ process generateSplits {
   label 'bcftools'
 
   input:
-  tuple path(vcf), path(vcf_index), path(vep_config), val(index_type)
+  tuple val(meta), path(vcf), path(vcf_index), path(vep_config)
   val(bin_size)
 
   output:
-  tuple path(vcf), path(vcf_index), path("x*"), path(vep_config), val(index_type)
+  tuple val(meta), path(vcf), path(vcf_index), path("x*"), path(vep_config)
 
   shell:
   """
