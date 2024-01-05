@@ -121,8 +121,6 @@ workflow {
 
   output_dir = createOutputChannel(params.outdir)
   
-  // this works like 'merge' operator and thus might make the pipeline un-resumable
-  // we might think of using 'toSortedList' and generate appropriate input from the 'processInput' module
   vcf
     .combine( vep_config )
     .combine( one_to_many )
