@@ -478,8 +478,9 @@ sub finished_stats {
     }
 
     $self->{finished_stats} = {
-      charts => $self->generate_chart_data($stats),
-      run_stats => $self->generate_run_stats($stats),
+      charts        => $self->generate_chart_data($stats),
+      run_stats     => $self->generate_run_stats($stats),
+      data_version  => $self->generate_data_version(),
       general_stats => $self->generate_general_stats($stats),
     }
   }
@@ -648,18 +649,13 @@ sub generate_run_stats {
     ['Start time', $self->start_time],
     ['End time', $self->end_time],
     ['Run time', $self->run_time." seconds"],
-    ['Input file', $self->param('input_file')],
-    [
-      'Output file',
-      $self->param('output_file')#.
-      # (defined($config->{html}) ? ' '.a({href => $config->{output_file}.'.html'}, '[HTML]') : '').
-      # ' '.a({href => $config->{output_file}}, '[text]')
-    ],
+    ['Input file', "<pre>".$self->param('input_file')."</pre>"],
+    ['Output file', "<pre>".$self->param('output_file')."</pre>"],
   );
 
   my @cache_db_strings;
   if($info->{cache_dir}) {
-    push @cache_db_strings, "Cache: ".$info->{cache_dir};
+    push @cache_db_strings, "Cache: <kbd>".$info->{cache_dir}."</kbd>";
   }
   if($self->param('database') or ($self->param('cache') && !$self->param('offline'))) {
     push @cache_db_strings, sprintf('%s on %s', $info->{db_name}, $info->{db_host});
