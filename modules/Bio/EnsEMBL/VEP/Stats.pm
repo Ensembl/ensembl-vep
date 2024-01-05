@@ -675,6 +675,25 @@ sub generate_run_stats {
 }
 
 
+=head2 generate_data_version
+
+  Example    : $run_stats = $stats->generate_data_version();
+  Description: Generates data version information.
+  Returntype : arrayref
+  Exceptions : none
+  Caller     : finished_stats()
+  Status     : Stable
+
+=cut
+
+sub generate_data_version {
+  my $self = shift;
+  my %version_data = %{ $self->{info}->{version_data} };
+  my @return = map { [ %version_data{$_} ] } sort keys %version_data;
+  return \@return;
+}
+
+
 =head2 generate_general_stats
 
   Arg 1      : hashref $stats
@@ -786,7 +805,10 @@ sub dump_text {
 
   print $fh "[VEP run statistics]\n";
   print $fh join("\t", map {s/\<.+?\>//g; $_} @{$_})."\n" for @{$finished_stats->{run_stats}};
-  
+
+  print $fh "[Data version]\n";
+  print $fh join("\t", map {s/\<.+?\>//g; $_} @{$_})."\n" for @{$finished_stats->{data_version}};
+
   print $fh "\n[General statistics]\n";
   print $fh join("\t", map {s/\<.+?\>//g; $_} grep {defined($_)} @{$_})."\n" for @{$finished_stats->{general_stats}};
   
@@ -828,6 +850,7 @@ sub dump_html {
           join('', map {sprintf('<li><a href="#%s">%s</a></li>', $_->[0], $_->[1])} (
             ['masthead', 'Top of page'],
             ['run_stats', 'VEP run statistics'],
+            ['data_version', 'Data version'],
             ['gen_stats', 'General statistics'],
             map {
               [$_->{id}, $_->{title}]
@@ -844,7 +867,13 @@ sub dump_html {
     '<table class="stats_table">'.
       join('', map {'<tr>'.join('', map {'<td>'.$_.'</td>'} @$_).'</tr>'} @{$finished_stats->{run_stats}}).
     '</table>';
-  
+
+  print $fh
+    '<h3 id="data_version">Data version</h3>'.
+    '<table class="stats_table">'.
+      join('', map {'<tr>'.join('', map {'<td>'.$_.'</td>'} @$_).'</tr>'} @{$finished_stats->{data_version}}).
+    '</table>';
+
   # vars in/out stats
   print $fh
     '<h3 id="gen_stats">General statistics</h3>'.
