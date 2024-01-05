@@ -1036,10 +1036,22 @@ sub stats_html_head {
     
     .stats_table {
       margin: 5px;
+      table-layout: fixed;
+      width: 100%;
     }
-    
+
+    pre {
+      white-space: normal;
+      word-break: keep-all;
+    }
+
     td {
       padding: 5px;
+      word-break: break-word;
+    }
+
+    td:nth-child(2) {
+      width: 80%;
     }
 
     th.gradient {
