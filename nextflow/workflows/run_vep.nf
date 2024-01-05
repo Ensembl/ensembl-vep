@@ -20,7 +20,6 @@ params.skip_check = 0
 params.help = false
 
 // module imports
-include { processInput } from '../nf_modules/process_input.nf'
 include { checkVCF } from '../nf_modules/check_VCF.nf'
 include { generateSplits } from '../nf_modules/generate_splits.nf'
 include { splitVCF } from '../nf_modules/split_VCF.nf' 
@@ -50,77 +49,36 @@ Options:
 
 
 def createInputChannels (input, pattern) {
-  if (input instanceof String) {
-    // if input is a String, process as file or directory
-    files = file(input)
-    if ( !files.exists() ) {
-      exit 1, "The specified input does not exist: ${input}"
-    }
-
-    if (files.isDirectory()) {
-      files = "${files}/${pattern}"
-    }
-    files = Channel.fromPath(files)
-  } else {
-    // if input is a Channel, just pass along
-    files = input
+  files = file(input)
+  if ( !files.exists() ) {
+    exit 1, "The specified input does not exist: ${input}"
   }
+
+  if (files.isDirectory()) {
+    files = "${files}/${pattern}"
+  }
+  files = Channel.fromPath(files)
   
   return files;
 }
 
 def createOutputChannel (output) {
-  if (output instanceof String){
-    def dir = new File(output)
-  
-    // convert output dir to absolute path if necessary
-    if (!dir.isAbsolute()) {
-        output = "${launchDir}/${output}";
-    }
-    return Channel.fromPath(output)
+  def dir = new File(output)
+
+  // convert output dir to absolute path if necessary
+  if (!dir.isAbsolute()) {
+      output = "${launchDir}/${output}";
   }
-  
-  return output;
+
+  return Channel.fromPath(output)
 }
 
 workflow vep {
   take:
-    vcf
-    vep_config
-    output_dir
+    inputs
   main:
-    if (!vcf) {
-      exit 1, "Undefined --vcf parameter. Please provide the path to a VCF file."
-    }
-
-    if (!vep_config) {
-      exit 1, "Undefined --vep_config parameter. Please provide a VEP config file."
-    }
-    
-    vcf = createInputChannels(vcf, pattern="*.{vcf,gz}")
-    vep_config = createInputChannels(vep_config, pattern="*.ini")
-
-    vcf.count()
-      .combine( vep_config.count() )
-      .subscribe{ if ( it[0] != 1 && it[1] != 1 ) 
-        exit 1, "Detected many-to-many scenario between VCF and VEP config files - currently not supported" 
-      }
-      
-    output_dir = createOutputChannel(output_dir)
-    
-    // set if it is a one_to_many situation (single VCF and multiple ini file)
-    // in this situation we produce output files with different names
-    one_to_many = vcf.count()
-      .combine( vep_config.count() )
-      .map{ it[0] == 1 && it[1] != 1 }
-
-    // process input and create Channel
-    // this works like 'merge' operator and thus might make the pipeline un-resumable
-    // we might think of using 'toSortedList' and generate appropriate input from the 'processInput' module
-    processInput(vcf.combine(vep_config))
-    
     // Prepare input VCF files (bgzip + tabix)
-    checkVCF(processInput.out)
+    checkVCF(inputs)
     
     // Generate split files that each contain bin_size number of variants from VCF
     generateSplits(checkVCF.out, params.bin_size)
@@ -132,14 +90,54 @@ workflow vep {
     runVEP(splitVCF.out.transpose())
     
     // Merge split VCF files (creates one output VCF for each input VCF)
-    mergeVCF(runVEP.out.files.groupTuple(by: [0, 3, 4])
-      .combine(one_to_many
-      .combine(output_dir))
-    )
+    mergeVCF(runVEP.out.files.groupTuple(by: [0, 1, 4]))
   emit:
     mergeVCF.out
 }
 
 workflow {
-  vep(params.vcf, params.vep_config, params.outdir)
+  if (!params.vcf) {
+    exit 1, "Undefined --vcf parameter. Please provide the path to a VCF file."
+  }
+
+  if (!params.vep_config) {
+    exit 1, "Undefined --vep_config parameter. Please provide a VEP config file."
+  }
+
+  vcf = createInputChannels(params.vcf, pattern="*.{vcf,gz}")
+  vep_config = createInputChannels(params.vep_config, pattern="*.ini")
+
+  vcf.count()
+    .combine( vep_config.count() )
+    .subscribe{ if ( it[0] != 1 && it[1] != 1 ) 
+      exit 1, "Detected many-to-many scenario between VCF and VEP config files - currently not supported" 
+    }
+    
+  // set if it is a one-to-many situation (single VCF and multiple ini file)
+  // in this situation we produce output files with different names
+  one_to_many = vcf.count()
+    .combine( vep_config.count() )
+    .map{ it[0] == 1 && it[1] != 1 }
+
+  output_dir = createOutputChannel(params.outdir)
+  
+  vcf
+    .combine( vep_config )
+    .combine( one_to_many )
+    .combine( output_dir )
+    .map {
+      vcf, vep_config, one_to_many, output_dir ->
+        meta = [:]
+        meta.one_to_many = one_to_many
+        meta.output_dir = output_dir
+        // NOTE: csi is default unless a tbi index already exists
+        meta.index_type = file(vcf + ".tbi").exists() ? "tbi" : "csi"
+
+        vcf_index = vcf + ".${meta.index_type}"
+
+        [ meta, vcf, vcf_index, vep_config ]
+    }
+    .set{ ch_input }
+  
+  vep(ch_input)
 }
