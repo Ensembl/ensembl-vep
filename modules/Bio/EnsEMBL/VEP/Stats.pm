@@ -665,7 +665,7 @@ sub generate_run_stats {
   }
 
   unshift @return, ['Annotation sources', join("; ", @cache_db_strings)];
-  unshift @return, ['VEP version (API)', sprintf(' %i (%i)', $info->{vep_version}, $info->{api_version})];
+  unshift @return, ['VEP version (API)', sprintf(' %s (%s)', $info->{vep_version}, $info->{api_version})];
 
   return \@return;
 }

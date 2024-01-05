@@ -204,8 +204,9 @@ sub headers {
 
   # add VEP version string
   push @headers, sprintf(
-    '##VEP="v%i" time="%s"%s%s',
+    '##VEP="v%s" API="v%s" time="%s"%s%s',
     $info->{vep_version},
+    $info->{api_version},
     $info->{time},
     $info->{cache_dir} ? ' cache="'.$info->{cache_dir}.'"' : '',
     $info->{db_name} ? ' db="'.$info->{db_name}.'@'.$info->{db_host}.'"' : ''
