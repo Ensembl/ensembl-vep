@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       docker-tag:
-        description: 'Docker image tag'
+        description: 'Docker image tag (such as: release_111.0)'
         required: true
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
           images: ensemblorg/ensembl-vep
           tags: |
             # example of Docker tag: release_109.3 (for consistency with previous releases)
-            type=match,pattern=release/(\d+\.\d+),group=1,prefix=release_
+            type=match,pattern=\d+\.\d+,group=0,prefix=release_
             latest
             ${{ github.event.inputs.docker-tag }}
 
