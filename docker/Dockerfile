@@ -119,7 +119,10 @@ ENV LANG_VAR en_US.UTF-8
 ARG BRANCH
 
 # Create vep user
-RUN useradd -r -m -U -d "$OPT" -s /bin/bash -c "VEP User" -p '' vep && usermod -a -G sudo vep && mkdir -p $OPT_SRC
+RUN mkdir -p $OPT && \
+    useradd -r -m -U -d "$OPT" -s /bin/bash -c "VEP User" -p '' vep && \
+    usermod -a -G sudo vep && \
+    mkdir -p $OPT_SRC
 USER vep
 
 # Copy downloaded libraries (stage 1) to this image (stage 2)
