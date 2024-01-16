@@ -429,68 +429,58 @@ sub pubmed {
   my $self = shift;
   my $as = shift;
 
-  if(!exists($self->{_pubmed})) {
-
-    my %pm;
-    my $file = sprintf(
-      '%s/pubmed_%s_%s_%s.txt',
-      $self->required_param('pipeline_dir'),
-      $self->required_param('species'),
-      $self->required_param('ensembl_release'),
-      $self->required_param('assembly')
-    );
-    
-    if(-e $file) {
-      open IN, $file or die "Could not write to pubmed file $file $!";
-      while(<IN>) {
-        chomp;
-        my @split = split;
-        $pm{$split[0]} = $split[1];
-      }
-      close IN;
+  my %pm;
+  my $file = sprintf(
+    '%s/pubmed_%s_%s_%s.txt',
+    $self->required_param('pipeline_dir'),
+    $self->required_param('species'),
+    $self->required_param('ensembl_release'),
+    $self->required_param('assembly')
+  );
+  
+  if(-e $file) {
+    open IN, $file or die "Could not write to pubmed file $file $!";
+    while(<IN>) {
+      chomp;
+      my @split = split;
+      $pm{$split[0]} = $split[1];
     }
-    else{
-      $self->warning('Unable to find PUBMED file: ' . $file);
-    }
-
-    $self->{_pubmed} = \%pm;
+    close IN;
+  }
+  else{
+    $self->warning('Unable to find PUBMED file: ' . $file);
   }
 
-  return $self->{_pubmed};
+  return \%pm;
 }
 
 sub var_synonyms {
   my $self = shift;
   my $as = shift;
 
-  if(!exists($self->{_var_synonyms})) {
+  my %pm;
+  my $file = sprintf(
+    '%s/var_synonyms_%s_%s_%s.txt',
+    $self->required_param('pipeline_dir'),
+    $self->required_param('species'),
+    $self->required_param('ensembl_release'),
+    $self->required_param('assembly')
+  );
 
-    my %pm;
-    my $file = sprintf(
-      '%s/var_synonyms_%s_%s_%s.txt',
-      $self->required_param('pipeline_dir'),
-      $self->required_param('species'),
-      $self->required_param('ensembl_release'),
-      $self->required_param('assembly')
-    );
-
-    if(-e $file) {
-      open IN, $file or die "Could not write to var synonyms file $file $!";
-      while(<IN>) {
-        chomp;
-        my @split = split(/\t/);
-        $pm{$split[0]} = $split[1];
-      }
-      close IN;
+  if(-e $file) {
+    open IN, $file or die "Could not write to var synonyms file $file $!";
+    while(<IN>) {
+      chomp;
+      my @split = split(/\t/);
+      $pm{$split[0]} = $split[1];
     }
-    else{
-      $self->warning('Unable to find Variation Synonyms file: ' . $file);
-    }
-
-    $self->{_var_synonyms} = \%pm;
+    close IN;
+  }
+  else{
+    $self->warning('Unable to find Variation Synonyms file: ' . $file);
   }
 
-  return $self->{_var_synonyms};
+  return \%pm;
 }
 
 
