@@ -119,7 +119,10 @@ ENV LANG_VAR en_US.UTF-8
 ARG BRANCH
 
 # Create vep user
-RUN useradd -r -m -U -d "$OPT" -s /bin/bash -c "VEP User" -p '' vep && usermod -a -G sudo vep && mkdir -p $OPT_SRC
+RUN useradd -r -m -U -d "$OPT" -s /bin/bash -c "VEP User" -p '' vep && \
+    chmod a+rx $OPT && \
+    usermod -a -G sudo vep && \
+    mkdir -p $OPT_SRC
 USER vep
 
 # Copy downloaded libraries (stage 1) to this image (stage 2)
@@ -195,7 +198,7 @@ RUN curl -O "$PLUGIN_DEPS/ubuntu-packages.txt" && \
     rm -rf /var/lib/apt/lists/* ubuntu-packages.txt
 #   - Symlink python to python2
 RUN ln -s /usr/bin/python2 /usr/bin/python
-#   - Perl modules
+#   - Perl modules
 RUN curl -O "$PLUGIN_DEPS/cpanfile" && \
     cpanm --installdeps --with-recommends . && \
     rm -rf /root/.cpanm cpanfile
