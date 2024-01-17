@@ -1,4 +1,4 @@
-ARG BRANCH=main
+ARG BRANCH=release/111
 
 ###################################################
 # Stage 1 - docker container to build ensembl-vep #
@@ -91,6 +91,7 @@ RUN apt-get update && apt-get -y install \
     cpanminus \
     curl \
     libmysqlclient-dev \
+    libdbd-mysql-perl \
     libpng-dev \
     libssl-dev \
     zlib1g-dev \
