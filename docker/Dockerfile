@@ -91,6 +91,7 @@ RUN apt-get update && apt-get -y install \
     cpanminus \
     curl \
     libmysqlclient-dev \
+    libdbd-mysql-perl \
     libpng-dev \
     libssl-dev \
     zlib1g-dev \
