@@ -66,6 +66,7 @@ use Bio::EnsEMBL::VEP::Utils qw(get_time);
 use Bio::EnsEMBL::Slice;
 use Bio::EnsEMBL::CoordSystem;
 use Bio::EnsEMBL::VEP::Stats;
+use File::Spec;
 use FileHandle;
 
 
@@ -259,6 +260,8 @@ sub registry {
 
       # load DB options from registry file if given
       if(my $registry_file = $self->param('registry')) {
+        $registry_file = File::Spec->rel2abs($registry_file);
+        throw("ERROR: Registry file $registry_file not found") unless -e $registry_file;
         $self->status_msg("Loading DB self from registry file ", $registry_file) if $self->param('verbose');
         
         $reg->load_all(
