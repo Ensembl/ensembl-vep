@@ -52,7 +52,7 @@ cmp_deeply(
   $of->headers,
   [
     '##fileformat=VCFv4.1',
-    '##VEP="v1" time="test"',
+    '##VEP="v1" API="v1" time="test"',
     '##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|custom_test">',
     '##INFO=<ID=custom_test,Number=.,Type=String,Description="test.vcf.gz">',
     re('\#\#VEP-command-line=\'vep'),
