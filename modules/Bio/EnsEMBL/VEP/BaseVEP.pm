@@ -395,7 +395,7 @@ sub get_slice {
   my $self = shift;
   my $orig_chr = shift;
 
-  my $chr = $self->get_source_chr_name($orig_chr, 'slices', [keys %{$self->chr_lengths}]);
+  my $chr = $self->get_standard_chr_name($orig_chr);
 
   my $cache = $self->{_slice_cache} ||= {};
 
@@ -676,6 +676,27 @@ sub get_source_chr_name {
   }
 
   return $chr_name_map->{$chr};
+}
+
+
+=head2 get_standard_chr_name
+
+  Arg 1      : string $chr
+  Example    : $syns = $obj->get_standard_chr_name('NC_000012.12')
+  Description: Attempts to get the standard chromosome name based on the keys of
+               $self->chr_lengths. If no valid match is found, returns $chr as
+               given.
+  Returntype : string
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+
+=cut
+
+sub get_standard_chr_name {
+  my ($self, $chr) = @_;
+  my @names = keys %{$self->chr_lengths};
+  return $self->get_source_chr_name($chr, 'slices', \@names);
 }
 
 
