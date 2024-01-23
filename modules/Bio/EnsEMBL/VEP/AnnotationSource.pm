@@ -176,7 +176,7 @@ sub get_regions_from_coords {
   my $seen              = shift;
 
   # find actual chromosome name used by AnnotationSource
-  my $source_chr = $self->get_standard_chr_name($chr);
+  my $source_chr = $self->get_source_chr_name($chr);
 
   # allow for indels
   ($start, $end) = ($end, $start) if $start > $end;
@@ -238,7 +238,7 @@ sub get_all_regions_by_InputBuffer {
     next if $vf->{vep_skip};
 
     $chr = $vf->{chr} || $vf->{slice}->{seq_region_name};
-    throw("ERROR: Cannot get chromosome $chr from VariationFeature") unless $chr;
+    throw("ERROR: Cannot get chromosome from VariationFeature") unless $chr;
 
     ($chr, $min, $max, $seen, @new_regions) = $self->get_regions_from_coords(
       $chr, $vf->{start}, $vf->{end},
@@ -294,7 +294,7 @@ sub _check_overlap {
 
   # if there is no chromosome info, return first key of $min_max
   my $chr = exists $elem->{slice} ? $elem->{slice}->{seq_region_name} : $elem->{chr};
-  $chr = defined $chr ? $self->get_standard_chr_name($chr) : (keys %$min_max)[0];
+  $chr = defined $chr ? $self->get_source_chr_name($chr) : (keys %$min_max)[0];
 
   my $check = exists $min_max->{$chr} &&
     overlap($elem->{start}, $elem->{end},

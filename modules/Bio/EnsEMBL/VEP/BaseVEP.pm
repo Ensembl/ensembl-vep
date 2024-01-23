@@ -395,7 +395,7 @@ sub get_slice {
   my $self = shift;
   my $orig_chr = shift;
 
-  my $chr = $self->get_standard_chr_name($orig_chr);
+  my $chr = $self->get_source_chr_name($orig_chr, 'slices', [keys %{$self->chr_lengths}]);
 
   my $cache = $self->{_slice_cache} ||= {};
 
@@ -565,6 +565,47 @@ sub chr_lengths {
 }
 
 
+=head2 _fetch_chr_synonyms
+
+  Arg 1      : string $SeqRegionSynonyms_adaptor
+  Arg 2      : string $slice_adaptor
+  Example    : $tree = $obj->_fetch_chr_synonyms($srsa, $sa)
+  Description: Fetches chromosome synonyms
+  Returntype : hashref
+  Exceptions : none
+  Caller     : chromosome_synonyms()
+  Status     : Stable
+
+=cut
+
+sub _fetch_chr_synonyms {
+  my ($srsa, $sa) = @_;
+
+  # synonyms can be indirect i.e. A <-> B <-> C
+  # and there may not be a direct link between A <-> C in the DB
+  # so let's allow for one level of indirection
+  my $tree = {};
+
+  my @all_syns = @{$srsa->fetch_all};
+
+  # To prevent memory errors, species with many seq_regions will not search for indirect synonyms
+  # With 4GB memory supplied, errors seem to start with species with ~50k seq regions, so 
+  # we've chosen 40k as the limit for calculating indirect synonyms 
+  my $syn_threshold = 40000; 
+  foreach my $syn(@all_syns) {
+    my $syn_slice = $sa->fetch_by_seq_region_id($syn->seq_region_id);
+    next unless $syn_slice;
+    my ($a, $b) = sort ($syn_slice->seq_region_name, $syn->name);
+    $tree->{$a}->{$b} = 1;
+    unless(scalar(@all_syns) > $syn_threshold){ 
+      $tree->{$_}->{$b} = 1 for keys %{$tree->{$a} || {}};
+      $tree->{$_}->{$a} = 1 for keys %{$tree->{$b} || {}};
+    }
+  }
+  return $tree;
+}
+
+
 =head2 chromosome_synonyms
   
   Arg 1      : (optional) string $synonyms_file
@@ -582,7 +623,10 @@ sub chromosome_synonyms {
   my $self = shift;
   my $file = shift;
 
-  if($file) {
+  return $self->config->{_chromosome_synonyms}
+    if $self->config->{_chromosome_synonyms};
+
+  if ($file) {
     open IN, $file or throw("ERROR: Could not read synonyms file $file: $!");
 
     my $synonyms = $self->config->{_chromosome_synonyms} ||= {};
@@ -600,6 +644,10 @@ sub chromosome_synonyms {
     }
 
     close IN;
+  } elsif ($self->param('database')) {
+    my $sa   = $self->get_adaptor('core', 'slice');
+    my $srsa = $self->get_adaptor('core', 'SeqRegionSynonym');
+    $self->config->{_chromosome_synonyms} = _fetch_chr_synonyms($srsa, $sa);
   }
 
   return $self->config->{_chromosome_synonyms} ||= {};
@@ -676,27 +724,6 @@ sub get_source_chr_name {
   }
 
   return $chr_name_map->{$chr};
-}
-
-
-=head2 get_standard_chr_name
-
-  Arg 1      : string $chr
-  Example    : $syns = $obj->get_standard_chr_name('NC_000012.12')
-  Description: Attempts to get the standard chromosome name based on the keys of
-               $self->chr_lengths. If no valid match is found, returns $chr as
-               given.
-  Returntype : string
-  Exceptions : none
-  Caller     : general
-  Status     : Stable
-
-=cut
-
-sub get_standard_chr_name {
-  my ($self, $chr) = @_;
-  my @names = keys %{$self->chr_lengths};
-  return $self->get_source_chr_name($chr, 'slices', \@names);
 }
 
 

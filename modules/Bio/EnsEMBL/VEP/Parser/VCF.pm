@@ -424,7 +424,7 @@ sub create_StructuralVariationFeatures {
     $end = $parser->get_end if $incorrect_end;
 
     if (defined $info->{CHR2}) {
-      my $breakend_chr = $self->get_standard_chr_name($info->{CHR2});
+      my $breakend_chr = $self->get_source_chr_name($info->{CHR2});
       my $breakend_pos = $info->{END2} || $incorrect_end;
       if (defined $breakend_chr and defined $breakend_pos) {
         $alt = $alt =~ /^<?BND>?$/i ? "N" : "$alt/N";
@@ -457,7 +457,7 @@ sub create_StructuralVariationFeatures {
     strand         => 1,
     adaptor        => $self->get_adaptor('variation', 'StructuralVariationFeature'),
     variation_name => @$ids ? $ids->[0] : undef,
-    chr            => $self->get_standard_chr_name($chr),
+    chr            => $self->get_source_chr_name($chr),
     class_SO_term  => $so_term,
     allele_string  => $alt,
     _line          => $record
