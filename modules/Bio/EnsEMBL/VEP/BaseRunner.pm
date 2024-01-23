@@ -502,6 +502,9 @@ sub _set_package_variables {
     $Bio::EnsEMBL::Variation::Utils::VariationEffect::UPSTREAM_DISTANCE = $u;
     $Bio::EnsEMBL::Variation::Utils::VariationEffect::DOWNSTREAM_DISTANCE = $d;
   }
+
+  # chromosome synonyms
+  $Bio::EnsEMBL::Variation::Utils::VariationEffect::CHROMOSOME_SYNONYMS = $self->chromosome_synonyms;
 }
 
 
