@@ -294,8 +294,14 @@ sub _check_overlap {
 
   # if there is no chromosome info, return first key of $min_max
   my $chr = exists $elem->{slice} ? $elem->{slice}->{seq_region_name} : $elem->{chr};
+
   my @names = keys %$min_max;
-  $chr = defined $chr ? $self->get_source_chr_name($chr, undef, \@names) : $names[0];
+  if (!defined $chr) {
+    $chr = $names[0];
+  } elsif (!grep /^$chr$/, @names) {
+    # check for synonyms if $chr is not in $min_max
+    $chr = $self->get_source_chr_name($chr, 'slices', \@names);
+  }
 
   my $check = exists $min_max->{$chr} &&
     overlap($elem->{start}, $elem->{end},
