@@ -623,13 +623,11 @@ sub chromosome_synonyms {
   my $self = shift;
   my $file = shift;
 
-  return $self->config->{_chromosome_synonyms}
-    if $self->config->{_chromosome_synonyms};
+  my $synonyms = $self->config->{_chromosome_synonyms} ||= {};
+  return $synonyms if %$synonyms;
 
   if ($file) {
     open IN, $file or throw("ERROR: Could not read synonyms file $file: $!");
-
-    my $synonyms = $self->config->{_chromosome_synonyms} ||= {};
 
     while(<IN>) {
       chomp;
@@ -647,10 +645,11 @@ sub chromosome_synonyms {
   } elsif ($self->param('database')) {
     my $sa   = $self->get_adaptor('core', 'slice');
     my $srsa = $self->get_adaptor('core', 'SeqRegionSynonym');
-    $self->config->{_chromosome_synonyms} = _fetch_chr_synonyms($srsa, $sa);
+    $synonyms = _fetch_chr_synonyms($srsa, $sa);
   }
 
-  return $self->config->{_chromosome_synonyms} ||= {};
+  $self->config->{_chromosome_synonyms} = $synonyms;
+  return $synonyms;
 }
 
 
