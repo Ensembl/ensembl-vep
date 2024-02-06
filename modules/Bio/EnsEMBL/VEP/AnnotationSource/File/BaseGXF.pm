@@ -239,7 +239,7 @@ sub _get_records_by_coords {
     else {
       my $type = $parser->get_type;
       my $file = $self->{file};
-      $self->warning_msg("Ignoring non-supported '$type' feature_type from $file\n");
+      $self->warning_msg("Ignoring '$type' feature_type from $file GFF/GTF file. This feature_type is not supported in Ensembl VEP.\n");
     }
 
     $parser->next();
