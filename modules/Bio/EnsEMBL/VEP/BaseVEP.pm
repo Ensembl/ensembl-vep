@@ -565,6 +565,47 @@ sub chr_lengths {
 }
 
 
+=head2 _fetch_chr_synonyms
+
+  Arg 1      : string $SeqRegionSynonyms_adaptor
+  Arg 2      : string $slice_adaptor
+  Example    : $tree = $obj->_fetch_chr_synonyms($srsa, $sa)
+  Description: Fetches chromosome synonyms
+  Returntype : hashref
+  Exceptions : none
+  Caller     : chromosome_synonyms()
+  Status     : Stable
+
+=cut
+
+sub _fetch_chr_synonyms {
+  my ($srsa, $sa) = @_;
+
+  # synonyms can be indirect i.e. A <-> B <-> C
+  # and there may not be a direct link between A <-> C in the DB
+  # so let's allow for one level of indirection
+  my $tree = {};
+
+  my @all_syns = @{$srsa->fetch_all};
+
+  # To prevent memory errors, species with many seq_regions will not search for indirect synonyms
+  # With 4GB memory supplied, errors seem to start with species with ~50k seq regions, so 
+  # we've chosen 40k as the limit for calculating indirect synonyms 
+  my $syn_threshold = 40000; 
+  foreach my $syn(@all_syns) {
+    my $syn_slice = $sa->fetch_by_seq_region_id($syn->seq_region_id);
+    next unless $syn_slice;
+    my ($a, $b) = sort ($syn_slice->seq_region_name, $syn->name);
+    $tree->{$a}->{$b} = 1;
+    unless(scalar(@all_syns) > $syn_threshold){ 
+      $tree->{$_}->{$b} = 1 for keys %{$tree->{$a} || {}};
+      $tree->{$_}->{$a} = 1 for keys %{$tree->{$b} || {}};
+    }
+  }
+  return $tree;
+}
+
+
 =head2 chromosome_synonyms
   
   Arg 1      : (optional) string $synonyms_file
@@ -582,10 +623,10 @@ sub chromosome_synonyms {
   my $self = shift;
   my $file = shift;
 
-  if($file) {
-    open IN, $file or throw("ERROR: Could not read synonyms file $file: $!");
+  my $synonyms = $self->config->{_chromosome_synonyms} ||= {};
 
-    my $synonyms = $self->config->{_chromosome_synonyms} ||= {};
+  if ($file) {
+    open IN, $file or throw("ERROR: Could not read synonyms file $file: $!");
 
     while(<IN>) {
       chomp;
@@ -600,9 +641,12 @@ sub chromosome_synonyms {
     }
 
     close IN;
+  } elsif (!%{$synonyms} && $self->param('database')) {
+    my $sa    = $self->get_adaptor('core', 'slice');
+    my $srsa  = $self->get_adaptor('core', 'SeqRegionSynonym');
+    $synonyms = _fetch_chr_synonyms($srsa, $sa);
   }
-
-  return $self->config->{_chromosome_synonyms} ||= {};
+  return $self->config->{_chromosome_synonyms} = $synonyms;
 }
 
 
