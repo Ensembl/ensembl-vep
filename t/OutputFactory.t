@@ -1964,7 +1964,7 @@ is_deeply(
   'HGVS 3prime shifting - ON'
 );
 
-# Shifting OFF
+# Shifting OFF - the default look up is 5' direction
 $ib = get_annotated_buffer({
   input_file => $input_file_example,
   shift_hgvs => 0
@@ -1978,7 +1978,7 @@ is_deeply(
     "Consequence" => [
       "intron_variant"
     ],
-    "HGVSg" => "21:g.25592982_25592985dup",
+    "HGVSg" => "21:g.25592986_25592989dup",
     "Allele" => "TAAA"
   },
   'HGVS 3prime shifting - OFF'
