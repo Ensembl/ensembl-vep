@@ -674,6 +674,22 @@ sub _add_identifiers {
       value => 'tsl'.$tsl,
     });
   }
+
+  # add MANE_Select and MANE_Plus_Clinical
+  if($tr_record->{attributes}->{tag}) {
+    foreach (qw/MANE_Select MANE_Plus_Clinical/) {
+      if($tr_record->{attributes}->{tag} =~ /$_/) {
+        push @{$tr->{attributes}}, Bio::EnsEMBL::Attribute->new_fast({
+          code => $_
+        });
+      }
+    }
+  }
+
+  # add canonical
+  if($tr_record->{attributes}->{tag} && $tr_record->{attributes}->{tag} =~ /Ensembl_canonical/) {
+    $tr->{is_canonical} = 1;
+  }
 }
 
 

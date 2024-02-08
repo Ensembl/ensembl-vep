@@ -1503,12 +1503,16 @@ sub BaseTranscriptVariationAllele_to_output_hash {
     if(my $mane_value = $mane->value) {
       $hash->{MANE_SELECT} = $mane_value;
     }
+
+    push @{ $hash->{MANE} }, 'MANE_Select';
   }
 
   if($self->{mane_plus_clinical} && (my ($mane) = grep {$_->code eq 'MANE_Plus_Clinical'} @attribs)) {
     if(my $mane_value = $mane->value) {
       $hash->{MANE_PLUS_CLINICAL} = $mane_value;
     }
+
+    push @{ $hash->{MANE} }, 'MANE_Plus_Clinical';
   }
   
   # transcript support level
