@@ -2035,8 +2035,8 @@ $ib = get_annotated_buffer({
 });
 
 $of->{individual_zyg} = ['dave,barry'];
-my $result = $of->VariationFeature_to_output_hash($ib->buffer->[0]);
-my $genotype = join ',', sort(@{$result->{ZYG}});
+$result = $of->VariationFeature_to_output_hash($ib->buffer->[0]);
+$genotype = join ',', sort(@{$result->{ZYG}});
 
 is($genotype, 'barry:HOM,dave:HET', 'VariationFeature_to_output_hash - individual_zyg correct sample name');
 delete($of->{individual_zyg});

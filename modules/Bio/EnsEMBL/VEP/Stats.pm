@@ -478,8 +478,9 @@ sub finished_stats {
     }
 
     $self->{finished_stats} = {
-      charts => $self->generate_chart_data($stats),
-      run_stats => $self->generate_run_stats($stats),
+      charts        => $self->generate_chart_data($stats),
+      run_stats     => $self->generate_run_stats($stats),
+      data_version  => $self->generate_data_version(),
       general_stats => $self->generate_general_stats($stats),
     }
   }
@@ -648,18 +649,13 @@ sub generate_run_stats {
     ['Start time', $self->start_time],
     ['End time', $self->end_time],
     ['Run time', $self->run_time." seconds"],
-    ['Input file', $self->param('input_file')],
-    [
-      'Output file',
-      $self->param('output_file')#.
-      # (defined($config->{html}) ? ' '.a({href => $config->{output_file}.'.html'}, '[HTML]') : '').
-      # ' '.a({href => $config->{output_file}}, '[text]')
-    ],
+    ['Input file', "<pre>".$self->param('input_file')."</pre>"],
+    ['Output file', "<pre>".$self->param('output_file')."</pre>"],
   );
 
   my @cache_db_strings;
   if($info->{cache_dir}) {
-    push @cache_db_strings, "Cache: ".$info->{cache_dir};
+    push @cache_db_strings, "Cache: <kbd>".$info->{cache_dir}."</kbd>";
   }
   if($self->param('database') or ($self->param('cache') && !$self->param('offline'))) {
     push @cache_db_strings, sprintf('%s on %s', $info->{db_name}, $info->{db_host});
@@ -669,8 +665,27 @@ sub generate_run_stats {
   }
 
   unshift @return, ['Annotation sources', join("; ", @cache_db_strings)];
-  unshift @return, ['VEP version (API)', sprintf(' %i (%i)', $info->{vep_version}, $info->{api_version})];
+  unshift @return, ['VEP version (API)', sprintf(' %s (%s)', $info->{vep_version}, $info->{api_version})];
 
+  return \@return;
+}
+
+
+=head2 generate_data_version
+
+  Example    : $run_stats = $stats->generate_data_version();
+  Description: Generates data version information.
+  Returntype : arrayref
+  Exceptions : none
+  Caller     : finished_stats()
+  Status     : Stable
+
+=cut
+
+sub generate_data_version {
+  my $self = shift;
+  my %version_data = %{ $self->{info}->{version_data} };
+  my @return = map { [ $_, $version_data{$_} ] } sort keys %version_data;
   return \@return;
 }
 
@@ -786,7 +801,10 @@ sub dump_text {
 
   print $fh "[VEP run statistics]\n";
   print $fh join("\t", map {s/\<.+?\>//g; $_} @{$_})."\n" for @{$finished_stats->{run_stats}};
-  
+
+  print $fh "[Data version]\n";
+  print $fh join("\t", map {s/\<.+?\>//g; $_} @{$_})."\n" for @{$finished_stats->{data_version}};
+
   print $fh "\n[General statistics]\n";
   print $fh join("\t", map {s/\<.+?\>//g; $_} grep {defined($_)} @{$_})."\n" for @{$finished_stats->{general_stats}};
   
@@ -828,6 +846,7 @@ sub dump_html {
           join('', map {sprintf('<li><a href="#%s">%s</a></li>', $_->[0], $_->[1])} (
             ['masthead', 'Top of page'],
             ['run_stats', 'VEP run statistics'],
+            ['data_version', 'Data version'],
             ['gen_stats', 'General statistics'],
             map {
               [$_->{id}, $_->{title}]
@@ -844,7 +863,13 @@ sub dump_html {
     '<table class="stats_table">'.
       join('', map {'<tr>'.join('', map {'<td>'.$_.'</td>'} @$_).'</tr>'} @{$finished_stats->{run_stats}}).
     '</table>';
-  
+
+  print $fh
+    '<h3 id="data_version">Data version</h3>'.
+    '<table class="stats_table">'.
+      join('', map {'<tr>'.join('', map {'<td>'.$_.'</td>'} @$_).'</tr>'} @{$finished_stats->{data_version}}).
+    '</table>';
+
   # vars in/out stats
   print $fh
     '<h3 id="gen_stats">General statistics</h3>'.
@@ -1007,10 +1032,22 @@ sub stats_html_head {
     
     .stats_table {
       margin: 5px;
+      table-layout: fixed;
+      width: 100%;
     }
-    
+
+    pre {
+      white-space: normal;
+      word-break: keep-all;
+    }
+
     td {
       padding: 5px;
+      word-break: break-word;
+    }
+
+    td:nth-child(2) {
+      width: 80%;
     }
 
     th.gradient {
