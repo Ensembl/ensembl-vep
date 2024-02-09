@@ -66,6 +66,7 @@ use Bio::EnsEMBL::VEP::Utils qw(get_time);
 use Bio::EnsEMBL::Slice;
 use Bio::EnsEMBL::CoordSystem;
 use Bio::EnsEMBL::VEP::Stats;
+use File::Spec;
 use FileHandle;
 
 
@@ -259,6 +260,8 @@ sub registry {
 
       # load DB options from registry file if given
       if(my $registry_file = $self->param('registry')) {
+        $registry_file = File::Spec->rel2abs($registry_file);
+        throw("ERROR: Registry file $registry_file not found") unless -e $registry_file;
         $self->status_msg("Loading DB self from registry file ", $registry_file) if $self->param('verbose');
         
         $reg->load_all(
@@ -279,16 +282,25 @@ sub registry {
           }
         }
 
+        my $host       = $self->param('host');
+        my $user       = $self->param('user');
+        my $port       = $self->param('port');
+        my $db_version = $self->param('db_version');
         $reg->load_registry_from_db(
-          -host       => $self->param('host'),
-          -user       => $self->param('user'),
+          -host       => $host,
+          -user       => $user,
           -pass       => $self->param('password'),
           -port       => $self->param('port'),
-          -db_version => $self->param('db_version'),
+          -db_version => $db_version,
           -species    => $species,
           -verbose    => $self->param('verbose'),
           -no_cache   => $self->param('no_slice_cache'),
         );
+
+        my @db_names = map { $_->dbc->dbname } @{ $reg->get_all_DBAdaptors };
+        my $hostname = ($user eq 'anonymous' ? '' : $user . '@') . "$host:$port";
+        $self->warning_msg("No database names in $hostname contain version $db_version")
+          unless grep { /$db_version/ } @db_names;
       }
 
       eval { $reg->set_reconnect_when_lost() };
@@ -336,7 +348,7 @@ sub get_adaptor {
     my $ad;
 
     if($self->param('database') || ($self->param('cache') && !$self->param('offline'))) {
-      $ad = $self->registry->get_adaptor($self->species, $group, $type)
+      $ad = $self->registry->get_adaptor($self->species, $group, $type);
     }
 
     $ad ||= $self->_get_fake_adaptor($group, $type);
