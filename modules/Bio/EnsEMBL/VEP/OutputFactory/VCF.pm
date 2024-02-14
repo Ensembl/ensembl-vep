@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2023] EMBL-European Bioinformatics Institute
+Copyright [2016-2024] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -204,8 +204,9 @@ sub headers {
 
   # add VEP version string
   push @headers, sprintf(
-    '##VEP="v%i" time="%s"%s%s',
+    '##VEP="v%s" API="v%s" time="%s"%s%s',
     $info->{vep_version},
+    $info->{api_version},
     $info->{time},
     $info->{cache_dir} ? ' cache="'.$info->{cache_dir}.'"' : '',
     $info->{db_name} ? ' db="'.$info->{db_name}.'@'.$info->{db_host}.'"' : ''

@@ -1,4 +1,4 @@
-# Copyright [2016-2023] EMBL-European Bioinformatics Institute
+# Copyright [2016-2024] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -336,8 +336,10 @@ SKIP: {
 
   $as = Bio::EnsEMBL::VEP::AnnotationSource::File::GFF->new({file => $test_cfg->{custom_gff}, config => $runner->config});
 
+  ok($as->chromosome_synonyms($test_cfg->{chr_synonyms}), 'load synonyms');
   is($as->get_source_chr_name(21), 21, 'get_source_chr_name - exists, same');
   is($as->get_source_chr_name('chr21'), 21, 'get_source_chr_name - strip chr');
+  is($as->get_source_chr_name('NC_000021.9'), 21, 'get_source_chr_name - synonyms');
 
   push @{$as->{valid_chromosomes}}, 'chrFoo';
   is($as->get_source_chr_name('Foo'), 'chrFoo', 'get_source_chr_name - add chr');

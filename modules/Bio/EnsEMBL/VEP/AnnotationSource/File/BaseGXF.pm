@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2023] EMBL-European Bioinformatics Institute
+Copyright [2016-2024] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -239,7 +239,7 @@ sub _get_records_by_coords {
     else {
       my $type = $parser->get_type;
       my $file = $self->{file};
-      $self->warning_msg("Ignoring non-supported '$type' feature_type from $file\n");
+      $self->warning_msg("Ignoring '$type' feature_type from $file GFF/GTF file. This feature_type is not supported in VEP.\n");
     }
 
     $parser->next();

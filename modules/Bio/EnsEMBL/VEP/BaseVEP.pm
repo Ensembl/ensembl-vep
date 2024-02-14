@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [2016-2023] EMBL-European Bioinformatics Institute
+Copyright [2016-2024] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -66,6 +66,7 @@ use Bio::EnsEMBL::VEP::Utils qw(get_time);
 use Bio::EnsEMBL::Slice;
 use Bio::EnsEMBL::CoordSystem;
 use Bio::EnsEMBL::VEP::Stats;
+use File::Spec;
 use FileHandle;
 
 
@@ -259,6 +260,8 @@ sub registry {
 
       # load DB options from registry file if given
       if(my $registry_file = $self->param('registry')) {
+        $registry_file = File::Spec->rel2abs($registry_file);
+        throw("ERROR: Registry file $registry_file not found") unless -e $registry_file;
         $self->status_msg("Loading DB self from registry file ", $registry_file) if $self->param('verbose');
         
         $reg->load_all(
@@ -279,16 +282,25 @@ sub registry {
           }
         }
 
+        my $host       = $self->param('host');
+        my $user       = $self->param('user');
+        my $port       = $self->param('port');
+        my $db_version = $self->param('db_version');
         $reg->load_registry_from_db(
-          -host       => $self->param('host'),
-          -user       => $self->param('user'),
+          -host       => $host,
+          -user       => $user,
           -pass       => $self->param('password'),
           -port       => $self->param('port'),
-          -db_version => $self->param('db_version'),
+          -db_version => $db_version,
           -species    => $species,
           -verbose    => $self->param('verbose'),
           -no_cache   => $self->param('no_slice_cache'),
         );
+
+        my @db_names = map { $_->dbc->dbname } @{ $reg->get_all_DBAdaptors };
+        my $hostname = ($user eq 'anonymous' ? '' : $user . '@') . "$host:$port";
+        $self->warning_msg("No database names in $hostname contain version $db_version")
+          unless grep { /$db_version/ } @db_names;
       }
 
       eval { $reg->set_reconnect_when_lost() };
@@ -336,7 +348,7 @@ sub get_adaptor {
     my $ad;
 
     if($self->param('database') || ($self->param('cache') && !$self->param('offline'))) {
-      $ad = $self->registry->get_adaptor($self->species, $group, $type)
+      $ad = $self->registry->get_adaptor($self->species, $group, $type);
     }
 
     $ad ||= $self->_get_fake_adaptor($group, $type);
@@ -565,6 +577,47 @@ sub chr_lengths {
 }
 
 
+=head2 _fetch_chr_synonyms
+
+  Arg 1      : string $SeqRegionSynonyms_adaptor
+  Arg 2      : string $slice_adaptor
+  Example    : $tree = $obj->_fetch_chr_synonyms($srsa, $sa)
+  Description: Fetches chromosome synonyms
+  Returntype : hashref
+  Exceptions : none
+  Caller     : chromosome_synonyms()
+  Status     : Stable
+
+=cut
+
+sub _fetch_chr_synonyms {
+  my ($srsa, $sa) = @_;
+
+  # synonyms can be indirect i.e. A <-> B <-> C
+  # and there may not be a direct link between A <-> C in the DB
+  # so let's allow for one level of indirection
+  my $tree = {};
+
+  my @all_syns = @{$srsa->fetch_all};
+
+  # To prevent memory errors, species with many seq_regions will not search for indirect synonyms
+  # With 4GB memory supplied, errors seem to start with species with ~50k seq regions, so 
+  # we've chosen 40k as the limit for calculating indirect synonyms 
+  my $syn_threshold = 40000; 
+  foreach my $syn(@all_syns) {
+    my $syn_slice = $sa->fetch_by_seq_region_id($syn->seq_region_id);
+    next unless $syn_slice;
+    my ($a, $b) = sort ($syn_slice->seq_region_name, $syn->name);
+    $tree->{$a}->{$b} = 1;
+    unless(scalar(@all_syns) > $syn_threshold){ 
+      $tree->{$_}->{$b} = 1 for keys %{$tree->{$a} || {}};
+      $tree->{$_}->{$a} = 1 for keys %{$tree->{$b} || {}};
+    }
+  }
+  return $tree;
+}
+
+
 =head2 chromosome_synonyms
   
   Arg 1      : (optional) string $synonyms_file
@@ -582,10 +635,10 @@ sub chromosome_synonyms {
   my $self = shift;
   my $file = shift;
 
-  if($file) {
-    open IN, $file or throw("ERROR: Could not read synonyms file $file: $!");
+  my $synonyms = $self->config->{_chromosome_synonyms} ||= {};
 
-    my $synonyms = $self->config->{_chromosome_synonyms} ||= {};
+  if ($file) {
+    open IN, $file or throw("ERROR: Could not read synonyms file $file: $!");
 
     while(<IN>) {
       chomp;
@@ -600,9 +653,12 @@ sub chromosome_synonyms {
     }
 
     close IN;
+  } elsif (!%{$synonyms} && $self->param('database')) {
+    my $sa    = $self->get_adaptor('core', 'slice');
+    my $srsa  = $self->get_adaptor('core', 'SeqRegionSynonym');
+    $synonyms = _fetch_chr_synonyms($srsa, $sa);
   }
-
-  return $self->config->{_chromosome_synonyms} ||= {};
+  return $self->config->{_chromosome_synonyms} = $synonyms;
 }
 
 

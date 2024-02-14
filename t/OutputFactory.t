@@ -1,4 +1,4 @@
-# Copyright [2016-2023] EMBL-European Bioinformatics Institute
+# Copyright [2016-2024] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -1964,7 +1964,7 @@ is_deeply(
   'HGVS 3prime shifting - ON'
 );
 
-# Shifting OFF
+# Shifting OFF - the default look up is 5' direction
 $ib = get_annotated_buffer({
   input_file => $input_file_example,
   shift_hgvs => 0
@@ -1978,7 +1978,7 @@ is_deeply(
     "Consequence" => [
       "intron_variant"
     ],
-    "HGVSg" => "21:g.25592982_25592985dup",
+    "HGVSg" => "21:g.25592986_25592989dup",
     "Allele" => "TAAA"
   },
   'HGVS 3prime shifting - OFF'
@@ -2035,8 +2035,8 @@ $ib = get_annotated_buffer({
 });
 
 $of->{individual_zyg} = ['dave,barry'];
-my $result = $of->VariationFeature_to_output_hash($ib->buffer->[0]);
-my $genotype = join ',', sort(@{$result->{ZYG}});
+$result = $of->VariationFeature_to_output_hash($ib->buffer->[0]);
+$genotype = join ',', sort(@{$result->{ZYG}});
 
 is($genotype, 'barry:HOM,dave:HET', 'VariationFeature_to_output_hash - individual_zyg correct sample name');
 delete($of->{individual_zyg});
