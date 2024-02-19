@@ -210,6 +210,18 @@ RUN curl -O "$PLUGIN_DEPS/requirements.txt" && \
     python2 -m pip install --no-cache-dir -r requirements.txt && \
     rm requirements.txt
 
+# Install GeneSplicer binary
+USER vep
+WORKDIR $VEP_DIR_PLUGINS
+RUN curl -O ftp://ftp.ccb.jhu.edu/pub/software/genesplicer/GeneSplicer.tar.gz && \
+    tar -xzf GeneSplicer.tar.gz && \
+    rm GeneSplicer.tar.gz && \
+    cd GeneSplicer/sources && \
+    make && \
+    mv genesplicer .. && \
+    rm -rf GeneSplicer/*/
+ENV PATH $VEP_DIR_PLUGINS/GeneSplicer:$PATH
+
 # Set working directory as symlink to $OPT/.vep (containing VEP cache and data)
 USER root
 RUN ln -s $OPT/.vep /data
