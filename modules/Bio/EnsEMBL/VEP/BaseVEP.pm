@@ -69,6 +69,9 @@ use Bio::EnsEMBL::VEP::Stats;
 use File::Spec;
 use FileHandle;
 
+use base qw(Exporter);
+
+our @EXPORT_OK = qw(_fetch_chr_synonyms);
 
 =head2 new
 
