@@ -303,7 +303,7 @@ sub registry {
         my @db_names = map { $_->dbc->dbname } @{ $reg->get_all_DBAdaptors };
         my $hostname = ($user eq 'anonymous' ? '' : $user . '@') . "$host:$port";
         $self->warning_msg("No database names in $hostname contain version $db_version")
-          unless grep { /$db_version/ } @db_names;
+          if defined $db_version and not grep { /$db_version/ } @db_names;
       }
 
       eval { $reg->set_reconnect_when_lost() };
