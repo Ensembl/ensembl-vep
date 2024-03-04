@@ -459,10 +459,10 @@ sub _create_transcript {
   my $tr_record = shift;
   my $gene_record = shift;
 
-  return unless $tr_record->{_children};
+  return unless $tr_record->{_children} or $tr_record->{type} eq 'CDS';
 
   my $id = $tr_record->{attributes}->{transcript_id} || $self->_record_get_id($tr_record);
-  $id =~ s/^(gene|transcript)://i;
+  $id =~ s/^(gene|transcript|cds)[:-]//i;
 
   my $slice = $self->get_slice($tr_record->{chr});
 
@@ -518,8 +518,18 @@ sub _create_transcript {
 
   # check for exons for protein_coding biotype
   if ($biotype eq 'protein_coding' && scalar @exons == 0){
-    $self->warning_msg("WARNING: No exons found for protein_coding transcript $id");
-    return;
+    if ($tr_record->{type} eq 'CDS'){
+      # create single-exon transcript based on a CDS without transcript parent
+      # example: microbial annotations from NCBI
+      push @exons, {
+        start  => $tr_record->{start},
+        end    => $tr_record->{end},
+        strand => $tr_record->{strand},
+      };
+    } else {
+      $self->warning_msg("WARNING: No exons found for protein_coding transcript $id");
+      return;
+    }
   }
 
   # sort exons
