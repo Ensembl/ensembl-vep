@@ -643,13 +643,23 @@ sub generate_run_stats {
     }
   }
 
+  # Distinguish input source
+  my ($input, $input_label);
+  if ($self->param('input_file') eq *Bio::EnsEMBL::VEP::Runner::IN) {
+    $input = $self->param('input_data');
+    $input_label = 'Input data';
+  } else {
+    $input = $self->param('input_file');
+    $input_label = 'Input file';
+  }
+
   my @return = (
     ['Species', $self->species],
     ['Command line options', '<pre>'.join(" ", @opts).'</pre>'],
     ['Start time', $self->start_time],
     ['End time', $self->end_time],
     ['Run time', $self->run_time." seconds"],
-    ['Input file', "<pre>".$self->param('input_file')."</pre>"],
+    [$input_label, "<pre>".$input."</pre>"],
     ['Output file', "<pre>".$self->param('output_file')."</pre>"],
   );
 
@@ -684,7 +694,7 @@ sub generate_run_stats {
 
 sub generate_data_version {
   my $self = shift;
-  my %version_data = %{ $self->{info}->{version_data} };
+  my %version_data = %{ $self->{info}->{version_data} } if $self->{info}->{version_data};
   my @return = map { [ $_, $version_data{$_} ] } sort keys %version_data;
   return \@return;
 }
@@ -802,8 +812,12 @@ sub dump_text {
   print $fh "[VEP run statistics]\n";
   print $fh join("\t", map {s/\<.+?\>//g; $_} @{$_})."\n" for @{$finished_stats->{run_stats}};
 
-  print $fh "[Data version]\n";
-  print $fh join("\t", map {s/\<.+?\>//g; $_} @{$_})."\n" for @{$finished_stats->{data_version}};
+  print $fh "\n[Data version]\n";
+  if (@{$finished_stats->{data_version}}) {
+    print $fh join("\t", map {s/\<.+?\>//g; $_} @{$_})."\n" for @{$finished_stats->{data_version}};
+  } else {
+    print $fh "No data version information available.\n";
+  }
 
   print $fh "\n[General statistics]\n";
   print $fh join("\t", map {s/\<.+?\>//g; $_} grep {defined($_)} @{$_})."\n" for @{$finished_stats->{general_stats}};
@@ -864,11 +878,15 @@ sub dump_html {
       join('', map {'<tr>'.join('', map {'<td>'.$_.'</td>'} @$_).'</tr>'} @{$finished_stats->{run_stats}}).
     '</table>';
 
-  print $fh
-    '<h3 id="data_version">Data version</h3>'.
-    '<table class="stats_table">'.
-      join('', map {'<tr>'.join('', map {'<td>'.$_.'</td>'} @$_).'</tr>'} @{$finished_stats->{data_version}}).
-    '</table>';
+  print $fh '<h3 id="data_version">Data version</h3>';
+  if (@{$finished_stats->{data_version}}) {
+    print $fh
+      '<table class="stats_table">'.
+        join('', map {'<tr>'.join('', map {'<td>'.$_.'</td>'} @$_).'</tr>'} @{$finished_stats->{data_version}}).
+      '</table>';
+  } else {
+    print $fh 'No data version information available.';
+  }
 
   # vars in/out stats
   print $fh
