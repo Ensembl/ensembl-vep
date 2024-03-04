@@ -84,7 +84,7 @@ SKIP: {
         'havana_gene' => 'OTTHUMG00000078371',
         'havana_transcript_version' => '2',
         'exon_id' => 'ENSE00003528074',
-        'tag' => 'basic',
+        'tag' => ['CCDS', 'basics'],
         'transcript_id' => 'ENST00000307301',
         'gene_id' => 'ENSG00000154719',
         'transcript_biotype' => 'protein_coding',
