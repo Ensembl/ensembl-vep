@@ -460,9 +460,15 @@ sub create_StructuralVariationFeatures {
     $parser->get_IDs,
   );
 
-  ## get structural variant type from SVTYPE tag (deprecated in VCF 4.4) or ALT
+  ## get structural variant type from ALT or (deprecated) SVTYPE tag
   my $alt = join("/", @$alts);
-  my $type = $alt ne '.' ? $alt : $info->{SVTYPE};
+  my $type = $alt;
+
+  # replace with SVTYPE tag if ALT does not follow VCF 4.4 specs
+  if ($info->{SVTYPE} && $alt !~ /^<?(DEL|INS|DUP|INV|CNV|CN=?[0-9]+)/) {
+    $type = $info->{SVTYPE};
+  }
+
   my $so_term = $self->get_SO_term($type);
   unless ($so_term) {
     $skip_line = 1;

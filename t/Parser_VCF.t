@@ -621,14 +621,14 @@ is_deeply($cvf, bless( {
                  'inner_start' => '774570',
                  'strand' => 1,
                  'seq_region_end' => 828435,
-                 'class_SO_term' => '<CPX>',
+                 'class_SO_term' => 'CPX',
                  'variation_name' => 'gnomAD_v2_CPX_1_1',
                  'start' => 774570
                },
                 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature - CPX skipped');
 
 
-like($tmp, qr/CPX type is not supported/, 'StructuralVariationFeature - skip CPX warning');
+like($tmp, qr/CPX is not a supported structural variant type/, 'StructuralVariationFeature - skip CPX warning');
 
 open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
