@@ -532,6 +532,7 @@ sub evaluate {
 
 sub get_input {
   my ($self, $field, $value, $data) = @_;
+  
   my $input;
 
   if(exists($data->{$field})) {
