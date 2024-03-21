@@ -138,8 +138,6 @@ sub new {
 
   $self->{filter_root} = $self->parse_filters(\@_);
 
-  use Data::Dumper; print Dumper($self->{filter_root}), "\n";
-
   return $self;
 }
 
@@ -224,7 +222,6 @@ sub parse_filters {
 
     while($filter_list =~ m/([^\(^\)^\s]*?)(\s|\(|\)|$)/g) {
       my ($word, $sep) = ($1, $2);
-      # print $word, ": ", $sep, "sep_done", "\n";
 
       # no word or separator - should be end of the string
       unless($self->defined_and_non_empty($word) || $self->defined_and_non_empty($sep)) {
@@ -535,10 +532,6 @@ sub evaluate {
 
 sub get_input {
   my ($self, $field, $value, $data) = @_;
-# use Data::Dumper;
-# print Dumper($data), "\n";
-# print $field, "\n";
-# print $value, "\n";
   my $input;
 
   if(exists($data->{$field})) {
