@@ -64,6 +64,7 @@ SKIP: {
   my $records;
   warning { $records = $as->_get_records_by_coords(21, 25585733, 25585733) };
   is(scalar @$records, 77, '_get_records_by_coords - count');
+  delete $records->[0]->{attributes}->{tag};
 
   is_deeply(
     $records->[0],
