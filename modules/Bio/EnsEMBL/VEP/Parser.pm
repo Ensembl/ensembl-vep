@@ -723,7 +723,7 @@ sub get_SO_term {
   my $res = $terms{$abbrev};
   ## unsupported SV types
   if ($self->isa('Bio::EnsEMBL::VEP::Parser')) {
-    $self->skipped_variant_msg("$abbrev type is not supported") unless $res;
+    $self->skipped_variant_msg("$abbrev is not a supported structural variant type") unless $res;
   }
   return $res;
 }
