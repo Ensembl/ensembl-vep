@@ -596,9 +596,9 @@ our %REQUIRES = (
 
 # incompatible options
 our %INCOMPATIBLE = (
-  most_severe => [qw(biotype no_intergenic protein symbol sift polyphen coding_only ccds mane canonical xref_refseq numbers domains tsl appris uniprot summary pick flag_pick pick_allele flag_pick_allele)],
-  summary     => [qw(biotype no_intergenic protein symbol sift polyphen coding_only ccds mane canonical xref_refseq numbers domains tsl appris uniprot most_severe pick flag_pick pick_allele flag_pick_allele)],
-  database    => [qw(af_1kg af_gnomad af_gnomade af_gnomadg max_af pubmed var_synonyms offline cache)],
+  most_severe => [qw(biotype no_intergenic protein symbol sift polyphen coding_only ccds mane mane_select canonical xref_refseq numbers domains tsl appris uniprot pick flag_pick pick_allele flag_pick_allele vcf summary)],
+  summary     => [qw(biotype no_intergenic protein symbol sift polyphen coding_only ccds mane mane_select canonical xref_refseq numbers domains tsl appris uniprot pick flag_pick pick_allele flag_pick_allele vcf most_severe)],
+  database    => [qw(af_1kg af_gnomad af_gnomade af_gnomadg af_esp af_exac max_af pubmed var_synonyms offline cache)],
   af_gnomade    => [qw(af_gnomad)],
   quiet       => [qw(verbose)],
   refseq      => [qw(gencode_basic merged)],
@@ -608,7 +608,9 @@ our %INCOMPATIBLE = (
   individual  => [qw(minimal individual_zyg)],
   check_ref   => [qw(lookup_ref)],
   check_svs   => [qw(offline)],
-  ga4gh_vrs   => [qw(vcf)]
+  ga4gh_vrs   => [qw(vcf)],
+  shift_hgvs  => [qw(shift_3prime shift_genomic)],
+  lrg         => [qw(offline)]
 );
 
 # deprecated/replaced flags
