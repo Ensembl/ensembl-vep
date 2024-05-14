@@ -204,6 +204,11 @@ sub filter_transcript {
     return 0;
   }
 
+   # using gencode primary?
+  if($self->{gencode_primary} && !(grep {$_->{code} eq 'gencode_primary'} @{$t->get_all_Attributes})) {
+    return 0;
+  }
+
   # using all_refseq?
   if(
     !$self->{all_refseq} &&
