@@ -122,15 +122,20 @@ workflow {
 
   output_dir = createOutputChannel(params.outdir)
   
+  filters = Channel.of(params.filters)
+  
   vcf
     .combine( vep_config )
     .combine( one_to_many )
     .combine( output_dir )
+    .combine( filters )
     .map {
-      vcf, vep_config, one_to_many, output_dir ->
+      vcf, vep_config, one_to_many, output_dir, filters ->
         meta = [:]
         meta.one_to_many = one_to_many
         meta.output_dir = output_dir
+        meta.filters = filters
+        
         // NOTE: csi is default unless a tbi index already exists
         meta.index_type = file(vcf + ".tbi").exists() ? "tbi" : "csi"
 

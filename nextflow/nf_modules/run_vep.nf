@@ -37,8 +37,8 @@ process runVEP {
   else if ( !vcf_index.exists() ){
     exit 1, "VCF index file is not generated: ${vcf_index}"
   }
-  else if ( params.filters != null ){
-    def filters = params.filters.split(",")
+  else if ( meta.filters != null ){
+    def filters = meta.filters.split(",")
     def filter_arg = ""
     for (filter in filters) {
       filter_arg = filter_arg + "-filter \"" + filter + "\" "
