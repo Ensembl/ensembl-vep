@@ -12,6 +12,7 @@ params.cpus = 1
 
 params.vcf = null
 params.vep_config = null
+params.filters = null
 params.outdir = "outdir"
 
 params.output_prefix = ""
@@ -43,6 +44,9 @@ Options:
   --outdir DIRNAME          Name of output directory. Default: outdir
   --output_prefix PREFIX    Output filename prefix. The generated output file will have name <vcf>-<output_prefix>.vcf.gz
   --skip_check [0,1]        Skip check for tabix index file of input VCF. Enables use of cache with -resume. Default: 0
+  --filter STRING           Comma-separated list of filter conditions to pass to filter_vep, such as "AF < 0.01,Feature is ENST00000377918".
+                            Read more on how to write filters at https://ensembl.org/info/docs/tools/vep/script/vep_filter.html
+                            Default: null (filter_vep is not run)
   """
   exit 1
 }
@@ -121,15 +125,20 @@ workflow {
 
   output_dir = createOutputChannel(params.outdir)
   
+  filters = Channel.of(params.filters)
+  
   vcf
     .combine( vep_config )
     .combine( one_to_many )
     .combine( output_dir )
+    .combine( filters )
     .map {
-      vcf, vep_config, one_to_many, output_dir ->
+      vcf, vep_config, one_to_many, output_dir, filters ->
         meta = [:]
         meta.one_to_many = one_to_many
         meta.output_dir = output_dir
+        meta.filters = filters
+        
         // NOTE: csi is default unless a tbi index already exists
         meta.index_type = file(vcf + ".tbi").exists() ? "tbi" : "csi"
 
