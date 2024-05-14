@@ -26,7 +26,6 @@ process runVEP {
   
   output:
   tuple val(meta), val(original_vcf), path(out_vcf), path("${out_vcf}.{tbi,csi}"), val("${vep_config}"), emit: files
-  path("*.vcf.gz_summary.*")
 
   script:
   index_type = meta.index_type
@@ -37,6 +36,25 @@ process runVEP {
   }
   else if ( !vcf_index.exists() ){
     exit 1, "VCF index file is not generated: ${vcf_index}"
+  }
+  else if ( params.filters != null ){
+    def filters = params.filters.split(",")
+    def filter_arg = ""
+    for (filter in filters) {
+      filter_arg = filter_arg + "-filter \"" + filter + "\" "
+    }
+    """
+    vep -i ${vcf} -o STDOUT --vcf --format vcf --config ${vep_config} | filter_vep -o filtered.vcf --only_matched --format vcf ${filter_arg}  
+    
+    bgzip filtered.vcf
+    mv filtered.vcf.gz ${out_vcf}
+    
+    if [[ "${index_type}" == "tbi" ]]; then
+      tabix -p vcf ${out_vcf}
+    else
+      tabix -C -p vcf ${out_vcf}
+    fi
+    """
   }
   else {
     """

@@ -12,6 +12,7 @@ params.cpus = 1
 
 params.vcf = null
 params.vep_config = null
+params.filters = null
 params.outdir = "outdir"
 
 params.output_prefix = ""
