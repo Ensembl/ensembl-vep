@@ -399,7 +399,7 @@ SKIP: {
     $of->get_all_lines_by_InputBuffer($runner->get_InputBuffer)->[0],
     "21\t25585733\t.\tCATG\tTACG\t.\t.\t".
     "CSQ=TACG|3_prime_UTR_variant|MODIFIER||ENSG00000154719|Transcript|ENST00000307301||||||1119-1122|||||||-1|||test1&del1&del2,".
-    "TACG|missense_variant|MODERATE||ENSG00000154719|Transcript|ENST00000352957||||||1030-1033|988-991|330-331|HA/RT|CATGca/CGTAca|||-1|||test1&del1&del2,".
+    "TACG|missense_variant|MODERATE||ENSG00000154719|Transcript|ENST00000352957||||||1030-1033|988-991|330-331|KA/RT|AAAGca/CGTAca|||-1|||test1&del1&del2,".
     "TACG|upstream_gene_variant|MODIFIER||ENSG00000260583|Transcript|ENST00000567517||||||||||||2407|-1|||test1&del1&del2",
     'get_all_lines_by_InputBuffer - custom overlap'
   );
