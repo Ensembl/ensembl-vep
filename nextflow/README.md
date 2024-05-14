@@ -60,6 +60,10 @@ The following config files are used and can be modified depending on user requir
   --output_prefix PREFIX    Output filename prefix. The generated output file will have name <output_prefix>_VEP.vcf.gz.
                             NOTE: Do not use this parameter if you are expecting multiple output files.
   --skip_check [0,1]        Skip check for tabix index file of input VCF. Enables use of cache with -resume. Default: 0
+  --filters STRING          Comma-separated list of filter conditions to pass to filter_vep,
+                            such as "amino_acids not match X[A-Za-z*]?\/,Feature is ENST00000377918".
+                            Read more on how to write filters at https://ensembl.org/info/docs/tools/vep/script/vep_filter.html
+                            Default: null (filter_vep is not run)
 ```
 
 ---
