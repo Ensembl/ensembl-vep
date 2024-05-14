@@ -30,6 +30,7 @@ process runVEP {
   script:
   index_type = meta.index_type
   out_vcf = "vep" + "-" + file(original_vcf).getSimpleName() + "-" + vep_config.getSimpleName() + "-" + vcf
+  tabix_arg = index_type == 'tbi' ? '' : '-C'
   
   if( !vcf.exists() ) {
     exit 1, "VCF file is not generated: ${vcf}"
@@ -49,22 +50,14 @@ process runVEP {
     bgzip filtered.vcf
     mv filtered.vcf.gz ${out_vcf}
     
-    if [[ "${index_type}" == "tbi" ]]; then
-      tabix -p vcf ${out_vcf}
-    else
-      tabix -C -p vcf ${out_vcf}
-    fi
+    tabix ${tabix_arg} -p vcf ${out_vcf}
     """
   }
   else {
     """
     vep -i ${vcf} -o ${out_vcf} --vcf --compress_output bgzip --format vcf --config ${vep_config}
     
-    if [[ "${index_type}" == "tbi" ]]; then
-      tabix -p vcf ${out_vcf}
-    else
-      tabix -C -p vcf ${out_vcf}
-    fi
+    tabix ${tabix_arg} -p vcf ${out_vcf}
     """
   }
 }
