@@ -675,19 +675,26 @@ sub _add_identifiers {
     });
   }
 
-  # add MANE_Select and MANE_Plus_Clinical
+  # gff tags are in comma separated string and gtf tags are arrayref
+  my @tags;
   if($tr_record->{attributes}->{tag}) {
-    foreach (qw/MANE_Select MANE_Plus_Clinical/) {
-      if($tr_record->{attributes}->{tag} =~ /$_/) {
+    @tags = ref $tr_record->{attributes}->{tag} eq "ARRAY" ?
+      @{ $tr_record->{attributes}->{tag} } : split(',', $tr_record->{attributes}->{tag});
+  }
+
+  # add MANE_Select and MANE_Plus_Clinical
+  if(@tags) {
+    foreach my $attr (qw/MANE_Select MANE_Plus_Clinical/) {
+      if( grep(/^$attr$/, @tags) ) {
         push @{$tr->{attributes}}, Bio::EnsEMBL::Attribute->new_fast({
-          code => $_
+          code => $attr
         });
       }
     }
   }
 
   # add canonical
-  if($tr_record->{attributes}->{tag} && $tr_record->{attributes}->{tag} =~ /Ensembl_canonical/) {
+  if(@tags && grep(/^Ensembl_canonical$/, @tags)) {
     $tr->{is_canonical} = 1;
   }
 }
