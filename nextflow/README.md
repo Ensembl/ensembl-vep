@@ -1,9 +1,9 @@
 ## Nextflow VEP pipeline
 
-The nextflow pipeline aims to run VEP faster utilising simple parallelisation. It is deployable on an individual Linux machine or on computing clusters running lsf or slurm (not tested). The process can be summarised briefly by the following steps:
+The nextflow pipeline aims to run VEP faster utilising simple parallelisation. It is deployable on an individual Linux machine or on computing clusters running LSF or SLURM. The process can be summarised briefly by the following steps:
 
- * Splitting the VCF in a given number of bins (100 variants by default)
- * Running VEP on the split VCFs in parallel
+ * Splitting the input data into multiple files using a given number of bins (100 by default)
+ * Running VEP on the split files in parallel
  * Merging VEP outputs into a single file
 
 ##### Table of contents
@@ -45,14 +45,14 @@ The following config files are used and can be modified depending on user requir
 
 ```bash
   nextflow run workflows/run_vep.nf \
-  --vcf <path-to-vcf> \
+  --input <path-to-file> \
   -profile <standard or lsf or slurm>
 ```
 
 #### Options
 
 ```bash
-  --vcf VCF                 Sorted and bgzipped VCF. Alternatively, can also be a directory containing VCF files
+  --input FILE              Input file: if VCF, it must be sorted and bgzipped. Alternatively, can also be a directory containing input files
   --bin_size INT            Number of variants used to split input VCF into multiple jobs. Default: 100
   --vep_config FILENAME     VEP config file. Alternatively, can also be a directory containing VEP INI files. Default: vep_config/vep.ini
   --cpus INT                Number of CPUs to use. Default: 1
@@ -76,10 +76,10 @@ The following config files are used and can be modified depending on user requir
 
   nextflow \
     run workflows/run_vep.nf \
-    --vcf $PWD/examples/clinvar-testset/input.vcf.gz \
-    -profile lsf
+    --input $PWD/examples/clinvar-testset/input.vcf.gz \
+    -profile slurm
  ```
-The above commands start the pipeline and generate the output file upon completion.
+The above commands start the pipeline in SLURM and generate the output file upon completion.
 
 #### Output validation
 
