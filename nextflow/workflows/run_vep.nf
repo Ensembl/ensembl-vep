@@ -96,33 +96,31 @@ workflow vep {
     data.vcf |
       checkVCF |
       // Generate split files that each contain bin_size number of variants
-      generateSplits |
+      generateSplits | transpose |
       // Split VCF using split files
-      transpose | splitVCF |
+      splitVCF | transpose |
       // Run VEP for each split VCF file and for each VEP config
-      transpose | map { it + [format: 'vcf'] } | runVEPonVCF
+      map { it + [format: 'vcf'] } | runVEPonVCF
 
     // Run VEP on non-VCF files
-    data.other
-      .map {
+    data.other |
+      map {
           // Split input by bin_size
           files = it.file.splitText(by: params.bin_size, file: true)
           res = []
           for (f : files) {
-            // index is it.file simply to avoid Nexrflow errors
+            // put it.file as index to avoid Nextflow errors
             res += [ meta: it.meta, original: it.file, file: f, index: it.file, vep_config: it.vep_config, format: 'other' ]
           }
           res
-      }
-      .flatten() |
+      } |
+      flatten |
       runVEP
 
-    // Merge all output data
+    // Merge split VCF files (creates one output VCF for each input VCF)
     out = runVEP.out.files
             .mix(runVEPonVCF.out.files)
             .groupTuple(by: [0, 1, 4])
-
-    // Merge split VCF files (creates one output VCF for each input VCF)
     mergeVCF(out)
   emit:
     mergeVCF.out
