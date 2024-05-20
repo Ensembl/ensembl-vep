@@ -177,10 +177,10 @@ sub default_options {
     highmem_lsf_options => '-q production -R"select[mem>15000] rusage[mem=15000]" -M15000', # this is Sanger LSF speak for "give me 15GB of memory"
     long_lsf_options    => '-q production -R"select[mem>2000] rusage[mem=2000]" -M2000',
 
-    default_slurm_options => '--partition=production --time=15:00:00 --mem=4G',
-    urgent_slurm_options  => '--partition=production --time=15:00:00 --mem=2G',
-    highmem_slurm_options => '--partition=production --time=15:00:00 --mem=15G',
-    long_slurm_options    => '--partition=production --time=30:00:00 --mem=2G',
+    default_slurm_options => '--partition=production --time=24:00:00 --mem=4G',
+    urgent_slurm_options  => '--partition=production --time=24:00:00 --mem=2G',
+    highmem_slurm_options => '--partition=production --time=24:00:00 --mem=15G',
+    long_slurm_options    => '--partition=production --time=48:00:00 --mem=2G',
     
     debug => 0,
     qc => 1,
@@ -269,7 +269,7 @@ sub pipeline_analyses {
         group           => 'otherfeatures',
         skip_meta_checks => $self->o('skip_meta_checks'),
       },
-      -rc_name       => 'default',
+      -rc_name       => 'long',
       -hive_capacity => 1,
       -max_retry_count => 0,
       -can_be_empty   => 1,
