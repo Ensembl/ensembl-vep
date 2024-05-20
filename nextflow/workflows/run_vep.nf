@@ -18,6 +18,7 @@ params.outdir = "outdir"
 params.output_prefix = ""
 params.bin_size = 100
 params.skip_check = 0
+params.sort = false
 params.help = false
 
 // module imports
@@ -38,12 +39,14 @@ Usage:
   nextflow run workflows/run_vep.nf --input <path-to-file> --vep_config vep_config/vep.ini
 
 Options:
-  --input FILE                 Input file: if VCF, it must be sorted and bgzipped. Alternatively, can also be a directory containing input files
+  --input FILE              Input file: if VCF, it must be sorted and bgzipped. Alternatively, can also be a directory containing input files
   --bin_size INT            Number of lines to split input into multiple jobs. Default: 100
   --vep_config FILENAME     VEP config file. Alternatively, can also be a directory containing VEP INI files. Default: vep_config/vep.ini
   --cpus INT                Number of CPUs to use. Default: 1
   --outdir DIRNAME          Name of output directory. Default: outdir
   --output_prefix PREFIX    Output filename prefix. The generated output file will have name <vcf>-<output_prefix>.vcf.gz
+
+  --sort                    Sort VCF results from VEP (only required if input is unsorted; slower if enabled). Default: false
   --skip_check [0,1]        Skip check for tabix index file of input VCF. Enables use of cache with -resume. Default: 0
   --filter STRING           Comma-separated list of filter conditions to pass to filter_vep, such as "AF < 0.01,Feature is ENST00000377918".
                             Read more on how to write filters at https://ensembl.org/info/docs/tools/vep/script/vep_filter.html

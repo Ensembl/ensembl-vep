@@ -44,25 +44,24 @@ process runVEP {
     for (filter in filters) {
       filter_arg = filter_arg + "-filter \"" + filter + "\" "
     }
-    """
-    vep -i ${input} -o STDOUT --vcf --config ${vep_config} | filter_vep -o filtered.vcf --only_matched ${filter_arg}
-
-    # Sort, bgzip and tabix VCF
-    (head -1000 filtered.vcf | grep "^#"; cat out.vcf | grep -v "^#" | sort -k1,1d -k2,2n) > sorted.vcf
-    mv sorted.vcf ${out}
-    bgzip ${out}
-    tabix ${tabix_arg} ${out}.gz
-    """
+    vep = "vep -i ${input} -o STDOUT --vcf --config ${vep_config} | filter_vep -o out.vcf --only_matched ${filter_arg}"
   }
   else {
-    """
-    vep -i ${input} -o out.vcf --vcf --config ${vep_config}
-    
-    # Sort, bgzip and tabix VCF
-    (head -1000 out.vcf | grep "^#"; cat out.vcf | grep -v "^#" | sort -k1,1d -k2,2n) > sorted.vcf
-    mv sorted.vcf ${out}
-    bgzip ${out}
-    tabix ${tabix_arg} ${out}.gz
-    """
+    vep = "vep -i ${input} -o out.vcf --vcf --config ${vep_config}"
   }
+
+  if( params.sort ) {
+    sort = "(head -1000 out.vcf | grep '^#'; grep -v '^#' out.vcf | sort -k1,1d -k2,2n) > ${out}"
+  } else {
+    sort = "mv out.vcf ${out}"
+  }
+
+  """
+  ${vep}
+
+  # Sort, bgzip and tabix VCF
+  ${sort}
+  bgzip ${out}
+  tabix ${tabix_arg} ${out}.gz
+  """
 }
