@@ -9,7 +9,8 @@ nextflow.enable.dsl=2
  // params default
 params.cpus = 1
 
-params.input = null
+params.vcf = null
+params.input = params.vcf
 params.vep_config = null
 params.filters = null
 params.outdir = "outdir"
@@ -129,6 +130,10 @@ workflow vep {
 workflow {
   if (!params.input) {
     exit 1, "Undefined --input parameter. Please provide the path to an input file."
+  }
+
+  if (params.vcf) {
+    log.warn "The --vcf parameter is deprecated in Nextflow VEP. Please use --input instead."
   }
 
   if (!params.vep_config) {
