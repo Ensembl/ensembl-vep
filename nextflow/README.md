@@ -61,7 +61,6 @@ The following config files are used and can be modified depending on user requir
                             NOTE: Do not use this parameter if you are expecting multiple output files.
 
   --sort                    Sort VCF results from VEP (only required if input is unsorted; slower if enabled). Default: false
-  --skip_check [0,1]        Skip check for tabix index file of input VCF. Enables use of cache with -resume. Default: 0
   --filters STRING          Comma-separated list of filter conditions to pass to filter_vep,
                             such as "AF < 0.01,Feature is ENST00000377918".
                             Read more on how to write filters at https://ensembl.org/info/docs/tools/vep/script/vep_filter.html
