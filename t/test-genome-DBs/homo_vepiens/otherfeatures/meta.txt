@@ -1,5 +1,5 @@
 1	\N	schema_type	core
-2	\N	schema_version	112
+2	\N	schema_version	113
 3	\N	patch	patch_73_74_a.sql|schema_version
 4	\N	patch	patch_73_74_b.sql|remove_dnac
 5	\N	patch	patch_73_74_c.sql|remove_unconventional_transcript_association
@@ -179,3 +179,6 @@
 889 \N  patch   patch_110_111_a.sql|schema_version
 890 \N  patch   patch_111_112_a.sql|schema_version
 891 \N  patch   patch_111_112_b.sql|Allow meta_value to be null
+892	\N	patch	patch_111_112_c.sql|Extend meta_key length to 64
+893	\N	patch	patch_112_113_a.sql|schema_version
+894	\N	patch	patch_112_113_b.sql|Ensure meta_value is not null

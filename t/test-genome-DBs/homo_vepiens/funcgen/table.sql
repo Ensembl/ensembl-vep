@@ -386,7 +386,7 @@ CREATE TABLE `idr` (
 CREATE TABLE `meta` (
   `meta_id` int(10) NOT NULL AUTO_INCREMENT,
   `species_id` int(10) unsigned DEFAULT '1',
-  `meta_key` varchar(46) NOT NULL,
+  `meta_key` varchar(64) NOT NULL,
   `meta_value` varchar(950) NOT NULL,
   PRIMARY KEY (`meta_id`),
   UNIQUE KEY `species_key_value_idx` (`species_id`,`meta_key`,`meta_value`),
