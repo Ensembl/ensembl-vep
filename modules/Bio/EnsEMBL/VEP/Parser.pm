@@ -68,7 +68,7 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::Utils qw(get_compressed_filehandle);
 use Bio::EnsEMBL::Variation::Utils::Sequence qw(trim_sequences);
 use Bio::EnsEMBL::Variation::Utils::VEP qw(&check_format);
-use Bio::EnsEMBL::Variation::Utils::Config qw(%SV_SO_TERMS);
+use Bio::EnsEMBL::Variation::Utils::Config qw(%SO_TERMS);
 
 use Bio::EnsEMBL::VEP::Parser::VCF;
 use Bio::EnsEMBL::VEP::Parser::VEP_input;
@@ -698,7 +698,7 @@ sub get_SO_term {
     $abbrev = $type;
   }
 
-  my %terms = %SV_SO_TERMS;
+  my %terms = %SO_TERMS;
 
   my $res = $terms{$abbrev};
   ## unsupported SV types
