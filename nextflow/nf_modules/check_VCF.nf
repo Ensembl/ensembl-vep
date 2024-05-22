@@ -29,16 +29,20 @@ process checkVCF {
 
   script:
   index_type = meta.index_type
+  tabix_arg = index_type == 'tbi' ? '' : '-C'
 
+  sort_cmd = ""
+  if( params.sort ) {
+    isGzipped = vcf.extension == 'gz'
+    cat_cmd   = isGzipped ? "zcat ${vcf}" : "cat ${vcf}"
+    sort_cmd += "(${cat_cmd} | head -1000 | grep '^#'; ${cat_cmd} | grep -v '^#' | sort -k1,1d -k2,2n) > tmp.vcf; "
+    sort_cmd += isGzipped ? "bgzip -c tmp.vcf > ${vcf}" : "mv tmp.vcf ${vcf}"
+  }
   """
-  [ -f *gz ] || bgzip -c ${vcf} > ${vcf}.gz
-  
-  if [[ "${index_type}" == "tbi" ]]; then
-    [ -f *gz.tbi ] || tabix -p vcf -f *.gz
-  else
-    [ -f *gz.csi ] || tabix -C -p vcf -f *.gz
-  fi
-    
+  ${sort_cmd}
+  [ -f *.gz ] || bgzip -c ${vcf} > ${vcf}.gz
+  [ -f *.gz.${index_type} ] || tabix ${tabix_arg} -p vcf -f *.gz
+
   # quickly test tabix -- ensures both bgzip and tabix are okay
   chr=\$(tabix -l *.gz | head -n1)
   tabix *.gz \${chr}:1-10001

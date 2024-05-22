@@ -38,7 +38,7 @@ Usage:
   nextflow run workflows/run_vep.nf --input <path-to-file> --vep_config vep_config/vep.ini
 
 Options:
-  --input FILE              Input file: if VCF, it must be sorted and bgzipped. Alternatively, can also be a directory containing input files
+  --input FILE              Input file (if unsorted, use --sort to avoid errors). Alternatively, can also be a directory containing input files
   --bin_size INT            Number of lines to split input into multiple jobs. Default: 100
   --vep_config FILENAME     VEP config file. Alternatively, can also be a directory containing VEP INI files. Default: vep_config/vep.ini
   --cpus INT                Number of CPUs to use. Default: 1
