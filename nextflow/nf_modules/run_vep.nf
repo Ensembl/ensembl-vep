@@ -33,7 +33,8 @@ process runVEP {
   tabix_arg = index_type == 'tbi' ? '' : '-C'
   
   if( !input.exists() ) {
-    exit 1, "VCF file is not generated: ${input}"
+    exit 1, "Missing input: ${input}"
+
   }
   else if ( format == 'vcf' && !index.exists() ){
     exit 1, "VCF index file is not generated: ${index}"
@@ -44,23 +45,27 @@ process runVEP {
     for (filter in filters) {
       filter_arg = filter_arg + "-filter \"" + filter + "\" "
     }
-    vep = "vep -i ${input} -o STDOUT --vcf --config ${vep_config} | filter_vep -o out.vcf --only_matched ${filter_arg}"
+    vep_cmd = "vep -i ${input} -o STDOUT --vcf --config ${vep_config} | filter_vep -o out.vcf --only_matched ${filter_arg}"
+
   }
   else {
-    vep = "vep -i ${input} -o out.vcf --vcf --config ${vep_config}"
+    vep_cmd = "vep -i ${input} -o out.vcf --vcf --config ${vep_config}"
+
   }
 
   if( params.sort ) {
-    sort = "(head -1000 out.vcf | grep '^#'; grep -v '^#' out.vcf | sort -k1,1d -k2,2n) > ${out}"
+    sort_cmd = "(head -1000 out.vcf | grep '^#'; grep -v '^#' out.vcf | sort -k1,1d -k2,2n) > ${out}"
   } else {
-    sort = "mv out.vcf ${out}"
+    sort_cmd = "mv out.vcf ${out}"
   }
 
+
   """
-  ${vep}
+  ${vep_cmd}
 
   # Sort, bgzip and tabix VCF
-  ${sort}
+  ${sort_cmd}
+
   bgzip ${out}
   tabix ${tabix_arg} ${out}.gz
   """
