@@ -86,7 +86,7 @@ use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::IO::ListBasedParser;
 
-use Bio::EnsEMBL::Variation::Utils::VEP qw(&_valid_region_regex);
+# use Bio::EnsEMBL::Variation::Utils::VEP qw(&_valid_region_regex);
 
 =head2 new
 
