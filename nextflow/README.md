@@ -52,7 +52,7 @@ The following config files are used and can be modified depending on user requir
 #### Options
 
 ```bash
-  --input FILE              Input file (if unsorted, use --sort to avoid errors). Alternatively, can also be a directory containing input files
+  --input FILE              Input file (if unsorted, use --sort to avoid errors in indexing the output file). Alternatively, can also be a directory containing input files
   --bin_size INT            Number of variants used to split input VCF into multiple jobs. Default: 100
   --vep_config FILENAME     VEP config file. Alternatively, can also be a directory containing VEP INI files. Default: vep_config/vep.ini
   --cpus INT                Number of CPUs to use. Default: 1
