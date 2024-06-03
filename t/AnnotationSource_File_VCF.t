@@ -285,7 +285,7 @@ SKIP: {
     {
       'foo' => [
         { name => 'del1', allele => '-', fields => {'GOO' => 'B','FILTER' => 'PASS'} },
-        { name => 'del2', allele => '-', fields => {'FILTER' => 'SEGDUP,RF'} }
+        { name => 'del2', allele => '-', fields => {'FILTER' => 'SEGDUP%3BRF'} }
       ]
     },
     'annotate_InputBuffer - deletion'
@@ -442,7 +442,7 @@ SKIP: {
     $ib->buffer->[0]->{_custom_annotations},
     {
       'foo' => [
-        { name => 'del2', fields => { 'FILTER' => 'SEGDUP,RF'} },
+        { name => 'del2', fields => { 'FILTER' => 'SEGDUP%3BRF'} },
       ]
     },
     'annotate_InputBuffer - SV reverts to overlap'
