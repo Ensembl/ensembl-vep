@@ -216,7 +216,7 @@ sub _create_records {
     }
     ## extract pass/fail info from filter column
     $fields_data->{FILTER} .= $parser->get_raw_filter_results();
-    $fields_data->{FILTER} =~ s/\;/\,/g;
+    $fields_data->{FILTER} =~ s/\;/\%3B/g; # a semi-colon have special meaning in VCF INFO column
   }
 
 
