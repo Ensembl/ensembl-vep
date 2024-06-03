@@ -1,8 +1,7 @@
 /* 
- * Workflow to run VEP on VCF files
+ * Workflow to run VEP on multiple input files
  *
- * This workflow relies on Nextflow (see https://www.nextflow.io/tags/workflow.html)
- *
+ * Requires Nextflow: https://nextflow.io
  */
 
 nextflow.enable.dsl=2
@@ -11,13 +10,14 @@ nextflow.enable.dsl=2
 params.cpus = 1
 
 params.vcf = null
+params.input = params.vcf
 params.vep_config = null
 params.filters = null
 params.outdir = "outdir"
 
 params.output_prefix = ""
 params.bin_size = 100
-params.skip_check = 0
+params.sort = false
 params.help = false
 
 // module imports
@@ -25,6 +25,7 @@ include { checkVCF } from '../nf_modules/check_VCF.nf'
 include { generateSplits } from '../nf_modules/generate_splits.nf'
 include { splitVCF } from '../nf_modules/split_VCF.nf' 
 include { mergeVCF } from '../nf_modules/merge_VCF.nf'  
+include { runVEP as runVEPonVCF } from '../nf_modules/run_vep.nf'
 include { runVEP } from '../nf_modules/run_vep.nf'
 
 // print usage
@@ -34,16 +35,17 @@ Pipeline to run VEP
 -------------------
 
 Usage:
-  nextflow run workflows/run_vep.nf --vcf <path-to-vcf> --vep_config vep_config/vep.ini
+  nextflow run workflows/run_vep.nf --input <path-to-file> --vep_config vep_config/vep.ini
 
 Options:
-  --vcf VCF                 Sorted and bgzipped VCF. Alternatively, can also be a directory containing VCF files
-  --bin_size INT            Number of variants used to split input VCF into multiple jobs. Default: 100
+  --input FILE              Input file (if unsorted, use --sort to avoid errors in indexing the output file). Alternatively, can also be a directory containing input files
+  --bin_size INT            Number of lines to split input into multiple jobs. Default: 100
   --vep_config FILENAME     VEP config file. Alternatively, can also be a directory containing VEP INI files. Default: vep_config/vep.ini
   --cpus INT                Number of CPUs to use. Default: 1
   --outdir DIRNAME          Name of output directory. Default: outdir
   --output_prefix PREFIX    Output filename prefix. The generated output file will have name <vcf>-<output_prefix>.vcf.gz
-  --skip_check [0,1]        Skip check for tabix index file of input VCF. Enables use of cache with -resume. Default: 0
+
+  --sort                    Sort VCF results from VEP (only required if input is unsorted; slower if enabled). Default: false
   --filter STRING           Comma-separated list of filter conditions to pass to filter_vep, such as "AF < 0.01,Feature is ENST00000377918".
                             Read more on how to write filters at https://ensembl.org/info/docs/tools/vep/script/vep_filter.html
                             Default: null (filter_vep is not run)
@@ -81,37 +83,68 @@ workflow vep {
   take:
     inputs
   main:
-    // Prepare input VCF files (bgzip + tabix)
-    checkVCF(inputs)
-    
-    // Generate split files that each contain bin_size number of variants from VCF
-    generateSplits(checkVCF.out, params.bin_size)
+    // Process input based on file extension
+    inputs |
+      branch {
+        index: it.file =~ '\\.(tbi|csi)$'
+        registry: it.file =~ '\\.registry$'
+        ini: it.file =~ '\\.ini$'
+        vcf: it.file =~ '\\.vcf(.gz)?$'
+        other: true
+      } |
+      set { data }
 
-    // Split VCF using split files
-    splitVCF(generateSplits.out.transpose())
+    // Run VEP on VCF files
+    data.vcf |
+      checkVCF |
+      // Generate split files that each contain bin_size number of variants
+      generateSplits | transpose |
+      // Split VCF using split files
+      splitVCF | transpose |
+      // Run VEP for each split VCF file and for each VEP config
+      map { it + [format: 'vcf'] } | runVEPonVCF
 
-    // Run VEP for each split VCF file and for each VEP config
-    runVEP(splitVCF.out.transpose())
-    
+    // Run VEP on non-VCF files
+    data.other |
+      map {
+          // Split input by bin_size
+          files = it.file.splitText(by: params.bin_size, file: true)
+          res = []
+          for (f : files) {
+            // put it.file as index to avoid Nextflow errors
+            res += [ meta: it.meta, original: it.file, file: f, index: it.file, vep_config: it.vep_config, format: 'other' ]
+          }
+          res
+      } |
+      flatten |
+      runVEP
+
     // Merge split VCF files (creates one output VCF for each input VCF)
-    mergeVCF(runVEP.out.files.groupTuple(by: [0, 1, 4]))
+    out = runVEP.out.files
+            .mix(runVEPonVCF.out.files)
+            .groupTuple(by: [0, 1, 4])
+    mergeVCF(out)
   emit:
     mergeVCF.out
 }
 
 workflow {
-  if (!params.vcf) {
-    exit 1, "Undefined --vcf parameter. Please provide the path to a VCF file."
+  if (!params.input) {
+    exit 1, "Undefined --input parameter. Please provide the path to an input file."
+  }
+
+  if (params.vcf) {
+    log.warn "The --vcf parameter is deprecated in Nextflow VEP. Please use --input instead."
   }
 
   if (!params.vep_config) {
     exit 1, "Undefined --vep_config parameter. Please provide a VEP config file."
   }
 
-  vcf = createInputChannels(params.vcf, pattern="*.{vcf,gz}")
+  input = createInputChannels(params.input, pattern="*")
   vep_config = createInputChannels(params.vep_config, pattern="*.ini")
 
-  vcf.count()
+  input.count()
     .combine( vep_config.count() )
     .subscribe{ if ( it[0] != 1 && it[1] != 1 ) 
       exit 1, "Detected many-to-many scenario between VCF and VEP config files - currently not supported" 
@@ -119,7 +152,7 @@ workflow {
     
   // set if it is a one-to-many situation (single VCF and multiple ini file)
   // in this situation we produce output files with different names
-  one_to_many = vcf.count()
+  one_to_many = input.count()
     .combine( vep_config.count() )
     .map{ it[0] == 1 && it[1] != 1 }
 
@@ -127,24 +160,24 @@ workflow {
   
   filters = Channel.of(params.filters)
   
-  vcf
+  input
     .combine( vep_config )
     .combine( one_to_many )
     .combine( output_dir )
     .combine( filters )
     .map {
-      vcf, vep_config, one_to_many, output_dir, filters ->
+      data, vep_config, one_to_many, output_dir, filters ->
         meta = [:]
         meta.one_to_many = one_to_many
         meta.output_dir = output_dir
         meta.filters = filters
         
         // NOTE: csi is default unless a tbi index already exists
-        meta.index_type = file(vcf + ".tbi").exists() ? "tbi" : "csi"
+        meta.index_type = file(data + ".tbi").exists() ? "tbi" : "csi"
 
-        vcf_index = vcf + ".${meta.index_type}"
+        index = data + ".${meta.index_type}"
 
-        [ meta, vcf, vcf_index, vep_config ]
+        [ meta: meta, file: data, index: index, vep_config: vep_config ]
     }
     .set{ ch_input }
   

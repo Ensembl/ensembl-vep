@@ -22,13 +22,12 @@ process generateSplits {
 
   input:
   tuple val(meta), path(vcf), path(vcf_index), path(vep_config)
-  val(bin_size)
 
   output:
   tuple val(meta), path(vcf), path(vcf_index), path("x*"), path(vep_config)
 
   shell:
   """
-  bcftools query -f'%CHROM\t%POS\n' ${vcf} | uniq | split -a 3 -l ${bin_size}
+  bcftools query -f'%CHROM\t%POS\n' ${vcf} | uniq | split -a 3 -l ${params.bin_size}
   """
 }
