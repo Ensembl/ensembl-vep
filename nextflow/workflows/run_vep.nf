@@ -21,12 +21,12 @@ params.sort = false
 params.help = false
 
 // module imports
-include { checkVCF } from '../nf_modules/check_VCF.nf'
-include { generateSplits } from '../nf_modules/generate_splits.nf'
-include { splitVCF } from '../nf_modules/split_VCF.nf' 
-include { mergeVCF } from '../nf_modules/merge_VCF.nf'  
-include { runVEP as runVEPonVCF } from '../nf_modules/run_vep.nf'
-include { runVEP } from '../nf_modules/run_vep.nf'
+include { checkVCF } from '../modules/check_VCF.nf'
+include { generateSplits } from '../modules/generate_splits.nf'
+include { splitVCF } from '../modules/split_VCF.nf' 
+include { mergeVCF } from '../modules/merge_VCF.nf'  
+include { runVEP as runVEPonVCF } from '../modules/run_vep.nf'
+include { runVEP } from '../modules/run_vep.nf'
 
 // print usage
 if (params.help) {
@@ -128,7 +128,7 @@ workflow vep {
     mergeVCF.out
 }
 
-workflow {
+workflow NF_VEP {
   if (!params.input) {
     exit 1, "Undefined --input parameter. Please provide the path to an input file."
   }
@@ -182,4 +182,8 @@ workflow {
     .set{ ch_input }
   
   vep(ch_input)
+}
+
+workflow {
+  NF_VEP()
 }
