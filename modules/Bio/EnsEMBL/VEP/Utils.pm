@@ -185,7 +185,7 @@ sub format_coords {
 sub convert_arrayref {
   my $arg    = shift;
   my $sep    = shift || ',';
-  my $subsep = shift || ':';
+  my $subsep = shift || ';';
 
   my $res;
   if(ref($arg) eq 'ARRAY') {
