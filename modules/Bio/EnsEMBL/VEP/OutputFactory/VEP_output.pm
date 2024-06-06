@@ -113,7 +113,11 @@ sub output_hash_to_line {
 
   push @line, (
     join(';',
-      map {$_.'='.convert_arrayref($extra{$_})}
+      map {
+        my $data = convert_arrayref($extra{$_});
+        $data =~ s/\;/\%3B/g;
+        $_.'='.$data;
+      }
       sort {
         (defined($field_order->{$a}) ? $field_order->{$a} : 100)
         <=>
