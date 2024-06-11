@@ -87,6 +87,7 @@ our @FLAG_FIELDS = (
   { flag => 'mane_select',     fields => ['MANE_SELECT']},
   { flag => 'mane',            fields => ['MANE_SELECT', 'MANE_PLUS_CLINICAL']},
   { flag => 'tsl',             fields => ['TSL']},
+  { flag => 'gencode_primary', fields => ['GENCODE_primary']},
   { flag => 'appris',          fields => ['APPRIS']},
   { flag => 'ccds',            fields => ['CCDS'] },
   { flag => 'protein',         fields => ['ENSP'] },
