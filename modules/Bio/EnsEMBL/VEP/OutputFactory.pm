@@ -1576,8 +1576,6 @@ sub BaseTranscriptVariationAllele_to_output_hash {
       $hash->{miRNA} = [sort map {$map{$_}} keys %chars];
     }
   }
-  use Data::Dumper;
-  print(Dumper($hash));
   return $hash;
 }
 

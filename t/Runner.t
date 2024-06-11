@@ -210,6 +210,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'mane' => undef,
   'mane_select' => undef,
   'mane_plus_clinical' => undef,
+  'gencode_primary' => undef,
   'spdi'  => undef,
   'header_info' => $info,
   'plugins' => [],
