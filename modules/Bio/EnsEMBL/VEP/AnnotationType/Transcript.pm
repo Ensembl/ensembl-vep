@@ -204,35 +204,23 @@ sub filter_transcript {
     return 0;
   }
 
-  # using all_refseq?
+  # RefSeq: we only want transcripts e.g. NM_12930,
+  # or 4540 for MT transcripts
+  # or ND4L (or, rna-TRNP for e105 cache or before) for MT transcripts
   if(
     !$self->{all_refseq} &&
     (
-      # we only want RefSeq transcripts e.g. NM_12930,
-      # or 4540 for MT transcripts
-      # or TRNP (or, rna-TRNP for e105 cache or before) for MT transcripts
-      (
-        $self->{source_type} eq 'refseq' &&
-        !(($t->stable_id || '') =~ /^[A-Z]{2}\_\d+/ || 
-        (($t->seq_region_name || '') eq 'MT' && ($t->stable_id || '') =~ /^\d{4}$|^(rna-)?[A-Z]{3,4}\d{0,1}$/) || 
-        (defined($t->display_xref) && ($t->display_xref->{display_id} || '') =~ /^[A-Z]{2}\_\d+|^\d{4}$/))
-      ) 
-      
-      ||
-
-      # and the same from the merged cache
-      (
-        $self->{source_type} eq 'merged' &&
-        ($t->{_source_cache} || '') eq 'RefSeq' &&
-        !(($t->stable_id || '') =~ /^[A-Z]{2}\_\d+/ ||
-        (($t->seq_region_name || '') eq 'MT' && ($t->stable_id || '') =~ /^\d{4}$|^(rna-)?[A-Z]{3,4}\d{0,1}$/) || 
-        (defined($t->display_xref) && ($t->display_xref->{display_id} || '') =~ /^[A-Z]{2}\_\d+|^\d{4}$/))
-      )
+      $self->{source_type} eq 'refseq' ||
+      ($self->{source_type} eq 'merged' && ($t->{_source_cache} || '') eq 'RefSeq')
+    ) && (
+      !(($t->stable_id || '') =~ /^[A-Z]{2}\_\d+/ ||
+      (($t->seq_region_name || '') eq 'MT' && ($t->stable_id || '') =~ /^\d{4}$|^(rna-)?[A-Z0-9]{3,}$/) ||
+      (defined($t->display_xref) && ($t->display_xref->{display_id} || '') =~ /^[A-Z]{2}\_\d+|^\d{4}$/))
     )
   ) {
     return 0;
   }
-  
+
   return 1;
 }
 
