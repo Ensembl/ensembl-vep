@@ -176,6 +176,11 @@ sub default_options {
     urgent_lsf_options  => '-q production -R"select[mem>2000] rusage[mem=2000]" -M2000',
     highmem_lsf_options => '-q production -R"select[mem>15000] rusage[mem=15000]" -M15000', # this is Sanger LSF speak for "give me 15GB of memory"
     long_lsf_options    => '-q production -R"select[mem>2000] rusage[mem=2000]" -M2000',
+
+    default_slurm_options => '--partition=production --time=24:00:00 --mem=6G',
+    urgent_slurm_options  => '--partition=production --time=24:00:00 --mem=2G',
+    highmem_slurm_options => '--partition=production --time=24:00:00 --mem=20G',
+    long_slurm_options    => '--partition=production --time=48:00:00 --mem=4G',
     
     debug => 0,
     qc => 1,
@@ -186,10 +191,10 @@ sub default_options {
 sub resource_classes {
   my ($self) = @_;
   return {
-    'default' => { 'LSF' => $self->o('default_lsf_options') },
-    'urgent'  => { 'LSF' => $self->o('urgent_lsf_options')  },
-    'highmem' => { 'LSF' => $self->o('highmem_lsf_options') },
-    'long'    => { 'LSF' => $self->o('long_lsf_options')    },
+    'default' => { 'LSF' => $self->o('default_lsf_options'), 'SLURM' => $self->o('default_slurm_options') },
+    'urgent'  => { 'LSF' => $self->o('urgent_lsf_options'), 'SLURM' => $self->o('urgent_slurm_options') },
+    'highmem' => { 'LSF' => $self->o('highmem_lsf_options'), 'SLURM' => $self->o('highmem_slurm_options') },
+    'long'    => { 'LSF' => $self->o('long_lsf_options'), 'SLURM' => $self->o('long_slurm_options') },
   };
 }
 
@@ -264,7 +269,7 @@ sub pipeline_analyses {
         group           => 'otherfeatures',
         skip_meta_checks => $self->o('skip_meta_checks'),
       },
-      -rc_name       => 'default',
+      -rc_name       => 'long',
       -hive_capacity => 1,
       -max_retry_count => 0,
       -can_be_empty   => 1,
