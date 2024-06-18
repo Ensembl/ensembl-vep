@@ -1,6 +1,6 @@
-language: "perl"
 os: "linux"
 
+language: "perl"
 perl:
   - "5.10"
   - "5.14"
