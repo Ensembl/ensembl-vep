@@ -1,13 +1,9 @@
 #!/bin/bash
 
 # export DEPS=$HOME/dependencies
-
 export PERL5LIB=$DEPS/bioperl-live:$PWD/ensembl-test/modules:$PWD/ensembl/modules:$PWD/modules:$PWD/ensembl-io/modules:$PWD/ensembl-funcgen/modules:$PWD/ensembl-variation/modules:$DEPS/Bio-HTS/blib/lib:$DEPS/Bio-HTS/blib/arch:$PERL5LIB
-
 # export HTSLIB_DIR=$DEPS/htslib
-
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$DEPS/htslib
-
 export PATH=$PATH:$DEPS/htslib
 
 echo "Running test suite"
