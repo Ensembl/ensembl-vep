@@ -118,7 +118,7 @@ sub new {
   throw("ERROR: Region format is not compatible with --check_ref") if $self->param('check_ref');
 
   # config so lookups get done
-  $self->param('lookup_ref', 1);
+  $self->param('lookup_ref', 1); 
   $self->{lookup_ref} = 1;
 
   return $self;
