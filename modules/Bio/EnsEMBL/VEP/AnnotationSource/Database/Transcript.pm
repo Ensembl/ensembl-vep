@@ -93,6 +93,7 @@ sub new {
     core_type
     assembly
     gencode_basic
+    gencode_primary
     all_refseq
     merged
     sift

@@ -97,6 +97,7 @@ our @VEP_PARAMS = (
   'merged',                  # use merged cache
   'all_refseq',              # report consequences on all transcripts in RefSeq cache, includes CCDS, EST etc
   'gencode_basic',           # limit to using just GenCode basic transcript set
+  'gencode_primary',         # limit to using just GenCode primary transcript set
   'is_multispecies=i',       # '1' for a multispecies database (e.g protists_euglenozoa1_collection_core_29_82_1)
 
   # runtime options
