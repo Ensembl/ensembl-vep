@@ -187,6 +187,9 @@ sub get_features_by_regions_uncached {
     next unless defined($features);
 
     foreach my $rf(@$features) { 
+      # skip EMER feature types as they can have very long names
+      next if $rf->feature_so_term eq 'epigenetically_modified_region';
+
       # weaken a circular ref
       foreach my $a(@{$rf->{_regulatory_activity} || []}) {
         weaken($a->{_regulatory_feature}) unless isweak($a->{_regulatory_feature});
