@@ -459,6 +459,10 @@ sub create_StructuralVariationFeatures {
     $parser->get_info,
     $parser->get_IDs,
   );
+  # VEP accepts VCF input with the first 5 fields: fill the remaining mandatory fields to avoid warnings
+  $record->[5] ||= '.';
+  $record->[6] ||= '.';
+  $record->[7] ||= '.';
 
   ## get structural variant type from ALT or (deprecated) SVTYPE tag
   my $alt = join("/", @$alts);
