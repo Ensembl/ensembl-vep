@@ -204,7 +204,7 @@ sub get_features_by_regions_uncached {
     }
     # skipping EMER feature types here as they can have very long names
     push @region_features,
-      map { $_->feature_so_term eq 'epigenetically_modified_region' ? $_ : ()}
+      map { $_->feature_so_term eq 'epigenetically_modified_region' ? () : $_}
       map { $_->{_vep_feature_type} ||= $type; $_ }
       map { $_->transfer($sr_slice) }
       @{$features};
