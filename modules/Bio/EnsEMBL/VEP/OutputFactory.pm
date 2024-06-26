@@ -935,7 +935,7 @@ sub VariationFeature_to_output_hash {
     my @tmp;
     foreach my $geno_ind (keys %{$vf->{genotype_ind}}) {
       my %unique = map {$_ => 1} @{$vf->{genotype_ind}->{$geno_ind}};
-      push @tmp, $geno_ind.":".(scalar keys %unique > 1 ? 'HET' : 'HOM').(defined($vf->{hom_ref}->{$geno_ind}) ? 'REF' : '');
+      push @tmp, $geno_ind.":".(scalar keys %unique > 1 ? 'HET' : 'HOM').(defined($vf->{hom_ref_samples}->{$geno_ind}) ? 'REF' : '');
     }
     $hash->{ZYG} = \@tmp;
   }
