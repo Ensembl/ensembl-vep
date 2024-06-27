@@ -1192,7 +1192,7 @@ is_deeply($vf, bless( {
   'genotype_ind' => {'jeff' => ['A', 'A'], 'barry' => ['G', 'G'], 'dave' => ['A', 'G']},
   'non_variant' => { 'jeff' => 1 },
   'phased' => {'jeff' => 0, 'barry' => 0, 'dave' => 1},
-  'hom_ref' => { 'jeff' => 1 },
+  'hom_ref_samples' => { 'jeff' => 1 },
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'individual_zyg');
 
 ### individual_zyg data - test situation where a line has no valid ALT genotypes
