@@ -1190,7 +1190,7 @@ is_deeply($vf, bless( {
   'seq_region_end' => 25587759,
   'seq_region_start' => 25587759,
   'genotype_ind' => {'jeff' => ['A', 'A'], 'barry' => ['G', 'G'], 'dave' => ['A', 'G']},
-  'non_variant' => { 'jeff' => 1 },
+  'non_variant_samples' => { 'jeff' => 1 },
   'phased' => {'jeff' => 0, 'barry' => 0, 'dave' => 1},
   'hom_ref_samples' => { 'jeff' => 1 },
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'individual_zyg');
