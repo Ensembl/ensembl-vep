@@ -227,11 +227,12 @@ our @VEP_PARAMS = (
 
   # cache stuff
   'database',                # must specify this to use DB now
-  'cache:s',                 # use cache (optional param treated like --cache-dir)
+  'cache:s',                 # use cache (optional param treated like --dir_cache)
   'cache_version=i',         # specify a different cache version
   'show_cache_info',         # print cache info and quit
   'dir=s',                   # dir where cache is found (defaults to $HOME/.vep/)
   'dir_cache=s',             # specific directory for cache
+  'full_cache_dir=s',        # directory to specific cache to use (ignores --dir_cache if set)
   'dir_plugins=s',           # specific directory for plugins
   'offline',                 # offline mode uses minimal set of modules installed in same dir, no DB connection
   'fasta|fa=s',              # file or dir containing FASTA files with reference sequence
