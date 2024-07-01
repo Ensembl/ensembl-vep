@@ -1628,6 +1628,10 @@ sub TranscriptVariationAllele_to_output_hash {
 
   my $pre = $vfoa->_pre_consequence_predicates();
 
+  if($vfoa->{invalid_alleles}) {
+    $self->warning_msg("Transcript-assembly mismatch '".$hash->{Location}." ".$hash->{REF_ALLELE}."/".$hash->{Allele});
+  }
+
   if($pre->{within_feature}) {
 
     # exonic only
