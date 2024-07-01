@@ -720,8 +720,8 @@ sub create_individuals_zyg_VariationFeature {
 
     # Genotype is reference
     if(!scalar keys %non_ref) {
-      $vf->{hom_ref}->{$ind} = 1;
-      $vf->{non_variant}->{$ind} = 1;
+      $vf->{hom_ref_samples}->{$ind} = 1;
+      $vf->{non_variant_samples}->{$ind} = 1;
 
       if($n_individuals == 1) {
         $vf->{allele_string} = $ref."/".$ref ;

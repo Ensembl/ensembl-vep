@@ -2041,6 +2041,23 @@ $genotype = join ',', sort(@{$result->{ZYG}});
 is($genotype, 'barry:HOM,dave:HET', 'VariationFeature_to_output_hash - individual_zyg correct sample name');
 delete($of->{individual_zyg});
 
+### individual_zyg with alt allele '.'
+$ib = get_annotated_buffer({
+  input_file => $test_cfg->create_input_file([
+    ['##fileformat=VCFv4.1'],
+    [qw(#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT dave barry jeff)],
+    [qw(21 25607429 indtest A . . . . GT 0/0)],
+  ]),
+  individual_zyg => 'dave',
+});
+
+$of->{individual_zyg} = ['dave'];
+$result = $of->VariationFeature_to_output_hash($ib->buffer->[0]);
+$genotype = join ',', sort(@{$result->{ZYG}});
+
+is($genotype, 'dave:HOMREF', 'VariationFeature_to_output_hash - individual_zyg alt = .');
+
+delete($of->{individual_zyg});
 
 # done
 done_testing();
