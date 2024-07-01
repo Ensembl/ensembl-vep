@@ -930,7 +930,7 @@ sub VariationFeature_to_output_hash {
     }
   }
   
-  # individual_zig
+  # individual_zyg
   if(defined($vf->{genotype_ind})) {
     my @tmp;
     foreach my $geno_ind (keys %{$vf->{genotype_ind}}) {
