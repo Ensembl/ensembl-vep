@@ -192,6 +192,7 @@ sub new {
     tsl
     appris
     transcript_version
+    gene_version
     gene_phenotype
     mirna
     ambiguity
@@ -1388,6 +1389,7 @@ sub BaseTranscriptVariationAllele_to_output_hash {
 
   # get gene
   $hash->{Gene} = $tr->{_gene_stable_id};
+  $hash->{Gene} .= '.'.$tr->{_gene_version} if $self->{gene_version} && $tr->{_gene_version} && $hash->{Gene} !~ /\.\d+$/;
 
   # strand
   $hash->{STRAND} = $tr->strand + 0;

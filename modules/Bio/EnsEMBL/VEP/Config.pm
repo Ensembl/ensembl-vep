@@ -184,6 +184,7 @@ our @VEP_PARAMS = (
   'hgnc',                    # add HGNC gene ID to extra column
   'symbol',                  # add gene symbol (e.g. HGNC)
   'transcript_version',      # add transcript version to stable id in feature column
+  'gene_version',            # add gene version to stable id in gene column
   'gene_phenotype',          # indicate if genes are phenotype-associated
   'mirna',                   # identify miRNA structural elements overlapped by variant
   'spdi',                    # add genomic SPDI

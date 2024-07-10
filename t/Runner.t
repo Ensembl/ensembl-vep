@@ -222,6 +222,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'af_gnomade' => undef,
   'af_gnomadg' => undef,
   'transcript_version' => undef,
+  'gene_version' => undef,
   'cell_type' => undef,
   'mirna' => undef,
   'ambiguity' => undef,
