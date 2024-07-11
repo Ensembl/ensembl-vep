@@ -166,8 +166,7 @@ sub get_chr_jobs {
 
   # get slices
   my $sa = $dba->get_SliceAdaptor;
-  my @slices = @{$sa->fetch_all('toplevel')};
-  push @slices, map {$_->alternate_slice} map {@{$_->get_all_AssemblyExceptionFeatures}} @slices;
+  my @slices = @{$sa->fetch_all('toplevel', undef, 1)};
   push @slices, @{$sa->fetch_all('lrg', undef, 1, undef, 1)} if $self->param('lrg') && $self->param('group') ne 'otherfeatures';
 
   # remove/sort out duplicates, in human you get 3 Y slices
