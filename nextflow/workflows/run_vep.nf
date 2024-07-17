@@ -6,20 +6,6 @@
 
 nextflow.enable.dsl=2
 
- // params default
-params.cpus = 1
-
-params.vcf = null
-params.input = params.vcf
-params.vep_config = null
-params.filters = null
-params.outdir = "outdir"
-
-params.output_prefix = ""
-params.bin_size = 100
-params.sort = false
-params.help = false
-
 // module imports
 include { checkVCF } from '../modules/check_VCF.nf'
 include { generateSplits } from '../modules/generate_splits.nf'
