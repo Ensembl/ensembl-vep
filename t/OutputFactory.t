@@ -1704,9 +1704,9 @@ is_deeply(
       'Gene' => 'ENSG00000154727',
       'cDNA_position' => '289-297',
       'Protein_position' => '23-26',
-      'Amino_acids' => 'KKKG/S',
+      'Amino_acids' => 'TEES/S',
       'Feature' => 'ENST00000400075',
-      'Codons' => 'aAGAAGAAAGgc/agc',
+      'Codons' => 'aCAGAAGAAAgc/agc',
       'Location' => '21:25741665-25741674',
       'SHIFT_LENGTH' => 0,
     },
@@ -1724,9 +1724,9 @@ is_deeply(
       'Gene' => 'ENSG00000154727',
       'cDNA_position' => 288,
       'Protein_position' => 23,
-      'Amino_acids' => 'P/S',
+      'Amino_acids' => 'T/S',
       'Feature' => 'ENST00000400075',
-      'Codons' => 'Cca/Tca',
+      'Codons' => 'Aca/Tca',
       'Location' => '21:25741665-25741674',
       'SHIFT_LENGTH' => 0,
     }
@@ -2041,6 +2041,23 @@ $genotype = join ',', sort(@{$result->{ZYG}});
 is($genotype, 'barry:HOM,dave:HET', 'VariationFeature_to_output_hash - individual_zyg correct sample name');
 delete($of->{individual_zyg});
 
+### individual_zyg with alt allele '.'
+$ib = get_annotated_buffer({
+  input_file => $test_cfg->create_input_file([
+    ['##fileformat=VCFv4.1'],
+    [qw(#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT dave barry jeff)],
+    [qw(21 25607429 indtest A . . . . GT 0/0)],
+  ]),
+  individual_zyg => 'dave',
+});
+
+$of->{individual_zyg} = ['dave'];
+$result = $of->VariationFeature_to_output_hash($ib->buffer->[0]);
+$genotype = join ',', sort(@{$result->{ZYG}});
+
+is($genotype, 'dave:HOMREF', 'VariationFeature_to_output_hash - individual_zyg alt = .');
+
+delete($of->{individual_zyg});
 
 # done
 done_testing();

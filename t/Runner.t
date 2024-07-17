@@ -223,6 +223,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'af_gnomade' => undef,
   'af_gnomadg' => undef,
   'transcript_version' => undef,
+  'gene_version' => undef,
   'cell_type' => undef,
   'mirna' => undef,
   'ambiguity' => undef,
@@ -771,13 +772,6 @@ $runner = Bio::EnsEMBL::VEP::Runner->new({
   offline => 1,
 });
 throws_ok {$runner->post_setup_checks} qr/Cannot use transcript reference sequences/, 'post_setup_checks - use_transcript_ref + offline with no fasta';
-
-$runner = Bio::EnsEMBL::VEP::Runner->new({
-  %$cfg_hash,
-  lrg => 1,
-  offline => 1,
-});
-throws_ok {$runner->post_setup_checks} qr/Cannot map to LRGs in offline mode/, 'post_setup_checks - lrg + offline';
 
 ## status_msg tests require we mess with STDOUT
 ###############################################

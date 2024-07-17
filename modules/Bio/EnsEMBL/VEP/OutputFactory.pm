@@ -194,6 +194,7 @@ sub new {
     tsl
     appris
     transcript_version
+    gene_version
     gene_phenotype
     mirna
     ambiguity
@@ -932,12 +933,12 @@ sub VariationFeature_to_output_hash {
     }
   }
   
-  # individual_zig
+  # individual_zyg
   if(defined($vf->{genotype_ind})) {
     my @tmp;
     foreach my $geno_ind (keys %{$vf->{genotype_ind}}) {
       my %unique = map {$_ => 1} @{$vf->{genotype_ind}->{$geno_ind}};
-      push @tmp, $geno_ind.":".(scalar keys %unique > 1 ? 'HET' : 'HOM').(defined($vf->{hom_ref}->{$geno_ind}) ? 'REF' : '');
+      push @tmp, $geno_ind.":".(scalar keys %unique > 1 ? 'HET' : 'HOM').(defined($vf->{hom_ref_samples}->{$geno_ind}) ? 'REF' : '');
     }
     $hash->{ZYG} = \@tmp;
   }
@@ -1390,6 +1391,7 @@ sub BaseTranscriptVariationAllele_to_output_hash {
 
   # get gene
   $hash->{Gene} = $tr->{_gene_stable_id};
+  $hash->{Gene} .= '.'.$tr->{_gene_version} if $self->{gene_version} && $tr->{_gene_version} && $hash->{Gene} !~ /\.\d+$/;
 
   # strand
   $hash->{STRAND} = $tr->strand + 0;
@@ -1505,12 +1507,16 @@ sub BaseTranscriptVariationAllele_to_output_hash {
     if(my $mane_value = $mane->value) {
       $hash->{MANE_SELECT} = $mane_value;
     }
+
+    push @{ $hash->{MANE} }, 'MANE_Select';
   }
 
   if($self->{mane_plus_clinical} && (my ($mane) = grep {$_->code eq 'MANE_Plus_Clinical'} @attribs)) {
     if(my $mane_value = $mane->value) {
       $hash->{MANE_PLUS_CLINICAL} = $mane_value;
     }
+
+    push @{ $hash->{MANE} }, 'MANE_Plus_Clinical';
   }
  
   # Gencode primary

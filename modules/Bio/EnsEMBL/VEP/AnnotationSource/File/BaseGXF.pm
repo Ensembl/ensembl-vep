@@ -674,6 +674,29 @@ sub _add_identifiers {
       value => 'tsl'.$tsl,
     });
   }
+
+  # gff tags are in comma separated string and gtf tags are arrayref
+  my @tags;
+  if($tr_record->{attributes}->{tag}) {
+    @tags = ref $tr_record->{attributes}->{tag} eq "ARRAY" ?
+      @{ $tr_record->{attributes}->{tag} } : split(',', $tr_record->{attributes}->{tag});
+  }
+
+  # add MANE_Select and MANE_Plus_Clinical
+  if(@tags) {
+    foreach my $attr (qw/MANE_Select MANE_Plus_Clinical/) {
+      if( grep(/^$attr$/, @tags) ) {
+        push @{$tr->{attributes}}, Bio::EnsEMBL::Attribute->new_fast({
+          code => $attr
+        });
+      }
+    }
+  }
+
+  # add canonical
+  if(@tags && grep(/^Ensembl_canonical$/, @tags)) {
+    $tr->{is_canonical} = 1;
+  }
 }
 
 

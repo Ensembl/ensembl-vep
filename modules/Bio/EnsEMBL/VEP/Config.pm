@@ -186,6 +186,7 @@ our @VEP_PARAMS = (
   'hgnc',                    # add HGNC gene ID to extra column
   'symbol',                  # add gene symbol (e.g. HGNC)
   'transcript_version',      # add transcript version to stable id in feature column
+  'gene_version',            # add gene version to stable id in gene column
   'gene_phenotype',          # indicate if genes are phenotype-associated
   'mirna',                   # identify miRNA structural elements overlapped by variant
   'spdi',                    # add genomic SPDI
@@ -229,11 +230,12 @@ our @VEP_PARAMS = (
 
   # cache stuff
   'database',                # must specify this to use DB now
-  'cache:s',                 # use cache (optional param treated like --cache-dir)
+  'cache:s',                 # use cache (optional param treated like --dir_cache)
   'cache_version=i',         # specify a different cache version
   'show_cache_info',         # print cache info and quit
   'dir=s',                   # dir where cache is found (defaults to $HOME/.vep/)
   'dir_cache=s',             # specific directory for cache
+  'full_cache_dir=s',        # directory to specific cache to use (ignores --dir_cache if set)
   'dir_plugins=s',           # specific directory for plugins
   'offline',                 # offline mode uses minimal set of modules installed in same dir, no DB connection
   'fasta|fa=s',              # file or dir containing FASTA files with reference sequence
@@ -598,9 +600,9 @@ our %REQUIRES = (
 
 # incompatible options
 our %INCOMPATIBLE = (
-  most_severe => [qw(biotype no_intergenic protein symbol sift polyphen coding_only ccds mane canonical xref_refseq numbers domains tsl appris uniprot summary pick flag_pick pick_allele flag_pick_allele)],
-  summary     => [qw(biotype no_intergenic protein symbol sift polyphen coding_only ccds mane canonical xref_refseq numbers domains tsl appris uniprot most_severe pick flag_pick pick_allele flag_pick_allele)],
-  database    => [qw(af_1kg af_gnomad af_gnomade af_gnomadg max_af pubmed var_synonyms offline cache)],
+  most_severe => [qw(biotype no_intergenic protein symbol sift polyphen coding_only ccds mane mane_select canonical xref_refseq numbers domains tsl appris uniprot pick flag_pick pick_allele flag_pick_allele vcf summary)],
+  summary     => [qw(biotype no_intergenic protein symbol sift polyphen coding_only ccds mane mane_select canonical xref_refseq numbers domains tsl appris uniprot pick flag_pick pick_allele flag_pick_allele vcf most_severe)],
+  database    => [qw(af_1kg af_gnomad af_gnomade af_gnomadg af_esp af_exac max_af pubmed var_synonyms offline cache)],
   af_gnomade    => [qw(af_gnomad)],
   quiet       => [qw(verbose)],
   refseq      => [qw(gencode_basic merged)],
@@ -610,7 +612,9 @@ our %INCOMPATIBLE = (
   individual  => [qw(minimal individual_zyg)],
   check_ref   => [qw(lookup_ref)],
   check_svs   => [qw(offline)],
-  ga4gh_vrs   => [qw(vcf)]
+  ga4gh_vrs   => [qw(vcf)],
+  shift_hgvs  => [qw(shift_3prime shift_genomic)],
+  lrg         => [qw(offline)]
 );
 
 # deprecated/replaced flags

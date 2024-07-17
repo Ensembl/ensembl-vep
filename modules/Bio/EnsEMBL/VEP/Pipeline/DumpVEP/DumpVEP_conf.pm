@@ -123,12 +123,22 @@ sub default_options {
                 version => 'phase3'
               },
               {
-                file => $self->o('data_dir').'/gnomAD/v2.1/grch37/exomes/gnomad.exomes.r2.1.sites.chr+++CHR+++_noVEP.vcf.gz',
-                pops => ['', qw(afr amr asj eas fin nfe oth sas)],
+                file => $self->o('data_dir').'/gnomAD/v4.1/grch37/exomes/gnomad.exomes.v4.1.sites.grch37.chr+++CHR+++_trimmed_liftover.vcf.gz',
+                pops => ['', qw(afr amr asj eas fin nfe remaining sas mid)],
                 chroms => [qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y)],
                 name => 'gnomADe',
                 prefix => 'gnomADe',
-                version => 'r2.1',
+                version => 'v4.1',
+                use_chr_prefix => 1,
+              },
+              {
+                file => $self->o('data_dir').'/gnomAD/v4.1/grch37/genomes/gnomad.genomes.v4.1.sites.grch37.chr+++CHR+++_trimmed_liftover.vcf.gz',
+                pops => ['', qw(afr amr asj eas fin nfe remaining sas mid ami)],
+                chroms => [qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y)],
+                name => 'gnomADg',
+                prefix => 'gnomADg',
+                version => 'v4.1',
+                use_chr_prefix => 1,
               },
             ],
           },
@@ -143,21 +153,21 @@ sub default_options {
                 version => 'phase3'
               },
               {
-                file => $self->o('data_dir').'/gnomAD/v2.1.1/grch38/exomes/gnomad.exomes.r2.1.1.sites.+++CHR+++.liftover_grch38_no_VEP.vcf.gz',
-                pops => ['', qw(afr amr asj eas fin nfe oth sas)],
+                file => $self->o('data_dir').'/gnomAD/v4.1/grch38/exomes/gnomad.exomes.v4.1.sites.chr+++CHR+++_trimmed.vcf.bgz',
+                pops => ['', qw(afr amr asj eas fin nfe remaining sas mid)],
                 chroms => [qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y)],
                 name => 'gnomADe',
                 prefix => 'gnomADe',
-                version => 'r2.1.1',
+                version => 'v4.1',
                 use_chr_prefix => 1,
               },
               {
-                file => $self->o('data_dir').'/gnomAD/v3.1.2/grch38/genomes/gnomad.genomes.v3.1.2.sites.chr+++CHR+++_trimmed_info.vcf.bgz',
-                pops => ['', qw(afr ami amr asj eas fin mid nfe oth sas)],
+                file => $self->o('data_dir').'/gnomAD/v4.1/grch38/genomes/gnomad.genomes.v4.1.sites.chr+++CHR+++_trimmed.vcf.bgz',
+                pops => ['', qw(afr ami amr asj eas fin mid nfe remaining sas)],
                 chroms => [qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y)],
                 name => 'gnomADg',
                 prefix => 'gnomADg',
-                version => 'v3.1.2',
+                version => 'v4.1',
                 use_chr_prefix => 1,
               },
             ],
@@ -176,6 +186,11 @@ sub default_options {
     urgent_lsf_options  => '-q production -R"select[mem>2000] rusage[mem=2000]" -M2000',
     highmem_lsf_options => '-q production -R"select[mem>15000] rusage[mem=15000]" -M15000', # this is Sanger LSF speak for "give me 15GB of memory"
     long_lsf_options    => '-q production -R"select[mem>2000] rusage[mem=2000]" -M2000',
+
+    default_slurm_options => '--partition=production --time=24:00:00 --mem=6G',
+    urgent_slurm_options  => '--partition=production --time=24:00:00 --mem=2G',
+    highmem_slurm_options => '--partition=production --time=24:00:00 --mem=20G',
+    long_slurm_options    => '--partition=production --time=48:00:00 --mem=4G',
     
     debug => 0,
     qc => 1,
@@ -186,10 +201,10 @@ sub default_options {
 sub resource_classes {
   my ($self) = @_;
   return {
-    'default' => { 'LSF' => $self->o('default_lsf_options') },
-    'urgent'  => { 'LSF' => $self->o('urgent_lsf_options')  },
-    'highmem' => { 'LSF' => $self->o('highmem_lsf_options') },
-    'long'    => { 'LSF' => $self->o('long_lsf_options')    },
+    'default' => { 'LSF' => $self->o('default_lsf_options'), 'SLURM' => $self->o('default_slurm_options') },
+    'urgent'  => { 'LSF' => $self->o('urgent_lsf_options'), 'SLURM' => $self->o('urgent_slurm_options') },
+    'highmem' => { 'LSF' => $self->o('highmem_lsf_options'), 'SLURM' => $self->o('highmem_slurm_options') },
+    'long'    => { 'LSF' => $self->o('long_lsf_options'), 'SLURM' => $self->o('long_slurm_options') },
   };
 }
 
@@ -264,7 +279,7 @@ sub pipeline_analyses {
         group           => 'otherfeatures',
         skip_meta_checks => $self->o('skip_meta_checks'),
       },
-      -rc_name       => 'default',
+      -rc_name       => 'long',
       -hive_capacity => 1,
       -max_retry_count => 0,
       -can_be_empty   => 1,
