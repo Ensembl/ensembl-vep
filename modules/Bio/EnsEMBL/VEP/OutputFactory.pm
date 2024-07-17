@@ -190,6 +190,7 @@ sub new {
     mane_select
     mane_plus_clinical
     gencode_primary
+    flag_gencode_primary
     tsl
     appris
     transcript_version
@@ -1513,10 +1514,8 @@ sub BaseTranscriptVariationAllele_to_output_hash {
   }
  
   # Gencode primary
-  if($self->{gencode_primary} && (my ($gencode_primary) = grep {$_->code eq 'gencode_primary'} @attribs)) {
-    if($gencode_primary->value =~ m/GENCODE primary/) {
-      $hash->{GENCODE_primary} = 1;
-    }
+  if($self->{flag_gencode_primary} && !$self->{gencode_primary} && (my ($gencode_primary) = grep {$_->code eq 'gencode_primary'} @attribs)) {
+    $hash->{GENCODE_PRIMARY} = 1;
   }
   
   # transcript support level

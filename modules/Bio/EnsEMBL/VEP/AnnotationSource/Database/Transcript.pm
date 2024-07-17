@@ -94,6 +94,7 @@ sub new {
     assembly
     gencode_basic
     gencode_primary
+    flag_gencode_primary
     all_refseq
     merged
     sift

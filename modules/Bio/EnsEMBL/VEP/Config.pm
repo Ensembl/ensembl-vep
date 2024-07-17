@@ -113,6 +113,7 @@ our @VEP_PARAMS = (
   'flag_pick',               # flag one con per line
   'flag_pick_allele',        # flag one con per allele
   'flag_pick_allele_gene',   # flag one con per gene, allele
+  'flag_gencode_primary',    # flag gencode primary transcripts
   'pick_order=s',            # define the order of categories used by the --*pick* flags
   'buffer_size=i',           # number of variations to read in before analysis
   'failed=i',                # include failed variations when finding existing
