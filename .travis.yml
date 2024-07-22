@@ -1,5 +1,6 @@
-language: "perl"
+os: "linux"
 
+language: "perl"
 perl:
   - "5.10"
   - "5.14"
@@ -8,12 +9,12 @@ perl:
   - "5.26"
 
 env:
-  matrix:
-  - COVERALLS=true  DB=mysql
+  jobs:
+    COVERALLS: true
+    DB: mysql
   global:
-  - secure: Zv7EYDaaew3VF7dRZtghmqZulcMP9FLcn84vX8/nP5oWaSx0NmN3QyfBq7prL1zgF+i767MGVdfw70uts4r9J1BD47iL1mg/gL2vjIdbsr41L2TsJT6iOAQKhdZHtqActkTB3PUS59RAtuSzcboHzaJ6wNrdATaqSruB5YT4JQZYwB/OdqFtf/3xte5SWxGxc5/quYpzQO6QiqcQ7Nw2dYt1QXmi+3dhjnt/HD7G44erJQoIvLnWy1v9gozLeni6CiJYnHlctol8LfLUj/Ftl07DZdw5N5csiZGi2iI6FtdFARQcQ9LM34HHZNpujRqf3azi4KoasWjHCyzITXbsavLsWY7Kiv7SHIZbxONiu8wTWxWeCBaSC42c1dwc51JdF25PtB058BIFBWiXb2NWzBUj1n/3zk9L18rPKmkjd8+D5DBjO5LjRJjsRjs3rv6dLOHtEMxOW93cQDY8j5y1rhY4XvK4ZXt+W04Dy1U4lGOVpK7eSp1h3lDCECMACSLh7DOXEUab4Rt5cSeQL7N824Yc0Ps4j62CjRkjTtHeVPTeY82l+vA2itVf7xIOnpyaKRv9THt+iiLfmPPmpTG6zYO4fFPZFp6qDFLHki/LHprBr7gvw+YVn8JJEA85Cc3r6HuHBFMdaoBMRdZ687J8g8C5nC44DS9YKrR1nEaX1Wk=
+    secure: Zv7EYDaaew3VF7dRZtghmqZulcMP9FLcn84vX8/nP5oWaSx0NmN3QyfBq7prL1zgF+i767MGVdfw70uts4r9J1BD47iL1mg/gL2vjIdbsr41L2TsJT6iOAQKhdZHtqActkTB3PUS59RAtuSzcboHzaJ6wNrdATaqSruB5YT4JQZYwB/OdqFtf/3xte5SWxGxc5/quYpzQO6QiqcQ7Nw2dYt1QXmi+3dhjnt/HD7G44erJQoIvLnWy1v9gozLeni6CiJYnHlctol8LfLUj/Ftl07DZdw5N5csiZGi2iI6FtdFARQcQ9LM34HHZNpujRqf3azi4KoasWjHCyzITXbsavLsWY7Kiv7SHIZbxONiu8wTWxWeCBaSC42c1dwc51JdF25PtB058BIFBWiXb2NWzBUj1n/3zk9L18rPKmkjd8+D5DBjO5LjRJjsRjs3rv6dLOHtEMxOW93cQDY8j5y1rhY4XvK4ZXt+W04Dy1U4lGOVpK7eSp1h3lDCECMACSLh7DOXEUab4Rt5cSeQL7N824Yc0Ps4j62CjRkjTtHeVPTeY82l+vA2itVf7xIOnpyaKRv9THt+iiLfmPPmpTG6zYO4fFPZFp6qDFLHki/LHprBr7gvw+YVn8JJEA85Cc3r6HuHBFMdaoBMRdZ687J8g8C5nC44DS9YKrR1nEaX1Wk=
 
-sudo: required
 dist: trusty
 group: deprecated
 
@@ -58,7 +59,7 @@ install:
   - cd $CWD
   - cpanm --quiet --installdeps --with-recommends --notest --cpanfile ensembl/cpanfile .
   - cpanm --quiet --installdeps --with-recommends --notest .
-  - cpanm --quiet -n Devel::Cover::Report::Coveralls
+  - if [[ "$COVERALLS" = 'true' && ! "${TRAVIS_PERL_VERSION}" =~ '5.10' ]]; then cpanm --quiet -n Devel::Cover::Report::Coveralls; fi
   - cp travisci/MultiTestDB.conf.travisci  t/MultiTestDB.conf
 
 script: "./travisci/harness.sh"

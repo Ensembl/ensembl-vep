@@ -104,7 +104,9 @@ sub new {
 
   # need to either specify full path (dir) e.g. ~/.vep/homo_sapiens/78_GRCh38/
   # or root path (root_dir) e.g. ~/.vep/ where species and version are drawn from config and assembly from config, DB or scanning dir
-  throw("ERROR: No root_dir or dir specified") unless $hashref && ($hashref->{root_dir} or $hashref->{dir});
+  my $dir = $hashref->{dir};
+  throw("ERROR: No root_dir or dir specified") unless $hashref && ($hashref->{root_dir} or $dir);
+  throw("ERROR: Directory $dir does not exist") if defined $dir && !-d $dir;
 
   $self->{$_} = $hashref->{$_} for keys %$hashref;
 

@@ -1,9 +1,9 @@
 ## Nextflow VEP pipeline
 
-The nextflow pipeline aims to run VEP faster utilising simple parallelisation. It is deployable on an individual Linux machine or on computing clusters running lsf or slurm (not tested). The process can be summarised briefly by the following steps:
+The nextflow pipeline aims to run VEP faster utilising simple parallelisation. It is deployable on an individual Linux machine or on computing clusters running LSF or SLURM. The process can be summarised briefly by the following steps:
 
- * Splitting the VCF in a given number of bins (100 variants by default)
- * Running VEP on the split VCFs in parallel
+ * Splitting the input data into multiple files using a given number of bins (100 by default)
+ * Running VEP on the split files in parallel
  * Merging VEP outputs into a single file
 
 ##### Table of contents
@@ -45,21 +45,26 @@ The following config files are used and can be modified depending on user requir
 
 ```bash
   nextflow run workflows/run_vep.nf \
-  --vcf <path-to-vcf> \
+  --input <path-to-file> \
   -profile <standard or lsf or slurm>
 ```
 
 #### Options
 
 ```bash
-  --vcf VCF                 Sorted and bgzipped VCF. Alternatively, can also be a directory containing VCF files
+  --input FILE              Input file (if unsorted, use --sort to avoid errors in indexing the output file). Alternatively, can also be a directory containing input files
   --bin_size INT            Number of variants used to split input VCF into multiple jobs. Default: 100
   --vep_config FILENAME     VEP config file. Alternatively, can also be a directory containing VEP INI files. Default: vep_config/vep.ini
   --cpus INT                Number of CPUs to use. Default: 1
   --outdir DIRNAME          Name of output directory. Default: outdir
   --output_prefix PREFIX    Output filename prefix. The generated output file will have name <output_prefix>_VEP.vcf.gz.
                             NOTE: Do not use this parameter if you are expecting multiple output files.
-  --skip_check [0,1]        Skip check for tabix index file of input VCF. Enables use of cache with -resume. Default: 0
+
+  --sort                    Sort VCF results from VEP (only required if input is unsorted; slower if enabled). Default: false
+  --filters STRING          Comma-separated list of filter conditions to pass to filter_vep,
+                            such as "AF < 0.01,Feature is ENST00000377918".
+                            Read more on how to write filters at https://ensembl.org/info/docs/tools/vep/script/vep_filter.html
+                            Default: null (filter_vep is not run)
 ```
 
 ---
@@ -72,10 +77,10 @@ The following config files are used and can be modified depending on user requir
 
   nextflow \
     run workflows/run_vep.nf \
-    --vcf $PWD/examples/clinvar-testset/input.vcf.gz \
-    -profile lsf
+    --input $PWD/examples/clinvar-testset/input.vcf.gz \
+    -profile slurm
  ```
-The above commands start the pipeline and generate the output file upon completion.
+The above commands start the pipeline in SLURM and generate the output file upon completion.
 
 #### Output validation
 
