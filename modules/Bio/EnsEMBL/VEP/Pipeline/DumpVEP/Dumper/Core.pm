@@ -177,6 +177,7 @@ sub clean_transcript {
     my @new_atts;
     my %keep = map {$_ => 1} qw(
       gencode_basic
+      gencode_primary
       miRNA
       ncRNA
       cds_start_NF
