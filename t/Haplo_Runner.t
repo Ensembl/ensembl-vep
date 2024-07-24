@@ -62,6 +62,7 @@ SKIP: {
         'dir' => $test_cfg->{cache_dir},
         'serializer_type' => undef,
         'gencode_basic' => undef,
+        'gencode_primary' => undef,
         'source_type' => 'ensembl',
         'all_refseq' => undef,
         'polyphen' => undef,
