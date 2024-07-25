@@ -234,7 +234,7 @@ sub check_dirs {
 
   # get slices
   my $sa = $dba->get_SliceAdaptor;
-  my @slices = @{$sa->fetch_all('toplevel')};
+  my @slices = @{$sa->fetch_all('toplevel', undef, 1)};
   push @slices, map {$_->alternate_slice} map {@{$_->get_all_AssemblyExceptionFeatures}} @slices;
   push @slices, @{$sa->fetch_all('lrg', undef, 1, undef, 1)} if $self->param('lrg');
 
