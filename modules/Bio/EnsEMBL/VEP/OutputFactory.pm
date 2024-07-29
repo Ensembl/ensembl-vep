@@ -1520,7 +1520,7 @@ sub BaseTranscriptVariationAllele_to_output_hash {
   }
  
   # Gencode primary
-  if($self->{flag_gencode_primary} && !$self->{gencode_primary} && (my ($gencode_primary) = grep {$_->code eq 'gencode_primary'} @attribs)) {
+  if($self->{flag_gencode_primary} && (my ($gencode_primary) = grep {$_->code eq 'gencode_primary'} @attribs)) {
     $hash->{GENCODE_PRIMARY} = 1;
   }
   
