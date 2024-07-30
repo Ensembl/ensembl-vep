@@ -204,9 +204,15 @@ sub filter_transcript {
     return 0;
   }
 
+  # using gencode primary?
+  if($self->{gencode_primary} && !(grep {$_->{code} eq 'gencode_primary'} @{$t->get_all_Attributes})) {
+    return 0;
+  }
+
   # RefSeq: we only want transcripts e.g. NM_12930,
   # or 4540 for MT transcripts
   # or ND4L (or, rna-TRNP for e105 cache or before) for MT transcripts
+
   if(
     !$self->{all_refseq} &&
     (

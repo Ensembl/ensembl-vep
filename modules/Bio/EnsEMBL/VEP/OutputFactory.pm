@@ -189,6 +189,8 @@ sub new {
     mane
     mane_select
     mane_plus_clinical
+    gencode_primary
+    flag_gencode_primary
     tsl
     appris
     transcript_version
@@ -1516,6 +1518,11 @@ sub BaseTranscriptVariationAllele_to_output_hash {
 
     push @{ $hash->{MANE} }, 'MANE_Plus_Clinical';
   }
+ 
+  # Gencode primary
+  if($self->{flag_gencode_primary} && (my ($gencode_primary) = grep {$_->code eq 'gencode_primary'} @attribs)) {
+    $hash->{GENCODE_PRIMARY} = 1;
+  }
   
   # transcript support level
   if($self->{tsl} && (my ($tsl) = grep {$_->code eq 'TSL'} @attribs)) {
@@ -1574,7 +1581,6 @@ sub BaseTranscriptVariationAllele_to_output_hash {
       $hash->{miRNA} = [sort map {$map{$_}} keys %chars];
     }
   }
-
   return $hash;
 }
 

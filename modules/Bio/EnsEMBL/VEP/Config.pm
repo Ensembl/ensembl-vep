@@ -97,6 +97,7 @@ our @VEP_PARAMS = (
   'merged',                  # use merged cache
   'all_refseq',              # report consequences on all transcripts in RefSeq cache, includes CCDS, EST etc
   'gencode_basic',           # limit to using just GenCode basic transcript set
+  'gencode_primary',         # limit to using just GenCode primary transcript set
   'is_multispecies=i',       # '1' for a multispecies database (e.g protists_euglenozoa1_collection_core_29_82_1)
 
   # runtime options
@@ -112,6 +113,7 @@ our @VEP_PARAMS = (
   'flag_pick',               # flag one con per line
   'flag_pick_allele',        # flag one con per allele
   'flag_pick_allele_gene',   # flag one con per gene, allele
+  'flag_gencode_primary',    # flag gencode primary transcripts
   'pick_order=s',            # define the order of categories used by the --*pick* flags
   'buffer_size=i',           # number of variations to read in before analysis
   'failed=i',                # include failed variations when finding existing
