@@ -73,15 +73,16 @@ workflow vep {
     inputs |
       branch {
         index: it.file =~ '\\.(tbi|csi)$'
-        registry: it.file =~ '\\.registry$'
-        ini: it.file =~ '\\.ini$'
-        vcf: it.file =~ '\\.vcf(.gz)?$'
+        ignore: it.file =~ '\\.(ini|registry|config)$'
+        vcf_with_header:
+          ( it.file =~ '\\.vcf$' && it.file.readLines()[0][0] =~ '^#' ) ||
+          ( it.file =~ '\\.vcf\\.b?gz$' && "zcat ${it.file} | head -c 1".execute() =~ '^#' )
         other: true
       } |
       set { data }
 
-    // Run VEP on VCF files
-    data.vcf |
+    // Run VEP on VCF files with header
+    data.vcf_with_header |
       checkVCF |
       // Generate split files that each contain bin_size number of variants
       generateSplits | transpose |
@@ -90,7 +91,7 @@ workflow vep {
       // Run VEP for each split VCF file and for each VEP config
       map { it + [format: 'vcf'] } | runVEPonVCF
 
-    // Run VEP on non-VCF files
+    // Run VEP on headerless VCF and non-VCF files
     data.other |
       map {
           // Split input by bin_size
