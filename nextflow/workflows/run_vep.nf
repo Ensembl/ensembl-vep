@@ -7,7 +7,7 @@
 nextflow.enable.dsl=2
 
 // module imports
-include { checkVCF } from '../modules/check_VCF.nf'
+include { checkVCFheader; checkVCF } from '../modules/check_VCF.nf'
 include { generateSplits } from '../modules/generate_splits.nf'
 include { splitVCF } from '../modules/split_VCF.nf' 
 include { mergeVCF } from '../modules/merge_VCF.nf'  
@@ -74,9 +74,7 @@ workflow vep {
       branch {
         index: it.file =~ '\\.(tbi|csi)$'
         ignore: it.file =~ '\\.(ini|registry|config)$'
-        vcf_with_header:
-          ( it.file =~ '\\.vcf$' && it.file.readLines()[0][0] =~ '^#' ) ||
-          ( it.file =~ '\\.vcf\\.b?gz$' && "zcat ${it.file} | head -c 1".execute() =~ '^#' )
+        vcf_with_header: checkVCFheader(it.file)
         other: true
       } |
       set { data }
