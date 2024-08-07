@@ -1628,6 +1628,12 @@ sub TranscriptVariationAllele_to_output_hash {
 
   my $pre = $vfoa->_pre_consequence_predicates();
 
+  # Only for RefSeq annotations
+  # If invalid_alleles is set to 1 then the ref and alt alleles are the same -> this is an invalid variant
+  if($vfoa->{invalid_alleles}) {
+    $self->warning_msg("Transcript-assembly mismatch in ".$hash->{Uploaded_variation});
+  }
+
   if($pre->{within_feature}) {
 
     # exonic only
