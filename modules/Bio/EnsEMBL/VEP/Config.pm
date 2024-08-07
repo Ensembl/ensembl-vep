@@ -115,6 +115,7 @@ our @VEP_PARAMS = (
   'flag_pick_allele_gene',   # flag one con per gene, allele
   'flag_gencode_primary',    # flag gencode primary transcripts
   'pick_order=s',            # define the order of categories used by the --*pick* flags
+  'pick_count=i',            # define the number of transcripts to return used by the --*pick* flags  
   'buffer_size=i',           # number of variations to read in before analysis
   'failed=i',                # include failed variations when finding existing
   'gp',                      # read coords from GP part of INFO column in VCF (probably only relevant to 1KG)

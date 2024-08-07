@@ -150,6 +150,7 @@ sub new {
     output_format
     no_escape
     pick_order
+    pick_count
     allele_number
     show_ref_allele
     use_transcript_ref
@@ -769,7 +770,7 @@ sub pick_worst_VariationFeatureOverlapAllele {
     push @vfoa_info, $info;
   }
   if(scalar @vfoa_info) {
-    my @order = @{$self->{pick_order}};
+    my @order = reverse @{$self->{pick_order}};
     my $picked;
 
     # go through each category in order
@@ -793,17 +794,12 @@ sub pick_worst_VariationFeatureOverlapAllele {
       # now add to @tmp those vfoas that have the same value self $cat as $picked
       push @tmp, shift @vfoa_info while @vfoa_info && $vfoa_info[0]->{$cat} eq $picked->{$cat};
 
-      # if there was only one, return
-      return $picked->{vfoa} if scalar @tmp == 1;
-
-      # otherwise shrink the array to just those that had the lowest
-      # this gives fewer to sort on the next round
-      @vfoa_info = @tmp;
-
+      # if there are sufficient transcripts, return
+      return map {$_->{vfoa}} @tmp if scalar @tmp == $self->pick_count;
     }
 
-    # probably shouldn't get here, but if we do, return the first
-    return $vfoa_info[0]->{vfoa};
+    # return the number of picK_count transcript
+    return map {$_->{vfoa}} @vfoa_info[0..($self->pick_count-1)];
   }
 
   return undef;
