@@ -304,6 +304,7 @@ our %DEFAULTS = (
   core_type         => 'core',
   polyphen_analysis => 'humvar',
   pick_order        => [qw(mane_select mane_plus_clinical canonical appris tsl biotype ccds rank length ensembl refseq )],
+  pick_count        => 1,
   terminal_width    => 48,
   vcf_info_field    => 'CSQ',
   ucsc_data_root    => 'http://hgdownload.cse.ucsc.edu/goldenpath/',
