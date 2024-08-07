@@ -4,7 +4,41 @@
  * Script to check if the files are bgzipped and bgzip if not
  */
 
-nextflow.enable.dsl=2
+import java.util.zip.GZIPInputStream
+import java.util.zip.GZIPOutputStream
+
+def checkVCFheader (f) {
+  // Check file extension
+  if (!f  =~ '\\.vcf\\.b?gz$') {
+    return false
+  }
+
+  // Check if file is compressed
+  if (f =~ '\\.b?gz$') {
+    InputStream fileStream = new FileInputStream(f.toString())
+    InputStream gzip = new GZIPInputStream(fileStream)
+    Reader decoder = new InputStreamReader(gzip)
+    BufferedReader data = new BufferedReader(decoder)
+    lines = data.lines()
+  } else {
+    lines = f.readLines()
+  }
+
+  // Check file header
+  is_vcf_format = false
+  has_header = false
+  for( line : lines ) {
+    if (!line =~ '^#') {
+      // stop inspecting file when reaching a line not starting with hash
+      break
+    } else if (line =~ '^##fileformat=') {
+      is_vcf_format = true
+    } else if (line =~ '^#CHROM') {
+      has_header = true
+    }
+  }
+  return is_vcf_format && has_header
+}
 
 process checkVCF {
   /*

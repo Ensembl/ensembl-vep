@@ -41,7 +41,7 @@ process mergeVCF {
   
   """
   sorted_vcfs=\$(echo ${vcf_files} | xargs -n1 | sort | xargs)
-  bcftools concat --no-version -a \${sorted_vcfs} -Oz -o ${merged_vcf}
+  bcftools concat --no-version --naive \${sorted_vcfs} -Oz -o ${merged_vcf}
   bcftools index ${index_flag} ${merged_vcf}
   
   # move the output file

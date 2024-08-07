@@ -26,17 +26,14 @@ The nextflow pipeline requires **[Nextflow](https://www.nextflow.io)** (tested o
 
 The following config files are used and can be modified depending on user requirements:
 
-  * VEP config file
-  ``` bash
-      cp vep_config/vep.ini.template vep_config/vep.ini
-  ```
+* VEP config file
+    ``` bash
+    cp vep_config/vep.ini.template vep_config/vep.ini
+    ```
 
-  * Nextflow config file
+* Nextflow config file
 
-    `nextflow.config` has the default options for running the pipeline. The file can be modified to change the default options or override them using command line options.
-
- Currently supported profiles for executors are standard (local), LSF and SLURM (untested!). As mentioned SLURM is untested at present, if you are running this pipeline on a slurm compute cluster and encounter problems, please contact us with details (raise a ticket on the github) and we can investigate.
- NB: If no profile is mentioned, the pipeline takes the standard profile.
+    `nextflow.config` has the default options for running the pipeline. The default options can be changed by directly modifying this file or by overriding them using command line options.
 
 ---
 <a id="usage"></a>
@@ -44,7 +41,7 @@ The following config files are used and can be modified depending on user requir
 ### Usage
 
 ```bash
-  nextflow run workflows/run_vep.nf \
+  nextflow run main.nf \
   --input <path-to-file> \
   -profile <standard or lsf or slurm>
 ```
@@ -73,14 +70,11 @@ The following config files are used and can be modified depending on user requir
 ### Example
 
 ```bash
-  bgzip -c $PWD/examples/clinvar-testset/input.vcf > $PWD/examples/clinvar-testset/input.vcf.gz
-
-  nextflow \
-    run workflows/run_vep.nf \
-    --input $PWD/examples/clinvar-testset/input.vcf.gz \
+  nextflow run main.nf \
+    --input ../examples/clinvar-testset/input.vcf \
     -profile slurm
  ```
-The above commands start the pipeline in SLURM and generate the output file upon completion.
+The above commands start the pipeline in SLURM and generates the output file upon completion.
 
 #### Output validation
 
@@ -89,7 +83,7 @@ The above commands start the pipeline in SLURM and generate the output file upon
     -H outdir/merged-file.vcf.gz \
     -r 1
 ```
-Expected result
+Expected result:
 
 ```bash
 1 925952  1019397 G A . . ALLELEID=1003021;CLNDISDB=MedGen:CN517202;CLNDN=not_provided;CLNHGVS=NC_000001.11:g.925952G>A;CLNREVSTAT=criteria_provided,_single_submitter;CLNSIG=Uncertain_significance;CLNVC=single_nucleotide_variant;CLNVCSO=SO:0001483;GENEINFO=SAMD11:148398;MC=SO:0001583|missense_variant;ORIGIN=1;CSQ=A|upstream_gene_variant|MODIFIER|SAMD11|ENSG00000187634|Transcript|ENST00000341065|protein_coding|||||||||||4360|1|cds_start_NF|HGNC|HGNC:28706,A|missense_variant|MODERATE|SAMD11|ENSG00000187634|Transcript|ENST00000342066|protein_coding|2/14||||101|11|4|G/E|gGg/gAg|||1||HGNC|HGNC:28706,A|missense_variant|MODERATE|SAMD11|ENSG00000187634|Transcript|ENST00000437963|protein_coding|2/5||||71|11|4|G/E|gGg/gAg|||1|cds_end_NF|HGNC|HGNC:28706,A|upstream_gene_variant|MODIFIER|LINC02593|ENSG00000223764|Transcript|ENST00000609207|retained_intron|||||||||||4936|-1||HGNC|HGNC:53933,A|missense_variant|MODERATE|SAMD11|ENSG00000187634|Transcript|ENST00000616016|protein_coding|2/14||||1057|548|183|G/E|gGg/gAg|||1||HGNC|HGNC:28706,A|missense_variant|MODERATE|SAMD11|ENSG00000187634|Transcript|ENST00000616125|protein_coding|1/11||||11|11|4|G/E|gGg/gAg|||1|cds_start_NF|HGNC|HGNC:28706,A|missense_variant|MODERATE|SAMD11|ENSG00000187634|Transcript|ENST00000617307|protein_coding|1/13||||11|11|4|G/E|gGg/gAg|||1|cds_start_NF|HGNC|HGNC:28706,A|missense_variant|MODERATE|SAMD11|ENSG00000187634|Transcript|ENST00000618181|protein_coding|1/10||||11|11|4|G/E|gGg/gAg|||1|cds_start_NF|HGNC|HGNC:28706,A|missense_variant|MODERATE|SAMD11|ENSG00000187634|Transcript|ENST00000618323|protein_coding|2/14||||1057|548|183|G/E|gGg/gAg|||1||HGNC|HGNC:28706,A|missense_variant|MODERATE|SAMD11|ENSG00000187634|Transcript|ENST00000618779|protein_coding|1/12||||11|11|4|G/E|gGg/gAg|||1|cds_start_NF|HGNC|HGNC:28706,A|missense_variant|MODERATE|SAMD11|ENSG00000187634|Transcript|ENST00000622503|protein_coding|1/13||||11|11|4|G/E|gGg/gAg|||1|cds_start_NF|HGNC|HGNC:28706
