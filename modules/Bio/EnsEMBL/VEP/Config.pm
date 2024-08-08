@@ -606,6 +606,7 @@ our %INCOMPATIBLE = (
   af_gnomade    => [qw(af_gnomad)],
   quiet       => [qw(verbose)],
   refseq      => [qw(gencode_basic merged)],
+  gencode_primary => [qw(gencode_basic refseq)],
   json        => [qw(vcf tab)],
   vcf         => [qw(json tab)],
   tab         => [qw(vcf json)],
@@ -703,7 +704,16 @@ sub new {
     $config->{dir_cache} ||= $config->{cache} if -d "$config->{cache}";
     $config->{cache} = 1;
   }
+  
+  # throw a warning for GENCODE primary if assembly is not GRCh38
+  if (defined($config->{'gencode_primary'}) && lc($config->{'gencode_primary'}) && defined($config->{'assembly'}) && lc($config->{'assembly'}) ne 'grch38') {
+    printf("WARNING: --gencode_primary option is currently only available for human on the GRCh38 assembly\n");
+  }
 
+    # throw a warning for GENCODE primary if assembly is not GRCh38
+  if (defined($config->{'flag_gencode_primary'}) && lc($config->{'flag_gencode_primary'}) && defined($config->{'assembly'}) && lc($config->{'assembly'}) ne 'grch38') {
+    printf("WARNING: --flag_gencode_primary option is currently only available for human on the GRCh38 assembly\n");
+  }
   my $config_command = "";
 
   my @skip_opts = qw(web_output host port stats_file user warning_file input_data);
