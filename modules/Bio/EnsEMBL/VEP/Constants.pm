@@ -259,7 +259,7 @@ our %FIELD_DESCRIPTIONS = (
   'CHECK_REF'	       => 'Reports variants where the input reference does not match the expected reference',
   'UPLOADED_ALLELE'    => 'The variant allele uploaded',
   'SHIFT_LENGTH'       => 'Reports the number of bases the insertion or deletion has been shifted relative to the underlying transcript due to right alignment before consequence calculation',
-  'GENCODE_PRIMARY'    => 'Reports if transcript is Gencode Primary'
+  'GENCODE_PRIMARY'    => 'Reports if transcript is GENCODE primary'
 );
 
 our @DEFAULT_OUTPUT_COLS = qw(
