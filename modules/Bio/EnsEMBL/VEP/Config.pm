@@ -706,12 +706,12 @@ sub new {
   }
   
   # throw a warning for GENCODE primary if assembly is not GRCh38
-  if (defined($config->{'gencode_primary'}) && lc($config->{'gencode_primary'}) && defined($config->{'assembly'}) && lc($config->{'assembly'}) ne 'grch38') {
+  if (defined($config->{'gencode_primary'}) && $config->{'gencode_primary'} && defined($config->{'assembly'}) && lc($config->{'assembly'}) ne 'grch38') {
     printf("WARNING: --gencode_primary option is currently only available for human on the GRCh38 assembly\n");
   }
 
     # throw a warning for GENCODE primary if assembly is not GRCh38
-  if (defined($config->{'flag_gencode_primary'}) && lc($config->{'flag_gencode_primary'}) && defined($config->{'assembly'}) && lc($config->{'assembly'}) ne 'grch38') {
+  if (defined($config->{'flag_gencode_primary'}) && $config->{'flag_gencode_primary'} && defined($config->{'assembly'}) && lc($config->{'assembly'}) ne 'grch38') {
     printf("WARNING: --flag_gencode_primary option is currently only available for human on the GRCh38 assembly\n");
   }
   my $config_command = "";
