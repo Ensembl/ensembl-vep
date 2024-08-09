@@ -591,7 +591,7 @@ sub get_input {
 
     my ($text, $num) = ($1, $2);
     
-    if($num ne "") {
+    if($num ne '') {
       ## Value can also be a HASH, we pick a key to make it scalar
       ## Assumes that all the values are of similar format
       if (ref $value eq "HASH") {
