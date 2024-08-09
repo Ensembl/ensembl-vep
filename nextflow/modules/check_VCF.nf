@@ -9,7 +9,7 @@ import java.util.zip.GZIPOutputStream
 
 def checkVCFheader (f) {
   // Check file extension
-  if (!f  =~ '\\.vcf\\.b?gz$') {
+  if (!(f  =~ '\\.vcf$') && !(f =~ '\\.vcf\\.b?gz$')) {
     return false
   }
 
