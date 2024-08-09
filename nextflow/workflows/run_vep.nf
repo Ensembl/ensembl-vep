@@ -74,7 +74,7 @@ workflow vep {
       branch {
         index: it.file =~ '\\.(tbi|csi)$'
         ignore: it.file =~ '\\.(ini|registry|config)$'
-        vcf_with_header: checkVCFheader(it.file)
+        vcf_with_header: (it.file =~ '\\.vcf$' || it.file =~ '\\.vcf\\.b?gz$') && checkVCFheader(it.file)
         other: true
       } |
       set { data }
