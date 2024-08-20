@@ -110,7 +110,7 @@ RUN apt-get update && apt-get -y install \
 # Setup VEP environment
 ENV OPT=/opt/vep
 ENV OPT_SRC=$OPT/src
-ENV PERL5LIB_TMP=$PERL5LIB:$OPT_SRC/ensembl-vep:$OPT_SRC/ensembl-vep/modules
+ENV PERL5LIB_TMP=$PERL5LIB:$OPT_SRC/ensembl-vep:$OPT_SRC/ensembl-vep/modules:/plugins
 ENV PERL5LIB=$PERL5LIB_TMP:$OPT_SRC/bioperl-live
 ENV KENT_SRC=$OPT/src/kent-335_base/src
 ENV HTSLIB_DIR=$OPT_SRC/htslib
