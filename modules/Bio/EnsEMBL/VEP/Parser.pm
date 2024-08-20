@@ -399,8 +399,8 @@ sub check_format {
     elsif (
         $line[0] =~ /(chr)?\w+/ &&
         $line[1] =~ /^\d+$/ &&
-        $line[3] && $line[3] =~ /^[ACGTN\-\.]+$/i &&
-        $line[4]
+        exists $line[3] && $line[3] =~ /^[ACGTN\-\.]+$/i &&
+        exists $line[4]
     ) {
         $format = 'vcf';
     }
@@ -409,8 +409,8 @@ sub check_format {
     elsif (
         $line[0] =~ /\w+/ &&
         $line[1] =~ /^\d+$/ &&
-        $line[2] && $line[2] =~ /^\d+$/ &&
-        $line[3] && $line[3] =~ /([a-z]{2,})|([ACGTN-]+\/[ACGTN-]+)/i
+        exists $line[2] && $line[2] =~ /^\d+$/ &&
+        exists $line[3] && $line[3] =~ /([a-z]{2,})|([ACGTN-]+\/[ACGTN-]+)/i
     ) {
         $format = 'ensembl';
     }
