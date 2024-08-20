@@ -726,7 +726,7 @@ sub validate_vf {
 
 sub get_SO_term {
   my $self = shift;
-  my $type = shift || join(",", @{ $self->get_alternatives });
+  my $type = shift || ( $self->can("get_alternatives") ? join(",", @{ $self->get_alternatives }) : '');
   my $abbrev;
 
   my @mobile_elements = ("ALU", "HERV", "LINE1", "SVA");
