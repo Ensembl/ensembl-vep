@@ -976,7 +976,7 @@ sub minimise_alleles {
         $new_vf->{end}                    = $end;
         $new_vf->{seq_region_start}       = $start;
         $new_vf->{seq_region_end}         = $end;
-        $new_vf->{original_allele_string} = $vf->{allele_string};
+        $new_vf->{original_allele_string} = $vf->{original_allele_string} || $vf->{allele_string};
         $new_vf->{original_start}         = $vf->{start};
         $new_vf->{original_end}           = $vf->{end};
         $new_vf->{minimised}              = 1;

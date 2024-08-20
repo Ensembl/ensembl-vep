@@ -287,6 +287,9 @@ sub create_VariationFeatures {
   # record original alleles
   # if they get changed, we need to map from old to new in create_individual_VariationFeatures
   my @original_alleles = ($ref, @$alts);
+  use Data::Dumper;
+  print("Original alleles"."\n");
+  print(Dumper(@original_alleles));
 
   # adjust end coord
   # $end += (length($ref) - 1);
@@ -336,10 +339,14 @@ sub create_VariationFeatures {
   }
 
   # create VF object
+  use Data::Dumper;
+  # print("VF:".$ref."\n");
+  # print("VF:".Dumper(@$alts)."\n");
   my $vf = Bio::EnsEMBL::Variation::VariationFeature->new_fast({
     start          => $start,
     end            => $end,
     allele_string  => $non_variant ? $ref : $ref.'/'.join('/', @$alts),
+    original_allele_string => $non_variant ? $original_alleles[0] : join("/",@original_alleles),
     strand         => 1,
     map_weight     => 1,
     adaptor        => $self->get_adaptor('variation', 'VariationFeature'),
@@ -347,6 +354,8 @@ sub create_VariationFeatures {
     chr            => $chr,
     _line          => $record,
   });
+
+  print($vf->{original_allele_string});
 
   # flag as non-variant
   $vf->{non_variant} = 1 if $non_variant;
