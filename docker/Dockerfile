@@ -29,6 +29,9 @@ ARG BRANCH
 # Working directory
 WORKDIR $OPT_SRC
 
+# Add ensembl-vep files from current context
+ADD . ensembl-vep
+
 # Clone/download repositories/libraries
 RUN if [ "$BRANCH" = "main" ]; \
     then export BRANCH_OPT=""; \
@@ -36,8 +39,6 @@ RUN if [ "$BRANCH" = "main" ]; \
     fi && \
     # Get ensembl cpanfile in order to get the list of the required Perl libraries
     wget -q "https://raw.githubusercontent.com/Ensembl/ensembl/$BRANCH/cpanfile" -O "ensembl_cpanfile" && \
-    # Clone ensembl-vep git repository
-    git clone $BRANCH_OPT --depth 1 https://github.com/Ensembl/ensembl-vep.git && chmod u+x ensembl-vep/*.pl && \
     # Clone ensembl-variation git repository and compile C code
     git clone $BRANCH_OPT --depth 1 https://github.com/Ensembl/ensembl-variation.git && \
     mkdir var_c_code && \
@@ -56,7 +57,6 @@ RUN if [ "$BRANCH" = "main" ]; \
     ## A lot of cleanup on the imported libraries, in order to reduce the docker image ##
     rm -rf Bio-HTS/.??* Bio-HTS/Changes Bio-HTS/DISCLAIMER Bio-HTS/MANIFEST* Bio-HTS/README Bio-HTS/scripts Bio-HTS/t Bio-HTS/travisci \
            bioperl-ext/.??* bioperl-ext/Bio/SeqIO bioperl-ext/Bio/Tools bioperl-ext/Makefile.PL bioperl-ext/README* bioperl-ext/t bioperl-ext/examples \
-           ensembl-vep/.??* ensembl-vep/docker \
            ensembl-xs/.??* ensembl-xs/TODO ensembl-xs/Changes ensembl-xs/INSTALL ensembl-xs/MANIFEST ensembl-xs/README ensembl-xs/t ensembl-xs/travisci \
            htslib/.??* htslib/INSTALL htslib/NEWS htslib/README* htslib/test && \
     # Only keep needed kent-335_base libraries for VEP - used by Bio::DB::BigFile (bigWig parsing)
@@ -186,8 +186,8 @@ RUN echo >> $OPT/.profile && \
     echo export PATH >> $OPT/.profile && \
     # Install Ensembl API and plugins
     ./INSTALL.pl --auto ap --plugins all --pluginsdir $VEP_DIR_PLUGINS --no_update --no_htslib && \
-    # Remove the ensemb-vep tests and travis
-    rm -rf t travisci .travis.yml
+    # Remove ensemb-vep's travisci folder
+    rm -rf travisci
 
 # Install dependencies for VEP plugins:
 USER root
