@@ -950,8 +950,13 @@ sub minimise_alleles {
 
     # skip VFs with more than one alt
     # they get taken care of later by split_variants/rejoin_variants
-    if(!$vf->{allele_string} || $vf->{allele_string} =~ /.+\/.+\/.+/ || $vf->{allele_string} !~ /.+\/.+/) {
+    if(!$vf->{allele_string} || $vf->{allele_string} !~ /.+\/.+/) {
       push @return, $vf;
+    }
+
+    elsif($vf->{allele_string} =~ /.+\/.+\/.+/)
+    {
+      $vf->{minimised} = 1;
     }
 
     else {

@@ -209,6 +209,8 @@ sub next {
   if(my $parser = $self->parser) {
     while(@$buffer < $buffer_size && (my $vf = $parser->next)) {
 
+      ## Set minimal to 1 if indel
+      $self->{minimal} = 1 if (defined($vf->{minimised}) && $vf->{minimised});
 
       # exit the program if the maximum number of variants not ordered in the input file is reached
       if (!$self->param('no_check_variants_order') &&
