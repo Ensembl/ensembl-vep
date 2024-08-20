@@ -170,6 +170,7 @@ sub format_coords {
 
   Arg 1      : arrayref $arrayref or scalar $scalar
   Arg 2      : (optional) string $separator
+  Arg 3      : (optional) string $sub_separator
   Example    : $converted = convert_arrayref($arrayref)
   Description: If given an arrayref, returns string joined by $separator
                (defaults to comma ","). If given a scalar, just returns
@@ -182,12 +183,18 @@ sub format_coords {
 =cut
 
 sub convert_arrayref {
-  if(ref($_[0]) eq 'ARRAY') {
-    return join(($_[1] || ","), @{$_[0]});
+  my $arg    = shift;
+  my $sep    = shift || ',';
+  my $subsep = shift || ';';
+
+  my $res;
+  if(ref($arg) eq 'ARRAY') {
+    $arg = [ map { ref $_ eq 'ARRAY' ? join($subsep, @$_) : $_ } @$arg ];
+    $res = join($sep, @$arg);
+  } else {
+    $res = $arg;
   }
-  else {
-    return $_[0];
-  }
+  return $res;
 }
 
 

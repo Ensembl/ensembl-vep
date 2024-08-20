@@ -459,10 +459,20 @@ sub create_StructuralVariationFeatures {
     $parser->get_info,
     $parser->get_IDs,
   );
+  # VEP accepts VCF input with the first 5 fields: fill the remaining mandatory fields to avoid warnings
+  $record->[5] ||= '.';
+  $record->[6] ||= '.';
+  $record->[7] ||= '.';
 
-  ## get structural variant type from SVTYPE tag (deprecated in VCF 4.4) or ALT
+  ## get structural variant type from ALT or (deprecated) SVTYPE tag
   my $alt = join("/", @$alts);
-  my $type = $alt ne '.' ? $alt : $info->{SVTYPE};
+  my $type = $alt;
+
+  # replace with SVTYPE tag if ALT does not follow VCF 4.4 specs
+  if ($info->{SVTYPE} && $alt !~ /^<?(DEL|INS|DUP|INV|CNV|CN=?[0-9]+)/) {
+    $type = $info->{SVTYPE};
+  }
+
   my $so_term = $self->get_SO_term($type);
   unless ($so_term) {
     $skip_line = 1;
@@ -710,8 +720,8 @@ sub create_individuals_zyg_VariationFeature {
 
     # Genotype is reference
     if(!scalar keys %non_ref) {
-      $vf->{hom_ref}->{$ind} = 1;
-      $vf->{non_variant}->{$ind} = 1;
+      $vf->{hom_ref_samples}->{$ind} = 1;
+      $vf->{non_variant_samples}->{$ind} = 1;
 
       if($n_individuals == 1) {
         $vf->{allele_string} = $ref."/".$ref ;

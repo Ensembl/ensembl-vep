@@ -9,7 +9,7 @@
 10	patch	patch_72_73_b.sql|meta	\N
 12	patch	patch_73_74_a.sql|schema_version	\N
 14	patch	patch_74_75_a.sql|schema_version	\N
-15	schema_version	112	\N
+15	schema_version	113	\N
 16	patch	patch_75_76_a.sql|schema_version	\N
 17	patch	patch_76_77_a.sql|schema_version	\N
 18	patch	patch_77_78_a.sql|schema_version	\N
@@ -54,3 +54,7 @@
 57	patch	patch_109_110_a.sql|schema_version	\N
 58	patch	patch_110_111_a.sql|schema_version	\N
 59	patch	patch_111_112_a.sql|schema_version	\N
+60	patch	patch_111_112_b.sql|Allow meta_value to be null	\N
+61	patch	patch_111_112_c.sql|Extend meta_key length to 64	\N
+62	patch	patch_112_113_a.sql|schema_version	\N
+63	patch	patch_112_113_b.sql|Ensure meta_value is not null	\N

@@ -1,0 +1,108 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://raw.githubusercontent.com/nf-core/vep/master/nextflow_schema.json",
+  "title": "Ensembl VEP pipeline parameters",
+  "description": "The Ensembl Variant Effect Predictor predicts the functional effects of genomic variants",
+  "type": "object",
+  "definitions": {
+    "input_output_options": {
+      "title": "Input/output options",
+      "type": "object",
+      "fa_icon": "fas fa-terminal",
+      "description": "Define where the pipeline should find input data and save output data.",
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "format": "file-path",
+          "description": "Input file (if unsorted, use --sort to avoid errors in indexing the output file). Alternatively, can also be a directory containing input files",
+          "fa_icon": "fas fa-file-alt"
+        },
+        "vcf": {
+          "type": "string",
+          "hidden": true,
+          "fa_icon": "fas fa-file-alt",
+          "description": "Deprecated; shortcut to --input"
+        },
+        "vep_config": {
+          "type": "string",
+          "fa_icon": "fas fa-cogs",
+          "description": "VEP config file",
+          "help_text": "Alternatively, can also be a directory containing VEP INI files",
+          "default": "vep_config/vep.ini"
+        },
+        "outdir": {
+          "type": "string",
+          "format": "directory-path",
+          "fa_icon": "fas fa-folder-open",
+          "description": "Name of output directory",
+          "default": "outdir"
+        },
+        "output_prefix": {
+          "type": "string",
+          "description": "Output filename prefix",
+          "help_text": "The generated output file will have name <output_prefix>_VEP.vcf.gz.\nNOTE: Do not use this parameter if you are expecting multiple output files.",
+          "fa_icon": "fas fa-i-cursor"
+        }
+      }
+    },
+    "extra_settings": {
+      "title": "Extra settings",
+      "type": "object",
+      "description": "",
+      "default": "",
+      "fa_icon": "fas fa-wrench",
+      "properties": {
+        "bin_size": {
+          "type": "integer",
+          "default": 100,
+          "description": "Number of variants used to split input VCF into multiple jobs",
+          "fa_icon": "far fa-object-group"
+        },
+        "cpus": {
+          "type": "integer",
+          "default": 1,
+          "fa_icon": "fas fa-server",
+          "description": "Number of CPUs to use"
+        },
+        "sort": {
+          "type": "boolean",
+          "fa_icon": "fas fa-sort-amount-down",
+          "description": "Sort VCF results from VEP (only required if input is unsorted; slower if enabled)"
+        },
+        "filters": {
+          "type": "string",
+          "fa_icon": "fas fa-filter",
+          "default": "null (filter_vep is not run)",
+          "help_text": "Read more on filtering at https://ensembl.org/info/docs/tools/vep/script/vep_filter.html",
+          "description": "Comma-separated list of filter conditions to pass to filter_vep, such as \"AF < 0.01,Feature is ENST00000377918\""
+        }
+      }
+    },
+    "generic_options": {
+      "title": "Generic options",
+      "type": "object",
+      "fa_icon": "fas fa-file-import",
+      "description": "Less common options for the pipeline.",
+      "properties": {
+        "help": {
+          "type": "boolean",
+          "description": "Display help text.",
+          "fa_icon": "fas fa-question-circle",
+          "hidden": true
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "$ref": "#/definitions/input_output_options"
+    },
+    {
+      "$ref": "#/definitions/extra_settings"
+    },
+    {
+      "$ref": "#/definitions/generic_options"
+    }
+  ]
+}

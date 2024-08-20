@@ -181,12 +181,12 @@ CREATE TABLE `individual_type` (
 CREATE TABLE `meta` (
   `meta_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `species_id` int(10) unsigned DEFAULT '1',
-  `meta_key` varchar(40) NOT NULL,
+  `meta_key` varchar(64) NOT NULL,
   `meta_value` varchar(255) NOT NULL,
   PRIMARY KEY (`meta_id`),
   UNIQUE KEY `species_key_value_idx` (`species_id`,`meta_key`,`meta_value`),
   KEY `species_value_idx` (`species_id`,`meta_value`)
-) ENGINE=MyISAM AUTO_INCREMENT=167 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=170 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `meta_coord` (
   `table_name` varchar(40) NOT NULL,
@@ -544,7 +544,7 @@ CREATE TABLE `tmp_individual_genotype_single_bp` (
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `transcript_variation` (
-  `transcript_variation_id` BIGINT unsigned NOT NULL AUTO_INCREMENT,
+  `transcript_variation_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `variation_feature_id` int(11) unsigned NOT NULL,
   `feature_stable_id` varchar(128) DEFAULT NULL,
   `allele_string` text,

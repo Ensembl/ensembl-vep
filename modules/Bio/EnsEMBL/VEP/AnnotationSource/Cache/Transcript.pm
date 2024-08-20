@@ -110,6 +110,7 @@ sub new {
   # add shortcuts to these params
   $self->add_shortcuts([qw(
     gencode_basic
+    gencode_primary
     all_refseq
     sift
     polyphen

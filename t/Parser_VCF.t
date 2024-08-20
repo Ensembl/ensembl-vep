@@ -621,14 +621,14 @@ is_deeply($cvf, bless( {
                  'inner_start' => '774570',
                  'strand' => 1,
                  'seq_region_end' => 828435,
-                 'class_SO_term' => '<CPX>',
+                 'class_SO_term' => 'CPX',
                  'variation_name' => 'gnomAD_v2_CPX_1_1',
                  'start' => 774570
                },
                 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature - CPX skipped');
 
 
-like($tmp, qr/CPX type is not supported/, 'StructuralVariationFeature - skip CPX warning');
+like($tmp, qr/CPX is not a supported structural variant type/, 'StructuralVariationFeature - skip CPX warning');
 
 open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
@@ -1190,9 +1190,9 @@ is_deeply($vf, bless( {
   'seq_region_end' => 25587759,
   'seq_region_start' => 25587759,
   'genotype_ind' => {'jeff' => ['A', 'A'], 'barry' => ['G', 'G'], 'dave' => ['A', 'G']},
-  'non_variant' => { 'jeff' => 1 },
+  'non_variant_samples' => { 'jeff' => 1 },
   'phased' => {'jeff' => 0, 'barry' => 0, 'dave' => 1},
-  'hom_ref' => { 'jeff' => 1 },
+  'hom_ref_samples' => { 'jeff' => 1 },
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'individual_zyg');
 
 ### individual_zyg data - test situation where a line has no valid ALT genotypes

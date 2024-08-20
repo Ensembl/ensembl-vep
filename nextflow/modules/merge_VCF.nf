@@ -22,7 +22,7 @@ process mergeVCF {
   cache 'lenient'
    
   input:
-  tuple val(meta), val(original_vcf), path(vcf_files), path(index_files), val(vep_config)
+  tuple val(meta), val(original_file), path(vcf_files), path(index_files), val(vep_config)
   
   output:
   val("${output_dir}/${merged_vcf}")
@@ -32,7 +32,7 @@ process mergeVCF {
   one_to_many = meta.one_to_many
   output_dir = meta.output_dir
   
-  merged_vcf = merged_vcf ?: file(original_vcf).getName().replace(".vcf", "_VEP.vcf")
+  merged_vcf = merged_vcf ?: file(original_file).getSimpleName() + "_VEP.vcf.gz"
   merged_vcf = one_to_many ? merged_vcf.replace(
     "_VEP.vcf", 
     "_" + file(vep_config).getName().replace(".ini", "") + "_VEP.vcf"
@@ -41,7 +41,7 @@ process mergeVCF {
   
   """
   sorted_vcfs=\$(echo ${vcf_files} | xargs -n1 | sort | xargs)
-  bcftools concat --no-version -a \${sorted_vcfs} -Oz -o ${merged_vcf}
+  bcftools concat --no-version --naive \${sorted_vcfs} -Oz -o ${merged_vcf}
   bcftools index ${index_flag} ${merged_vcf}
   
   # move the output file

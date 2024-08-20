@@ -93,6 +93,7 @@ sub new {
     core_type
     assembly
     gencode_basic
+    gencode_primary
     all_refseq
     merged
     sift
@@ -235,6 +236,7 @@ sub get_features_by_regions_uncached {
 
     foreach my $gene(map {$_->transfer($sr_slice)} @{$sub_slice->get_all_Genes(undef, undef, 1)}) {
       my $gene_stable_id = $gene->stable_id;
+      my $gene_version = $gene->version;
       my $canonical_tr_id = $gene->{canonical_transcript_id};
 
       # any phenotypes?
@@ -268,6 +270,7 @@ sub get_features_by_regions_uncached {
         next if @{ $tr->get_all_Attributes("readthrough_tra") };
         
         $tr->{_gene_stable_id} = $gene_stable_id;
+        $tr->{_gene_version} = $gene_version;
         $tr->{_gene} = $gene;
         $self->prefetch_gene_ids($tr);
 

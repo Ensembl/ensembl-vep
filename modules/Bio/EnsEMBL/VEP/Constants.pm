@@ -52,7 +52,7 @@ use warnings;
 
 use base qw(Exporter);
 
-our $VEP_VERSION     = 112;
+our $VEP_VERSION     = 113;
 our $VEP_SUB_VERSION = 0;
 
 our @EXPORT_OK = qw(
@@ -84,9 +84,10 @@ our @FLAG_FIELDS = (
   { flag => 'symbol',          fields => ['SYMBOL','SYMBOL_SOURCE','HGNC_ID'] },
   { flag => 'biotype',         fields => ['BIOTYPE'] },
   { flag => 'canonical',       fields => ['CANONICAL'] },
-  { flag => 'mane_select',     fields => ['MANE_SELECT']},
-  { flag => 'mane',            fields => ['MANE_SELECT', 'MANE_PLUS_CLINICAL']},
+  { flag => 'mane_select',     fields => ['MANE', 'MANE_SELECT']},
+  { flag => 'mane',            fields => ['MANE', 'MANE_SELECT', 'MANE_PLUS_CLINICAL']},
   { flag => 'tsl',             fields => ['TSL']},
+  { flag => 'flag_gencode_primary', fields => ['GENCODE_PRIMARY']},
   { flag => 'appris',          fields => ['APPRIS']},
   { flag => 'ccds',            fields => ['CCDS'] },
   { flag => 'protein',         fields => ['ENSP'] },
@@ -154,6 +155,7 @@ our %FIELD_DESCRIPTIONS = (
   'Existing_variation' => 'Identifier(s) of co-located known variants',
   'IMPACT'             => 'Subjective impact classification of consequence type',
   'CANONICAL'          => 'Indicates if transcript is canonical for this gene',
+  'MANE'               => 'MANE (Matched Annotation from NCBI and EMBL-EBI) set(s) the transcript belongs to',
   'MANE_SELECT'        => 'MANE Select (Matched Annotation from NCBI and EMBL-EBI) Transcript',
   'MANE_PLUS_CLINICAL' => 'MANE Plus Clinical (Matched Annotation from NCBI and EMBL-EBI) Transcript',
   'TSL'                => 'Transcript support level',
@@ -256,7 +258,8 @@ our %FIELD_DESCRIPTIONS = (
   'OverlapPC'          => 'Percentage of corresponding structural variation feature overlapped by the given input',
   'CHECK_REF'	       => 'Reports variants where the input reference does not match the expected reference',
   'UPLOADED_ALLELE'    => 'The variant allele uploaded',
-  'SHIFT_LENGTH'       => 'Reports the number of bases the insertion or deletion has been shifted relative to the underlying transcript due to right alignment before consequence calculation'
+  'SHIFT_LENGTH'       => 'Reports the number of bases the insertion or deletion has been shifted relative to the underlying transcript due to right alignment before consequence calculation',
+  'GENCODE_PRIMARY'    => 'Reports if transcript is GENCODE primary'
 );
 
 our @DEFAULT_OUTPUT_COLS = qw(
