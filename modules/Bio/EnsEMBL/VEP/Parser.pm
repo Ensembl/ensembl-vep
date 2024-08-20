@@ -768,7 +768,8 @@ sub get_SO_term {
 
   my $res = $terms{$abbrev};
   ## unsupported SV types
-  if ($self->isa('Bio::EnsEMBL::VEP::Parser')) {
+  ## $self can be an empty hash from Bio::EnsEMBL::Variation::Utils::VEP::parse_vcf
+  if (%{ $self } && $self->isa('Bio::EnsEMBL::VEP::Parser')) {
     $self->skipped_variant_msg("$abbrev type is not supported") unless $res;
   }
   return $res;
