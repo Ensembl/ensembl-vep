@@ -349,7 +349,6 @@ sub create_VariationFeatures {
     _line          => $record,
   });
 
-
   # flag as non-variant
   $vf->{non_variant} = 1 if $non_variant;
 
