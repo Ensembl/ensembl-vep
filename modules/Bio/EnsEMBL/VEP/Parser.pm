@@ -957,6 +957,7 @@ sub minimise_alleles {
     elsif($vf->{allele_string} =~ /.+\/.+\/.+/)
     {
       $vf->{minimised} = 1;
+      push @return, $vf;
     }
 
     else {
