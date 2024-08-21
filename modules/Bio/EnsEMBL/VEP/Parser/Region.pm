@@ -166,7 +166,7 @@ sub create_VariationFeatures {
 
   my $region = $parser->get_value();
 
-  return [] unless $region =~ &_valid_region_regex();
+  return [] unless $region =~ $self->_valid_region_regex();
   my ($chr, $start, $end) = ($1, $2, $3);
 
   my ($strand, $allele);
