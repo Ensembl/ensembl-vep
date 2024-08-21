@@ -37,7 +37,7 @@ before_install:
   - git clone --branch $ENSEMBL_BRANCH --depth 1 https://github.com/Ensembl/ensembl.git
   - git clone --branch $ENSEMBL_BRANCH --depth 1 https://github.com/Ensembl/ensembl-io.git
   - git clone --branch $ENSEMBL_BRANCH --depth 1 https://github.com/Ensembl/ensembl-funcgen.git
-  - git clone --branch $ENSEMBL_BRANCH --depth 1 https://github.com/Ensembl/ensembl-variation.git
+  - git clone --branch fix_sv_so --depth 1 https://github.com/nakib103/ensembl-variation.git
 
   - export CWD=$PWD
   - export DEPS=$HOME/dependencies
