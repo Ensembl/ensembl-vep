@@ -851,13 +851,13 @@ sub post_process_vfs {
     $vf->seq_region_start($vf->{start});
     $vf->seq_region_end($vf->{end});
 
-    # Checks if the allele string is insertion or/and deletion
+    # Checks if the allele string is non-minimised insertion or/and deletion
     my $is_sv = ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature';
     if(!$is_sv && defined($vf->{allele_string}) && $vf->{allele_string} =~ /\//){
-      my $is_indel = 0;
+      my $is_non_minimised_indel = 0;
       my ($ref_allele_string,$alt_allele_string) = split(/\//, $vf->{allele_string});
-      $is_indel = 1 unless length($ref_allele_string) == length($alt_allele_string) or $vf->{allele_string} =~ /-/;
-      $vf = ${$self->minimise_alleles([$vf])}[0] if $is_indel;
+      $is_non_minimised_indel = 1 unless length($ref_allele_string) == length($alt_allele_string) or $vf->{allele_string} =~ /-/;
+      $vf = ${$self->minimise_alleles([$vf])}[0] if $is_non_minimised_indel;
     }
   }
   return $vfs;
