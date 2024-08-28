@@ -3,7 +3,7 @@ ARG BRANCH=main
 ###################################################
 # Stage 1 - docker container to build ensembl-vep #
 ###################################################
-FROM ubuntu:22.04 as builder
+FROM ubuntu:22.04 AS builder
 
 # Update aptitude and install some required packages
 # a lot of them are required for Bio::DB::BigFile
@@ -21,13 +21,16 @@ RUN apt-get update && apt-get -y install \
     rm -rf /var/lib/apt/lists/*
 
 # Setup VEP environment
-ENV OPT /opt/vep
-ENV OPT_SRC $OPT/src
-ENV HTSLIB_DIR $OPT_SRC/htslib
+ENV OPT=/opt/vep
+ENV OPT_SRC=$OPT/src
+ENV HTSLIB_DIR=$OPT_SRC/htslib
 ARG BRANCH
 
 # Working directory
 WORKDIR $OPT_SRC
+
+# Add ensembl-vep files from current context
+ADD . ensembl-vep
 
 # Clone/download repositories/libraries
 RUN if [ "$BRANCH" = "main" ]; \
@@ -36,8 +39,6 @@ RUN if [ "$BRANCH" = "main" ]; \
     fi && \
     # Get ensembl cpanfile in order to get the list of the required Perl libraries
     wget -q "https://raw.githubusercontent.com/Ensembl/ensembl/$BRANCH/cpanfile" -O "ensembl_cpanfile" && \
-    # Clone ensembl-vep git repository
-    git clone $BRANCH_OPT --depth 1 https://github.com/Ensembl/ensembl-vep.git && chmod u+x ensembl-vep/*.pl && \
     # Clone ensembl-variation git repository and compile C code
     git clone $BRANCH_OPT --depth 1 https://github.com/Ensembl/ensembl-variation.git && \
     mkdir var_c_code && \
@@ -56,7 +57,6 @@ RUN if [ "$BRANCH" = "main" ]; \
     ## A lot of cleanup on the imported libraries, in order to reduce the docker image ##
     rm -rf Bio-HTS/.??* Bio-HTS/Changes Bio-HTS/DISCLAIMER Bio-HTS/MANIFEST* Bio-HTS/README Bio-HTS/scripts Bio-HTS/t Bio-HTS/travisci \
            bioperl-ext/.??* bioperl-ext/Bio/SeqIO bioperl-ext/Bio/Tools bioperl-ext/Makefile.PL bioperl-ext/README* bioperl-ext/t bioperl-ext/examples \
-           ensembl-vep/.??* ensembl-vep/docker \
            ensembl-xs/.??* ensembl-xs/TODO ensembl-xs/Changes ensembl-xs/INSTALL ensembl-xs/MANIFEST ensembl-xs/README ensembl-xs/t ensembl-xs/travisci \
            htslib/.??* htslib/INSTALL htslib/NEWS htslib/README* htslib/test && \
     # Only keep needed kent-335_base libraries for VEP - used by Bio::DB::BigFile (bigWig parsing)
@@ -108,15 +108,15 @@ RUN apt-get update && apt-get -y install \
     rm -rf /var/lib/apt/lists/*
 
 # Setup VEP environment
-ENV OPT /opt/vep
-ENV OPT_SRC $OPT/src
-ENV PERL5LIB_TMP $PERL5LIB:$OPT_SRC/ensembl-vep:$OPT_SRC/ensembl-vep/modules
-ENV PERL5LIB $PERL5LIB_TMP:$OPT_SRC/bioperl-live
-ENV KENT_SRC $OPT/src/kent-335_base/src
-ENV HTSLIB_DIR $OPT_SRC/htslib
-ENV DEPS $OPT_SRC
-ENV PATH $OPT_SRC/ensembl-vep:$OPT_SRC/var_c_code:$PATH
-ENV LANG_VAR en_US.UTF-8
+ENV OPT=/opt/vep
+ENV OPT_SRC=$OPT/src
+ENV PERL5LIB_TMP=$PERL5LIB:$OPT_SRC/ensembl-vep:$OPT_SRC/ensembl-vep/modules:/plugins
+ENV PERL5LIB=$PERL5LIB_TMP:$OPT_SRC/bioperl-live
+ENV KENT_SRC=$OPT/src/kent-335_base/src
+ENV HTSLIB_DIR=$OPT_SRC/htslib
+ENV DEPS=$OPT_SRC
+ENV PATH=$OPT_SRC/ensembl-vep:$OPT_SRC/var_c_code:$PATH
+ENV LANG_VAR=en_US.UTF-8
 ARG BRANCH
 
 # Create vep user
@@ -160,23 +160,23 @@ RUN export MACHTYPE=$(uname -m) &&\
     # Remove CPAN cache
     rm -rf /root/.cpanm
 
-ENV LC_ALL $LANG_VAR
-ENV LANG $LANG_VAR
+ENV LC_ALL=$LANG_VAR
+ENV LANG=$LANG_VAR
 
 # Switch back to vep user
 USER vep
-ENV PERL5LIB $PERL5LIB_TMP
+ENV PERL5LIB=$PERL5LIB_TMP
 
 # Setup Docker environment for when users run VEP and INSTALL.pl in Docker image:
 #   - skip VEP updates in INSTALL.pl
-ENV VEP_NO_UPDATE 1
+ENV VEP_NO_UPDATE=1
 #   - avoid Faidx/HTSLIB installation in INSTALL.pl
-ENV VEP_NO_HTSLIB 1
+ENV VEP_NO_HTSLIB=1
 #   - skip plugin installation in INSTALL.pl
-ENV VEP_NO_PLUGINS 1
+ENV VEP_NO_PLUGINS=1
 #   - set plugins directory for VEP and INSTALL.pl
-ENV VEP_DIR_PLUGINS /plugins
-ENV VEP_PLUGINSDIR $VEP_DIR_PLUGINS
+ENV VEP_DIR_PLUGINS=/plugins
+ENV VEP_PLUGINSDIR=$VEP_DIR_PLUGINS
 WORKDIR $VEP_DIR_PLUGINS
 
 # Update bash profile
@@ -186,12 +186,12 @@ RUN echo >> $OPT/.profile && \
     echo export PATH >> $OPT/.profile && \
     # Install Ensembl API and plugins
     ./INSTALL.pl --auto ap --plugins all --pluginsdir $VEP_DIR_PLUGINS --no_update --no_htslib && \
-    # Remove the ensemb-vep tests and travis
-    rm -rf t travisci .travis.yml
+    # Remove ensemb-vep's travisci folder
+    rm -rf travisci
 
 # Install dependencies for VEP plugins:
 USER root
-ENV PLUGIN_DEPS "https://raw.githubusercontent.com/Ensembl/VEP_plugins/$BRANCH/config"
+ENV PLUGIN_DEPS="https://raw.githubusercontent.com/Ensembl/VEP_plugins/$BRANCH/config"
 #   - Ubuntu packages
 RUN curl -O "$PLUGIN_DEPS/ubuntu-packages.txt" && \
     apt-get update && apt-get install -y --no-install-recommends \
@@ -220,7 +220,7 @@ RUN curl -O ftp://ftp.ccb.jhu.edu/pub/software/genesplicer/GeneSplicer.tar.gz &&
     make && \
     mv genesplicer .. && \
     rm -rf GeneSplicer/*/
-ENV PATH $VEP_DIR_PLUGINS/GeneSplicer:$PATH
+ENV PATH=$VEP_DIR_PLUGINS/GeneSplicer:$PATH
 
 # Set working directory as symlink to $OPT/.vep (containing VEP cache and data)
 USER root

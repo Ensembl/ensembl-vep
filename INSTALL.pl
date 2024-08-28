@@ -138,6 +138,7 @@ my @API_MODULES = (
   { name => 'ensembl',           path => ' ',         test_pm => 'Bio::EnsEMBL::Registry' },
   { name => 'ensembl-variation', path => 'Variation', test_pm => 'Bio::EnsEMBL::Variation::Variation' },
   { name => 'ensembl-funcgen',   path => 'Funcgen',   test_pm => 'Bio::EnsEMBL::Funcgen::RegulatoryFeature' },
+  { name => 'ensembl-compara',   path => 'Compara',   test_pm => 'Bio::EnsEMBL::Compara::Homology' },
   { name => 'ensembl-io',        path => 'IO,Utils',  test_pm => 'Bio::EnsEMBL::IO::Parser' },
 );
 my $ensembl_url_tail = '/archive/';
@@ -636,7 +637,7 @@ sub check_api() {
   }
 
   elsif($total > 0) {
-    $message = "It looks like you already have the following API modules installed:\n\n".(join "\n", grep {$has_api->{$_}} keys %$has_api)."\n\nThe VEP requires the ensembl, ensembl-io, ensembl-variation and ensembl-funcgen modules";
+    $message = "It looks like you already have the following API modules installed:\n\n".(join "\n", grep {$has_api->{$_}} keys %$has_api)."\n\nEnsembl VEP requires the ensembl, ensembl-io, ensembl-variation, ensembl-compara and ensembl-funcgen modules";
   }
 
   if($AUTO =~ /a/ || !defined($message)) {
