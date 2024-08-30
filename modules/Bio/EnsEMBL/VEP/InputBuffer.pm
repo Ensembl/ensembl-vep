@@ -191,6 +191,9 @@ sub next {
   while(@$pre_buffer && @$buffer < $buffer_size) {
     my $vf = $pre_buffer->[0];
 
+    ## Set minimal to 1 if indel
+    $self->{minimal} = 1 if (defined($vf->{minimised}) && $vf->{minimised});
+
     # new chromosome
     if($prev_chr && $vf->{chr} ne $prev_chr) {
       $self->split_variants() if $self->{minimal};
