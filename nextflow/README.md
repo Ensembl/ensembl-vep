@@ -55,10 +55,10 @@ The following config files are used and can be modified depending on user requir
 ```bash
 [Mandatory]
   --input FILE              Input file (if unsorted, use --sort to avoid errors in indexing the output file). Alternatively, can also be a directory containing input files
+  --vep_config FILENAME     VEP config file. Alternatively, can also be a directory containing VEP INI files. Default: 'vep_config/vep.ini'
 
 [OPTIONAL]
   --bin_size INT            Number of lines to split input into multiple jobs. Default: 100
-  --vep_config FILENAME     VEP config file. Alternatively, can also be a directory containing VEP INI files. Default: 'vep_config/vep.ini'
   --vep_version VERSION     VEP version to use from Docker Hub (such as 113.0); only required when using Docker or Singularity profile. Default: 'latest'
   --cpus INT                Number of CPUs to use. Default: 1
   --outdir DIRNAME          Name of output directory. Default: outdir
@@ -76,12 +76,16 @@ The following config files are used and can be modified depending on user requir
 
 ### Example
 
+You need to create a `vep.ini` file based on `vep_config/vep.ini.template`.
+Always use absolute paths in `vep.ini` when indicating directories.
+
 ```bash
   nextflow run main.nf \
     --input ../examples/clinvar-testset/input.vcf \
+    --vep_config ../vep_config/vep.ini
     -profile slurm,singularity
  ```
-The above commands start the pipeline in SLURM using the Singularity image and
+The above command starts the pipeline in SLURM using the Singularity image and
 generates the output file upon completion.
 
 #### Output validation
