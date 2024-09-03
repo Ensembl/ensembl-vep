@@ -32,6 +32,16 @@ WORKDIR $OPT_SRC
 # Add ensembl-vep files from current context
 ADD . ensembl-vep
 
+# For release branches, raise an error if VEP version does not match the branch name
+RUN if expr "$BRANCH" : "^release/.*" > /dev/null ; \
+    then \
+      branch_version=$(echo $BRANCH | sed -E 's|release/([0-9]+).*|\1|g'); \
+      vep_version=$(grep VEP_VERSION */modules/Bio/EnsEMBL/VEP/Constants.pm | grep -Eo '[0-9]+'); \
+      if [ $branch_version -ne $vep_version ]; then \
+        echo "ERROR: VEP version $vep_version does not match version in branch name '$BRANCH'"; exit 1; \
+      fi; \
+    fi
+
 # Clone/download repositories/libraries
 RUN if [ "$BRANCH" = "main" ]; \
     then export BRANCH_OPT=""; \
