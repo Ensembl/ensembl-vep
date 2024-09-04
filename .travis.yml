@@ -57,9 +57,7 @@ install:
   - cd $DEPS
   - $CWD/travisci/build_c.sh
   - cd $CWD
-  - cpanm --quiet --installdeps --with-recommends --notest --cpanfile ensembl/cpanfile .
-  - cpanm --quiet --installdeps --with-recommends --notest .
-  - if [[ "$COVERALLS" = 'true' && ! "${TRAVIS_PERL_VERSION}" =~ '5.10' ]]; then cpanm --quiet -n Devel::Cover::Report::Coveralls; fi
+  - $CWD/travisci/install_dependencies.sh
   - cp travisci/MultiTestDB.conf.travisci  t/MultiTestDB.conf
 
 script: "./travisci/harness.sh"
