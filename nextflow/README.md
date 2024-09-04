@@ -22,18 +22,21 @@ The nextflow pipeline requires **[Nextflow](https://www.nextflow.io)** (tested o
 <a id="setup"></a>
 ### Pipeline setup
 
-#### Config files
-
 The following config files are used and can be modified depending on user requirements:
 
 * VEP config file
     ``` bash
     cp vep_config/vep.ini.template vep_config/vep.ini
     ```
-
 * Nextflow config file
-
     `nextflow.config` has the default options for running the pipeline. The default options can be changed by directly modifying this file or by overriding them using command line options.
+* VEP cache (optional, but faster than using `database`)
+    VEP cache can be downloaded and extracted from the [Ensembl FTP][].
+    The VEP config file needs to contain the absolute path to the cache directory.
+    More detailed instructions are available in our [VEP cache documentation][].
+
+[Ensembl FTP]: https://ftp.ensembl.org/pub/current_variation/indexed_vep_cache
+[VEP cache documentation]: https://www.ensembl.org/info/docs/tools/vep/script/vep_cache.html#cache
 
 ---
 <a id="usage"></a>
@@ -42,24 +45,28 @@ The following config files are used and can be modified depending on user requir
 
 ```bash
   nextflow run main.nf \
+  -profile <profiles-to-use> \
   --input <path-to-file> \
-  -profile <standard or lsf or slurm>
+  --vep_config <path-to-vep-config>
 ```
 
 #### Options
 
 ```bash
+[Mandatory]
   --input FILE              Input file (if unsorted, use --sort to avoid errors in indexing the output file). Alternatively, can also be a directory containing input files
-  --bin_size INT            Number of variants used to split input VCF into multiple jobs. Default: 100
-  --vep_config FILENAME     VEP config file. Alternatively, can also be a directory containing VEP INI files. Default: vep_config/vep.ini
+  --vep_config FILENAME     VEP config file. Alternatively, can also be a directory containing VEP INI files. Default: 'vep_config/vep.ini'
+
+[OPTIONAL]
+  --bin_size INT            Number of lines to split input into multiple jobs. Default: 100
+  --vep_version VERSION     VEP version to use from Docker Hub (such as 113.0); only required when using Docker or Singularity profile. Default: 'latest'
   --cpus INT                Number of CPUs to use. Default: 1
   --outdir DIRNAME          Name of output directory. Default: outdir
   --output_prefix PREFIX    Output filename prefix. The generated output file will have name <output_prefix>_VEP.vcf.gz.
                             NOTE: Do not use this parameter if you are expecting multiple output files.
 
   --sort                    Sort VCF results from VEP (only required if input is unsorted; slower if enabled). Default: false
-  --filters STRING          Comma-separated list of filter conditions to pass to filter_vep,
-                            such as "AF < 0.01,Feature is ENST00000377918".
+  --filters STRING          Comma-separated list of filter conditions to pass to filter_vep, such as "AF < 0.01,Feature is ENST00000377918".
                             Read more on how to write filters at https://ensembl.org/info/docs/tools/vep/script/vep_filter.html
                             Default: null (filter_vep is not run)
 ```
@@ -69,12 +76,17 @@ The following config files are used and can be modified depending on user requir
 
 ### Example
 
+You need to create a `vep.ini` file based on `vep_config/vep.ini.template`.
+Always use absolute paths in `vep.ini` when indicating directories.
+
 ```bash
   nextflow run main.nf \
     --input ../examples/clinvar-testset/input.vcf \
-    -profile slurm
+    --vep_config ../vep_config/vep.ini
+    -profile slurm,singularity
  ```
-The above commands start the pipeline in SLURM and generates the output file upon completion.
+The above command starts the pipeline in SLURM using the Singularity image and
+generates the output file upon completion.
 
 #### Output validation
 
