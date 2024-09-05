@@ -462,7 +462,7 @@ sub _create_transcript {
   return unless $tr_record->{_children} or $tr_record->{type} eq 'CDS';
 
   if (!$self->param('cds_as_transcript_gxf') && $tr_record->{type} eq 'CDS') {
-    $self->warning_msg("WARNING: $self->{file} contains CDS features whose parents are genes (instead of transcripts); use --cds_as_transcript_gxf to parse protein-coding CDS as single-exon transcripts (required if using NCBI prokaryotic GFF/GTF annotations)");
+    $self->warning_msg("WARNING: $self->{file} contains CDS features whose parents are genes (instead of transcripts); use --cds_as_transcript_gxf to parse protein-coding CDS as single-exon transcripts (useful for NCBI microbe GFF/GTF annotations)");
     return;
   }
 
@@ -525,7 +525,7 @@ sub _create_transcript {
   if ($biotype eq 'protein_coding' && scalar @exons == 0){
     if ($self->param('cds_as_transcript_gxf') && $tr_record->{type} eq 'CDS'){
       # create single-exon transcript based on a CDS without transcript parent
-      # example: prokaryotic GFF/GTF annotations from NCBI
+      # example: NCBI microbe GFF/GTF annotations
       push @exons, {
         start  => $tr_record->{start},
         end    => $tr_record->{end},

@@ -136,7 +136,7 @@ sub _record_get_parent_ids {
     my $type = lc($record->{type});
     my $parent_type = $PARENTS{$type};
 
-    # Avoid unassigned transcripts (fix for NCBI prokaryotic GTFs)
+    # Avoid unassigned transcripts (fix for NCBI microbe GTFs)
     $parent_type = 'gene' if $parent_type && $record->{attributes}->{$parent_type.'_id'} =~ /^unassigned/;
 
     my @parent_ids = ($parent_type) ? split(',',$record->{attributes}->{$parent_type.'_id'}) : ();
