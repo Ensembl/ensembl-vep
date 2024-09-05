@@ -184,22 +184,8 @@ sub create_VariationFeatures {
 
   my $vf;
   
-  # sv?
-  my $so_term = $self->get_SO_term($allele);
-  if(defined($so_term)) {
-    $vf = Bio::EnsEMBL::Variation::StructuralVariationFeature->new_fast({
-      start          => $start,
-      end            => $end,
-      strand         => $strand,
-      adaptor        => $self->get_adaptor('variation', 'StructuralVariationFeature'),
-      variation_name => $region,
-      chr            => $chr,
-      class_SO_term  => $so_term,
-    });
-  }
-
   # normal vf
-  else {
+  if ($allele =~ /^[ACGTN-]+$/) {
     my $ref = ('N' x (($end - $start) + 1)) || '-';
 
     $vf = Bio::EnsEMBL::Variation::VariationFeature->new_fast({
@@ -211,6 +197,22 @@ sub create_VariationFeatures {
       adaptor        => $self->get_adaptor('variation', 'VariationFeature'),
       variation_name => $region,
       chr            => $chr,
+    });
+  }
+
+  # sv
+  else {
+    my $so_term = $self->get_SO_term($allele);
+    return [] unless defined $so_term;
+
+    $vf = Bio::EnsEMBL::Variation::StructuralVariationFeature->new_fast({
+      start          => $start,
+      end            => $end,
+      strand         => $strand,
+      adaptor        => $self->get_adaptor('variation', 'StructuralVariationFeature'),
+      variation_name => $region,
+      chr            => $chr,
+      class_SO_term  => $so_term,
     });
   }
 

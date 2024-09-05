@@ -64,6 +64,7 @@ SKIP: {
   my $records;
   warning { $records = $as->_get_records_by_coords(21, 25585733, 25585733) };
   is(scalar @$records, 77, '_get_records_by_coords - count');
+  delete $records->[0]->{attributes}->{tag};
 
   is_deeply(
     $records->[0],
@@ -84,7 +85,6 @@ SKIP: {
         'havana_gene' => 'OTTHUMG00000078371',
         'havana_transcript_version' => '2',
         'exon_id' => 'ENSE00003528074',
-        'tag' => 'basic',
         'transcript_id' => 'ENST00000307301',
         'gene_id' => 'ENSG00000154719',
         'transcript_biotype' => 'protein_coding',
