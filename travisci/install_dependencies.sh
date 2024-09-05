@@ -2,8 +2,8 @@
 
 if [[ "$COVERALLS" = 'true' && ! "${TRAVIS_PERL_VERSION}" =~ '5.10' ]]
 then
-  awk '!/Devel::Cover/' ensembl/cpanfile > tmp_cpanfile && mv tmp_cpanfile ensembl/cpanfile
-  awk '!/Devel::Cover/' cpanfile > tmp_cpanfile && mv tmp_cpanfile cpanfile
+  sed -i '/Devel::Cover/d' ensembl/cpanfile
+  sed -i '/Devel::Cover/d' cpanfile
 fi
 
 cpanm --quiet --installdeps --with-recommends --notest --cpanfile ensembl/cpanfile .
