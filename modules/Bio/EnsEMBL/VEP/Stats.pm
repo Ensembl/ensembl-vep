@@ -684,6 +684,8 @@ sub generate_run_stats {
 
 sub generate_data_version {
   my $self = shift;
+  return [] unless defined $self->{info}->{version_data};
+
   my %version_data = %{ $self->{info}->{version_data} };
   my @return = map { [ $_, $version_data{$_} ] } sort keys %version_data;
   return \@return;

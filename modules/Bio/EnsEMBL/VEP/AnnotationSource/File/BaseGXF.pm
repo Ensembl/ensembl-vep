@@ -461,6 +461,11 @@ sub _create_transcript {
 
   return unless $tr_record->{_children} or $tr_record->{type} eq 'CDS';
 
+  if (!$self->param('cds_as_transcript_gxf') && $tr_record->{type} eq 'CDS') {
+    $self->warning_msg("WARNING: $self->{file} contains CDS features whose parents are genes (instead of transcripts); use --cds_as_transcript_gxf to parse protein-coding CDS as single-exon transcripts (required if using NCBI prokaryotic GFF/GTF annotations)");
+    return;
+  }
+
   my $id = $tr_record->{attributes}->{transcript_id} || $self->_record_get_id($tr_record);
   $id =~ s/^(gene|transcript|cds)[:-]//i;
 
@@ -518,16 +523,16 @@ sub _create_transcript {
 
   # check for exons for protein_coding biotype
   if ($biotype eq 'protein_coding' && scalar @exons == 0){
-    if ($tr_record->{type} eq 'CDS'){
+    if ($self->param('cds_as_transcript_gxf') && $tr_record->{type} eq 'CDS'){
       # create single-exon transcript based on a CDS without transcript parent
-      # example: microbial annotations from NCBI
+      # example: prokaryotic GFF/GTF annotations from NCBI
       push @exons, {
         start  => $tr_record->{start},
         end    => $tr_record->{end},
         strand => $tr_record->{strand},
       };
     } else {
-      $self->warning_msg("WARNING: No exons found for protein_coding transcript $id");
+      $self->warning_msg("WARNING: No exons found for protein-coding transcript $id");
       return;
     }
   }

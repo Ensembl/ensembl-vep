@@ -136,7 +136,7 @@ sub _record_get_parent_ids {
     my $type = lc($record->{type});
     my $parent_type = $PARENTS{$type};
 
-    # Avoid unassigned transcripts (fix for NCBI microbe GTFs)
+    # Avoid unassigned transcripts (fix for NCBI prokaryotic GTFs)
     $parent_type = 'gene' if $parent_type && $record->{attributes}->{$parent_type.'_id'} =~ /^unassigned/;
 
     my @parent_ids = ($parent_type) ? split(',',$record->{attributes}->{$parent_type.'_id'}) : ();
@@ -167,7 +167,8 @@ sub _record_get_id {
 =head2 _record_get_biotype
 
   Arg 1      : hashref $transcript_record_hash
-  Example    : $biotype = $as->_record_get_biotype($tr_record);
+  Arg 2      : hashref $gene_record_hash
+  Example    : $biotype = $as->_record_get_biotype($tr_record, $gene_record);
   Description: Get sequence ontology (SO) biotype of this record. Attempts to
                find it in the "biotype", "transcript_type" or "transcript_biotype"
                attribute fields, and if that fails default to the source field.
@@ -179,12 +180,13 @@ sub _record_get_id {
 =cut
 
 sub _record_get_biotype {
-  return
-    $_[1]->{attributes}->{transcript_biotype} ||
-    $_[1]->{attributes}->{transcript_type} ||
-    $_[1]->{attributes}->{biotype} ||
-    $_[1]->{_gene_record}->{attributes}->{gene_biotype} ||
-    $_[1]->{source};
+  my ($self, $record, $gene_record) = @_;
+  my $biotype = $record->{attributes}->{transcript_biotype} ||
+                $record->{attributes}->{transcript_type} ||
+                $record->{attributes}->{biotype} ||
+                ($self->param('cds_as_transcript_gxf') ? $gene_record->{attributes}->{gene_biotype} : undef) ||
+                $record->{source};
+  return $biotype;
 }
 
 1;

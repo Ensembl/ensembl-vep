@@ -231,7 +231,7 @@ sub _record_get_biotype {
     my $biotype = $record->{attributes}->{biotype} ||
                   $record->{attributes}->{transcript_type} ||
                   $record->{attributes}->{transcript_biotype} ||
-                  $gene_record->{attributes}->{gene_biotype};
+                  ($self->param('cds_as_transcript_gxf') ? $gene_record->{attributes}->{gene_biotype} : undef);
 
     # others we need to (guess) work it out
     if(!$biotype) {
