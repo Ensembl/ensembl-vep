@@ -8,7 +8,7 @@ nextflow.enable.dsl=2
 
 // defaults
 merged_vcf = null
-if ( params.output_prefix && params.output_prefix != "" ){
+if ( params.output_prefix ){
   merged_vcf = params.output_prefix + "_VEP.vcf.gz"
 }
 
