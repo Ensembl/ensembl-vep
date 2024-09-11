@@ -62,6 +62,8 @@ use Digest::MD5 qw(md5_hex);
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
+use Data::Dumper;
+
 use base qw(
   Bio::EnsEMBL::VEP::AnnotationSource::Database
   Bio::EnsEMBL::VEP::AnnotationType::Variation
@@ -154,7 +156,13 @@ sub get_features_by_regions_uncached {
 
     my $adaptor = $self->get_adaptor('variation', 'phenotypefeature');
     my $source_id = $self->clinvar_source_id_cache;
-    my $attribs = $adaptor->get_clinsig_alleles_by_location($chr_is_seq_region ? $chr : $sr_cache->{$chr}, $s, $e, $source_id) if defined($adaptor) && defined($source_id);
+    my $attribs;
+    my $attribs_clinical_impact;
+
+    if (defined($adaptor) && defined($source_id)) {
+      $attribs = $adaptor->get_clinsig_alleles_by_location($chr_is_seq_region ? $chr : $sr_cache->{$chr}, $s, $e, $source_id);
+      $attribs_clinical_impact = $adaptor->get_somatic_clin_impact_by_location($chr_is_seq_region ? $chr : $sr_cache->{$chr}, $s, $e, $source_id);
+    }
 
     my $phenotype_attrib_id = $self->phenotype_attrib_id || 0;
 
@@ -185,9 +193,14 @@ sub get_features_by_regions_uncached {
     while($sth->fetch) {
       my %v_copy = %v;
       $v_copy{allele_string} =~ s/\s+/\_/g;
-      my $v_clinsigs = $attribs->{($chr_is_seq_region ? $chr : $sr_cache->{$chr}) . ':' . $v_copy{start} . '-' . $v_copy{end}};
+
+      my $key = ($chr_is_seq_region ? $chr : $sr_cache->{$chr}) . ':' . $v_copy{start} . '-' . $v_copy{end};
+      # Clinical significance (germline)
+      my $v_clinsigs = $attribs->{$key};
+
       my @pfas_by_allele;
       my %clin_sigs;
+
       foreach my $pfa(@{$v_clinsigs})
       {
         if(defined($pfa->{clinvar_clin_sig}) && $v_copy{variation_name} eq $pfa->{id})
@@ -198,6 +211,15 @@ sub get_features_by_regions_uncached {
       }
       my @array = keys(%clin_sigs);
       $v_copy{clin_sig_allele} = join ';', @array if scalar(@array);
+
+      # somatic clinical impact
+      my $v_clin_impact = $attribs_clinical_impact->{$key};
+
+      if($v_clin_impact){
+        # TODO: edit the clinical impact format
+        $v_copy{clinical_impact} = _format_clinical_impact($v_clin_impact);
+      }
+
       $v_copy{variation_id} = $var_id;
       ## fix for e!94 alleles
       $v_copy{allele_string} =~ s/\/$//g;
@@ -216,6 +238,44 @@ sub get_features_by_regions_uncached {
   return \@return;
 }
 
+sub _format_clinical_impact {
+  my $v_clin_impact = shift;
+
+  my @somatic_clin_sig_list;
+  my @impact_assertion_list;
+  my @impact_clin_sig_list;
+
+  for my $pheno_feat (@{$v_clin_impact}) {
+    my @tmp;
+    my $classification;
+
+    # Get the somatic clinical impact
+    if($pheno_feat->{somatic_clin_sig}) {
+      @somatic_clin_sig_list = split(",", $pheno_feat->{somatic_clin_sig});
+    }
+    if($pheno_feat->{impact_assertion}) {
+      @impact_assertion_list = split(",", $pheno_feat->{impact_assertion});
+    }
+    if($pheno_feat->{impact_clin_sig}) {
+      @impact_clin_sig_list = split(",", $pheno_feat->{impact_clin_sig});
+    }
+
+    for (my $i=0; $i<(scalar @somatic_clin_sig_list); $i++) {
+      my $somatic_clin_sig = $somatic_clin_sig_list[$i];
+      if(scalar @impact_assertion_list && scalar @impact_clin_sig_list) {
+        $somatic_clin_sig .= " (" . $impact_assertion_list[$i] . ":" . $impact_clin_sig_list[$i] . ")";
+      }
+      push @tmp, $somatic_clin_sig;
+    }
+
+    if(scalar @tmp) {
+      $classification = join(",", @tmp);
+      $pheno_feat->{somatic_clin_sig} = $classification;
+    }
+  }
+
+  return $v_clin_impact;
+}
 
 =head2 seq_region_cache
 

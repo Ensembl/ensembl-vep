@@ -84,6 +84,8 @@ use Bio::EnsEMBL::VEP::OutputFactory::VEP_output;
 use Bio::EnsEMBL::VEP::OutputFactory::VCF;
 use Bio::EnsEMBL::VEP::OutputFactory::Tab;
 
+use Data::Dumper;
+
 our $CAN_USE_JSON;
 
 BEGIN {
@@ -174,6 +176,7 @@ sub new {
     max_af
     pubmed
     clin_sig_allele
+    somatic_classification
 
     numbers
     domains
@@ -1039,11 +1042,29 @@ sub add_colocated_variant_info {
     # ID
     push @{$hash->{Existing_variation}}, $ex->{variation_name} if $ex->{variation_name};
 
+    # print "\nvariation name: ", $ex->{variation_name}, "\n";
+
     # Variation Synonyms
     # VEP fetches the variation synonyms from the cache
     push @{$hash->{VAR_SYNONYMS}}, $ex->{var_synonyms} if $self->{var_synonyms} && $ex->{var_synonyms} && !$self->{_config}->{_params}->{is_vr};
 
     # Find allele specific clin_sig data if it exists
+    if(defined($ex->{clinical_impact}) && $self->{somatic_classification}) {
+      my @final_clin_impact;
+
+      for my $ci (@{$ex->{clinical_impact}}) {
+        if(defined $ci->{somatic_clin_sig}) {
+          my $somatic_clin_sig = $ci->{somatic_clin_sig};
+          if(defined $ci->{oncogenic_clin_sig}) {
+            $somatic_clin_sig = $somatic_clin_sig . " (Oncogenicity:" . $ci->{oncogenic_clin_sig} . ")";
+          }
+          push @final_clin_impact, $somatic_clin_sig;
+        }
+      }
+
+      $hash->{SOMATIC_CLASSIFICATION} = join(",", @final_clin_impact);
+    }
+
     if(defined($ex->{clin_sig_allele}) && $self->{clin_sig_allele} )
     {
 
