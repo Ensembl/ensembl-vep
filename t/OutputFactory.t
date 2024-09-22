@@ -772,7 +772,7 @@ is_deeply(
     'gnomADe_AF' => [
       '9.75e-05'
     ],
-    'gnomADe_OTH_AF' => [
+    'gnomADe_REMAINING_AF' => [
       '0.0001823'
     ],
     'gnomADe_AFR_AF' => [
@@ -791,6 +791,9 @@ is_deeply(
       '0'
     ],
     'gnomADe_ASJ_AF' => [
+      '0'
+    ],
+    'gnomADe_MID_AF' => [
       '0'
     ]
   },

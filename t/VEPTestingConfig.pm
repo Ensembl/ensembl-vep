@@ -35,7 +35,7 @@ our %DEFAULTS = (
     allele_string strand minor_allele minor_allele_freq
     clin_sig phenotype_or_disease pubmed
     AFR AMR EAS EUR SAS AA EA
-    gnomADe gnomADe_AFR gnomADe_AMR gnomADe_ASJ gnomADe_EAS gnomADe_FIN gnomADe_NFE gnomADe_OTH gnomADe_SAS
+    gnomADe gnomADe_AFR gnomADe_AMR gnomADe_ASJ gnomADe_EAS gnomADe_FIN gnomADe_MID gnomADe_NFE gnomADe_REMAINING gnomADe_SAS
   )],
 
   chr_synonyms   => $Bin.'/testdata/chr_synonyms.txt',
