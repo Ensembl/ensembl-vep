@@ -284,7 +284,7 @@ SKIP: {
      'type' => 'mRNA',
   );
   my $trans = $as->lazy_load_transcript(\%feature_record, $feature_record{_gene_record});
-  ok($tmp =~ /No exons found for protein_coding transcript/, 'no exons warning message');
+  ok($tmp =~ /No exons found for protein-coding transcript/, 'no exons warning message');
 
   # restore STDERR
   open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
