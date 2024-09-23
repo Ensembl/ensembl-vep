@@ -219,13 +219,6 @@ sub get_features_by_regions_uncached {
 
     foreach my $mf(@motif_features) {
       $mf->get_BindingMatrix->summary_as_hash();
-      if($self->{cell_type} && scalar(@{$self->{cell_type}})) {
-        my %cl =  
-          map {$_->[0] => $_->[1]}
-          map {$_->[0] =~ s/ /\_/g; $_}
-          map { [$_->name, 1] } @{$mf->get_all_Epigenomes_with_experimental_evidence};
-        $mf->{cell_types} = \%cl;
-      }
     }
     push @region_features,
       map { $_->{_vep_feature_type} ||= $type; $_ }
