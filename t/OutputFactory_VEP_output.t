@@ -217,7 +217,7 @@ is(
   'HGVSc=ENST00000307301.11:c.*18G>A;'.
   'AF=0.0010;AFR_AF=0.003;AMR_AF=0.0014;EAS_AF=0;EUR_AF=0;SAS_AF=0;'.
   'gnomADe_AF=0.0003478;gnomADe_AFR_AF=0.004643;gnomADe_AMR_AF=0.0003236;gnomADe_ASJ_AF=0;'.
-  'gnomADe_EAS_AF=0;gnomADe_FIN_AF=0;gnomADe_NFE_AF=1.886e-05;gnomADe_OTH_AF=0;gnomADe_SAS_AF=0;MAX_AF=0.004643;MAX_AF_POPS=gnomADe_AFR',
+  'gnomADe_EAS_AF=0;gnomADe_FIN_AF=0;gnomADe_MID_AF=0;gnomADe_NFE_AF=1.886e-05;gnomADe_REMAINING_AF=0;gnomADe_SAS_AF=0;MAX_AF=0.004643;MAX_AF_POPS=gnomADe_AFR',
   'get_all_lines_by_InputBuffer - everything'
 );
 

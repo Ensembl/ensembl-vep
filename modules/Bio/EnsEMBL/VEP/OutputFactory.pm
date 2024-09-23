@@ -107,9 +107,9 @@ my %DISTANCE_CONS = (upstream_gene_variant => 1, downstream_gene_variant => 1);
 my %FREQUENCY_KEYS = (
   af           => ['AF'],
   af_1kg       => [qw(AF AFR AMR ASN EAS EUR SAS)],
-  af_gnomad    => [('gnomADe', map {'gnomADe_'.$_} qw(AFR AMR ASJ EAS FIN NFE OTH SAS))],
-  af_gnomade    => [('gnomADe', map {'gnomADe_'.$_} qw(AFR AMR ASJ EAS FIN NFE OTH SAS))],
-  af_gnomadg => [('gnomADg', map {'gnomADg_'.$_} qw(AFR AMI AMR ASJ EAS FIN MID NFE OTH SAS))],
+  af_gnomad    => [('gnomADe', map {'gnomADe_'.$_} qw(AFR AMR ASJ EAS FIN MID NFE REMAINING SAS))],
+  af_gnomade    => [('gnomADe', map {'gnomADe_'.$_} qw(AFR AMR ASJ EAS FIN MID NFE REMAINING SAS))],
+  af_gnomadg => [('gnomADg', map {'gnomADg_'.$_} qw(AFR AMI AMR ASJ EAS FIN MID NFE REMAINING SAS))],
 );
 
 
