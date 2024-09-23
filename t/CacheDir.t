@@ -210,8 +210,9 @@ is_deeply(
       'gnomADe_ASJ',
       'gnomADe_EAS',
       'gnomADe_FIN',
+      'gnomADe_MID',
       'gnomADe_NFE',
-      'gnomADe_OTH',
+      'gnomADe_REMAINING',
       'gnomADe_SAS',
       'var_synonyms',
       'AF'

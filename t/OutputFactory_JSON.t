@@ -133,7 +133,7 @@ SKIP: {
               'amr' => '0.0014',
               'gnomade_sas' => '0',
               'gnomade' => '0.0003478',
-              'gnomade_oth' => '0',
+              'gnomade_remaining' => '0',
               'gnomade_asj' => '0',
               'gnomade_nfe' => '1.886e-05',
               'gnomade_afr' => '0.004643',
@@ -142,6 +142,7 @@ SKIP: {
               'gnomade_fin' => '0',
               'sas' => '0',
               'gnomade_eas' => '0',
+              'gnomade_mid' => '0',
               'eur' => '0',
               'eas' => '0'
             }
@@ -201,10 +202,11 @@ SKIP: {
                 'gnomade_fin' => '0',
                 'gnomade_amr' => '0',
                 'gnomade' => '7.313e-05',
-                'gnomade_oth' => '0',
+                'gnomade_remaining' => '0',
                 'gnomade_asj' => '0',
                 'gnomade_eas' => '0',
-                'gnomade_nfe' => '0.0001433'
+                'gnomade_nfe' => '0.0001433',
+                'gnomade_mid' => '0'
               }
            },
            'end' => '25891785',
@@ -319,7 +321,7 @@ SKIP: {
               'amr' => 0.0014,
               'gnomade_sas' => 0,
               'gnomade' => 0.0003478,
-              'gnomade_oth' => 0,
+              'gnomade_remaining' => 0,
               'gnomade_asj' => 0,
               'gnomade_nfe' =>  1.886e-05,
               'gnomade_afr' => 0.004643,
@@ -328,6 +330,7 @@ SKIP: {
               'gnomade_fin' => 0,
               'sas' => 0,
               'gnomade_eas' => 0,
+              'gnomade_mid' => 0,
               'eur' => 0,
               'eas' => 0
             }
