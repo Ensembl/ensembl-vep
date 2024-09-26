@@ -725,7 +725,7 @@ sub validate_vf {
 =cut
 
 sub get_SO_term {
-  my $self = shift;
+  my $self = shift || {};
   my $type = shift || ( $self->can("get_alternatives") ? join(",", @{ $self->get_alternatives }) : '');
   my $abbrev;
 
