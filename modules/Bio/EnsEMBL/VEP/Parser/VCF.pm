@@ -340,6 +340,7 @@ sub create_VariationFeatures {
     start          => $start,
     end            => $end,
     allele_string  => $non_variant ? $ref : $ref.'/'.join('/', @$alts),
+    nontrimmed_allele_string => $non_variant ? $original_alleles[0] : join("/",@original_alleles),
     strand         => 1,
     map_weight     => 1,
     adaptor        => $self->get_adaptor('variation', 'VariationFeature'),
