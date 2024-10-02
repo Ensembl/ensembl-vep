@@ -478,12 +478,14 @@ sub _create_transcript {
     $tr_record->{strand}
   );
 
+  my $version = $tr_record->{attributes}->{version};
+
   my $tr = Bio::EnsEMBL::Transcript->new_fast({
     stable_id => $id,
     biotype   => $biotype,
     slice     => $slice,
     strand    => $tr_strand,
-    version   => 1,
+    version   => $version,
     dbID      => $self->{_tr_dbID}++,
     start     => $tr_start,
     end       => $tr_end,
@@ -632,8 +634,9 @@ sub _add_identifiers {
 
   $tr->{_source_cache} = $self->short_name;
 
-  # get gene ID
+  # get gene ID and version
   $tr->{_gene_stable_id} = $tr_record->{attributes}->{gene_id};
+  $tr->{_gene_version} = $gene_record->{attributes}->{version};
 
   if(!$tr->{_gene_stable_id}) {
     foreach my $pair(split(',', $tr_record->{attributes}->{dbxref} || $tr_record->{attributes}->{Dbxref} || '')) {

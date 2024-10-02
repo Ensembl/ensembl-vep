@@ -1387,7 +1387,7 @@ sub BaseTranscriptVariationAllele_to_output_hash {
   # basics
   $hash->{Feature_type} = 'Transcript';
   $hash->{Feature}      = $tr->stable_id if $tr;
-  $hash->{Feature}     .= '.'.$tr->version if $hash->{Feature} && $self->{transcript_version} && $hash->{Feature} !~ /\.\d+$/;
+  $hash->{Feature}     .= '.'.$tr->version if $hash->{Feature} && $self->{transcript_version} && $tr->version && $hash->{Feature} !~ /\.\d+$/;
 
   # get gene
   $hash->{Gene} = $tr->{_gene_stable_id};
