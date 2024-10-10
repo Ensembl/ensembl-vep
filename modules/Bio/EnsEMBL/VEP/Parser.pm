@@ -67,7 +67,7 @@ use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::Utils qw(get_compressed_filehandle);
 use Bio::EnsEMBL::Variation::Utils::Sequence qw(trim_sequences);
-use Bio::EnsEMBL::Variation::Utils::VEP qw(&check_format);
+use Bio::EnsEMBL::Variation::Utils::Config qw(%SO_TERMS);
 
 use Bio::EnsEMBL::VEP::Parser::VCF;
 use Bio::EnsEMBL::VEP::Parser::VEP_input;
@@ -82,7 +82,11 @@ use FileHandle;
 
 use base qw(Exporter);
 
-our @EXPORT_OK = qw(get_SO_term);
+our @EXPORT_OK = qw(
+    get_SO_term
+    &check_format
+    &_valid_region_regex
+);
 
 my %FORMAT_MAP = (
   'vcf'     => 'VCF',
@@ -348,6 +352,69 @@ sub delimiter {
   my $self = shift;
   $self->{delimiter} = shift if @_;
   return $self->{delimiter};
+}
+
+
+sub _valid_region_regex {
+  return qr/^([^:]+):(\d+)-(\d+)(:[-\+]?1)?[\/:]([a-z0-9:]{3,}|[ACGTN-]+)$/i;
+}
+
+# sub-routine to check format of string
+sub check_format {
+    my @line = @_;
+    my $format;
+
+    # any changes here must be copied to the JavaScript file to run instant VEP:
+    # public-plugins/tools/htdocs/components/20_VEPForm.js
+
+    # region: chr21:10-10:1/A
+    if ( scalar @line == 1 && $line[0] =~ &_valid_region_regex() ) {
+        $format = 'region';
+    }
+
+    # SPDI: NC_000016.10:68684738:G:A
+    elsif ( scalar @line == 1 && $line[0] =~ /^(.*?\:){2}([^\:]+|)$/i ) {
+        $format = 'spdi';
+    }
+
+    # CAID: CA9985736
+    elsif ( scalar @line == 1 && $line[0] =~ /^CA\d{1,}$/i ) {
+        $format = 'caid';
+    }
+
+    # HGVS: ENST00000285667.3:c.1047_1048insC
+    elsif (
+        scalar @line == 1 &&
+        $line[0] =~ /^([^\:]+)\:.*?([cgmrp]?)\.?([\*\-0-9]+.*)$/i
+    ) {
+        $format = 'hgvs';
+    }
+
+    # variant identifier: rs123456
+    elsif ( scalar @line == 1 ) {
+        $format = 'id';
+    }
+
+    # VCF: 20  14370  rs6054257  G  A  29  0  NS=58;DP=258;AF=0.786;DB;H2  GT:GQ:DP:HQ
+    elsif (
+        $line[0] =~ /(chr)?\w+/ &&
+        $line[1] =~ /^\d+$/ &&
+        exists $line[3] && $line[3] =~ /^[ACGTN\-\.]+$/i &&
+        exists $line[4]
+    ) {
+        $format = 'vcf';
+    }
+
+    # ensembl: 20  14370  14370  A/G  +
+    elsif (
+        $line[0] =~ /\w+/ &&
+        $line[1] =~ /^\d+$/ &&
+        exists $line[2] && $line[2] =~ /^\d+$/ &&
+        exists $line[3] && $line[3] =~ /([a-z]{2,})|([ACGTN-]+\/[ACGTN-]+)/i
+    ) {
+        $format = 'ensembl';
+    }
+    return $format;
 }
 
 
@@ -658,8 +725,8 @@ sub validate_vf {
 =cut
 
 sub get_SO_term {
-  my $self = shift;
-  my $type = shift || join(",", @{ $self->get_alternatives });
+  my $self = shift || {};
+  my $type = shift || ( $self->can("get_alternatives") ? join(",", @{ $self->get_alternatives }) : '');
   my $abbrev;
 
   my @mobile_elements = ("ALU", "HERV", "LINE1", "SVA");
@@ -697,33 +764,13 @@ sub get_SO_term {
     $abbrev = $type;
   }
 
-  my %terms = (
-    INS       => 'insertion',
-    INS_ME    => 'mobile_element_insertion',
-    INS_ALU   => 'Alu_insertion',
-    INS_HERV  => 'HERV_insertion',
-    INS_LINE1 => 'LINE1_insertion',
-    INS_SVA   => 'SVA_insertion',
-
-    DEL       => 'deletion',
-    DEL_ME    => 'mobile_element_deletion',
-    DEL_ALU   => 'Alu_deletion',
-    DEL_HERV  => 'HERV_deletion',
-    DEL_LINE1 => 'LINE1_deletion',
-    DEL_SVA   => 'SVA_deletion',
-
-    TREP => 'tandem_repeat',
-    TDUP => 'tandem_duplication',
-    DUP  => 'duplication',
-    CNV  => 'copy_number_variation',
-    INV  => 'inversion',
-    BND  => 'chromosome_breakpoint'
-  );
+  my %terms = %SO_TERMS;
 
   my $res = $terms{$abbrev};
   ## unsupported SV types
-  if ($self->isa('Bio::EnsEMBL::VEP::Parser')) {
-    $self->skipped_variant_msg("$abbrev is not a supported structural variant type") unless $res;
+  ## $self can be an empty hash from Bio::EnsEMBL::Variation::Utils::VEP::parse_vcf
+  if (%{ $self } && $self->isa('Bio::EnsEMBL::VEP::Parser')) {
+    $self->skipped_variant_msg("$abbrev type is not supported") unless $res;
   }
   return $res;
 }

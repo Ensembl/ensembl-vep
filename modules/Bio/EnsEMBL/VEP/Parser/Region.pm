@@ -86,8 +86,6 @@ use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::IO::ListBasedParser;
 
-use Bio::EnsEMBL::Variation::Utils::VEP qw(&_valid_region_regex);
-
 =head2 new
 
   Arg 1      : hashref $args
@@ -168,7 +166,7 @@ sub create_VariationFeatures {
 
   my $region = $parser->get_value();
 
-  return [] unless $region =~ &_valid_region_regex();
+  return [] unless $region =~ $self->_valid_region_regex();
   my ($chr, $start, $end) = ($1, $2, $3);
 
   my ($strand, $allele);
