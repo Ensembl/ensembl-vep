@@ -1147,7 +1147,7 @@ sub cache() {
   chomp($tabix);
   $tabix ||= "$HTSLIB_DIR/tabix";
   
-  my $URL_TO_USE = (-e $tabix) ? $CACHE_URL_INDEXED : $CACHE_URL;
+  my $URL_TO_USE = (-e $tabix) ? $CACHE_URL_INDEXED : die "ERROR: Could not find tabix. It is recommended to use indexed cache files";
 
   if(is_url($URL_TO_USE)) {
     $URL_TO_USE =~ m/(.*:\/\/)?(.+?)\/(.+)/;
