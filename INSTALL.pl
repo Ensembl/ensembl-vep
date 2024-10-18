@@ -262,7 +262,6 @@ $FTP_USER     ||= 'anonymous';
 ## Set the indexed cache url if it's been overwritten by the user
 $CACHE_URL_INDEXED = $CACHE_URL;
 
-$CACHE_URL  ||= "https://ftp.ensembl.org/pub/release-$DATA_VERSION/variation/vep";
 $CACHE_URL_INDEXED  ||= "https://ftp.ensembl.org/pub/release-$DATA_VERSION/variation/indexed_vep_cache";
 $FASTA_URL  ||= "https://ftp.ensembl.org/pub/release-$DATA_VERSION/fasta/";
 $PLUGIN_URL ||= 'https://raw.githubusercontent.com/Ensembl/VEP_plugins';
@@ -1149,7 +1148,7 @@ sub cache() {
   chomp($tabix);
   $tabix ||= "$HTSLIB_DIR/tabix";
   
-  my $URL_TO_USE = (-e $tabix) ? $CACHE_URL_INDEXED : $CACHE_URL;
+  my $URL_TO_USE = (-e $tabix) ? $CACHE_URL_INDEXED : die "ERROR: Could not find tabix";
 
   if(is_url($URL_TO_USE)) {
     $URL_TO_USE =~ m/(.*:\/\/)?(.+?)\/(.+)/;
