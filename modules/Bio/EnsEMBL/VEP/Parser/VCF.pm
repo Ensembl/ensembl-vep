@@ -551,7 +551,7 @@ sub create_StructuralVariationFeatures {
     $parser->get_outer_end,
   );
 
-  if($start >= $end && $so_term =~ /del/i) {
+  if($start > $end && $so_term =~ /del/i) {
     $self->skipped_variant_msg("deletion looks incomplete");
     $skip_line = 1;
   }
