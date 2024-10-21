@@ -767,11 +767,11 @@ is_deeply($bnd_vf, bless( {
                  'start' => 68914093,
                  'inner_start' => 68914093,
                  'outer_start' => 68914093,
-                 'end' => 68914095,
-                 'inner_end' => 68914095,
-                 'outer_end' => 68914095,
+                 'end' => 68914093,
+                 'inner_end' => 68914093,
+                 'outer_end' => 68914093,
                  'seq_region_start' => 68914093,
-                 'seq_region_end' => 68914095
+                 'seq_region_end' => 68914093
                },
                'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) ,
                'StructuralVariationFeature - BND with unsupported INFO/END field');
@@ -869,14 +869,14 @@ is_deeply($bnd5_vf, bless( {
                  'start' => 68914093,
                  'inner_start' => 68914093,
                  'outer_start' => 68914093,
-                 'end' => 68914095,
-                 'inner_end' => 68914095,
-                 'outer_end' => 68914095,
+                 'end' => 68914094,
+                 'inner_end' => 68914094,
+                 'outer_end' => 68914094,
                  'seq_region_start' => 68914093,
-                 'seq_region_end' => 68914095
+                 'seq_region_end' => 68914094
                },
                'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) ,
-               'StructuralVariationFeature - BND with unsupported INFO/END field');
+               'StructuralVariationFeature - BND with undefined INFO/END field');
 
 ## test tandem repeats
 

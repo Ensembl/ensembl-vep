@@ -431,7 +431,7 @@ SKIP: {
     config => $cfg,
     parser => Bio::EnsEMBL::VEP::Parser::VCF->new({
       config => $cfg,
-      file => $test_cfg->create_input_file([qw(21 25585735 . G . . . SVTYPE=DEL;SVLEN=2)]),
+      file => $test_cfg->create_input_file([qw(21 25585735 . T . . . SVTYPE=DEL;SVLEN=1)]),
       valid_chromosomes => [21]
     })
   });
