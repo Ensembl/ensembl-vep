@@ -480,7 +480,10 @@ sub create_StructuralVariationFeatures {
   }
 
   ## get breakends from INFO field (from Illumina Manta, for instance)
-  if ($so_term =~ /breakpoint/) {
+  if ($so_term =~ /insertion/) {
+    $end = $start - 1;
+  }
+  elsif ($so_term =~ /breakpoint/) {
     ## Illumina Manta (SV caller) may use INFO/END to identify the position of
     ## the breakend mate (this is not supported by VCF 4.4 specifications)
     my $incorrect_end = $info->{END};
