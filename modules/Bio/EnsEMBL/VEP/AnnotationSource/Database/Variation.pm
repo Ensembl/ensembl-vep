@@ -164,6 +164,8 @@ sub get_features_by_regions_uncached {
       $attribs_clinical_impact = $adaptor->get_somatic_clin_impact_by_location($chr_is_seq_region ? $chr : $sr_cache->{$chr}, $s, $e, $source_id);
     }
 
+    print "\n->attribs_clinical_impact: ", Dumper($attribs_clinical_impact);
+
     my $phenotype_attrib_id = $self->phenotype_attrib_id || 0;
 
     my $sth = $self->var_dbc->prepare(qq{
@@ -216,8 +218,8 @@ sub get_features_by_regions_uncached {
       my $v_clin_impact = $attribs_clinical_impact->{$key};
 
       if($v_clin_impact){
-        # TODO: edit the clinical impact format
         $v_copy{clinical_impact} = _format_clinical_impact($v_clin_impact);
+        print "---v_clin_impact specific key after format: ", Dumper($v_clin_impact);
       }
 
       $v_copy{variation_id} = $var_id;
@@ -244,34 +246,64 @@ sub _format_clinical_impact {
   my @somatic_clin_sig_list;
   my @impact_assertion_list;
   my @impact_clin_sig_list;
+  my @oncogenic_clin_sig_list;
+
+  # print "\n(_format_clinical_impact) ", Dumper($v_clin_impact);
 
   for my $pheno_feat (@{$v_clin_impact}) {
     my @tmp;
     my $classification;
 
+    # If somatic clinical significance already has '(' then the prognostic/diagnostic
+    # is already attached to it
+    if($pheno_feat->{final_somatic_clin_sig}) {
+        return $v_clin_impact;
+    }
+
     # Get the somatic clinical impact
+    # Example: Tier IV - Benign/Likely benign
     if($pheno_feat->{somatic_clin_sig}) {
       @somatic_clin_sig_list = split(",", $pheno_feat->{somatic_clin_sig});
     }
+
+    # The impact assertion is optional
+    # Example: diagnostic,prognostic
     if($pheno_feat->{impact_assertion}) {
       @impact_assertion_list = split(",", $pheno_feat->{impact_assertion});
     }
+
+    # The impact_clin_sig is optional
+    # Example: supports diagnosis,better outcome
     if($pheno_feat->{impact_clin_sig}) {
       @impact_clin_sig_list = split(",", $pheno_feat->{impact_clin_sig});
+    }
+
+    if($pheno_feat->{oncogenic_clin_sig}) {
+      @oncogenic_clin_sig_list = split(",", $pheno_feat->{oncogenic_clin_sig});
     }
 
     for (my $i=0; $i<(scalar @somatic_clin_sig_list); $i++) {
       my $somatic_clin_sig = $somatic_clin_sig_list[$i];
       if(scalar @impact_assertion_list && scalar @impact_clin_sig_list) {
         $somatic_clin_sig .= " (" . $impact_assertion_list[$i] . ":" . $impact_clin_sig_list[$i] . ")";
+        push @tmp, $somatic_clin_sig;
       }
-      push @tmp, $somatic_clin_sig;
     }
 
     if(scalar @tmp) {
       $classification = join(",", @tmp);
-      $pheno_feat->{somatic_clin_sig} = $classification;
+      # $pheno_feat->{somatic_clin_sig} = $classification;
+      $pheno_feat->{final_somatic_clin_sig} = $pheno_feat->{phenotype}." ".$classification;
     }
+    elsif($pheno_feat->{somatic_clin_sig} && $pheno_feat->{oncogenic_clin_sig}) {
+      $pheno_feat->{final_somatic_clin_sig} = $pheno_feat->{phenotype}." ".$pheno_feat->{somatic_clin_sig}."(oncogenicity:".$pheno_feat->{oncogenic_clin_sig}.")";
+    }
+    elsif($pheno_feat->{somatic_clin_sig}) {
+      $pheno_feat->{final_somatic_clin_sig} = $pheno_feat->{phenotype}." ".$pheno_feat->{somatic_clin_sig};
+    }
+
+    # print "somatic_clin_sig: ", Dumper($pheno_feat->{somatic_clin_sig});
+
   }
 
   return $v_clin_impact;

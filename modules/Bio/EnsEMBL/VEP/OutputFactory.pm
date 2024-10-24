@@ -1023,6 +1023,8 @@ sub add_colocated_variant_info {
 
   my %clin_sigs;
   
+  # print "***vf_existing: ", Dumper($vf->{existing});
+
   foreach my $ex(
     sort {
       ($a->{somatic} || 0) <=> ($b->{somatic} || 0) ||
@@ -1048,21 +1050,35 @@ sub add_colocated_variant_info {
     # VEP fetches the variation synonyms from the cache
     push @{$hash->{VAR_SYNONYMS}}, $ex->{var_synonyms} if $self->{var_synonyms} && $ex->{var_synonyms} && !$self->{_config}->{_params}->{is_vr};
 
+    # print Dumper($ex);
+
     # Find allele specific clin_sig data if it exists
     if(defined($ex->{clinical_impact}) && $self->{somatic_classification}) {
-      my @final_clin_impact;
 
-      for my $ci (@{$ex->{clinical_impact}}) {
-        if(defined $ci->{somatic_clin_sig}) {
-          my $somatic_clin_sig = $ci->{somatic_clin_sig};
-          if(defined $ci->{oncogenic_clin_sig}) {
-            $somatic_clin_sig = $somatic_clin_sig . " (Oncogenicity:" . $ci->{oncogenic_clin_sig} . ")";
-          }
-          push @final_clin_impact, $somatic_clin_sig;
+      print "\n---Output factory: ", Dumper($ex->{clinical_impact});
+
+      if(ref($ex->{clinical_impact}) eq "ARRAY") {
+        my @final_clin_impact;
+        foreach my $pf (@{$ex->{clinical_impact}}) {
+          push @final_clin_impact, $pf->{final_somatic_clin_sig} if $pf->{final_somatic_clin_sig};
         }
-      }
+        $hash->{SOMATIC_CLASSIFICATION} = join(";", @final_clin_impact);
+      }    
+      else {
+        $hash->{SOMATIC_CLASSIFICATION} = $ex->{clinical_impact};
+      }  
 
-      $hash->{SOMATIC_CLASSIFICATION} = join(",", @final_clin_impact);
+      print "Somatic classification: ", $hash->{SOMATIC_CLASSIFICATION}, "\n";
+
+      # for my $ci (@{$ex->{clinical_impact}}) {
+      #   if(defined $ci->{somatic_clin_sig}) {
+      #     my $somatic_clin_sig = $ci->{somatic_clin_sig};
+      #     if(defined $ci->{oncogenic_clin_sig}) {
+      #       $somatic_clin_sig = $somatic_clin_sig . " (Oncogenicity:" . $ci->{oncogenic_clin_sig} . ")";
+      #     }
+      #     push @final_clin_impact, $somatic_clin_sig;
+      #   }
+      # }
     }
 
     if(defined($ex->{clin_sig_allele}) && $self->{clin_sig_allele} )
