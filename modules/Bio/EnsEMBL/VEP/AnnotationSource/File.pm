@@ -532,14 +532,16 @@ sub _record_overlaps_VF {
     # check overlap percentage
     my @overlap_start = sort { $a <=> $b } ($vs, $ref_start);
     my @overlap_end   = sort { $a <=> $b } ($ve, $ref_end);
-    my $overlap_percentage = 100 * (1 + $overlap_end[0] - $overlap_start[1]) / $length;
+    my $overlap_percentage = $length != 0 ? 100 * (1 + $overlap_end[0] - $overlap_start[1]) / $length : 100;
 
     return 0 if $overlap_percentage < $overlap_cutoff;
 
     if ($reciprocal) {
       # check bi-directional overlap - percentage of reference variant covered
       my $ref_length = $ref_end - $ref_start + 1;
-      my $ref_overlap_percentage = 100 * (1 + $overlap_end[0] - $overlap_start[1]) / $ref_length;
+
+      # in some cases $ref_length can be 0, for example in old VCF with single base deletion without INFO/SVLEN
+      my $ref_overlap_percentage = $ref_length != 0 ? 100 * (1 + $overlap_end[0] - $overlap_start[1]) / $ref_length : 100;
       return 0 if $ref_overlap_percentage < $overlap_cutoff;
 
       # report minimum overlap
