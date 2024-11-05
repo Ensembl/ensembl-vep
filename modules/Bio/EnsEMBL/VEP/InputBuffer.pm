@@ -191,9 +191,6 @@ sub next {
   while(@$pre_buffer && @$buffer < $buffer_size) {
     my $vf = $pre_buffer->[0];
 
-    ## Set minimal to 1 if indel
-    $self->{minimal} = 1 if (defined($vf->{minimised}) && $vf->{minimised});
-
     # new chromosome
     if($prev_chr && $vf->{chr} ne $prev_chr) {
       $self->split_variants() if $self->{minimal};
@@ -212,8 +209,6 @@ sub next {
   if(my $parser = $self->parser) {
     while(@$buffer < $buffer_size && (my $vf = $parser->next)) {
 
-      ## Set minimal to 1 if indel
-      $self->{minimal} = 1 if (defined($vf->{minimised}) && $vf->{minimised});
 
       # exit the program if the maximum number of variants not ordered in the input file is reached
       if (!$self->param('no_check_variants_order') &&
@@ -262,8 +257,7 @@ sub next {
     die($error_msg);
   }
 
-  $self->split_variants() if $self->{minimal};
-
+  $self->split_variants() if $self->{minimal}  ;
   return $buffer;
 }
 

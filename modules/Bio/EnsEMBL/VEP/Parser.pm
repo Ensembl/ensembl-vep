@@ -858,8 +858,16 @@ sub post_process_vfs {
       # For VCF input, the allele_string is trimmed to remove anchor base, so we capture original allele
       
       my $original_allele_string = ($vf->{nontrimmed_allele_string} || $vf->{allele_string});
-      my ($ref_allele_string,$alt_allele_string) = split(/\//, $original_allele_string);
-      $is_non_minimised_indel = 1 unless length($ref_allele_string) == length($alt_allele_string) or $original_allele_string =~ /-/;
+      my @alleles = split(/\//, $original_allele_string);
+      my $ref_allele_string = shift @alleles;
+      my $alt_allele_count;
+
+      foreach my $alt(@alleles) {
+        if (length($ref_allele_string) != length($alt) or $original_allele_string =~ /^-/){
+          $is_non_minimised_indel = 1;
+          last;
+        }
+      }
       $vf = ${$self->minimise_alleles([$vf])}[0] if $is_non_minimised_indel;
     }
   }
@@ -961,6 +969,7 @@ sub minimise_alleles {
     {
       # Updating a flag to minimise multi-allelic variants in split_variants/rejoin_variants
       $vf->{minimised} = 1;
+      $vf->{original_allele_string} = $vf->{nontrimmed_allele_string} || $vf->{allele_string};
       push @return, $vf;
     }
 
