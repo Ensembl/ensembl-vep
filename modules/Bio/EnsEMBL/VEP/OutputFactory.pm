@@ -1387,7 +1387,7 @@ sub BaseTranscriptVariationAllele_to_output_hash {
   # basics
   $hash->{Feature_type} = 'Transcript';
   $hash->{Feature}      = $tr->stable_id if $tr;
-  $hash->{Feature}     .= '.'.$tr->version if $hash->{Feature} && $self->{transcript_version} && $tr->version && $hash->{Feature} !~ /\.\d+$/;
+  $hash->{Feature}     .= '.'.$tr->version if $hash->{Feature} && $self->{transcript_version} && $hash->{Feature} !~ /\.\d+$/;
 
   # get gene
   $hash->{Gene} = $tr->{_gene_stable_id};
@@ -1630,7 +1630,10 @@ sub TranscriptVariationAllele_to_output_hash {
 
   # Only for RefSeq annotations
   # If invalid_alleles is set to 1 then the ref and alt alleles are the same -> this is an invalid variant
-  if($vfoa->{invalid_alleles}) {
+  # Print mismatch warning only if:
+  #  - there is transcripts mismatch
+  #  - use_given_ref is not defined
+  if($vfoa->{invalid_alleles} && !$self->param('use_given_ref')) {
     $self->warning_msg("Transcript-assembly mismatch in ".$hash->{Uploaded_variation});
   }
 
