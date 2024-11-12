@@ -604,7 +604,7 @@ open STDERR, '>', \$tmp;
 
 my $cvf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1, max_sv_size => 1000, warning_file => 'STDERR'}),
-  file => $test_cfg->create_input_file([qw(1 774569 gnomAD_v2_CPX_1_1 N	<CPX> 1 PASS END=828435;SVTYPE=CPX;CHR2=1;SVLEN=53959)]),
+  file => $test_cfg->create_input_file([qw(1 774569 gnomAD_v2_CPX_1_1 N	<CPX> 1 PASS END=828435;SVTYPE=CPX;CHR2=1;SVLEN=53866)]),
   valid_chromosomes => [1]
 })->next();
 delete($cvf->{adaptor}); delete($cvf->{_line});
@@ -669,7 +669,7 @@ is_deeply($svf->{class_SO_term}, 'LINE1_deletion',
 ## CNV: deletion
 my $cnv_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1,  warning_file => 'STDERR'}),
-  file => $test_cfg->create_input_file([qw(1 774569 gnomAD_v2_DEL_1_1 N <CN=0> 1 PASS END=828435;SVTYPE=DEL;CHR2=1;SVLEN=53959)]),
+  file => $test_cfg->create_input_file([qw(1 774569 gnomAD_v2_DEL_1_1 N <CN=0> 1 PASS END=828435;SVTYPE=DEL;CHR2=1;SVLEN=53866)]),
   valid_chromosomes => [1]
 })->next();
 delete($cnv_vf->{adaptor}); delete($cnv_vf->{_line});
@@ -694,7 +694,7 @@ is_deeply($cnv_vf, bless( {
 ## CNV: duplication
 $cnv_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1,  warning_file => 'STDERR'}),
-  file => $test_cfg->create_input_file([qw(1 774569 gnomAD_v2_DEL_1_1 N <CN2> 1 PASS END=828435;SVTYPE=DUP;CHR2=1;SVLEN=53959)]),
+  file => $test_cfg->create_input_file([qw(1 774569 gnomAD_v2_DEL_1_1 N <CN2> 1 PASS END=828435;SVTYPE=DUP;CHR2=1;SVLEN=53866)]),
   valid_chromosomes => [1]
 })->next();
 delete($cnv_vf->{adaptor}); delete($cnv_vf->{_line});
@@ -719,7 +719,7 @@ is_deeply($cnv_vf, bless( {
 ## CNV: generic
 $cnv_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1,  warning_file => 'STDERR'}),
-  file => $test_cfg->create_input_file([qw(1 774569 gnomAD_v2_DEL_1_1 N <CN0>,<CN=2> 1 PASS END=828435;SVTYPE=CNV;CHR2=1;SVLEN=53959)]),
+  file => $test_cfg->create_input_file([qw(1 774569 gnomAD_v2_DEL_1_1 N <CN0>,<CN=2> 1 PASS END=828435;SVTYPE=CNV;CHR2=1;SVLEN=53866)]),
   valid_chromosomes => [1]
 })->next();
 delete($cnv_vf->{adaptor}); delete($cnv_vf->{_line});
@@ -743,7 +743,7 @@ is_deeply($cnv_vf, bless( {
 
 my $cnv2_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1,  warning_file => 'STDERR'}),
-  file => $test_cfg->create_input_file([qw(1 774569 gnomAD_v2_DEL_1_1 N <CNV> 1 PASS END=828435;SVTYPE=CNV;CHR2=1;SVLEN=53959)]),
+  file => $test_cfg->create_input_file([qw(1 774569 gnomAD_v2_DEL_1_1 N <CNV> 1 PASS END=828435;SVTYPE=CNV;CHR2=1;SVLEN=53866)]),
   valid_chromosomes => [1]
 })->next();
 delete($cnv2_vf->{adaptor}); delete($cnv2_vf->{_line});
