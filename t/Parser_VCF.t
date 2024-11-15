@@ -363,6 +363,7 @@ $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   valid_chromosomes => [21],
 })->next();
 delete($vf->{adaptor}); delete($vf->{_line});
+
 is_deeply($vf, bless( {
   'chr' => '21',
   'minimised' => 1,
