@@ -90,8 +90,6 @@ use Bio::EnsEMBL::VEP::Utils qw(numberify);
 use JSON;
 use Scalar::Util qw(looks_like_number);
 
-use Data::Dumper;
-
 my %SKIP_KEYS = (
   'Uploaded_variation' => 1,
   'Location' => 1,
@@ -473,8 +471,6 @@ sub add_colocated_variant_info_JSON {
   }
 
   push @{$hash->{colocated_variants}}, $ex;
-
-  print "-> ", Dumper($hash->{colocated_variants});
 
   return $hash;
 }

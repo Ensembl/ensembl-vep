@@ -1022,8 +1022,6 @@ sub add_colocated_variant_info {
   );
 
   my %clin_sigs;
-  
-  # print "***vf_existing: ", Dumper($vf->{existing});
 
   foreach my $ex(
     sort {
@@ -1043,8 +1041,6 @@ sub add_colocated_variant_info {
 
     # ID
     push @{$hash->{Existing_variation}}, $ex->{variation_name} if $ex->{variation_name};
-
-    # print "\nvariation name: ", $ex->{variation_name}, "\n";
 
     # Variation Synonyms
     # VEP fetches the variation synonyms from the cache

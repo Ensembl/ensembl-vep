@@ -35,8 +35,6 @@ use warnings;
 use FileHandle;
 use File::Path qw(mkpath);
 
-use Data::Dumper;
-
 use Bio::EnsEMBL::VEP::Config;
 use Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation;
 use Bio::EnsEMBL::VEP::AnnotationSource::Cache::Variation;
@@ -69,20 +67,19 @@ sub run {
   my $region_size = $self->param('region_size');
 
   my $hive_dbc = $self->dbc;
-  # die "(2) ", Dumper($hive_dbc);
-  # $hive_dbc->disconnect_if_idle() if defined $hive_dbc;
-  # die "(3)";
+  $hive_dbc->disconnect_if_idle() if defined $hive_dbc;
+
   my $as = Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation->new({
     config => $config,
     cache_region_size => $region_size,
   });
-  # die "(4)";
+
   my $cache = Bio::EnsEMBL::VEP::AnnotationSource::Cache::Variation->new({
     config => $config,
     cache_region_size => $region_size,
     dir => $self->get_cache_dir($vep_params)
   });
-  # die "(5)";
+
   # create prefixed names here to use later
   if($vep_params->{freq_vcf} && !$self->{freq_vcf}) {
     foreach my $vcf_conf(@{$vep_params->{freq_vcf}}) {
@@ -95,7 +92,7 @@ sub run {
     }
     $self->{freq_vcf} = $vep_params->{freq_vcf};
   }
-  # die "(6)";
+
   $self->dump_chrs($as, $cache);
 
   # bgzip and tabix-index all_vars files
@@ -226,23 +223,14 @@ sub dump_obj {
   }
 
   # get freqs from VCFs?
-  # $self->freqs_from_vcf($obj, $chr) if $self->{freq_vcf};
-  
-  open(FH, '>>', "/hps/nobackup/flicek/ensembl/variation/dlemos/vep/test_code/clin_sig_clinvar_somatic/dump_cache/log.txt") or die $!;
+  $self->freqs_from_vcf($obj, $chr) if $self->{freq_vcf};
 
   my $pubmed = $self->pubmed;
   my $var_synonyms = $self->var_synonyms;
   foreach my $v(@$obj) {
-
-    print FH "->", Dumper($v);
-
     my $tmp_clinical_impact = '';
-    my @tmp_ci;
     if($v->{clinical_impact}) {
-      foreach my $pf (@{$v->{clinical_impact}}) {
-        push @tmp_ci, $pf->{final_somatic_clin_sig};
-      }
-      $tmp_clinical_impact = join(";", @tmp_ci);
+      $tmp_clinical_impact = $v->{clinical_impact};
     }
 
     my @tmp = (
@@ -276,7 +264,6 @@ sub dump_obj {
       print $all_vars_fh "\n";
     }
   }
-  close(FH);
   close DUMP;
 }
 

@@ -62,8 +62,6 @@ use Digest::MD5 qw(md5_hex);
 
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 
-use Data::Dumper;
-
 use base qw(
   Bio::EnsEMBL::VEP::AnnotationSource::Database
   Bio::EnsEMBL::VEP::AnnotationType::Variation
