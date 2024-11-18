@@ -337,8 +337,8 @@
 783	\N	patch	patch_108_109_a.sql|schema_version
 784	\N	patch	patch_109_110_a.sql|schema_version
 785	\N	patch	patch_110_111_a.sql|schema_version
-786	0		\N
-787	0		\N
+786 \N  patch   patch_111_112_a.sql|schema_version
+787 \N  patch   patch_111_112_b.sql|fix data_file_id length
 788	\N	patch	patch_111_112_c.sql|set data_file_id to not null auto increment
 789	\N	patch	patch_112_113_a.sql|schema_version
 790	\N	patch	patch_112_113_b.sql|fix_compatibility_issues

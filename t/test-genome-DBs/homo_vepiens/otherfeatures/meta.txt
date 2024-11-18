@@ -173,7 +173,12 @@
 883	\N	patch	patch_107_108_a.sql|schema_version
 884	\N	patch	patch_108_109_a.sql|schema_version
 885	\N	patch	patch_108_109_b.sql|Added xref source GeneCards into external_db
-886	0		
+886 \N  patch   patch_109_110_a.sql|schema_version
+887 \N  patch   patch_109_110_b.sql|Add IS_PAR relationship to link X- and Y-PAR genes
+888 \N  patch   patch_109_110_c.sql|Allow gene id to belong to multiple alt allele groups
+889 \N  patch   patch_110_111_a.sql|schema_version
+890 \N  patch   patch_111_112_a.sql|schema_version
+891 \N  patch   patch_111_112_b.sql|Allow meta_value to be null	
 892	\N	patch	patch_111_112_c.sql|Extend meta_key length to 64
 893	\N	patch	patch_112_113_a.sql|schema_version
 894	\N	patch	patch_112_113_b.sql|Ensure meta_value is not null
