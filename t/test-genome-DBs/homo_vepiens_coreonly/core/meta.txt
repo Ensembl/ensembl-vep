@@ -1,5 +1,5 @@
 1	\N	schema_type	core
-2	\N	schema_version	113
+2	\N	schema_version	114
 3	\N	patch	patch_73_74_a.sql|schema_version
 4	\N	patch	patch_73_74_b.sql|remove_dnac
 5	\N	patch	patch_73_74_c.sql|remove_unconventional_transcript_association
@@ -196,7 +196,8 @@
 944 \N  patch   patch_109_110_c.sql|Allow gene id to belong to multiple alt allele groups
 945 \N  patch   patch_110_111_a.sql|schema_version
 946 \N  patch   patch_111_112_a.sql|schema_version
-947 \N  patch   patch_111_112_b.sql|Allow meta_value to be null
+947 \N  patch   patch_111_112_b.sql|Allow meta_value to be null		
 948	\N	patch	patch_111_112_c.sql|Extend meta_key length to 64
 949	\N	patch	patch_112_113_a.sql|schema_version
 950	\N	patch	patch_112_113_b.sql|Ensure meta_value is not null
+951	\N	patch	patch_113_114_a.sql|schema_version

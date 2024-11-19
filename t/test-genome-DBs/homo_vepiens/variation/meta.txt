@@ -1,5 +1,5 @@
 1	\N	schema_type	variation
-2	\N	schema_version	113
+2	\N	schema_version	114
 3	\N	patch	patch_73_74_a.sql|schema version
 4	\N	patch	patch_73_74_b.sql|Add doi and UCSC id to publication table
 5	\N	patch	patch_73_74_c.sql|Add clinical_significance to variation_feature table
@@ -142,3 +142,4 @@
 173	\N	patch	patch_111_112_a.sql|schema version
 174	\N	patch	patch_112_113_a.sql|schema version
 175	\N	patch	patch_112_113_b.sql|Update meta_key length
+176	\N	patch	patch_113_114_a.sql|schema version

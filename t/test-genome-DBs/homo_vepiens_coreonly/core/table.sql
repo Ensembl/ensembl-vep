@@ -1,11 +1,11 @@
 CREATE TABLE `alt_allele` (
-  `alt_allele_id` INT UNSIGNED AUTO_INCREMENT,
-  `alt_allele_group_id` INT UNSIGNED NOT NULL,
-  `gene_id` INT UNSIGNED NOT NULL,
+  `alt_allele_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `alt_allele_group_id` int(10) unsigned NOT NULL,
+  `gene_id` int(10) unsigned NOT NULL,
   PRIMARY KEY (`alt_allele_id`),
-  KEY (`gene_id`,`alt_allele_group_id`),
-    KEY `gene_idx` (`gene_id`)
-) COLLATE=latin1_swedish_ci ENGINE=MyISAM;
+  KEY `gene_id` (`gene_id`,`alt_allele_group_id`),
+  KEY `gene_idx` (`gene_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `alt_allele_attrib` (
   `alt_allele_id` int(10) unsigned DEFAULT NULL,
@@ -490,7 +490,7 @@ CREATE TABLE `meta` (
   PRIMARY KEY (`meta_id`),
   UNIQUE KEY `species_key_value_idx` (`species_id`,`meta_key`,`meta_value`),
   KEY `species_value_idx` (`species_id`,`meta_value`)
-) ENGINE=MyISAM AUTO_INCREMENT=942 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=952 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `meta_coord` (
   `table_name` varchar(40) NOT NULL,
