@@ -1630,7 +1630,10 @@ sub TranscriptVariationAllele_to_output_hash {
 
   # Only for RefSeq annotations
   # If invalid_alleles is set to 1 then the ref and alt alleles are the same -> this is an invalid variant
-  if($vfoa->{invalid_alleles}) {
+  # Print mismatch warning only if:
+  #  - there is transcripts mismatch
+  #  - use_given_ref is not defined
+  if($vfoa->{invalid_alleles} && !$self->param('use_given_ref')) {
     $self->warning_msg("Transcript-assembly mismatch in ".$hash->{Uploaded_variation});
   }
 
