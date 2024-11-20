@@ -363,6 +363,7 @@ $vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   valid_chromosomes => [21],
 })->next();
 delete($vf->{adaptor}); delete($vf->{_line});
+
 is_deeply($vf, bless( {
   'chr' => '21',
   'minimised' => 1,
@@ -610,17 +611,17 @@ my $cvf = Bio::EnsEMBL::VEP::Parser::VCF->new({
 delete($cvf->{adaptor}); delete($cvf->{_line});
 
 is_deeply($cvf, bless( {
-                 'outer_end' => '828435',
+                 'outer_end' => '828528',
                  'chr' => '1',
                  'allele_string' => '<CPX>',
-                 'inner_end' => '828435',
+                 'inner_end' => '828528',
                  'outer_start' => '774570',
-                 'end' => 828435,
+                 'end' => 828528,
                  'vep_skip' => 1,
                  'seq_region_start' => 774570,
                  'inner_start' => '774570',
                  'strand' => 1,
-                 'seq_region_end' => 828435,
+                 'seq_region_end' => 828528,
                  'class_SO_term' => 'CPX',
                  'variation_name' => 'gnomAD_v2_CPX_1_1',
                  'start' => 774570
@@ -675,16 +676,16 @@ my $cnv_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
 delete($cnv_vf->{adaptor}); delete($cnv_vf->{_line});
 
 is_deeply($cnv_vf, bless( {
-                 'outer_end' => '828435',
+                 'outer_end' => '828528',
                  'chr' => '1',
                  'allele_string' => '<CN=0>',
-                 'inner_end' => '828435',
+                 'inner_end' => '828528',
                  'outer_start' => '774570',
-                 'end' => 828435,
+                 'end' => 828528,
                  'seq_region_start' => 774570,
                  'inner_start' => '774570',
                  'strand' => 1,
-                 'seq_region_end' => 828435,
+                 'seq_region_end' => 828528,
                  'class_SO_term' => 'deletion',
                  'variation_name' => 'gnomAD_v2_DEL_1_1',
                  'start' => 774570
@@ -700,16 +701,16 @@ $cnv_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
 delete($cnv_vf->{adaptor}); delete($cnv_vf->{_line});
 
 is_deeply($cnv_vf, bless( {
-                 'outer_end' => '828435',
+                 'outer_end' => '828528',
                  'chr' => '1',
                  'allele_string' => '<CN2>',
-                 'inner_end' => '828435',
+                 'inner_end' => '828528',
                  'outer_start' => '774570',
-                 'end' => 828435,
+                 'end' => 828528,
                  'seq_region_start' => 774570,
                  'inner_start' => '774570',
                  'strand' => 1,
-                 'seq_region_end' => 828435,
+                 'seq_region_end' => 828528,
                  'class_SO_term' => 'duplication',
                  'variation_name' => 'gnomAD_v2_DEL_1_1',
                  'start' => 774570
@@ -725,16 +726,16 @@ $cnv_vf = Bio::EnsEMBL::VEP::Parser::VCF->new({
 delete($cnv_vf->{adaptor}); delete($cnv_vf->{_line});
 
 is_deeply($cnv_vf, bless( {
-                 'outer_end' => '828435',
+                 'outer_end' => '828528',
                  'chr' => '1',
                  'allele_string' => '<CN0>/<CN=2>',
-                 'inner_end' => '828435',
+                 'inner_end' => '828528',
                  'outer_start' => '774570',
-                 'end' => 828435,
+                 'end' => 828528,
                  'seq_region_start' => 774570,
                  'inner_start' => '774570',
                  'strand' => 1,
-                 'seq_region_end' => 828435,
+                 'seq_region_end' => 828528,
                  'class_SO_term' => 'copy_number_variation',
                  'variation_name' => 'gnomAD_v2_DEL_1_1',
                  'start' => 774570
