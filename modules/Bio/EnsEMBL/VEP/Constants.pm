@@ -79,7 +79,7 @@ our @FLAG_FIELDS = (
   { flag => 'minimal',         fields => ['MINIMISED']},
   { flag => 'spdi',            fields => ['SPDI']},
   { flag => 'ga4gh_vrs',       fields => ['GA4GH_VRS']},
-  { flag => 'somatic_classification', fields => ['SOMATIC_CLASSIFICATION']},
+  { flag => 'clinvar_somatic_classification', fields => ['CLINVAR_SOMATIC_CLASSIFICATION']},
 
   # gene-related
   { flag => 'symbol',          fields => ['SYMBOL','SYMBOL_SOURCE','HGNC_ID'] },
@@ -237,7 +237,7 @@ our %FIELD_DESCRIPTIONS = (
   'MAX_AF_POPS'        => 'Populations in which maximum allele frequency was observed',
   'DISTANCE'           => 'Shortest distance from variant to transcript',
   'CLIN_SIG'           => 'ClinVar clinical significance of the dbSNP variant',
-  'SOMATIC_CLASSIFICATION' => 'ClinVar somatic classification of the dbSNP variant',
+  'CLINVAR_SOMATIC_CLASSIFICATION' => 'ClinVar somatic classification of the dbSNP variant',
   'BIOTYPE'            => 'Biotype of transcript or regulatory feature',
   'PUBMED'             => 'Pubmed ID(s) of publications that cite existing variant',
   'ALLELE_NUM'         => 'Allele number from input; 0 is reference, 1 is first alternate etc',

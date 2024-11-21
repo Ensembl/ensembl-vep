@@ -108,7 +108,7 @@ my %RENAME_KEYS = (
   'chr' => 'seq_region_name',
   'variation_name' => 'id',
   'sv' => 'colocated_structural_variants',
-  'clinical_impact' => 'somatic_classification'
+  'clinical_impact' => 'clinvar_somatic_classification'
 );
 
 my %NUMBERIFY_EXEMPT = (

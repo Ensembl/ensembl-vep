@@ -84,8 +84,6 @@ use Bio::EnsEMBL::VEP::OutputFactory::VEP_output;
 use Bio::EnsEMBL::VEP::OutputFactory::VCF;
 use Bio::EnsEMBL::VEP::OutputFactory::Tab;
 
-use Data::Dumper;
-
 our $CAN_USE_JSON;
 
 BEGIN {
@@ -176,7 +174,7 @@ sub new {
     max_af
     pubmed
     clin_sig_allele
-    somatic_classification
+    clinvar_somatic_classification
 
     numbers
     domains
@@ -1047,8 +1045,8 @@ sub add_colocated_variant_info {
     push @{$hash->{VAR_SYNONYMS}}, $ex->{var_synonyms} if $self->{var_synonyms} && $ex->{var_synonyms} && !$self->{_config}->{_params}->{is_vr};
 
     # ClinVar somatic classification
-    if(defined($ex->{clinical_impact}) && $self->{somatic_classification}) {
-      $hash->{SOMATIC_CLASSIFICATION} = $ex->{clinical_impact};
+    if(defined($ex->{clinical_impact}) && $self->{clinvar_somatic_classification}) {
+      $hash->{CLINVAR_SOMATIC_CLASSIFICATION} = $ex->{clinical_impact};
     }
 
     if(defined($ex->{clin_sig_allele}) && $self->{clin_sig_allele} )
