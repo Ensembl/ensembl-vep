@@ -45,6 +45,7 @@ use File::Basename;
 use Net::FTP;
 use Cwd;
 use Scalar::Util qw(looks_like_number);
+use List::Util qw(first);
 use Bio::EnsEMBL::VEP::Utils qw(get_version_data get_version_string);
 
 our (
@@ -79,6 +80,7 @@ our (
   $REALPATH_DEST_DIR,
   $NO_TEST,
   $NO_BIOPERL,
+  $USE_HTTPS_PROTO,
   $ua,
 
   $CAN_USE_CURL,
@@ -90,6 +92,7 @@ our (
   $CAN_USE_TAR,
   $CAN_USE_DBI,
   $CAN_USE_DBD_MYSQL,
+  $CAN_USE_HTTML_EXTRACT
 );
 
 
@@ -120,6 +123,10 @@ BEGIN {
     $CAN_USE_DBD_MYSQL = 1;
   }
 
+  if(eval q{ use HTML::TableExtract; 1 }) {
+    $CAN_USE_HTTML_EXTRACT = 1;
+  }
+
   $CAN_USE_CURL      = 1 if `which curl` =~ /\/curl/;
   $CAN_USE_HTTP_TINY = 1 if eval q{ use HTTP::Tiny; 1 };
   $CAN_USE_ARCHIVE   = 1 if eval q{ use Archive::Extract; 1 };
@@ -146,7 +153,7 @@ my $archive_type = '.zip';
 my $git_api_root = 'https://api.github.com/repos/Ensembl/';
 my $VEP_MODULE_NAME = 'ensembl-vep';
 
-our (@store_species, @indexes, @files, $ftp, $dirname);
+our (@store_species, @indexes, @files, %file_sizes, $ftp, $dirname);
 
 my $config = {};
 GetOptions(
@@ -172,7 +179,8 @@ GetOptions(
   'TEST',
   'NO_HTSLIB|l',
   'NO_TEST',
-  'NO_BIOPERL'
+  'NO_BIOPERL',
+  'USE_HTTPS_PROTO'
 ) or die("ERROR: Failed to parse arguments");
 
 # Read configuration from environment variables starting with VEP_
@@ -219,6 +227,7 @@ $TEST         ||=  $config->{TEST};
 $NO_HTSLIB    ||=  $config->{NO_HTSLIB};
 $NO_TEST      ||=  $config->{NO_TEST};
 $NO_BIOPERL   ||=  $config->{NO_BIOPERL};
+$USE_HTTPS_PROTO  ||=  $config->{USE_HTTPS_PROTO};
 
 # load version data
 our $CURRENT_VERSION_DATA = get_version_data($RealBin.'/.version');
@@ -1078,6 +1087,22 @@ sub test() {
 # CACHE FILES
 #############
 
+sub convert_file_size {
+  # convert file size string to byte
+
+  my $size = shift;
+  my @units = ( 'K', 'M', 'G', 'T' );
+
+  $size =~ m/\s?(\d+\.?\d+)([T,G,M,K]?)/;
+
+  # in bytes already
+  return $1 unless defined $2;
+
+  # convert to bytes
+  my $scale = first {$units[$_] eq $2} 0..$#units;
+  return $scale ? $1 * (1024**($scale + 1)) : 0;
+}
+
 sub format_file_size {
   # Format $size (in bytes) based on most adequate unit, e.g.:
   #             0 =>   0 bytes
@@ -1100,6 +1125,11 @@ sub format_file_size {
 }
 
 sub cache() {
+
+  if ($USE_HTTPS_PROTO and !$CAN_USE_HTTML_EXTRACT) {
+    print "Cannot use HTTPS protocol for downloading cache without HTML::TableExtract Perl library installed\nSkipping cache installation\n" unless $QUIET;
+    return;
+  }
 
   my $ok;
 
@@ -1152,16 +1182,38 @@ sub cache() {
   my $URL_TO_USE = (-e $tabix) ? $CACHE_URL_INDEXED : $CACHE_URL;
 
   if(is_url($URL_TO_USE)) {
-    $URL_TO_USE =~ m/(.*:\/\/)?(.+?)\/(.+)/;
-    $ftp = Net::FTP->new($2, Passive => 1) or die "ERROR: Could not connect to FTP host $2\n$@\n";
-    $ftp->login($FTP_USER) or die "ERROR: Could not login as $FTP_USER\n$@\n";
-    $ftp->binary();
+    if($USE_HTTPS_PROTO) {
+      # get cache file list in HTML format
+      my $ftp_html = get_html($URL_TO_USE);
+      unless (defined $ftp_html) {
+        print "curl failed to retrieve file list from FTP - $URL_TO_USE\n" unless $QUIET;
+        return;
+      }
 
-    foreach my $sub(split /\//, $3) {
-      $ftp->cwd($sub) or die "ERROR: Could not change directory to $sub\n$@\n";
+      # parse HTML cache file list
+      my $te = HTML::TableExtract->new();
+      $te->parse($ftp_html);
+
+      foreach my $rows ($te->first_table_found->rows){
+        my ($name, $size) = ($rows->[1], $rows->[3]);
+
+        next unless $name =~ /tar.gz/;
+        push @files, $name;
+        $file_sizes{$name} = convert_file_size($size);
+      }
     }
+    else {
+      $URL_TO_USE =~ m/(.*:\/\/)?(.+?)\/(.+)/;
+      $ftp = Net::FTP->new($2, Passive => 1) or die "ERROR: Could not connect to FTP host $2\n$@\n";
+      $ftp->login($FTP_USER) or die "ERROR: Could not login as $FTP_USER\n$@\n";
+      $ftp->binary();
 
-    push @files, grep {$_ =~ /tar.gz/} $ftp->ls;
+      foreach my $sub(split /\//, $3) {
+        $ftp->cwd($sub) or die "ERROR: Could not change directory to $sub\n$@\n";
+      }
+
+      push @files, grep {$_ =~ /tar.gz/} $ftp->ls;
+    }
   }
   else {
     opendir DIR, $URL_TO_USE;
@@ -1193,7 +1245,16 @@ sub cache() {
   my $size;
   my $total_size = 0;
   foreach my $file(@files) {
-    $size = defined $ftp ? $ftp->size($file) : 0;
+    if (defined $ftp) {
+      $size = $ftp->size($file);
+    }
+    elsif (%file_sizes) {
+      $size = $file_sizes{$file};
+    }
+    else {
+      $size = 0;
+    }
+
     $total_size += $size;
     $size = $size ? " (" . format_file_size($size) . ")" : "";
     $species_list .= ++$num . " : $file$size\n";
@@ -1313,11 +1374,21 @@ sub cache() {
     if(is_url($URL_TO_USE)) {
       print " - downloading $URL_TO_USE/$file_path\n" unless $QUIET;
       if(!$TEST) {
-        $ftp->get($file_name, $target_file) or download_to_file("$URL_TO_USE/$file_path", $target_file);
+        if ($USE_HTTPS_PROTO) {
+          download_to_file("$URL_TO_USE/$file_path", $target_file);
+        }
+        else {
+          $ftp->get($file_name, $target_file) or download_to_file("$URL_TO_USE/$file_path", $target_file);
+        }
 
         my $checksums = "CHECKSUMS";
         my $checksums_target_file = "$CACHE_DIR/tmp/$checksums";
-        $ftp->get($checksums, $checksums_target_file) or download_to_file("$URL_TO_USE/$checksums", $checksums_target_file);
+        if ($USE_HTTPS_PROTO) {
+          download_to_file("$URL_TO_USE/$checksums", $checksums_target_file);
+        }
+        else {
+          $ftp->get($checksums, $checksums_target_file) or download_to_file("$URL_TO_USE/$checksums", $checksums_target_file);
+        }
         if (-e $checksums_target_file) {
           my $sum_download = `sum $target_file`;
           $sum_download =~ m/([0-9]+)(\s+)([0-9]+)/;
@@ -1368,6 +1439,11 @@ sub cache() {
 #############
 sub fasta() {
 
+  if ($USE_HTTPS_PROTO and !$CAN_USE_HTTML_EXTRACT) {
+    print "Cannot use HTTPS protocol for downloading FASTA without HTML::TableExtract Perl library installed\nSkipping FASTA installation\n" unless $QUIET;
+    return;
+  }
+
   ### SPECIAL CASE GRCh37
   if((grep {$files[$_ - 1] =~ /GRCh37/} @indexes) || (defined($ASSEMBLY) && $ASSEMBLY eq 'GRCh37')) {
 
@@ -1402,17 +1478,39 @@ sub fasta() {
   }
 
   my @dirs = ();
-
   if(is_url($FASTA_URL)) {
-    $FASTA_URL =~ m/(.*:\/\/)?(.+?)\/(.+)/;
-    $ftp = Net::FTP->new($2, Passive => 1) or die "ERROR: Could not connect to FTP host $2\n$@\n";
-    $ftp->login($FTP_USER) or die "ERROR: Could not login as $FTP_USER\n$@\n";
-    $ftp->binary();
+    if($USE_HTTPS_PROTO) {
+      # get species list in HTML format
+      my $ftp_html = get_html($FASTA_URL);
+      unless (defined $ftp_html) {
+        print "curl failed to retrieve species list from FTP - $FASTA_URL\n" unless $QUIET;
+        return;
+      }
 
-    foreach my $sub(split /\//, $3) {
-      $ftp->cwd($sub) or die "ERROR: Could not change directory to $sub\n$@\n";
+      # parse HTML cache file list
+      my $te = HTML::TableExtract->new();
+      $te->parse($ftp_html);
+
+      foreach my $rows ($te->first_table_found->rows){
+        my $name = $rows->[1];
+
+        next unless $name =~ /\/$/;
+        next if $name =~ /ancestral_alleles/;
+
+        push @dirs,  substr($name, 0, -1);
+      }
     }
-    push @dirs, grep { !/ancestral_alleles/i } sort $ftp->ls;
+    else {
+      $FASTA_URL =~ m/(.*:\/\/)?(.+?)\/(.+)/;
+      $ftp = Net::FTP->new($2, Passive => 1) or die "ERROR: Could not connect to FTP host $2\n$@\n";
+      $ftp->login($FTP_USER) or die "ERROR: Could not login as $FTP_USER\n$@\n";
+      $ftp->binary();
+
+      foreach my $sub(split /\//, $3) {
+        $ftp->cwd($sub) or die "ERROR: Could not change directory to $sub\n$@\n";
+      }
+      push @dirs, grep { !/ancestral_alleles/i } sort $ftp->ls;
+    }
   }
   else {
     opendir DIR, $FASTA_URL;
@@ -1460,6 +1558,25 @@ sub fasta() {
       $ftp->cwd('dna_index') or $ftp->cwd('dna') or die "ERROR: Could not change directory to dna\n$@\n";
       @files = $ftp->ls;
       $dna_path = $ftp->pwd =~ /dna_index/ ? 'dna_index' : 'dna';
+    }
+    elsif($USE_HTTPS_PROTO) {
+      # get fasta file list in HTML format
+      my $ftp_html = get_html("$FASTA_URL/$species/dna");
+      unless (defined $ftp_html) {
+        print "curl failed to retrieve file list from FTP - $FASTA_URL/$species/dna\n" unless $QUIET;
+        return;
+      }
+
+      # parse HTML cache file list
+      my $te = HTML::TableExtract->new();
+      $te->parse($ftp_html);
+
+      foreach my $rows ($te->first_table_found->rows){
+        my $name = $rows->[1];
+        next unless $name =~ /fa.gz/;
+
+        push @files,  $name;
+      }
     }
     else {
       if(!opendir DIR, "$FASTA_URL/$species/dna") {
@@ -1519,6 +1636,9 @@ sub fasta() {
         $ftp->get($file, $ex) or download_to_file("$FASTA_URL/$species/$dna_path/$file", $ex);
       }
     }
+    elsif($USE_HTTPS_PROTO) {
+      download_to_file("$FASTA_URL/$species/dna/$file", $ex);
+    }
     else {
       print " - copying $file\n" unless $QUIET;
       copy("$FASTA_URL/$species/dna/$file", $ex) unless $TEST;
@@ -1552,7 +1672,12 @@ sub fasta() {
         if(!$TEST) {
           $index_file =~ /$file(\..+)/;
           print " - downloading $index_file\n" unless $QUIET;
-          $ftp->get($index_file, $ex.$1) or download_to_file("$FASTA_URL/$species/$dna_path/$index_file", $ex.$1);
+          if($USE_HTTPS_PROTO) {
+            download_to_file("$FASTA_URL/$species/$dna_path/$index_file", $ex.$1);
+          }
+          else {
+            $ftp->get($index_file, $ex.$1) or download_to_file("$FASTA_URL/$species/$dna_path/$index_file", $ex.$1);
+          }
           $got_indexes++;
         }
       }
@@ -1855,6 +1980,51 @@ sub download_to_file {
   }
   else {
     die("ERROR: Unable to download files without curl, LWP or HTTP::Tiny installed\n");
+  }
+}
+
+sub get_html {
+  my $url = shift;
+
+  if($CAN_USE_CURL) {
+    my $response = `curl -s -w '%{http_code}' --location "$url" `;
+    my @lines = split(/\n/, $response);
+    my $status_code = pop @lines;
+    if ( $status_code != 200 && $status_code != 226) {
+      print "curl failed ($response), trying to fetch using LWP::Simple\n" unless $QUIET;
+      $CAN_USE_CURL = 0;
+      get_html($url);
+    }
+
+    return join("\n", @lines);
+  }
+
+  elsif($CAN_USE_LWP) {
+    my $req = HTTP::Request->new(GET => $url);
+    my $response = $ua->request($req);
+
+    unless($response->is_success) {
+      print "LWP::Simple failed ($response), trying to fetch using HTTP::Tiny\n" unless $QUIET;
+      $CAN_USE_LWP = 0;
+      get_html($url);
+    }
+
+    return $response->content;
+  }
+  elsif($CAN_USE_HTTP_TINY) {
+    my $response = HTTP::Tiny->new()->get($url);
+
+    unless($response->{success}) {
+      print("Failed last resort of using HTTP::Tiny to download $url\n");
+
+      return undef;
+    }
+
+    return $response->{content};
+  }
+  else {
+    print("Failed to get HTML content without curl, LWP or HTTP::Tiny installed\n");
+    return undef;
   }
 }
 
