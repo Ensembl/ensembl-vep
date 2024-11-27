@@ -1637,6 +1637,7 @@ sub fasta() {
       }
     }
     elsif($USE_HTTPS_PROTO) {
+      print " - downloading $file\n" unless $QUIET;
       download_to_file("$FASTA_URL/$species/dna/$file", $ex);
     }
     else {
