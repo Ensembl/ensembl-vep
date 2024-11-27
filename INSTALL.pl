@@ -81,6 +81,7 @@ our (
   $NO_TEST,
   $NO_BIOPERL,
   $USE_HTTPS_PROTO,
+  $GITHUB_TOKEN,
   $ua,
 
   $CAN_USE_CURL,
@@ -180,7 +181,8 @@ GetOptions(
   'NO_HTSLIB|l',
   'NO_TEST',
   'NO_BIOPERL',
-  'USE_HTTPS_PROTO'
+  'USE_HTTPS_PROTO',
+  'GITHUBTOKEN|GITHUB_TOKEN=s',
 ) or die("ERROR: Failed to parse arguments");
 
 # Read configuration from environment variables starting with VEP_
@@ -189,8 +191,8 @@ sub read_config_from_environment {
   my $config = shift;
 
   for my $key (keys %ENV) {
-    # Look for environment variables that start with VEP_
-    next unless $key =~ "^VEP_";
+    # Look for environment variables that start with VEP_ unless it is GITHUB_TOKEN
+    next unless ($key =~ "^VEP_" or $key eq "GITHUB_TOKEN");
 
     # Avoid setting empty strings
     my $value = $ENV{$key};
@@ -228,6 +230,7 @@ $NO_HTSLIB    ||=  $config->{NO_HTSLIB};
 $NO_TEST      ||=  $config->{NO_TEST};
 $NO_BIOPERL   ||=  $config->{NO_BIOPERL};
 $USE_HTTPS_PROTO  ||=  $config->{USE_HTTPS_PROTO};
+$GITHUB_TOKEN ||= $config->{GITHUBTOKEN};
 
 # load version data
 our $CURRENT_VERSION_DATA = get_version_data($RealBin.'/.version');
@@ -1930,7 +1933,8 @@ sub download_to_file {
   my ($url, $file) = @_;
 
   if($CAN_USE_CURL) {
-    my $response = `curl -s -o $file -w '%{http_code}' --location "$url" `;
+    my $header = defined $GITHUB_TOKEN ? "--header \"Authorization: Bearer $GITHUB_TOKEN\"" : "";
+    my $response = `curl -s -o $file -w '%{http_code}' $header --location "$url" `;
     if ( $response != 200 && $response != 226) {
       print "curl failed ($response), trying to fetch using LWP::Simple\n" unless $QUIET;
       $CAN_USE_CURL = 0;
@@ -1988,7 +1992,8 @@ sub get_html {
   my $url = shift;
 
   if($CAN_USE_CURL) {
-    my $response = `curl -s -w '%{http_code}' --location "$url" `;
+    my $header = defined $GITHUB_TOKEN ? "--header \"Authorization: Bearer $GITHUB_TOKEN\"" : "";
+    my $response = `curl -s -w '%{http_code}' $header --location "$url" `;
     my @lines = split(/\n/, $response);
     my $status_code = pop @lines;
     if ( $status_code != 200 && $status_code != 226) {
