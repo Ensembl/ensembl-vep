@@ -1490,7 +1490,7 @@ sub fasta() {
         return;
       }
 
-      # parse HTML cache file list
+      # parse HTML species list
       my $te = HTML::TableExtract->new();
       $te->parse($ftp_html);
 
@@ -1563,14 +1563,14 @@ sub fasta() {
       $dna_path = $ftp->pwd =~ /dna_index/ ? 'dna_index' : 'dna';
     }
     elsif($USE_HTTPS_PROTO) {
-      # get fasta file list in HTML format
+      # get FASTA file list in HTML format
       my $ftp_html = get_html("$FASTA_URL/$species/dna");
       unless (defined $ftp_html) {
         print "curl failed to retrieve file list from FTP - $FASTA_URL/$species/dna\n" unless $QUIET;
         return;
       }
 
-      # parse HTML cache file list
+      # parse HTML FASTA file list
       my $te = HTML::TableExtract->new();
       $te->parse($ftp_html);
 
