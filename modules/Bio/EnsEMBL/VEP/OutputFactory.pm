@@ -2194,7 +2194,8 @@ sub rejoin_variants_in_InputBuffer {
   foreach my $vf(@{$buffer->buffer}) {
 
     # reset original one
-    if(defined($vf->{original_allele_string})) {
+    # check $vf->{first} to get first $vf in split_variants
+    if(defined($vf->{first})) {
 
       # do consequence stuff
       $self->get_all_output_hashes_by_VariationFeature($vf);

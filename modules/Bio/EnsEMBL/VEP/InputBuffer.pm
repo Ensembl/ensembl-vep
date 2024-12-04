@@ -663,7 +663,8 @@ sub split_variants {
           $first->{original_allele_string} = $original_vf->{allele_string};
           $first->{original_start}         = $original_vf->{start};
           $first->{original_end}           = $original_vf->{end};
-          $first->{minimised}              = 1
+          $first->{minimised}              = 1;
+          $first->{first}              = 1;
         }
 
         push @tmp, $new_vf;

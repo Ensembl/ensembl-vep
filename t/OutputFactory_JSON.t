@@ -532,7 +532,7 @@ SKIP: {
       'cdna_start' => 2347,
       'transcript_id' => 'NM_000484.3',
       'gene_id' => '351',
-      'uploaded_allele' => '-/A',
+      'uploaded_allele' => 'G/GA',
       'cds_start' => 2147,
       'protein_start' => 716,
       'refseq_match' => [
