@@ -116,9 +116,13 @@ is_deeply($vf, bless( {
   'variation_name' => 'test',
   'map_weight' => 1,
   'allele_string' => 'C/-',
+  'original_allele_string' => 'AC/A',
+  'nontrimmed_allele_string' => 'AC/A',
   'minimised' => 1,
   'end' => 25587760,
   'start' => 25587760,
+  'original_end' => 25587760,
+  'original_start' => 25587760,
   'seq_region_end' => 25587760,
   'seq_region_start' => 25587760
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'deletion');
@@ -137,8 +141,12 @@ is_deeply($vf, bless( {
   'map_weight' => 1,
   'minimised' => 1,
   'allele_string' => '-/C',
+  'original_allele_string' => 'A/AC',
+  'nontrimmed_allele_string' => 'A/AC',
   'end' => 25587759,
   'start' => 25587760,
+  'original_start' => 25587760,
+  'original_end' => 25587759,
   'seq_region_end' => 25587759,
   'seq_region_start' => 25587760
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'insertion');
@@ -157,8 +165,12 @@ is_deeply($vf, bless( {
   'map_weight' => 1,
   'minimised' => 1,
   'allele_string' => 'C/-',
+  'original_allele_string' => 'AC/A',
+  'nontrimmed_allele_string' => 'AC/A',
   'end' => 25587760,
   'start' => 25587760,
+  'original_end' => 25587760,
+  'original_start' => 25587760,
   'seq_region_end' => 25587760,
   'seq_region_start' => 25587760
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'deletion ignore SVTYPE');
@@ -177,8 +189,12 @@ is_deeply($vf, bless( {
   'map_weight' => 1,
   'minimised' => 1,
   'allele_string' => '-/C',
+  'original_allele_string' => 'A/AC',
+  'nontrimmed_allele_string' => 'A/AC',
   'end' => 25587759,
   'start' => 25587760,
+  'original_end' => 25587759,
+  'original_start' => 25587760,
   'seq_region_end' => 25587759,
   'seq_region_start' => 25587760
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'insertion ignore SVLEN');
