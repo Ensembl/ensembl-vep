@@ -154,7 +154,13 @@ sub get_features_by_regions_uncached {
 
     my $adaptor = $self->get_adaptor('variation', 'phenotypefeature');
     my $source_id = $self->clinvar_source_id_cache;
-    my $attribs = $adaptor->get_clinsig_alleles_by_location($chr_is_seq_region ? $chr : $sr_cache->{$chr}, $s, $e, $source_id) if defined($adaptor) && defined($source_id);
+    my $attribs;
+    my $attribs_clinical_impact;
+
+    if (defined($adaptor) && defined($source_id)) {
+      $attribs = $adaptor->get_clinsig_alleles_by_location($chr_is_seq_region ? $chr : $sr_cache->{$chr}, $s, $e, $source_id);
+      $attribs_clinical_impact = $adaptor->get_somatic_clin_impact_by_location($chr_is_seq_region ? $chr : $sr_cache->{$chr}, $s, $e, $source_id);
+    }
 
     my $phenotype_attrib_id = $self->phenotype_attrib_id || 0;
 
@@ -185,9 +191,14 @@ sub get_features_by_regions_uncached {
     while($sth->fetch) {
       my %v_copy = %v;
       $v_copy{allele_string} =~ s/\s+/\_/g;
-      my $v_clinsigs = $attribs->{($chr_is_seq_region ? $chr : $sr_cache->{$chr}) . ':' . $v_copy{start} . '-' . $v_copy{end}};
+
+      my $key = ($chr_is_seq_region ? $chr : $sr_cache->{$chr}) . ':' . $v_copy{start} . '-' . $v_copy{end};
+      # Clinical significance (germline)
+      my $v_clinsigs = $attribs->{$key};
+
       my @pfas_by_allele;
       my %clin_sigs;
+
       foreach my $pfa(@{$v_clinsigs})
       {
         if(defined($pfa->{clinvar_clin_sig}) && $v_copy{variation_name} eq $pfa->{id})
@@ -198,6 +209,14 @@ sub get_features_by_regions_uncached {
       }
       my @array = keys(%clin_sigs);
       $v_copy{clin_sig_allele} = join ';', @array if scalar(@array);
+
+      # somatic clinical impact
+      my $v_clin_impact = $attribs_clinical_impact->{$key};
+
+      if($v_clin_impact){
+        $v_copy{clinical_impact} = _format_clinical_impact($v_clin_impact);
+      }
+
       $v_copy{variation_id} = $var_id;
       ## fix for e!94 alleles
       $v_copy{allele_string} =~ s/\/$//g;
@@ -216,6 +235,41 @@ sub get_features_by_regions_uncached {
   return \@return;
 }
 
+=head2 _format_clinical_impact
+
+  Example    : $clinical_impact = _format_clinical_impact($v_clin_impact)
+  Description: Internal method to format the clinvar somatic classification
+  Returntype : string
+  Exceptions : none
+  Caller     : get_features_by_regions_uncached()
+  Status     : Stable
+
+=cut
+
+sub _format_clinical_impact {
+  my $v_clin_impact = shift;
+
+  my @somatic_clin_sig_list = ();
+
+  for my $pheno_feat (@{$v_clin_impact}) {
+    # Get the somatic clinical impact
+    # Example: Tier IV - Benign/Likely benign
+    if($pheno_feat->{somatic_clin_sig}) {
+      $pheno_feat->{somatic_clin_sig} =~ s/,/;/g;
+      my $tmp = $pheno_feat->{phenotype} . "(" . $pheno_feat->{somatic_clin_sig} . ")";
+      push @somatic_clin_sig_list, $tmp;
+    }
+
+    if($pheno_feat->{oncogenic_clin_sig}) {
+      my $tmp = $pheno_feat->{phenotype} . "(oncogenicity:" . $pheno_feat->{oncogenic_clin_sig} . ")";
+      push @somatic_clin_sig_list, $tmp;
+    }
+  }
+
+  my $classification = join(";", @somatic_clin_sig_list);
+
+  return $classification;
+}
 
 =head2 seq_region_cache
 

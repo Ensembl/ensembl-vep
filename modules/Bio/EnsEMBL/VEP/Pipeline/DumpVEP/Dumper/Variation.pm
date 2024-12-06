@@ -92,7 +92,7 @@ sub run {
     }
     $self->{freq_vcf} = $vep_params->{freq_vcf};
   }
-  
+
   $self->dump_chrs($as, $cache);
 
   # bgzip and tabix-index all_vars files
@@ -181,6 +181,7 @@ sub _generic_dump_info {
   my @cols = (
     @{$as->get_cache_columns()},
     'clin_sig_allele',
+    'clinical_impact',
     'pubmed',
     'var_synonyms',
   );
@@ -223,10 +224,15 @@ sub dump_obj {
 
   # get freqs from VCFs?
   $self->freqs_from_vcf($obj, $chr) if $self->{freq_vcf};
-  
+
   my $pubmed = $self->pubmed;
   my $var_synonyms = $self->var_synonyms;
   foreach my $v(@$obj) {
+    my $tmp_clinical_impact = '';
+    if($v->{clinical_impact}) {
+      $tmp_clinical_impact = $v->{clinical_impact};
+    }
+
     my @tmp = (
       $v->{variation_name},
       $v->{failed} == 0 ? '' : $v->{failed},
@@ -238,8 +244,9 @@ sub dump_obj {
       $v->{clin_sig} || '',
       $v->{phenotype_or_disease} == 0 ? '' : $v->{phenotype_or_disease},
       $v->{clin_sig_allele} || '',
+      $tmp_clinical_impact|| '',
     );
-  
+
     push @tmp, $pubmed->{$v->{variation_name}} || '';
     push @tmp, $var_synonyms->{$v->{variation_id}} || '';
 
@@ -257,7 +264,6 @@ sub dump_obj {
       print $all_vars_fh "\n";
     }
   }
-
   close DUMP;
 }
 
