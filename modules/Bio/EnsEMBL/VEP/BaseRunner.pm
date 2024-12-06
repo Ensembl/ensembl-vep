@@ -114,7 +114,11 @@ sub setup_db_connection {
   my $self = shift;
 
   return if $self->param('offline');
-  return unless $self->param('database') || $self->param('cache');
+  unless ( $self->param('database') || $self->param('cache') ) {
+    # set offline in case other parts of code tries to connect to db
+    $self->{_config}->param('offline', 1);
+    return;
+  }
 
   # doing this inits the registry and DB connection
   my $reg = $self->registry();
