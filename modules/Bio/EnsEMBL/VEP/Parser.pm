@@ -68,6 +68,7 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::Utils qw(get_compressed_filehandle);
 use Bio::EnsEMBL::Variation::Utils::Sequence qw(trim_sequences);
 use Bio::EnsEMBL::Variation::Utils::VEP qw(&check_format);
+use Bio::EnsEMBL::Variation::Utils::Config qw(%SO_TERMS);
 
 use Bio::EnsEMBL::VEP::Parser::VCF;
 use Bio::EnsEMBL::VEP::Parser::VEP_input;
@@ -697,28 +698,7 @@ sub get_SO_term {
     $abbrev = $type;
   }
 
-  my %terms = (
-    INS       => 'insertion',
-    INS_ME    => 'mobile_element_insertion',
-    INS_ALU   => 'Alu_insertion',
-    INS_HERV  => 'HERV_insertion',
-    INS_LINE1 => 'LINE1_insertion',
-    INS_SVA   => 'SVA_insertion',
-
-    DEL       => 'deletion',
-    DEL_ME    => 'mobile_element_deletion',
-    DEL_ALU   => 'Alu_deletion',
-    DEL_HERV  => 'HERV_deletion',
-    DEL_LINE1 => 'LINE1_deletion',
-    DEL_SVA   => 'SVA_deletion',
-
-    TREP => 'tandem_repeat',
-    TDUP => 'tandem_duplication',
-    DUP  => 'duplication',
-    CNV  => 'copy_number_variation',
-    INV  => 'inversion',
-    BND  => 'chromosome_breakpoint'
-  );
+  my %terms = %SO_TERMS;
 
   my $res = $terms{$abbrev};
   ## unsupported SV types
