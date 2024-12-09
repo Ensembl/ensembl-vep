@@ -103,6 +103,12 @@ is_deeply(
   "minimal - long trim"
 );
 
+is($p->get_SO_term('INS'), 'insertion', 'get_SO_term - insertion');
+is($p->get_SO_term('DEL'), 'deletion', 'get_SO_term - deletion');
+is($p->get_SO_term('INV'), 'inversion', 'get_SO_term - inversion');
+is($p->get_SO_term('TREP'), 'tandem_repeat', 'get_SO_term - tandem_repeat');
+is($p->get_SO_term('BND'), 'chromosome_breakpoint', 'get_SO_term - chromosome_breakpoint');
+is($p->get_SO_term('DEL_ME'), 'mobile_element_deletion', 'get_SO_term - mobile_element_deletion');
 
 ## VALIDATION CHECKS
 ####################
