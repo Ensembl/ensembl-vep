@@ -1296,7 +1296,8 @@ sub VariationFeatureOverlapAllele_to_output_hash {
 
   # reference allele
   $hash->{REF_ALLELE} = $vf->ref_allele_string if $self->{show_ref_allele};
- 
+
+  # Capture uploaded allele
   $hash->{UPLOADED_ALLELE} = ($vf->{original_allele_string} || $vf->{allele_string} || $vf->{class_SO_term} || "" ) if $self->param('uploaded_allele');
 
   # picked?
@@ -2193,7 +2194,8 @@ sub rejoin_variants_in_InputBuffer {
   foreach my $vf(@{$buffer->buffer}) {
 
     # reset original one
-    if(defined($vf->{original_allele_string})) {
+    # check $vf->{first} to get first $vf in split_variants
+    if(defined($vf->{first})) {
 
       # do consequence stuff
       $self->get_all_output_hashes_by_VariationFeature($vf);
