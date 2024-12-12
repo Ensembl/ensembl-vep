@@ -2114,6 +2114,12 @@ Options
                    a remote (e.g. FTP) address. The FASTA URL/directory must have
                    gzipped FASTA files under the following structure:
                    [species]/[dna]/
+--USE_HTTPS_PROTO  Download cache and FASTA file using HTTPs protocol instead of FTP.
+                   Useful for networks where FTP port is blocked by firewall.
+
+
+--GITHUBTOKEN      Set token to use for authentication when querying GitHub API. Authenticated
+                   user have increased rate-limit. PLEASE NOTE: use token with read-only access.
 END
 
   print $usage;
