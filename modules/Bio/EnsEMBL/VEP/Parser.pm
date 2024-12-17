@@ -863,7 +863,11 @@ sub post_process_vfs {
       my $alt_allele_count;
 
       foreach my $alt(@alleles) {
-        if (length($ref_allele_string) != length($alt) or $original_allele_string =~ /^-/){
+        if ($original_allele_string =~ /-/)
+        {
+          last;
+        }
+        elsif (length($ref_allele_string) != length($alt)) {
           $is_non_minimised_indel = 1;
           last;
         }

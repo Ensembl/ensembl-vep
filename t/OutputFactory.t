@@ -1678,9 +1678,7 @@ $ib = get_annotated_buffer({
 
 is(scalar @{$ib->buffer}, 2, 'minimal - expanded count');
 is($ib->buffer->[0]->allele_string, 'C/T', 'minimal - expanded first allele string');
-# print("Before rejoin\n");
-# use Data::Dumper;
-# print(Dumper($ib->buffer));
+
 $of->rejoin_variants_in_InputBuffer($ib);
 
 is(scalar @{$ib->buffer}, 1, 'minimal - rejoined count');
