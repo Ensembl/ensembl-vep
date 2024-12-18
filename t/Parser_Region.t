@@ -127,13 +127,9 @@ is_deeply($vf, bless( {
   'strand' => '1',
   'variation_name' => '21:25587759-25587758:1/A',
   'map_weight' => 1,
-  'minimised' => 1,
   'allele_string' => '-/A',
-  'original_allele_string' => '-/A',
   'end' => '25587758',
   'start' => '25587759',
-  'original_start' => '25587759',
-  'original_end' => '25587758',
   'seq_region_end' => '25587758',
   'seq_region_start' => '25587759',
   '_line' => ['21:25587759-25587758:1/A']
