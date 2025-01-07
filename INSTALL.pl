@@ -2119,7 +2119,7 @@ Options
 
 
 --GITHUBTOKEN      Set token to use for authentication when querying GitHub API. Authenticated
-                   user have increased rate-limit. PLEASE NOTE: use token with read-only access.
+                   user have increased rate-limit. NOTE: use token with read-only access.
 END
 
   print $usage;
