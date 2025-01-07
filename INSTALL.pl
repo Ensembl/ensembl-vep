@@ -1103,7 +1103,7 @@ sub convert_file_size {
 
   # convert to bytes
   my $scale = first {$units[$_] eq $2} 0..$#units;
-  return $scale ? $1 * (1024**($scale + 1)) : 0;
+  return defined $scale ? $1 * (1024**($scale + 1)) : 0;
 }
 
 sub format_file_size {
