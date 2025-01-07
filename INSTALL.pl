@@ -1096,7 +1096,7 @@ sub convert_file_size {
   my $size = shift;
   my @units = ( 'K', 'M', 'G', 'T' );
 
-  $size =~ m/\s?(\d+\.?\d+)([T,G,M,K]?)/;
+  $size =~ m/\s?(\d+\.?\d+)([TGMK]?)/;
 
   # in bytes already
   return $1 unless defined $2;
