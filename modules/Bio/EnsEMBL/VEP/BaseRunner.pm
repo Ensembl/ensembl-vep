@@ -116,6 +116,7 @@ sub setup_db_connection {
   return if $self->param('offline');
   unless ( $self->param('database') || $self->param('cache') ) {
     # set offline in case other parts of code tries to connect to db
+    $self->warning_msg("Setting offline mode. To create database connection use either --database or --cache.");
     $self->{_config}->param('offline', 1);
     return;
   }
