@@ -1680,7 +1680,7 @@ sub TranscriptVariationAllele_to_output_hash {
       my $offset = $vfoa->hgvs_offset;
 
       # URI encode "="
-      $hgvs_p =~ s/\=/\%3D/g if $hgvs_p && !$self->{no_escape};
+      $hgvs_p =~ s/\=/\%3D/g if $hgvs_p && !$self->{no_escape} && $self->{output_format} ne 'tab';
 
       $hash->{HGVSp} = $hgvs_p if $hgvs_p;
       $hash->{HGVS_OFFSET} = $offset * $strand if $offset && $hgvs_p;
