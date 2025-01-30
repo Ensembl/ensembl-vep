@@ -478,13 +478,17 @@ is_deeply(
     'variation_name' => '.',
     'map_weight' => 1,
     'minimised' => 1,
-    'allele_string' => 'CAG/TAG/T',
+    'allele_string' => 'C/T',
     'original_allele_string' => 'CAG/TAG/T',
     'nontrimmed_allele_string' => 'CAG/TAG/T',
-    'end' => 3,
+    'alt_allele' => 'T',
+    'end' => 1,
     'start' => 1,
     'seq_region_start' => 1,
-    'seq_region_end' => 3,
+    'seq_region_end' => 1,
+    'original_start' => 1,
+    'original_end' => 3,
+    'first' => 1
   }, 'Bio::EnsEMBL::Variation::VariationFeature' ),
   'minimal - doesnt affect non-minimisable'
 );
