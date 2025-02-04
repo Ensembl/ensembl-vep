@@ -27,8 +27,8 @@ addons:
       - libpng-dev
       - libssl-dev
       - openssl
-      - mysql-client-5.6
-      - mysql-client-core-5.6
+      - mysql-client-5.7
+      - mysql-client-core-5.7
 
 before_install:
   - export ENSEMBL_BRANCH=main
