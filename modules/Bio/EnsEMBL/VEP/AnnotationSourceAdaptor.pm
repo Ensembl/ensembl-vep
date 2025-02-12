@@ -312,7 +312,6 @@ sub get_all_custom {
       my @valid_chromosomes = keys %{$self->chr_lengths} > 0 ? sort keys %{$self->chr_lengths}: ((1..22), qw(X Y MT));
       
       foreach my $chr (@valid_chromosomes){
-        print $chr."\n";
         my $new_file = $hash{"file"};
         my $new_opts = { %$opts };
         $new_file =~ s/\#\#\#CHR\#\#\#/$chr/;
