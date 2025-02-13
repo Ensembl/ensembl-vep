@@ -108,6 +108,7 @@ my %RENAME_KEYS = (
   'chr' => 'seq_region_name',
   'variation_name' => 'id',
   'sv' => 'colocated_structural_variants',
+  'clinical_impact' => 'clinvar_somatic_classification'
 );
 
 my %NUMBERIFY_EXEMPT = (
@@ -123,6 +124,7 @@ my @LIST_FIELDS = qw(
   clin_sig
   pubmed
   var_synonyms
+  clinical_impact
 );
 
 my @FREQ_FIELDS = qw(
@@ -407,7 +409,7 @@ sub add_colocated_variant_info_JSON {
   my $hash = shift;
   my $frequency_hashes = shift;
   my $ex_orig = shift;
-  
+
   # work on a copy as we're going to modify/delete things
   my $ex;
   %$ex = %$ex_orig;
@@ -455,6 +457,13 @@ sub add_colocated_variant_info_JSON {
 	$output_hash{$split[0]} = \@syns;
       }
       $ex->{$field} = \%output_hash;
+    }
+    elsif($field eq 'clinical_impact') {
+      my @final_clinical_impact;
+      for my $clinical_impact (@{$ex->{$field}}){
+        push(@final_clinical_impact, $clinical_impact->{somatic_clin_sig}) if(defined $clinical_impact->{somatic_clin_sig});
+      }
+      $ex->{$field} = join(',', @final_clinical_impact);
     }
     else{
       $ex->{$field} = [split(',', $ex->{$field})];

@@ -79,6 +79,7 @@ our @FLAG_FIELDS = (
   { flag => 'minimal',         fields => ['MINIMISED']},
   { flag => 'spdi',            fields => ['SPDI']},
   { flag => 'ga4gh_vrs',       fields => ['GA4GH_VRS']},
+  { flag => 'clinvar_somatic_classification', fields => ['CLINVAR_SOMATIC_CLASSIFICATION']},
 
   # gene-related
   { flag => 'symbol',          fields => ['SYMBOL','SYMBOL_SOURCE','HGNC_ID'] },
@@ -236,6 +237,7 @@ our %FIELD_DESCRIPTIONS = (
   'MAX_AF_POPS'        => 'Populations in which maximum allele frequency was observed',
   'DISTANCE'           => 'Shortest distance from variant to transcript',
   'CLIN_SIG'           => 'ClinVar clinical significance of the dbSNP variant',
+  'CLINVAR_SOMATIC_CLASSIFICATION' => 'ClinVar somatic classification of the dbSNP variant',
   'BIOTYPE'            => 'Biotype of transcript or regulatory feature',
   'PUBMED'             => 'Pubmed ID(s) of publications that cite existing variant',
   'ALLELE_NUM'         => 'Allele number from input; 0 is reference, 1 is first alternate etc',
@@ -257,7 +259,7 @@ our %FIELD_DESCRIPTIONS = (
   'AMBIGUITY'          => 'Allele ambiguity code',
   'OverlapBP'          => 'Number of base pairs overlapping with the corresponding structural variation feature',
   'OverlapPC'          => 'Percentage of corresponding structural variation feature overlapped by the given input',
-  'CHECK_REF'	       => 'Reports variants where the input reference does not match the expected reference',
+  'CHECK_REF'	         => 'Reports variants where the input reference does not match the expected reference',
   'UPLOADED_ALLELE'    => 'The variant allele uploaded',
   'SHIFT_LENGTH'       => 'Reports the number of bases the insertion or deletion has been shifted relative to the underlying transcript due to right alignment before consequence calculation',
   'GENCODE_PRIMARY'    => 'Reports if transcript is GENCODE primary'

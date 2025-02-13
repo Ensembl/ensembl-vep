@@ -174,6 +174,7 @@ sub new {
     max_af
     pubmed
     clin_sig_allele
+    clinvar_somatic_classification
 
     numbers
     domains
@@ -1019,7 +1020,7 @@ sub add_colocated_variant_info {
   );
 
   my %clin_sigs;
-  
+
   foreach my $ex(
     sort {
       ($a->{somatic} || 0) <=> ($b->{somatic} || 0) ||
@@ -1043,7 +1044,11 @@ sub add_colocated_variant_info {
     # VEP fetches the variation synonyms from the cache
     push @{$hash->{VAR_SYNONYMS}}, $ex->{var_synonyms} if $self->{var_synonyms} && $ex->{var_synonyms} && !$self->{_config}->{_params}->{is_vr};
 
-    # Find allele specific clin_sig data if it exists
+    # ClinVar somatic classification
+    if(defined($ex->{clinical_impact}) && $self->{clinvar_somatic_classification}) {
+      $hash->{CLINVAR_SOMATIC_CLASSIFICATION} = $ex->{clinical_impact};
+    }
+
     if(defined($ex->{clin_sig_allele}) && $self->{clin_sig_allele} )
     {
 

@@ -149,9 +149,10 @@ our @VEP_PARAMS = (
   'nearest=s',               # get nearest transcript, gene or symbol (for gene)
   'distance=s',              # set up/downstream distance
   'clin_sig_allele=i',       # use allele specific clinical significance data where it exists
-  'overlaps',                # report length and percent of a transcript or regulatory feature overlaped with a SV
-  'max_sv_size=i',           # modify the size of structural variant to be handled (limited by default to reduce memory requirements)
-  'remove_hgvsp_version',    # removes translation version from hgvs_protein output
+  'clinvar_somatic_classification',  # report the somatic classification of a variant as reported by ClinVar
+  'overlaps',                        # report length and percent of a transcript or regulatory feature overlaped with a SV
+  'max_sv_size=i',                   # modify the size of structural variant to be handled (limited by default to reduce memory requirements)
+  'remove_hgvsp_version',            # removes translation version from hgvs_protein output
 
 
   # verbosity options
