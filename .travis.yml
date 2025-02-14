@@ -21,14 +21,14 @@ addons:
   apt:
     packages:
       - unzip
-      - mysql-server-5.7
+      - mariadb-server-10.6
       - apache2
       - libmysqlclient-dev
       - libpng-dev
       - libssl-dev
       - openssl
-      - mysql-client-5.7
-      - mysql-client-core-5.7
+      - mariadb-client-10.6
+      - mariadb-client-core-10.6
 
 before_install:
   - export ENSEMBL_BRANCH=main
