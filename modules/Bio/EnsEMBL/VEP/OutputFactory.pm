@@ -882,8 +882,15 @@ sub VariationFeature_to_output_hash {
   my $self = shift;
   my $vf = shift;
 
+  my $var_name = sprintf(
+    '%s_%i_%s',
+    $vf->{original_chr} || $vf->{chr},
+    $vf->{start},
+    $vf->{allele_string} || $vf->{class_SO_term}
+  );
+
   my $hash = {
-    Uploaded_variation  => $vf->variation_name ne '.' ? $vf->variation_name : ($vf->{original_chr} || $vf->{chr}).'_'.$vf->{start}.'_'.($vf->{allele_string} || $vf->{class_SO_term}),
+    Uploaded_variation => ($vf->variation_name ne "." && $vf->variation_name ne $var_name) ? $vf->variation_name :  ($vf->{original_chr} || $vf->{chr}).'_'.$vf->{start}.'_'.($vf->{original_allele_string} || $vf->{allele_string} || $vf->{class_SO_term}),
     Location            => ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start}, $vf->{end}),
   };
 
