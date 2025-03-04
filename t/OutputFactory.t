@@ -1699,7 +1699,6 @@ is_deeply(
         'inframe_deletion',
         'splice_region_variant'
       ],
-      'MINIMISED' => 1,
       'Feature_type' => 'Transcript',
       'Uploaded_variation' => '21_25741665_CAGAAGAAAG/TAGAAGAAAG/C',
       'Allele' => '-',
@@ -1719,7 +1718,6 @@ is_deeply(
       'Consequence' => [
         'missense_variant'
       ],
-      'MINIMISED' => 1,
       'Feature_type' => 'Transcript',
       'Uploaded_variation' => '21_25741665_CAGAAGAAAG/TAGAAGAAAG/C',
       'Allele' => 'T',

@@ -951,7 +951,8 @@ sub VariationFeature_to_output_hash {
   }
 
   # minimised?
-  $hash->{MINIMISED} = 1 if $vf->{minimised};
+  my $minimal_flag = $self->{_config}->{_params}->{minimal} if defined($self->{_config}->{_params}->{minimal}) && $self->{_config}->{_params}->{minimal}==1;
+  $hash->{MINIMISED} = 1 if $vf->{minimised} && defined($minimal_flag);
   
   
   if(ref($vf) eq 'Bio::EnsEMBL::Variation::VariationFeature') {
