@@ -21,14 +21,11 @@ addons:
   apt:
     packages:
       - unzip
-      - mysql-server-8.0
       - apache2
       - libmysqlclient-dev
       - libpng-dev
       - libssl-dev
       - openssl
-      - mysql-client-8.0
-      - mysql-client-core-8.0
 
 before_install:
   - export ENSEMBL_BRANCH=main
@@ -65,7 +62,7 @@ jobs:
   include:
     - stage: trigger_dependent_builds
       script: ./travisci/trigger-dependent-build.sh
-      perl: "5.14"
+      perl: "5.22"
 
 services: mysql
 
