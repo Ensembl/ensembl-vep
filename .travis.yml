@@ -2,11 +2,11 @@ os: "linux"
 
 language: "perl"
 perl:
-  - "5.10"
-  - "5.14"
-  - "5.18"
   - "5.22"
   - "5.26"
+  - "5.30"
+  - "5.32"
+  - "5.33"
 
 env:
   jobs:
@@ -21,14 +21,14 @@ addons:
   apt:
     packages:
       - unzip
-      - mariadb-server-10.6
+      - mysql-server
       - apache2
       - libmysqlclient-dev
       - libpng-dev
       - libssl-dev
       - openssl
-      - mariadb-client-10.6
-      - mariadb-client-core-10.6
+      - mysql-client
+      - mysql-client-core
 
 before_install:
   - export ENSEMBL_BRANCH=main
