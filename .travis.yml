@@ -21,14 +21,14 @@ addons:
   apt:
     packages:
       - unzip
-      - mysql-server
+      - mysql-server-8.0
       - apache2
       - libmysqlclient-dev
       - libpng-dev
       - libssl-dev
       - openssl
-      - mysql-client
-      - mysql-client-core
+      - mysql-client-8.0
+      - mysql-client-core-8.0
 
 before_install:
   - export ENSEMBL_BRANCH=main
