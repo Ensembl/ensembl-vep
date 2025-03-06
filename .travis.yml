@@ -42,6 +42,8 @@ before_install:
   - $CWD/travisci/get_dependencies.sh
   - cd $CWD
 
+  - mysql -e 'SET GLOBAL local_infile=1;'
+
 install:
   - export CWD=$PWD
   - export DEPS=$HOME/dependencies
