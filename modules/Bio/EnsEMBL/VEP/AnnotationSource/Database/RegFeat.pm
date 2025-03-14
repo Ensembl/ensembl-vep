@@ -210,12 +210,7 @@ sub get_features_by_regions_uncached {
       @{$features};
 
     $type = 'MotifFeature';
-    my @motif_features = ();
-    foreach my $rf (@$features) {
-      my $rf_seq_region = $rf->seq_region_name;
-      my @experimentally_verified_MotifFeatures = grep {$_->seq_region_name eq "$rf_seq_region"} @{$rf->get_all_experimentally_verified_MotifFeatures()};  
-      push @motif_features, @experimentally_verified_MotifFeatures;
-    } 
+    my @motif_features = @{ $self->get_adaptor('funcgen', $type)->fetch_all_by_Slice($sub_slice) };
 
     foreach my $mf(@motif_features) {
       $mf->get_BindingMatrix->summary_as_hash();
