@@ -138,13 +138,13 @@ SKIP: {
   $features = $as->get_features_by_regions_uncached([[21, 511]]);
 
   is(ref($features), 'ARRAY', 'get_features_by_regions_uncached ref 1');
-  is(scalar @$features, 11, 'get_features_by_regions_uncached count');
+  is(scalar @$features, 12, 'get_features_by_regions_uncached count');
   is(ref($features->[0]), 'Bio::EnsEMBL::Funcgen::RegulatoryFeature', 'get_features_by_regions_uncached ref 2');
   is($features->[0]->stable_id, 'ENSR00001963185', 'get_features_by_regions_uncached stable_id');
 
   is_deeply(
     [sort keys %{{map {ref($_) => 1} @$features}}],
-    ['Bio::EnsEMBL::Funcgen::RegulatoryFeature'],
+    ['Bio::EnsEMBL::Funcgen::MotifFeature', 'Bio::EnsEMBL::Funcgen::RegulatoryFeature'],
     'get_features_by_regions_uncached feature types'
   );
 
@@ -229,7 +229,7 @@ SKIP: {
   is(ref($features->[0]), 'Bio::EnsEMBL::Funcgen::RegulatoryFeature', 'get_all_features_by_InputBuffer ref 2');
   is(ref($features->[-1]), 'Bio::EnsEMBL::Funcgen::RegulatoryFeature', 'get_all_features_by_InputBuffer ref 3');
   is($features->[0]->stable_id, 'ENSR00001963192', 'get_all_features_by_InputBuffer stable_id');
-  is(scalar @$features, 79, 'get_all_features_by_InputBuffer count');
+  is(scalar @$features, 90, 'get_all_features_by_InputBuffer count');
 
   # do it again to get them from memory
   $features = $as->get_all_features_by_InputBuffer($ib);
