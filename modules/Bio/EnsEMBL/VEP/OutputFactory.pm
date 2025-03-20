@@ -1,4 +1,3 @@
-
 =head1 LICENSE
 
 Copyright [2016-2025] EMBL-European Bioinformatics Institute
@@ -16,6 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 =cut
+
 
 =head1 CONTACT
 
@@ -61,6 +61,7 @@ for writing to output.
 
 =cut
 
+
 use strict;
 use warnings;
 
@@ -86,50 +87,31 @@ use Bio::EnsEMBL::VEP::OutputFactory::Tab;
 our $CAN_USE_JSON;
 
 BEGIN {
-    if ( eval q{ use Bio::EnsEMBL::VEP::OutputFactory::JSON; 1 } ) {
-        $CAN_USE_JSON = 1;
-    }
+  if(eval q{ use Bio::EnsEMBL::VEP::OutputFactory::JSON; 1 }) {
+    $CAN_USE_JSON = 1;
+  }
 }
 
-my %SO_RANKS = map { $_->SO_term => $_->rank }
-  values %Bio::EnsEMBL::Variation::Utils::Constants::OVERLAP_CONSEQUENCES;
+my %SO_RANKS = map {$_->SO_term => $_->rank} values %Bio::EnsEMBL::Variation::Utils::Constants::OVERLAP_CONSEQUENCES;
 
 my %FORMAT_MAP = (
-    'vcf'     => 'VCF',
-    'ensembl' => 'VEP_output',
-    'vep'     => 'VEP_output',
-    'tab'     => 'Tab',
-    'json'    => 'JSON',
+  'vcf'     => 'VCF',
+  'ensembl' => 'VEP_output',
+  'vep'     => 'VEP_output',
+  'tab'     => 'Tab',
+  'json'    => 'JSON',
 );
 
-my %DISTANCE_CONS =
-  ( upstream_gene_variant => 1, downstream_gene_variant => 1 );
+my %DISTANCE_CONS = (upstream_gene_variant => 1, downstream_gene_variant => 1);
 
 my %FREQUENCY_KEYS = (
-    af        => ['AF'],
-    af_1kg    => [qw(AF AFR AMR ASN EAS EUR SAS)],
-    af_gnomad => [
-        (
-            'gnomADe',
-            map { 'gnomADe_' . $_ }
-              qw(AFR AMR ASJ EAS FIN MID NFE REMAINING SAS)
-        )
-    ],
-    af_gnomade => [
-        (
-            'gnomADe',
-            map { 'gnomADe_' . $_ }
-              qw(AFR AMR ASJ EAS FIN MID NFE REMAINING SAS)
-        )
-    ],
-    af_gnomadg => [
-        (
-            'gnomADg',
-            map { 'gnomADg_' . $_ }
-              qw(AFR AMI AMR ASJ EAS FIN MID NFE REMAINING SAS)
-        )
-    ],
+  af           => ['AF'],
+  af_1kg       => [qw(AF AFR AMR ASN EAS EUR SAS)],
+  af_gnomad    => [('gnomADe', map {'gnomADe_'.$_} qw(AFR AMR ASJ EAS FIN MID NFE REMAINING SAS))],
+  af_gnomade    => [('gnomADe', map {'gnomADe_'.$_} qw(AFR AMR ASJ EAS FIN MID NFE REMAINING SAS))],
+  af_gnomadg => [('gnomADg', map {'gnomADg_'.$_} qw(AFR AMI AMR ASJ EAS FIN MID NFE REMAINING SAS))],
 );
+
 
 =head2 new
 
@@ -153,122 +135,118 @@ my %FREQUENCY_KEYS = (
 =cut
 
 sub new {
-    my $caller = shift;
-    my $class  = ref($caller) || $caller;
+  my $caller = shift;
+  my $class = ref($caller) || $caller;
+  
+  my $self = $class->SUPER::new(@_);
 
-    my $self = $class->SUPER::new(@_);
+  # add shortcuts to these params
+  $self->add_shortcuts([qw(
+    no_stats
+    no_intergenic
+    process_ref_homs
+    coding_only
+    terms
+    output_format
+    no_escape
+    pick_order
+    allele_number
+    show_ref_allele
+    use_transcript_ref
+    vcf_string
 
-    # add shortcuts to these params
-    $self->add_shortcuts(
-        [
-            qw(
-              no_stats
-              no_intergenic
-              process_ref_homs
-              coding_only
-              terms
-              output_format
-              no_escape
-              pick_order
-              allele_number
-              show_ref_allele
-              use_transcript_ref
-              vcf_string
+    most_severe
+    summary
+    per_gene
+    pick
+    pick_allele
+    pick_allele_gene
+    flag_pick
+    flag_pick_allele
+    flag_pick_allele_gene
+    
+    variant_class
+    af
+    af_1kg
+    af_gnomad
+    af_gnomade
+    af_gnomadg
+    max_af
+    pubmed
+    clin_sig_allele
 
-              most_severe
-              summary
-              per_gene
-              pick
-              pick_allele
-              pick_allele_gene
-              flag_pick
-              flag_pick_allele
-              flag_pick_allele_gene
+    numbers
+    domains
+    symbol
+    ccds
+    xref_refseq
+    refseq
+    merged
+    protein
+    uniprot
+    canonical
+    biotype
+    mane
+    mane_select
+    mane_plus_clinical
+    gencode_primary
+    flag_gencode_primary
+    tsl
+    appris
+    transcript_version
+    gene_version
+    gene_phenotype
+    mirna
+    ambiguity
+    var_synonyms
 
-              variant_class
-              af
-              af_1kg
-              af_gnomad
-              af_gnomade
-              af_gnomadg
-              max_af
-              pubmed
-              clin_sig_allele
+    total_length
+    hgvsc
+    hgvsp
+    hgvsg
+    hgvsg_use_accession
+    hgvsp_use_prediction
+    spdi
+    sift
+    ga4gh_vrs
+    polyphen
+    polyphen_analysis
 
-              numbers
-              domains
-              symbol
-              ccds
-              xref_refseq
-              refseq
-              merged
-              protein
-              uniprot
-              canonical
-              biotype
-              mane
-              mane_select
-              mane_plus_clinical
-              gencode_primary
-              flag_gencode_primary
-              tsl
-              appris
-              transcript_version
-              gene_version
-              gene_phenotype
-              mirna
-              ambiguity
-              var_synonyms
+    cell_type
+    shift_3prime
+    shift_genomic
+    remove_hgvsp_version
+  )]);
 
-              total_length
-              hgvsc
-              hgvsp
-              hgvsg
-              hgvsg_use_accession
-              hgvsp_use_prediction
-              spdi
-              sift
-              ga4gh_vrs
-              polyphen
-              polyphen_analysis
+  my $hashref = $_[0];
 
-              cell_type
-              shift_3prime
-              shift_genomic
-              remove_hgvsp_version
-            )
-        ]
-    );
+  if(my $format = $hashref->{format}) {
 
-    my $hashref = $_[0];
+    delete $hashref->{format};
 
-    if ( my $format = $hashref->{format} ) {
+    $format = lc($format);
+    throw("ERROR: Unknown or unsupported output format $format\n") unless $FORMAT_MAP{$format};
 
-        delete $hashref->{format};
 
-        $format = lc($format);
-        throw("ERROR: Unknown or unsupported output format $format\n")
-          unless $FORMAT_MAP{$format};
-
-        if ( $FORMAT_MAP{$format} eq 'JSON' ) {
-            throw(
-"ERROR: Cannot use format $format without JSON module installed\n"
-            ) unless $CAN_USE_JSON;
-        }
-
-        my $class = 'Bio::EnsEMBL::VEP::OutputFactory::' . $FORMAT_MAP{$format};
-        return $class->new( { %$hashref, config => $self->config } );
+    if($FORMAT_MAP{$format} eq 'JSON') {
+      throw("ERROR: Cannot use format $format without JSON module installed\n") unless $CAN_USE_JSON;
     }
 
-    $self->{header_info} = $hashref->{header_info} if $hashref->{header_info};
+    my $class = 'Bio::EnsEMBL::VEP::OutputFactory::'.$FORMAT_MAP{$format};
+    return $class->new({%$hashref, config => $self->config});
+  }
 
-    $self->{plugins} = $hashref->{plugins} if $hashref->{plugins};
+  $self->{header_info} = $hashref->{header_info} if $hashref->{header_info};
 
-    return $self;
+  $self->{plugins} = $hashref->{plugins} if $hashref->{plugins};;
+
+  return $self;
 }
+
 
 ### Top level methods
 #####################
+
 
 =head2 get_all_lines_by_InputBuffer
 
@@ -284,13 +262,13 @@ sub new {
 =cut
 
 sub get_all_lines_by_InputBuffer {
-    my $self   = shift;
-    my $buffer = shift;
+  my $self = shift;
+  my $buffer = shift;
 
-# output_hash_to_line will be implemented in the child class as its behaviour varies by output type
-    return [ map { $self->output_hash_to_line($_) }
-          @{ $self->get_all_output_hashes_by_InputBuffer($buffer) } ];
+  # output_hash_to_line will be implemented in the child class as its behaviour varies by output type
+  return [map {$self->output_hash_to_line($_)} @{$self->get_all_output_hashes_by_InputBuffer($buffer)}];
 }
+
 
 =head2 get_all_output_hashes_by_InputBuffer
 
@@ -306,37 +284,43 @@ sub get_all_lines_by_InputBuffer {
 =cut
 
 sub get_all_output_hashes_by_InputBuffer {
-    my $self   = shift;
-    my $buffer = shift;
+  my $self = shift;
+  my $buffer = shift;
 
-    # rejoin variants that have been split
-    # this can happen when using --minimal
-    $self->rejoin_variants_in_InputBuffer($buffer) if $buffer->rejoin_required;
+  # rejoin variants that have been split
+  # this can happen when using --minimal
+  $self->rejoin_variants_in_InputBuffer($buffer) if $buffer->rejoin_required;
 
-    map { @{ $self->reset_shifted_positions($_) } } @{ $buffer->buffer };
 
-    return [ map { @{ $self->get_all_output_hashes_by_VariationFeature($_) } }
-          @{ $buffer->buffer } ];
+  map {@{$self->reset_shifted_positions($_)}}
+    @{$buffer->buffer};
+  
+  return [
+    map {@{$self->get_all_output_hashes_by_VariationFeature($_)}}
+    @{$buffer->buffer}
+  ];
 }
 
 sub reset_shifted_positions {
-    my $self = shift;
-    my $vf   = shift;
-    return []
-      if ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature';
-    my @tvs = $vf->get_all_TranscriptVariations();
-    foreach my $tv ( @{ $tvs[0] } ) {
-        map { bless $_, 'Bio::EnsEMBL::Variation::TranscriptVariationAllele' }
+  my $self = shift;
+  my $vf = shift;
+  return [] if ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature';
+  my @tvs = $vf->get_all_TranscriptVariations();
+  foreach my $tv (@{$tvs[0]})
+  {
+      map { bless $_, 'Bio::EnsEMBL::Variation::TranscriptVariationAllele' } 
           @{ $tv->get_all_BaseVariationFeatureOverlapAlleles };
-
-        ## Obtains all relevant $tva objects and removes shifted positions from
-        ## CDS CDNA and Protein positions
-        map { $_->clear_shifting_variables }
+        
+      ## Obtains all relevant $tva objects and removes shifted positions from 
+      ## CDS CDNA and Protein positions   
+      map { $_->clear_shifting_variables} 
           @{ $tv->get_all_BaseVariationFeatureOverlapAlleles };
-    }
+  }
 
-    return \@tvs;
+  return \@tvs;
 }
+
+
 
 =head2 get_all_output_hashes_by_VariationFeature
 
@@ -354,15 +338,15 @@ sub reset_shifted_positions {
 =cut
 
 sub get_all_output_hashes_by_VariationFeature {
-    my $self = shift;
-    my $vf   = shift;
+  my $self = shift;
+  my $vf = shift;
 
-    # get the basic initial hash; this basically contains the location and ID
-    my $hash = $self->VariationFeature_to_output_hash($vf);
+  # get the basic initial hash; this basically contains the location and ID
+  my $hash = $self->VariationFeature_to_output_hash($vf);
 
-    return $self->get_all_VariationFeatureOverlapAllele_output_hashes( $vf,
-        $hash );
+  return $self->get_all_VariationFeatureOverlapAllele_output_hashes($vf, $hash);
 }
+
 
 =head2 get_all_VariationFeatureOverlapAllele_output_hashes
 
@@ -381,45 +365,45 @@ sub get_all_output_hashes_by_VariationFeature {
 =cut
 
 sub get_all_VariationFeatureOverlapAllele_output_hashes {
-    my $self = shift;
-    my $vf   = shift;
-    my $hash = shift;
+  my $self = shift;
+  my $vf = shift;
+  my $hash = shift;
 
-    my @return;
+  my @return;
 
-    # we want to handle StructuralVariationFeatures differently
-    my $method = sprintf( 'get_all_%sOverlapAlleles',
-        ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature'
-        ? 'StructuralVariation'
-        : 'VariationFeature' );
+  # we want to handle StructuralVariationFeatures differently
+  my $method =  sprintf(
+    'get_all_%sOverlapAlleles',
+    ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature'
+      ? 'StructuralVariation'
+      : 'VariationFeature'
+  );
 
-    my $vfoas = $self->$method($vf);
+  my $vfoas = $self->$method($vf);
 
-    # summary, most_severe don't need most of the downstream logic from hereon
-    return $self->summary_only( $vf, $hash, $vfoas )
-      if $self->{summary} || $self->{most_severe};
+  # summary, most_severe don't need most of the downstream logic from hereon
+  return $self->summary_only($vf, $hash, $vfoas) if $self->{summary} || $self->{most_severe};
 
-    foreach my $vfoa (@$vfoas) {
+  foreach my $vfoa(@$vfoas) {
+    # copy the initial VF-based hash so we're not overwriting
+    my %copy = %$hash;
 
-        # copy the initial VF-based hash so we're not overwriting
-        my %copy = %$hash;
+    # we have a method defined for each sub-class of VariationFeatureOverlapAllele
+    my $method = (split('::', ref($vfoa)))[-1].'_to_output_hash';
+    my $output = $self->$method($vfoa, \%copy, $vf);
 
-  # we have a method defined for each sub-class of VariationFeatureOverlapAllele
-        my $method = ( split( '::', ref($vfoa) ) )[-1] . '_to_output_hash';
-        my $output = $self->$method( $vfoa, \%copy, $vf );
+    # run plugins
+    $output = $self->run_plugins($vfoa, $output, $vf);
 
-        # run plugins
-        $output = $self->run_plugins( $vfoa, $output, $vf );
+    # log stats
+    $self->stats->log_VariationFeatureOverlapAllele($vfoa, $output) unless $self->{no_stats};
 
-        # log stats
-        $self->stats->log_VariationFeatureOverlapAllele( $vfoa, $output )
-          unless $self->{no_stats};
+    push @return, $output if $output;
+  }
 
-        push @return, $output if $output;
-    }
-
-    return \@return;
+  return \@return;
 }
+
 
 =head2 summary_only
 
@@ -438,41 +422,40 @@ sub get_all_VariationFeatureOverlapAllele_output_hashes {
 =cut
 
 sub summary_only {
-    my ( $self, $vf, $hash, $vfoas ) = @_;
+  my ($self, $vf, $hash, $vfoas) = @_;
 
-    my $term_method = $self->{terms} . '_term';
+  my $term_method = $self->{terms}.'_term';
 
-    my @ocs = sort { $a->rank <=> $b->rank }
-      map { @{ $_->get_all_OverlapConsequences } } @$vfoas;
+  my @ocs = sort {$a->rank <=> $b->rank} map {@{$_->get_all_OverlapConsequences}} @$vfoas;
 
-    if (@ocs) {
+  if(@ocs) {
 
-        # summary is just all unique consequence terms
-        if ( $self->{summary} ) {
-            my ( @cons, %seen );
-            foreach my $con ( map { $_->$term_method || $_->SO_term } @ocs ) {
-                push @cons, $con unless $seen{$con};
-                $seen{$con} = 1;
-            }
-            $hash->{Consequence} = \@cons;
-        }
-
-        # most severe is the consequence term with the lowest rank
-        else {
-            $hash->{Consequence} =
-              [ $ocs[0]->$term_method || $ocs[0]->SO_term ];
-        }
-
-# unless(defined($config->{no_stats})) {
-#   $config->{stats}->{consequences}->{$_}++ for split(',', $hash->{Consequence});
-# }
+    # summary is just all unique consequence terms
+    if($self->{summary}) {
+      my (@cons, %seen);
+      foreach my $con(map {$_->$term_method || $_->SO_term} @ocs) {
+        push @cons, $con unless $seen{$con};
+        $seen{$con} = 1;
+      }
+      $hash->{Consequence} = \@cons;
     }
+
+    # most severe is the consequence term with the lowest rank
     else {
-        $self->warning_msg("Unable to assign consequence type");
+      $hash->{Consequence} = [$ocs[0]->$term_method || $ocs[0]->SO_term];
     }
 
-    return [$hash];
+    # unless(defined($config->{no_stats})) {
+    #   $config->{stats}->{consequences}->{$_}++ for split(',', $hash->{Consequence});
+    # }
+  }
+  else {
+    $self->warning_msg("Unable to assign consequence type");
+  }
+
+  return [$hash];
 }
+
 
 =head2 get_all_VariationFeatureOverlapAlleles
 
@@ -490,57 +473,46 @@ sub summary_only {
 =cut
 
 sub get_all_VariationFeatureOverlapAlleles {
-    my $self = shift;
-    my $vf   = shift;
+  my $self = shift;
+  my $vf = shift;
 
-    # no intergenic?
-    return []
-      if $self->{no_intergenic} && defined( $vf->{intergenic_variation} );
+  # no intergenic?
+  return [] if $self->{no_intergenic} && defined($vf->{intergenic_variation});
 
-    # get all VFOAs
-    # need to be sensitive to whether --coding_only is switched on
-    my $vfos = $vf->get_all_VariationFeatureOverlaps;
+  # get all VFOAs
+  # need to be sensitive to whether --coding_only is switched on
+  my $vfos = $vf->get_all_VariationFeatureOverlaps;
 
-# if coding only filter TranscriptVariations down to coding ones
-# leave others intact, otherwise doesn't make sense to do --regulatory and --coding_only
-    if ( $self->{coding_only} ) {
-        my @new;
+  # if coding only filter TranscriptVariations down to coding ones
+  # leave others intact, otherwise doesn't make sense to do --regulatory and --coding_only
+  if($self->{coding_only}) {
+    my @new;
 
-        foreach my $vfo (@$vfos) {
-            if (
-                $vfo->isa(
-                    'Bio::EnsEMBL::Variation::BaseVariationFeatureOverlap')
-              )
-            {
-                push @new, $vfo
-                  if $vfo->can('affects_cds') && $vfo->affects_cds;
-            }
-            else {
-                push @new, $vfo;
-            }
-        }
-
-        $vfos = \@new;
+    foreach my $vfo(@$vfos) {
+      if($vfo->isa('Bio::EnsEMBL::Variation::BaseVariationFeatureOverlap')) {
+        push @new, $vfo if $vfo->can('affects_cds') && $vfo->affects_cds;
+      }
+      else {
+        push @new, $vfo;
+      }
     }
 
-# the option individual_zyg has to run a specific method if there is only one individual (unique_ind)
-    if ( $vf->{unique_ind} ) {
-        return $self->filter_VariationFeatureOverlapAlleles(
-            [
-                map { $_->get_reference_VariationFeatureOverlapAllele } @{$vfos}
-            ]
-        );
-    }
-    else {
-        # method name stub for getting *VariationAlleles
-        my $allele_method =
-          $self->{process_ref_homs} ? 'get_all_' : 'get_all_alternate_';
-        my $method = $allele_method . 'VariationFeatureOverlapAlleles';
+    $vfos = \@new;
+  }
 
-        return $self->filter_VariationFeatureOverlapAlleles(
-            [ map { @{ $_->$method } } @{$vfos} ] );
-    }
+  # the option individual_zyg has to run a specific method if there is only one individual (unique_ind)
+  if($vf->{unique_ind}) {
+    return $self->filter_VariationFeatureOverlapAlleles([map {$_->get_reference_VariationFeatureOverlapAllele} @{$vfos}]);
+  }
+  else {
+    # method name stub for getting *VariationAlleles
+    my $allele_method = $self->{process_ref_homs} ? 'get_all_' : 'get_all_alternate_';  
+    my $method = $allele_method.'VariationFeatureOverlapAlleles';
+
+    return $self->filter_VariationFeatureOverlapAlleles([map {@{$_->$method}} @{$vfos}]);
+  }
 }
+
 
 =head2 get_all_StructuralVariationOverlapAlleles
 
@@ -558,34 +530,34 @@ sub get_all_VariationFeatureOverlapAlleles {
 =cut
 
 sub get_all_StructuralVariationOverlapAlleles {
-    my $self = shift;
-    my $svf  = shift;
+  my $self = shift;
+  my $svf = shift;
 
-    # no intergenic?
-    my $isv = $svf->get_IntergenicStructuralVariation(1);
-    return [] if $self->{no_intergenic} && $isv;
+  # no intergenic?
+  my $isv = $svf->get_IntergenicStructuralVariation(1);
+  return [] if $self->{no_intergenic} && $isv;
 
-    # get all VFOAs
-    # need to be sensitive to whether --coding_only is switched on
-    my $vfos;
+  # get all VFOAs
+  # need to be sensitive to whether --coding_only is switched on
+  my $vfos;
 
-    # if coding only just get transcript & intergenic ones
-    if ( $self->{coding_only} ) {
-        @$vfos = grep { defined($_) }
-          ( @{ $svf->get_all_TranscriptStructuralVariations }, $isv );
-    }
-    else {
-        $vfos = $svf->get_all_StructuralVariationOverlaps;
-    }
-
-    # grep out non-coding?
-    @$vfos = grep { $_->can('affects_cds') && $_->affects_cds } @$vfos
-      if $self->{coding_only};
-
-    return $self->filter_StructuralVariationOverlapAlleles(
-        [ map { @{ $_->get_all_StructuralVariationOverlapAlleles } } @{$vfos} ]
+  # if coding only just get transcript & intergenic ones
+  if($self->{coding_only}) {
+    @$vfos = grep {defined($_)} (
+      @{$svf->get_all_TranscriptStructuralVariations},
+      $isv
     );
+  }
+  else {
+    $vfos = $svf->get_all_StructuralVariationOverlaps;
+  }
+
+  # grep out non-coding?
+  @$vfos = grep {$_->can('affects_cds') && $_->affects_cds} @$vfos if $self->{coding_only};
+
+  return $self->filter_StructuralVariationOverlapAlleles([map {@{$_->get_all_StructuralVariationOverlapAlleles}} @{$vfos}]);
 }
+
 
 =head2 filter_VariationFeatureOverlapAlleles
 
@@ -602,81 +574,59 @@ sub get_all_StructuralVariationOverlapAlleles {
 =cut
 
 sub filter_VariationFeatureOverlapAlleles {
-    my $self  = shift;
-    my $vfoas = shift;
+  my $self = shift;
+  my $vfoas = shift;
 
-    return [] unless $vfoas && scalar @$vfoas;
+  return [] unless $vfoas && scalar @$vfoas;
 
-    # pick worst?
-    if ( $self->{pick} ) {
-        return [ $self->pick_worst_VariationFeatureOverlapAllele($vfoas) ];
+  # pick worst?
+  if($self->{pick}) {
+    return [$self->pick_worst_VariationFeatureOverlapAllele($vfoas)];
+  }
+
+  # pick worst per allele?
+  elsif($self->{pick_allele}) {
+    my %by_allele;
+    push @{$by_allele{$_->variation_feature_seq}}, $_ for @$vfoas;
+    return [map {$self->pick_worst_VariationFeatureOverlapAllele($by_allele{$_})} keys %by_allele];
+  }
+
+  # pick per gene?
+  elsif($self->{per_gene}) {
+    return $self->pick_VariationFeatureOverlapAllele_per_gene($vfoas);
+  }
+
+  # pick worst per allele and gene?
+  elsif($self->{pick_allele_gene}) {
+    my %by_allele;
+    push @{$by_allele{$_->variation_feature_seq}}, $_ for @$vfoas;
+    return [map {@{$self->pick_VariationFeatureOverlapAllele_per_gene($by_allele{$_})}} keys %by_allele];
+  }
+
+  # flag picked?
+  elsif($self->{flag_pick}) {
+    if(my $worst = $self->pick_worst_VariationFeatureOverlapAllele($vfoas)) {
+      $worst->{PICK} = 1;
     }
+  }
 
-    # pick worst per allele?
-    elsif ( $self->{pick_allele} ) {
-        my %by_allele;
-        push @{ $by_allele{ $_->variation_feature_seq } }, $_ for @$vfoas;
-        return [
-            map {
-                $self->pick_worst_VariationFeatureOverlapAllele(
-                    $by_allele{$_} )
-            } keys %by_allele
-        ];
-    }
+  # flag worst per allele?
+  elsif($self->{flag_pick_allele}) {
+    my %by_allele;
+    push @{$by_allele{$_->variation_feature_seq}}, $_ for @$vfoas;
+    $self->pick_worst_VariationFeatureOverlapAllele($by_allele{$_})->{PICK} = 1 for keys %by_allele;
+  }
 
-    # pick per gene?
-    elsif ( $self->{per_gene} ) {
-        return $self->pick_VariationFeatureOverlapAllele_per_gene($vfoas);
-    }
+  # flag worst per allele and gene?
+  elsif($self->{flag_pick_allele_gene}) {
+    my %by_allele;
+    push @{$by_allele{$_->variation_feature_seq}}, $_ for @$vfoas;
+    map {$_->{PICK} = 1} map {@{$self->pick_VariationFeatureOverlapAllele_per_gene($by_allele{$_})}} keys %by_allele;
+  }
 
-    # pick worst per allele and gene?
-    elsif ( $self->{pick_allele_gene} ) {
-        my %by_allele;
-        push @{ $by_allele{ $_->variation_feature_seq } }, $_ for @$vfoas;
-        return [
-            map {
-                @{
-                    $self->pick_VariationFeatureOverlapAllele_per_gene(
-                        $by_allele{$_}
-                    )
-                }
-            } keys %by_allele
-        ];
-    }
-
-    # flag picked?
-    elsif ( $self->{flag_pick} ) {
-        if ( my $worst =
-            $self->pick_worst_VariationFeatureOverlapAllele($vfoas) )
-        {
-            $worst->{PICK} = 1;
-        }
-    }
-
-    # flag worst per allele?
-    elsif ( $self->{flag_pick_allele} ) {
-        my %by_allele;
-        push @{ $by_allele{ $_->variation_feature_seq } }, $_ for @$vfoas;
-        $self->pick_worst_VariationFeatureOverlapAllele( $by_allele{$_} )
-          ->{PICK} = 1
-          for keys %by_allele;
-    }
-
-    # flag worst per allele and gene?
-    elsif ( $self->{flag_pick_allele_gene} ) {
-        my %by_allele;
-        push @{ $by_allele{ $_->variation_feature_seq } }, $_ for @$vfoas;
-        map { $_->{PICK} = 1 } map {
-            @{
-                $self->pick_VariationFeatureOverlapAllele_per_gene(
-                    $by_allele{$_}
-                )
-            }
-        } keys %by_allele;
-    }
-
-    return $vfoas;
+  return $vfoas;
 }
+
 
 =head2 filter_StructuralVariationOverlapAlleles
 
@@ -693,39 +643,37 @@ sub filter_VariationFeatureOverlapAlleles {
 =cut
 
 sub filter_StructuralVariationOverlapAlleles {
-    my $self  = shift;
-    my $svoas = shift;
+  my $self = shift;
+  my $svoas = shift;
 
-    return [] unless $svoas && scalar @$svoas;
+  return [] unless $svoas && scalar @$svoas;
 
-    # pick worst? pick worst per allele?
-    if ( $self->{pick} || $self->{pick_allele} ) {
-        return [ $self->pick_worst_VariationFeatureOverlapAllele($svoas) ];
+  # pick worst? pick worst per allele?
+  if($self->{pick} || $self->{pick_allele}) {
+    return [$self->pick_worst_VariationFeatureOverlapAllele($svoas)];
+  }
+
+  # pick per gene? pick worst per allele and gene?
+  elsif($self->{per_gene} || $self->{pick_allele_gene}) {
+    return $self->pick_VariationFeatureOverlapAllele_per_gene($svoas);
+  }
+
+  # flag picked? flag worst per allele?
+  elsif($self->{flag_pick} || $self->{flag_pick_allele}) {
+    if(my $worst = $self->pick_worst_VariationFeatureOverlapAllele($svoas)) {
+      $worst->{PICK} = 1;
     }
+  }
 
-    # pick per gene? pick worst per allele and gene?
-    elsif ( $self->{per_gene} || $self->{pick_allele_gene} ) {
-        return $self->pick_VariationFeatureOverlapAllele_per_gene($svoas);
-    }
+  # flag worst per allele and gene?
+  elsif($self->{flag_pick_allele_gene}) {
+    map {$_->{PICK} = 1} @{$self->pick_VariationFeatureOverlapAllele_per_gene($svoas)};
+  }
 
-    # flag picked? flag worst per allele?
-    elsif ( $self->{flag_pick} || $self->{flag_pick_allele} ) {
-        if ( my $worst =
-            $self->pick_worst_VariationFeatureOverlapAllele($svoas) )
-        {
-            $worst->{PICK} = 1;
-        }
-    }
-
-    # flag worst per allele and gene?
-    elsif ( $self->{flag_pick_allele_gene} ) {
-        map { $_->{PICK} = 1 }
-          @{ $self->pick_VariationFeatureOverlapAllele_per_gene($svoas) };
-    }
-
-    return $svoas;
+  return $svoas;
 
 }
+
 
 =head2 pick_worst_VariationFeatureOverlapAllele
 
@@ -751,129 +699,116 @@ sub filter_StructuralVariationOverlapAlleles {
 =cut
 
 sub pick_worst_VariationFeatureOverlapAllele {
-    my $self  = shift;
-    my $vfoas = shift || [];
+  my $self = shift;
+  my $vfoas = shift || [];
 
-    my @vfoa_info;
+  my @vfoa_info;
 
-    return $vfoas->[0] if scalar @$vfoas == 1;
+  return $vfoas->[0] if scalar @$vfoas == 1;
 
-    foreach my $vfoa (@$vfoas) {
+  foreach my $vfoa(@$vfoas) {
 
-        # create a hash self info for this VFOA that will be used to rank it
-        my $info = {
-            vfoa => $vfoa,
-            rank => undef,
+    # create a hash self info for this VFOA that will be used to rank it
+    my $info = {
+      vfoa => $vfoa,
+      rank => undef,
 
-          # these will only be used by transcript types, default to 1 for others
-          # to avoid writing an else clause below
-            mane_select        => 1,
-            mane_plus_clinical => 1,
-            canonical          => 1,
-            ccds               => 1,
-            length             => 0,
-            biotype            => 1,
-            tsl                => 100,
-            appris             => 100,
-            ensembl            => 1,
-            refseq             => 1,
-        };
+      # these will only be used by transcript types, default to 1 for others
+      # to avoid writing an else clause below
+      mane_select => 1,
+      mane_plus_clinical => 1,
+      canonical => 1,
+      ccds => 1,
+      length => 0,
+      biotype => 1,
+      tsl => 100,
+      appris => 100,
+      ensembl => 1,
+      refseq => 1,
+    };
 
-        if (
-            $vfoa->isa(
-                'Bio::EnsEMBL::Variation::BaseTranscriptVariationAllele')
-          )
-        {
-            my $tr = $vfoa->feature;
+    if($vfoa->isa('Bio::EnsEMBL::Variation::BaseTranscriptVariationAllele')) {
+      my $tr = $vfoa->feature;
 
-            # 0 is "best"
-            $info->{mane_select} = scalar( grep { $_->code eq 'MANE_Select' }
-                  @{ $tr->get_all_Attributes() } ) ? 0 : 1;
-            $info->{mane_plus_clinical} =
-              scalar( grep { $_->code eq 'MANE_Plus_Clinical' }
-                  @{ $tr->get_all_Attributes() } ) ? 0 : 1;
-            $info->{canonical} = $tr->is_canonical                   ? 0 : 1;
-            $info->{biotype}   = $tr->biotype eq 'protein_coding'    ? 0 : 1;
-            $info->{ccds}      = $tr->{_ccds} && $tr->{_ccds} ne '-' ? 0 : 1;
-            $info->{ lc( $tr->{_source_cache} ) } = 0
-              if exists( $tr->{_source_cache} );
+      # 0 is "best"
+      $info->{mane_select} = scalar(grep {$_->code eq 'MANE_Select'}  @{$tr->get_all_Attributes()}) ? 0 : 1;
+      $info->{mane_plus_clinical} = scalar(grep {$_->code eq 'MANE_Plus_Clinical'}  @{$tr->get_all_Attributes()}) ? 0 : 1;
+      $info->{canonical} = $tr->is_canonical ? 0 : 1;
+      $info->{biotype} = $tr->biotype eq 'protein_coding' ? 0 : 1;
+      $info->{ccds} = $tr->{_ccds} && $tr->{_ccds} ne '-' ? 0 : 1;
+      $info->{lc($tr->{_source_cache})} = 0 if exists($tr->{_source_cache});
 
-            # "invert" length so longer is best
-            $info->{length} = 0 - (
-                $tr->translation
-                ? length(
-                    $tr->{_variation_effect_feature_cache}->{translateable_seq}
-                      || $tr->translateable_seq
-                  )
-                : $tr->length()
-            );
+      # "invert" length so longer is best
+      $info->{length} = 0 - (
+        $tr->translation ?
+        length($tr->{_variation_effect_feature_cache}->{translateable_seq} || $tr->translateable_seq) :
+        $tr->length()
+      );
 
-            # lower TSL is best
-            if ( my ($tsl) = @{ $tr->get_all_Attributes('TSL') } ) {
-                if ( $tsl->value =~ m/tsl(\d+)/ ) {
-                    $info->{tsl} = $1 if $1;
-                }
-            }
-
-            # lower APPRIS is best
-            if ( my ($appris) = @{ $tr->get_all_Attributes('appris') } ) {
-                if ( $appris->value =~ m/([A-Za-z]).+(\d+)/ ) {
-                    my ( $type, $grade ) = ( $1, $2 );
-
-            # values are principal1, principal2, ..., alternative1, alternative2
-            # so add 10 to grade if alternative
-                    $grade += 10 if substr( $type, 0, 1 ) eq 'a';
-
-                    $info->{appris} = $grade if $grade;
-                }
-            }
+      # lower TSL is best
+      if(my ($tsl) = @{$tr->get_all_Attributes('TSL')}) {
+        if($tsl->value =~ m/tsl(\d+)/) {
+          $info->{tsl} = $1 if $1;
         }
+      }
 
-        push @vfoa_info, $info;
-    }
-    if ( scalar @vfoa_info ) {
-        my @order = @{ $self->{pick_order} };
-        my $picked;
+      # lower APPRIS is best
+      if(my ($appris) = @{$tr->get_all_Attributes('appris')}) {
+        if($appris->value =~ m/([A-Za-z]).+(\d+)/) {
+          my ($type, $grade) = ($1, $2);
 
-        # go through each category in order
-        foreach my $cat (@order) {
+          # values are principal1, principal2, ..., alternative1, alternative2
+          # so add 10 to grade if alternative
+          $grade += 10 if substr($type, 0, 1) eq 'a';
 
-            # get ranks here as it saves time
-            if ( $cat eq 'rank' ) {
-                foreach my $info (@vfoa_info) {
-                    my @ocs = sort { $a->rank <=> $b->rank }
-                      @{ $info->{vfoa}->get_all_OverlapConsequences };
-                    $info->{rank} =
-                      scalar @ocs ? $SO_RANKS{ $ocs[0]->SO_term } : 1000;
-                }
-            }
-
-            # sort on that category
-            @vfoa_info = sort { $a->{$cat} <=> $b->{$cat} } @vfoa_info;
-
-            # take the first (will have the lowest value self $cat)
-            $picked = shift @vfoa_info;
-            my @tmp = ($picked);
-
-     # now add to @tmp those vfoas that have the same value self $cat as $picked
-            push @tmp, shift @vfoa_info
-              while @vfoa_info && $vfoa_info[0]->{$cat} eq $picked->{$cat};
-
-            # if there was only one, return
-            return $picked->{vfoa} if scalar @tmp == 1;
-
-            # otherwise shrink the array to just those that had the lowest
-            # this gives fewer to sort on the next round
-            @vfoa_info = @tmp;
-
+          $info->{appris} = $grade if $grade;
         }
-
-        # probably shouldn't get here, but if we do, return the first
-        return $vfoa_info[0]->{vfoa};
+      }
     }
 
-    return undef;
+    push @vfoa_info, $info;
+  }
+  if(scalar @vfoa_info) {
+    my @order = @{$self->{pick_order}};
+    my $picked;
+
+    # go through each category in order
+    foreach my $cat(@order) {
+
+      # get ranks here as it saves time
+      if($cat eq 'rank') {
+        foreach my $info(@vfoa_info) {
+          my @ocs = sort {$a->rank <=> $b->rank} @{$info->{vfoa}->get_all_OverlapConsequences};
+          $info->{rank} = scalar @ocs ? $SO_RANKS{$ocs[0]->SO_term} : 1000;
+        }
+      }
+
+      # sort on that category
+      @vfoa_info = sort {$a->{$cat} <=> $b->{$cat}} @vfoa_info;
+
+      # take the first (will have the lowest value self $cat)
+      $picked = shift @vfoa_info;
+      my @tmp = ($picked);
+
+      # now add to @tmp those vfoas that have the same value self $cat as $picked
+      push @tmp, shift @vfoa_info while @vfoa_info && $vfoa_info[0]->{$cat} eq $picked->{$cat};
+
+      # if there was only one, return
+      return $picked->{vfoa} if scalar @tmp == 1;
+
+      # otherwise shrink the array to just those that had the lowest
+      # this gives fewer to sort on the next round
+      @vfoa_info = @tmp;
+
+    }
+
+    # probably shouldn't get here, but if we do, return the first
+    return $vfoa_info[0]->{vfoa};
+  }
+
+  return undef;
 }
+
 
 =head2 pick_VariationFeatureOverlapAllele_per_gene
 
@@ -891,51 +826,44 @@ sub pick_worst_VariationFeatureOverlapAllele {
 =cut
 
 sub pick_VariationFeatureOverlapAllele_per_gene {
-    my $self  = shift;
-    my $vfoas = shift;
+  my $self = shift;
+  my $vfoas = shift;
 
-    my @return;
-    my @tvas;
+  my @return;
+  my @tvas;
 
-    # pick out TVAs
-    foreach my $vfoa (@$vfoas) {
-        if (
-            $vfoa->isa(
-                'Bio::EnsEMBL::Variation::BaseTranscriptVariationAllele')
-          )
-        {
-            push @tvas, $vfoa;
-        }
-        else {
-            push @return, $vfoa;
-        }
+  # pick out TVAs
+  foreach my $vfoa(@$vfoas) {
+    if($vfoa->isa('Bio::EnsEMBL::Variation::BaseTranscriptVariationAllele')) {
+      push @tvas, $vfoa;
     }
-
-    # sort the TVA objects into a hash by gene
-    my %by_gene;
-
-    foreach my $tva (@tvas) {
-        my $gene = $tva->transcript->{_gene_stable_id}
-          || $self->{ga}
-          ->fetch_by_transcript_stable_id( $tva->transcript->stable_id )
-          ->stable_id;
-        push @{ $by_gene{$gene} }, $tva;
+    else {
+      push @return, $vfoa;
     }
+  }
 
-    foreach my $gene ( keys %by_gene ) {
-        push @return,
-          grep { defined($_) }
-          $self->pick_worst_VariationFeatureOverlapAllele( $by_gene{$gene} );
-    }
+  # sort the TVA objects into a hash by gene
+  my %by_gene;
 
-    return \@return;
+  foreach my $tva(@tvas) {
+    my $gene = $tva->transcript->{_gene_stable_id} || $self->{ga}->fetch_by_transcript_stable_id($tva->transcript->stable_id)->stable_id;
+    push @{$by_gene{$gene}}, $tva;
+  }
+
+  foreach my $gene(keys %by_gene) {
+    push @return, grep {defined($_)} $self->pick_worst_VariationFeatureOverlapAllele($by_gene{$gene});
+  }
+
+  return \@return;
 }
+
 
 ### Transforming methods
 ### Typically these methods will transform an API object into hash-able data
 ### Most will take the object to be transformed and the hash into which the
 ### data are inserted as the arguments, and return the hashref
 ############################################################################
+
 
 =head2 VariationFeature_to_output_hash
 
@@ -951,121 +879,106 @@ sub pick_VariationFeatureOverlapAllele_per_gene {
 =cut
 
 sub VariationFeature_to_output_hash {
-    my $self = shift;
-    my $vf   = shift;
+  my $self = shift;
+  my $vf = shift;
 
-    my $hash = {
-        Uploaded_variation => $vf->variation_name ne '.'
-        ? $vf->variation_name
-        : ( $vf->{original_chr} || $vf->{chr} ) . '_'
-          . $vf->{start} . '_'
-          . ( $vf->{allele_string} || $vf->{class_SO_term} ),
-        Location => ( $vf->{chr} || $vf->seq_region_name ) . ':'
-          . format_coords( $vf->{start}, $vf->{end} ),
-    };
+  my $hash = {
+    Uploaded_variation  => $vf->variation_name ne '.' ? $vf->variation_name : ($vf->{original_chr} || $vf->{chr}).'_'.$vf->{start}.'_'.($vf->{allele_string} || $vf->{class_SO_term}),
+    Location            => ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start}, $vf->{end}),
+  };
 
-    my $converted_to_vcf = $vf->to_VCF_record;
+  my $converted_to_vcf = $vf->to_VCF_record;
 
-    my $alt_allele_vcf = ${$converted_to_vcf}[4];
+  my $alt_allele_vcf = ${$converted_to_vcf}[4];
 
-    if ( $self->{vcf_string} ) {
-        if ( $alt_allele_vcf =~ /,/ ) {
-            my @list_vcfs;
-            my @alt_splited_list = split( q(,), $alt_allele_vcf );
+  if($self->{vcf_string}){
+    if($alt_allele_vcf =~ /,/){
+      my @list_vcfs;
+      my @alt_splited_list = split(q(,), $alt_allele_vcf);
 
-            foreach my $alt_splited (@alt_splited_list) {
-                push( @list_vcfs,
-                        $vf->{chr} . '-'
-                      . ${$converted_to_vcf}[1] . '-'
-                      . ${$converted_to_vcf}[3] . '-'
-                      . $alt_splited );
-            }
-            $hash->{vcf_string} = \@list_vcfs;
-        }
-        else {
-            $hash->{vcf_string} =
-                $vf->{chr} . '-'
-              . ${$converted_to_vcf}[1] . '-'
-              . ${$converted_to_vcf}[3] . '-'
-              . ${$converted_to_vcf}[4];
-        }
+      foreach my $alt_splited (@alt_splited_list){
+        push(@list_vcfs, $vf->{chr}.'-'.${$converted_to_vcf}[1].'-'.${$converted_to_vcf}[3].'-'.$alt_splited);
+      }
+      $hash->{vcf_string} = \@list_vcfs;
     }
-
-# get variation synonyms for Variant Recoder
-# if the tool is Variant Recoder fetches the variation synonyms from the database
-    if ( $self->{_config}->{_params}->{is_vr} && $self->{var_synonyms} ) {
-        my $variation    = $vf->variation();
-        my $var_synonyms = $variation->get_all_synonyms( '', 1 );
-        $hash->{var_synonyms} = $var_synonyms;
+    else{
+      $hash->{vcf_string} = $vf->{chr}.'-'.${$converted_to_vcf}[1].'-'.${$converted_to_vcf}[3].'-'.${$converted_to_vcf}[4];
     }
+  }
 
-    # overlapping SVs
-    if ( $vf->{overlapping_svs} ) {
-        $hash->{SV} = [ sort keys %{ $vf->{overlapping_svs} } ];
+  # get variation synonyms for Variant Recoder
+  # if the tool is Variant Recoder fetches the variation synonyms from the database
+  if($self->{_config}->{_params}->{is_vr} && $self->{var_synonyms}){
+    my $variation = $vf->variation();
+    my $var_synonyms = $variation->get_all_synonyms('', 1);
+    $hash->{var_synonyms} = $var_synonyms;
+  }
+
+  # overlapping SVs
+  if($vf->{overlapping_svs}) {
+    $hash->{SV} = [sort keys %{$vf->{overlapping_svs}}];
+  }
+
+  # variant class
+  $hash->{VARIANT_CLASS} = $vf->class_SO_term() if $self->{variant_class};
+
+  # individual?
+  if(defined($vf->{individual})) {
+    $hash->{IND} = $vf->{individual};
+
+    # zygosity
+    if(defined($vf->{genotype})) {
+    my %unique = map {$_ => 1} @{$vf->{genotype}};
+    $hash->{ZYG} = (scalar keys %unique > 1 ? 'HET' : 'HOM').(defined($vf->{hom_ref}) ? 'REF' : '');
     }
-
-    # variant class
-    $hash->{VARIANT_CLASS} = $vf->class_SO_term() if $self->{variant_class};
-
-    # individual?
-    if ( defined( $vf->{individual} ) ) {
-        $hash->{IND} = $vf->{individual};
-
-        # zygosity
-        if ( defined( $vf->{genotype} ) ) {
-            my %unique = map { $_ => 1 } @{ $vf->{genotype} };
-            $hash->{ZYG} = ( scalar keys %unique > 1 ? 'HET' : 'HOM' )
-              . ( defined( $vf->{hom_ref} ) ? 'REF' : '' );
-        }
+  }
+  
+  # individual_zyg
+  if(defined($vf->{genotype_ind})) {
+    my @tmp;
+    foreach my $geno_ind (keys %{$vf->{genotype_ind}}) {
+      my %unique = map {$_ => 1} @{$vf->{genotype_ind}->{$geno_ind}};
+      push @tmp, $geno_ind.":".(scalar keys %unique > 1 ? 'HET' : 'HOM').(defined($vf->{hom_ref_samples}->{$geno_ind}) ? 'REF' : '');
     }
+    $hash->{ZYG} = \@tmp;
+  }
 
-    # individual_zyg
-    if ( defined( $vf->{genotype_ind} ) ) {
-        my @tmp;
-        foreach my $geno_ind ( keys %{ $vf->{genotype_ind} } ) {
-            my %unique = map { $_ => 1 } @{ $vf->{genotype_ind}->{$geno_ind} };
-            push @tmp,
-                $geno_ind . ":"
-              . ( scalar keys %unique > 1 ? 'HET' : 'HOM' )
-              . ( defined( $vf->{hom_ref_samples}->{$geno_ind} ) ? 'REF' : '' );
-        }
-        $hash->{ZYG} = \@tmp;
+  # minimised?
+  $hash->{MINIMISED} = 1 if $vf->{minimised};
+  
+  
+  if(ref($vf) eq 'Bio::EnsEMBL::Variation::VariationFeature') {
+    my $ambiguity_code = $vf->ambig_code();
+    
+    if($self->{ambiguity} && defined($ambiguity_code)) {
+      $hash->{AMBIGUITY} = $ambiguity_code;
     }
+  }
 
-    # minimised?
-    $hash->{MINIMISED} = 1 if $vf->{minimised};
+  # custom annotations
+  foreach my $custom_name(keys %{$vf->{_custom_annotations} || {}}) {
+    $self->_add_custom_annotations_to_hash(
+      $hash,
+      $custom_name,
+      [
+        grep {!exists($_->{allele})}
+        @{$vf->{_custom_annotations}->{$custom_name}}
+      ],
+      $vf->{_custom_annotations_stats}->{$custom_name}
+    );
+  }
 
-    if ( ref($vf) eq 'Bio::EnsEMBL::Variation::VariationFeature' ) {
-        my $ambiguity_code = $vf->ambig_code();
+  # nearest
+  $hash->{NEAREST} = $vf->{nearest} if $vf->{nearest};
 
-        if ( $self->{ambiguity} && defined($ambiguity_code) ) {
-            $hash->{AMBIGUITY} = $ambiguity_code;
-        }
-    }
+  # check_ref tests
+  $hash->{CHECK_REF} = 'failed' if defined($vf->{check_ref_failed});
 
-    # custom annotations
-    foreach my $custom_name ( keys %{ $vf->{_custom_annotations} || {} } ) {
-        $self->_add_custom_annotations_to_hash(
-            $hash,
-            $custom_name,
-            [
-                grep { !exists( $_->{allele} ) }
-                  @{ $vf->{_custom_annotations}->{$custom_name} }
-            ],
-            $vf->{_custom_annotations_stats}->{$custom_name}
-        );
-    }
+  $self->stats->log_VariationFeature($vf, $hash) unless $self->{no_stats};
 
-    # nearest
-    $hash->{NEAREST} = $vf->{nearest} if $vf->{nearest};
-
-    # check_ref tests
-    $hash->{CHECK_REF} = 'failed' if defined( $vf->{check_ref_failed} );
-
-    $self->stats->log_VariationFeature( $vf, $hash ) unless $self->{no_stats};
-
-    return $hash;
+  return $hash;
 }
+
 
 =head2 add_colocated_variant_info
 
@@ -1081,130 +994,120 @@ sub VariationFeature_to_output_hash {
 =cut
 
 sub add_colocated_variant_info {
-    my $self = shift;
-    my $vf   = shift;
-    my $hash = shift;
+  my $self = shift;
+  my $vf = shift;
+  my $hash = shift;
 
-    return unless $vf->{existing} && scalar @{ $vf->{existing} };
+  return unless $vf->{existing} && scalar @{$vf->{existing}};
 
-    my $this_allele = $hash->{Allele};
+  my $this_allele = $hash->{Allele};
 
-    my $shifted_allele = $vf->{shifted_allele_string};
-    $shifted_allele ||= "";
-    my $tmp = {};
+  my $shifted_allele = $vf->{shifted_allele_string};
+  $shifted_allele ||= "";
+  my $tmp = {};
 
-    my $clin_sig_allele_exists = 0;
+  my $clin_sig_allele_exists = 0;
+  # use these to sort variants
+  my %prefix_ranks = (
+    'rs' => 1, # dbSNP
 
-    # use these to sort variants
-    my %prefix_ranks = (
-        'rs' => 1,    # dbSNP
+    'cm' => 2, # HGMD
+    'ci' => 2,
+    'cd' => 2,
 
-        'cm' => 2,    # HGMD
-        'ci' => 2,
-        'cd' => 2,
+    'co' => 3, # COSMIC
+  );
 
-        'co' => 3,    # COSMIC
-    );
+  my %clin_sigs;
+  
+  foreach my $ex(
+    sort {
+      ($a->{somatic} || 0) <=> ($b->{somatic} || 0) ||
 
-    my %clin_sigs;
+      ($prefix_ranks{lc(substr($a->{variation_name}, 0, 2))} || 100)
+      <=>
+      ($prefix_ranks{lc(substr($b->{variation_name}, 0, 2))} || 100)
+    }
+    @{$vf->{existing}}
+  ) {
 
-    foreach my $ex (
-        sort {
-            ( $a->{somatic} || 0 ) <=> ( $b->{somatic} || 0 ) ||
+    # check allele match
+    if(my $matched = $ex->{matched_alleles}) {
+      next unless (grep {$_->{a_allele} eq $this_allele} @$matched) || (grep {$_->{a_allele} eq $shifted_allele} @$matched) ;
+    }
 
-              ( $prefix_ranks{ lc( substr( $a->{variation_name}, 0, 2 ) ) }
-                || 100 )
-              <=> ( $prefix_ranks{ lc( substr( $b->{variation_name}, 0, 2 ) ) }
-                  || 100 )
-        } @{ $vf->{existing} }
-      )
+    # ID
+    push @{$hash->{Existing_variation}}, $ex->{variation_name} if $ex->{variation_name};
+
+    # Variation Synonyms
+    # VEP fetches the variation synonyms from the cache
+    push @{$hash->{VAR_SYNONYMS}}, $ex->{var_synonyms} if $self->{var_synonyms} && $ex->{var_synonyms} && !$self->{_config}->{_params}->{is_vr};
+
+    # Find allele specific clin_sig data if it exists
+    if(defined($ex->{clin_sig_allele}) && $self->{clin_sig_allele} )
     {
 
-        # check allele match
-        if ( my $matched = $ex->{matched_alleles} ) {
-            next
-              unless ( grep { $_->{a_allele} eq $this_allele } @$matched )
-              || ( grep { $_->{a_allele} eq $shifted_allele } @$matched );
-        }
+      my %cs_hash;
+      my @clin_sig_array = split(';', $ex->{clin_sig_allele});
+      foreach my $cs(@clin_sig_array){
+        my @cs_split = split(':', $cs);
 
-        # ID
-        push @{ $hash->{Existing_variation} }, $ex->{variation_name}
-          if $ex->{variation_name};
+        $cs_hash{$cs_split[0]} = '' if !defined($cs_hash{$cs_split[0]});
+        $cs_hash{$cs_split[0]} .= ',' if $cs_hash{$cs_split[0]} ne ''; 
+        $cs_hash{$cs_split[0]} .= $cs_split[1];
+      }
 
-        # Variation Synonyms
-        # VEP fetches the variation synonyms from the cache
-        push @{ $hash->{VAR_SYNONYMS} }, $ex->{var_synonyms}
-          if $self->{var_synonyms}
-          && $ex->{var_synonyms}
-          && !$self->{_config}->{_params}->{is_vr};
-
-        # Find allele specific clin_sig data if it exists
-        if ( defined( $ex->{clin_sig_allele} ) && $self->{clin_sig_allele} ) {
-
-            my %cs_hash;
-            my @clin_sig_array = split( ';', $ex->{clin_sig_allele} );
-            foreach my $cs (@clin_sig_array) {
-                my @cs_split = split( ':', $cs );
-
-                $cs_hash{ $cs_split[0] } = ''
-                  if !defined( $cs_hash{ $cs_split[0] } );
-                $cs_hash{ $cs_split[0] } .= ','
-                  if $cs_hash{ $cs_split[0] } ne '';
-                $cs_hash{ $cs_split[0] } .= $cs_split[1];
-            }
-
-            my $hash_ref = \%cs_hash;
-            $clin_sigs{ $hash_ref->{$this_allele} } = 1
-              if defined( $hash_ref->{$this_allele} );
-            $clin_sig_allele_exists = 1;
-        }
-
-        # clin sig and pubmed?
-        push @{ $tmp->{CLIN_SIG} }, split( ',', $ex->{clin_sig} )
-          if $ex->{clin_sig} && !$clin_sig_allele_exists;
-        push @{ $tmp->{PUBMED} }, split( ',', $ex->{pubmed} )
-          if $self->{pubmed} && $ex->{pubmed};
-
-        # somatic?
-        push @{ $tmp->{SOMATIC} }, $ex->{somatic} ? 1 : 0;
-
-        # phenotype or disease
-        push @{ $tmp->{PHENO} }, $ex->{phenotype_or_disease} ? 1 : 0;
+      my $hash_ref = \%cs_hash;
+      $clin_sigs{$hash_ref->{$this_allele}} = 1 if defined($hash_ref->{$this_allele});
+      $clin_sig_allele_exists = 1;
     }
 
-    # post-process to remove all-0, e.g. SOMATIC
-    foreach my $key ( keys %$tmp ) {
-        delete $tmp->{$key} unless grep { $_ } @{ $tmp->{$key} };
+    # clin sig and pubmed?
+    push @{$tmp->{CLIN_SIG}}, split(',', $ex->{clin_sig}) if $ex->{clin_sig} && !$clin_sig_allele_exists;
+    push @{$tmp->{PUBMED}}, split(',', $ex->{pubmed}) if $self->{pubmed} && $ex->{pubmed};
+
+    # somatic?
+    push @{$tmp->{SOMATIC}}, $ex->{somatic} ? 1 : 0;
+
+    # phenotype or disease
+    push @{$tmp->{PHENO}}, $ex->{phenotype_or_disease} ? 1 : 0;   
+  }
+
+  # post-process to remove all-0, e.g. SOMATIC
+  foreach my $key(keys %$tmp) {
+    delete $tmp->{$key} unless grep {$_} @{$tmp->{$key}};
+  }
+  
+  # post-process to merge var synonyms into one entry so we can control the delimiter
+  $hash->{VAR_SYNONYMS} = join '--', @{$hash->{VAR_SYNONYMS}} if defined($hash->{VAR_SYNONYMS});
+
+  my @keys = keys(%clin_sigs);
+  $tmp->{CLIN_SIG} = join(';', @keys) if scalar(@keys) && $self->{clin_sig_allele};
+ 
+  # copy to hash
+  $hash->{$_} = $tmp->{$_} for keys %$tmp;
+  # frequencies used to filter will appear here
+  if($vf->{_freq_check_freqs}) {
+    my @freqs;
+
+    foreach my $p(keys %{$vf->{_freq_check_freqs}}) {
+      foreach my $a(keys %{$vf->{_freq_check_freqs}->{$p}}) {
+        push @freqs, sprintf(
+          '%s:%s:%s',
+          $p,
+          $a,
+          $vf->{_freq_check_freqs}->{$p}->{$a}
+        )
+      }
     }
 
-# post-process to merge var synonyms into one entry so we can control the delimiter
-    $hash->{VAR_SYNONYMS} = join '--', @{ $hash->{VAR_SYNONYMS} }
-      if defined( $hash->{VAR_SYNONYMS} );
+    $hash->{FREQS} = \@freqs;
+  }
 
-    my @keys = keys(%clin_sigs);
-    $tmp->{CLIN_SIG} = join( ';', @keys )
-      if scalar(@keys) && $self->{clin_sig_allele};
-
-    # copy to hash
-    $hash->{$_} = $tmp->{$_} for keys %$tmp;
-
-    # frequencies used to filter will appear here
-    if ( $vf->{_freq_check_freqs} ) {
-        my @freqs;
-
-        foreach my $p ( keys %{ $vf->{_freq_check_freqs} } ) {
-            foreach my $a ( keys %{ $vf->{_freq_check_freqs}->{$p} } ) {
-                push @freqs,
-                  sprintf( '%s:%s:%s',
-                    $p, $a, $vf->{_freq_check_freqs}->{$p}->{$a} );
-            }
-        }
-
-        $hash->{FREQS} = \@freqs;
-    }
-
-    return $hash;
+  return $hash;
 }
+
+
 
 =head2 add_colocated_frequency_data
 
@@ -1221,121 +1124,100 @@ sub add_colocated_variant_info {
 =cut
 
 sub add_colocated_frequency_data {
-    my $self = shift;
-    my ( $vf, $hash, $ex, $shift_hash ) = @_;
+  my $self = shift;
+  my ($vf, $hash, $ex, $shift_hash) = @_;
 
-    return $hash
-      unless grep { $self->{$_} } keys %FREQUENCY_KEYS or $self->{max_af};
+  return $hash unless grep {$self->{$_}} keys %FREQUENCY_KEYS or $self->{max_af};
 
-    my @ex_alleles = split( '/', $ex->{allele_string} );
+  my @ex_alleles = split('/', $ex->{allele_string});
 
-    my @keys = keys %FREQUENCY_KEYS;
-    @keys = grep { $self->{$_} } @keys unless $self->{max_af};
+  my @keys = keys %FREQUENCY_KEYS;
+  @keys = grep {$self->{$_}} @keys unless $self->{max_af};
+  
+  my $this_allele = $hash->{Allele} ||= '-'; #if exists($hash->{Allele});
+  my $this_allele_unshifted = $shift_hash->{alt_orig_allele_string} if defined($shift_hash);
+  $this_allele_unshifted ||= "";
+  
+  my ($matched_allele) = grep {$_->{a_allele} eq $this_allele || $_->{a_allele} eq $this_allele_unshifted} @{$ex->{matched_alleles} || []};
 
-    my $this_allele = $hash->{Allele} ||= '-';    #if exists($hash->{Allele});
-    my $this_allele_unshifted = $shift_hash->{alt_orig_allele_string}
-      if defined($shift_hash);
-    $this_allele_unshifted ||= "";
+  return $hash unless $matched_allele || (grep {$_ eq 'af'} @keys);
 
-    my ($matched_allele) = grep {
-             $_->{a_allele} eq $this_allele
-          || $_->{a_allele} eq $this_allele_unshifted
-    } @{ $ex->{matched_alleles} || [] };
+  my $max_af = 0;
+  my @max_af_pops;
+  
+  foreach my $group(sort @keys) {
+    foreach my $key(grep {$ex->{$_}} @{$FREQUENCY_KEYS{$group}}) {
 
-    return $hash unless $matched_allele || ( grep { $_ eq 'af' } @keys );
+      my %freq_data;
+      my $total = 0;
 
-    my $max_af = 0;
-    my @max_af_pops;
+      # use this to log which alleles we've explicitly seen freqs for
+      my %remaining = map {$_ => 1} @ex_alleles;
 
-    foreach my $group ( sort @keys ) {
-        foreach my $key ( grep { $ex->{$_} } @{ $FREQUENCY_KEYS{$group} } ) {
+      # get the frequencies for each allele into a hashref
+      foreach my $pair(split(',', $ex->{$key})) {
+        my ($a, $f) = split(':', $pair);
+        $f = sprintf("%.4f", $f) if $key eq 'AF'; # this format is just to keep old compability with dbSNP import
+        $freq_data{$a} = $f;
+        $total += $f;
+        delete $remaining{$a} if $remaining{$a};
+      }
 
-            my %freq_data;
-            my $total = 0;
+      # interpolate the frequency for the remaining allele if there's only 1
+      # we can only do this reliably for the AF key as only the minor AF is stored
+      # for others we expect all ALTs to have a store frequency, those without cannot be reliably interpolated
+      my $interpolated = 0;
+      if(scalar @ex_alleles == 2 && scalar keys %remaining == 1 && $key eq 'AF') {
+        $freq_data{(keys %remaining)[0]} = 1 - $total;
+        $interpolated = 1;
+      }
 
-            # use this to log which alleles we've explicitly seen freqs for
-            my %remaining = map { $_ => 1 } @ex_alleles;
+      if(
+        ($matched_allele && exists($freq_data{$matched_allele->{b_allele}})) ||
+        ($interpolated && $freq_data{$this_allele})
+      ) {
 
-            # get the frequencies for each allele into a hashref
-            foreach my $pair ( split( ',', $ex->{$key} ) ) {
-                my ( $a, $f ) = split( ':', $pair );
-                $f = sprintf( "%.4f", $f )
-                  if $key eq 'AF'
-                  ; # this format is just to keep old compability with dbSNP import
-                $freq_data{$a} = $f;
-                $total += $f;
-                delete $remaining{$a} if $remaining{$a};
-            }
+        my $f =
+          $matched_allele && exists($freq_data{$matched_allele->{b_allele}}) ?
+          $freq_data{$matched_allele->{b_allele}} :
+          $freq_data{$this_allele};
 
-# interpolate the frequency for the remaining allele if there's only 1
-# we can only do this reliably for the AF key as only the minor AF is stored
-# for others we expect all ALTs to have a store frequency, those without cannot be reliably interpolated
-            my $interpolated = 0;
-            if (   scalar @ex_alleles == 2
-                && scalar keys %remaining == 1
-                && $key eq 'AF' )
-            {
-                $freq_data{ ( keys %remaining )[0] } = 1 - $total;
-                $interpolated = 1;
-            }
-
-            if (
-                (
-                    $matched_allele
-                    && exists( $freq_data{ $matched_allele->{b_allele} } )
-                )
-                || ( $interpolated && $freq_data{$this_allele} )
-              )
-            {
-
-                my $f =
-                  $matched_allele
-                  && exists( $freq_data{ $matched_allele->{b_allele} } )
-                  ? $freq_data{ $matched_allele->{b_allele} }
-                  : $freq_data{$this_allele};
-
-                # record the frequency if requested
-                if ( $self->{$group} ) {
-                    my $out_key = $key eq 'AF' ? 'AF' : $key . '_AF';
-                    merge_arrays( $hash->{$out_key} ||= [], [$f] );
-                }
-
-                # update max_af data if required
-                # make sure we don't include any combined-level pops
-                if (   $self->{max_af}
-                    && $key ne 'AF'
-                    && $key ne 'ExAC'
-                    && $key ne 'ExAC_Adj'
-                    && $key ne 'gnomADe'
-                    && $key ne 'gnomADg' )
-                {
-                    if ( $f > $max_af ) {
-                        $max_af      = $f;
-                        @max_af_pops = ($key);
-                    }
-                    elsif ( $f == $max_af ) {
-                        push @max_af_pops, $key
-                          unless grep { $_ eq $key } @max_af_pops;
-                    }
-                }
-            }
-        }
-    }
-
-    # add/update max_af info
-    if ( $self->{max_af} && @max_af_pops ) {
-        my $current_max = $hash->{MAX_AF} ||= 0;
-
-        if ( $max_af > $current_max ) {
-            $hash->{MAX_AF}      = $max_af;
-            $hash->{MAX_AF_POPS} = [];
+        # record the frequency if requested
+        if($self->{$group}) {
+          my $out_key = $key eq 'AF' ? 'AF' : $key.'_AF';
+          merge_arrays($hash->{$out_key} ||= [], [$f]);
         }
 
-        push @{ $hash->{MAX_AF_POPS} }, @max_af_pops if $max_af >= $current_max;
+        # update max_af data if required
+        # make sure we don't include any combined-level pops
+        if($self->{max_af} && $key ne 'AF' && $key ne 'ExAC' && $key ne 'ExAC_Adj' && $key ne 'gnomADe' && $key ne 'gnomADg') {
+          if($f > $max_af) {
+            $max_af = $f;
+            @max_af_pops = ($key);
+          }
+          elsif($f == $max_af) {
+            push @max_af_pops, $key unless grep{$_ eq $key} @max_af_pops;
+          }
+        }
+      }
     }
+  }
 
-    return $hash;
+  # add/update max_af info
+  if($self->{max_af} && @max_af_pops) {
+    my $current_max = $hash->{MAX_AF} ||= 0;
+
+    if($max_af > $current_max) {
+      $hash->{MAX_AF} = $max_af;
+      $hash->{MAX_AF_POPS} = [];
+    }
+    
+    push @{$hash->{MAX_AF_POPS}}, @max_af_pops if $max_af >= $current_max;
+  }
+
+  return $hash;
 }
+
 
 =head2 _add_custom_annotations_to_hash
 
@@ -1354,22 +1236,22 @@ sub add_colocated_frequency_data {
 =cut
 
 sub _add_custom_annotations_to_hash {
-    my ( $self, $hash, $custom_name, $annots, $annots_stats ) = @_;
+  my ($self, $hash, $custom_name, $annots, $annots_stats) = @_;
 
-    foreach my $annot (@$annots) {
-        push @{ $hash->{$custom_name} }, $annot->{name};
-        foreach my $field ( keys %{ $annot->{fields} || {} } ) {
-            push @{ $hash->{ $custom_name . '_' . $field } },
-              $annot->{fields}->{$field};
-        }
+  foreach my $annot(@$annots) {
+    push @{$hash->{$custom_name}}, $annot->{name};
+    foreach my $field(keys %{$annot->{fields} || {}}) {
+      push @{$hash->{$custom_name.'_'.$field}}, $annot->{fields}->{$field};
     }
+  }
 
-    foreach my $stat ( keys %{ $annots_stats || {} } ) {
-        $hash->{ $custom_name . '_' . $stat } = $annots_stats->{$stat};
-    }
+  foreach my $stat(keys %{$annots_stats || {}}) {
+    $hash->{$custom_name.'_'.$stat} = $annots_stats->{$stat};
+  }
 
-    return $hash;
+  return $hash;
 }
+
 
 =head2 VariationFeatureOverlapAllele_to_output_hash
 
@@ -1390,115 +1272,95 @@ sub _add_custom_annotations_to_hash {
 =cut
 
 sub VariationFeatureOverlapAllele_to_output_hash {
-    my $self = shift;
-    my ( $vfoa, $hash, $vf ) = @_;
+  my $self = shift;
+  my ($vfoa, $hash, $vf) = @_;
 
-    my @ocs =
-      sort { $a->rank <=> $b->rank } @{ $vfoa->get_all_OverlapConsequences };
+  my @ocs = sort {$a->rank <=> $b->rank} @{$vfoa->get_all_OverlapConsequences};
 
-    # consequence type(s)
-    my $term_method = $self->{terms} . '_term';
-    $hash->{Consequence} = [ map { $_->$term_method || $_->SO_term } @ocs ];
+  # consequence type(s)
+  my $term_method = $self->{terms}.'_term';
+  $hash->{Consequence} = [map {$_->$term_method || $_->SO_term} @ocs];
 
-    # impact
-    $hash->{IMPACT} = $ocs[0]->impact() if @ocs;
+  # impact
+  $hash->{IMPACT} = $ocs[0]->impact() if @ocs;
 
-    # allele
-    $hash->{Allele} = $vfoa->variation_feature_seq;
+  # allele
+  $hash->{Allele} = $vfoa->variation_feature_seq; 
 
-    if (   defined( $vfoa->{shift_hash} )
-        && defined( $vfoa->{shift_hash}->{hgvs_allele_string} )
-        && $self->param('shift_genomic') )
-    {
-        $hash->{Allele} = $vfoa->{shift_hash}->{hgvs_allele_string};
+  if(defined($vfoa->{shift_hash})&& defined($vfoa->{shift_hash}->{hgvs_allele_string}) && $self->param('shift_genomic'))
+  {
+    $hash->{Allele} = $vfoa->{shift_hash}->{hgvs_allele_string};
+  }
+  # allele number
+  $hash->{ALLELE_NUM} = $vfoa->allele_number if $self->{allele_number};
+
+  # reference allele
+  $hash->{REF_ALLELE} = $vf->ref_allele_string if $self->{show_ref_allele};
+ 
+  $hash->{UPLOADED_ALLELE} = ($vf->{original_allele_string} || $vf->{allele_string} || $vf->{class_SO_term} || "" ) if $self->param('uploaded_allele');
+
+  # picked?
+  $hash->{PICK} = 1 if defined($vfoa->{PICK});
+
+  # hgvs g.
+  if($self->{hgvsg}) {
+    # if offline mode then hgvsg_use_accession has to access chromosome synonyms from cache
+    if(!$vf->slice->adaptor && $self->{hgvsg_use_accession}) {
+      my $chr_syn = $self->config->{_chromosome_synonyms}->{($vf->{chr})};
+      my @new_chr_array = grep(/NC_/, keys %{$chr_syn});
+      $vf->{_hgvs_genomic} ||= $vf->hgvs_genomic($vf->slice, $new_chr_array[0]);
+    }
+    else {
+      $vf->{_hgvs_genomic} ||= $vf->hgvs_genomic($vf->slice, $self->{hgvsg_use_accession} ? undef : $vf->{chr});
     }
 
-    # allele number
-    $hash->{ALLELE_NUM} = $vfoa->allele_number if $self->{allele_number};
+    if(my $hgvsg = $vf->{_hgvs_genomic}->{$vfoa->variation_feature_seq}) {
+      $hash->{HGVSg} = $hgvsg; 
+    }
+  }
+  # spdi + ga4gh_vrs
+  if($self->{spdi} || $self->{ga4gh_vrs}) {
+    $vf->{_spdi_genomic} = $vf->spdi_genomic(); 
 
-    # reference allele
-    $hash->{REF_ALLELE} = $vf->ref_allele_string if $self->{show_ref_allele};
+    if (my $spdi = $vf->{_spdi_genomic}->{$hash->{Allele}}) {
+      $hash->{SPDI} = $spdi if $self->{spdi};
 
-    $hash->{UPLOADED_ALLELE} =
-      (      $vf->{original_allele_string}
-          || $vf->{allele_string}
-          || $vf->{class_SO_term}
-          || "" )
-      if $self->param('uploaded_allele');
-
-    # picked?
-    $hash->{PICK} = 1 if defined( $vfoa->{PICK} );
-
-    # hgvs g.
-    if ( $self->{hgvsg} ) {
-
-# if offline mode then hgvsg_use_accession has to access chromosome synonyms from cache
-        if ( !$vf->slice->adaptor && $self->{hgvsg_use_accession} ) {
-            my $chr_syn =
-              $self->config->{_chromosome_synonyms}->{ ( $vf->{chr} ) };
-            my @new_chr_array = grep( /NC_/, keys %{$chr_syn} );
-            $vf->{_hgvs_genomic} ||=
-              $vf->hgvs_genomic( $vf->slice, $new_chr_array[0] );
+      if ($self->{ga4gh_vrs} && $spdi =~ /^NC/) {
+        my $ga4gh_vrs = ga4gh_vrs_from_spdi($spdi);
+        if ($ga4gh_vrs) {
+          throw("ERROR: Cannot use --ga4gh_vrs without JSON module installed\n") unless $CAN_USE_JSON;
+          my $json = JSON->new;
+          # avoid encoding JSON twice in case of returning JSON output format
+          $ga4gh_vrs = $json->encode($ga4gh_vrs) if $self->{output_format} ne 'json';
+          $hash->{GA4GH_VRS} = $ga4gh_vrs;
         }
-        else {
-            $vf->{_hgvs_genomic} ||= $vf->hgvs_genomic( $vf->slice,
-                $self->{hgvsg_use_accession} ? undef : $vf->{chr} );
-        }
-
-        if ( my $hgvsg =
-            $vf->{_hgvs_genomic}->{ $vfoa->variation_feature_seq } )
-        {
-            $hash->{HGVSg} = $hgvsg;
-        }
+      }
     }
+  }
 
-    # spdi + ga4gh_vrs
-    if ( $self->{spdi} || $self->{ga4gh_vrs} ) {
-        $vf->{_spdi_genomic} = $vf->spdi_genomic();
+  # custom annotations
+  foreach my $custom_name(keys %{$vf->{_custom_annotations} || {}}) {
+    $self->_add_custom_annotations_to_hash(
+      $hash,
+      $custom_name,
+      [
+        grep {$_->{allele} && ($_->{allele} eq $hash->{Allele})}
+        @{$vf->{_custom_annotations}->{$custom_name}}
+      ]
+    );
+  }
 
-        if ( my $spdi = $vf->{_spdi_genomic}->{ $hash->{Allele} } ) {
-            $hash->{SPDI} = $spdi if $self->{spdi};
+  # colocated
+  $self->add_colocated_variant_info($vf, $hash);
 
-            if ( $self->{ga4gh_vrs} && $spdi =~ /^NC/ ) {
-                my $ga4gh_vrs = ga4gh_vrs_from_spdi($spdi);
-                if ($ga4gh_vrs) {
-                    throw(
-"ERROR: Cannot use --ga4gh_vrs without JSON module installed\n"
-                    ) unless $CAN_USE_JSON;
-                    my $json = JSON->new;
+  # frequency data
+  foreach my $ex(@{$vf->{existing} || []}) {
+    $self->add_colocated_frequency_data($vf, $hash, $ex, $vfoa->{shift_hash});
+  }
 
-             # avoid encoding JSON twice in case of returning JSON output format
-                    $ga4gh_vrs = $json->encode($ga4gh_vrs)
-                      if $self->{output_format} ne 'json';
-                    $hash->{GA4GH_VRS} = $ga4gh_vrs;
-                }
-            }
-        }
-    }
-
-    # custom annotations
-    foreach my $custom_name ( keys %{ $vf->{_custom_annotations} || {} } ) {
-        $self->_add_custom_annotations_to_hash(
-            $hash,
-            $custom_name,
-            [
-                grep { $_->{allele} && ( $_->{allele} eq $hash->{Allele} ) }
-                  @{ $vf->{_custom_annotations}->{$custom_name} }
-            ]
-        );
-    }
-
-    # colocated
-    $self->add_colocated_variant_info( $vf, $hash );
-
-    # frequency data
-    foreach my $ex ( @{ $vf->{existing} || [] } ) {
-        $self->add_colocated_frequency_data( $vf, $hash, $ex,
-            $vfoa->{shift_hash} );
-    }
-
-    return $hash;
+  return $hash;
 }
+
 
 =head2 BaseTranscriptVariationAllele_to_output_hash
 
@@ -1515,246 +1377,213 @@ sub VariationFeatureOverlapAllele_to_output_hash {
 =cut
 
 sub BaseTranscriptVariationAllele_to_output_hash {
-    my $self = shift;
-    my ( $vfoa, $hash ) = @_;
+  my $self = shift;
+  my ($vfoa, $hash) = @_;
 
-    my $tv  = $vfoa->base_variation_feature_overlap;
-    my $tr  = $tv->transcript;
-    my $pre = $vfoa->_pre_consequence_predicates;
+  my $tv = $vfoa->base_variation_feature_overlap;
+  my $tr = $tv->transcript;
+  my $pre = $vfoa->_pre_consequence_predicates;
 
-    # basics
-    $hash->{Feature_type} = 'Transcript';
-    $hash->{Feature}      = $tr->stable_id if $tr;
-    $hash->{Feature} .= '.' . $tr->version
-      if $hash->{Feature}
-      && $self->{transcript_version}
-      && $tr->version
-      && $hash->{Feature} !~ /\.\d+$/;
+  # basics
+  $hash->{Feature_type} = 'Transcript';
+  $hash->{Feature}      = $tr->stable_id if $tr;
+  $hash->{Feature}     .= '.'.$tr->version if $hash->{Feature} && $self->{transcript_version} && $tr->version && $hash->{Feature} !~ /\.\d+$/;
 
-    # get gene
-    $hash->{Gene} = $tr->{_gene_stable_id};
-    $hash->{Gene} .= '.' . $tr->{_gene_version}
-      if $self->{gene_version}
-      && $tr->{_gene_version}
-      && $hash->{Gene} !~ /\.\d+$/;
+  # get gene
+  $hash->{Gene} = $tr->{_gene_stable_id};
+  $hash->{Gene} .= '.'.$tr->{_gene_version} if $self->{gene_version} && $tr->{_gene_version} && $hash->{Gene} !~ /\.\d+$/;
 
-    # strand
-    $hash->{STRAND} = $tr->strand + 0;
+  # strand
+  $hash->{STRAND} = $tr->strand + 0;
 
-    my @attribs = @{ $tr->get_all_Attributes() };
+  my @attribs = @{$tr->get_all_Attributes()};
 
-    # flags
-    my @flags =
-      grep { substr( $_, 0, 4 ) eq 'cds_' } map { $_->{code} } @attribs;
-    $hash->{FLAGS} = \@flags if scalar @flags;
+  # flags
+  my @flags = grep {substr($_, 0, 4) eq 'cds_'} map {$_->{code}} @attribs;
+  $hash->{FLAGS} = \@flags if scalar @flags;
 
-    # exon/intron numbers
-    if ( $self->{numbers} ) {
-        if ( $pre->{exon} ) {
-            if ( my $num = $tv->exon_number ) {
-                $hash->{EXON} = $num;
-            }
-        }
-        if ( $pre->{intron} ) {
-            if ( my $num = $tv->intron_number ) {
-                $hash->{INTRON} = $num;
-            }
-        }
+  # exon/intron numbers
+  if($self->{numbers}) {
+    if($pre->{exon}) {
+      if(my $num = $tv->exon_number) {
+        $hash->{EXON} = $num;
+      }
+    }
+    if($pre->{intron}) {
+      if(my $num = $tv->intron_number) {
+        $hash->{INTRON} = $num;
+      }
+    }
+  }
+
+  # protein domains
+  if($self->{domains} && $pre->{coding}) {
+    my $feats = $tv->get_overlapping_ProteinFeatures;
+
+    my @strings;
+
+    for my $feat (@$feats) {
+
+      # do a join/grep in case self missing data
+      my $label = join(':', grep {$_} ($feat->analysis->display_label, $feat->hseqname));
+
+      # replace any special characters
+      $label =~ s/[\s;=]/_/g;
+
+      push @strings, $label;
     }
 
-    # protein domains
-    if ( $self->{domains} && $pre->{coding} ) {
-        my $feats = $tv->get_overlapping_ProteinFeatures;
+    $hash->{DOMAINS} = \@strings if @strings;
+  }
 
-        my @strings;
+  # distance to transcript
+  if(grep {$DISTANCE_CONS{$_}} @{$hash->{Consequence} || []}) {
+    $hash->{DISTANCE} = $tv->distance_to_transcript;
+  }
 
-        for my $feat (@$feats) {
+  # gene symbol
+  if($self->{symbol}) {
+    my $symbol  = $tr->{_gene_symbol} || $tr->{_gene_hgnc};
+    my $source  = $tr->{_gene_symbol_source};
+    my $hgnc_id = $tr->{_gene_hgnc_id} if defined($tr->{_gene_hgnc_id});
 
-            # do a join/grep in case self missing data
-            my $label = join( ':',
-                grep { $_ }
-                  ( $feat->analysis->display_label, $feat->hseqname ) );
+    $hash->{SYMBOL} = $symbol if defined($symbol) && $symbol ne '-';
+    ## encode spaces in symbol name for VCF
+    $hash->{SYMBOL} =~ s/\s/\%20/g if $hash->{SYMBOL} && $self->{output_format} eq 'vcf' && !$self->{no_escape};
 
-            # replace any special characters
-            $label =~ s/[\s;=]/_/g;
+    $hash->{SYMBOL_SOURCE} = $source if defined($source) && $source ne '-';
+    $hash->{HGNC_ID} = $hgnc_id if defined($hgnc_id) && $hgnc_id ne '-';
+  }
 
-            push @strings, $label;
-        }
+  # CCDS
+  $hash->{CCDS} = $tr->{_ccds} if
+    $self->{ccds} &&
+    defined($tr->{_ccds}) &&
+    $tr->{_ccds} ne '-';
 
-        $hash->{DOMAINS} = \@strings if @strings;
+  # refseq xref
+  $hash->{RefSeq} = [split(',', $tr->{_refseq})] if
+    $self->{xref_refseq} &&
+    defined($tr->{_refseq}) &&
+    $tr->{_refseq} ne '-';
+
+  # refseq match info
+  if($self->{refseq} || $self->{merged}) {
+    my @rseq_attrs = grep {$_->code =~ /^rseq/} @attribs;
+    $hash->{REFSEQ_MATCH} = [map {$_->code} @rseq_attrs] if scalar @rseq_attrs;
+  }
+
+  if(my $status = $tr->{_bam_edit_status}) {
+    $hash->{BAM_EDIT} = uc($status);
+  }
+
+  # protein ID
+  $hash->{ENSP} = $tr->{_protein} if
+    $self->{protein} &&
+    defined($tr->{_protein}) &&
+    $tr->{_protein} ne '-';
+
+  # uniprot
+  if($self->{uniprot}) {
+    for my $db(qw(swissprot trembl uniparc uniprot_isoform)) {
+      my $id = $tr->{'_'.$db};
+      $id = undef if defined($id) && $id eq '-';
+      $hash->{uc($db)} = [split(',', $id)] if defined($id);
+    }
+  }
+
+  # canonical transcript
+  $hash->{CANONICAL} = 'YES' if $self->{canonical} && $tr->is_canonical;
+
+  # biotype
+  $hash->{BIOTYPE} = $tr->biotype if $self->{biotype} && $tr->biotype;
+
+  # source cache self transcript if using --merged
+  $hash->{SOURCE} = $tr->{_source_cache} if defined $tr->{_source_cache};
+
+  # gene phenotype
+  $hash->{GENE_PHENO} = 1 if $self->{gene_phenotype} && $tr->{_gene_phenotype};
+  if($self->{mane_select} && (my ($mane) = grep {$_->code eq 'MANE_Select'} @attribs)) {
+    if(my $mane_value = $mane->value) {
+      $hash->{MANE_SELECT} = $mane_value;
     }
 
-    # distance to transcript
-    if ( grep { $DISTANCE_CONS{$_} } @{ $hash->{Consequence} || [] } ) {
-        $hash->{DISTANCE} = $tv->distance_to_transcript;
+    push @{ $hash->{MANE} }, 'MANE_Select';
+  }
+
+  if($self->{mane_plus_clinical} && (my ($mane) = grep {$_->code eq 'MANE_Plus_Clinical'} @attribs)) {
+    if(my $mane_value = $mane->value) {
+      $hash->{MANE_PLUS_CLINICAL} = $mane_value;
     }
 
-    # gene symbol
-    if ( $self->{symbol} ) {
-        my $symbol  = $tr->{_gene_symbol} || $tr->{_gene_hgnc};
-        my $source  = $tr->{_gene_symbol_source};
-        my $hgnc_id = $tr->{_gene_hgnc_id} if defined( $tr->{_gene_hgnc_id} );
-
-        $hash->{SYMBOL} = $symbol if defined($symbol) && $symbol ne '-';
-        ## encode spaces in symbol name for VCF
-        $hash->{SYMBOL} =~ s/\s/\%20/g
-          if $hash->{SYMBOL}
-          && $self->{output_format} eq 'vcf'
-          && !$self->{no_escape};
-
-        $hash->{SYMBOL_SOURCE} = $source if defined($source) && $source ne '-';
-        $hash->{HGNC_ID} = $hgnc_id if defined($hgnc_id)     && $hgnc_id ne '-';
+    push @{ $hash->{MANE} }, 'MANE_Plus_Clinical';
+  }
+ 
+  # Gencode primary
+  if($self->{flag_gencode_primary} && (my ($gencode_primary) = grep {$_->code eq 'gencode_primary'} @attribs)) {
+    $hash->{GENCODE_PRIMARY} = 1;
+  }
+  
+  # transcript support level
+  if($self->{tsl} && (my ($tsl) = grep {$_->code eq 'TSL'} @attribs)) {
+    if($tsl->value =~ m/tsl(\d+)/) {
+      $hash->{TSL} = $1 if $1;
     }
+  }
 
-    # CCDS
-    $hash->{CCDS} = $tr->{_ccds}
-      if $self->{ccds}
-      && defined( $tr->{_ccds} )
-      && $tr->{_ccds} ne '-';
-
-    # refseq xref
-    $hash->{RefSeq} = [ split( ',', $tr->{_refseq} ) ]
-      if $self->{xref_refseq}
-      && defined( $tr->{_refseq} )
-      && $tr->{_refseq} ne '-';
-
-    # refseq match info
-    if ( $self->{refseq} || $self->{merged} ) {
-        my @rseq_attrs = grep { $_->code =~ /^rseq/ } @attribs;
-        $hash->{REFSEQ_MATCH} = [ map { $_->code } @rseq_attrs ]
-          if scalar @rseq_attrs;
+  # APPRIS
+  if($self->{appris} && (my ($appris) = grep {$_->code eq 'appris'} @attribs)) {
+    if(my $value = $appris->value) {
+      $value =~ s/principal/P/;
+      $value =~ s/alternative/A/;
+      $hash->{APPRIS} = $value;
     }
+  }
 
-    if ( my $status = $tr->{_bam_edit_status} ) {
-        $hash->{BAM_EDIT} = uc($status);
+  # miRNA structure
+  if($self->{mirna} && $tr->biotype eq 'miRNA' &&
+     (my ($mirna_attrib) = grep {$_->code eq 'ncRNA'} @attribs)) {
+
+    my ($start, $end, $struct) = split /\s+|\:/, $mirna_attrib->value;
+
+    my ($cdna_start, $cdna_end) = ($tv->cdna_start, $tv->cdna_end);
+
+    if(
+      defined($struct) && $struct =~ /[\(\.\)]+/ &&
+      $start && $end && $cdna_start && $cdna_end &&
+      overlap($start, $end, $cdna_start, $cdna_end)
+    ) {
+      # account for insertions
+      ($cdna_start, $cdna_end) = ($cdna_end, $cdna_start) if $cdna_start > $cdna_end;
+    
+      # parse out structure
+      my @struct;
+      while($struct =~ m/([\.\(\)])([0-9]+)?/g) {
+        my $num = $2 || 1;
+        push @struct, $1 for(1..$num);
+      }
+      
+      # get struct element types overlapped by variant
+      my %chars;
+      for my $pos($cdna_start..$cdna_end) {
+        $pos -= $start;
+        next if $pos < 0 or $pos > scalar @struct;
+        $chars{$struct[$pos]} = 1;
+      }
+      
+      # map element types to SO terms
+      my %map = (
+        '(' => 'miRNA_stem',
+        ')' => 'miRNA_stem',
+        '.' => 'miRNA_loop'
+      );
+      
+      $hash->{miRNA} = [sort map {$map{$_}} keys %chars];
     }
-
-    # protein ID
-    $hash->{ENSP} = $tr->{_protein}
-      if $self->{protein}
-      && defined( $tr->{_protein} )
-      && $tr->{_protein} ne '-';
-
-    # uniprot
-    if ( $self->{uniprot} ) {
-        for my $db (qw(swissprot trembl uniparc uniprot_isoform)) {
-            my $id = $tr->{ '_' . $db };
-            $id                = undef if defined($id) && $id eq '-';
-            $hash->{ uc($db) } = [ split( ',', $id ) ] if defined($id);
-        }
-    }
-
-    # canonical transcript
-    $hash->{CANONICAL} = 'YES' if $self->{canonical} && $tr->is_canonical;
-
-    # biotype
-    $hash->{BIOTYPE} = $tr->biotype if $self->{biotype} && $tr->biotype;
-
-    # source cache self transcript if using --merged
-    $hash->{SOURCE} = $tr->{_source_cache} if defined $tr->{_source_cache};
-
-    # gene phenotype
-    $hash->{GENE_PHENO} = 1
-      if $self->{gene_phenotype} && $tr->{_gene_phenotype};
-    if ( $self->{mane_select}
-        && ( my ($mane) = grep { $_->code eq 'MANE_Select' } @attribs ) )
-    {
-        if ( my $mane_value = $mane->value ) {
-            $hash->{MANE_SELECT} = $mane_value;
-        }
-
-        push @{ $hash->{MANE} }, 'MANE_Select';
-    }
-
-    if ( $self->{mane_plus_clinical}
-        && ( my ($mane) = grep { $_->code eq 'MANE_Plus_Clinical' } @attribs ) )
-    {
-        if ( my $mane_value = $mane->value ) {
-            $hash->{MANE_PLUS_CLINICAL} = $mane_value;
-        }
-
-        push @{ $hash->{MANE} }, 'MANE_Plus_Clinical';
-    }
-
-    # Gencode primary
-    if (
-        $self->{flag_gencode_primary}
-        && (
-            my ($gencode_primary) =
-            grep { $_->code eq 'gencode_primary' } @attribs
-        )
-      )
-    {
-        $hash->{GENCODE_PRIMARY} = 1;
-    }
-
-    # transcript support level
-    if ( $self->{tsl} && ( my ($tsl) = grep { $_->code eq 'TSL' } @attribs ) ) {
-        if ( $tsl->value =~ m/tsl(\d+)/ ) {
-            $hash->{TSL} = $1 if $1;
-        }
-    }
-
-    # APPRIS
-    if ( $self->{appris}
-        && ( my ($appris) = grep { $_->code eq 'appris' } @attribs ) )
-    {
-        if ( my $value = $appris->value ) {
-            $value =~ s/principal/P/;
-            $value =~ s/alternative/A/;
-            $hash->{APPRIS} = $value;
-        }
-    }
-
-    # miRNA structure
-    if (   $self->{mirna}
-        && $tr->biotype eq 'miRNA'
-        && ( my ($mirna_attrib) = grep { $_->code eq 'ncRNA' } @attribs ) )
-    {
-
-        my ( $start, $end, $struct ) = split /\s+|\:/, $mirna_attrib->value;
-
-        my ( $cdna_start, $cdna_end ) = ( $tv->cdna_start, $tv->cdna_end );
-
-        if (   defined($struct)
-            && $struct =~ /[\(\.\)]+/
-            && $start
-            && $end
-            && $cdna_start
-            && $cdna_end
-            && overlap( $start, $end, $cdna_start, $cdna_end ) )
-        {
-            # account for insertions
-            ( $cdna_start, $cdna_end ) = ( $cdna_end, $cdna_start )
-              if $cdna_start > $cdna_end;
-
-            # parse out structure
-            my @struct;
-            while ( $struct =~ m/([\.\(\)])([0-9]+)?/g ) {
-                my $num = $2 || 1;
-                push @struct, $1 for ( 1 .. $num );
-            }
-
-            # get struct element types overlapped by variant
-            my %chars;
-            for my $pos ( $cdna_start .. $cdna_end ) {
-                $pos -= $start;
-                next if $pos < 0 or $pos > scalar @struct;
-                $chars{ $struct[$pos] } = 1;
-            }
-
-            # map element types to SO terms
-            my %map = (
-                '(' => 'miRNA_stem',
-                ')' => 'miRNA_stem',
-                '.' => 'miRNA_loop'
-            );
-
-            $hash->{miRNA} = [ sort map { $map{$_} } keys %chars ];
-        }
-    }
-    return $hash;
+  }
+  return $hash;
 }
+
 
 =head2 TranscriptVariationAllele_to_output_hash
 
@@ -1770,132 +1599,107 @@ sub BaseTranscriptVariationAllele_to_output_hash {
 =cut
 
 sub TranscriptVariationAllele_to_output_hash {
-    my $self = shift;
-    my ( $vfoa, $hash ) = @_;
+  my $self = shift;
+  my ($vfoa, $hash) = @_;
 
-    # run "super" methods
-    $hash = $self->VariationFeatureOverlapAllele_to_output_hash(@_);
-    $hash = $self->BaseTranscriptVariationAllele_to_output_hash(@_);
+  # run "super" methods
+  $hash = $self->VariationFeatureOverlapAllele_to_output_hash(@_);
+  $hash = $self->BaseTranscriptVariationAllele_to_output_hash(@_);
+  
+  my $shift_length = (defined($vfoa->{shift_hash}) ? $vfoa->{shift_hash}->{shift_length} : 0);
+  $shift_length ||= 0;
+  
+  return undef unless $hash;
 
-    my $shift_length = (
-        defined( $vfoa->{shift_hash} )
-        ? $vfoa->{shift_hash}->{shift_length}
-        : 0
-    );
-    $shift_length ||= 0;
+  $hash->{SHIFT_LENGTH} = $shift_length if ($self->param('shift_3prime') && $self->param('shift_length')); 
 
-    return undef unless $hash;
+  my $tv = $vfoa->base_variation_feature_overlap;
+  my $tr = $tv->transcript;
+  
+  my $strand = defined($tr->strand) ? $tr->strand : 1;
 
-    $hash->{SHIFT_LENGTH} = $shift_length
-      if ( $self->param('shift_3prime') && $self->param('shift_length') );
+  if($self->{shift_genomic})
+  {
+    my $vf = $vfoa->variation_feature;
+    $hash->{Location} = ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start} + ($shift_length * $strand), $vf->{end} + ($shift_length * $strand));
+  }
 
-    my $tv = $vfoa->base_variation_feature_overlap;
-    my $tr = $tv->transcript;
+  my $vep_cache = $tr->{_variation_effect_feature_cache};
 
-    my $strand = defined( $tr->strand ) ? $tr->strand : 1;
+  my $pre = $vfoa->_pre_consequence_predicates();
 
-    if ( $self->{shift_genomic} ) {
-        my $vf = $vfoa->variation_feature;
-        $hash->{Location} =
-          ( $vf->{chr} || $vf->seq_region_name ) . ':'
-          . format_coords(
-            $vf->{start} + ( $shift_length * $strand ),
-            $vf->{end} + ( $shift_length * $strand )
-          );
+  # Only for RefSeq annotations
+  # If invalid_alleles is set to 1 then the ref and alt alleles are the same -> this is an invalid variant
+  # Print mismatch warning only if:
+  #  - there is transcripts mismatch
+  #  - use_given_ref is not defined
+  if($vfoa->{invalid_alleles} && !$self->param('use_given_ref')) {
+    $self->warning_msg("Transcript-assembly mismatch in ".$hash->{Uploaded_variation});
+  }
+
+  if($pre->{within_feature}) {
+
+    # exonic only
+    if($pre->{exon}) {
+      my $shifting_offset = $shift_length * $strand;
+      $hash->{cDNA_position}  = format_coords($tv->cdna_start(undef,$shifting_offset), $tv->cdna_end(undef,$shifting_offset));  
+
+      $hash->{cDNA_position} .= '/'.$tr->length if $self->{total_length};
+
+      # coding only
+      if($pre->{coding}) {
+
+        $hash->{Amino_acids} = $vfoa->pep_allele_string;
+        $hash->{Codons}      = $vfoa->display_codon_allele_string;
+        $shifting_offset = 0 if defined($tv->{_boundary_shift}) && $tv->{_boundary_shift} == 1;
+
+        $hash->{CDS_position}  = format_coords($tv->cds_start, $tv->cds_end);
+        $hash->{CDS_position} .= '/'.length($vep_cache->{translateable_seq})
+          if $self->{total_length} && $vep_cache->{translateable_seq};
+
+        $hash->{Protein_position}  = format_coords($tv->translation_start(undef, $shifting_offset), $tv->translation_end(undef, $shifting_offset));
+        $hash->{Protein_position} .= '/'.length($vep_cache->{peptide})
+          if $self->{total_length} && $vep_cache->{peptide};
+
+        $self->add_sift_polyphen($vfoa, $hash);
+      }
+    }
+    my $strand = $tr->strand() > 0 ? 1 : -1;
+    # HGVS
+    if($self->{hgvsc}) {
+      my $hgvs_t = $vfoa->hgvs_transcript(undef, !$self->param('shift_3prime'));
+      my $offset = $vfoa->hgvs_offset;
+
+      $hash->{HGVSc} = $hgvs_t if $hgvs_t;
+      $hash->{HGVS_OFFSET} = $offset * $strand if $offset && $hgvs_t;
     }
 
-    my $vep_cache = $tr->{_variation_effect_feature_cache};
+    if($self->{hgvsp}) {
+      $vfoa->{remove_hgvsp_version} = 1 if $self->{remove_hgvsp_version};
+      my $hgvs_p = $vfoa->hgvs_protein(undef, $self->{hgvsp_use_prediction});
+      my $offset = $vfoa->hgvs_offset;
 
-    my $pre = $vfoa->_pre_consequence_predicates();
+      # URI encode "="
+      $hgvs_p =~ s/\=/\%3D/g if $hgvs_p && !$self->{no_escape};
 
-# Only for RefSeq annotations
-# If invalid_alleles is set to 1 then the ref and alt alleles are the same -> this is an invalid variant
-# Print mismatch warning only if:
-#  - there is transcripts mismatch
-#  - use_given_ref is not defined
-    if ( $vfoa->{invalid_alleles} && !$self->param('use_given_ref') ) {
-        $self->warning_msg(
-            "Transcript-assembly mismatch in " . $hash->{Uploaded_variation} );
+      $hash->{HGVSp} = $hgvs_p if $hgvs_p;
+      $hash->{HGVS_OFFSET} = $offset * $strand if $offset && $hgvs_p;
     }
+    $hash->{REFSEQ_OFFSET} = $vfoa->{refseq_misalignment_offset} if defined($vfoa->{refseq_misalignment_offset}) && $vfoa->{refseq_misalignment_offset} != 0;
+  }
 
-    if ( $pre->{within_feature} ) {
 
-        # exonic only
-        if ( $pre->{exon} ) {
-            my $shifting_offset = $shift_length * $strand;
-            $hash->{cDNA_position} = format_coords(
-                $tv->cdna_start( undef, $shifting_offset ),
-                $tv->cdna_end( undef, $shifting_offset )
-            );
 
-            $hash->{cDNA_position} .= '/' . $tr->length
-              if $self->{total_length};
+  if($self->{use_transcript_ref}) {
+    my $ref_tva = $tv->get_reference_TranscriptVariationAllele;
+    $hash->{USED_REF} = $ref_tva->variation_feature_seq;
+    $hash->{USED_REF} = $ref_tva->{shift_hash}->{ref_orig_allele_string} if !$self->{shift_3prime} && defined($ref_tva->{shift_hash});
+    $hash->{GIVEN_REF} = $ref_tva->{given_ref};
+  }
 
-            # coding only
-            if ( $pre->{coding} ) {
-
-                $hash->{Amino_acids} = $vfoa->pep_allele_string;
-                $hash->{Codons}      = $vfoa->display_codon_allele_string;
-                $shifting_offset     = 0
-                  if defined( $tv->{_boundary_shift} )
-                  && $tv->{_boundary_shift} == 1;
-
-                $hash->{CDS_position} =
-                  format_coords( $tv->cds_start, $tv->cds_end );
-                $hash->{CDS_position} .=
-                  '/' . length( $vep_cache->{translateable_seq} )
-                  if $self->{total_length} && $vep_cache->{translateable_seq};
-
-                $hash->{Protein_position} = format_coords(
-                    $tv->translation_start( undef, $shifting_offset ),
-                    $tv->translation_end( undef, $shifting_offset )
-                );
-                $hash->{Protein_position} .=
-                  '/' . length( $vep_cache->{peptide} )
-                  if $self->{total_length} && $vep_cache->{peptide};
-
-                $self->add_sift_polyphen( $vfoa, $hash );
-            }
-        }
-        my $strand = $tr->strand() > 0 ? 1 : -1;
-
-        # HGVS
-        if ( $self->{hgvsc} ) {
-            my $hgvs_t =
-              $vfoa->hgvs_transcript( undef, !$self->param('shift_3prime') );
-            my $offset = $vfoa->hgvs_offset;
-
-            $hash->{HGVSc}       = $hgvs_t           if $hgvs_t;
-            $hash->{HGVS_OFFSET} = $offset * $strand if $offset && $hgvs_t;
-        }
-
-        if ( $self->{hgvsp} ) {
-            $vfoa->{remove_hgvsp_version} = 1 if $self->{remove_hgvsp_version};
-            my $hgvs_p =
-              $vfoa->hgvs_protein( undef, $self->{hgvsp_use_prediction} );
-            my $offset = $vfoa->hgvs_offset;
-
-            # URI encode "="
-            $hgvs_p =~ s/\=/\%3D/g if $hgvs_p && !$self->{no_escape};
-
-            $hash->{HGVSp}       = $hgvs_p           if $hgvs_p;
-            $hash->{HGVS_OFFSET} = $offset * $strand if $offset && $hgvs_p;
-        }
-        $hash->{REFSEQ_OFFSET} = $vfoa->{refseq_misalignment_offset}
-          if defined( $vfoa->{refseq_misalignment_offset} )
-          && $vfoa->{refseq_misalignment_offset} != 0;
-    }
-
-    if ( $self->{use_transcript_ref} ) {
-        my $ref_tva = $tv->get_reference_TranscriptVariationAllele;
-        $hash->{USED_REF} = $ref_tva->variation_feature_seq;
-        $hash->{USED_REF} = $ref_tva->{shift_hash}->{ref_orig_allele_string}
-          if !$self->{shift_3prime} && defined( $ref_tva->{shift_hash} );
-        $hash->{GIVEN_REF} = $ref_tva->{given_ref};
-    }
-
-    return $hash;
+  return $hash;
 }
+
 
 =head2 add_sift_polyphen
 
@@ -1911,60 +1715,60 @@ sub TranscriptVariationAllele_to_output_hash {
 =cut
 
 sub add_sift_polyphen {
-    my $self = shift;
-    my ( $vfoa, $hash ) = @_;
+  my $self = shift;
+  my ($vfoa, $hash) = @_;
 
-    foreach my $tool (qw(SIFT PolyPhen)) {
-        my $lc_tool = lc($tool);
+  foreach my $tool (qw(SIFT PolyPhen)) {
+    my $lc_tool = lc($tool);
 
-        if ( my $opt = $self->{$lc_tool} ) {
-            my $want_pred  = $opt =~ /^p/i;
-            my $want_score = $opt =~ /^s/i;
-            my $want_both  = $opt =~ /^b/i;
+    if (my $opt = $self->{$lc_tool}) {
+      my $want_pred  = $opt =~ /^p/i;
+      my $want_score = $opt =~ /^s/i;
+      my $want_both  = $opt =~ /^b/i;
 
-            if ($want_both) {
-                $want_pred  = 1;
-                $want_score = 1;
-            }
+      if ($want_both) {
+        $want_pred  = 1;
+        $want_score = 1;
+      }
 
-            next unless $want_pred || $want_score;
+      next unless $want_pred || $want_score;
 
-            my $pred_meth  = $lc_tool . '_prediction';
-            my $score_meth = $lc_tool . '_score';
-            my $analysis = $self->{polyphen_analysis} if $lc_tool eq 'polyphen';
+      my $pred_meth  = $lc_tool.'_prediction';
+      my $score_meth = $lc_tool.'_score';
+      my $analysis   = $self->{polyphen_analysis} if $lc_tool eq 'polyphen';
 
-            my $pred = $vfoa->$pred_meth($analysis);
+      my $pred = $vfoa->$pred_meth($analysis);
 
-            if ($pred) {
+      if($pred) {
 
-                if ($want_pred) {
-                    $pred =~ s/\s+/\_/g;
-                    $pred =~ s/\_\-\_/\_/g;
-                    $hash->{$tool} = $pred;
-                }
-
-                if ($want_score) {
-                    my $score = $vfoa->$score_meth($analysis);
-
-                    if ( defined $score ) {
-                        if ($want_pred) {
-                            $hash->{$tool} .= "($score)";
-                        }
-                        else {
-                            $hash->{$tool} = $score;
-                        }
-                    }
-                }
-            }
-
-            # update stats
-            $self->stats->log_sift_polyphen( $tool, $pred )
-              if $pred && !$self->{no_stats};
+        if ($want_pred) {
+          $pred =~ s/\s+/\_/g;
+          $pred =~ s/\_\-\_/\_/g;
+          $hash->{$tool} = $pred;
         }
-    }
 
-    return $hash;
+        if ($want_score) {
+          my $score = $vfoa->$score_meth($analysis);
+
+          if(defined $score) {
+            if($want_pred) {
+              $hash->{$tool} .= "($score)";
+            }
+            else {
+              $hash->{$tool} = $score;
+            }
+          }
+        }
+      }
+
+      # update stats
+      $self->stats->log_sift_polyphen($tool, $pred) if $pred && !$self->{no_stats};
+    }
+  }
+
+  return $hash;
 }
+
 
 =head2 RegulatoryFeatureVariationAllele_to_output_hash
 
@@ -1980,27 +1784,24 @@ sub add_sift_polyphen {
 =cut
 
 sub RegulatoryFeatureVariationAllele_to_output_hash {
-    my $self = shift;
-    my ( $vfoa, $hash ) = @_;
+  my $self = shift;
+  my ($vfoa, $hash) = @_;
 
-    # run "super" method
-    $hash = $self->VariationFeatureOverlapAllele_to_output_hash(@_);
-    return undef unless $hash;
+  # run "super" method
+  $hash = $self->VariationFeatureOverlapAllele_to_output_hash(@_);
+  return undef unless $hash;
 
-    my $rf = $vfoa->regulatory_feature;
+  my $rf = $vfoa->regulatory_feature;
 
-    $hash->{Feature_type} = 'RegulatoryFeature';
-    $hash->{Feature}      = $rf->stable_id;
-    $hash->{CELL_TYPE}    = $self->get_cell_types($rf) if $self->{cell_type};
+  $hash->{Feature_type} = 'RegulatoryFeature';
+  $hash->{Feature}      = $rf->stable_id;
+  $hash->{CELL_TYPE}    = $self->get_cell_types($rf) if $self->{cell_type};
 
-    $hash->{BIOTYPE} =
-      ref( $rf->{feature_type} )
-      ? $rf->{feature_type}->{so_name}
-      : $rf->{feature_type}
-      if defined( $rf->{feature_type} );
+  $hash->{BIOTYPE} = ref($rf->{feature_type}) ? $rf->{feature_type}->{so_name} : $rf->{feature_type} if defined($rf->{feature_type});
 
-    return $hash;
+  return $hash;
 }
+
 
 =head2 MotifFeatureVariationAllele_to_output_hash
 
@@ -2016,43 +1817,42 @@ sub RegulatoryFeatureVariationAllele_to_output_hash {
 =cut
 
 sub MotifFeatureVariationAllele_to_output_hash {
-    my $self = shift;
-    my ( $vfoa, $hash ) = @_;
+  my $self = shift;
+  my ($vfoa, $hash) = @_;
 
-    # run "super" method
-    $hash = $self->VariationFeatureOverlapAllele_to_output_hash(@_);
-    return undef unless $hash;
+  # run "super" method
+  $hash = $self->VariationFeatureOverlapAllele_to_output_hash(@_);
+  return undef unless $hash;
 
-    my $mf = $vfoa->motif_feature;
+  my $mf = $vfoa->motif_feature;
 
-    # check that the motif has a binding matrix, if not there's not
-    # much we can do so don't return anything
-    return undef unless defined $mf->get_BindingMatrix;
-    my $matrix    = $mf->get_BindingMatrix;
-    my $matrix_id = $matrix->stable_id;
+  # check that the motif has a binding matrix, if not there's not
+  # much we can do so don't return anything
+  return undef unless defined $mf->get_BindingMatrix;
+  my $matrix = $mf->get_BindingMatrix;
+  my $matrix_id = $matrix->stable_id;
 
-    my $mf_stable_id = $mf->stable_id;
-    $hash->{Feature_type} = 'MotifFeature';
-    $hash->{Feature}      = $mf_stable_id;
-    $hash->{MOTIF_NAME}   = $matrix_id;
-    my @transcription_factors = ();
-    my $associated_transcription_factor_complexes =
-      $matrix->{associated_transcription_factor_complexes};
-    foreach my $tfc ( @{$associated_transcription_factor_complexes} ) {
-        push @transcription_factors, $tfc->{display_name};
-    }
-    $hash->{TRANSCRIPTION_FACTORS} = \@transcription_factors;
-    $hash->{STRAND}                = $mf->strand + 0;
-    $hash->{CELL_TYPE}    = $self->get_cell_types($mf) if $self->{cell_type};
-    $hash->{MOTIF_POS}    = $vfoa->motif_start if defined $vfoa->motif_start;
-    $hash->{HIGH_INF_POS} = ( $vfoa->in_informative_position ? 'Y' : 'N' );
+  my $mf_stable_id = $mf->stable_id;
+  $hash->{Feature_type} = 'MotifFeature';
+  $hash->{Feature}      = $mf_stable_id;
+  $hash->{MOTIF_NAME}   = $matrix_id;
+  my @transcription_factors = ();
+  my $associated_transcription_factor_complexes = $matrix->{associated_transcription_factor_complexes};
+  foreach my $tfc (@{$associated_transcription_factor_complexes}) {
+    push @transcription_factors, $tfc->{display_name};
+  }
+  $hash->{TRANSCRIPTION_FACTORS} = \@transcription_factors;
+  $hash->{STRAND}       = $mf->strand + 0;
+  $hash->{CELL_TYPE}    = $self->get_cell_types($mf) if $self->{cell_type};
+  $hash->{MOTIF_POS}    = $vfoa->motif_start if defined $vfoa->motif_start;
+  $hash->{HIGH_INF_POS} = ($vfoa->in_informative_position ? 'Y' : 'N');
 
-    my $delta = $vfoa->motif_score_delta
-      if $vfoa->variation_feature_seq =~ /^[ACGT]+$/;
-    $hash->{MOTIF_SCORE_CHANGE} = sprintf( "%.3f", $delta ) if defined $delta;
+  my $delta = $vfoa->motif_score_delta if $vfoa->variation_feature_seq =~ /^[ACGT]+$/;
+  $hash->{MOTIF_SCORE_CHANGE} = sprintf("%.3f", $delta) if defined $delta;
 
-    return $hash;
+  return $hash;
 }
+
 
 =head2 get_cell_types
 
@@ -2068,15 +1868,17 @@ sub MotifFeatureVariationAllele_to_output_hash {
 =cut
 
 sub get_cell_types {
-    my $self = shift;
-    my $ft   = shift;
+  my $self = shift;
+  my $ft = shift;
 
-    return [
-        map  { s/\s+/\_/g; $_ }
-        map  { $_ . ':' . $ft->{cell_types}->{$_} }
-        grep { $ft->{cell_types}->{$_} } @{ $self->{cell_type} }
-    ];
+  return [
+    map {s/\s+/\_/g; $_}
+    map {$_.':'.$ft->{cell_types}->{$_}}
+    grep {$ft->{cell_types}->{$_}}
+    @{$self->{cell_type}}
+  ];
 }
+
 
 =head2 IntergenicVariationAllele_to_output_hash
 
@@ -2093,33 +1895,27 @@ sub get_cell_types {
 =cut
 
 sub IntergenicVariationAllele_to_output_hash {
-    my $self = shift;
-    my $iva  = shift;
-    my $hash = shift;
-
-    ## By default, shifting in the 3' direction will not update the 'location' field unless '--shift_genomic' is supplied
-    unless ( !$self->{shift_3prime} || !$self->param('shift_genomic') )
-    { #if shifting without shift genomic, we still want to run $iva->genomic_shift
-        $iva->genomic_shift;
-        if ( defined( $iva->{shift_hash}->{shift_length} )
-            && $self->param('shift_genomic') )
-        {
-            my $vf = $iva->variation_feature;
-            $hash->{Location} =
-              ( $vf->{chr} || $vf->seq_region_name ) . ':'
-              . format_coords(
-                $vf->{start} + $iva->{shift_hash}->{shift_length},
-                $vf->{end} + $iva->{shift_hash}->{shift_length}
-              );
-        }
+  my $self = shift;
+  my $iva = shift;
+  my $hash = shift;
+    
+  ## By default, shifting in the 3' direction will not update the 'location' field unless '--shift_genomic' is supplied
+  unless(!$self->{shift_3prime} || !$self->param('shift_genomic')) { #if shifting without shift genomic, we still want to run $iva->genomic_shift
+    $iva->genomic_shift;
+    if (defined($iva->{shift_hash}->{shift_length}) && $self->param('shift_genomic')) {
+      my $vf = $iva->variation_feature;
+      $hash->{Location} = ($vf->{chr} || $vf->seq_region_name).':'.
+        format_coords($vf->{start} + $iva->{shift_hash}->{shift_length}, $vf->{end} + $iva->{shift_hash}->{shift_length});
     }
-
-    return $self->VariationFeatureOverlapAllele_to_output_hash( $iva, $hash,
-        @_ );
+  }
+  
+  return $self->VariationFeatureOverlapAllele_to_output_hash($iva, $hash, @_);
 }
+
 
 ### SV-type methods
 ###################
+
 
 =head2 BaseStructuralVariationOverlapAllele_to_output_hash
 
@@ -2136,36 +1932,36 @@ sub IntergenicVariationAllele_to_output_hash {
 =cut
 
 sub BaseStructuralVariationOverlapAllele_to_output_hash {
-    my $self = shift;
-    my ( $vfoa, $hash ) = @_;
+  my $self = shift;
+  my ($vfoa, $hash) = @_;
 
-    my $svf = $vfoa->base_variation_feature;
+  my $svf = $vfoa->base_variation_feature;
 
-    $hash->{Allele} = $vfoa->{breakend}->{string} || $svf->class_SO_term;
+  $hash->{Allele} = $vfoa->{breakend}->{string} || $svf->class_SO_term;
 
-    # allele number
-    $hash->{ALLELE_NUM} = $vfoa->allele_number if $self->{allele_number};
+  # allele number
+  $hash->{ALLELE_NUM} = $vfoa->allele_number if $self->{allele_number};
 
-    my @ocs =
-      sort { $a->rank <=> $b->rank } @{ $vfoa->get_all_OverlapConsequences };
+  my @ocs = sort {$a->rank <=> $b->rank} @{$vfoa->get_all_OverlapConsequences};
 
-    # consequence type(s)
-    my $term_method = $self->{terms} . '_term';
-    $hash->{Consequence} = [ map { $_->$term_method || $_->SO_term } @ocs ];
+  # consequence type(s)
+  my $term_method = $self->{terms}.'_term';
+  $hash->{Consequence} = [map {$_->$term_method || $_->SO_term} @ocs];
 
-    # impact
-    $hash->{IMPACT} = $ocs[0]->impact() if @ocs;
+  # impact
+  $hash->{IMPACT} = $ocs[0]->impact() if @ocs;
 
   # allele number
   # if($self->{allele_number}) {
   #   $hash->{ALLELE_NUM} = $vfoa->allele_number if $vfoa->can('allele_number');
   # }
 
-    # picked?
-    $hash->{PICK} = 1 if defined( $vfoa->{PICK} );
+  # picked?
+  $hash->{PICK} = 1 if defined($vfoa->{PICK});
 
-    return $hash;
+  return $hash;
 }
+
 
 =head2 StructuralVariationOverlapAllele_to_output_hash
 
@@ -2182,42 +1978,40 @@ sub BaseStructuralVariationOverlapAllele_to_output_hash {
 =cut
 
 sub StructuralVariationOverlapAllele_to_output_hash {
-    my $self = shift;
-    my ( $vfoa, $hash ) = @_;
+  my $self = shift;
+  my ($vfoa, $hash) = @_;
 
-    # run "super" method
-    $hash = $self->BaseStructuralVariationOverlapAllele_to_output_hash(@_);
-    return undef unless $hash;
+  # run "super" method
+  $hash = $self->BaseStructuralVariationOverlapAllele_to_output_hash(@_);
+  return undef unless $hash;
 
-    my $feature = $vfoa->feature;
-    my $svf     = $vfoa->base_variation_feature;
+  my $feature = $vfoa->feature;
+  my $svf = $vfoa->base_variation_feature;
 
-    # get feature type
-    my $feature_type = ( split '::', ref($feature) )[-1];
+  # get feature type
+  my $feature_type = (split '::', ref($feature))[-1];
 
-    $hash->{Feature_type} = $feature_type;
-    $hash->{Feature}      = $feature->stable_id;
+  $hash->{Feature_type} = $feature_type;
+  $hash->{Feature}      = $feature->stable_id;
 
-    # work out overlap amounts (except for breakpoints)
-    if ( $svf->class_SO_term !~ /breakpoint/ ) {
-        my $overlap_start =
-          ( sort { $a <=> $b } ( $svf->start, $feature->start ) )[-1];
-        my $overlap_end =
-          ( sort { $a <=> $b } ( $svf->end, $feature->end ) )[0];
-        my $overlap_length = ( $overlap_end - $overlap_start ) + 1;
-        my $overlap_pc     = 100 *
-          ( $overlap_length / ( ( $feature->end - $feature->start ) + 1 ) );
+  # work out overlap amounts (except for breakpoints)
+  if ($svf->class_SO_term !~ /breakpoint/) {
+    my $overlap_start  = (sort {$a <=> $b} ($svf->start, $feature->start))[-1];
+    my $overlap_end    = (sort {$a <=> $b} ($svf->end, $feature->end))[0];
+    my $overlap_length = ($overlap_end - $overlap_start) + 1;
+    my $overlap_pc     = 100 * ($overlap_length / (($feature->end - $feature->start) + 1));
 
-        $hash->{OverlapBP} = $overlap_length if $overlap_length > 0;
-        $hash->{OverlapPC} = sprintf( "%.2f", $overlap_pc ) if $overlap_pc > 0;
-    }
+    $hash->{OverlapBP} = $overlap_length if $overlap_length > 0;
+    $hash->{OverlapPC} = sprintf("%.2f", $overlap_pc) if $overlap_pc > 0;
+  }
 
-    # cell types
-    $hash->{CELL_TYPE} = $self->get_cell_types($feature)
-      if $self->{cell_type} && $feature_type =~ /(Motif|Regulatory)Feature/;
+  # cell types
+  $hash->{CELL_TYPE} = $self->get_cell_types($feature)
+    if $self->{cell_type} && $feature_type =~ /(Motif|Regulatory)Feature/;
 
-    return $hash;
+  return $hash;
 }
+
 
 =head2 TranscriptStructuralVariationAllele_to_output_hash
 
@@ -2233,50 +2027,44 @@ sub StructuralVariationOverlapAllele_to_output_hash {
 =cut
 
 sub TranscriptStructuralVariationAllele_to_output_hash {
-    my $self = shift;
-    my ( $vfoa, $hash ) = @_;
+  my $self = shift;
+  my ($vfoa, $hash) = @_;
 
-    # run "super" methods
-    $hash = $self->StructuralVariationOverlapAllele_to_output_hash(@_);
-    $hash = $self->BaseTranscriptVariationAllele_to_output_hash(@_);
-    return undef unless $hash;
+  # run "super" methods
+  $hash = $self->StructuralVariationOverlapAllele_to_output_hash(@_);
+  $hash = $self->BaseTranscriptVariationAllele_to_output_hash(@_);
+  return undef unless $hash;
 
-    my $svo       = $vfoa->base_variation_feature_overlap;
-    my $pre       = $vfoa->_pre_consequence_predicates;
-    my $tr        = $svo->transcript;
-    my $vep_cache = $tr->{_variation_effect_feature_cache};
+  my $svo = $vfoa->base_variation_feature_overlap;
+  my $pre = $vfoa->_pre_consequence_predicates;
+  my $tr  = $svo->transcript;
+  my $vep_cache = $tr->{_variation_effect_feature_cache};
 
-    if ( $pre->{within_feature} ) {
+  if($pre->{within_feature}) {
 
-        # exonic only
-        if ( $pre->{exon} ) {
+    # exonic only
+    if($pre->{exon}) {
 
-            $hash->{cDNA_position} =
-              format_coords( $svo->cdna_start, $svo->cdna_end );
-            $hash->{cDNA_position} .= '/' . $tr->length
-              if $self->{total_length};
+      $hash->{cDNA_position}  = format_coords($svo->cdna_start, $svo->cdna_end);
+      $hash->{cDNA_position} .= '/'.$tr->length if $self->{total_length};
 
-            # coding only
-            if ( $pre->{coding} ) {
+      # coding only
+      if($pre->{coding}) {
 
-                $hash->{CDS_position} =
-                  format_coords( $svo->cds_start, $svo->cds_end );
-                $hash->{CDS_position} .=
-                  '/' . length( $vep_cache->{translateable_seq} )
-                  if $self->{total_length} && $vep_cache->{translateable_seq};
+        $hash->{CDS_position}  = format_coords($svo->cds_start, $svo->cds_end);
+        $hash->{CDS_position} .= '/'.length($vep_cache->{translateable_seq})
+          if $self->{total_length} && $vep_cache->{translateable_seq};
 
-                $hash->{Protein_position} =
-                  format_coords( $svo->translation_start,
-                    $svo->translation_end );
-                $hash->{Protein_position} .=
-                  '/' . length( $vep_cache->{peptide} )
-                  if $self->{total_length} && $vep_cache->{peptide};
-            }
-        }
+        $hash->{Protein_position}  = format_coords($svo->translation_start, $svo->translation_end);
+        $hash->{Protein_position} .= '/'.length($vep_cache->{peptide})
+          if $self->{total_length} && $vep_cache->{peptide};
+      }
     }
+  }
 
-    return $hash;
+  return $hash;
 }
+
 
 =head2 IntergenicStructuralVariationAllele_to_output_hash
 
@@ -2293,12 +2081,14 @@ sub TranscriptStructuralVariationAllele_to_output_hash {
 =cut
 
 sub IntergenicStructuralVariationAllele_to_output_hash {
-    my $self = shift;
-    return $self->BaseStructuralVariationOverlapAllele_to_output_hash(@_);
+  my $self = shift;
+  return $self->BaseStructuralVariationOverlapAllele_to_output_hash(@_);
 }
+
 
 ### Other methods
 #################
+
 
 =head2 plugins
 
@@ -2312,8 +2102,9 @@ sub IntergenicStructuralVariationAllele_to_output_hash {
 =cut
 
 sub plugins {
-    return $_[0]->{plugins} || [];
+  return $_[0]->{plugins} || [];
 }
+
 
 =head2 run_plugins
 
@@ -2330,64 +2121,51 @@ sub plugins {
 =cut
 
 sub run_plugins {
-    my ( $self, $bvfoa, $line_hash, $vf ) = @_;
+  my ($self, $bvfoa, $line_hash, $vf) = @_;
 
-    my $skip_line = 0;
+  my $skip_line = 0;
 
-    for my $plugin ( @{ $self->plugins || [] } ) {
+  for my $plugin (@{ $self->plugins || [] }) {
 
-        # check that this plugin is interested in this type of variation feature
-        if (
-            $plugin->check_variant_feature_type(
-                ref( $vf || $bvfoa->base_variation_feature )
-            )
-          )
-        {
+    # check that this plugin is interested in this type of variation feature
+    if($plugin->check_variant_feature_type(ref($vf || $bvfoa->base_variation_feature))) {
 
-            # check that this plugin is interested in this type of feature
-            if (
-                $plugin->check_feature_type(
-                    ref( $bvfoa->feature ) || 'Intergenic'
-                )
-              )
-            {
+      # check that this plugin is interested in this type of feature
+      if($plugin->check_feature_type(ref($bvfoa->feature) || 'Intergenic')) {
 
-                eval {
-                    my $plugin_results = $plugin->run( $bvfoa, $line_hash );
+        eval {
+          my $plugin_results = $plugin->run($bvfoa, $line_hash);
 
-                    if ( defined $plugin_results ) {
-                        if ( ref $plugin_results eq 'HASH' ) {
-                            for my $key ( keys %$plugin_results ) {
-                                $line_hash->{$key} = $plugin_results->{$key};
-                            }
-                        }
-                        else {
-                            $self->warning_msg( "Plugin '"
-                                  . ( ref $plugin )
-                                  . "' did not return a hashref, output ignored!"
-                            );
-                        }
-                    }
-                    else {
-         # if a plugin returns undef, that means it want to filter out this line
-                        $skip_line = 1;
-                    }
-                };
-                if ($@) {
-                    $self->warning_msg(
-                        "Plugin '" . ( ref $plugin ) . "' went wrong: $@" );
-                }
-
-      # there's no point running any other plugins if we're filtering this line,
-      # because the first plugin to skip the line wins, so we might as well last
-      # out of the loop now and avoid any unnecessary computation
-                last if $skip_line;
+          if (defined $plugin_results) {
+            if (ref $plugin_results eq 'HASH') {
+              for my $key (keys %$plugin_results) {
+                $line_hash->{$key} = $plugin_results->{$key};
+              }
             }
+            else {
+              $self->warning_msg("Plugin '".(ref $plugin)."' did not return a hashref, output ignored!");
+            }
+          }
+          else {
+            # if a plugin returns undef, that means it want to filter out this line
+            $skip_line = 1;
+          }
+        };
+        if($@) {
+          $self->warning_msg("Plugin '".(ref $plugin)."' went wrong: $@");
         }
-    }
 
-    return $skip_line ? undef : $line_hash;
+        # there's no point running any other plugins if we're filtering this line,
+        # because the first plugin to skip the line wins, so we might as well last
+        # out of the loop now and avoid any unnecessary computation
+        last if $skip_line;
+      }
+    }
+  }
+
+  return $skip_line ? undef : $line_hash;
 }
+
 
 =head2 rejoin_variants_in_InputBuffer
 
@@ -2403,97 +2181,93 @@ sub run_plugins {
 =cut
 
 sub rejoin_variants_in_InputBuffer {
-    my $self   = shift;
-    my $buffer = shift;
+  my $self = shift;
+  my $buffer = shift;
 
-    my @joined_list = ();
+  my @joined_list = ();
 
-    # backup stat logging status
-    my $no_stats = $self->{no_stats};
-    $self->{no_stats} = 1;
+  # backup stat logging status
+  my $no_stats = $self->{no_stats};
+  $self->{no_stats} = 1;
 
-    foreach my $vf ( @{ $buffer->buffer } ) {
+  foreach my $vf(@{$buffer->buffer}) {
 
-        # reset original one
-        if ( defined( $vf->{original_allele_string} ) ) {
+    # reset original one
+    if(defined($vf->{original_allele_string})) {
 
-            # do consequence stuff
-            $self->get_all_output_hashes_by_VariationFeature($vf);
+      # do consequence stuff
+      $self->get_all_output_hashes_by_VariationFeature($vf);
 
-            $vf->{allele_string}    = $vf->{original_allele_string};
-            $vf->{seq_region_start} = $vf->{start} = $vf->{original_start};
-            $vf->{seq_region_end}   = $vf->{end}   = $vf->{original_end};
+      $vf->{allele_string}    = $vf->{original_allele_string};
+      $vf->{seq_region_start} = $vf->{start} = $vf->{original_start};
+      $vf->{seq_region_end}   = $vf->{end}   = $vf->{original_end};
 
-            push @joined_list, $vf;
-        }
-
-        # this one needs to be merged in
-        elsif ( defined( $vf->{merge_with} ) ) {
-            my $original = $vf->{merge_with};
-
-            # do consequence stuff
-            $self->get_all_output_hashes_by_VariationFeature($vf);
-
-            # now we have to copy the [Feature]Variation objects
-            # we can't simply copy the alleles as the coords will be different
-            # better to make new keys
-            # we also have to set the VF pointer to the original
-
-            # copy transcript variations etc
-            foreach my $type ( map { $_ . '_variations' }
-                qw(transcript motif_feature regulatory_feature) )
-            {
-                foreach my $key ( keys %{ $vf->{$type} || {} } ) {
-                    my $val = $vf->{$type}->{$key};
-                    $val->base_variation_feature($original);
-
-                    # rename the key they're stored under
-                    $original->{$type}->{ $vf->{allele_string} . '_' . $key } =
-                      $val;
-                }
-            }
-
-            # intergenic variation is a bit different
-            # there is only one, and no reference feature to key on
-            # means we have to copy over alleles manually
-            if ( my $iv = $vf->{intergenic_variation} ) {
-                my $bfvo = $original->{intergenic_variation};
-                $iv->base_variation_feature($original);
-
-                if ( my $oiv = $original->{intergenic_variation} ) {
-                    foreach my $alt ( @{ $iv->{alt_alleles} } ) {
-                        $alt->base_variation_feature_overlap($bfvo);
-                        push @{ $oiv->{alt_alleles} }, $alt;
-                    }
-                    $oiv->{_alleles_by_seq}->{ $_->variation_feature_seq } = $_
-                      for @{ $oiv->{alt_alleles} };
-                }
-
-                # this probably won't happen, but can't hurt to cover all bases
-                else {
-                    $original->{intergenic_variation} = $iv;
-                }
-            }
-
-            # reset these keys, they can be recalculated
-            delete $original->{$_}
-              for qw(overlap_consequences _most_severe_consequence);
-        }
-
-        # normal
-        else {
-            push @joined_list, $vf;
-        }
+      push @joined_list, $vf;
     }
 
-    $self->{no_stats} = $no_stats;
+    # this one needs to be merged in
+    elsif(defined($vf->{merge_with})) {
+      my $original = $vf->{merge_with};
 
-    $buffer->buffer( \@joined_list );
+      # do consequence stuff
+      $self->get_all_output_hashes_by_VariationFeature($vf);
+
+      # now we have to copy the [Feature]Variation objects
+      # we can't simply copy the alleles as the coords will be different
+      # better to make new keys
+      # we also have to set the VF pointer to the original
+
+      # copy transcript variations etc
+      foreach my $type(map {$_.'_variations'} qw(transcript motif_feature regulatory_feature)) {
+        foreach my $key(keys %{$vf->{$type} || {}}) {
+          my $val = $vf->{$type}->{$key};
+          $val->base_variation_feature($original);
+          # rename the key they're stored under
+          $original->{$type}->{$vf->{allele_string}.'_'.$key} = $val;
+        }
+      }
+
+      # intergenic variation is a bit different
+      # there is only one, and no reference feature to key on
+      # means we have to copy over alleles manually
+      if(my $iv = $vf->{intergenic_variation}) {
+        my $bfvo = $original->{intergenic_variation};
+        $iv->base_variation_feature($original);
+
+        if(my $oiv = $original->{intergenic_variation}) {
+          foreach my $alt (@{$iv->{alt_alleles}}) {
+            $alt->base_variation_feature_overlap($bfvo);
+            push @{$oiv->{alt_alleles}}, $alt;
+          }
+          $oiv->{_alleles_by_seq}->{$_->variation_feature_seq} = $_ for @{$oiv->{alt_alleles}};
+        }
+
+        # this probably won't happen, but can't hurt to cover all bases
+        else {
+            $original->{intergenic_variation} = $iv;
+        }
+      }
+
+      # reset these keys, they can be recalculated
+      delete $original->{$_} for qw(overlap_consequences _most_severe_consequence);
+    }
+
+    # normal
+    else {
+      push @joined_list, $vf;
+    }
+  }
+
+  $self->{no_stats} = $no_stats;
+
+  $buffer->buffer(\@joined_list);
 }
+
 
 ### Header etc methods
 ### These will be called when generating the actual output
 ##########################################################
+
 
 =head2 header_info
 
@@ -2507,9 +2281,10 @@ sub rejoin_variants_in_InputBuffer {
 =cut
 
 sub header_info {
-    my $self = shift;
-    return $self->{header_info} || {};
+  my $self = shift;
+  return $self->{header_info} || {};
 }
+
 
 =head2 headers
 
@@ -2524,8 +2299,9 @@ sub header_info {
 =cut
 
 sub headers {
-    return [];
+  return [];
 }
+
 
 =head2 get_plugin_headers
 
@@ -2539,20 +2315,21 @@ sub headers {
 =cut
 
 sub get_plugin_headers {
-    my $self = shift;
+  my $self = shift;
 
-    my @headers = ();
+  my @headers = ();
 
-    for my $plugin ( @{ $self->plugins } ) {
-        if ( my $hdr = $plugin->get_header_info ) {
-            for my $key ( sort keys %$hdr ) {
-                push @headers, [ $key, $hdr->{$key} ];
-            }
-        }
+  for my $plugin (@{$self->plugins}) {
+    if (my $hdr = $plugin->get_header_info) {
+      for my $key (sort keys %$hdr) {
+        push @headers, [$key, $hdr->{$key}];
+      }
     }
+  }
 
-    return \@headers;
+  return \@headers;
 }
+
 
 =head2 get_custom_headers
 
@@ -2566,83 +2343,70 @@ sub get_plugin_headers {
 =cut
 
 sub get_custom_headers {
-    my $self = shift;
+  my $self = shift;
 
-    my @headers;
+  my @headers;
 
-    foreach my $custom ( @{ $self->header_info->{custom_info} || [] } ) {
+  foreach my $custom(@{$self->header_info->{custom_info} || []}) {
+    
+    my @flatten_header = get_flatten(\@headers);
+    my %pos = map { $flatten_header[$_]=~/o/ ? ($flatten_header[$_]=>$_) : () } 0..$#flatten_header if @flatten_header;
+    
+    # To prevent printing internal directory mask filepath
+    my $masked_file = $custom->{file} =~ /\// ? "[PATH]/" . (basename $custom->{file}) : $custom->{file};
 
-        my @flatten_header = get_flatten( \@headers );
-        my %pos            = map {
-            $flatten_header[$_] =~ /o/
-              ? ( $flatten_header[$_] => $_ )
-              : ()
-        } 0 .. $#flatten_header if @flatten_header;
-
-        # To prevent printing internal directory mask filepath
-        my $masked_file =
-          $custom->{file} =~ /\//
-          ? "[PATH]/" . ( basename $custom->{file} )
-          : $custom->{file};
-
-        if ( grep { /^$custom->{short_name}$/ } @flatten_header ) {
-            my $pos = ( $pos{ $custom->{short_name} } || 0 ) / 2;
-            $headers[$pos][1] .= ",$masked_file";
-        }
-        else {
-            push @headers,
-              [ $custom->{short_name}, sprintf( "%s", $masked_file ) ];
-        }
-
-        foreach my $field ( @{ $custom->{fields} || [] } ) {
-            my $sub_id = sprintf( "%s_%s", $custom->{short_name}, $field );
-
-# Determine the description to use:
-# - If the custom annotation already contains a proper description for this field,
-#   use that description
-# - Otherwise, use a default string that says "<field> field from <masked_file>"
-            my $desc =
-              exists $custom->{field_descriptions}->{$field}
-              ? $custom->{field_descriptions}->{$field}
-              : sprintf( "%s field from %s", $field, $masked_file );
-
- # Check if a header row with this sub_id already exists in the flattened header
-            if ( grep { /^$sub_id$/ } @flatten_header ) {
-                my $pos = $pos{$sub_id} / 2;
-                $headers[$pos][1] .= ",$masked_file";
-            }
-
-            # Special case: if the field is "PC", use the custom overlap definition to create the description
-            elsif ( $field eq "PC" ) {
-                push @headers,
-                  [
-                    $sub_id,
-                    sprintf(
-                        $custom->{overlap_def} . " from %s", $masked_file
-                    )
-                  ];
-            }
-            # Otherwise, add a new header row with the sub_id and the determined description above
-            else {
-                push @headers, [ $sub_id, $desc ];
-            }
-        }
-
-        foreach my $stat ( @{ $custom->{summary_stats} || [] } ) {
-            my $sub_id = sprintf( "%s_%s", $custom->{short_name}, $stat );
-            if ( grep { /^$sub_id$/ } @flatten_header ) {
-                my $pos = $pos{$sub_id} / 2;
-                $headers[$pos][1] .= ",$masked_file";
-            }
-            else {
-                push @headers,
-                  [ $sub_id,
-                    sprintf( "%s data from %s", $stat, $masked_file ) ];
-            }
-        }
+    if (grep { /^$custom->{short_name}$/ }  @flatten_header){
+      my $pos = ($pos{$custom->{short_name}} || 0) / 2;
+      $headers[$pos][1] .= ",$masked_file";
+    } else {
+      push @headers, [
+        $custom->{short_name},
+        sprintf("%s", $masked_file)
+      ];
     }
 
-    return \@headers;
+    foreach my $field(@{$custom->{fields} || []}) {
+      my $sub_id = sprintf("%s_%s", $custom->{short_name}, $field);
+
+      # Determine the description to use:
+      # - If the custom annotation already contains a proper description for this field,
+      #   use that description
+      # - Otherwise, use a default string that says "<field> field from <masked_file>"
+      my $desc =
+        exists $custom->{field_descriptions}->{$field}
+        ? $custom->{field_descriptions}->{$field}
+        : sprintf( "%s field from %s", $field, $masked_file );
+
+      # Check if a header row with this sub_id already exists in the flattened header
+      if (grep { /^$sub_id$/ } @flatten_header){
+        my $pos = $pos{$sub_id} / 2;
+        $headers[$pos][1] .= ",$masked_file";
+      } elsif ($field eq "PC") {
+        push @headers, [
+          $sub_id,
+          sprintf($custom->{overlap_def} . " from %s", $masked_file)
+        ];
+      # Otherwise, add a new header row with the sub_id and the determined description above
+      } else {
+        push @headers, [ $sub_id, $desc ];
+      }
+    }
+
+    foreach my $stat(@{$custom->{summary_stats} || []}) {
+      my $sub_id = sprintf("%s_%s", $custom->{short_name}, $stat);
+      if (grep { /^$sub_id$/ } @flatten_header){
+        my $pos = $pos{$sub_id} / 2;
+        $headers[$pos][1] .= ",$masked_file";
+      } else {
+        push @headers, [
+          $sub_id,
+          sprintf("%s data from %s", $stat, $masked_file)
+        ];
+      }
+    }
+  }
+
+  return \@headers;
 }
 
 =head2 flag_fields
@@ -2657,26 +2421,29 @@ sub get_custom_headers {
 =cut
 
 sub flag_fields {
-    my $self = shift;
-
-    # get all fields
-    my @tmp = (
-        map    { @{ $_->{fields} } }
-          map  { $_->[0] }
-          grep { ref( $_->[1] ) eq 'ARRAY' ? scalar @{ $_->[1] } : $_->[1] }
-          map  { [ $_, $self->param( $_->{flag} ) ] }
-          @Bio::EnsEMBL::VEP::Constants::FLAG_FIELDS
-    );
-
-    # uniquify, retaining order
-    my ( %seen, @return );
-    for (@tmp) {
-        push @return, $_ unless $seen{$_};
-        $seen{$_} = 1;
+  my $self = shift;
+  
+  # get all fields
+  my @tmp = (
+    map {@{$_->{fields}}}
+    map {$_->[0]}
+    grep {
+      ref($_->[1]) eq 'ARRAY' ? scalar @{$_->[1]} : $_->[1]
     }
+    map {[$_, $self->param($_->{flag})]}
+    @Bio::EnsEMBL::VEP::Constants::FLAG_FIELDS
+  );
 
-    return \@return;
+  # uniquify, retaining order
+  my (%seen, @return);
+  for(@tmp) {
+    push @return, $_ unless $seen{$_};
+    $seen{$_} = 1;
+  }
+
+  return \@return;
 }
+
 
 =head2 get_full_command
 
@@ -2690,9 +2457,9 @@ sub flag_fields {
 =cut
 
 sub get_full_command {
-    my $self = shift;
+  my $self = shift;
 
-    return $self->{_config}->{_params}->{full_command} || "";
+  return $self->{_config}->{_params}->{full_command} || "";
 }
 
 1;
