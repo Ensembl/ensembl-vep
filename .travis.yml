@@ -66,8 +66,6 @@ jobs:
       script: ./travisci/trigger-dependent-build.sh
       perl: "5.22"
 
-services: mysql
-
 notifications:
   email:
     on_success: always
