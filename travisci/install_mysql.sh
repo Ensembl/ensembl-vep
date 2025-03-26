@@ -12,7 +12,7 @@ sudo debconf-set-selections <<< 'mysql-apt-config mysql-apt-config/unsupported-p
 wget http://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
 sudo dpkg -i mysql-apt-config_0.8.12-1_all.deb
 # apt-get update
-sudo apt-get install -y mysql-server mysql-client mysql-client-core
+sudo apt-get install -y mysql-server mysql-client
 mysql -e 'SET GLOBAL local_infile=1;'
 
 rm mysql-apt-config_0.8.12-1_all.deb
