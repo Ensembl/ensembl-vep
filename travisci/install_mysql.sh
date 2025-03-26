@@ -13,6 +13,7 @@ wget http://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
 sudo dpkg -i mysql-apt-config_0.8.12-1_all.deb
 # apt-get update
 sudo apt-get install -y mysql-server mysql-client
+sudo systemctl start mysql
 mysql -e 'SET GLOBAL local_infile=1;'
 
 rm mysql-apt-config_0.8.12-1_all.deb
