@@ -1,5 +1,12 @@
-export DEBIAN_FRONTEND=noninteractive
+# uninstall pre-installed mysql 8.0
+sudo sudo apt-get remove --purge mysql*
+sudo apt-get autoremove
+sudo apt-get autoclean
+sudo rm -rf /var/lib/mysql
+sudo rm -rf /etc/mysql
 
+# install mysql 5.7
+export DEBIAN_FRONTEND=noninteractive
 sudo debconf-set-selections <<< 'mysql-apt-config mysql-apt-config/repo-codename select focal'
 sudo debconf-set-selections <<< 'mysql-apt-config mysql-apt-config/repo-distro select ubuntu'
 sudo debconf-set-selections <<< 'mysql-apt-config mysql-apt-config/repo-url string http://repo.mysql.com/apt/'
@@ -11,7 +18,6 @@ sudo debconf-set-selections <<< 'mysql-apt-config mysql-apt-config/unsupported-p
 
 wget http://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
 sudo dpkg -i mysql-apt-config_0.8.12-1_all.deb
-# apt-get update
 sudo apt-get install -y mysql-server mysql-client
 sudo systemctl start mysql
 mysql -e 'SET GLOBAL local_infile=1;'
