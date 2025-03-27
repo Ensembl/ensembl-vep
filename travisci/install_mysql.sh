@@ -43,6 +43,8 @@ sudo apt-cache policy mysql-server
 sudo apt-get install -y mysql-server=5.7* mysql-client=5.7*
 
 # start and configure mysql server
+sudo apt-get install -y debconf-utils
+sudo debconf-get-selections | grep mysql
 sudo systemctl start mysql
 sudo mysql -u root -e "CREATE USER 'travis'@'127.0.0.1' IDENTIFIED BY ''; FLUSH PRIVILEGES;"
 mysql -e 'SET GLOBAL local_infile=1;'
