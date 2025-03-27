@@ -19,6 +19,7 @@ sudo debconf-set-selections <<< 'mysql-apt-config mysql-apt-config/unsupported-p
 wget http://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
 sudo dpkg -i mysql-apt-config_0.8.12-1_all.deb
 sudo apt-get update
+sudo apt-cache policy mysql-server
 sudo apt-get install -y mysql-server=5.7* mysql-client=5.7*
 sudo systemctl start mysql
 sudo mysql -u root -e "CREATE USER 'travis'@'127.0.0.1' IDENTIFIED BY ''; FLUSH PRIVILEGES;"
