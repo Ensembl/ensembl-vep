@@ -19,10 +19,10 @@ sudo debconf-set-selections <<< 'mysql-apt-config mysql-apt-config/select-tools 
 sudo debconf-set-selections <<< 'mysql-apt-config mysql-apt-config/unsupported-platform select abort'
 
 # set root user password
-sudo debconf-set-selections <<< "mysql-community-server mysql-community-server/root-pass password ''"
-sudo debconf-set-selections <<< "mysql-community-server mysql-community-server/re-root-pass password ''"
-sudo debconf-set-selections <<< "mysql-server-5.7 mysql-server/root_password password ''"
-sudo debconf-set-selections <<< "mysql-server-5.7 mysql-server/root_password_again password ''"
+sudo debconf-set-selections <<< "mysql-community-server mysql-community-server/root-pass password "
+sudo debconf-set-selections <<< "mysql-community-server mysql-community-server/re-root-pass password "
+sudo debconf-set-selections <<< "mysql-server-5.7 mysql-server/root_password password "
+sudo debconf-set-selections <<< "mysql-server-5.7 mysql-server/root_password_again password "
 
 # download and install mysql-apt-conf
 wget http://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
@@ -46,7 +46,7 @@ sudo apt-get install -y mysql-server=5.7* mysql-client=5.7*
 sudo apt-get install -y debconf-utils
 sudo debconf-get-selections | grep mysql
 sudo systemctl start mysql
-sudo mysql -u root -p'' -e "CREATE USER 'travis'@'127.0.0.1' IDENTIFIED BY ''; FLUSH PRIVILEGES;"
+sudo mysql -u root -e "CREATE USER 'travis'@'127.0.0.1' IDENTIFIED BY ''; FLUSH PRIVILEGES;"
 # mysql -e 'SET GLOBAL local_infile=1;'
 
 ## clean up
