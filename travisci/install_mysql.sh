@@ -18,6 +18,10 @@ sudo debconf-set-selections <<< 'mysql-apt-config mysql-apt-config/select-server
 sudo debconf-set-selections <<< 'mysql-apt-config mysql-apt-config/select-tools select Disabled'
 sudo debconf-set-selections <<< 'mysql-apt-config mysql-apt-config/unsupported-platform select abort'
 
+# set root user password
+sudo debconf-set-selections <<< "mysql-community-server mysql-community-server/root-pass password ''"
+sudo debconf-set-selections <<< "mysql-community-server mysql-community-server/re-root-pass password ''"
+
 # download and install mysql-apt-conf
 wget http://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
 sudo dpkg -i mysql-apt-config_0.8.12-1_all.deb
