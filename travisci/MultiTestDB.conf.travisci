@@ -1,6 +1,6 @@
 {
   'port'   => '3306',
   'driver' => 'mysql',
-  'user'   => 'root',
+  'user'   => 'travis',
   'host'   => '127.0.0.1',
 }

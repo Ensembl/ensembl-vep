@@ -19,9 +19,9 @@ sudo debconf-set-selections <<< 'mysql-apt-config mysql-apt-config/unsupported-p
 wget http://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
 sudo dpkg -i mysql-apt-config_0.8.12-1_all.deb
 sudo apt-get update
-sudo apt-get install -y mysql-server mysql-client
+sudo apt-get install -y mysql-server=5.7* mysql-client=5.7*
 sudo systemctl start mysql
-sudo mysql -u root -e "UPDATE mysql.user SET password='' WHERE user='root';FLUSH PRIVILEGES;"
+sudo mysql -u root -e "CREATE USER 'travis'@'127.0.0.1' IDENTIFIED BY ''; FLUSH PRIVILEGES;"
 mysql -e 'SET GLOBAL local_infile=1;'
 
 rm mysql-apt-config_0.8.12-1_all.deb
