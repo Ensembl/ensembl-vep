@@ -41,7 +41,6 @@ before_install:
   - cd $DEPS
   - $CWD/travisci/get_dependencies.sh
   - cd $CWD
-
   - $CWD/travisci/install_mysql.sh
 
 install:
@@ -56,6 +55,7 @@ install:
   - $CWD/travisci/build_c.sh
   - cd $CWD
   - $CWD/travisci/install_dependencies.sh
+  - cat /home/travis/.cpanm/work/1743118328.12436/build.log
   - cp travisci/MultiTestDB.conf.travisci  t/MultiTestDB.conf
 
 script: "./travisci/harness.sh"
