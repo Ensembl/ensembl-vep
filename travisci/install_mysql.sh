@@ -24,9 +24,9 @@ sudo dpkg -i mysql-apt-config_0.8.12-1_all.deb
 
 # install some dependencies that are not avaialable on focal repo
 wget http://archive.ubuntu.com/ubuntu/pool/main/liba/libaio/libaio1_0.3.110-5_amd64.deb
-dpkg -i libaio1_0.3.110-5_amd64.deb
+sudo dpkg -i libaio1_0.3.110-5_amd64.deb
 wget http://archive.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2_amd64.deb
-dpkg -i libtinfo5_6.3-2_amd64.deb
+sudo dpkg -i libtinfo5_6.3-2_amd64.deb
 
 # install public key otherwise will complain about mysql repo
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys B7B3B788A8D3785C
