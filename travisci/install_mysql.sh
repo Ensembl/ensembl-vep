@@ -21,6 +21,8 @@ sudo debconf-set-selections <<< 'mysql-apt-config mysql-apt-config/unsupported-p
 # set root user password
 sudo debconf-set-selections <<< "mysql-community-server mysql-community-server/root-pass password ''"
 sudo debconf-set-selections <<< "mysql-community-server mysql-community-server/re-root-pass password ''"
+sudo debconf-set-selections <<< "mysql-server-5.7 mysql-server/root_password password ''"
+sudo debconf-set-selections <<< "mysql-server-5.7 mysql-server/root_password_again password ''"
 
 # download and install mysql-apt-conf
 wget http://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
