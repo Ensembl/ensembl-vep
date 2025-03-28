@@ -47,9 +47,13 @@ sudo apt-get install -y mysql-server=5.7* mysql-client=5.7* libmysqlclient-dev
 sudo apt-get install -y debconf-utils
 sudo debconf-get-selections | grep mysql
 sudo systemctl start mysql
-sudo mysql -u root -e "CREATE USER 'travis'@'127.0.0.1' IDENTIFIED BY ''; FLUSH PRIVILEGES;"
+sudo mysql -u root <<END
+    CREATE USER 'travis'@'127.0.0.1' IDENTIFIED BY '';
+    GRANT ALL PRIVILEGES ON *.* TO 'travis'@'127.0.0.1';
+    FLUSH PRIVILEGES;
+END
 sudo mysql -u root -e "SELECT * FROM mysql.user;"
-mysql -e 'SET GLOBAL local_infile=1;'
+mysql -u travis -e 'SET GLOBAL local_infile=1;'
 
 ## clean up
 
