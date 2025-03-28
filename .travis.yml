@@ -22,7 +22,6 @@ addons:
     packages:
       - unzip
       - apache2
-      - libmysqlclient-dev
       - libpng-dev
       - libssl-dev
       - openssl

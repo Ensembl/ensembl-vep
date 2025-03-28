@@ -40,7 +40,7 @@ sudo apt-get update
 
 # install mysql 5.7
 sudo apt-cache policy mysql-server
-sudo apt-get install -y mysql-server=5.7* mysql-client=5.7*
+sudo apt-get install -y mysql-server=5.7* mysql-client=5.7* libmysqlclient-dev
 
 # start and configure mysql server
 sudo apt-get install -y debconf-utils
