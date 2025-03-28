@@ -1,4 +1,5 @@
 ## uninstall pre-installed mysql 8.0
+
 sudo sudo apt-get remove --purge mysql*
 sudo apt-get autoremove
 sudo apt-get autoclean
@@ -28,7 +29,7 @@ sudo debconf-set-selections <<< "mysql-server-5.7 mysql-server/root_password_aga
 wget http://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
 sudo dpkg -i mysql-apt-config_0.8.12-1_all.deb
 
-# install some dependencies that are not avaialable on focal repo - NOT NEEDED CURRENTLY
+# (NOT NEEDED CURRENTLY) install some dependencies that are not avaialable on focal repo
 # wget http://archive.ubuntu.com/ubuntu/pool/main/liba/libaio/libaio1_0.3.110-5_amd64.deb
 # sudo dpkg -i libaio1_0.3.110-5_amd64.deb
 # wget http://archive.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2_amd64.deb
@@ -50,6 +51,7 @@ sudo mysql -u root -e "CREATE USER 'travis'@'127.0.0.1' IDENTIFIED BY ''; FLUSH 
 mysql -e 'SET GLOBAL local_infile=1;'
 
 ## clean up
+
 rm mysql-apt-config_0.8.12-1_all.deb
 # rm libaio1_0.3.110-5_amd64.deb
 # rm libtinfo5_6.3-2_amd64.deb

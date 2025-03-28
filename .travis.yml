@@ -54,7 +54,6 @@ install:
   - $CWD/travisci/build_c.sh
   - cd $CWD
   - $CWD/travisci/install_dependencies.sh
-  - cat /home/travis/.cpanm/work/*/build.log
   - cp travisci/MultiTestDB.conf.travisci  t/MultiTestDB.conf
 
 script: "./travisci/harness.sh"
