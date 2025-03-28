@@ -52,8 +52,6 @@ sudo mysql -u root <<END
     GRANT ALL PRIVILEGES ON *.* TO 'travis'@'127.0.0.1';
     FLUSH PRIVILEGES;
 END
-sudo mysql -u root -e "SELECT * FROM mysql.user;"
-mysql -u travis -e 'SET GLOBAL local_infile=1;'
 
 ## clean up
 
