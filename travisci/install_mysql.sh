@@ -46,7 +46,7 @@ sudo apt-get install -y mysql-server=5.7* mysql-client=5.7* libmysqlclient-dev
 # start and configure mysql server
 sudo apt-get install -y debconf-utils
 sudo debconf-get-selections | grep mysql
-systemctl start mysql
+sudo systemctl start mysql
 mysql -e 'SET GLOBAL local_infile=1;'
 
 ## clean up
