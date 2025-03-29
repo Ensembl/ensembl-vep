@@ -29,7 +29,7 @@
 The VEP package requires:
 
   * **gcc**, **g++** and **make**
-  * **Perl** (>=5.10 recommended, tested on 5.10, 5.14, 5.18, 5.22, 5.26)
+  * **Perl** (>=5.22 recommended, tested on 5.22, 5.26, 5.30, 5.34, 5.38)
   * Perl libraries [Archive::Zip](https://metacpan.org/pod/Archive::Zip) and [DBI](https://metacpan.org/pod/DBI)
 
 The remaining dependencies can be installed using the included [INSTALL.pl](http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html#installer) script. Basic instructions:
