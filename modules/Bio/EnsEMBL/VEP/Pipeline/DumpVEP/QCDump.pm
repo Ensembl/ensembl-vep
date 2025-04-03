@@ -141,6 +141,7 @@ sub qc {
 
   # clean up
   rmtree($qc_dir);
+  rmtree($dump_dir.'/vep');
 
   return \@report_files;
 }
