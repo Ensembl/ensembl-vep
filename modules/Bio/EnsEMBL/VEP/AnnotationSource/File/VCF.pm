@@ -115,10 +115,6 @@ sub new {
 
   $self->fields($hashref->{fields}) if $hashref->{fields};      ## report INFO & FILTER fields
 
-  # Extract INFO descriptions from the custom file header
-  my $field_descriptions = $self->_extract_info_descriptions();
-  $hashref->{field_descriptions} = $field_descriptions;
-
   return $self;
 }
 
@@ -157,48 +153,6 @@ sub parser {
   return $self->{parser} ||= Bio::EnsEMBL::IO::Parser::VCF4Tabix->open($self->file);
 }
 
-=head2 _extract_info_descriptions
-
-  Arg       : None
-  Example   : my $field_descriptions = $self->_extract_info_descriptions();
-  Description: Extracts and returns a hash reference mapping INFO field IDs to their
-              description values parsed from the header of the custom VCF file.
-              This method retrieves the INFO metadata via the parser's
-              get_metadata_by_pragma('INFO') call, then loops through each metadata
-              entry. For each entry that has both an ID and a Description, it stores the
-              description in a hash with the INFO field ID as the key.
-  Returntype: Hash reference
-  Exceptions: None
-  Status    : Stable
-
-=cut
-
-# Subroutine to extract INFO field descriptions from VCFs supplied to --custom
-sub _extract_info_descriptions {
-    my $self = shift;
-
-    # Retrieve the parser (which has already read the header lines)
-    my $parser = $self->parser;
-
-    # Get all metadata for INFO fields
-    my $info_metadata = $parser->get_metadata_by_pragma('INFO');
-
-    my %field_descriptions;
-
-    # If metadata exists, iterate over it
-    if ( $info_metadata && ref($info_metadata) eq 'ARRAY' ) {
-        foreach my $entry (@$info_metadata) {
-
-    # If both an ID and a Description are available, store them, using ID as key
-            if ( defined $entry->{ID} && defined $entry->{Description} ) {
-                $field_descriptions{ $entry->{ID} } = $entry->{Description};
-            }
-        }
-    }
-
-    # Return the hash reference
-    return \%field_descriptions;
-}
 
 =head2 _create_records
  
