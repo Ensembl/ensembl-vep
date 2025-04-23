@@ -95,6 +95,8 @@ use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
 use Bio::EnsEMBL::VEP::Utils qw(convert_arrayref get_version_data);
 use Bio::EnsEMBL::VEP::Constants;
 
+use Bio::EnsEMBL::IO::Parser::VCF4Tabix;
+
 my @VCF_COLS = qw(
   Allele
   Consequence
@@ -166,6 +168,31 @@ sub new {
 
 sub headers {
   my $self = shift;
+
+  # load real INFO descriptions
+  foreach my $ci (@{ $self->header_info->{custom_info} || [] }) {
+
+    # only tabix-parse vcf/vcf.gz/.vcf.bgz for ## header fields
+    next unless $ci->{file} =~ /\.vcf(?:\.(?:gz|bgz))?$/i;
+
+    # use tabix parser to grab header (##) rows
+    my $p = Bio::EnsEMBL::IO::Parser::VCF4Tabix->open($ci->{file});
+    my $meta = $p->get_metadata_by_pragma('INFO');
+
+    my %desc;
+    # check that the VCF contains ## rows
+    if ($meta && ref $meta eq 'ARRAY') {
+
+      # loop over meta entries, keep only if 'ID' and 'Description' exist
+      for my $e (@$meta) {
+        next unless defined $e->{ID} && defined $e->{Description};
+        $desc{ $e->{ID} } = $e->{Description};
+      }
+    }
+
+    # store in custom_info obj
+    $ci->{field_descriptions} = \%desc;
+  }
 
   my $info = $self->header_info;
   my $field_descs = \%Bio::EnsEMBL::VEP::Constants::FIELD_DESCRIPTIONS;
