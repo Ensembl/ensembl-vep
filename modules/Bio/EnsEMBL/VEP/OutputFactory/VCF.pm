@@ -174,6 +174,7 @@ sub headers {
 
     # only tabix-parse vcf/vcf.gz/.vcf.bgz for ## header fields
     next unless $ci->{file} =~ /\.vcf(?:\.(?:gz|bgz))?$/i;
+    next unless -e $ci->{file}; # check if file exists
     next if exists $ci->{field_descriptions};
 
     my %desc;
