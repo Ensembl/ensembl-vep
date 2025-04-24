@@ -171,25 +171,25 @@ sub headers {
 
   # load real INFO descriptions
   foreach my $ci (@{ $self->header_info->{custom_info} || [] }) {
-
+    
     # only tabix-parse vcf/vcf.gz/.vcf.bgz for ## header fields
     next unless $ci->{file} =~ /\.vcf(?:\.(?:gz|bgz))?$/i;
-
-    # use tabix parser to grab header (##) rows
-    my $p = Bio::EnsEMBL::IO::Parser::VCF4Tabix->open($ci->{file});
-    my $meta = $p->get_metadata_by_pragma('INFO');
+    next if exists $ci->{field_descriptions};
 
     my %desc;
-    # check that the VCF contains ## rows
-    if ($meta && ref $meta eq 'ARRAY') {
+    eval {
+
+      # use tabix parser to grab header (##) rows
+      my $p = Bio::EnsEMBL::IO::Parser::VCF4Tabix->open($ci->{file});
+      my $meta = $p->get_metadata_by_pragma('INFO');
 
       # loop over meta entries, keep only if 'ID' and 'Description' exist
-      for my $e (@$meta) {
+      for my $e (@{$meta||[]}) {
         next unless defined $e->{ID} && defined $e->{Description};
         $desc{ $e->{ID} } = $e->{Description};
       }
-    }
-
+    };
+    
     # store in custom_info obj
     $ci->{field_descriptions} = \%desc;
   }
