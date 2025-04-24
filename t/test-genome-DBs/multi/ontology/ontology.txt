@@ -1,6 +1,0 @@
-1	GO	biological_process	\N
-2	GO	cellular_component	\N
-3	GO	molecular_function	\N
-5	SO	sequence	\N
-6	EFO	BrendaTissueOBO	\N
-7	EFO	EFO	\N

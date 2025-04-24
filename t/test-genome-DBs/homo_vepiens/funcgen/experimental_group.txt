@@ -1,4 +1,0 @@
-2	ENCODE	encode	The ENCODE Project	http://encodeproject.org	1
-3	Roadmap Epigenomics	roadmap_epigenomics	The NIH Roadmap Epigenomics Mapping Consortium	http://www.roadmapepigenomics.org/	1
-4	Publication	publication	Manual Curation from a Publication	\N	0
-5	BLUEPRINT	blueprint	A BLUEPRINT of Haematopoietic Epigenomes	http://www.blueprint-epigenome.eu/	1

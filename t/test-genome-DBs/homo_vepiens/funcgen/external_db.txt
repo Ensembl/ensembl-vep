@@ -1,8 +1,0 @@
-34	homo_sapiens_core_Transcript	60_37e	KNOWNXREF	1	5	EnsemblTranscript	MISC	\N	\N	\N
-49	homo_sapiens_core_Transcript	67_37	KNOWNXREF	1	5	EnsemblTranscript	MISC	\N	\N	\N
-62	homo_sapiens_core_Transcript	74_37	KNOWNXREF	1	5	EnsemblTranscript	MISC	\N	\N	\N
-64	homo_sapiens_core_Genome	76_38	KNOWNXREF	1	5	EnsemblGenome	MISC	\N	\N	\N
-65	homo_sapiens_core_Transcript	76_38	KNOWNXREF	1	5	EnsemblTranscript	MISC	\N	\N	\N
-66	homo_sapiens_core_Gene	76_38	KNOWNXREF	1	5	EnsemblGene	MISC	\N	\N	\N
-67	homo_sapiens_core_Transcript	84_38	KNOWNXREF	1	5	EnsemblTranscript	MISC	\N	\N	\N
-68	homo_sapiens_core_Gene	84_38	KNOWNXREF	1	5	EnsemblGene	MISC	\N	\N	\N

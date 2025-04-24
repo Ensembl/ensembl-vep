@@ -1,3 +1,0 @@
-64	protein_coding	gene	core,otherfeatures,rnaseq,vega,presite	\N	\N	coding	SO:0001217	\N
-65	protein_coding	transcript	core,otherfeatures,rnaseq,vega,presite	\N	\N	coding	SO:0000234	\N
-87	tRNA	gene	core,otherfeatures	\N	snoncoding		\N	\N

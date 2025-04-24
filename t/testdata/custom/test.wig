@@ -1,7 +1,0 @@
-variableStep chrom=chr21 span=1
-25585733 10
-25587701 20
-25587758 30
-fixedStep chrom=chr21 start=25592820 step=10 span=5
-11
-21

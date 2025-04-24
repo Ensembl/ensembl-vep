@@ -1,3 +1,0 @@
-587	179284	71	FANTOM	external	FANTOM predictions	FANTOM predictions
-588	45	19	VISTA enhancer set	external	Experimentally validated enhancers	VISTA Enhancers
-608	179077	67	TarBase miRNA	mirna_target	TarBase miRNA target predictions	TarBase miRNA target predictions
