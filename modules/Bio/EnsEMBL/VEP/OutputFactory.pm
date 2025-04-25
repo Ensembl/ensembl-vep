@@ -883,8 +883,15 @@ sub VariationFeature_to_output_hash {
   my $self = shift;
   my $vf = shift;
 
+  my $var_name = sprintf(
+    '%s_%i_%s',
+    $vf->{original_chr} || $vf->{chr},
+    $vf->{start},
+    $vf->{allele_string} || $vf->{class_SO_term}
+  );
+
   my $hash = {
-    Uploaded_variation  => $vf->variation_name ne '.' ? $vf->variation_name : ($vf->{original_chr} || $vf->{chr}).'_'.$vf->{start}.'_'.($vf->{allele_string} || $vf->{class_SO_term}),
+    Uploaded_variation => ($vf->variation_name ne "." && $vf->variation_name ne $var_name) ? $vf->variation_name :  ($vf->{original_chr} || $vf->{chr}).'_'.$vf->{start}.'_'.($vf->{original_allele_string} || $vf->{allele_string} || $vf->{class_SO_term}),
     Location            => ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start}, $vf->{end}),
   };
 
@@ -945,7 +952,8 @@ sub VariationFeature_to_output_hash {
   }
 
   # minimised?
-  $hash->{MINIMISED} = 1 if $vf->{minimised};
+  my $minimal_flag = $self->{_config}->{_params}->{minimal} if defined($self->{_config}->{_params}->{minimal}) && $self->{_config}->{_params}->{minimal}==1;
+  $hash->{MINIMISED} = 1 if $vf->{minimised} && defined($minimal_flag);
   
   
   if(ref($vf) eq 'Bio::EnsEMBL::Variation::VariationFeature') {
@@ -1301,7 +1309,8 @@ sub VariationFeatureOverlapAllele_to_output_hash {
 
   # reference allele
   $hash->{REF_ALLELE} = $vf->ref_allele_string if $self->{show_ref_allele};
- 
+
+  # Capture uploaded allele
   $hash->{UPLOADED_ALLELE} = ($vf->{original_allele_string} || $vf->{allele_string} || $vf->{class_SO_term} || "" ) if $self->param('uploaded_allele');
 
   # picked?
@@ -2198,7 +2207,8 @@ sub rejoin_variants_in_InputBuffer {
   foreach my $vf(@{$buffer->buffer}) {
 
     # reset original one
-    if(defined($vf->{original_allele_string})) {
+    # check $vf->{first} to get first $vf in split_variants
+    if(defined($vf->{first})) {
 
       # do consequence stuff
       $self->get_all_output_hashes_by_VariationFeature($vf);

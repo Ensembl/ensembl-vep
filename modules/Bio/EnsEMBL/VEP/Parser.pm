@@ -831,13 +831,28 @@ sub post_process_vfs {
     $vf->seq_region_start($vf->{start});
     $vf->seq_region_end($vf->{end});
 
-    # Checks if the allele string is insertion or/and deletion
+    # Checks if the allele string is non-minimised insertion or/and deletion
     my $is_sv = ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature';
     if(!$is_sv && defined($vf->{allele_string}) && $vf->{allele_string} =~ /\//){
-      my $is_indel = 0;
-      my ($ref_allele_string,$alt_allele_string) = split(/\//, $vf->{allele_string});
-      $is_indel = 1 unless length($ref_allele_string) == length($alt_allele_string) or $vf->{allele_string} =~ /-/;
-      $vf = ${$self->minimise_alleles([$vf])}[0] if $is_indel;
+      my $is_non_minimised_indel = 0;
+      # For VCF input, the allele_string is trimmed to remove anchor base, so we capture original allele
+      
+      my $original_allele_string = ($vf->{nontrimmed_allele_string} || $vf->{allele_string});
+      my @alleles = split(/\//, $original_allele_string);
+      my $ref_allele_string = shift @alleles;
+      my $alt_allele_count;
+
+      foreach my $alt(@alleles) {
+        if ($original_allele_string =~ /-/)
+        {
+          last;
+        }
+        elsif (length($ref_allele_string) != length($alt)) {
+          $is_non_minimised_indel = 1;
+          last;
+        }
+      }
+      $vf = ${$self->minimise_alleles([$vf])}[0] if $is_non_minimised_indel;
     }
   }
   return $vfs;
@@ -930,7 +945,15 @@ sub minimise_alleles {
 
     # skip VFs with more than one alt
     # they get taken care of later by split_variants/rejoin_variants
-    if(!$vf->{allele_string} || $vf->{allele_string} =~ /.+\/.+\/.+/ || $vf->{allele_string} !~ /.+\/.+/) {
+    if(!$vf->{allele_string} || $vf->{allele_string} !~ /.+\/.+/) {
+      push @return, $vf;
+    }
+
+    elsif($vf->{allele_string} =~ /.+\/.+\/.+/)
+    {
+      # Updating a flag to minimise multi-allelic variants in split_variants/rejoin_variants
+      $vf->{minimised} = 1;
+      $vf->{original_allele_string} = $vf->{nontrimmed_allele_string} || $vf->{allele_string};
       push @return, $vf;
     }
 
@@ -956,7 +979,7 @@ sub minimise_alleles {
         $new_vf->{end}                    = $end;
         $new_vf->{seq_region_start}       = $start;
         $new_vf->{seq_region_end}         = $end;
-        $new_vf->{original_allele_string} = $vf->{allele_string};
+        $new_vf->{original_allele_string} = $vf->{nontrimmed_allele_string} || $vf->{allele_string};
         $new_vf->{original_start}         = $vf->{start};
         $new_vf->{original_end}           = $vf->{end};
         $new_vf->{minimised}              = 1;
