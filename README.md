@@ -13,6 +13,7 @@
 * [Installation and requirements](#install)
 * [VEP](#vep)
   * [Usage](#vepusage)
+  * [Known Bugs](#knownbugs)
 * [Haplosaurus](#haplo)
   * [Usage](#haplousage)
   * [Output](#haplooutput)
@@ -53,9 +54,11 @@ The following modules are optional but most users will benefit from installing t
  
 #### Docker
 A docker image for VEP is available from [DockerHub](https://hub.docker.com/r/ensemblorg/ensembl-vep).
-
 See [documentation](http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html#docker) for the Docker installation instructions.
- 
+
+#### Conda
+Conda Ensembl VEP - the Ensembl VEP team did not produce the Conda install and we do not maintain it. You are welcome to use this package, but please be aware that we are not able to offer support for any issues related to the Conda installation you may encounter while using it.
+
 ---
 
 <a name="vep"></a>
@@ -72,6 +75,27 @@ See [documentation](http://www.ensembl.org/info/docs/tools/vep/script/vep_option
 > Please report any bugs or issues by [contacting Ensembl](http://www.ensembl.org/info/about/contact/index.html) or creating a [GitHub issue](https://github.com/Ensembl/ensembl-vep/issues)
 
 ---
+
+<a name="knownbugs"></a>
+### Known Bugs
+
+Below are a list of known Ensembl VEP bugs, where possible, workarounds have been provided. While we prefer to fix all bugs, some involve code that is fundamental, and any changes have potential far reaching impacts and require extensive testing. These can take considerable time and effort to resolve, so the list below details the issues we are aware of but may not be able to resolve for some time.
+
+* Using the options `–hgvs` and `–no_stats` with multi allelic variants may result in incorrect CDS and protein positions, or Ensembl VEP may crash. The fix for this is complex and we don’t currently have a timeline for it, but there are workarounds:
+  * Separating the multiallelic variants on to individual input lines should result in the correct annotation.
+  * Don’t combine the `–hgvs` and `–no_stats` options.
+
+* Variants overlapping exon / intron boundaries can occasionally be annotated with incorrect consequences and the HGVS may not be fully correct. We currently do not have an effective workaround for such cases and we will continue to investigate a fix.
+
+* Variants overlapping incomplete terminal codons - when annotating these, Ensembl VEP may produce unreliable variant consequences. 
+   * These transcripts have been annotated from protein fragments and thus may have incomplete open reading frames. We currently do not have a foolproof method to annotate variants overlapping these features, so the recommended workaround is to use an alternative, more complete transcript, where possible. 
+
+* Minor Allele Frequecy (MAF) filtering bug. Using the `--freq_freq`, `--freq_gt_lt`, and `--freq_filter` to filter the output of Ensembl VEP can lead to some variants being incorrectly excluded or included, depending on the parameters used with the options. This only affecte insertions / deletions and is caused by an allele matching issue. We are investigating a potenital fix, but it will take time to fully assess and implement.
+   * In the meantime, the simplest workaround is to not filter while running Ensembl VEP and instead use the [filter_vep script](https://www.ensembl.org/info/docs/tools/vep/script/vep_filter.html) to filter your output files. In almost all circumstances this is the better approach as you will retain marginal cases in your unfiltered file that may be relevant.
+   * Please note that this bug also impacts the MAF filtering options on the web version of Ensembl VEP.
+
+---
+
 <a name="haplo"></a>
 ## Haplosaurus
 `haplo` is a local tool implementation of the same functionality that powers the [Ensembl transcript haplotypes view](http://www.ensembl.org/Homo_sapiens/Transcript/Haplotypes?t=ENST00000304748). It takes phased genotypes from a VCF and constructs a pair of haplotype sequences for each overlapped transcript; these sequences are also translated into predicted protein haplotype sequences. Each variant haplotype sequence is aligned and compared to the reference, and an HGVS-like name is constructed representing its differences to the reference.
