@@ -93,7 +93,7 @@ Below are a list of known Ensembl VEP bugs, where possible, workarounds have bee
 * Minor Allele Frequecy (MAF) filtering bug. Using the `--freq_freq`, `--freq_gt_lt`, and `--freq_filter` to filter the output of Ensembl VEP can lead to some variants being incorrectly excluded or included, depending on the parameters used with the options. This only affecte insertions / deletions and is caused by an allele matching issue. We are investigating a potenital fix, but it will take time to fully assess and implement.
    * In the meantime, the simplest workaround is to not filter while running Ensembl VEP and instead use the [filter_vep script](https://www.ensembl.org/info/docs/tools/vep/script/vep_filter.html) to filter your output files. In almost all circumstances this is the better approach as you will retain marginal cases in your unfiltered file that may be relevant.
    * Please note that this bug also impacts the MAF filtering options on the web version of Ensembl VEP.
-
+* Non coding transcripts do not get their allele shifted when the `--shift_3prime` is enabled. This has consequence in custom annotation feature when used with the `--exact` option enabled or any other logic that tries to match variant allele with the annotated feature.
 ---
 
 <a name="haplo"></a>
