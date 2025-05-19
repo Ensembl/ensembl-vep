@@ -1328,7 +1328,8 @@ sub VariationFeatureOverlapAllele_to_output_hash {
       $vf->{_hgvs_genomic} ||= $vf->hgvs_genomic($vf->slice, $self->{hgvsg_use_accession} ? undef : $vf->{chr});
     }
 
-    if(my $hgvsg = $vf->{_hgvs_genomic}->{$vfoa->variation_feature_seq}) {
+    my $allele_string = (split(/\//,$vf->{allele_string}))[$vfoa->allele_number];
+    if(my $hgvsg = $vf->{_hgvs_genomic}->{$allele_string}) {
       $hash->{HGVSg} = $hgvsg; 
     }
   }
