@@ -59,6 +59,9 @@ use Bio::EnsEMBL::VEP::Utils qw(get_version_data);
 
 use base qw(Bio::EnsEMBL::VEP::OutputFactory);
 
+use File::Basename;
+use Bio::EnsEMBL::IO::Parser::VCF4Tabix;
+
 
 =head2 headers
 
@@ -75,6 +78,23 @@ sub headers {
   my $self = shift;
 
   my $info = $self->header_info();
+
+  foreach my $ci (@{ $info->{custom_info} || [] }) {
+  next unless $ci->{file} =~ /\.vcf(?:\.(?:gz|bgz))?$/i;
+  next unless -e $ci->{file};
+  next if exists $ci->{field_descriptions};
+
+  my %desc;
+  eval {
+    my $p    = Bio::EnsEMBL::IO::Parser::VCF4Tabix->open($ci->{file});
+    my $meta = $p->get_metadata_by_pragma('INFO');
+    for my $e (@{$meta||[]}) {
+      next unless defined $e->{ID} && defined $e->{Description};
+      $desc{ $e->{ID} } = $e->{Description};
+    }
+  };
+    $ci->{field_descriptions} = \%desc;
+  }
   
   my @headers = (
     '## ENSEMBL VARIANT EFFECT PREDICTOR v'.$info->{vep_version},
