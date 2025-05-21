@@ -79,20 +79,29 @@ sub headers {
 
   my $info = $self->header_info();
 
-  foreach my $ci (@{ $info->{custom_info} || [] }) {
-  next unless $ci->{file} =~ /\.vcf(?:\.(?:gz|bgz))?$/i;
-  next unless -e $ci->{file};
-  next if exists $ci->{field_descriptions};
+  # load real INFO descriptions
+  foreach my $ci (@{ $self->header_info->{custom_info} || [] }) {
 
-  my %desc;
-  eval {
-    my $p    = Bio::EnsEMBL::IO::Parser::VCF4Tabix->open($ci->{file});
-    my $meta = $p->get_metadata_by_pragma('INFO');
-    for my $e (@{$meta||[]}) {
-      next unless defined $e->{ID} && defined $e->{Description};
-      $desc{ $e->{ID} } = $e->{Description};
-    }
-  };
+    # only tabix-parse vcf/vcf.gz/.vcf.bgz for ## header fields
+    next unless $ci->{file} =~ /\.vcf(?:\.(?:gz|bgz))?$/i;
+    next unless -e $ci->{file}; # check if file exists
+    next if exists $ci->{field_descriptions};
+
+    my %desc;
+    eval {
+
+      # use tabix parser to grab header (##) rows
+      my $p = Bio::EnsEMBL::IO::Parser::VCF4Tabix->open($ci->{file});
+      my $meta = $p->get_metadata_by_pragma('INFO');
+
+      # loop over meta entries, keep only if 'ID' and 'Description' exist
+      for my $e (@{$meta||[]}) {
+        next unless defined $e->{ID} && defined $e->{Description};
+        $desc{ $e->{ID} } = $e->{Description};
+      }
+    };
+
+    # store in custom_info obj
     $ci->{field_descriptions} = \%desc;
   }
   
