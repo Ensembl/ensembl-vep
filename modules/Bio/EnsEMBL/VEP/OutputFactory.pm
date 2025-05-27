@@ -2364,12 +2364,7 @@ sub get_custom_headers {
       my $pos = ($pos{$custom->{short_name}} || 0) / 2;
       $headers[$pos][1] .= ",$masked_file";
     } else {
-        my $summary_desc = sprintf(
-          "%s data from %s",
-          $custom->{short_name},
-          $masked_file
-          );
-        push @headers, [ $custom->{short_name}, $summary_desc ];
+        push @headers, [ $custom->{short_name}, $masked_file ];
     }
 
     foreach my $field(@{$custom->{fields} || []}) {
