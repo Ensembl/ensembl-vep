@@ -2375,14 +2375,27 @@ sub get_custom_headers {
       my $pos = ($pos{$custom->{short_name}} || 0) / 2;
       $headers[$pos][1] .= ",$masked_file";
     } else {
-      push @headers, [
-        $custom->{short_name},
-        sprintf("%s", $masked_file)
-      ];
+        push @headers, [ $custom->{short_name}, $masked_file ];
     }
 
     foreach my $field(@{$custom->{fields} || []}) {
       my $sub_id = sprintf("%s_%s", $custom->{short_name}, $field);
+
+      # Determine the description to use:
+      # - If the custom annotation already contains a proper description for this field,
+      #   use that description
+      # - Otherwise, use a default string that says "<field> field from <masked_file>"
+      my $base_desc = exists $custom->{field_descriptions}->{$field}
+        ? $custom->{field_descriptions}->{$field}
+        : ucfirst($field);  # fallback if even no default desc
+      
+      my $desc = sprintf(
+        "%s. %s field from %s",
+        $base_desc,
+        $field,
+        $masked_file
+      );
+
       if (grep { /^$sub_id$/ } @flatten_header){
         my $pos = $pos{$sub_id} / 2;
         $headers[$pos][1] .= ",$masked_file";
@@ -2391,11 +2404,10 @@ sub get_custom_headers {
           $sub_id,
           sprintf($custom->{overlap_def} . " from %s", $masked_file)
         ];
+      
+      # Otherwise, add a new header row with the sub_id and the determined description above
       } else {
-        push @headers, [
-          $sub_id,
-          sprintf("%s field from %s", $field, $masked_file)
-        ];
+        push @headers, [ $sub_id, $desc ];
       }
     }
 
