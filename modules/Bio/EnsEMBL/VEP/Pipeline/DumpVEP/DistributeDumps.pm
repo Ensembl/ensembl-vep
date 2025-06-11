@@ -135,6 +135,7 @@ sub DistributeWeb{
         }
       }
       $dh_collection->close();
+      $self->compute_checksums("$dir/indexed_vep_cache/");
     }
     elsif ($content =~ /^vep$/) {
       opendir (my $dh_collection, "$dir/vep") or die $!;
@@ -147,6 +148,7 @@ sub DistributeWeb{
     }
   }
   $dh->close();
+  $self->compute_checksums("$dir/web");
 }
 
 sub compute_checksums {
