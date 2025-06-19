@@ -2062,6 +2062,27 @@ is($genotype, 'dave:HOMREF', 'VariationFeature_to_output_hash - individual_zyg a
 
 delete($of->{individual_zyg});
 
+## HGVSg for multi-allelic input
+$of->{hgvs} = 1;
+$of->{hgvsg} = 1;
+
+$ib = get_annotated_buffer({
+  input_file => $test_cfg->create_input_file([
+    ['##fileformat=VCFv4.1'],
+    [qw(#CHROM POS ID REF ALT)],
+    [qw(21 25769083 . C A,T)],
+  ])
+});
+
+my $vfoas = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0]);
+
+$result = $of->VariationFeatureOverlapAllele_to_output_hash($vfoas->[0], {}, $ib->buffer->[0]);
+is($result->{HGVSg}, '21:g.25769083C>A', 'VariationFeatureOverlapAllele_to_output_hash - hgvsg for multi-allelic');
+
+$result = $of->VariationFeatureOverlapAllele_to_output_hash($vfoas->[1], {}, $ib->buffer->[0]);
+is($result->{HGVSg}, '21:g.25769083C>T', 'VariationFeatureOverlapAllele_to_output_hash - hgvsg for multi-allelic');
+
+
 # done
 done_testing();
 
