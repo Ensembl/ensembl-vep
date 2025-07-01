@@ -2070,17 +2070,18 @@ $ib = get_annotated_buffer({
   input_file => $test_cfg->create_input_file([
     ['##fileformat=VCFv4.1'],
     [qw(#CHROM POS ID REF ALT)],
-    [qw(21 25769083 . C A,T)],
-  ])
-});
+    [qw(21 25769083 . CT C,CTT)],
+  ]),
+  shift_hgvs => 1
+},1);
 
 my $vfoas = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0]);
 
 $result = $of->VariationFeatureOverlapAllele_to_output_hash($vfoas->[0], {}, $ib->buffer->[0]);
-is($result->{HGVSg}, '21:g.25769083C>A', 'VariationFeatureOverlapAllele_to_output_hash - hgvsg for multi-allelic');
+is($result->{HGVSg}, '21:g.25769085del', 'VariationFeatureOverlapAllele_to_output_hash - hgvsg for multi-allelic');
 
 $result = $of->VariationFeatureOverlapAllele_to_output_hash($vfoas->[1], {}, $ib->buffer->[0]);
-is($result->{HGVSg}, '21:g.25769083C>T', 'VariationFeatureOverlapAllele_to_output_hash - hgvsg for multi-allelic');
+is($result->{HGVSg}, '21:g.25769085dup', 'VariationFeatureOverlapAllele_to_output_hash - hgvsg for multi-allelic');
 
 
 # done
