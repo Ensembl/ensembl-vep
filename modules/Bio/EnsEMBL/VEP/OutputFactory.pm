@@ -1322,13 +1322,27 @@ sub VariationFeatureOverlapAllele_to_output_hash {
     if(!$vf->slice->adaptor && $self->{hgvsg_use_accession}) {
       my $chr_syn = $self->config->{_chromosome_synonyms}->{($vf->{chr})};
       my @new_chr_array = grep(/NC_/, keys %{$chr_syn});
-      $vf->{_hgvs_genomic} ||= $vf->hgvs_genomic($vf->slice, $new_chr_array[0]);
+
+      my %hgvs_genomic = %{ $vf->hgvs_genomic($vf->slice, $new_chr_array[0]) };
+      $vf->{_hgvs_genomic} ||= {};
+      foreach (keys %hgvs_genomic) {
+        $vf->{_hgvs_genomic}->{$_} = $hgvs_genomic{$_};
+      }
     }
     else {
-      $vf->{_hgvs_genomic} ||= $vf->hgvs_genomic($vf->slice, $self->{hgvsg_use_accession} ? undef : $vf->{chr});
+      my %hgvs_genomic = %{ $vf->hgvs_genomic($vf->slice, $self->{hgvsg_use_accession} ? undef : $vf->{chr}) };
+      $vf->{_hgvs_genomic} ||= {};
+      foreach (keys %hgvs_genomic) {
+        $vf->{_hgvs_genomic}->{$_} = $hgvs_genomic{$_};
+      }
     }
 
-    my $allele_string = (split(/\//,$vf->{allele_string}))[$vfoa->allele_number];
+    # for multi-allelic the alleles can be more than 2
+    my @all_alleles = split(/\//, $vf->{allele_string});
+    my $allele_string = scalar @all_alleles > 2 ? 
+      $all_alleles[$vfoa->allele_number] :
+      $all_alleles[1];
+
     if(my $hgvsg = $vf->{_hgvs_genomic}->{$allele_string}) {
       $hash->{HGVSg} = $hgvsg; 
     }
