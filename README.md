@@ -81,9 +81,9 @@ See [documentation](http://www.ensembl.org/info/docs/tools/vep/script/vep_option
 
 Below are a list of known Ensembl VEP bugs, where possible, workarounds have been provided. While we prefer to fix all bugs, some involve code that is fundamental, and any changes have potential far reaching impacts and require extensive testing. These can take considerable time and effort to resolve, so the list below details the issues we are aware of but may not be able to resolve for some time.
 
-* Using the options `–hgvs` and `–no_stats` with multi allelic variants may result in incorrect CDS and protein positions, or Ensembl VEP may crash. The fix for this is complex and we don’t currently have a timeline for it, but there are workarounds:
+* Using the options `–-hgvs` and `–-no_stats` with multi allelic variants may result in incorrect CDS and protein positions, or Ensembl VEP may crash. The fix for this is complex and we don’t currently have a timeline for it, but there are workarounds:
   * Separating the multiallelic variants on to individual input lines should result in the correct annotation.
-  * Don’t combine the `–hgvs` and `–no_stats` options.
+  * Don’t combine the `–-hgvs` and `-–no_stats` options.
 
 * Variants overlapping exon / intron boundaries can occasionally be annotated with incorrect consequences and the HGVS may not be fully correct. We currently do not have an effective workaround for such cases and we will continue to investigate a fix.
 
