@@ -59,4 +59,4 @@
 62	patch	patch_112_113_a.sql|schema_version	\N
 63	patch	patch_112_113_b.sql|Ensure meta_value is not null	\N
 64	patch	patch_113_114_a.sql|schema_version	\N
-65  patch   patch_114_115_a.sql|schema_version  \N
+65	patch	patch_114_115_a.sql|schema_version	\N

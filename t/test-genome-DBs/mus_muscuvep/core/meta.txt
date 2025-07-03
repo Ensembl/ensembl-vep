@@ -213,4 +213,4 @@
 1891	\N	patch	patch_112_113_a.sql|schema_version
 1892	\N	patch	patch_112_113_b.sql|Ensure meta_value is not null
 1893	\N	patch	patch_113_114_a.sql|schema_version
-1894    \N  patch   patch_114_115_a.sql|schema_version
+1894	\N	patch	patch_114_115_a.sql|schema_version
