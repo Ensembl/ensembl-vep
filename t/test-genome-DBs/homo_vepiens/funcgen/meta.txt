@@ -343,4 +343,4 @@
 789	\N	patch	patch_112_113_a.sql|schema_version
 790	\N	patch	patch_112_113_b.sql|fix_compatibility_issues
 791	\N	patch	patch_113_114_a.sql|schema_version
-792 \N  patch   patch_114_115_a.sql|schema_version
+792	\N	patch	patch_114_115_a.sql|schema_version

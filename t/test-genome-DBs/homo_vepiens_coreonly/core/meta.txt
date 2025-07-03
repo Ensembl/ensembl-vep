@@ -201,4 +201,4 @@
 949	\N	patch	patch_112_113_a.sql|schema_version
 950	\N	patch	patch_112_113_b.sql|Ensure meta_value is not null
 951	\N	patch	patch_113_114_a.sql|schema_version
-952 \N  patch   patch_114_115_a.sql|schema_version
+952	\N	patch	patch_114_115_a.sql|schema_version
