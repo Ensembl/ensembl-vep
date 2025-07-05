@@ -214,9 +214,12 @@ sub _create_records {
         $fields_data->{$field} = $value;
       }
     }
-    ## extract pass/fail info from filter column
-    $fields_data->{FILTER} .= $parser->get_raw_filter_results();
-    $fields_data->{FILTER} = [ split /;/, $fields_data->{FILTER} ];
+    
+    if (grep(/^FILTER$/, @$fields)){
+      ## extract pass/fail info from filter column
+      $fields_data->{FILTER} .= $parser->get_raw_filter_results();
+      $fields_data->{FILTER} = [ split /;/, $fields_data->{FILTER} ];
+    }
   }
 
 
