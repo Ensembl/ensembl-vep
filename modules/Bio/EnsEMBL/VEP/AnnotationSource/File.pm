@@ -161,6 +161,7 @@ sub new {
   $self->{reciprocal}     = $hashref->{reciprocal}     || 0;
   $self->{overlap_def}    = $hashref->{overlap_def};
   $self->{num_records}    = defined $hashref->{num_records} ? $hashref->{num_records} : 50;
+  $self->{gff_type}       = $hashref->{gff_type}       || "transcript";
 
   $self->{info} = { custom_info => $hashref };
 
@@ -473,7 +474,7 @@ sub _get_record_name {
   my $self = shift;
   my $parser = $self->parser;
 
-  my $name = $parser->get_name;
+  my $name = $parser->can("get_name") ? $parser->get_name : undef;
 
   return ($self->report_coords || !defined($name)) ?
     sprintf(

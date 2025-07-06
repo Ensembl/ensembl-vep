@@ -116,6 +116,13 @@ my %INCLUDE_FEATURE_TYPES = map {$_ => 1} qw(
 );
 
 
+my %INCLUDE_FEATURE_TYPES_GENCODE_PROMOTER = map {$_ => 1} qw(
+  CTCF_binding_site
+  enhancer
+  open_chromatin_region
+  promoter
+);
+
 =head2 parser
 
   Example    : $parser = $as->parser();
@@ -133,6 +140,65 @@ sub parser {
 }
 
 
+=head2 annotate_InputBuffer
+
+  Arg 1      : Bio::EnsEMBL::VEP::InputBuffer
+  Example    : $as->annotate_InputBuffer($ib);
+  Description: Gets overlapping features from the source for the variants in
+               the input buffer, and adds them as references to the  relevant
+               VariationFeature.
+  Returntype : none
+  Exceptions : none
+  Caller     : Runner
+  Status     : Stable
+
+=cut
+
+sub annotate_InputBuffer {
+  my $self = shift;
+  my $buffer = shift;
+
+  if ($self->{gff_type} eq "transcript") {
+    Bio::EnsEMBL::VEP::AnnotationType::Transcript::annotate_InputBuffer($self, $buffer);
+  }
+  elsif ($self->{gff_type} eq "gencode_promoter") {
+    Bio::EnsEMBL::VEP::AnnotationSource::File::annotate_InputBuffer($self, $buffer);
+  }
+}
+
+
+=head2 _create_records
+ 
+  Arg 1      : bool or hashref $overlap_result
+  Arg 2      : bool $get_scores
+  Example    : $records = $as->_create_records();
+  Description: Create a custom annotation record from the current
+               record as read from the annotation source.
+  Returntype : arrayref of hashrefs
+  Exceptions : none
+  Caller     : annotate_VariationFeature()
+  Status     : Stable
+
+=cut
+
+sub _create_records {
+  my $self           = shift;
+  my $overlap_result = shift;
+  my $get_scores     = shift;
+  
+  my $record = [{ name  => $self->_get_record_name }];
+
+  my $record_hash = $self->_record_to_hash;
+  $record->[0]->{fields}->{type} = $record_hash->{'type'};
+  $record->[0]->{fields}->{feature_id} = $record_hash->{'attributes'}->{'ID'};
+
+  my $associated_gene = $record_hash->{'attributes'}->{'gene_id'} ? $record_hash->{'attributes'}->{'gene_id'}  : '.';
+  $record->[0]->{fields}->{associated_gene} = $associated_gene;
+
+  return $record;
+}
+
+
 =head2 include_feature_types
 
   Example    : $types = $as->include_feature_types();
@@ -145,7 +211,14 @@ sub parser {
 =cut
 
 sub include_feature_types {
-  return \%INCLUDE_FEATURE_TYPES;
+  my $self = shift;
+
+  if ($self->{gff_type} eq "transcript") {
+    return \%INCLUDE_FEATURE_TYPES;
+  }
+  elsif ($self->{gff_type} eq "gencode_promoter") {
+    return \%INCLUDE_FEATURE_TYPES_GENCODE_PROMOTER;
+  }
 }
 
 
