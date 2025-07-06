@@ -117,9 +117,6 @@ my %INCLUDE_FEATURE_TYPES = map {$_ => 1} qw(
 
 
 my %INCLUDE_FEATURE_TYPES_GENCODE_PROMOTER = map {$_ => 1} qw(
-  CTCF_binding_site
-  enhancer
-  open_chromatin_region
   promoter
 );
 
