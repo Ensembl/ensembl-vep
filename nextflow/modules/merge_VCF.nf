@@ -32,7 +32,7 @@ process mergeVCF {
   one_to_many = meta.one_to_many
   output_dir = meta.output_dir
   
-  merged_vcf = merged_vcf ?: file(original_file).getSimpleName() + "_VEP.vcf.gz"
+  merged_vcf = merged_vcf ?: file(original_file).getBaseName() + "_VEP.vcf.gz"
   merged_vcf = one_to_many ? merged_vcf.replace(
     "_VEP.vcf", 
     "_" + file(vep_config).getName().replace(".ini", "") + "_VEP.vcf"
