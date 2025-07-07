@@ -198,6 +198,7 @@ sub get_features_by_regions_uncached {
 
       my @pfas_by_allele;
       my %clin_sigs;
+      my $clin_sig_ref_allele;
 
       foreach my $pfa(@{$v_clinsigs})
       {
@@ -205,10 +206,12 @@ sub get_features_by_regions_uncached {
         {
           $pfa->{clinvar_clin_sig}=~s/ /_/g;
           $clin_sigs{$pfa->{risk_allele} . ':' .$pfa->{clinvar_clin_sig}} = 1;
+	  $clin_sig_ref_allele = $pfa->{clinvar_ref_allele} if $pfa->{clinvar_ref_allele};
         }
       }
       my @array = keys(%clin_sigs);
       $v_copy{clin_sig_allele} = join ';', @array if scalar(@array);
+      $v_copy{clin_sig_ref_allele} = $clin_sig_ref_allele if $clin_sig_ref_allele;
 
       # somatic clinical impact
       my $v_clin_impact = $attribs_clinical_impact->{$key};
