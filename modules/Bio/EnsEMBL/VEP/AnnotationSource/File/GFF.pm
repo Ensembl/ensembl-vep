@@ -117,7 +117,7 @@ my %INCLUDE_FEATURE_TYPES = map {$_ => 1} qw(
 
 
 my %INCLUDE_FEATURE_TYPES_GENCODE_PROMOTER = map {$_ => 1} qw(
-  promoter
+  promoter_window
 );
 
 =head2 parser
