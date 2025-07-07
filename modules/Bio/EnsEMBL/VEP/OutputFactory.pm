@@ -1010,6 +1010,7 @@ sub add_colocated_variant_info {
   return unless $vf->{existing} && scalar @{$vf->{existing}};
 
   my $this_allele = $hash->{Allele};
+  my $ref_allele = $vf->ref_allele_string;
 
   my $shifted_allele = $vf->{shifted_allele_string};
   $shifted_allele ||= "";
@@ -1060,10 +1061,19 @@ sub add_colocated_variant_info {
     if(defined($ex->{clin_sig_allele}) && $self->{clin_sig_allele} )
     {
 
+      my $allele_match = 1;
+      if($ex->{clin_sig_ref_allele} && $ex->{clin_sig_ref_allele} ne $ref_allele) {
+        $allele_match = 0;
+      }
+
       my %cs_hash;
       my @clin_sig_array = split(';', $ex->{clin_sig_allele});
       foreach my $cs(@clin_sig_array){
         my @cs_split = split(':', $cs);
+
+        if(!$allele_match) {
+          reverse_comp(\$cs_split[0]);
+        }
 
         $cs_hash{$cs_split[0]} = '' if !defined($cs_hash{$cs_split[0]});
         $cs_hash{$cs_split[0]} .= ',' if $cs_hash{$cs_split[0]} ne ''; 

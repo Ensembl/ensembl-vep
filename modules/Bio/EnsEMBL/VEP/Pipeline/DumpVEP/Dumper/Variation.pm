@@ -181,6 +181,7 @@ sub _generic_dump_info {
   my @cols = (
     @{$as->get_cache_columns()},
     'clin_sig_allele',
+    'clin_sig_ref_allele',
     'clinical_impact',
     'pubmed',
     'var_synonyms',
@@ -244,6 +245,7 @@ sub dump_obj {
       $v->{clin_sig} || '',
       $v->{phenotype_or_disease} == 0 ? '' : $v->{phenotype_or_disease},
       $v->{clin_sig_allele} || '',
+      $v->{clin_sig_ref_allele} || '',
       $tmp_clinical_impact|| '',
     );
 
