@@ -1062,7 +1062,6 @@ sub add_colocated_variant_info {
     {
 
       my $allele_match = 1;
-      print "clin_sig_ref_allele: ", $ex->{clin_sig_ref_allele}, "; ref allele: $ref_allele\n";
       if($ex->{clin_sig_ref_allele} && $ex->{clin_sig_ref_allele} ne $ref_allele) {
         $allele_match = 0;
       }
