@@ -184,8 +184,16 @@ sub _create_records {
   my $get_scores     = shift;
   
   my $record = [{ name  => $self->_get_record_name }];
-
   my $record_hash = $self->_record_to_hash;
+  my $type = $record_hash->{'type'};
+  
+  my $include = $self->include_feature_types;
+  unless ($include->{$type}) {
+    my $file = $self->{file};
+    $self->warning_msg("Ignoring '$type' feature_type from $file GFF/GTF file. This feature_type is not supported in VEP.\n");
+    return [];
+  }
+
   $record->[0]->{fields}->{type} = $record_hash->{'type'};
   $record->[0]->{fields}->{feature_id} = $record_hash->{'attributes'}->{'ID'};
 

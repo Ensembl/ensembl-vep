@@ -391,6 +391,8 @@ sub annotate_VariationFeature {
   my $get_scores = defined $stats;
   my $record = $self->_create_records($overlap_result, $get_scores);
 
+  return unless @$record;
+
   my $is_recorded = 0;
   if (@{$record}[0]->{'name'} =~  /^COSV/) {
     my ($matched_cosmic_record) = grep{$_->{'name'} eq @{$record}[0]->{'name'}} @{$vf->{_custom_annotations}->{$self->short_name}};
