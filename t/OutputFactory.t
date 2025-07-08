@@ -2073,12 +2073,16 @@ $ib = get_annotated_buffer({
   shift_hgvs => 1
 },1);
 
+
 my $vfoas = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[0]);
+
+# Variants are split within the input buffer
+my $vfoas2 = $of->get_all_VariationFeatureOverlapAlleles($ib->buffer->[1]);
 
 $result = $of->VariationFeatureOverlapAllele_to_output_hash($vfoas->[0], {}, $ib->buffer->[0]);
 is($result->{HGVSg}, '21:g.25769085del', 'VariationFeatureOverlapAllele_to_output_hash - hgvsg for multi-allelic');
 
-$result = $of->VariationFeatureOverlapAllele_to_output_hash($vfoas->[1], {}, $ib->buffer->[0]);
+$result = $of->VariationFeatureOverlapAllele_to_output_hash($vfoas2->[0], {}, $ib->buffer->[1]);
 is($result->{HGVSg}, '21:g.25769085dup', 'VariationFeatureOverlapAllele_to_output_hash - hgvsg for multi-allelic');
 
 
