@@ -49,12 +49,13 @@ is_deeply(
     overlap_cutoff => 0,
     distance => undef,
     same_type => 0,
+    gff_type => 'transcript',
     info => {
       custom_info => {
         file => 'foo/bar',
         type => 'exact',
         short_name => 'bar',
-        report_coords => 1,
+        report_coords => 1
       }
     }
   }, 'Bio::EnsEMBL::VEP::AnnotationSource::File'),

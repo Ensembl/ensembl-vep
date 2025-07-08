@@ -535,7 +535,7 @@ SKIP: {
   $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $runner->config, parser => $p});
   $ib->next();
   $as->annotate_InputBuffer($ib);
-  
+
   is_deeply(
     $ib->buffer->[0]->{_custom_annotations},
     {
@@ -544,7 +544,7 @@ SKIP: {
           'fields' => {
             'feature_id' => 'ENSR1_234',
             'associated_gene' => 'ENSG00000123456',
-            'type' => 'promoter'
+            'type' => 'promoter_window'
           },
           'name' => '21:25584733-25595733'
         }

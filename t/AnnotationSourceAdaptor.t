@@ -138,6 +138,7 @@ SKIP: {
         'same_type' => 0,
         'num_records' => 50,
         '_format' => 'vcf',
+        'gff_type' => 'transcript',
         'info' => {
           'custom_info' => {
             'short_name' => 'test',
@@ -151,6 +152,7 @@ SKIP: {
             'same_type' => 0,
             'num_records' => 50,
             '_format' => 'vcf',
+            'gff_type' => 'transcript'
           }
         }
       }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
@@ -176,6 +178,7 @@ SKIP: {
         'same_type' => 0,
         'num_records' => 50,
         '_format' => 'vcf',
+        'gff_type' => 'transcript',
         'info' => {
           'custom_info' => {
             'short_name' => 'test',
@@ -189,6 +192,7 @@ SKIP: {
             'same_type' => 0,
             'num_records' => 50,
             '_format' => 'vcf',
+            'gff_type' => 'transcript'
           }
         }
       }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
@@ -214,6 +218,7 @@ SKIP: {
         'same_type' => 0,
         'num_records' => 50,
         '_format' => 'vcf',
+        'gff_type' => 'transcript',
         'info' => {
           'custom_info' => {
             'short_name' => 'test',
@@ -227,6 +232,7 @@ SKIP: {
             'same_type' => 0,
             'num_records' => 50,
             '_format' => 'vcf',
+            'gff_type' => 'transcript'
           }
         }
       }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
@@ -253,6 +259,7 @@ SKIP: {
         'same_type' => 0,
         'num_records' => 50,
         '_format' => 'vcf',
+        'gff_type' => 'transcript',
         'info' => {
           'custom_info' => {
             'short_name' => 'test',
@@ -267,6 +274,7 @@ SKIP: {
             'same_type' => 0,
             'num_records' => 50,
             '_format' => 'vcf',
+            'gff_type' => 'transcript'
           }
         }
       }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
@@ -295,6 +303,7 @@ SKIP: {
         'same_type' => 0,
         'num_records' => 50,
         '_format' => 'vcf',
+        'gff_type' => 'transcript'
       }
     },
     'short_name' => 'test',
@@ -311,6 +320,7 @@ SKIP: {
     'same_type' => 0,
     'num_records' => 50,
     '_format' => 'vcf',
+    'gff_type' => 'transcript'
   }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' ),
   bless( {
     'info' => {
@@ -327,6 +337,7 @@ SKIP: {
         'same_type' => 0,
         'num_records' => 50,
         '_format' => 'vcf',
+        'gff_type' => 'transcript',
       }
     },
     'short_name' => 'test',
@@ -343,6 +354,7 @@ SKIP: {
     'same_type' => 0,
     'num_records' => 50,
     '_format' => 'vcf',
+    'gff_type' => 'transcript',
   }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
     ],
     'get_all_custom - automated ###CHR###'
