@@ -165,6 +165,10 @@ sub new {
 
   $self->{info} = { custom_info => $hashref };
 
+  if ($self->{gff_type} eq "gencode_promoter") {
+    $self->{info}->{custom_info}->{fields} = [qw/type feature_id associated_gene/];
+  }
+
   if(my $format = $hashref->{format}) {
 
     delete $hashref->{format};
