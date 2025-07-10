@@ -539,7 +539,7 @@ SKIP: {
   is_deeply(
     $ib->buffer->[0]->{_custom_annotations},
     {
-      'test_gencode_promoter.gff.gz' => [
+      'GENCODE_PROMOTER' => [
         {
           'fields' => {
             'feature_id' => 'ENSR1_234',
