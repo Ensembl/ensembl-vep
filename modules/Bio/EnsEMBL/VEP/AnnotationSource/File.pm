@@ -151,7 +151,11 @@ sub new {
   throw("ERROR: No file given\n") unless $hashref->{file};
   $self->file($hashref->{file});
 
-  $hashref->{short_name} = $self->short_name($hashref->{short_name} || (split '/', $self->file)[-1]);
+  $hashref->{short_name} = $self->short_name($hashref->{short_name} || (
+      $hashref->{gff_type} eq "gencode_promoter" ? 
+        "GENCODE_PROMOTER" :
+        split '/', $self->file)[-1]
+    );
   $hashref->{type} = $self->type($hashref->{type} || 'overlap');
   $self->report_coords(defined($hashref->{report_coords}) ? $hashref->{report_coords} : 0);
 
@@ -161,8 +165,13 @@ sub new {
   $self->{reciprocal}     = $hashref->{reciprocal}     || 0;
   $self->{overlap_def}    = $hashref->{overlap_def};
   $self->{num_records}    = defined $hashref->{num_records} ? $hashref->{num_records} : 50;
+  $self->{gff_type}       = $hashref->{gff_type}       || "transcript";
 
   $self->{info} = { custom_info => $hashref };
+
+  if ($self->{gff_type} eq "gencode_promoter") {
+    $self->{info}->{custom_info}->{fields} = [qw/type feature_id associated_gene/];
+  }
 
   if(my $format = $hashref->{format}) {
 
@@ -390,6 +399,8 @@ sub annotate_VariationFeature {
   my $get_scores = defined $stats;
   my $record = $self->_create_records($overlap_result, $get_scores);
 
+  return unless @$record;
+
   my $is_recorded = 0;
   if (@{$record}[0]->{'name'} =~  /^COSV/) {
     my ($matched_cosmic_record) = grep{$_->{'name'} eq @{$record}[0]->{'name'}} @{$vf->{_custom_annotations}->{$self->short_name}};
@@ -473,7 +484,7 @@ sub _get_record_name {
   my $self = shift;
   my $parser = $self->parser;
 
-  my $name = $parser->get_name;
+  my $name = $parser->can("get_name") ? $parser->get_name : undef;
 
   return ($self->report_coords || !defined($name)) ?
     sprintf(

@@ -518,6 +518,40 @@ SKIP: {
   $ib_refseq->finish_annotation();
 
   ok($ib_refseq->buffer->[0], 'RefSeq GFF annotation');
+
+  # GENCODE promoters
+  $as = Bio::EnsEMBL::VEP::AnnotationSource::File::GFF->new({
+    file => $test_cfg->{custom_gencode_promoter_gff},
+    gff_type => "gencode_promoter",
+    config => $runner->config
+  });
+
+  $p = Bio::EnsEMBL::VEP::Parser::VCF->new({
+    config => $runner->config,
+    file => $test_cfg->create_input_file([qw(21 25585733 rs142513484 C T . . .)]),
+    valid_chromosomes => [21]
+  });
+
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $runner->config, parser => $p});
+  $ib->next();
+  $as->annotate_InputBuffer($ib);
+
+  is_deeply(
+    $ib->buffer->[0]->{_custom_annotations},
+    {
+      'GENCODE_PROMOTER' => [
+        {
+          'fields' => {
+            'feature_id' => 'ENSR1_234',
+            'associated_gene' => 'ENSG00000123456',
+            'type' => 'promoter_window'
+          },
+          'name' => '21:25584733-25595733'
+        }
+      ]
+    },
+    'annotate_InputBuffer - gff_type gencode_promoter'
+  );
 }
 
 done_testing();

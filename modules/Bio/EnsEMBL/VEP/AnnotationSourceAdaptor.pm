@@ -215,7 +215,8 @@ sub get_all_custom {
     'coords',
     'same_type',
     'num_records',
-    'summary_stats'
+    'summary_stats',
+    'gff_type'
   );
 
   foreach my $custom_string(@{$self->param('custom') || []}) {
@@ -261,7 +262,8 @@ sub get_all_custom {
       distance => $hash{"distance"},
       same_type => $hash{"same_type"} || 0,
       reciprocal => $hash{"reciprocal"} || 0,
-      num_records => $hash{"num_records"}
+      num_records => $hash{"num_records"},
+      gff_type => $hash{"gff_type"} || "transcript"
     };
 
     $opts->{overlap_def} = $opts->{reciprocal} ?
