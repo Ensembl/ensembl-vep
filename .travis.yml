@@ -27,7 +27,7 @@ addons:
       - openssl
 
 before_install:
-  - export ENSEMBL_BRANCH=main
+  - export ENSEMBL_BRANCH=release/115
   - git clone --branch $ENSEMBL_BRANCH --depth 1 https://github.com/Ensembl/ensembl-test.git
   - git clone --branch $ENSEMBL_BRANCH --depth 1 https://github.com/Ensembl/ensembl.git
   - git clone --branch $ENSEMBL_BRANCH --depth 1 https://github.com/Ensembl/ensembl-io.git
