@@ -619,8 +619,7 @@ SKIP: {
         "test" => [
           {
             "fields" => {
-              "FOO" => "BAR",
-              "FILTER" => ["PASS"]
+              "FOO" => "BAR"
             },
             "name" => "test1",
             "allele" => "T"
