@@ -219,10 +219,24 @@ SKIP: {
     $ib->buffer->[0]->{_custom_annotations},
     {
       'test.vcf.gz' => [
-        { name => 'test1', fields => { 'FOO' => 'BAR', 'GOO' => 'CAR,STAR', 'NOVALUE' => 1, 'FILTER' => ['PASS'] } }
+        { name => 'test1', fields => { 'FOO' => 'BAR', 'GOO' => 'CAR,STAR', 'NOVALUE' => 1 } }
       ]
     },
     'annotate_InputBuffer - fields'
+  );
+
+  # VCF info fields with FILTER
+  delete($ib->buffer->[0]->{_custom_annotations});
+  $as->fields(['GOO', 'FILTER']);
+  $as->annotate_InputBuffer($ib);
+  is_deeply(
+    $ib->buffer->[0]->{_custom_annotations},
+    {
+      'test.vcf.gz' => [
+        { name => 'test1', fields => { 'GOO' => 'CAR,STAR', 'FILTER' => ['PASS'] } }
+      ]
+    },
+    'annotate_InputBuffer - FILTER'
   );
 
   # exact type
@@ -235,10 +249,10 @@ SKIP: {
     $ib->buffer->[0]->{_custom_annotations},
     {
       'test.vcf.gz' => [
-        { name => 'test1', fields => { 'FOO' => 'BAR', 'GOO' => 'CAR,STAR', 'NOVALUE' => 1, 'FILTER' => ['PASS'] } }
+        { name => 'test1', fields => { 'GOO' => 'CAR,STAR', 'FILTER' => ['PASS'] } }
       ],
       'foo' => [
-        { name => 'test1', allele => 'T', fields => { 'GOO' => 'CAR', 'FILTER' => ['PASS'] } }
+        { name => 'test1', allele => 'T', fields => { 'GOO' => 'CAR' } }
       ]
     },
     'annotate_InputBuffer - exact, info keyed on allele'
@@ -261,8 +275,8 @@ SKIP: {
     $ib->buffer->[0]->{_custom_annotations},
     {
       'foo' => [
-        { name => 'test1', allele => 'A', fields => {'GOO' => 'CAR','FILTER' => ['PASS']} },
-        { name => 'test1', allele => 'C', fields => {'GOO' => 'STAR','FILTER' => ['PASS']} }
+        { name => 'test1', allele => 'A', fields => {'GOO' => 'CAR'} },
+        { name => 'test1', allele => 'C', fields => {'GOO' => 'STAR'} }
       ]
     },
     'annotate_InputBuffer - exact, multiple, rev strand input'
@@ -284,8 +298,8 @@ SKIP: {
     $ib->buffer->[0]->{_custom_annotations},
     {
       'foo' => [
-        { name => 'del1', allele => '-', fields => {'GOO' => 'B','FILTER' => ['PASS']} },
-        { name => 'del2', allele => '-', fields => {'FILTER' => ['SEGDUP', 'RF']} }
+        { name => 'del1', allele => '-', fields => {'GOO' => 'B'} },
+        { name => 'del2', allele => '-' }
       ]
     },
     'annotate_InputBuffer - deletion'
@@ -310,7 +324,7 @@ SKIP: {
     $ib->buffer->[0]->{_custom_annotations},
     {
       'foo' => [
-        { name => 'ins1', allele => 'C', fields => {'GOO' => 'YAR','FILTER' => ['PASS']} },
+        { name => 'ins1', allele => 'C', fields => {'GOO' => 'YAR'} },
       ]
     },
     'annotate_InputBuffer - mixed - insertion'
@@ -319,7 +333,7 @@ SKIP: {
     $ib->buffer->[1]->{_custom_annotations},
     {
       'foo' => [
-        { name => 'ins1', allele => 'C', fields => {'GOO' => 'ZAR', 'FILTER' => ['PASS']} },
+        { name => 'ins1', allele => 'C', fields => {'GOO' => 'ZAR'} },
       ]
     },
     'annotate_InputBuffer - mixed - snp'
@@ -347,7 +361,7 @@ SKIP: {
     $ib->buffer->[0]->{_custom_annotations},
     {
       'foo' => [
-        { name => 'ins1', allele => 'C', fields => {'GOO' => 'YAR','FILTER' => ['PASS']} },
+        { name => 'ins1', allele => 'C', fields => {'GOO' => 'YAR'} },
       ]
     },
     'annotate_InputBuffer - trim input - insertion 1'
@@ -356,7 +370,7 @@ SKIP: {
     $ib->buffer->[1]->{_custom_annotations},
     {
       'foo' => [
-        { name => 'ins1', allele => 'C', fields => {'GOO' => 'YAR', 'FILTER' => ['PASS']} },
+        { name => 'ins1', allele => 'C', fields => {'GOO' => 'YAR'} },
       ]
     },
     'annotate_InputBuffer - trim input - insertion 2'
@@ -365,7 +379,7 @@ SKIP: {
     $ib->buffer->[2]->{_custom_annotations},
     {
       'foo' => [
-        { name => 'ins1', allele => 'CG', fields => {'GOO' => 'ZAR', 'FILTER' => ['PASS']} },
+        { name => 'ins1', allele => 'CG', fields => {'GOO' => 'ZAR'} },
       ]
     },
     'annotate_InputBuffer - trim input - snp 1'
@@ -374,7 +388,7 @@ SKIP: {
     $ib->buffer->[3]->{_custom_annotations},
     {
       'foo' => [
-        { name => 'ins1', allele => 'CGT', fields => {'GOO' => 'ZAR', 'FILTER' => ['PASS']} },
+        { name => 'ins1', allele => 'CGT', fields => {'GOO' => 'ZAR'} },
       ]
     },
     'annotate_InputBuffer - trim input - snp 2'
@@ -383,7 +397,7 @@ SKIP: {
     $ib->buffer->[4]->{_custom_annotations},
     {
       'foo' => [
-        { name => 'ins1', allele => 'GGCG', fields => {'GOO' => 'ZAR', 'FILTER' => ['PASS']} },
+        { name => 'ins1', allele => 'GGCG', fields => {'GOO' => 'ZAR'} },
       ]
     },
     'annotate_InputBuffer - trim input - snp 3'
@@ -409,7 +423,7 @@ SKIP: {
     $ib->buffer->[0]->{_custom_annotations},
     {
       'foo' => [
-        { name => 'comp1', allele => '-', fields => {'FOO' => 'CAR', 'FILTER' => ['PASS']} },
+        { name => 'comp1', allele => '-', fields => {'FOO' => 'CAR'} },
       ]
     },
     'annotate_InputBuffer - trim VCF - deletion 1'
@@ -418,7 +432,7 @@ SKIP: {
     $ib->buffer->[1]->{_custom_annotations},
     {
       'foo' => [
-        { name => 'comp1', allele => '-', fields => {'FOO' => 'CAR', 'FILTER' => ['PASS']} },
+        { name => 'comp1', allele => '-', fields => {'FOO' => 'CAR'} },
       ]
     },
     'annotate_InputBuffer - trim VCF - deletion 2'
@@ -442,7 +456,7 @@ SKIP: {
     $ib->buffer->[0]->{_custom_annotations},
     {
       'foo' => [
-        { name => 'del2', fields => { 'FILTER' => ['SEGDUP', 'RF']} },
+        { name => 'del2' },
       ]
     },
     'annotate_InputBuffer - SV reverts to overlap'
@@ -469,7 +483,7 @@ SKIP: {
     $ib->buffer->[0]->{_custom_annotations},
     {
       'foo' => [
-        { name => 'refinc', allele => 'T', fields => {'FOO' => 0.1, 'FILTER' => ['PASS']} },
+        { name => 'refinc', allele => 'T', fields => {'FOO' => 0.1} },
       ]
     },
     'annotate_InputBuffer - REF included in INFO chunks'
@@ -479,7 +493,7 @@ SKIP: {
     $ib->buffer->[1]->{_custom_annotations},
     {
       'foo' => [
-        { name => 'countwrong', allele => 'T', fields => {'FOO' => '0.7,0.2,0.1', 'FILTER' => ['PASS']} },
+        { name => 'countwrong', allele => 'T', fields => {'FOO' => '0.7,0.2,0.1'} },
       ]
     },
     'annotate_InputBuffer - INFO chunk count doesnt match ALT count'
