@@ -120,7 +120,8 @@ sub annotate_InputBuffer {
 
     foreach my $vf(@$vfs) {
       $vf->{slice} ||= $slice ||=  $tr->{slice};
-
+      # Ignoring if overlapping features are not on the same transcript
+      next unless $tr->{"slice"}->{"seq_region_name"} eq $vf->{"slice"}->{"seq_region_name"};
       if(ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature') {
         my $svo = Bio::EnsEMBL::Variation::TranscriptStructuralVariation->new(
           -transcript                   => $tr,
