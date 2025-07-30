@@ -261,6 +261,7 @@ our @VEP_PARAMS = (
   'ucsc_assembly=s',         # required for phyloP, phastCons, e.g. use hg19 for GRCh37, hg38 for GRCh38
   'ucsc_data_root=s',        # replace if you have the data locally, defaults to http://hgdownload.cse.ucsc.edu/goldenpath/
   'custom_multi_allelic',    # prevents filtering of custom annotation data when comma separated lists are assumed to be allele specific
+  'custom_suppress_filter',  # prevents adding from VCF FILTER column by default if not specified in 'fields' arguement, for internal use
 
   # plugins
   'plugin=s@',               # specify a method in a module in the plugins directory

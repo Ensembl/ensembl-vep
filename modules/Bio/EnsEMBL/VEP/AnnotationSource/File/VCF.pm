@@ -214,8 +214,9 @@ sub _create_records {
         $fields_data->{$field} = $value;
       }
     }
-    
-    if (grep(/^FILTER$/, @$fields)){
+
+    my $custom_suppress_filter = $self->config ? $self->config->param('custom_suppress_filter') : 0;
+    unless ($custom_suppress_filter && ! grep(/^FILTER$/, @$fields)){
       ## extract pass/fail info from filter column
       $fields_data->{FILTER} .= $parser->get_raw_filter_results();
       $fields_data->{FILTER} = [ split /;/, $fields_data->{FILTER} ];
