@@ -112,6 +112,7 @@ sub new {
   my $hashref = $_[0];
 
   $self->add_shortcuts(['custom_multi_allelic']);
+  $self->add_shortcuts(['custom_suppress_filter']);
 
   $self->fields($hashref->{fields}) if $hashref->{fields};      ## report INFO & FILTER fields
 
@@ -215,8 +216,7 @@ sub _create_records {
       }
     }
 
-    my $custom_suppress_filter = $self->config ? $self->config->param('custom_suppress_filter') : 0;
-    unless ($custom_suppress_filter && ! grep(/^FILTER$/, @$fields)){
+    unless ($self->{custom_suppress_filter} && ! grep(/^FILTER$/, @$fields)){
       ## extract pass/fail info from filter column
       $fields_data->{FILTER} .= $parser->get_raw_filter_results();
       $fields_data->{FILTER} = [ split /;/, $fields_data->{FILTER} ];
