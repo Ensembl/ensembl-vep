@@ -152,7 +152,7 @@ sub new {
   $self->file($hashref->{file});
 
   $hashref->{short_name} = $self->short_name($hashref->{short_name} || (
-      $hashref->{gff_type} eq "gencode_promoter" ? 
+      $hashref->{gff_type} && $hashref->{gff_type} eq "gencode_promoter" ? 
         "GENCODE_PROMOTER" :
         split '/', $self->file)[-1]
     );
