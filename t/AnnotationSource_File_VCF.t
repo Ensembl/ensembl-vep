@@ -510,5 +510,44 @@ SKIP: {
     'annotate_InputBuffer - COSMIC id without duplication'
   );
 
+  ## FILTER suppression
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
+    config => $cfg,
+    parser => Bio::EnsEMBL::VEP::Parser::VEP_input->new({
+      config => $cfg,
+      file => $test_cfg->create_input_file([qw(21 25585733 25585733 C/T + rs142513484)]),
+      valid_chromosomes => [21]
+    })
+  });
+  $ib->next;
+
+  $as->short_name("test");
+  $as->fields(['FOO', 'GOO', 'NOVALUE']);
+  $as->{custom_suppress_filter} = 1;
+  $as->annotate_InputBuffer($ib);
+  is_deeply(
+    $ib->buffer->[0]->{_custom_annotations},
+    {
+      'test' => [
+        { name => 'test1', allele => 'T', fields => {'FOO' => 'BAR', 'GOO' => 'CAR', 'NOVALUE' => 1} },
+      ]
+    },
+    'annotate_InputBuffer - FILTER suppression'
+  );
+
+  ## FILTER suppression off
+  delete $ib->buffer->[0]->{_custom_annotations};
+  $as->{custom_suppress_filter} = 0;
+  $as->annotate_InputBuffer($ib);
+  is_deeply(
+    $ib->buffer->[0]->{_custom_annotations},
+    {
+      'test' => [
+        { name => 'test1', allele => 'T', fields => {'FOO' => 'BAR', 'GOO' => 'CAR', 'NOVALUE' => 1, 'FILTER' => ['PASS']} },
+      ]
+    },
+    'annotate_InputBuffer - FILTER suppression off'
+  );
+
 }
 done_testing();
