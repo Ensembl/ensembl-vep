@@ -60,6 +60,7 @@ our (
   $CACHE_URL_INDEXED,
   $CACHE_DIR,
   $NO_PLUGINS,
+  $SKIP_PLUGINS,
   $PLUGINS,
   $PLUGIN_URL,
   $PLUGINS_DIR,
@@ -171,6 +172,7 @@ GetOptions(
   'SPECIES|s=s',
   'NO_PLUGINS',
   'PLUGINS|g=s',
+  'SKIP_PLUGINS=s',
   'PLUGINSDIR|PLUGINS_DIR|r=s',
   'PLUGINURL|PLUGIN_URL=s',
   'AUTO|a=s',
@@ -219,6 +221,7 @@ $NO_UPDATE    ||=  $config->{NO_UPDATE};
 $SPECIES      ||=  $config->{SPECIES};
 $NO_PLUGINS   ||=  $config->{NO_PLUGINS};
 $PLUGINS      ||=  $config->{PLUGINS};
+$SKIP_PLUGINS ||=  $config->{SKIP_PLUGINS};
 $PLUGINS_DIR  ||=  $config->{PLUGINSDIR};
 $PLUGIN_URL   ||=  $config->{PLUGINURL};
 $AUTO         ||=  $config->{AUTO};
@@ -1855,6 +1858,9 @@ sub plugins() {
   } elsif (lc($PLUGINS->[0]) eq 'all' || $PLUGINS->[0] eq '0') {
     # download all plugins
     @selected_plugins = sort {$a->{key} cmp $b->{key}} values %by_key;
+    my @skip_plugins = split /\,/, $SKIP_PLUGINS  if defined($SKIP_PLUGINS);
+    my %delete = map {  $_ => 1 } @skip_plugins if @skip_plugins>0 ;
+    @selected_plugins = grep { !$delete{$_->{key}} } @selected_plugins if %delete;
   } else {
     # download specific plugins from command-line arguments
     my @not_found = grep {!$by_key{lc($_)}} @$PLUGINS;

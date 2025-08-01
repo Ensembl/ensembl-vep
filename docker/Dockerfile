@@ -195,7 +195,7 @@ RUN echo >> $OPT/.profile && \
     echo PATH=$PATH:\$PATH >> $OPT/.profile && \
     echo export PATH >> $OPT/.profile && \
     # Install Ensembl API and plugins
-    ./INSTALL.pl --auto ap --plugins all --pluginsdir $VEP_DIR_PLUGINS --no_update --no_htslib && \
+    ./INSTALL.pl --auto ap --plugins all --skip_plugins LoF --pluginsdir $VEP_DIR_PLUGINS --no_update --no_htslib && \
     # Remove ensemb-vep's travisci folder
     rm -rf travisci
 
