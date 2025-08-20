@@ -86,6 +86,7 @@ sub configure {
     'vcf_info_field=s',        # VCF INFO field name to parse
     'soft_filter',             # do not exclude variants failing the filter - add a flag to the FILTER value in the vcf
                                # 'filter_vep_pass' variant passed the filter; 'filter_vep_fail' variant failed the filter 
+    'no_missing_consequence_warning',  # do not output missing consequence warning
 
     'ontology|y',              # use ontology for matching consequence terms
     'host=s',                  # DB options
@@ -342,7 +343,7 @@ sub main {
   print $out_fh "$count\n" if defined($config->{count});
 
   # If the VEP annotations INFO field (default value: CSQ) hasn't been found (or recognised) in at least 1 VCF input line.
-  if ($missing_vcf_info_field) {
+  if ($missing_vcf_info_field and not $config->{no_missing_consequence_warning}) {
     warning("The script 'filter_vep' couldn't find the VEP annotations INFO field $vcf_info_field in $missing_vcf_info_field lines of the input file");
   }
 }
@@ -413,7 +414,7 @@ sub parse_line {
   for(@$headers) {
     $data{$_} = undef unless exists($data{$_});
   }
-  
+
   return \%data;
 }
 
