@@ -372,9 +372,15 @@ sub _record_overlaps_VF {
     return 0 if defined $ref_class && defined $vf_class && $ref_class ne $vf_class;
   }
 
-  # we can use the superclass method if overlap type
+  # we can use the superclass method if either the input or parser variant is SV type
   return $self->SUPER::_record_overlaps_VF(@_)
-    if ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature';
+    if (
+      ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature'
+      || (
+          $parser->get_raw_alternatives !~ /^[ACGTN]+$/
+          && ($parser->get_info->{SVTYPE} || $parser->get_raw_alternatives =~ /[<\[\]][^\*]+[>\]\[]|^\.\w+|\w+\.$/)
+      )
+    );
 
   if ($type eq 'overlap') {
     my $parser_start = $parser->get_raw_start;
