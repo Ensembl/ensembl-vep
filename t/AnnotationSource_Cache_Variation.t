@@ -414,11 +414,11 @@ is_deeply(
 $ib = get_ib([qw(21 8987004 . TA C,TAGCG . . .)]);
 $c->annotate_InputBuffer($ib);
 is_deeply(
-  $ib->buffer->[1]->{existing}->[0]->{matched_alleles},
+  $ib->buffer->[0]->{existing}->[0]->{matched_alleles},
   [
     {
-      'a_index' => 0,
-      'a_allele' => 'GCG',
+      'a_index' => 1,
+      'a_allele' => 'TAGCG',
       'b_allele' => 'GCG',
       'b_index' => 0
     }
@@ -444,14 +444,20 @@ is_deeply(
 $ib = get_ib([qw(21 8987004 . TAT TAGCGT,TAGTGT . . .)]);
 $c->annotate_InputBuffer($ib);
 is_deeply(
-  $ib->buffer->[1]->{existing}->[0]->{matched_alleles},
+  $ib->buffer->[0]->{existing}->[0]->{matched_alleles},
   [
     {
-      'a_index' => 0,
-      'a_allele' => 'GTG',
-      'b_allele' => 'GTG',
-      'b_index' => 1
-    }
+        'a_index' => 0,
+        'a_allele' => 'AGCGT',
+        'b_allele' => 'GCG',
+        'b_index' => 0
+      },
+      {
+        'a_index' => 1,
+        'a_allele' => 'AGTGT',
+        'b_allele' => 'GTG',
+        'b_index' => 1
+      }
   ],'nastiness 4' );
 
 # test old_maf setting
