@@ -445,11 +445,11 @@ SKIP: {
   $ib = get_ib([qw(21 8987004 . TA C,TAGCG . . .)]);
   $c->annotate_InputBuffer($ib);
   is_deeply(
-    $ib->buffer->[1]->{existing}->[0]->{matched_alleles},
+    $ib->buffer->[0]->{existing}->[0]->{matched_alleles},
     [
       {
-        'a_index' => 0,
-        'a_allele' => 'GCG',
+        'a_index' => 1,
+        'a_allele' => 'TAGCG',
         'b_allele' => 'GCG',
         'b_index' => 0
       }
@@ -475,20 +475,26 @@ SKIP: {
   $ib = get_ib([qw(21 8987004 . TAT TAGCGT,TAGTGT . . .)]);
   $c->annotate_InputBuffer($ib);
   is_deeply(
-    $ib->buffer->[1]->{existing}->[0]->{matched_alleles},
+    $ib->buffer->[0]->{existing}->[0]->{matched_alleles},
     [
       {
-        'a_index' => 0,
-        'a_allele' => 'GTG',
-        'b_allele' => 'GTG',
-        'b_index' => 1
-      }
+      'a_index' => 0,
+      'a_allele' => 'AGCGT',
+      'b_allele' => 'GCG',
+      'b_index' => 0
+    },
+    {
+      'a_index' => 1,
+      'a_allele' => 'AGTGT',
+      'b_allele' => 'GTG',
+      'b_index' => 1
+    }
     ],
     'nastiness 4'
   );
 
   # Test frequency match for 'matched alleles'
-  my $ib_freq = get_ib([qw(21 25005811 . CA CAAA,CAAA . . .)]);
+  my $ib_freq = get_ib([qw(21 25005812 . CA CAAA,CAAA . . .)]);
   $c->{freq_pop} = '1KG_AMR';
   $c->annotate_InputBuffer($ib_freq);
   $vf = $ib_freq->buffer->[0];
@@ -498,7 +504,7 @@ SKIP: {
     $vf->{_freq_check_freqs},
     {
       '1KG_AMR' => {
-        'AA' => '0.4107'
+        'AAA' => '0.4107'
       },
     },
     'get_frequency_data - matched alleles'
@@ -601,11 +607,11 @@ SKIP: {
   $ib = get_ib([qw(21 8987004 . TA C,TAGCG . . .)]);
   $c->annotate_InputBuffer($ib);
   is_deeply(
-    $ib->buffer->[1]->{existing}->[0]->{matched_alleles},
+    $ib->buffer->[0]->{existing}->[0]->{matched_alleles},
     [
       {
-        'a_index' => 0,
-        'a_allele' => 'GCG',
+        'a_index' => 1,
+        'a_allele' => 'TAGCG',
         'b_allele' => 'GCG',
         'b_index' => 0
       }
@@ -631,11 +637,17 @@ SKIP: {
   $ib = get_ib([qw(21 8987004 . TAT TAGCGT,TAGTGT . . .)]);
   $c->annotate_InputBuffer($ib);
     is_deeply(
-    $ib->buffer->[1]->{existing}->[0]->{matched_alleles},
+    $ib->buffer->[0]->{existing}->[0]->{matched_alleles},
     [
       {
         'a_index' => 0,
-        'a_allele' => 'GTG',
+        'a_allele' => 'AGCGT',
+        'b_allele' => 'GCG',
+        'b_index' => 0
+      },
+      {
+        'a_index' => 1,
+        'a_allele' => 'AGTGT',
         'b_allele' => 'GTG',
         'b_index' => 1
       }
