@@ -193,6 +193,7 @@ sub next {
 
     # new chromosome
     if($prev_chr && $vf->{chr} ne $prev_chr) {
+      # Call split variants for multi-allelic variants
       # $self->{minimal}=1 if $vf->{minimised};
       $self->split_variants() if $self->{minimal};
       return $buffer;
@@ -225,6 +226,7 @@ sub next {
         # we can't push the VF back onto the parser, so add it to $pre_buffer
         # and it will get picked up on the following next() call
         push @$pre_buffer, $vf;
+        # Call split variants for multi-allelic variants 
         # $self->{minimal}=1 if $vf->{minimised};
         $self->split_variants() if $self->{minimal};
         $prev_start = 0;
@@ -246,6 +248,7 @@ sub next {
           }
         }
         $prev_start = $vf->{start};
+        # Call split variants for multi-allelic variants
         # $self->{minimal}=1 if $vf->{minimised};
       }
     }
