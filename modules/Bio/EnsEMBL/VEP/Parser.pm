@@ -952,7 +952,7 @@ sub minimise_alleles {
     elsif($vf->{allele_string} =~ /.+\/.+\/.+/)
     {
       # Updating a flag to minimise multi-allelic variants in split_variants/rejoin_variants
-      $vf->{minimised} = 1;
+      # $vf->{minimised} = 1;
       $vf->{original_allele_string} = $vf->{nontrimmed_allele_string} || $vf->{allele_string};
       push @return, $vf;
     }
