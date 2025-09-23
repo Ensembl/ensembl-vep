@@ -231,7 +231,6 @@ is_deeply($vf, bless( {
   'strand' => 1,
   'variation_name' => 'test',
   'map_weight' => 1,
-  'minimised' => 1,
   'allele_string' => 'A/C/GG',
   'nontrimmed_allele_string' => 'A/C/GG',
   'original_allele_string' => 'A/C/GG',
@@ -253,7 +252,6 @@ is_deeply($vf, bless( {
   'strand' => 1,
   'variation_name' => 'test',
   'map_weight' => 1,
-  'minimised' => 1,
   'allele_string' => '-/C/T',
   'original_allele_string' => 'G/GC/GT',
   'nontrimmed_allele_string' => 'G/GC/GT',
@@ -342,7 +340,6 @@ is_deeply($vf, bless( {
   'strand' => 1,
   'variation_name' => 'test',
   'map_weight' => 1,
-  'minimised' => 1,
   'allele_string' => 'G/C/<DEL:*>',
   'original_allele_string' => 'G/C/<DEL:*>',
   'nontrimmed_allele_string' => 'G/C/<DEL:*>',
@@ -364,7 +361,6 @@ is_deeply($vf, bless( {
   'strand' => 1,
   'variation_name' => 'test',
   'map_weight' => 1,
-  'minimised' => 1,
   'allele_string' => 'C/-/*',
   'original_allele_string' => 'GC/G/*',
   'nontrimmed_allele_string' => 'GC/G/*',
@@ -386,7 +382,6 @@ is_deeply($vf, bless( {
   'strand' => 1,
   'variation_name' => 'test',
   'map_weight' => 1,
-  'minimised' => 1,
   'allele_string' => '-/C/*',
   'original_allele_string' => 'G/GC/*',
   'nontrimmed_allele_string' => 'G/GC/*',
@@ -433,7 +428,6 @@ is_deeply($vf, bless( {
   'strand' => 1,
   'variation_name' => 'test',
   'map_weight' => 1,
-  'minimised' => 1,
   'allele_string' => 'C/T/CAA',
   'original_allele_string' => 'C/T/CAA',
   'nontrimmed_allele_string' => 'C/T/CAA',
@@ -973,8 +967,7 @@ is_deeply($tandem_RUC, bless( {
     'end' => 25587769,
     'seq_region_start' => 25587760,
     'seq_region_end' => 25587769,
-    'map_weight' => 1,
-    'minimised' => 1
+    'map_weight' => 1
   },
   'Bio::EnsEMBL::Variation::VariationFeature' ) ,
   'VariationFeature - tandem repeat using RUC');
@@ -993,8 +986,7 @@ is_deeply($tandem, bless( {
     'end' => 25587769,
     'seq_region_start' => 25587760,
     'seq_region_end' => 25587769,
-    'map_weight' => 1,
-    'minimised' => 1
+    'map_weight' => 1
   },
   'Bio::EnsEMBL::Variation::VariationFeature' ) ,
   'VariationFeature - tandem repeat with missing sequence');
@@ -1019,7 +1011,6 @@ is_deeply($tandem, bless( {
     'seq_region_start' => 25587760,
     'seq_region_end' => 25587760,
     'map_weight' => 1,
-    'minimised' => 1
   },
   'Bio::EnsEMBL::Variation::VariationFeature' ) ,
   'VariationFeature - tandem repeat with missing END and SVLEN');
