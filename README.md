@@ -95,6 +95,7 @@ Below are a list of known Ensembl VEP bugs, where possible, workarounds have bee
    * Please note that this bug also impacts the MAF filtering options on the web version of Ensembl VEP.
 * Non coding transcripts do not get their allele shifted when the `--shift_3prime` is enabled. This has consequence in custom annotation feature when used with the "type=exact" option enabled or any other logic that tries to match variant allele with the annotated feature.
 * Running `--fork` with `--merged` can cause discrepancies in results for HGNC ids due to internal caching. It is recommended to not run `--fork` when using `--merged` for obtaining HGNC ids.
+* For multi-allelic inputs, the alleles are not minimised by default.
 ---
 
 <a name="haplo"></a>
