@@ -45,8 +45,9 @@ process runVEP {
     for (filter in filters) {
       filter_arg = filter_arg + "-filter \"" + filter + "\" "
     }
-    vep_cmd = "vep -i ${input} -o STDOUT --vcf --config ${vep_config} | filter_vep -o out.vcf --force_overwrite --only_matched ${filter_arg}"
-
+    // write VEP output to a file, then run filter_vep on that file
+    vep_cmd = "vep -i ${input} -o vep.raw.vcf --vcf --config ${vep_config}; " +
+              "filter_vep --format vcf -i vep.raw.vcf -o out.vcf --force_overwrite --only_matched ${filter_arg}"
   }
   else {
     vep_cmd = "vep -i ${input} -o out.vcf --vcf --config ${vep_config}"
