@@ -891,8 +891,28 @@ sub VariationFeature_to_output_hash {
   );
 
   my $hash = {
-    Uploaded_variation => ($vf->variation_name ne "." && $vf->variation_name ne $var_name) ? $vf->variation_name :  ($vf->{original_chr} || $vf->{chr}).'_'.$vf->{start}.'_'.($vf->{original_allele_string} || $vf->{allele_string} || $vf->{class_SO_term}),
-    Location            => ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start}, $vf->{end}),
+    Uploaded_variation => do {
+      my $uv;
+      eval {
+        # Try to reconstruct the user-style variant using to_VCF_record to get an un-minimised version
+        # This is because original_start, original_end are polluted with minimisation
+        my ($chr, $pos, undef, $ref, $alt) = @{$vf->to_VCF_record}[0..4];
+        die "multi-allelic" if defined $alt && $alt =~ /,/;   # skip if multi-allelic
+        $uv = join('_', $chr, $pos+0, ($ref // '-').'/'.($alt // '-'));
+      };
+      # Fallback to legacy behaviour if multi-allelic or to_VCF_record fails
+      $uv // (
+        ($vf->variation_name ne "." && $vf->variation_name ne $var_name)
+          ? $vf->variation_name
+          : sprintf(
+              '%s_%d_%s',
+              ($vf->{original_chr} || $vf->{chr}),
+              $vf->{start},
+              ($vf->{original_allele_string} || $vf->{allele_string} || $vf->{class_SO_term})
+            )
+      )
+    },
+    Location => ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start}, $vf->{end}),
   };
 
   my $converted_to_vcf = $vf->to_VCF_record;
