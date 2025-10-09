@@ -897,7 +897,8 @@ sub VariationFeature_to_output_hash {
         # Try to reconstruct the user-style variant using to_VCF_record to get an un-minimised version
         # This is because original_start, original_end are polluted with minimisation
         my ($chr, $pos, undef, $ref, $alt) = @{$vf->to_VCF_record}[0..4];
-        die "multi-allelic" if defined $alt && $alt =~ /,/;   # skip if multi-allelic
+        # skip if multi-allelic
+        die "multi-allelic" if defined $alt && $alt =~ /,/;
         $uv = join('_', $chr, $pos+0, ($ref // '-').'/'.($alt // '-'));
       };
       # Fallback to legacy behaviour if multi-allelic or to_VCF_record fails
