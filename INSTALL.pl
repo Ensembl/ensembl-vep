@@ -1216,7 +1216,13 @@ sub cache() {
         $ftp->cwd($sub) or die "ERROR: Could not change directory to $sub\n$@\n";
       }
 
-      push @files, grep {$_ =~ /tar.gz/} $ftp->ls;
+      my @dir_list = $ftp->dir();
+      foreach my $line (@dir_list) {
+        if ($line =~ /^[d-][\w-]{9}\s+\d+\s+\S+\s+\S+\s+(\d+)\s+.*?(\S+\.tar\.gz)$/) {
+          push @files, $2;
+          $file_sizes{$2} = $1;
+        }
+      }
     }
   }
   else {
@@ -1249,11 +1255,11 @@ sub cache() {
   my $size;
   my $total_size = 0;
   foreach my $file(@files) {
-    if (defined $ftp) {
-      $size = $ftp->size($file);
-    }
-    elsif (%file_sizes) {
+    if (%file_sizes) {
       $size = $file_sizes{$file};
+    }
+    elsif (defined $ftp) {
+      $size = $ftp->size($file);
     }
     else {
       $size = 0;
