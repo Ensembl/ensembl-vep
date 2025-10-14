@@ -73,7 +73,7 @@ process checkVCF {
     sort_cmd += isGzipped ? "bgzip -c tmp.vcf > ${vcf}" : "mv tmp.vcf ${vcf}"
   }
   """
-  [ -f *.gz ] || sed -i '1i ##fileformat=VCFv4.2' ${vcf}
+  [ -f *.gz ] || grep -q "^##fileformat" ${vcf} || sed -i '1i ##fileformat=VCFv4.2' ${vcf}
   ${sort_cmd}
   [ -f *.gz ] || bgzip -c ${vcf} > ${vcf}.gz
   [ -f *.gz.${index_type} ] || tabix ${tabix_arg} -p vcf -f *.gz
