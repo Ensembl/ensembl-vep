@@ -1185,9 +1185,9 @@ is_deeply(
 
 
 @flags = (
-  [qw(sift     p SIFT     tolerated_low_confidence)],
-  [qw(sift     s SIFT     0.17)],
-  [qw(sift     b SIFT     tolerated_low_confidence\(0.17\))],
+  [qw(sift     p SIFT     tolerated)],
+  [qw(sift     s SIFT     0.52)],
+  [qw(sift     b SIFT     tolerated\(0.52\))],
   [qw(polyphen p PolyPhen benign)],
   [qw(polyphen s PolyPhen 0.001)],
   [qw(polyphen b PolyPhen benign\(0.001\))],

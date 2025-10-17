@@ -120,7 +120,7 @@ SKIP: {
         'polyphen_prediction' => 'benign',
         'polyphen_score' => 0,
         'sift_prediction' => 'tolerated',
-        'sift_score' => 1,
+        'sift_score' => 0.76,
       }
     ],
     'annotate_InputBuffer - PH diffs have sift/poly'

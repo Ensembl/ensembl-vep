@@ -401,7 +401,7 @@ SKIP: {
           'gene_id' => 'ENSG00000154719',
           'cds_start' => 991,
           'appris' => 'P1',
-          'sift_prediction' => 'tolerated_low_confidence',
+          'sift_prediction' => 'tolerated',
           'protein_id' => 'ENSP00000284967',
           'polyphen_prediction' => 'benign',
           'protein_start' => 331,
@@ -410,7 +410,7 @@ SKIP: {
           ],
           'biotype' => 'protein_coding',
           'gene_symbol_source' => 'HGNC',
-          'sift_score' => '0.17',
+          'sift_score' => '0.52',
           'cds_end' => 991,
           'consequence_terms' => [
             'missense_variant'
