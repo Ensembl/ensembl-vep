@@ -404,7 +404,7 @@ SKIP: {
           'hex' => 'c6c26cfaa79a2046a684220c04b5b2e4',
           'diffs' => [
             {
-              'sift_score' => 1,
+              'sift_score' => 0.76,
               'sift_prediction' => 'tolerated',
               'polyphen_prediction' => 'benign',
               'diff' => '31S>P',
