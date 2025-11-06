@@ -890,34 +890,17 @@ sub VariationFeature_to_output_hash {
     $vf->{allele_string} || $vf->{class_SO_term}
   );
 
-  my ($converted_to_vcf, $uploaded_pos);
-
-  # Prefer the uploaded VCF POS
-  if ($vf->can('to_VCF_record')) {
-    local $@;
-    $converted_to_vcf = eval { $vf->to_VCF_record };
-    if ($converted_to_vcf) {
-      my $alt = $converted_to_vcf->[4] // '';
-      # Only use VCF POS for single-allele records (ALT must not contain a comma, if it does it's multi-allelic)
-      if ($alt !~ /,/) {
-        $uploaded_pos = 0 + $converted_to_vcf->[1]; # ensure numeric (1-based VCF POS)
-      }
-    }
-  }
-  
-  # Fallback if VCF record was unusable (multi-allelic or error)
-  $uploaded_pos //= defined $vf->{original_start}
-    ? $vf->{original_start}
-    : ($vf->{start} <= $vf->{end} ? $vf->{start} : $vf->{end});
-
   my $hash = {
-    Uploaded_variation =>
-      ($vf->variation_name ne "." && $vf->variation_name ne $var_name)
-        ? $vf->variation_name
-        : $vf->{chr} . '_' . $uploaded_pos . '_' .
-          ($vf->{original_allele_string} || $vf->{allele_string} || $vf->{class_SO_term}),
+    Uploaded_variation => do {
+      my ($chr, $pos, $ref, $alt) = @{ $vf->{_line} }[0, 1, 3, 4];
+      $alt //= '';
+      $alt =~ s/,/\//g;
+      join '_', $chr, $pos, ($alt ne '' ? "$ref/$alt" : $ref);
+    },
     Location => ($vf->{chr} || $vf->seq_region_name).':'.format_coords($vf->{start}, $vf->{end}),
   };
+
+  my $converted_to_vcf = $vf->to_VCF_record;
 
   my $alt_allele_vcf = ${$converted_to_vcf}[4];
 
