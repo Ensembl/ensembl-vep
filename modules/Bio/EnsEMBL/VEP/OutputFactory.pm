@@ -893,30 +893,37 @@ sub VariationFeature_to_output_hash {
   my $hash = {
     Uploaded_variation => do {
       my $fmt = lc($self->param('format') // '');
+
+      # prefer ID
+      my $vn = $vf->variation_name;
+      if (defined $vn && $vn ne '' && $vn ne '.' && $vn ne $var_name) {
+        $vn
+      }
       # for VCF formatted _line
-      if ($fmt eq 'vcf' && ref($vf->{_line}) eq 'ARRAY' && @{$vf->{_line}} >= 5) {
+      elsif ($fmt eq 'vcf' && ref($vf->{_line}) eq 'ARRAY' && @{$vf->{_line}} >= 5) {
         my ($chr, $pos, $ref, $alt) = @{ $vf->{_line} }[0, 1, 3, 4];
         $alt //= '';
-        $alt =~ s/,/\//g; # i.e. "A,ATT" -> "A/ATT"
-        $pos = 0 + $pos; # ensure numeric
+        $alt =~ s/,/\//g;
+        $pos = 0 + $pos;
         join '_', $chr, $pos, ($alt ne '' ? "$ref/$alt" : $ref);
       }
       # for ensembl formatted _line
       elsif ($fmt eq 'ensembl' && ref($vf->{_line}) eq 'ARRAY' && @{$vf->{_line}} >= 4) {
         my ($chr, $s, $e, $alleles) = @{ $vf->{_line} }[0, 1, 2, 3];
-        my $pos = (defined $s && defined $e) ? ($s <= $e ? $s : $e) : ($s // $vf->{original_start} // $vf->{start});
+        my $pos = (defined $s && defined $e) ? ($s <= $e ? $s : $e)
+                                            : ($s // $vf->{original_start} // $vf->{start});
         $pos = 0 + $pos;
-        join '_', $chr, $pos, $alleles; # alleles already "REF/ALT" (e.g., "-/G")
+        join '_', $chr, $pos, $alleles;
       }
       # fallback to original construction method if format/_line doesn't work
-    else {
-      if (defined $vf->variation_name && $vf->variation_name ne "." && $vf->variation_name ne $var_name) {
-        $vf->variation_name
-      } else {
-        my $chr     = $vf->{original_chr} || $vf->{chr};
-        my $pos     = $vf->{start};
-        my $alleles = $vf->{original_allele_string} || $vf->{allele_string} || $vf->{class_SO_term};
-        join '_', $chr, $pos, $alleles;
+      else {
+        if (defined $vf->variation_name && $vf->variation_name ne "." && $vf->variation_name ne $var_name) {
+          $vf->variation_name
+        } else {
+          my $chr     = $vf->{original_chr} || $vf->{chr};
+          my $pos     = $vf->{start};
+          my $alleles = $vf->{original_allele_string} || $vf->{allele_string} || $vf->{class_SO_term};
+          join '_', $chr, $pos, $alleles;
         }
       }
     },
