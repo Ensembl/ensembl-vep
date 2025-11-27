@@ -120,7 +120,27 @@ sub annotate_InputBuffer {
 
     foreach my $vf(@$vfs) {
       $vf->{slice} ||= $slice ||=  $tr->{slice};
-
+      # Ignoring if overlapping features are not on the same seq_region except for chromosome_breakpoint
+      # If chromosome_breakpoint, only ignore if none of the breakends are on the same seq_region
+      my $seq_mismatch = 1;
+      if ($vf->class_SO_term eq 'chromosome_breakpoint')
+      { 
+        $seq_mismatch = 0 if $tr->{"slice"}->{"seq_region_name"} eq $vf->{"slice"}->{"seq_region_name"};
+        if ($seq_mismatch){
+        foreach my $breakend(@{$vf->{breakends}})
+        {
+          my $breakend_seq_region_name = $breakend->{"slice"}->{"seq_region_name"};
+          $breakend_seq_region_name =~ s/^chr//i;
+          $seq_mismatch = 0 if $tr->{"slice"}->{"seq_region_name"} eq $breakend_seq_region_name;
+          last unless $seq_mismatch;
+        }
+        }
+      }
+      else
+      {
+        $seq_mismatch = 0 if $tr->{"slice"}->{"seq_region_name"} eq $vf->{"slice"}->{"seq_region_name"};
+      }
+      next if $seq_mismatch;
       if(ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature') {
         my $svo = Bio::EnsEMBL::Variation::TranscriptStructuralVariation->new(
           -transcript                   => $tr,
