@@ -478,7 +478,7 @@ sub _create_transcript {
     $tr_record->{strand}
   );
 
-  my $version = $tr_record->{attributes}->{version};
+  my $version = $tr_record->{attributes}->{version} || $tr_record->{attributes}->{transcript_version};
 
   my $tr = Bio::EnsEMBL::Transcript->new_fast({
     stable_id => $id,
