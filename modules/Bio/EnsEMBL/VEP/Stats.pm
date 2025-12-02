@@ -655,7 +655,7 @@ sub generate_run_stats {
 
   my @return = (
     ['Species', $self->species],
-    ['Command line options', '<pre>'.join(" ", @opts).'</pre>'],
+    ['Command line options', '<pre>'.$self->config->{_params}->{full_command}.'</pre>'],
     ['Start time', $self->start_time],
     ['End time', $self->end_time],
     ['Run time', $self->run_time." seconds"],
