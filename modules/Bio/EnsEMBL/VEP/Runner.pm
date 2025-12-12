@@ -901,6 +901,8 @@ sub get_all_Plugins {
         next;
       }
       
+      print STDERR "Loaded plugin $module from path '$INC{$module.'.pm'}'\n" if $self->param('debug');
+
       # now check we can instantiate it, passing any parameters to the constructor      
       my $instance;
       
