@@ -888,9 +888,11 @@ sub get_all_Plugins {
 
     foreach my $dir (@plugins_dirs) {
       if(!-d $dir) {
-        my $msg = "Plugins directory '$dir' not found.\n";
-        throw($msg) if $self->param('safe');
-        $self->warning_msg($msg);
+        if(@{$self->param('plugin')}){
+          my $msg = "Plugins directory '$dir' not found.\n";
+          throw($msg) if $self->param('safe');
+          $self->warning_msg($msg);
+        }
         next;
       }
       else{
