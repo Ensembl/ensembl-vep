@@ -883,7 +883,23 @@ sub get_all_Plugins {
   if(!defined($self->{plugins})) {
     my @plugins = ();
 
-    unshift @INC, $self->param('dir_plugins') || $self->param('dir').'/Plugins';
+    my $plugins_dir = $self->param('dir_plugins') || $self->param('dir').'/Plugins';
+    my @plugins_dirs = glob($plugins_dir);  # Resolve things like tilde paths (~/)
+
+    foreach my $dir (@plugins_dirs) {
+      if(!-d $dir) {
+        if(@{$self->param('plugin')}){
+          my $msg = "Plugins directory '$dir' not found.\n";
+          throw($msg) if $self->param('safe');
+          $self->warning_msg($msg);
+        }
+        next;
+      }
+      else{
+        print "Adding plugins from path '$dir'\n" if $self->param('debug');
+        unshift @INC, $dir;
+      }
+    }
 
     PLUGIN: foreach my $plugin_config(@{$self->param('plugin') || []}) {
 
@@ -901,6 +917,8 @@ sub get_all_Plugins {
         next;
       }
       
+      print STDERR "Loaded plugin $module from path '$INC{$module.'.pm'}'\n" if $self->param('debug');
+
       # now check we can instantiate it, passing any parameters to the constructor      
       my $instance;
       
