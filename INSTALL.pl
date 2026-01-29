@@ -287,7 +287,7 @@ $Archive::Extract::PREFER_BIN = $PREFER_BIN == 0 ? 0 : 1;
 $QUIET = 0 unless $AUTO;
 
 # updates to ensembl-vep available?
-update() unless $NO_UPDATE;
+update() unless $NO_UPDATE or $AUTO;
 
 # auto?
 if($AUTO) {
