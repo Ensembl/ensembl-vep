@@ -287,7 +287,7 @@ $Archive::Extract::PREFER_BIN = $PREFER_BIN == 0 ? 0 : 1;
 $QUIET = 0 unless $AUTO;
 
 # updates to ensembl-vep available?
-update() unless $NO_UPDATE;
+update() unless $NO_UPDATE or $AUTO;
 
 # auto?
 if($AUTO) {
@@ -2101,7 +2101,7 @@ Options
 -a | --AUTO        Run installer without user prompts. Use "a" (API + Faidx/htslib),
                    "l" (Faidx/htslib only), "c" (cache), "f" (FASTA), "p" (plugins) to specify
                    parts to install e.g. -a ac for API and cache
--n | --NO_UPDATE   Do not check for updates to ensembl-vep or API
+-n | --NO_UPDATE   Do not check for updates to ensembl-vep or API.  Implied by --AUTO
 -s | --SPECIES     Comma-separated list of species to install when using --AUTO
 -y | --ASSEMBLY    Assembly name to use if more than one during --AUTO
 
