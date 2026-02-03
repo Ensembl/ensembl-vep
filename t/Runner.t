@@ -1189,27 +1189,27 @@ SKIP: {
           {
             'gene_id' => 'ENSG00000154719',
             'variant_allele' => 'T',
-            'cdna_end' => 1122,
             'consequence_terms' => [
               '3_prime_UTR_variant'
             ],
             'strand' => -1,
             'transcript_id' => 'ENST00000307301',
             'cdna_start' => 1122,
+            'cdna_end' => undef,
             'impact' => 'MODIFIER'
           },
           {
             'gene_id' => 'ENSG00000154719',
             'cds_start' => 991,
             'variant_allele' => 'T',
-            'cdna_end' => 1033,
+            'cdna_end' => undef,
             'protein_start' => 331,
             'codons' => 'Gca/Aca',
-            'cds_end' => 991,
+            'cds_end' => undef,
             'consequence_terms' => [
               'missense_variant'
             ],
-            'protein_end' => 331,
+            'protein_end' => undef,
             'amino_acids' => 'A/T',
             'strand' => -1,
             'transcript_id' => 'ENST00000352957',
