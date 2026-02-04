@@ -8,10 +8,6 @@ import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 
 def checkVCFheader (f) {
-  // Check file extension
-  if (!(f  =~ '\\.vcf$') && !(f =~ '\\.vcf\\.b?gz$')) {
-    return false
-  }
 
   // Check if file is compressed
   if (f =~ '\\.b?gz$') {
@@ -26,18 +22,22 @@ def checkVCFheader (f) {
 
   // Check file header
   is_vcf_format = false
-  has_header = false
   for( line : lines ) {
-    if (!line =~ '^#') {
+    if (!line.startsWith("#")) {
       // stop inspecting file when reaching a line not starting with hash
-      break
-    } else if (line =~ '^##fileformat=') {
-      is_vcf_format = true
-    } else if (line =~ '^#CHROM') {
-      has_header = true
+      columns = line.split("\\s+")
+      if ((columns.size() > 4 && columns[0] =~ /^(chr)?\w+/ && columns[1] =~ /^\d+$/ && columns[3] =~ /^[ACGTN\-.]+$/)) 
+      {
+        // All conditions passed
+        return true;
+      }
     }
+    else if (line =~ '^##fileformat=') {
+      return  true
+    } 
   }
-  return is_vcf_format && has_header
+  
+
 }
 
 process checkVCF {
@@ -69,10 +69,11 @@ process checkVCF {
   if( params.sort ) {
     isGzipped = vcf.extension == 'gz'
     cat_cmd   = isGzipped ? "zcat ${vcf}" : "cat ${vcf}"
-    sort_cmd += "(${cat_cmd} | head -1000 | grep '^#'; ${cat_cmd} | grep -v '^#' | sort -k1,1d -k2,2n) > tmp.vcf; "
+    sort_cmd += "(${cat_cmd} | head -1000 | grep '^#'; ${cat_cmd} | grep -v '^#' | sort -k1,1V -k2,2n) > tmp.vcf; "
     sort_cmd += isGzipped ? "bgzip -c tmp.vcf > ${vcf}" : "mv tmp.vcf ${vcf}"
   }
   """
+  [ -f *.gz ] || grep -q "^##fileformat" ${vcf} || sed -i '1i ##fileformat=VCFv4.2' ${vcf}
   ${sort_cmd}
   [ -f *.gz ] || bgzip -c ${vcf} > ${vcf}.gz
   [ -f *.gz.${index_type} ] || tabix ${tabix_arg} -p vcf -f *.gz
