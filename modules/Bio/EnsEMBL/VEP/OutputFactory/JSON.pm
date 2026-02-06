@@ -334,11 +334,11 @@ sub add_VariationFeatureOverlapAllele_info {
         my $coord_type = lc($1);
         my ($s, $e) = split('-', $tmp);
         $vfoa_hash->{$coord_type.'_start'} = $s;
-        $vfoa_hash->{$coord_type.'_end'} = defined($e) && $e =~ /^\d+$/ ? $e : $s;
+        $vfoa_hash->{$coord_type.'_end'} = $e;
 
         # on rare occasions coord can be "?"; for now just don't print anything
         delete $vfoa_hash->{$coord_type.'_start'} unless $vfoa_hash->{$coord_type.'_start'} =~ /^\d+(\/\d)?\d*$/ ;
-        delete $vfoa_hash->{$coord_type.'_end'}   unless $vfoa_hash->{$coord_type.'_end'} =~ /^\d+(\/\d)?\d*$/ ;
+        delete $vfoa_hash->{$coord_type.'_end'}   if defined($e) && $vfoa_hash->{$coord_type.'_end'} !~ /^\d+(\/\d)?\d*$/ ;
         next;
       }
 
