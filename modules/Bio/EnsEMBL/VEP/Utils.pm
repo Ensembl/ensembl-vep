@@ -438,7 +438,7 @@ sub get_compressed_filehandle {
     return $fh;
   }
   elsif($CAN_USE_GZIP) {
-    open my $fh, "gzip -dc $file |" or die("ERROR: $!");
+    open my $fh, "gzip -dc '$file' |" or die("ERROR: $!");
     return $fh;
   }
   elsif($CAN_USE_IO_UNCOMPRESS) {
