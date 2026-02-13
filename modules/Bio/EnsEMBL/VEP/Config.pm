@@ -165,6 +165,7 @@ our @VEP_PARAMS = (
   'output_file|o=s@',        # output file name
   'compress_output=s',       # compress output with e.g. bgzip, gzip
   'no_headers',              # don't print headers
+  'mask_cache_path',         # mask cache directory in output headers/stats metadata
   'stats_file|sf=s',         # stats file name
   'stats_text',              # write stats as text
   'stats_html',              # write stats as html
