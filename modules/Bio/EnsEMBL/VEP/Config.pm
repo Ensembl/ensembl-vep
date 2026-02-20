@@ -165,6 +165,7 @@ our @VEP_PARAMS = (
   'output_file|o=s@',        # output file name
   'compress_output=s',       # compress output with e.g. bgzip, gzip
   'no_headers',              # don't print headers
+  'mask_cache_path',         # mask cache directory in output headers/stats metadata
   'stats_file|sf=s',         # stats file name
   'stats_text',              # write stats as text
   'stats_html',              # write stats as html
@@ -729,8 +730,7 @@ sub new {
     $value = join(" --$flag ", @{$value}) if ref($value) eq "ARRAY";
 
     # replace most of the provided path with [PATH]/
-    my $delim = $^O eq "MSWin32" ? '\\' : '/';
-    $value =~ s|[^,=]+$delim(?! )(?!,)(?!$)|[PATH]$delim|g;
+    $value = mask_data_paths($value);
 
     $config_command .= $value eq 1? "--$flag "  : "--$flag $value ";
   }
@@ -762,6 +762,30 @@ sub new {
   $self->{_params} = $config;
     
   return $self;
+}
+
+
+=head2 mask_data_paths
+
+  Arg 1      : string $value
+  Example    : $masked = mask_data_paths('/foo/bar/cache/homo_sapiens/115_GRCh38')
+  Description: Replaces internal path components with [PATH]/ while preserving
+               the final filename/directory component.
+  Returntype : string
+  Exceptions : none
+  Caller     : new(), BaseRunner
+  Status     : Stable
+
+=cut
+
+sub mask_data_paths {
+  my $value = shift;
+  return $value unless defined $value;
+
+  my $delim = $^O eq "MSWin32" ? '\\' : '/';
+  $value =~ s|[^,=]+$delim(?! )(?!,)(?!$)|[PATH]$delim|g;
+
+  return $value;
 }
 
 
