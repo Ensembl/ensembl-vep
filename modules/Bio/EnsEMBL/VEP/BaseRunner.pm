@@ -417,7 +417,7 @@ sub get_output_header_info {
       $info->{version_data}->{$_} ||= $as_info->{$_} for grep {$_ ne 'custom_info'} keys %$as_info;
       if($as->can('dir')) {
         my $cache_dir = $as->dir;
-        $cache_dir = Bio::EnsEMBL::VEP::Config::mask_data_paths($cache_dir) if $self->param('mask_cache_path');
+        $cache_dir = Bio::EnsEMBL::VEP::Config::mask_data_paths($cache_dir) if $self->param('mask_header_cache_path');
         $info->{cache_dir} ||= $cache_dir if defined $cache_dir;
       }
       push @{$info->{custom_info}}, $as_info->{custom_info} if $as_info->{custom_info};

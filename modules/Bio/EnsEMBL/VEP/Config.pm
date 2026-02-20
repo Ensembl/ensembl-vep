@@ -165,7 +165,7 @@ our @VEP_PARAMS = (
   'output_file|o=s@',        # output file name
   'compress_output=s',       # compress output with e.g. bgzip, gzip
   'no_headers',              # don't print headers
-  'mask_cache_path',         # mask cache directory in output headers/stats metadata
+  'mask_header_cache_path',  # mask cache directory in output headers/stats metadata
   'stats_file|sf=s',         # stats file name
   'stats_text',              # write stats as text
   'stats_html',              # write stats as html
@@ -768,9 +768,9 @@ sub new {
 =head2 mask_data_paths
 
   Arg 1      : string $value
-  Example    : $masked = mask_data_paths('/foo/bar/cache/homo_sapiens/115_GRCh38')
+  Example    : $masked = mask_data_paths('/path/to/cache/homo_sapiens/11X_GRCh38')
   Description: Replaces internal path components with [PATH]/ while preserving
-               the final filename/directory component.
+               the final filename.
   Returntype : string
   Exceptions : none
   Caller     : new(), BaseRunner
