@@ -22,13 +22,13 @@ process splitVCF {
   cpus params.cpus
   label 'bcftools'
 
+  afterScript 'rm x*'
+
   input:
   tuple val(meta), val(output_base_name), path(vcf), path(vcf_index), path(split_file), path(vep_config)
 
   output:
   tuple val(meta), val(output_base_name), path("${prefix}*.vcf.gz"), path("${prefix}*.vcf.gz.{tbi,csi}"), path(vep_config)
-
-  afterScript 'rm x*'
 
   script:
   index_type = meta.index_type

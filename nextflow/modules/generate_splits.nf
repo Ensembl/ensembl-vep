@@ -27,7 +27,7 @@ process generateSplits {
   output:
   tuple val(meta), val(output_base_name), path(vcf), path(vcf_index), path("x*"), path(vep_config)
 
-  shell:
+  script:
   """
   bcftools query -f'%CHROM\t%POS\n' ${vcf} | uniq | split -a 3 -l ${params.bin_size}
   """

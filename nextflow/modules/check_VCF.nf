@@ -4,9 +4,6 @@
  * Script to check if the files are bgzipped and bgzip if not
  */
 
-import java.util.zip.GZIPInputStream
-import java.util.zip.GZIPOutputStream
-
 def checkVCFheader (f) {
   // Check file extension
   if (!(f  =~ '\\.vcf$') && !(f =~ '\\.vcf\\.b?gz$')) {
@@ -16,7 +13,7 @@ def checkVCFheader (f) {
   // Check if file is compressed
   if (f =~ '\\.b?gz$') {
     InputStream fileStream = new FileInputStream(f.toString())
-    InputStream gzip = new GZIPInputStream(fileStream)
+    InputStream gzip = new java.util.zip.GZIPInputStream(fileStream)
     Reader decoder = new InputStreamReader(gzip)
     BufferedReader data = new BufferedReader(decoder)
     lines = data.lines()
@@ -25,8 +22,8 @@ def checkVCFheader (f) {
   }
 
   // Check file header
-  is_vcf_format = false
-  has_header = false
+  boolean is_vcf_format = false
+  boolean has_header = false
   for( line : lines ) {
     if (!line =~ '^#') {
       // stop inspecting file when reaching a line not starting with hash
@@ -54,13 +51,13 @@ process checkVCF {
   label 'vep'
   errorStrategy 'ignore'
 
+  afterScript "rm *.vcf *.vcf.tbi *.vcf.csi"
+
   input:
   tuple val(meta), path(vcf), path(vcf_index), path(vep_config)
   
   output:
   tuple val(meta), val(vcf.simpleName), path("${vcf.simpleName}-checked.vcf.gz"), path("${vcf.simpleName}-checked.vcf.gz.${meta.index_type}"), path(vep_config)
-
-  afterScript "rm *.vcf *.vcf.tbi *.vcf.csi"
 
   script:
   index_type = meta.index_type
