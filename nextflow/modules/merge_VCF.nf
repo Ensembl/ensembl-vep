@@ -16,7 +16,8 @@ process mergeVCF {
   /*
   Merge VCF files into a single file
   */
-    
+
+  cache 'lenient'
   cpus params.cpus
   label 'bcftools'
   cache 'lenient'

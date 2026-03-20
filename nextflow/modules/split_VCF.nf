@@ -18,14 +18,15 @@ process splitVCF {
   Tuple of original VCF, split VCF files, split VCF index files, vep config file, a output dir, and the index type of VCF file
   */
   
+  cache 'lenient'
   cpus params.cpus
   label 'bcftools'
 
   input:
-  tuple val(meta), path(vcf), path(vcf_index), path(split_file), path(vep_config)
+  tuple val(meta), val(output_base_name), path(vcf), path(vcf_index), path(split_file), path(vep_config)
 
   output:
-  tuple val(meta), val("${vcf}"), path("${prefix}*.vcf.gz"), path("${prefix}*.vcf.gz.{tbi,csi}"), path(vep_config)
+  tuple val(meta), val(output_base_name), path("${prefix}*.vcf.gz"), path("${prefix}*.vcf.gz.{tbi,csi}"), path(vep_config)
 
   afterScript 'rm x*'
 

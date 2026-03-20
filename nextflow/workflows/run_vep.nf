@@ -104,7 +104,7 @@ workflow vep {
           res = []
           for (f : files) {
             // put it.file as index to avoid Nextflow errors
-            res += [ meta: it.meta, original: it.file, file: f, index: it.file, vep_config: it.vep_config, format: 'other' ]
+            res += [ meta: it.meta, output_base_name: it.file.simpleName, file: f, index: it.file, vep_config: it.vep_config, format: 'other' ]
           }
           res
       } |

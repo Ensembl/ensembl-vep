@@ -17,14 +17,15 @@ process generateSplits {
   Tuple of VCF, VCF index, split files, vep config file, a output dir, and the index type of VCF file
   */
   
+  cache 'lenient'
   cpus params.cpus
   label 'bcftools'
 
   input:
-  tuple val(meta), path(vcf), path(vcf_index), path(vep_config)
+  tuple val(meta), val(output_base_name), path(vcf), path(vcf_index), path(vep_config)
 
   output:
-  tuple val(meta), path(vcf), path(vcf_index), path("x*"), path(vep_config)
+  tuple val(meta), val(output_base_name), path(vcf), path(vcf_index), path("x*"), path(vep_config)
 
   shell:
   """

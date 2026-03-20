@@ -49,6 +49,7 @@ process checkVCF {
   Tuple of VCF, VCF index, vep config file, a output dir, and the index type of VCF file
   */
 
+  cache 'lenient'
   cpus params.cpus
   label 'vep'
   errorStrategy 'ignore'
@@ -57,7 +58,7 @@ process checkVCF {
   tuple val(meta), path(vcf), path(vcf_index), path(vep_config)
   
   output:
-  tuple val(meta), path("*.gz", includeInputs: true), path ("*.gz.{tbi,csi}", includeInputs: true), path(vep_config)
+  tuple val(meta), val(vcf.simpleName), path("${vcf.simpleName}-checked.vcf.gz"), path("${vcf.simpleName}-checked.vcf.gz.${meta.index_type}"), path(vep_config)
 
   afterScript "rm *.vcf *.vcf.tbi *.vcf.csi"
 
@@ -65,20 +66,30 @@ process checkVCF {
   index_type = meta.index_type
   tabix_arg = index_type == 'tbi' ? '' : '-C'
 
+  outfile_name = "${vcf.simpleName}-checked.vcf.gz"
+
+  sorted_file = ""
   sort_cmd = ""
   if( params.sort ) {
     isGzipped = vcf.extension == 'gz'
+    sorted_file = "${vcf.baseName}.sorted.vcf"
+    sorted_file += isGzipped ? ".gz" : ""
     cat_cmd   = isGzipped ? "zcat ${vcf}" : "cat ${vcf}"
-    sort_cmd += "(${cat_cmd} | head -1000 | grep '^#'; ${cat_cmd} | grep -v '^#' | sort -k1,1d -k2,2n) > tmp.vcf; "
-    sort_cmd += isGzipped ? "bgzip -c tmp.vcf > ${vcf}" : "mv tmp.vcf ${vcf}"
+    sort_cmd += "(${cat_cmd} | head -1000 | grep '^#'; ${cat_cmd} | grep -v '^#' | sort -k1,1d -k2,2n)"  // Sort
+    sort_cmd += isGzipped ? "| bgzip -c" : ""  // Conditionally compress
+    sort_cmd += " > ${sorted_file}"  // Write to output file
   }
+  else {
+    sorted_file = vcf.toString()
+  }
+
   """
   ${sort_cmd}
-  [ -f *.gz ] || bgzip -c ${vcf} > ${vcf}.gz
-  [ -f *.gz.${index_type} ] || tabix ${tabix_arg} -p vcf -f *.gz
+  [[ "${sorted_file}" == *.gz ]] && mv ${sorted_file} ${outfile_name} || bgzip -c ${sorted_file} > ${outfile_name}
+  [ -f ${outfile_name}.${index_type} ] || tabix ${tabix_arg} -p vcf -f ${outfile_name}
 
   # quickly test tabix -- ensures both bgzip and tabix are okay
-  chr=\$(tabix -l *.gz | head -n1)
-  tabix *.gz \${chr}:1-10001
+  chr=\$(tabix -l ${outfile_name} | head -n1)
+  tabix ${outfile_name} \${chr}:1-10001
   """
 }
