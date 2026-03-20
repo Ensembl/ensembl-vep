@@ -6,12 +6,6 @@
 
 nextflow.enable.dsl=2
 
-// defaults
-merged_vcf = null
-if ( params.output_prefix ){
-  merged_vcf = params.output_prefix + "_VEP.vcf.gz"
-}
-
 process mergeVCF {
   /*
   Merge VCF files into a single file
@@ -29,6 +23,11 @@ process mergeVCF {
   val("${output_dir}/${merged_vcf}")
 
   script:
+  merged_vcf = null
+  if ( params.output_prefix ){
+    merged_vcf = params.output_prefix + "_VEP.vcf.gz"
+  }
+
   index_type = meta.index_type
   one_to_many = meta.one_to_many
   output_dir = meta.output_dir
