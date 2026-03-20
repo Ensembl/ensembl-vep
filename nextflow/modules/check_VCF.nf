@@ -49,7 +49,7 @@ process checkVCF {
   cache 'lenient'
   cpus params.cpus
   label 'vep'
-  errorStrategy 'ignore'
+  errorStrategy 'terminate'
 
   afterScript "rm *.vcf *.vcf.tbi *.vcf.csi"
 
