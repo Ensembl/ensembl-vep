@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-/* 
+/*
  * Script to check if the files are bgzipped and bgzip if not
  */
 
@@ -55,7 +55,7 @@ process checkVCF {
 
   input:
   tuple val(meta), path(vcf), path(vcf_index), path(vep_config)
-  
+
   output:
   tuple val(meta), val(vcf.simpleName), path("${vcf.simpleName}-checked.vcf.gz"), path("${vcf.simpleName}-checked.vcf.gz.${meta.index_type}"), path(vep_config)
 

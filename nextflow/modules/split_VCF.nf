@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-/* 
+/*
  * Script to split a VCF file into multiple smaller VCFs
  */
 
@@ -17,7 +17,7 @@ process splitVCF {
   -------
   Tuple of original VCF, split VCF files, split VCF index files, vep config file, a output dir, and the index type of VCF file
   */
-  
+
   cache 'lenient'
   cpus params.cpus
   label 'bcftools'
@@ -33,7 +33,7 @@ process splitVCF {
   script:
   index_type = meta.index_type
   index_flag = index_type == "tbi" ? "-t" : "-c"
-  
+
   """
   bcftools view --no-version -T ${split_file} -Oz ${vcf} > ${prefix}.${split_file}.vcf.gz
   bcftools index ${index_flag} ${prefix}.${split_file}.vcf.gz

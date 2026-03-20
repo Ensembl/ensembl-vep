@@ -1,4 +1,4 @@
-/* 
+/*
  * Workflow to run VEP on multiple input files
  *
  * Requires Nextflow: https://nextflow.io
@@ -9,8 +9,8 @@ nextflow.enable.dsl=2
 // module imports
 include { checkVCFheader; checkVCF } from '../modules/check_VCF.nf'
 include { generateSplits } from '../modules/generate_splits.nf'
-include { splitVCF } from '../modules/split_VCF.nf' 
-include { mergeVCF } from '../modules/merge_VCF.nf'  
+include { splitVCF } from '../modules/split_VCF.nf'
+include { mergeVCF } from '../modules/merge_VCF.nf'
 include { runVEP as runVEPonVCF } from '../modules/run_vep.nf'
 include { runVEP } from '../modules/run_vep.nf'
 
@@ -57,7 +57,7 @@ def createInputChannels (input, pattern) {
     files = "${files}/${pattern}"
   }
   files = Channel.fromPath(files)
-  
+
   return files;
 }
 
@@ -138,10 +138,10 @@ workflow NF_VEP {
 
   input.count()
     .combine( vep_config.count() )
-    .subscribe{ if ( it[0] != 1 && it[1] != 1 ) 
-      exit 1, "Detected many-to-many scenario between VCF and VEP config files - currently not supported" 
+    .subscribe{ if ( it[0] != 1 && it[1] != 1 )
+      exit 1, "Detected many-to-many scenario between VCF and VEP config files - currently not supported"
     }
-    
+
   // set if it is a one-to-many situation (single VCF and multiple ini file)
   // in this situation we produce output files with different names
   one_to_many = input.count()
@@ -149,9 +149,9 @@ workflow NF_VEP {
     .map{ it[0] == 1 && it[1] != 1 }
 
   output_dir = createOutputChannel(params.outdir)
-  
+
   filters = Channel.of(params.filters)
-  
+
   input
     .combine( vep_config )
     .combine( one_to_many )
@@ -163,7 +163,7 @@ workflow NF_VEP {
         meta.one_to_many = one_to_many
         meta.output_dir = output_dir
         meta.filters = filters
-        
+
         // NOTE: csi is default unless a tbi index already exists
         meta.index_type = file(data + ".tbi").exists() ? "tbi" : "csi"
 
@@ -172,7 +172,7 @@ workflow NF_VEP {
         [ meta: meta, file: data, index: index, vep_config: vep_config ]
     }
     .set{ ch_input }
-  
+
   vep(ch_input)
 }
 
