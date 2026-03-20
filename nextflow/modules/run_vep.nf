@@ -16,20 +16,21 @@ process runVEP {
   */
   
   publishDir "${params.outdir}/vep-summary",
-    pattern: "vep-${original}-${vep_config}-*.gz_summary.*",
+    pattern: "vep-${output_base_name}-${vep_config}-*.gz_summary.*",
     mode:'move'
+  cache 'lenient'
   cpus params.cpus
   label 'vep'
 
   input:
-  tuple val(meta), val(original_file), path(input), path(index), path(vep_config), val(format)
+  tuple val(meta), val(output_base_name), path(input), path(index), path(vep_config), val(format)
   
   output:
-  tuple val(meta), val(original_file), path("${out}{.gz,}"), path("${out}{.gz,}.{tbi,csi}"), val("${vep_config}"), emit: files
+  tuple val(meta), val(output_base_name), path("${out}{.gz,}"), path("${out}{.gz,}.{tbi,csi}"), val("${vep_config}"), emit: files
 
   script:
   index_type = meta.index_type
-  out = "vep" + "-" + file(original_file).getSimpleName() + "-" + vep_config.getSimpleName() + "-" + input.getName().replace(".gz", "")
+  out = "vep" + "-" + output_base_name + "-" + vep_config.getSimpleName() + "-" + input.getName().replace(".gz", "")
   tabix_arg = index_type == 'tbi' ? '' : '-C'
   
   if( !input.exists() ) {
