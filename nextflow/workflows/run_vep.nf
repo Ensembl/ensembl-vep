@@ -112,10 +112,10 @@ workflow vep {
       runVEP
 
     // Merge split VCF files (creates one output VCF for each input VCF)
-    out = runVEP.out.files
+    mergeInput = runVEP.out.files
             .mix(runVEPonVCF.out.files)
             .groupTuple(by: [0, 1, 4])
-    mergeVCF(out)
+    mergeVCF(mergeInput)
   emit:
     mergeVCF.out
 }

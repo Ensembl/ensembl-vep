@@ -6,8 +6,6 @@
 
 nextflow.enable.dsl=2
 
-prefix = ""
-
 process generateSplits {
   /*
   Function to read variants from VCF file and write them to separate to split files
