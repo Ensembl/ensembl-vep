@@ -174,6 +174,8 @@ sub _create_records {
   my $self = shift;
   my $overlap_result = shift;
   my $get_scores = shift;
+  my $overlap_percentage = shift;
+  my $overlap_bp = shift;
 
   my @records;
 
@@ -241,6 +243,10 @@ sub _create_records {
         $record->{fields}->{$field} = ref($data) eq 'HASH' ? $data->{$index} : $data;
       }
 
+      $record->{overlap_percentage} = $overlap_percentage if defined $overlap_percentage && $self->{show_overlaps};
+      $record->{overlap_bp} = $overlap_bp if defined $overlap_bp && $self->{show_overlaps};
+      $self->_add_identifier($record) if $self->report_coords == 2;     # try to add name besides coord if coords=2
+
       push @records, $record;
     }
   }
@@ -259,6 +265,8 @@ sub _create_records {
       }
     }
 
+    $record->{overlap_percentage} = $overlap_percentage if defined $overlap_percentage && $self->{show_overlaps};
+    $record->{overlap_bp} = $overlap_bp if defined $overlap_bp && $self->{show_overlaps};
     $self->_add_identifier($record) if $self->report_coords == 2;     # try to add name besides coord if coords=2
 
     push @records, $record;

@@ -216,7 +216,8 @@ sub get_all_custom {
     'same_type',
     'num_records',
     'summary_stats',
-    'gff_type'
+    'gff_type',
+    'show_overlaps',
   );
 
   foreach my $custom_string(@{$self->param('custom') || []}) {
@@ -263,7 +264,8 @@ sub get_all_custom {
       same_type => $hash{"same_type"} || 0,
       reciprocal => $hash{"reciprocal"} || 0,
       num_records => $hash{"num_records"},
-      gff_type => $hash{"gff_type"} || "transcript"
+      gff_type => $hash{"gff_type"} || "transcript",
+      show_overlaps => $hash{"show_overlaps"} || 0,
     };
 
     $opts->{overlap_def} = $opts->{reciprocal} ?
