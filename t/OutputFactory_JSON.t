@@ -69,7 +69,7 @@ SKIP: {
         {
           'gene_id' => 'ENSG00000154719',
           'variant_allele' => 'T',
-          'cdna_end' => '1122',
+          'cdna_end' => undef,
           'consequence_terms' => [
             '3_prime_UTR_variant'
           ],
@@ -82,14 +82,14 @@ SKIP: {
           'gene_id' => 'ENSG00000154719',
           'cds_start' => '991',
           'variant_allele' => 'T',
-          'cdna_end' => '1033',
+          'cdna_end' => undef,
           'protein_start' => '331',
           'codons' => 'Gca/Aca',
-          'cds_end' => '991',
+          'cds_end' => undef,
           'consequence_terms' => [
             'missense_variant'
           ],
-          'protein_end' => '331',
+          'protein_end' => undef,
           'amino_acids' => 'A/T',
           'strand' => -1,
           'transcript_id' => 'ENST00000352957',
@@ -244,7 +244,7 @@ SKIP: {
           ],
           'variant_allele' => 'T',
           'strand' => -1,
-          'cdna_end' => 1122,
+          'cdna_end' => undef,
           'cdna_start' => 1122,
           'transcript_id' => 'ENST00000307301',
           'impact' => 'MODIFIER'
@@ -253,14 +253,14 @@ SKIP: {
           'cds_start' => 991,
           'gene_id' => 'ENSG00000154719',
           'variant_allele' => 'T',
-          'cdna_end' => 1033,
+          'cdna_end' => undef,
           'protein_start' => 331,
           'codons' => 'Gca/Aca',
-          'cds_end' => 991,
+          'cds_end' => undef,
           'consequence_terms' => [
             'missense_variant'
           ],
-          'protein_end' => 331,
+          'protein_end' => undef,
           'strand' => -1,
           'amino_acids' => 'A/T',
           'cdna_start' => 1033,
@@ -354,7 +354,7 @@ SKIP: {
       'transcript_consequences' => [
         {
           'variant_allele' => 'T',
-          'cdna_end' => 1122,
+          'cdna_end' => undef,
           'swissprot' => [
             'Q9NYK5'
           ],
@@ -383,14 +383,14 @@ SKIP: {
         {
           'hgvsp' => 'ENSP00000284967.6:p.Ala331Thr',
           'variant_allele' => 'T',
-          'cdna_end' => 1033,
+          'cdna_end' => undef,
           'polyphen_score' => '0.001',
           'codons' => 'Gca/Aca',
           'swissprot' => [
             'Q9NYK5'
           ],
           'hgvsc' => 'ENST00000352957.8:c.991G>A',
-          'protein_end' => 331,
+          'protein_end' => undef,
           'strand' => -1,
           'amino_acids' => 'A/T',
           'hgnc_id' => 'HGNC:14027',
@@ -411,7 +411,7 @@ SKIP: {
           'biotype' => 'protein_coding',
           'gene_symbol_source' => 'HGNC',
           'sift_score' => '0.17',
-          'cds_end' => 991,
+          'cds_end' => undef,
           'consequence_terms' => [
             'missense_variant'
           ],
@@ -526,7 +526,7 @@ SKIP: {
       'cdna_end' => 2348,
       'codons' => 'atc/atTc',
       'used_ref' => '-',
-      'protein_end' => 716,
+      'protein_end' => undef,
       'amino_acids' => 'I/IX',
       'strand' => -1,
       'cdna_start' => 2347,
@@ -556,7 +556,7 @@ SKIP: {
   is_deeply($json->decode($lines[0])->{'transcript_consequences'}, [{
     'gene_id' => 'ENSG00000154719',
     'variant_allele' => 'T',
-    'cdna_end' => '1122/1199',
+    'cdna_end' => undef,
     'consequence_terms' => [
       '3_prime_UTR_variant'
     ],
@@ -569,14 +569,14 @@ SKIP: {
     'cds_start' => '991/1017',
     'gene_id' => 'ENSG00000154719',
     'variant_allele' => 'T',
-    'cdna_end' => '1033/1110',
+    'cdna_end' => undef,
     'protein_start' => '331/338',
     'codons' => 'Gca/Aca',
-    'cds_end' => '991/1017',
+    'cds_end' => undef,
     'consequence_terms' => [
       'missense_variant'
     ],
-    'protein_end' => '331/338',
+    'protein_end' => undef,
     'strand' => -1,
     'amino_acids' => 'A/T',
     'cdna_start' => '1033/1110',
