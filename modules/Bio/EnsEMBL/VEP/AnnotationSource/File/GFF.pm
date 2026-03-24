@@ -200,6 +200,9 @@ sub _create_records {
   my $associated_gene = $record_hash->{'attributes'}->{'gene_id'} ? $record_hash->{'attributes'}->{'gene_id'}  : '.';
   $record->[0]->{fields}->{associated_gene} = $associated_gene;
 
+
+  $self->_add_identifier($record->[0]) if $self->report_coords == 2;     # try to add name besides coord if coords=2
+
   return $record;
 }
 

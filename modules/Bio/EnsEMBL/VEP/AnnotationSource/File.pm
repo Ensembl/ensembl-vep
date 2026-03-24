@@ -463,6 +463,7 @@ sub _create_records {
   my $get_scores     = shift;
 
   my $record = [{ name  => $self->_get_record_name }];
+  $self->_add_identifier($record->[0]) if $self->report_coords == 2;     # try to add name besides coord if coords=2
   $record->[0]->{score} = $self->parser->get_score if $get_scores;
   return $record;
 }
@@ -494,6 +495,30 @@ sub _get_record_name {
       $parser->get_end
     ) :
     $name;
+}
+
+
+=head2 _add_identifier
+ 
+  Arg 1      : record hashref
+  Example    : $as->_add_identifier($record);
+  Description: Add an identifier to the given record as read from the 
+               annotation source. Does not add anything if no identifier found.
+  Returntype : none
+  Exceptions : none
+  Caller     : _create_records()
+  Status     : Stable
+
+=cut
+
+sub _add_identifier {
+  my $self = shift;
+  my $record = shift;
+
+  my $parser = $self->parser;
+  my $identifier = $parser->can("get_name") ? $parser->get_name : undef;
+
+  $record->{id} = $identifier if defined $identifier;
 }
 
 

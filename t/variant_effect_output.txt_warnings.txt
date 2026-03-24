@@ -1,0 +1,41 @@
+WARNING: Setting offline mode. To create database connection use either --database or --cache.
+n/ensembl-vep/t/testdata/custom/test.gff.gz GFF/GTF file. This feature_type is not supported in VEP.
+WARNING: Ignoring 'three_prime_UTR' feature_type from /hps/software/users/ensembl/variation/snhossain/ensembl-vep/t/testdata/custom/test.gff.gz GFF/GTF file. This feature_type is not supported in VEP.
+WARNING: Ignoring 'biological_region' feature_type from /hps/software/users/ensembl/variation/snhossain/ensembl-vep/t/testdata/custom/test.gff.gz GFF/GTF file. This feature_type is not supported in VEP.
+WARNING: Ignoring 'five_prime_UTR' feature_type from /hps/software/users/ensembl/variation/snhossain/ensembl-vep/t/testdata/custom/test.gff.gz GFF/GTF file. This feature_type is not supported in VEP.
+WARNING: Parent entries with the following IDs were not found or skipped due to invalid types: foo
+WARNING: Unable to determine biotype of ENST00000307301
+WARNING: Failed to add exon to transcript ENST00000307301
+
+-------------------- EXCEPTION --------------------
+MSG: Exon overlaps with other exon in same transcript.
+Transcript Exons:
+  25607403-25607517 (-1) 
+  25606449-25606655 (-1) 
+  25603796-25603935 (-1) 
+  25601368-25601467 (-1) 
+  25599799-25599866 (-1) 
+  25597302-25597414 (-1) 
+  25593893-25593958 (-1) 
+  25592812-25592965 (-1) 
+  25588835-25588882 (-1) 
+  25587701-25587789 (-1) 
+
+This Exon:
+  25585656-25685754 (-1) 
+
+STACK Bio::EnsEMBL::Transcript::add_Exon /hps/software/users/ensembl/variation/snhossain/ensembl/modules/Bio/EnsEMBL/Transcript.pm:1418
+STACK (eval) /hps/software/users/ensembl/variation/snhossain/ensembl-vep/modules/Bio/EnsEMBL/VEP/AnnotationSource/File/BaseGXF.pm:574
+STACK Bio::EnsEMBL::VEP::AnnotationSource::File::BaseGXF::_create_transcript /hps/software/users/ensembl/variation/snhossain/ensembl-vep/modules/Bio/EnsEMBL/VEP/AnnotationSource/File/BaseGXF.pm:574
+STACK Bio::EnsEMBL::VEP::AnnotationSource::File::BaseGXF::lazy_load_transcript /hps/software/users/ensembl/variation/snhossain/ensembl-vep/modules/Bio/EnsEMBL/VEP/AnnotationSource/File/BaseGXF.pm:844
+STACK toplevel AnnotationSource_File_GFF.t:233
+Date (localtime)    = Thu Jul 10 15:10:03 2025
+Ensembl API version = 114
+---------------------------------------------------
+WARNING: No exons found for protein_coding transcript parent_gene_id.1
+WARNING: Ignoring 'chromosome' feature_type from /hps/software/users/ensembl/variation/snhossain/ensembl-vep/t/testdata/custom/test.gff.gz GFF/GTF file. This feature_type is not supported in VEP.
+WARNING: Ignoring 'biological_region' feature_type from /hps/software/users/ensembl/variation/snhossain/ensembl-vep/t/testdata/custom/test.gff.gz GFF/GTF file. This feature_type is not supported in VEP.
+WARNING: Ignoring 'three_prime_UTR' feature_type from /hps/software/users/ensembl/variation/snhossain/ensembl-vep/t/testdata/custom/test.gff.gz GFF/GTF file. This feature_type is not supported in VEP.
+WARNING: Ignoring 'five_prime_UTR' feature_type from /hps/software/users/ensembl/variation/snhossain/ensembl-vep/t/testdata/custom/test.gff.gz GFF/GTF file. This feature_type is not supported in VEP.
+WARNING: Ignoring 'region' feature_type from /hps/software/users/ensembl/variation/snhossain/ensembl-vep/t/testdata/custom/refseq.gff.gz GFF/GTF file. This feature_type is not supported in VEP.
+WARNING: Ignoring 'match' feature_type from /hps/software/users/ensembl/variation/snhossain/ensembl-vep/t/testdata/custom/refseq.gff.gz GFF/GTF file. This feature_type is not supported in VEP.
