@@ -15,7 +15,7 @@ include { runVEP as runVEPonVCF } from '../modules/run_vep.nf'
 include { runVEP } from '../modules/run_vep.nf'
 
 // print usage
-if (params.help) {
+def print_help () {
   log.info """
 Pipeline to run VEP
 -------------------
@@ -41,14 +41,12 @@ Parameters:
   --filters STRING          Comma-separated list of filter conditions to pass to filter_vep,
                             such as "AF < 0.01,Feature is ENST00000377918".
                             Read more on how to write filters at https://ensembl.org/info/docs/tools/vep/script/vep_filter.html
-                            Default: null (filter_vep is not run)
-  """
-  exit 1
+                            Default: null (filter_vep is not run)"""
 }
 
 
 def createInputChannels (input, pattern) {
-  files = file(input)
+  def files = file(input)
   if ( !files.exists() ) {
     exit 1, "The specified input does not exist: ${input}"
   }
@@ -56,7 +54,7 @@ def createInputChannels (input, pattern) {
   if (files.isDirectory()) {
     files = "${files}/${pattern}"
   }
-  files = Channel.fromPath(files)
+  files = channel.fromPath(files)
 
   return files;
 }
@@ -69,7 +67,7 @@ def createOutputChannel (output) {
       output = "${launchDir}/${output}";
   }
 
-  return Channel.fromPath(output)
+  return channel.fromPath(output)
 }
 
 workflow vep {
@@ -78,10 +76,10 @@ workflow vep {
   main:
     // Process input based on file extension
     inputs |
-      branch {
-        index: it.file =~ '\\.(tbi|csi)$'
-        ignore: it.file =~ '\\.(ini|registry|config)$'
-        vcf_with_header: checkVCFheader(it.file)
+      branch { in ->
+        index: in.file =~ '\\.(tbi|csi)$'
+        ignore: in.file =~ '\\.(ini|registry|config)$'
+        vcf_with_header: checkVCFheader(in.file)
         other: true
       } |
       set { data }
@@ -94,19 +92,19 @@ workflow vep {
       // Split VCF using split files
       splitVCF | transpose |
       // Run VEP for each split VCF file and for each VEP config
-      map { it + [format: 'vcf'] } | runVEPonVCF
+      map { split_out -> split_out + [format: 'vcf'] } | runVEPonVCF
 
     // Run VEP on headerless VCF and non-VCF files
     data.other |
-      map {
-          // Split input by bin_size
-          files = it.file.splitText(by: params.bin_size, file: true)
-          res = []
-          for (f : files) {
-            // put it.file as index to avoid Nextflow errors
-            res += [ meta: it.meta, output_base_name: it.file.simpleName, file: f, index: it.file, vep_config: it.vep_config, format: 'other' ]
-          }
-          res
+      map { in ->
+        // Split input by bin_size
+        def files = in.file.splitText(by: params.bin_size, file: true)
+        def res = []
+        files.each { file ->
+          // put in.file as index to avoid Nextflow errors
+          res += [ meta: in.meta, output_base_name: in.file.simpleName, file: file, index: in.file, vep_config: in.vep_config, format: 'other' ]
+        }
+        res
       } |
       flatten |
       runVEP
@@ -136,40 +134,38 @@ workflow NF_VEP {
   input = createInputChannels(params.input, "*")
   vep_config = createInputChannels(params.vep_config, "*.ini")
 
-  input.count()
-    .combine( vep_config.count() )
-    .subscribe{ if ( it[0] != 1 && it[1] != 1 )
-      exit 1, "Detected many-to-many scenario between VCF and VEP config files - currently not supported"
-    }
+  def input_count = input.count()
+  def config_count = vep_config.count()
+
+  if (input_count != 1 && config_count != 1) {
+    exit 1, "Detected many-to-many scenario between VCF and VEP config files - currently not supported"
+  }
 
   // set if it is a one-to-many situation (single VCF and multiple ini file)
   // in this situation we produce output files with different names
-  one_to_many = input.count()
-    .combine( vep_config.count() )
-    .map{ it[0] == 1 && it[1] != 1 }
+  one_to_many = input_count == 1 && config_count != 1
 
   output_dir = createOutputChannel(params.outdir)
 
-  filters = Channel.of(params.filters)
+  filters = channel.of(params.filters)
 
   input
     .combine( vep_config )
-    .combine( one_to_many )
     .combine( output_dir )
     .combine( filters )
     .map {
-      data, vep_config, one_to_many, output_dir, filters ->
-        meta = [:]
+      data, config, out_dir, filter ->
+        def meta = [:]
         meta.one_to_many = one_to_many
-        meta.output_dir = output_dir
-        meta.filters = filters
+        meta.output_dir = out_dir
+        meta.filters = filter
 
         // NOTE: csi is default unless a tbi index already exists
         meta.index_type = file(data + ".tbi").exists() ? "tbi" : "csi"
 
-        index = data + ".${meta.index_type}"
+        def index = data + ".${meta.index_type}"
 
-        [ meta: meta, file: data, index: index, vep_config: vep_config ]
+        [ meta: meta, file: data, index: index, vep_config: config ]
     }
     .set{ ch_input }
 
@@ -177,5 +173,9 @@ workflow NF_VEP {
 }
 
 workflow {
+  if (params.help) {
+    print_help()
+    exit 1
+  }
   NF_VEP()
 }

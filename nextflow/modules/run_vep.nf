@@ -29,9 +29,9 @@ process runVEP {
   tuple val(meta), val(output_base_name), path("${out}{.gz,}"), path("${out}{.gz,}.{tbi,csi}"), val("${vep_config}"), emit: files
 
   script:
-  index_type = meta.index_type
   out = "vep" + "-" + output_base_name + "-" + vep_config.getSimpleName() + "-" + input.getName().replace(".gz", "")
-  tabix_arg = index_type == 'tbi' ? '' : '-C'
+  def index_type = meta.index_type
+  def tabix_arg = index_type == 'tbi' ? '' : '-C'
   
   if( !input.exists() ) {
     exit 1, "Missing input: ${input}"
@@ -43,7 +43,7 @@ process runVEP {
   else if ( meta.filters != null ){
     def filters = meta.filters.split(",")
     def filter_arg = ""
-    for (filter in filters) {
+    filters.each { filter ->
       filter_arg = filter_arg + "-filter \"" + filter + "\" "
     }
     // write VEP output to a file, then run filter_vep on that file
