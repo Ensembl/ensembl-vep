@@ -323,10 +323,6 @@ sub annotate_InputBuffer {
       if ($parser->seek($self->get_source_chr_name($chr), $vf_start - 1, $vf_end + 1)) {
         $parser->next();
       }
-      # try to seek first record from the same chrosome, the previous seek may fail if annotation starts way upstream   
-      elsif ($parser->seek($self->get_source_chr_name($chr))) {
-        $parser->next();    
-      }
 
       my $stats = $self->{summary_stats};
       # Different checks before annotating the VF:
