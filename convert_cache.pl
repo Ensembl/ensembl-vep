@@ -248,7 +248,7 @@ sub main {
           while(keys %$chr_files or $active_forks) {
 
             # only spawn new forks if we have space
-            if($active_forks <= $fork_number) {
+            if($active_forks < $fork_number) {
 
               my $chr = (keys %$chr_files)[0];
               my $files = delete($chr_files->{$chr});
