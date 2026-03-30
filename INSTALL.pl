@@ -1066,8 +1066,10 @@ sub test() {
 
   print "\nTesting VEP installation\n" unless $QUIET;
 
-  eval q{use Test::Harness; use Test::Exception; };
-  if(!$@) {
+  my @test_modules = qw(Test::Harness Test::Exception Test::Warnings);
+  my @missing_test_modules = grep {!eval "use $_; 1"} @test_modules;
+
+  if(!@missing_test_modules) {
     opendir TEST, "$dirname\/t";
     my @test_files = map {"$dirname\/t\/".$_} grep {!/^\./ && /\.t$/} readdir TEST;
     closedir TEST;
@@ -1079,6 +1081,12 @@ sub test() {
     print "Warning: Tests failed, VEP may not run correctly\n" unless runtests(@test_files);
   }
   else {
+    print
+      "Warning: Full test suite not run because these Perl test modules are missing: ".
+      join(", ", @missing_test_modules).
+      "\n"
+      unless $QUIET;
+
     my $test_vep = `perl -I $DEST_DIR $dirname/vep --help 2>&1`;
 
     $test_vep =~ /ENSEMBL VARIANT EFFECT PREDICTOR/ or die "ERROR: Testing VEP script failed with the following error\n$test_vep\n";
