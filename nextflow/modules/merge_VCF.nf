@@ -20,24 +20,28 @@ process mergeVCF {
   tuple val(meta), val(original_file), path(vcf_files), path(index_files), val(vep_config)
 
   output:
-  val("${output_dir}/${merged_vcf}")
+  tuple val(file_base_name), val(vep_config), val("${output_dir}/${merged_vcf}")
 
   script:
+  file_base_name = meta.file_base_name
   merged_vcf = null
   if ( params.output_prefix ){
-    merged_vcf = params.output_prefix + "_VEP.vcf.gz"
+    merged_vcf = params.output_prefix
+  }
+  else{
+    merged_vcf = meta.file_base_name
   }
 
-  index_type = meta.index_type
-  one_to_many = meta.one_to_many
+  if (meta.one_to_many) {
+    merged_vcf += "_" + file(vep_config).getName().replace(".ini", "")
+  }
+
+  merged_vcf += '_VEP.vcf.gz'
+
+  def index_type = meta.index_type
   output_dir = meta.output_dir
 
-  merged_vcf = merged_vcf ?: file(original_file).getBaseName() + "_VEP.vcf.gz"
-  merged_vcf = one_to_many ? merged_vcf.replace(
-    "_VEP.vcf",
-    "_" + file(vep_config).getName().replace(".ini", "") + "_VEP.vcf"
-  ) : merged_vcf
-  index_flag = index_type == "tbi" ? "-t" : "-c"
+  def index_flag = index_type == "tbi" ? "-t" : "-c"
 
   """
   sorted_vcfs=\$(echo ${vcf_files} | xargs -n1 | sort | xargs)

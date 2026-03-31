@@ -57,13 +57,14 @@ process checkVCF {
   tuple val(meta), path(vcf), path(vcf_index), path(vep_config)
 
   output:
-  tuple val(meta), val(vcf.simpleName), path("${vcf.simpleName}-checked.vcf.gz"), path("${vcf.simpleName}-checked.vcf.gz.${meta.index_type}"), path(vep_config)
+  tuple val(meta), val(file_base_name), path("${file_base_name}-checked.vcf.gz"), path("${file_base_name}-checked.vcf.gz.${meta.index_type}"), path(vep_config)
 
   script:
+  file_base_name = meta.file_base_name
   index_type = meta.index_type
   tabix_arg = index_type == 'tbi' ? '' : '-C'
 
-  outfile_name = "${vcf.simpleName}-checked.vcf.gz"
+  outfile_name = "${file_base_name}-checked.vcf.gz"
 
   sorted_file = ""
   sort_cmd = ""

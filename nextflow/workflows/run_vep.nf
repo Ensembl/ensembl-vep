@@ -102,7 +102,7 @@ workflow vep {
         def res = []
         files.each { file ->
           // put in.file as index to avoid Nextflow errors
-          res += [ meta: in.meta, output_base_name: in.file.simpleName, file: file, index: in.file, vep_config: in.vep_config, format: 'other' ]
+          res += [ meta: in.meta, output_base_name: in.meta.file_base_name, file: file, index: in.file, vep_config: in.vep_config, format: 'other' ]
         }
         res
       } |
@@ -155,17 +155,17 @@ workflow NF_VEP {
     .combine( filters )
     .map {
       data, config, out_dir, filter ->
-        def meta = [:]
-        meta.one_to_many = one_to_many
-        meta.output_dir = out_dir
-        meta.filters = filter
+        def vep_meta = [:]
+        vep_meta.one_to_many = one_to_many
+        vep_meta.output_dir = out_dir
+        vep_meta.filters = filter
 
         // NOTE: csi is default unless a tbi index already exists
-        meta.index_type = file(data + ".tbi").exists() ? "tbi" : "csi"
+        vep_meta.index_type = file(data + ".tbi").exists() ? "tbi" : "csi"
 
-        def index = data + ".${meta.index_type}"
+        def index = data + ".${vep_meta.index_type}"
 
-        [ meta: meta, file: data, index: index, vep_config: config ]
+        [ meta: vep_meta, file: data, index: index, vep_config: config ]
     }
     .set{ ch_input }
 
