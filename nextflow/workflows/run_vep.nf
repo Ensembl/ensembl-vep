@@ -131,8 +131,8 @@ workflow NF_VEP {
     exit 1, "Undefined --vep_config parameter. Please provide a VEP config file."
   }
 
-  input = createInputChannels(params.input, "*")
-  vep_config = createInputChannels(params.vep_config, "*.ini")
+  def input = createInputChannels(params.input, "*")
+  def vep_config = createInputChannels(params.vep_config, "*.ini")
 
   def input_count = input.count()
   def config_count = vep_config.count()
