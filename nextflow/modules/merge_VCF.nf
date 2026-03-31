@@ -14,7 +14,6 @@ process mergeVCF {
   cache 'lenient'
   cpus params.cpus
   label 'bcftools'
-  cache 'lenient'
 
   input:
   tuple val(meta), val(original_file), path(vcf_files), path(index_files), val(vep_config)
