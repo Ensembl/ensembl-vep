@@ -488,14 +488,16 @@ sub validate_vf {
   }
 
   # check against size upperlimit to avoid memory problems
-  my $len = $vf->{end} - $vf->{start};
-  my $max_sv_size = $self->{max_sv_size};
-  if( $len > $max_sv_size ){
-    $self->skipped_variant_msg(
-      "variant size ($len) is bigger than --max_sv_size ($max_sv_size)"
-    );
-    $vf->{vep_skip} = 1;
-    return 0 if $self->param('rest');
+  if($self->{max_sv_size} != -1){
+    my $len = $vf->{end} - $vf->{start};
+    my $max_sv_size = $self->{max_sv_size};
+    if( $len > $max_sv_size ){
+      $self->skipped_variant_msg(
+        "variant size ($len) is bigger than --max_sv_size ($max_sv_size)"
+      );
+      $vf->{vep_skip} = 1;
+      return 0 if $self->param('rest');
+    }
   }
 
   # check we have this chr in any of the annotation sources
