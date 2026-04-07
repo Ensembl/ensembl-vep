@@ -604,8 +604,7 @@ is_deeply($snv, bless( {
   'seq_region_start' => 25587759
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'VariationFeature - variant not skipped');
 
-## test max SV length
-no warnings 'once';
+## test if variant exceeding max SV length is skipped
 open(SAVE, ">&STDERR") or die "Can't save STDERR\n";
 close STDERR;
 open STDERR, '>', \$tmp;
@@ -615,25 +614,7 @@ my $lvf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DUP> . . SVLEN=10001;CIPOS=-3,2;CIEND=-4,5)]),
   valid_chromosomes => [21]
 })->next();
-delete($lvf->{adaptor}); delete($lvf->{_line});
-
-is_deeply($lvf, bless( {
-  'outer_end' => 25597764,
-  'chr' => '21',
-  'allele_string' => '<DUP>',
-  'inner_end' => 25597755,
-  'outer_start' => 25587756,
-  'end' => 25597759,
-  'vep_skip' => 1,
-  'seq_region_end' => 25597759,
-  'inner_start' => 25587761,
-  'strand' => 1,
-  'class_SO_term' => 'duplication',
-  'variation_name' => 'sv_dup',
-  'start' => 25587759,
-  'seq_region_start' => 25587759,
-}, 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature - longer than specified maximum');
-
+ok($tmp =~ /variant size \(10001\) is bigger than --max_sv_size \(1000\)/, 'StructuralVariationFeature - longer than specified maximum');
 open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
 ## test complex SV
