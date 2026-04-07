@@ -624,7 +624,7 @@ close STDERR;
 open STDERR, '>', \$tmp;
 
 my $cvf = Bio::EnsEMBL::VEP::Parser::VCF->new({
-  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1, max_sv_size => 1000, warning_file => 'STDERR'}),
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1, max_sv_size => 54000, warning_file => 'STDERR'}),
   file => $test_cfg->create_input_file([qw(1 774569 gnomAD_v2_CPX_1_1 N	<CPX> 1 PASS END=828435;SVTYPE=CPX;CHR2=1;SVLEN=53959)]),
   valid_chromosomes => [1]
 })->next();
