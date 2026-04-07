@@ -526,7 +526,10 @@ sub _record_overlaps_VF {
   if (defined $self->{_format} && $self->{_format} eq 'vcf' && $parser->get_raw_alternatives =~ /INS/) {
     $ref_end = ($ref_start + length($parser->get_raw_reference) - 1);
   }
-  $ref_start += 1 if defined $self->{_format} && $self->{_format} eq 'bigwig';
+  elsif (defined $self->{_format} && $self->{_format} eq 'bigwig') {
+    # BigWig format is 0-based half-open
+    $ref_start += 1;
+  }
 
   if($type eq 'overlap' || $type eq 'within' || $type eq 'surrounding') {
     # account for insertions in Ensembl world where s = e+1
