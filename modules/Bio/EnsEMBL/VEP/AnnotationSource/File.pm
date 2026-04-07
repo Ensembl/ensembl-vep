@@ -521,6 +521,11 @@ sub _record_overlaps_VF {
   my $reciprocal = $self->{reciprocal};
 
   my ($ref_start, $ref_end) = ($parser->get_start, $parser->get_end);
+  # For VCF, insertion should not take alt length into account
+  # Note: File::VCF ensures we only have SV here
+  if (defined $self->{_format} && $self->{_format} eq 'vcf' && $parser->get_raw_alternatives =~ /INS/) {
+    $ref_end = ($ref_start + length($parser->get_raw_reference) - 1);
+  }
   $ref_start += 1 if defined $self->{_format} && $self->{_format} eq 'bigwig';
 
   if($type eq 'overlap' || $type eq 'within' || $type eq 'surrounding') {
