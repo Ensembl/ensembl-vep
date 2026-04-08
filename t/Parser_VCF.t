@@ -610,13 +610,13 @@ close STDERR;
 open STDERR, '>', \$tmp;
 
 my $lvf_parser = Bio::EnsEMBL::VEP::Parser::VCF->new({
-  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1, max_sv_size => 1000, warning_file => 'STDERR'}),
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, max_sv_size => 1000, warning_file => 'STDERR'}),
   file => $test_cfg->create_input_file([
     [qw(21 25587758 sv_dup T <DUP> . . SVLEN=10001;CIPOS=-3,2;CIEND=-4,5)],
     [qw(21 25587759 test A C . . .)]]),
   valid_chromosomes => [21]
 });
-ok($tmp =~ /variant size \(10001\) is bigger than --max_sv_size \(1000\)/, 'StructuralVariationFeature - longer than specified maximum');
+ok($tmp =~ /variant size \(10000\) is bigger than --max_sv_size \(1000\)/, 'StructuralVariationFeature - longer than specified maximum');
 open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
 my $snv = $lvf_parser->next();
