@@ -619,11 +619,11 @@ my $lvf_parser = Bio::EnsEMBL::VEP::Parser::VCF->new({
 ok($tmp =~ /variant size \(10000\) is bigger than --max_sv_size \(1000\)/, 'StructuralVariationFeature - longer than specified maximum');
 open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
-my $snv = $lvf_parser->next();
-delete($snv->{adaptor});
-delete($snv->{_line});
+my $lvf_snv = $lvf_parser->next();
+delete($lvf_snv->{adaptor});
+delete($lvf_snv->{_line});
 
-is_deeply($snv, bless( {
+is_deeply($lvf_snv, bless( {
   'chr' => '21',
   'strand' => 1,
   'variation_name' => 'test',
