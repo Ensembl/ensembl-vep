@@ -1,4 +1,4 @@
-# Copyright [2016-2026] EMBL-European Bioinformatics Institute
+# Copyright [2016-2025] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -253,14 +253,14 @@ SKIP: {
           'cds_start' => 991,
           'gene_id' => 'ENSG00000154719',
           'variant_allele' => 'T',
-          'cdna_end' => '1033',
-          'protein_start' => '331',
+          'cdna_end' => 1033,
+          'protein_start' => 331,
           'codons' => 'Gca/Aca',
-          'cds_end' => '991',
+          'cds_end' => 991,
           'consequence_terms' => [
             'missense_variant'
           ],
-          'protein_end' => '331',
+          'protein_end' => 331,
           'strand' => -1,
           'amino_acids' => 'A/T',
           'cdna_start' => 1033,
@@ -354,7 +354,7 @@ SKIP: {
       'transcript_consequences' => [
         {
           'variant_allele' => 'T',
-          'cdna_end' => '1122',
+          'cdna_end' => 1122,
           'swissprot' => [
             'Q9NYK5'
           ],
@@ -383,14 +383,14 @@ SKIP: {
         {
           'hgvsp' => 'ENSP00000284967.6:p.Ala331Thr',
           'variant_allele' => 'T',
-          'cdna_end' => '1033',
+          'cdna_end' => 1033,
           'polyphen_score' => '0.001',
           'codons' => 'Gca/Aca',
           'swissprot' => [
             'Q9NYK5'
           ],
           'hgvsc' => 'ENST00000352957.8:c.991G>A',
-          'protein_end' => '331',
+          'protein_end' => 331,
           'strand' => -1,
           'amino_acids' => 'A/T',
           'hgnc_id' => 'HGNC:14027',
@@ -595,6 +595,57 @@ SKIP: {
     'impact' => 'MODIFIER'
   }], "use total_length 1");
 
+  # test when variant is outside of cdna or cds or protein sequence - coords should be undefined
+  
+  $ib = get_annotated_buffer({
+    input_file => $test_cfg->create_input_file([qw(21 25585652 sv_del T . . . SVTYPE=DEL;END=25585700)]),
+  });
+  $of = Bio::EnsEMBL::VEP::OutputFactory::JSON->new({config => $ib->config});
+  
+  @lines = @{$of->get_all_lines_by_InputBuffer($ib)};
+  use Data::Dumper;
+  is_deeply($json->decode($lines[0])->{'transcript_consequences'}, [
+  {
+    'cdna_start' => 1155,
+    'bp_overlap' => 45,
+    'gene_id' => 'ENSG00000154719',
+    'transcript_id' => 'ENST00000307301',
+    'impact' => 'HIGH',
+    'percentage_overlap' => '0.21',
+    'consequence_terms' => [
+      'feature_truncation',
+      '3_prime_UTR_variant'
+    ],
+    'variant_allele' => 'deletion',
+    'strand' => -1
+  },
+  {
+    'consequence_terms' => [
+      'feature_truncation',
+      '3_prime_UTR_variant'
+    ],
+    'percentage_overlap' => '0.21',
+    'variant_allele' => 'deletion',
+    'strand' => -1,
+    'bp_overlap' => 45,
+    'cdna_start' => 1066,
+    'gene_id' => 'ENSG00000154719',
+    'transcript_id' => 'ENST00000352957',
+    'impact' => 'HIGH'
+  },
+  {
+    'consequence_terms' => [
+      'upstream_gene_variant'
+    ],
+    'distance' => 2327,
+    'gene_id' => 'ENSG00000260583',
+    'transcript_id' => 'ENST00000567517',
+    'impact' => 'MODIFIER',
+    'variant_allele' => 'deletion',
+    'strand' => -1
+  }
+  ], "check coordinates when variant is outside of feature");
+  
   # test custom
   use_ok('Bio::EnsEMBL::VEP::AnnotationSource::File');
 
