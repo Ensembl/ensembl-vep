@@ -74,6 +74,13 @@ See [documentation](http://www.ensembl.org/info/docs/tools/vep/script/vep_option
 
 > Please report any bugs or issues by [contacting Ensembl](http://www.ensembl.org/info/about/contact/index.html) or creating a [GitHub issue](https://github.com/Ensembl/ensembl-vep/issues)
 
+If you use Ensembl VEP, please cite our most recent publication to help us continue to support development:
+
+McLaren W, Gil L, Hunt SE, Riat HS, Ritchie GR, Thormann A, Flicek P, Cunningham F.<br>
+The Ensembl Variant Effect Predictor.<br>
+Genome Biology Jun 6;17(1):122. (2016)<br>
+[doi:10.1186/s13059-016-0974-4](https://doi.org/10.1186/s13059-016-0974-4)<br>
+
 ---
 
 <a name="knownbugs"></a>
