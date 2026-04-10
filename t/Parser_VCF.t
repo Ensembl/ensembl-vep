@@ -604,37 +604,37 @@ is_deeply($snv, bless( {
   'seq_region_start' => 25587759
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'VariationFeature - variant not skipped');
 
-## test max SV length
-no warnings 'once';
+## test if variant exceeding max SV length is skipped
 open(SAVE, ">&STDERR") or die "Can't save STDERR\n";
 close STDERR;
 open STDERR, '>', \$tmp;
 
-my $lvf = Bio::EnsEMBL::VEP::Parser::VCF->new({
-  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1, max_sv_size => 1000, warning_file => 'STDERR'}),
-  file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DUP> . . SVLEN=10001;CIPOS=-3,2;CIEND=-4,5)]),
+my $lvf_parser = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, max_sv_size => 1000, warning_file => 'STDERR'}),
+  file => $test_cfg->create_input_file([
+    [qw(21 25587758 sv_dup T <DUP> . . SVLEN=10001;CIPOS=-3,2;CIEND=-4,5)],
+    [qw(21 25587759 test A C . . .)]]),
   valid_chromosomes => [21]
-})->next();
-delete($lvf->{adaptor}); delete($lvf->{_line});
-
-is_deeply($lvf, bless( {
-  'outer_end' => 25597764,
-  'chr' => '21',
-  'allele_string' => '<DUP>',
-  'inner_end' => 25597755,
-  'outer_start' => 25587756,
-  'end' => 25597759,
-  'vep_skip' => 1,
-  'seq_region_end' => 25597759,
-  'inner_start' => 25587761,
-  'strand' => 1,
-  'class_SO_term' => 'duplication',
-  'variation_name' => 'sv_dup',
-  'start' => 25587759,
-  'seq_region_start' => 25587759,
-}, 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature - longer than specified maximum');
-
+});
+my $lvf_snv = $lvf_parser->next();
+ok($tmp =~ /variant size \(10000\) is bigger than --max_sv_size \(1000\)/, 'StructuralVariationFeature - longer than specified maximum');
 open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
+
+delete($lvf_snv->{adaptor});
+delete($lvf_snv->{_line});
+
+is_deeply($lvf_snv, bless( {
+  'chr' => '21',
+  'strand' => 1,
+  'variation_name' => 'test',
+  'nontrimmed_allele_string' => 'A/C',
+  'map_weight' => 1,
+  'allele_string' => 'A/C',
+  'end' => 25587759,
+  'start' => 25587759,
+  'seq_region_end' => 25587759,
+  'seq_region_start' => 25587759
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'StructuralVariationFeature - variant not skipped');
 
 ## test complex SV
 no warnings 'once';
@@ -643,7 +643,7 @@ close STDERR;
 open STDERR, '>', \$tmp;
 
 my $cvf = Bio::EnsEMBL::VEP::Parser::VCF->new({
-  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1, max_sv_size => 1000, warning_file => 'STDERR'}),
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1, max_sv_size => 54000, warning_file => 'STDERR'}),
   file => $test_cfg->create_input_file([qw(1 774569 gnomAD_v2_CPX_1_1 N	<CPX> 1 PASS END=828435;SVTYPE=CPX;CHR2=1;SVLEN=53959)]),
   valid_chromosomes => [1]
 })->next();
