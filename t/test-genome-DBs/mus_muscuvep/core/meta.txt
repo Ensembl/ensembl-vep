@@ -1,5 +1,5 @@
 1	\N	schema_type	core
-2	\N	schema_version	115
+2	\N	schema_version	116
 3	\N	patch	patch_65_66_a.sql|schema_version
 4	\N	patch	patch_65_66_b.sql|fix_external_db_id
 5	\N	patch	patch_65_66_c.sql|reorder_unmapped_obj_index
@@ -214,3 +214,4 @@
 1892	\N	patch	patch_112_113_b.sql|Ensure meta_value is not null
 1893	\N	patch	patch_113_114_a.sql|schema_version
 1894	\N	patch	patch_114_115_a.sql|schema_version
+1895	\N	patch	patch_115_116_a.sql|schema_version
