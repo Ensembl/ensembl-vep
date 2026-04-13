@@ -16,21 +16,22 @@ process runVEP {
   */
   
   publishDir "${params.outdir}/vep-summary",
-    pattern: "vep-${original}-${vep_config}-*.gz_summary.*",
+    pattern: "vep-${meta.file_base_name}-${vep_config}-*.gz_summary.*",
     mode:'move'
+  cache 'lenient'
   cpus params.cpus
   label 'vep'
 
   input:
-  tuple val(meta), val(original_file), path(input), path(index), path(vep_config), val(format)
+  tuple val(meta), val(output_base_name), path(input), path(index), path(vep_config), val(format)
   
   output:
-  tuple val(meta), val(original_file), path("${out}{.gz,}"), path("${out}{.gz,}.{tbi,csi}"), val("${vep_config}"), emit: files
+  tuple val(meta), val(output_base_name), path("${out}{.gz,}"), path("${out}{.gz,}.{tbi,csi}"), val("${vep_config}"), emit: files
 
   script:
-  index_type = meta.index_type
-  out = "vep" + "-" + file(original_file).getSimpleName() + "-" + vep_config.getSimpleName() + "-" + input.getName().replace(".gz", "")
-  tabix_arg = index_type == 'tbi' ? '' : '-C'
+  out = "vep" + "-" + meta.file_base_name + "-" + vep_config.getSimpleName() + "-" + input.getName().replace(".gz", "")
+  def index_type = meta.index_type
+  def tabix_arg = index_type == 'tbi' ? '' : '-C'
   
   if( !input.exists() ) {
     exit 1, "Missing input: ${input}"
@@ -42,7 +43,7 @@ process runVEP {
   else if ( meta.filters != null ){
     def filters = meta.filters.split(",")
     def filter_arg = ""
-    for (filter in filters) {
+    filters.each { filter ->
       filter_arg = filter_arg + "-filter \"" + filter + "\" "
     }
     // write VEP output to a file, then run filter_vep on that file
