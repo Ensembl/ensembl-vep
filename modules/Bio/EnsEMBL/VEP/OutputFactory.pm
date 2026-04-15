@@ -1298,6 +1298,9 @@ sub _add_custom_annotations_to_hash {
 
   foreach my $annot(@$annots) {
     push @{$hash->{$custom_name}}, $annot->{name};
+    push @{$hash->{$custom_name.'_ID'}}, $annot->{id} if defined($annot->{id});
+    push @{$hash->{$custom_name.'_OverlapBP'}}, $annot->{overlap_bp} if defined($annot->{overlap_bp});
+    push @{$hash->{$custom_name.'_OverlapPC'}}, $annot->{overlap_percentage} if defined($annot->{overlap_percentage});
     foreach my $field(keys %{$annot->{fields} || {}}) {
       push @{$hash->{$custom_name.'_'.$field}}, $annot->{fields}->{$field};
     }
