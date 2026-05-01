@@ -675,7 +675,6 @@ sub get_SO_term {
 
     if (@normalized && scalar(grep { $_ eq $normalized[0] } @normalized) == @normalized) {
       $type = $parts[0];
-      $type =~ s/^\s+|\s+$//g;
     }
   }
 
