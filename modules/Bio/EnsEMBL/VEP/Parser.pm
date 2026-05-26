@@ -690,8 +690,8 @@ sub get_SO_term {
       $subtype = $element if grep /^$element$/i, @mobile_elements;
     }
     $abbrev .= '_' . $subtype;
-  # } elsif ($type =~ /DEL/i && $type =~ /DUP/i) {
-  #   $abbrev = "CNV";
+  } elsif ($type =~ /DEL/i && $type =~ /DUP/i) {
+    $abbrev = "CNV";
   } elsif ($type =~ /DUP:TANDEM/i) {
     $abbrev = "TDUP";
   } elsif ($type =~ /CNV:TR/i) {
