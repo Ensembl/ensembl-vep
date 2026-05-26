@@ -546,7 +546,7 @@ sub validate_vf {
   }
 
   # structural variation?
-  return ($self->validate_svf($vf) && !($vf->{vep_skip})) if ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature';
+  return $self->validate_svf($vf) if ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature';
 
   # uppercase allele string
   $vf->{allele_string} =~ tr/[a-z]/[A-Z]/;
@@ -690,8 +690,8 @@ sub get_SO_term {
       $subtype = $element if grep /^$element$/i, @mobile_elements;
     }
     $abbrev .= '_' . $subtype;
-  } elsif ($type =~ /DEL/i && $type =~ /DUP/i) {
-    $abbrev = "CNV";
+  # } elsif ($type =~ /DEL/i && $type =~ /DUP/i) {
+  #   $abbrev = "CNV";
   } elsif ($type =~ /DUP:TANDEM/i) {
     $abbrev = "TDUP";
   } elsif ($type =~ /CNV:TR/i) {
@@ -813,6 +813,10 @@ sub _have_chr {
 =cut
 
 sub validate_svf {
+  my ($self, $vf) = @_ ;
+  if ($vf->{vep_skip}) {
+    return 0;
+  }
   return 1;
 }
 
