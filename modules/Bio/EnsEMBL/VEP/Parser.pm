@@ -546,7 +546,7 @@ sub validate_vf {
   }
 
   # structural variation?
-  return $self->validate_svf($vf) if ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature';
+  return ($self->validate_svf($vf) && !($vf->{vep_skip})) if ref($vf) eq 'Bio::EnsEMBL::Variation::StructuralVariationFeature';
 
   # uppercase allele string
   $vf->{allele_string} =~ tr/[a-z]/[A-Z]/;
