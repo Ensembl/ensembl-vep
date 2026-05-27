@@ -563,8 +563,9 @@ my $vf_del = Bio::EnsEMBL::VEP::Parser::VCF->new({
   valid_chromosomes => [21]
 });
 
-
 my $snv = $vf_del->next();
+ok($tmp =~ /deletion looks incomplete/, 'StructuralVariationFeature del without end or length (2 variants)');
+open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 delete($snv->{adaptor});
 delete($snv->{_line});
 
@@ -600,8 +601,19 @@ open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 delete($lvf_snv->{adaptor});
 delete($lvf_snv->{_line});
 
+is_deeply($lvf_snv, bless( {
+  'chr' => '21',
+  'strand' => 1,
+  'variation_name' => 'test',
+  'nontrimmed_allele_string' => 'A/C',
+  'map_weight' => 1,
+  'allele_string' => 'A/C',
+  'end' => 25587759,
+  'start' => 25587759,
+  'seq_region_end' => 25587759,
+  'seq_region_start' => 25587759
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'StructuralVariationFeature - variant not skipped');
 
-is_deeply($lvf, {} , 'StructuralVariationFeature - longer than specified maximum');
 
 open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
@@ -617,9 +629,6 @@ my $cvf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   valid_chromosomes => [1]
 })->next();
 delete($cvf->{adaptor}); delete($cvf->{_line});
-is_deeply($cvf, {} , 'StructuralVariationFeature - CPX skipped');
-
-
 like($tmp, qr/CPX is not a supported structural variant type/, 'StructuralVariationFeature - skip CPX warning');
 
 open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
@@ -943,13 +952,21 @@ is_deeply($tandem, bless( {
   'Bio::EnsEMBL::Variation::VariationFeature' ) ,
   'VariationFeature - tandem repeat with missing sequence');
 
+
 my $tandem_svlen_1 = parse_variant([qw(21	25587759	tr0	T	<CNV:TR>,<CNV:TR>	.	PASS	SVLEN=10,10;RUS=CAT,.,CA;RUC=2,5,4;RN=2,1)]);
+
 is_deeply($tandem, $tandem_svlen_1,
   'VariationFeature - tandem repeat with missing END but with SVLEN');
 
+no warnings 'once';
+open(SAVE, ">&STDERR") or die "Can't save STDERR\n";
+close STDERR;
+open STDERR, '>', \$tmp;
 my $tandem_svlen_2 = parse_variant([qw(21	25587759	tr0	T	<CNV:TR>,<CNV:TR>	.	PASS	SVLEN=5,10;RUS=CAT,.,CA;RUC=2,5,4;RN=2,1)]);
 is_deeply($tandem_svlen_1, $tandem_svlen_2,
   'VariationFeature - tandem repeat with missing END and multiple non-unique SVLEN');
+ok($tmp =~ /found tandem repeats with different references per alternative allele/, 'VariationFeature - tandem repeat with missing END and multiple non-unique SVLEN warning');
+open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
 $tandem = parse_variant([qw(21	25587759	tr0	T	<CNV:TR>,<CNV:TR>	.	PASS	RUS=CAT,.,CA;RUC=2,5,4;RN=2,1)]);
 is_deeply($tandem, bless( {
