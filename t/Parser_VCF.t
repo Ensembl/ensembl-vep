@@ -581,18 +581,25 @@ is_deeply($snv, bless( {
   'seq_region_start' => 25587759
 }, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'VariationFeature - SV skipped and SNV variant not skipped');
 
-## test max SV length
-no warnings 'once';
+## test if variant exceeding max SV length is skipped
 open(SAVE, ">&STDERR") or die "Can't save STDERR\n";
 close STDERR;
 open STDERR, '>', \$tmp;
 
-my $lvf = Bio::EnsEMBL::VEP::Parser::VCF->new({
-  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1, max_sv_size => 1000, warning_file => 'STDERR'}),
-  file => $test_cfg->create_input_file([qw(21 25587758 sv_dup T <DUP> . . SVLEN=10001;CIPOS=-3,2;CIEND=-4,5)]),
+my $lvf_parser = Bio::EnsEMBL::VEP::Parser::VCF->new({
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, max_sv_size => 1000, warning_file => 'STDERR'}),
+  file => $test_cfg->create_input_file([
+    [qw(21 25587758 sv_dup T <DUP> . . SVLEN=10001;CIPOS=-3,2;CIEND=-4,5)],
+    [qw(21 25587759 test A C . . .)]]),
   valid_chromosomes => [21]
-})->next();
-delete($lvf->{adaptor}); delete($lvf->{_line});
+});
+my $lvf_snv = $lvf_parser->next();
+ok($tmp =~ /variant size \(10000\) is bigger than --max_sv_size \(1000\)/, 'StructuralVariationFeature - longer than specified maximum');
+open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
+
+delete($lvf_snv->{adaptor});
+delete($lvf_snv->{_line});
+
 
 is_deeply($lvf, {} , 'StructuralVariationFeature - longer than specified maximum');
 
@@ -605,7 +612,7 @@ close STDERR;
 open STDERR, '>', \$tmp;
 
 my $cvf = Bio::EnsEMBL::VEP::Parser::VCF->new({
-  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1, max_sv_size => 1000, warning_file => 'STDERR'}),
+  config => Bio::EnsEMBL::VEP::Config->new({%$base_testing_cfg, gp => 1, max_sv_size => 54000, warning_file => 'STDERR'}),
   file => $test_cfg->create_input_file([qw(1 774569 gnomAD_v2_CPX_1_1 N	<CPX> 1 PASS END=828435;SVTYPE=CPX;CHR2=1;SVLEN=53959)]),
   valid_chromosomes => [1]
 })->next();

@@ -1,5 +1,5 @@
 1	\N	schema_type	variation
-2	\N	schema_version	115
+2	\N	schema_version	116
 3	\N	patch	patch_73_74_a.sql|schema version
 4	\N	patch	patch_73_74_b.sql|Add doi and UCSC id to publication table
 5	\N	patch	patch_73_74_c.sql|Add clinical_significance to variation_feature table
@@ -139,3 +139,4 @@
 176	\N	patch	patch_113_114_a.sql|schema version
 177	\N	patch	patch_114_115_a.sql|schema version
 178	\N	patch	patch_114_115_b.sql|Add column DNA_type to phenotype_feature
+179	\N	patch	patch_115_116_a.sql|schema version

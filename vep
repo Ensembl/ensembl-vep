@@ -85,6 +85,12 @@ Basic options
 For full option documentation see:
 http://www.ensembl.org/info/docs/tools/vep/script/vep_options.html
 
+If you use Ensembl VEP, please cite our most recent publication to help us continue to support development:
+
+McLaren W, Gil L, Hunt SE, Riat HS, Ritchie GR, Thormann A, Flicek P, Cunningham F.
+The Ensembl Variant Effect Predictor.
+Genome Biology Jun 6;17(1):122. (2016)
+https://doi.org/10.1186/s13059-016-0974-4
 END
 
   print $usage;
