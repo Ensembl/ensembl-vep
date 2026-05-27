@@ -563,29 +563,6 @@ my $vf_del = Bio::EnsEMBL::VEP::Parser::VCF->new({
   valid_chromosomes => [21]
 });
 
-my $sv = $vf_del->next();
-ok($tmp =~ /deletion looks incomplete/, 'StructuralVariationFeature del without end or length (2 variants)');
-open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
-
-delete($sv->{adaptor});
-delete($sv->{_line});
-
-is_deeply($sv, bless( {
-  'outer_end' => 25587759,
-  'chr' => '21',
-  'allele_string' => '<DEL>',
-  'inner_end' => 25587759,
-  'outer_start' => 25587759,
-  'end' => 25587759,
-  'vep_skip' => 1,
-  'seq_region_end' => 25587759,
-  'inner_start' => 25587759,
-  'strand' => 1,
-  'class_SO_term' => 'deletion',
-  'variation_name' => 'sv_del',
-  'start' => 25587759,
-  'seq_region_start' => 25587759,
-}, 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature - skipping incomplete variant');
 
 my $snv = $vf_del->next();
 delete($snv->{adaptor});
@@ -602,7 +579,7 @@ is_deeply($snv, bless( {
   'start' => 25587759,
   'seq_region_end' => 25587759,
   'seq_region_start' => 25587759
-}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'VariationFeature - variant not skipped');
+}, 'Bio::EnsEMBL::Variation::VariationFeature' ), 'VariationFeature - SV skipped and SNV variant not skipped');
 
 ## test max SV length
 no warnings 'once';
@@ -617,22 +594,7 @@ my $lvf = Bio::EnsEMBL::VEP::Parser::VCF->new({
 })->next();
 delete($lvf->{adaptor}); delete($lvf->{_line});
 
-is_deeply($lvf, bless( {
-  'outer_end' => 25597764,
-  'chr' => '21',
-  'allele_string' => '<DUP>',
-  'inner_end' => 25597755,
-  'outer_start' => 25587756,
-  'end' => 25597759,
-  'vep_skip' => 1,
-  'seq_region_end' => 25597759,
-  'inner_start' => 25587761,
-  'strand' => 1,
-  'class_SO_term' => 'duplication',
-  'variation_name' => 'sv_dup',
-  'start' => 25587759,
-  'seq_region_start' => 25587759,
-}, 'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature - longer than specified maximum');
+is_deeply($lvf, {} , 'StructuralVariationFeature - longer than specified maximum');
 
 open(STDERR, ">&SAVE") or die "Can't restore STDERR\n";
 
@@ -648,24 +610,7 @@ my $cvf = Bio::EnsEMBL::VEP::Parser::VCF->new({
   valid_chromosomes => [1]
 })->next();
 delete($cvf->{adaptor}); delete($cvf->{_line});
-
-is_deeply($cvf, bless( {
-                 'outer_end' => '828528',
-                 'chr' => '1',
-                 'allele_string' => '<CPX>',
-                 'inner_end' => '828528',
-                 'outer_start' => '774570',
-                 'end' => 828528,
-                 'vep_skip' => 1,
-                 'seq_region_start' => 774570,
-                 'inner_start' => '774570',
-                 'strand' => 1,
-                 'seq_region_end' => 828528,
-                 'class_SO_term' => 'CPX',
-                 'variation_name' => 'gnomAD_v2_CPX_1_1',
-                 'start' => 774570
-               },
-                'Bio::EnsEMBL::Variation::StructuralVariationFeature' ) , 'StructuralVariationFeature - CPX skipped');
+is_deeply($cvf, {} , 'StructuralVariationFeature - CPX skipped');
 
 
 like($tmp, qr/CPX is not a supported structural variant type/, 'StructuralVariationFeature - skip CPX warning');

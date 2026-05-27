@@ -807,6 +807,8 @@ sub _have_chr {
   Description: Performs (configurable) checks on a StructuralVariationFeature
                as produced by the parser:
                - checks if SO term is supported
+               - checks if deletion looks complete, END or SVLEN are defined and consistent with start
+               - checks against size upperlimit to avoid memory problems
   Returntype : bool
   Exceptions : none
   Caller     : validate_vf()
