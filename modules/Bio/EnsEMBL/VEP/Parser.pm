@@ -804,7 +804,9 @@ sub _have_chr {
 
   Arg 1      : Bio::EnsEMBL::Variation::StructuralVariationFeature
   Example    : $is_valid = $parser->validate_svf($svf);
-  Description: Stub, not currently implemented
+  Description: Performs (configurable) checks on a StructuralVariationFeature
+               as produced by the parser:
+               - checks if SO term is supported
   Returntype : bool
   Exceptions : none
   Caller     : validate_vf()

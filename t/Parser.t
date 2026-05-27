@@ -116,7 +116,8 @@ is($p->get_SO_term('DEL_ME'), 'mobile_element_deletion', 'get_SO_term - mobile_e
 $p = Bio::EnsEMBL::VEP::Parser->new({file => $test_cfg->{test_vcf}, config => $cfg});
 $p->{valid_chromosomes} = {1 => 1, 21 => 1, CHR_1 => 1, MT => 1, chromosome => 1, chr12 => 1};
 
-is($p->validate_svf(), 1, 'validate_svf - not implemented yet');
+is($p->validate_svf(get_vf({allele_string => '<DEL>,<DUP>'})), 1, 'validate_svf - ok');
+is($p->validate_svf(get_vf({allele_string => '<DEL>,<DUP>', vep_skip => 1})), 0, 'validate_svf - skip');
 
 is($p->validate_vf(get_vf({allele_string => 'G/C'})), 1, 'validate_vf - ok');
 
