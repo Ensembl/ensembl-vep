@@ -110,6 +110,7 @@ Below are a list of known Ensembl VEP bugs, where possible, workarounds have bee
 
 * Running `--fork` with `--merged` can cause discrepancies in results for HGNC ids due to internal caching. It is recommended to not run `--fork` when using `--merged` for obtaining HGNC ids.
 * For multi-allelic inputs, the alleles are not minimised by default.
+* When using VEP with Perl version [>=5.18.0](https://perldoc.perl.org/5.18.0/perl5180delta), users may notice non-deterministic ordering of annotations within the `CSQ` field between VEP runs. This is caused by VEP relying on Perl hash  order, which is not deterministic in newer Perl versions. This has been observed when using the `--pick_allele_gene` flag, see issue [#2008](https://github.com/Ensembl/ensembl-vep/issues/2008). A known workaround, if deterministic ordering between VEP runs is required, is to set: `PERL_HASH_SEED=0 PERL_PERTURB_KEYS=0`.
 ---
 
 <a name="haplo"></a>
