@@ -665,6 +665,21 @@ sub get_SO_term {
   my $type = shift || join(",", @{ $self->get_alternatives });
   my $abbrev;
 
+  # normalize repeated variants: e.g. INS/INS or <INS>,<INS> => INS
+  if ($type =~ /[\/,]/) {
+    my @parts = split(/[\/,]/, $type);
+    my @normalized = map {
+      my $v = $_;
+      $v =~ s/^\s+|\s+$//g;
+      $v =~ s/^\<|\>$//g;
+      uc($v || '');
+    } @parts;
+
+    if (@normalized && scalar(grep { $_ eq $normalized[0] } @normalized) == @normalized) {
+      $type = $parts[0];
+    }
+  }
+
   my @mobile_elements = ("ALU", "HERV", "LINE1", "SVA");
 
   if ($type =~ /(INS|DEL):(ME):?([A-Z0-9]+)?/i) {
@@ -677,6 +692,8 @@ sub get_SO_term {
       $subtype = $element if grep /^$element$/i, @mobile_elements;
     }
     $abbrev .= '_' . $subtype;
+  } elsif ($type =~ /DEL/i && $type =~ /DUP/i) {
+    $abbrev = "CNV";
   } elsif ($type =~ /DUP:TANDEM/i) {
     $abbrev = "TDUP";
   } elsif ($type =~ /CNV:TR/i) {
@@ -789,7 +806,11 @@ sub _have_chr {
 
   Arg 1      : Bio::EnsEMBL::Variation::StructuralVariationFeature
   Example    : $is_valid = $parser->validate_svf($svf);
-  Description: Stub, not currently implemented
+  Description: Performs (configurable) checks on a StructuralVariationFeature
+               as produced by the parser:
+               - checks if SO term is supported
+               - checks if deletion looks complete, END or SVLEN are defined and consistent with start
+               - checks against size upperlimit to avoid memory problems
   Returntype : bool
   Exceptions : none
   Caller     : validate_vf()
@@ -798,6 +819,10 @@ sub _have_chr {
 =cut
 
 sub validate_svf {
+  my ($self, $vf) = @_ ;
+  if ($vf->{vep_skip}) {
+    return 0;
+  }
   return 1;
 }
 
@@ -826,7 +851,6 @@ sub post_process_vfs {
   # minimise alleles?
   $vfs = $self->minimise_alleles($vfs) if $self->{minimal};
   
-
   # copy start, end coords to seq_region_start, seq_region_end
   # otherwise for circular chromosomes the core API will try to do a DB lookup and die
   foreach my $vf(@$vfs) {
