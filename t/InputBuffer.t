@@ -487,6 +487,56 @@ is_deeply(
   'minimal - doesnt affect non-minimisable'
 );
 
+{
+  package Bio::EnsEMBL::VEP::Test::BreakendVF;
+  sub get_breakends { return $_[0]->{breakends}; }
+}
+
+SKIP: {
+  no warnings "once";
+  skip "Set::IntervalTree not installed", 4 unless $Bio::EnsEMBL::VEP::InputBuffer::CAN_USE_INTERVAL_TREE;
+
+  my $chr_vf = bless({
+    chr => "21",
+    start => 100,
+    end => 101,
+  }, "Bio::EnsEMBL::Variation::VariationFeature");
+
+  my $bnd_vf = bless({
+    chr => "1",
+    start => 1,
+    end => 1,
+    breakends => [{ chr => "22", pos => 100 }],
+  }, "Bio::EnsEMBL::VEP::Test::BreakendVF");
+
+  my $chr_ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg, variation_features => []});
+  $chr_ib->buffer([$chr_vf, $bnd_vf]);
+
+  is_deeply(
+    $chr_ib->get_overlapping_vfs("21", 100, 100),
+    [$chr_vf],
+    "get_overlapping_vfs chr filter keeps same chromosome VF"
+  );
+
+  is_deeply(
+    $chr_ib->get_overlapping_vfs("chr21", 100, 100),
+    [$chr_vf],
+    "get_overlapping_vfs chr filter normalises chr prefix"
+  );
+
+  is_deeply(
+    $chr_ib->get_overlapping_vfs("22", 100, 100),
+    [$bnd_vf],
+    "get_overlapping_vfs chr filter keeps matching breakend mate"
+  );
+
+  is_deeply(
+    $chr_ib->get_overlapping_vfs("1", 100, 100),
+    [],
+    "get_overlapping_vfs chr filter excludes breakend mate on another chromosome"
+  );
+}
+
 # Check non ordered variants
 my $max_non_ordered_variants = 5;
 my $max_not_ordered_variants_distance = 5;

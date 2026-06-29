@@ -105,7 +105,7 @@ sub annotate_InputBuffer {
     my $slice;
 
     # get overlapping VFs
-    my $vfs = $buffer->get_overlapping_vfs($fs, $fe);
+    my $vfs = $buffer->get_overlapping_vfs($tr->{slice}->{seq_region_name}, $fs, $fe);
     next unless @$vfs;
 
     # lazy load transcript
