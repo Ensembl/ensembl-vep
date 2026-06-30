@@ -352,10 +352,25 @@ sub _normalise_chr_for_vf_overlap {
   my ($self, $chr) = @_;
   return undef unless defined $chr;
 
-  $chr = $self->get_source_chr_name($chr);
-  $chr =~ s/^chr//i;
+  my %names = ($chr => 1);
+  $names{$self->get_source_chr_name($chr)} = 1;
 
-  return $chr;
+  my $synonyms = $self->chromosome_synonyms || {};
+  foreach my $name (keys %names) {
+    $names{$_} = 1 for keys %{$synonyms->{$name} || {}};
+  }
+
+  foreach my $name (keys %names) {
+    $names{$self->get_source_chr_name($name)} = 1;
+  }
+
+  my @names = map {
+    my $name = $_;
+    $name =~ s/^chr//i;
+    $name;
+  } keys %names;
+
+  return (sort { length($a) <=> length($b) || $a cmp $b } @names)[0];
 }
 
 =head2 interval_tree
