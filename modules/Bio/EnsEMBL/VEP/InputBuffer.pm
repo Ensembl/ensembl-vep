@@ -289,7 +289,6 @@ sub get_overlapping_vfs {
 
   if(@_ == 3) {
     ($chr, $start, $end) = @_;
-    $chr = $self->_normalise_chr_for_vf_overlap($chr);
   }
   else {
     ($start, $end) = @_;
@@ -321,15 +320,14 @@ sub get_overlapping_vfs {
   foreach my $vf (@all_vfs)  {
     my $vf_chr = $vf->{chr};
     $vf_chr ||= $vf->{slice}->{seq_region_name} if $vf->{slice};
-    $vf_chr = $self->_normalise_chr_for_vf_overlap($vf_chr);
 
     if (overlap($vf->{start}, $vf->{end}, $start, $end)){
-      push(@vfs, $vf) if !defined $chr || (defined $vf_chr && $vf_chr eq $chr);
+      push(@vfs, $vf) if $self->_chr_matches_for_vf_overlap($chr, $vf_chr);
     }
 
     if ((defined($vf->{unshifted_end}) && (defined($vf->{unshifted_start})))) {
       if (overlap($vf->{unshifted_start}, $vf->{unshifted_end}, $start, $end)) {
-        push(@vfs, $vf) if !defined $chr || (defined $vf_chr && $vf_chr eq $chr);
+        push(@vfs, $vf) if $self->_chr_matches_for_vf_overlap($chr, $vf_chr);
       }
     }
 
@@ -338,9 +336,8 @@ sub get_overlapping_vfs {
     for my $alt (@{ $vf->get_breakends }) {
       my $alt_chr = $alt->{chr};
       $alt_chr ||= $alt->{slice}->{seq_region_name} if $alt->{slice};
-      $alt_chr = $self->_normalise_chr_for_vf_overlap($alt_chr);
       push(@vfs, $vf) if
-        (!defined $chr || (defined $alt_chr && $alt_chr eq $chr)) &&
+        $self->_chr_matches_for_vf_overlap($chr, $alt_chr) &&
         overlap($alt->{pos}, $alt->{pos}, $start, $end);
     }
   }
@@ -348,29 +345,15 @@ sub get_overlapping_vfs {
 }
 
 
-sub _normalise_chr_for_vf_overlap {
-  my ($self, $chr) = @_;
-  return undef unless defined $chr;
+sub _chr_matches_for_vf_overlap {
+  my ($self, $query_chr, $vf_chr) = @_;
 
-  my %names = ($chr => 1);
-  $names{$self->get_source_chr_name($chr)} = 1;
+  return 1 unless defined $query_chr;
+  return 0 unless defined $vf_chr;
+  return 1 if $vf_chr eq $query_chr;
 
-  my $synonyms = $self->chromosome_synonyms || {};
-  foreach my $name (keys %names) {
-    $names{$_} = 1 for keys %{$synonyms->{$name} || {}};
-  }
-
-  foreach my $name (keys %names) {
-    $names{$self->get_source_chr_name($name)} = 1;
-  }
-
-  my @names = map {
-    my $name = $_;
-    $name =~ s/^chr//i;
-    $name;
-  } keys %names;
-
-  return (sort { length($a) <=> length($b) || $a cmp $b } @names)[0];
+  my $set = sprintf(q{vf_overlap_%s}, $query_chr);
+  return $self->get_source_chr_name($vf_chr, $set, [$query_chr]) eq $query_chr;
 }
 
 =head2 interval_tree
