@@ -269,11 +269,13 @@ sub next {
 
 =head2 get_overlapping_vfs
   
-  Arg 1      : int $start
-  Arg 2      : int $end
+  Arg 1      : optional string $chr
+  Arg 2      : int $start
+  Arg 3      : int $end
   Example    : $vfs = $ib->get_overlapping_vfs($start, $end);
+               $vfs = $ib->get_overlapping_vfs($chr, $start, $end);
   Description: Gets all VariationFeatures overlapping the coordinate
-               range given by $start, $end
+               range given by $start, $end, optionally restricted to $chr
   Returntype : arrayref of Bio::EnsEMBL::Variation::VariationFeature
   Exceptions : none
   Caller     : AnnotationSource
@@ -283,8 +285,14 @@ sub next {
 
 sub get_overlapping_vfs {
   my $self = shift;
-  my $start = shift;
-  my $end = shift;
+  my ($chr, $start, $end);
+
+  if(@_ == 3) {
+    ($chr, $start, $end) = @_;
+  }
+  else {
+    ($start, $end) = @_;
+  }
 
   my @all_vfs;
   ($start, $end) = ($end, $start) if $start > $end;
@@ -310,25 +318,43 @@ sub get_overlapping_vfs {
 
   my @vfs;
   foreach my $vf (@all_vfs)  {
+    my $vf_chr = $vf->{chr};
+    $vf_chr ||= $vf->{slice}->{seq_region_name} if $vf->{slice};
+
     if (overlap($vf->{start}, $vf->{end}, $start, $end)){
-      push(@vfs, $vf);
+      push(@vfs, $vf) if $self->_chr_matches_for_vf_overlap($chr, $vf_chr);
     }
 
     if ((defined($vf->{unshifted_end}) && (defined($vf->{unshifted_start})))) {
       if (overlap($vf->{unshifted_start}, $vf->{unshifted_end}, $start, $end)) {
-        push(@vfs, $vf);
+        push(@vfs, $vf) if $self->_chr_matches_for_vf_overlap($chr, $vf_chr);
       }
     }
 
     # check overlap with complex alternative alleles (such as breakend structural variants)
     next unless Scalar::Util::blessed($vf) and $vf->can('get_breakends');
     for my $alt (@{ $vf->get_breakends }) {
-      push(@vfs, $vf) if overlap($alt->{pos}, $alt->{pos}, $start, $end);
+      my $alt_chr = $alt->{chr};
+      $alt_chr ||= $alt->{slice}->{seq_region_name} if $alt->{slice};
+      push(@vfs, $vf) if
+        $self->_chr_matches_for_vf_overlap($chr, $alt_chr) &&
+        overlap($alt->{pos}, $alt->{pos}, $start, $end);
     }
   }
   return [@vfs];
 }
 
+
+sub _chr_matches_for_vf_overlap {
+  my ($self, $query_chr, $vf_chr) = @_;
+
+  return 1 unless defined $query_chr;
+  return 0 unless defined $vf_chr;
+  return 1 if $vf_chr eq $query_chr;
+
+  my $set = sprintf(q{vf_overlap_%s}, $query_chr);
+  return $self->get_source_chr_name($vf_chr, $set, [$query_chr]) eq $query_chr;
+}
 
 =head2 interval_tree
   
