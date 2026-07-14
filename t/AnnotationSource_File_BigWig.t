@@ -29,7 +29,7 @@ SKIP: {
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
   no warnings 'once';
-  skip 'Bio::DB::BigFile module not available', 20 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_BIGWIG;
+  skip 'Bio::DB::BigFile module not available', 25 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_BIGWIG;
 
 
   ## BASIC TESTS
@@ -250,6 +250,88 @@ SKIP: {
       ]
     },
     'get scores even when reporting coords'
+  );
+
+
+  ## LARGE-SPAN ZOOM SUMMARY TESTS
+  ################################
+  # For a large reference span (e.g. a multi-Mb SV) summary_stats min/max are read
+  # from the bigWig's precomputed zoom reductions instead of walking every base.
+  # This asserts min and max are bit-exact vs the per-base walk, that the
+  # per-record output is preserved, and that a combination also needing
+  # sum/mean/count falls back to the exact per-base path.
+  #
+  # A subclass shrinks the exact/zoom window sizes so a small committed fixture
+  # (t/testdata/custom/test_large.bw, 3 kb of per-base scores) genuinely
+  # exercises the decomposition: with zoom_grid=256 the interior is read from
+  # the reduction-160 zoom level, capped by the exact_end=512 end windows.
+  {
+    no warnings 'once';
+    @Bio::EnsEMBL::VEP::AnnotationSource::File::BigWig::SmallWindow::ISA =
+      ('Bio::EnsEMBL::VEP::AnnotationSource::File::BigWig');
+    *Bio::EnsEMBL::VEP::AnnotationSource::File::BigWig::SmallWindow::zoom_grid = sub { 256 };
+  }
+
+  my $large_file = $test_cfg->{custom_bigwig_large};
+
+  my $annotate_large_span = sub {
+    my ($fast, $stats) = @_;
+    my $class = $fast
+      ? 'Bio::EnsEMBL::VEP::AnnotationSource::File::BigWig::SmallWindow'
+      : 'Bio::EnsEMBL::VEP::AnnotationSource::File::BigWig';
+    my $as_l = $class->new({file => $large_file, format => 'bigwig', config => $cfg});
+    $as_l->{summary_stats} = [ @$stats ];
+    $as_l->short_name('cons');
+    $as_l->type('overlap');
+
+    my $vf_l = { chr => 21, start => 1101, end => 3900 };   # span 2800 bp (> zoom_min_span)
+    my $ib_l = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg});
+    $ib_l->buffer([$vf_l]);
+
+    if ($fast) {
+      $as_l->annotate_InputBuffer($ib_l);                   # may take the zoom path
+    }
+    else {
+      # base-class implementation = the exact per-base walk
+      Bio::EnsEMBL::VEP::AnnotationSource::File::annotate_InputBuffer($as_l, $ib_l);
+    }
+    return $vf_l;
+  };
+
+  # summary_stats=min,max -> zoom decomposition, bit-exact vs the per-base walk
+  my $exact_vf = $annotate_large_span->(0, [qw(min max)]);
+  my $zoom_vf  = $annotate_large_span->(1, [qw(min max)]);
+
+  is(
+    $zoom_vf->{_custom_annotations_stats}->{cons}->{max},
+    $exact_vf->{_custom_annotations_stats}->{cons}->{max},
+    'large span - max bit-exact vs per-base walk'
+  );
+  is(
+    $zoom_vf->{_custom_annotations_stats}->{cons}->{min},
+    $exact_vf->{_custom_annotations_stats}->{cons}->{min},
+    'large span - min bit-exact vs per-base walk'
+  );
+
+  # per-record output parity: same first record, and a truncation marker
+  is(
+    $zoom_vf->{_custom_annotations}->{cons}->[0]->{name},
+    $exact_vf->{_custom_annotations}->{cons}->[0]->{name},
+    'large span - first per-record annotation matches per-base walk'
+  );
+  is(
+    $zoom_vf->{_custom_annotations}->{cons}->[-1]->{name}, '...',
+    'large span - per-record list truncated with ... marker'
+  );
+
+  # a combination that also needs sum/mean/count falls back to the exact per-base
+  # path, so its output is identical to the base class (no zoom approximation)
+  my $fb_exact = $annotate_large_span->(0, [qw(max mean count)]);
+  my $fb_zoom  = $annotate_large_span->(1, [qw(max mean count)]);
+  is_deeply(
+    $fb_zoom->{_custom_annotations_stats}->{cons},
+    $fb_exact->{_custom_annotations_stats}->{cons},
+    'large span - stats needing sum/mean/count fall back to exact per-base path'
   );
 
 }
