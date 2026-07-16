@@ -30,7 +30,7 @@ SKIP: {
   no warnings 'once';
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'Bio::DB::HTS::Tabix module not available', 15 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+  skip 'Bio::DB::HTS::Tabix module not available', 17 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
 
   ## BASIC TESTS
   ##############
@@ -192,6 +192,47 @@ SKIP: {
     },
     'annotate_InputBuffer - get scores'
   );
+
+  # summary_stats min/max when a score is exactly 0 (github #2027). 0 is falsy in
+  # Perl, so the old accumulator ('$v < ($min || "+inf")') dropped a running min/max
+  # of 0 and reported the next value instead.
+  $as->type('overlap');
+  $as->short_name('foo');
+
+  # overlaps minZero (score 0) then minPos (score 5): min must be 0, not 5
+  $as->{summary_stats} = [ 'min' ];
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
+    config => $cfg,
+    parser => Bio::EnsEMBL::VEP::Parser::VCF->new({
+      config => $cfg,
+      file => $test_cfg->create_input_file([qw(21 25586060 rs142513484 C T . . .)]),
+      valid_chromosomes => [21]
+    })
+  });
+  $ib->next();
+  $as->annotate_InputBuffer($ib);
+  is(
+    $ib->buffer->[0]->{_custom_annotations_stats}->{foo}->{min}, 0,
+    'summary_stats - min is 0 when a score is exactly 0'
+  );
+
+  # overlaps maxZero (score 0) then maxNeg (score -3): max must be 0, not -3
+  $as->{summary_stats} = [ 'max' ];
+  $ib = Bio::EnsEMBL::VEP::InputBuffer->new({
+    config => $cfg,
+    parser => Bio::EnsEMBL::VEP::Parser::VCF->new({
+      config => $cfg,
+      file => $test_cfg->create_input_file([qw(21 25587060 rs142513484 C T . . .)]),
+      valid_chromosomes => [21]
+    })
+  });
+  $ib->next();
+  $as->annotate_InputBuffer($ib);
+  is(
+    $ib->buffer->[0]->{_custom_annotations_stats}->{foo}->{max}, 0,
+    'summary_stats - max is 0 when a score is exactly 0'
+  );
+
   $as->type('exact');
 }
 
