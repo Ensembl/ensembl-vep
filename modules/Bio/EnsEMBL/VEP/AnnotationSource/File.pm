@@ -424,10 +424,10 @@ sub annotate_VariationFeature {
     my $value = $record->[0]->{score} if defined $stats;
     if (defined $value) {
       if ( grep(/^min$/, @$stats) ) {
-        $annot_stats->{min} = $value if $value < ($annot_stats->{min} || '+inf');
+        $annot_stats->{min} = $value if !defined($annot_stats->{min}) || $value < $annot_stats->{min};
       }
       if ( grep(/^max$/, @$stats) ) {
-        $annot_stats->{max} = $value if $value > ($annot_stats->{max} || '-inf');
+        $annot_stats->{max} = $value if !defined($annot_stats->{max}) || $value > $annot_stats->{max};
       }
       $annot_stats->{sum} += $value if grep(/^(sum|mean)$/, @$stats);
       $vf->{_custom_annotations_stats}->{$self->short_name} = $annot_stats;
