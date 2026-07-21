@@ -84,8 +84,6 @@ use Bio::EnsEMBL::VEP::OutputFactory::VEP_output;
 use Bio::EnsEMBL::VEP::OutputFactory::VCF;
 use Bio::EnsEMBL::VEP::OutputFactory::Tab;
 
-use Data::Dumper;
-
 our $CAN_USE_JSON;
 
 BEGIN {
