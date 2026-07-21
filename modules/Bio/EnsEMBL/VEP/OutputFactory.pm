@@ -84,6 +84,8 @@ use Bio::EnsEMBL::VEP::OutputFactory::VEP_output;
 use Bio::EnsEMBL::VEP::OutputFactory::VCF;
 use Bio::EnsEMBL::VEP::OutputFactory::Tab;
 
+use Data::Dumper;
+
 our $CAN_USE_JSON;
 
 BEGIN {
@@ -184,6 +186,7 @@ sub new {
     refseq
     merged
     protein
+    protein_version
     uniprot
     canonical
     biotype
@@ -1556,6 +1559,12 @@ sub BaseTranscriptVariationAllele_to_output_hash {
     $self->{protein} &&
     defined($tr->{_protein}) &&
     $tr->{_protein} ne '-';
+  $hash->{ENSP} .= '.'.$tr->translation->version if 
+    $hash->{ENSP} && 
+    $self->{protein_version} &&
+    $tr->translation && 
+    $tr->translation->version && 
+    $hash->{ENSP} !~ /\.\d+$/;
 
   # uniprot
   if($self->{uniprot}) {
