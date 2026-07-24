@@ -194,7 +194,11 @@ sub annotate_InputBuffer {
   # run the unchanged base-class loop for the rest by pointing it at just them
   if (@exact_vfs) {
     my $all = $buffer->buffer;
-    $buffer->buffer(\@exact_vfs);
+    my $ok = eval {
+      $buffer->buffer(\@exact_vfs);
+      $self->SUPER::annotate_InputBuffer($buffer);
+      1;
+    };
     $self->SUPER::annotate_InputBuffer($buffer);
     $buffer->buffer($all);
   }
