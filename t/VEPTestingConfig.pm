@@ -77,6 +77,7 @@ our %DEFAULTS = (
   custom_gtf     => $Bin.'/testdata/custom/test.gtf.gz',
   custom_gtf_mt     => $Bin.'/testdata/custom/test_MT.gtf.gz',
   custom_bigwig  => $Bin.'/testdata/custom/test.bw',
+  custom_bigwig_large => $Bin.'/testdata/custom/test_large.bw',
   custom_cosmic  => $Bin.'/testdata/custom/cosmic.vcf.gz',
 
   bam_edit_gff   => $Bin.'/testdata/custom/bam_edit.gff.gz',
