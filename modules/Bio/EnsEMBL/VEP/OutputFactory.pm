@@ -184,6 +184,7 @@ sub new {
     refseq
     merged
     protein
+    protein_version
     uniprot
     canonical
     biotype
@@ -1556,6 +1557,12 @@ sub BaseTranscriptVariationAllele_to_output_hash {
     $self->{protein} &&
     defined($tr->{_protein}) &&
     $tr->{_protein} ne '-';
+  $hash->{ENSP} .= '.'.$tr->translation->version if 
+    $hash->{ENSP} && 
+    $self->{protein_version} &&
+    $tr->translation && 
+    $tr->translation->version && 
+    $hash->{ENSP} !~ /\.\d+$/;
 
   # uniprot
   if($self->{uniprot}) {

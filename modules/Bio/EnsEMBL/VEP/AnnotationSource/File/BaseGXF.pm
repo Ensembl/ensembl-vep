@@ -724,11 +724,12 @@ sub _add_translation {
 
   # copy protein ID to transcript object for outputfactory
   $tr->{_protein} = $protein_id if $protein_id;
-
+  my $version = $ordered_cdss->[0]->{attributes}->{version} || 1;
+  
   # create translation object
   my $translation = $tr->{translation} ||= Bio::EnsEMBL::Translation->new(
     -TRANSCRIPT => $tr,
-    -VERSION    => 1,
+    -VERSION    => $version,
     -STABLE_ID  => $protein_id,
   );
   $translation->{transcript} = $tr;
@@ -736,7 +737,6 @@ sub _add_translation {
 
   # we need to use the first and last cds record to set the translation start and ends
   my $offset;
-
   if($ordered_cdss->[0]->{strand} > 0) {
     $offset = ($ordered_cdss->[0]->{start} - $ordered_cdss->[0]->{_exon}->start) + 1;
   }
