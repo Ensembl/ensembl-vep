@@ -193,6 +193,7 @@ is_deeply($runner->get_OutputFactory, bless( {
   'af' => undef,
   'biotype' => undef,
   'protein' => undef,
+  'protein_version' => undef,
   'domains' => undef,
   'pick_allele_gene' => undef,
   'variant_class' => undef,
