@@ -184,6 +184,7 @@ our @VEP_PARAMS = (
   'xref_refseq',             # output refseq mrna xref
   'uniprot',                 # output Uniprot identifiers (includes UniParc)
   'protein',                 # add e! protein ID to extra column
+  'protein_version',         # add protein version to e! protein ID
   'biotype',                 # add biotype of transcript to output
   'hgnc',                    # add HGNC gene ID to extra column
   'symbol',                  # add gene symbol (e.g. HGNC)
