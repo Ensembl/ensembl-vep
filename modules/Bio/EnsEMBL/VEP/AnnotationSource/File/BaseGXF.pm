@@ -685,9 +685,9 @@ sub _add_identifiers {
       @{ $tr_record->{attributes}->{tag} } : split(',', $tr_record->{attributes}->{tag});
   }
 
-  # add MANE_Select and MANE_Plus_Clinical
+  # add MANE_Select, MANE_Plus_Clinical, Gencode Primary and Basic
   if(@tags) {
-    foreach my $attr (qw/MANE_Select MANE_Plus_Clinical/) {
+    foreach my $attr (qw/MANE_Select MANE_Plus_Clinical gencode_primary gencode_basic/) {
       if( grep(/^$attr$/, @tags) ) {
         push @{$tr->{attributes}}, Bio::EnsEMBL::Attribute->new_fast({
           code => $attr
