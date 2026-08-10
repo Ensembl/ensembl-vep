@@ -209,7 +209,28 @@ sub run {
     print $fh "$line\n";
   }
 
-  close $fh;
+  # close() on a piped filehandle (--compress_output) is where the child is
+  # reaped and $? is set; it returns false if the compressor exited non-zero.
+  # Discarding that result means a failed compressor - a full filesystem, for
+  # example - produces a truncated output file and an exit status of 0.
+  unless(close $fh) {
+    my $status = $?;
+
+    if(my $compress = $self->param('compress_output')) {
+      throw(sprintf(
+        "ERROR: %s compressor for output file %s failed%s - output is truncated and must not be used\n",
+        $compress,
+        $self->param('output_file'),
+        # $? is -1 if the child was already reaped, so only report it if valid
+        $status > 0 ? sprintf(" (exit status %d, signal %d)", $status >> 8, $status & 127) : ""
+      ));
+    }
+
+    throw(sprintf(
+      "ERROR: Failed to close output file %s: %s - output may be truncated\n",
+      $self->param('output_file'), $!
+    ));
+  }
 
   $self->finish();
 
