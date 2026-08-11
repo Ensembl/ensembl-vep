@@ -18,6 +18,7 @@ use warnings;
 use Test::More;
 use Test::Exception;
 use FindBin qw($Bin);
+use File::Temp qw(tempdir);
 use B;
 
 use lib $Bin;
@@ -386,6 +387,92 @@ SKIP: {
   };
 
   ok($stdout, 'get_output_file_handle - compressed stdout - wrote OK');
+}
+
+## compressor failure detection
+###############################
+
+# A compressor that reads all of its input and then exits non-zero, as gzip
+# does when it cannot write its own output (a full filesystem, for example).
+# The writer never blocks, so no SIGPIPE is raised: the only evidence of the
+# failure is the child's exit status, which close() reaps.
+{
+  my $tmpdir = tempdir(CLEANUP => 1);
+  my $fake_compressor = 'vep_test_failing_compressor';
+
+  open(my $fake_fh, '>', $tmpdir.'/'.$fake_compressor) or die $!;
+  print $fake_fh "#!/bin/sh\ncat > /dev/null\nexit 3\n";
+  close $fake_fh;
+  chmod 0755, $tmpdir.'/'.$fake_compressor;
+
+  local $ENV{PATH} = $tmpdir.':'.$ENV{PATH};
+
+  my $failed_file = $test_cfg->{user_file}.'.compressfail.out';
+
+  $runner = Bio::EnsEMBL::VEP::Runner->new({
+    %$cfg_hash,
+    output_file => $failed_file,
+    compress_output => 'gzip',
+    force_overwrite => 1,
+  });
+
+  # --compress_output only accepts gzip/bgzip, so swap in the stub afterwards
+  $runner->param('compress_output', $fake_compressor);
+
+  throws_ok
+    { $runner->run }
+    qr/compressor for output file .+ failed \(exit status 3/,
+    'run - failing compressor raises rather than reporting success';
+
+  unlink($failed_file);
+}
+
+# /dev/full returns ENOSPC on every write, so this exercises the same failure
+# with the real gzip binary. Linux only. gzip prints its own "No space left on
+# device" to stderr during this test; that output is expected.
+SKIP: {
+  no warnings 'once';
+
+  skip 'gzip not in path', 1 unless $Bio::EnsEMBL::VEP::Utils::CAN_USE_GZIP;
+  skip 'no writable /dev/full', 1 unless -e '/dev/full' && -w '/dev/full';
+
+  $runner = Bio::EnsEMBL::VEP::Runner->new({
+    %$cfg_hash,
+    output_file => '/dev/full',
+    compress_output => 'gzip',
+    force_overwrite => 1,
+  });
+
+  throws_ok
+    { $runner->run }
+    qr/gzip compressor for output file .+ failed/,
+    'run - gzip failing on ENOSPC raises rather than reporting success';
+}
+
+# regression guard: a compressor that succeeds must still return cleanly
+SKIP: {
+  no warnings 'once';
+
+  skip 'gzip not in path', 3 unless $Bio::EnsEMBL::VEP::Utils::CAN_USE_GZIP;
+
+  my $ok_file = $test_cfg->{user_file}.'.compressok.out.gz';
+
+  $runner = Bio::EnsEMBL::VEP::Runner->new({
+    %$cfg_hash,
+    output_file => $ok_file,
+    compress_output => 'gzip',
+    force_overwrite => 1,
+  });
+
+  ok($runner->run, 'run - successful compressed run returns true');
+  ok(-e $ok_file, 'run - successful compressed run - file exists');
+
+  open IN, "gzip -dc $ok_file |";
+  my @compressed_lines = <IN>;
+  close IN;
+  is(scalar @compressed_lines, 41, 'run - successful compressed run - count lines');
+
+  unlink($ok_file);
 }
 
 ## stats file
