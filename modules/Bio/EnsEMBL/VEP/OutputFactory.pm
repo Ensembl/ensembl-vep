@@ -1414,12 +1414,21 @@ sub VariationFeatureOverlapAllele_to_output_hash {
   }
 
   # custom annotations
+  # allele-specific annotations are keyed on the unshifted allele, as the custom
+  # file is matched against the VariationFeature before any shifting is applied.
+  # 3' shifting rotates the allele (e.g. GGGCC becomes CGGGC), so the shifted
+  # allele will not match the record for this allele, and may match the record
+  # belonging to another ALT that happens to equal the rotated string.
+  my $custom_allele = $hash->{Allele};
+  $custom_allele = $vfoa->{shift_hash}->{alt_orig_allele_string}
+    if defined($vfoa->{shift_hash}) && defined($vfoa->{shift_hash}->{alt_orig_allele_string});
+
   foreach my $custom_name(keys %{$vf->{_custom_annotations} || {}}) {
     $self->_add_custom_annotations_to_hash(
       $hash,
       $custom_name,
       [
-        grep {$_->{allele} && ($_->{allele} eq $hash->{Allele})}
+        grep {$_->{allele} && ($_->{allele} eq $custom_allele)}
         @{$vf->{_custom_annotations}->{$custom_name}}
       ]
     );
