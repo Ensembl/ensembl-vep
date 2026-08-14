@@ -50,22 +50,13 @@ process runVEP {
   }
   else {
     vep_cmd = "vep -i ${input} -o out.vcf --vcf --config ${vep_config}"
-
   }
-
-  if( params.sort ) {
-    sort_cmd = "(head -1000 out.vcf | grep '^#'; grep -v '^#' out.vcf | sort -k1,1d -k2,2n) > ${out}"
-  } else {
-    sort_cmd = "mv out.vcf ${out}"
-  }
-
 
   """
   ${vep_cmd}
 
   # Sort, bgzip and tabix VCF
-  ${sort_cmd}
-
+  mv out.vcf ${out}
   bgzip ${out}
   tabix ${tabix_arg} ${out}.gz
   """
