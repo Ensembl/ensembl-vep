@@ -67,7 +67,7 @@ process checkVCF {
 
   sort_cmd = ""
   if( params.sort ) {
-    isGzipped = vcf.extension == 'gz'
+    isGzipped = vcf.extension.toLowerCase() in ['gz', 'bgz']
     zip_cmd   = isGzipped ? "zcat ${vcf} | " : ""
     overall_cmd   = "(awk '/^#/{print; next}{exit}' ${vcf}; awk '!/^#/' ${vcf} | sort -k1,1V -k2,2n) > tmp.vcf;"
     sort_cmd += isGzipped ? "${zip_cmd} ${overall_cmd}" : "${overall_cmd}"  // Sort

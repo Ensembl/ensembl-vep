@@ -55,7 +55,7 @@ process runVEP {
   """
   ${vep_cmd}
 
-  # Sort, bgzip and tabix VCF
+  #Sort, bgzip and tabix VCF
   mv out.vcf ${out}
   bgzip ${out}
   tabix ${tabix_arg} ${out}.gz
