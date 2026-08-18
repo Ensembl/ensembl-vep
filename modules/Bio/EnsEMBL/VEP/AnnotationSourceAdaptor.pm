@@ -66,6 +66,7 @@ use Bio::EnsEMBL::Utils::Scalar qw(assert_ref);
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::VEP::CacheDir;
 use Bio::EnsEMBL::VEP::AnnotationSource::Database::RegFeat;
+use Bio::EnsEMBL::VEP::AnnotationSource::File::RegFeat;
 use Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation;
 use Bio::EnsEMBL::VEP::AnnotationSource::Database::StructuralVariation;
 use Bio::EnsEMBL::VEP::AnnotationSource::File;
@@ -91,6 +92,7 @@ sub get_all {
     (
       @{$self->get_all_from_cache},
       @{$self->get_all_from_database},
+      @{$self->get_all_regulatory_gff},
       @{$self->get_all_custom},
     )
   ];
@@ -168,9 +170,22 @@ sub get_all_from_database {
       }
     }
 
-    push @as, Bio::EnsEMBL::VEP::AnnotationSource::Database::RegFeat->new({
-      config => $self->config,
-    }) if $self->param('regulatory') && $self->get_adaptor('funcgen', 'RegulatoryFeature');
+    # --regulatory_gff supersedes the funcgen database regulatory source; both
+    # would feed AnnotationType::RegFeat and double annotate. Database
+    # transcripts remain available alongside a regulatory GFF.
+    if($self->param('regulatory') && $self->get_adaptor('funcgen', 'RegulatoryFeature')) {
+      if($self->param('regulatory_gff')) {
+        $self->warning_msg(
+          "WARNING: Using regulatory features from --regulatory_gff; ".
+          "ignoring the funcgen database regulatory source"
+        );
+      }
+      else {
+        push @as, Bio::EnsEMBL::VEP::AnnotationSource::Database::RegFeat->new({
+          config => $self->config,
+        });
+      }
+    }
 
     push @as, Bio::EnsEMBL::VEP::AnnotationSource::Database::Variation->new({
       config => $self->config,
@@ -184,6 +199,39 @@ sub get_all_from_database {
   }) if $self->param('check_svs') && $self->get_adaptor('variation', 'Variation');
 
   return \@as;
+}
+
+
+=head2 get_all_regulatory_gff
+
+  Example    : $sources = $asa->get_all_regulatory_gff()
+  Description: Gets the GFF-based regulatory AnnotationSource, if --regulatory_gff
+               was given.
+  Returntype : arrayref of Bio::EnsEMBL::VEP::AnnotationSource
+  Exceptions : throws if the file does not exist
+  Caller     : get_all()
+  Status     : Stable
+
+=cut
+
+sub get_all_regulatory_gff {
+  my $self = shift;
+
+  my $file = $self->param('regulatory_gff');
+  return [] unless $file;
+
+  throw("ERROR: Regulatory GFF file $file not found\n")
+    unless -e $file || $file =~ /^(ht|f)tp:\/\/.+/;
+
+  throw("ERROR: Access to remote data files disabled\n")
+    if $self->param('no_remote') && $file =~ /^(ht|f)tp:\/\/.+/;
+
+  return [
+    Bio::EnsEMBL::VEP::AnnotationSource::File::RegFeat->new({
+      config => $self->config,
+      file   => $file,
+    })
+  ];
 }
 
 

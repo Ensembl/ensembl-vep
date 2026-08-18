@@ -207,6 +207,8 @@ our @VEP_PARAMS = (
   'variant_class',           # get SO variant type
   'regulatory',              # enable regulatory stuff
   'cell_type=s',             # filter cell types for regfeats
+  'regulatory_gff=s',        # GFF3 of regulatory features, instead of cache/database
+  'extended_promoters',      # use extended_start/extended_end for promoters in --regulatory_gff
   'convert=s',               # DEPRECATED: convert input to another format (doesn't run VEP)
   'no_intergenic',           # don't print out INTERGENIC consequences
   'vcf',                     # produce vcf output
@@ -428,6 +430,13 @@ our @OPTION_SETS = (
       regulatory => 1,
     },
   },
+
+  {
+    flags => ['regulatory_gff'],
+    set   => {
+      regulatory => 1,
+    },
+  },
   
   {
     flags => ['filter_common'],
@@ -619,7 +628,12 @@ our %INCOMPATIBLE = (
   check_svs   => [qw(offline)],
   ga4gh_vrs   => [qw(vcf)],
   shift_hgvs  => [qw(shift_3prime shift_genomic)],
-  lrg         => [qw(offline)]
+  lrg         => [qw(offline)],
+  # A regulatory GFF supersedes the cache and funcgen database regulatory
+  # sources, and ignores --cell_type since a GFF carries no epigenome activity.
+  # Both are handled by suppression with a warning rather than as
+  # incompatibilities, so --database and --cell_type remain usable for the parts
+  # of a run a regulatory GFF does not supply.
 );
 
 # deprecated/replaced flags
