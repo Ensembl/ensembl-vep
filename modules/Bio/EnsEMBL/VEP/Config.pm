@@ -629,11 +629,6 @@ our %INCOMPATIBLE = (
   ga4gh_vrs   => [qw(vcf)],
   shift_hgvs  => [qw(shift_3prime shift_genomic)],
   lrg         => [qw(offline)],
-  # A regulatory GFF supersedes the cache and funcgen database regulatory
-  # sources, and ignores --cell_type since a GFF carries no epigenome activity.
-  # Both are handled by suppression with a warning rather than as
-  # incompatibilities, so --database and --cell_type remain usable for the parts
-  # of a run a regulatory GFF does not supply.
 );
 
 # deprecated/replaced flags

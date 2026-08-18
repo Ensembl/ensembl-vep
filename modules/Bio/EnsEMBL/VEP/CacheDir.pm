@@ -154,10 +154,7 @@ sub get_all_AnnotationSources {
     });
 
     # Regulatory features come from exactly one source. --regulatory_gff wins
-    # over the cache: both would feed AnnotationType::RegFeat and double
-    # annotate, since merge_features() deduplicates within a source only.
-    # Note --regulatory_gff itself sets regulatory, so this is not a conflict
-    # the user asked for - warn rather than fail.
+    # over the cache, warn that the cache is being ignored if both are present
     my $skip_cache_regfeat = 0;
     if($self->param('regulatory_gff') and $info->{regulatory}) {
       $skip_cache_regfeat = 1;
