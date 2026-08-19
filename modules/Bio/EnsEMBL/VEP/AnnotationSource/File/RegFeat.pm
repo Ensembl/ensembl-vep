@@ -77,8 +77,12 @@ use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Slice;
 use Bio::EnsEMBL::CoordSystem;
 use Bio::EnsEMBL::Funcgen::RegulatoryFeature;
+use Bio::EnsEMBL::Funcgen::MotifFeature;
+use Bio::EnsEMBL::Funcgen::BindingMatrix;
 use Bio::EnsEMBL::Variation::RegulatoryFeatureVariation;
+use Bio::EnsEMBL::Variation::MotifFeatureVariation;
 use Bio::EnsEMBL::IO::Parser::GFF3Tabix;
+use Bio::EnsEMBL::VEP::Utils qw(get_compressed_filehandle);
 
 use base qw(
   Bio::EnsEMBL::VEP::AnnotationSource::File
@@ -96,11 +100,19 @@ our %INCLUDE_FEATURE_TYPES = map {$_ => 1} qw(
   promoter_flanking_region
   TF_binding_site
   regulatory_region
+  EMAR
 );
 
 # only promoters carry extended_start/extended_end
 our %HAS_EXTENDED_BOUNDS = map {$_ => 1} qw(
   promoter
+);
+
+# GFF column 3 values accepted when this source is reading a motif GFF
+# (--regulatory_gff motifs=). Kept separate from the regulatory set so a motif
+# file and a regulatory file each accept only their own records.
+our %MOTIF_INCLUDE_FEATURE_TYPES = map {$_ => 1} qw(
+  TF_binding_site
 );
 
 # Length given to a fabricated slice when no real one is available. Offline
@@ -138,19 +150,42 @@ sub new {
 
   throw("ERROR: No file given\n") unless $hashref->{file};
   $self->file($hashref->{file});
-  $self->short_name($hashref->{short_name} || 'RegulatoryFeatures');
+
+  # A motif source (--regulatory_gff motifs=) builds MotifFeatures; otherwise the
+  # source builds RegulatoryFeatures. Everything else - parsing, dedup, slices,
+  # identifier handling - is shared, mirroring how Cache::RegFeat and
+  # Database::RegFeat each emit both feature classes from one class.
+  $self->{is_motif} = $hashref->{motif} ? 1 : 0;
+
+  $self->short_name($hashref->{short_name} ||
+    ($self->{is_motif} ? 'MotifFeatures' : 'RegulatoryFeatures'));
   $self->type('overlap');
 
-  $self->add_shortcuts([qw(extended_promoters)]);
+  # regulatory-only options; a motif GFF carries no extended bounds or activity
+  unless($self->{is_motif}) {
+    $self->add_shortcuts([qw(extended_promoters)]);
 
-  # A GFF carries no epigenome activity, so --cell_type cannot be honoured.
-  # Warn and ignore rather than fail: CELL_TYPE will simply be empty for
-  # GFF-derived features, and the warning makes that explicit.
-  if(my $ct = $self->param('cell_type')) {
-    $self->warning_msg(
-      "WARNING: --cell_type is ignored for regulatory features from ".
-      "--regulatory_gff; a GFF carries no epigenome activity data"
-    ) if ref($ct) eq 'ARRAY' ? scalar @$ct : $ct;
+    # optional epigenome activity table, supplied via --regulatory_gff activity=...
+    # (EMARs, when given, are a separate source instance created by the adaptor)
+    $self->{activity_file} = $hashref->{activity};
+
+    # --cell_type needs epigenome activity, which a feature GFF does not carry.
+    # With activity= supplied it can be honoured; without, warn and ignore rather
+    # than fail, so the rest of the run still works.
+    if(my $ct = $self->param('cell_type')) {
+      my $wanted = ref($ct) eq 'ARRAY' ? scalar @$ct : $ct;
+
+      if($wanted && !$self->{activity_file}) {
+        $self->warning_msg(
+          "WARNING: --cell_type is ignored for regulatory features from ".
+          "--regulatory_gff; supply activity=<file> for epigenome activity data"
+        );
+      }
+      elsif($wanted) {
+        $self->{cell_type} = ref($ct) eq 'ARRAY' ? $ct : [split(/,/, $ct)];
+        $self->check_cell_types;
+      }
+    }
   }
 
   $self->{cache_region_size} = 1e6;
@@ -190,7 +225,10 @@ sub parser {
 =cut
 
 sub include_feature_types {
-  return \%INCLUDE_FEATURE_TYPES;
+  my $self = shift;
+  return $self->{is_motif}
+    ? \%MOTIF_INCLUDE_FEATURE_TYPES
+    : \%INCLUDE_FEATURE_TYPES;
 }
 
 
@@ -313,6 +351,7 @@ sub _record_to_regfeat {
 
   # --extended_promoters widens promoters to their extended bounds; the
   # extension is always additive and only promoters carry these attributes
+  # (motif GFFs have none, and is_motif sources never set extended_promoters)
   if($self->{extended_promoters} && $HAS_EXTENDED_BOUNDS{$type}) {
     my $xs = $attributes->{extended_start};
     my $xe = $attributes->{extended_end};
@@ -325,24 +364,97 @@ sub _record_to_regfeat {
   my $strand = $parser->get_strand;
   $strand = 0 unless defined($strand);
 
+  my $stable_id = $self->_record_get_id($attributes, $chr, $start, $end, $type);
+
+  my $feature = $self->{is_motif}
+    ? $self->_build_motif_feature($attributes, $slice, $start, $end, $strand, $stable_id)
+    : $self->_build_regulatory_feature($slice, $start, $end, $strand, $stable_id, $type);
+
+  # deduplication key: md5 of the raw record. Features straddling a cache
+  # region boundary are read once per region and must collapse to one.
+  $feature->{md5} = $self->_record_md5;
+
+  $self->_check_id_collision($feature);
+
+  return $feature;
+}
+
+
+=head2 _build_regulatory_feature
+
+  Description: Builds a Bio::EnsEMBL::Funcgen::RegulatoryFeature from the current
+               record, joining epigenome activity by stable id when an activity
+               table was supplied.
+  Returntype : Bio::EnsEMBL::Funcgen::RegulatoryFeature
+  Caller     : _record_to_regfeat()
+  Status     : Stable
+
+=cut
+
+sub _build_regulatory_feature {
+  my ($self, $slice, $start, $end, $strand, $stable_id, $type) = @_;
+
   my $rf = Bio::EnsEMBL::Funcgen::RegulatoryFeature->new_fast({
     start             => $start,
     end               => $end,
     strand            => $strand,
     slice             => $slice,
-    stable_id         => $self->_record_get_id($attributes, $chr, $start, $end, $type),
+    stable_id         => $stable_id,
     dbID              => ++$self->{_rf_dbID},
     feature_type      => $type,
     _vep_feature_type => 'RegulatoryFeature',
   });
 
-  # deduplication key: md5 of the raw record. Features straddling a cache
-  # region boundary are read once per region and must collapse to one.
-  $rf->{md5} = $self->_record_md5;
-
-  $self->_check_id_collision($rf);
+  # OutputFactory::get_cell_types reads exactly this {epigenome=>state}
+  # structure, so nothing downstream needs to change.
+  if(my $act = $self->_activity->{$stable_id}) {
+    $rf->{cell_types} = $act;
+  }
 
   return $rf;
+}
+
+
+=head2 _build_motif_feature
+
+  Description: Builds a Bio::EnsEMBL::Funcgen::MotifFeature from the current
+               record. Carries a BindingMatrix stub with stable_id, length (the
+               motif span) and the transcription factor complexes; elements is
+               deliberately left unset, so OutputFactory omits HIGH_INF_POS and
+               MOTIF_SCORE_CHANGE (which need the position weight matrix). A
+               future matrices= source fills elements in and both fields light up
+               with no further change.
+  Returntype : Bio::EnsEMBL::Funcgen::MotifFeature
+  Caller     : _record_to_regfeat()
+  Status     : Stable
+
+=cut
+
+sub _build_motif_feature {
+  my ($self, $attributes, $slice, $start, $end, $strand, $stable_id) = @_;
+
+  # transcription_factor is a comma-separated list; model each as a complex with
+  # a display_name, which is all OutputFactory reads
+  my @tfcs =
+    map { { display_name => $_ } }
+    split(/,/, $attributes->{transcription_factor} || '');
+
+  my $matrix = bless {
+    stable_id                                 => $attributes->{binding_matrix_id},
+    length                                    => ($end - $start + 1),
+    associated_transcription_factor_complexes => \@tfcs,
+  }, 'Bio::EnsEMBL::Funcgen::BindingMatrix';
+
+  return Bio::EnsEMBL::Funcgen::MotifFeature->new_fast({
+    start             => $start,
+    end               => $end,
+    strand            => $strand,
+    slice             => $slice,
+    stable_id         => $stable_id,
+    dbID              => ++$self->{_rf_dbID},
+    binding_matrix    => $matrix,
+    _vep_feature_type => 'MotifFeature',
+  });
 }
 
 
@@ -547,6 +659,90 @@ sub merge_features {
 sub annotate_InputBuffer {
   my ($self, $buffer) = @_;
   return Bio::EnsEMBL::VEP::AnnotationType::RegFeat::annotate_InputBuffer($self, $buffer);
+}
+
+
+=head2 get_available_cell_types
+
+  Example    : $types = $as->get_available_cell_types();
+  Description: Epigenome names available for --cell_type, taken from the header
+               of the activity table (activity=). Empty if no activity table was
+               given. Parses only the header, so it is cheap.
+  Returntype : arrayref of strings
+  Exceptions : none
+  Caller     : check_cell_types() (inherited from AnnotationType::RegFeat)
+  Status     : Stable
+
+=cut
+
+sub get_available_cell_types {
+  my $self = shift;
+
+  unless(exists($self->{available_cell_types})) {
+    $self->{available_cell_types} = [];
+
+    if(my $file = $self->{activity_file}) {
+      my $fh = get_compressed_filehandle($file, 1);
+      my $header = <$fh>;
+      close $fh;
+      chomp $header if defined $header;
+
+      # columns: feature_id, feature_type, <epigenome> x N
+      my @cols = split(/\t/, $header || '');
+      $self->{available_cell_types} = [ @cols[2..$#cols] ] if @cols > 2;
+    }
+  }
+
+  return $self->{available_cell_types};
+}
+
+
+=head2 _activity
+
+  Example    : $act = $as->_activity();
+  Description: Lazily loads the epigenome activity table into a lookup keyed on
+               feature stable id: { feature_id => { epigenome => state } }. Only
+               the epigenome columns named by --cell_type are kept, so memory is
+               bounded by (rows x requested cell types) rather than the full
+               ~290k x 112 table. Returns an empty hashref when no activity table
+               was given or no cell types were requested - with nothing to join,
+               there is no reason to read the file.
+  Returntype : hashref
+  Exceptions : none
+  Caller     : _record_to_regfeat()
+  Status     : Stable
+
+=cut
+
+sub _activity {
+  my $self = shift;
+
+  unless(exists($self->{_activity_lookup})) {
+    $self->{_activity_lookup} = {};
+
+    my $requested = $self->{cell_type};
+    if($self->{activity_file} && $requested && @$requested) {
+      my $fh = get_compressed_filehandle($self->{activity_file}, 1);
+
+      my $header = <$fh>;
+      chomp $header if defined $header;
+      my @cols = split(/\t/, $header || '');
+
+      # indices of the requested epigenome columns
+      my %want = map {$_ => 1} @$requested;
+      my @keep = grep { $want{$cols[$_]} } (2..$#cols);
+
+      while(my $line = <$fh>) {
+        chomp $line;
+        my @f = split(/\t/, $line);
+        $self->{_activity_lookup}->{$f[0]} = { map { $cols[$_] => $f[$_] } @keep };
+      }
+
+      close $fh;
+    }
+  }
+
+  return $self->{_activity_lookup};
 }
 
 

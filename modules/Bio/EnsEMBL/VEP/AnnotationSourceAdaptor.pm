@@ -73,6 +73,16 @@ use Bio::EnsEMBL::VEP::AnnotationSource::File;
 
 use LWP::Simple;
 
+# Sub-sources accepted by --regulatory_gff. "matrices" is reserved but not yet
+# implemented; see get_all_regulatory_gff().
+our %REGULATORY_GFF_KEYS = map {$_ => 1} qw(
+  file
+  motifs
+  emars
+  activity
+  matrices
+);
+
 =head2 get_all
 
   Example    : $sources = $asa->get_all()
@@ -217,20 +227,77 @@ sub get_all_from_database {
 sub get_all_regulatory_gff {
   my $self = shift;
 
-  my $file = $self->param('regulatory_gff');
-  return [] unless $file;
+  my $string = $self->param('regulatory_gff');
+  return [] unless $string;
 
-  throw("ERROR: Regulatory GFF file $file not found\n")
-    unless -e $file || $file =~ /^(ht|f)tp:\/\/.+/;
+  my %opts;
 
-  throw("ERROR: Access to remote data files disabled\n")
-    if $self->param('no_remote') && $file =~ /^(ht|f)tp:\/\/.+/;
+  # Same key=value idiom as --custom; a bare filename remains valid, so
+  # "--regulatory_gff reg.gff3.gz" keeps working.
+  if($string =~ /=/) {
+    foreach my $param(split(/,/, $string)) {
+      my ($key, $val) = split('=', $param, 2);
+      throw(
+        "ERROR: Failed to parse --regulatory_gff parameter \"$param\"; ".
+        "expected key=value\n"
+      ) unless defined($key) && defined($val) && length($val);
+      $opts{$key} = $val;
+    }
 
+    my @invalid = grep { !$REGULATORY_GFF_KEYS{$_} } keys %opts;
+    throw(
+      "ERROR: Unsupported --regulatory_gff key(s): ".join(', ', sort @invalid)."\n".
+      "Supported keys: ".join(', ', sort keys %REGULATORY_GFF_KEYS)."\n"
+    ) if @invalid;
+
+    throw("ERROR: --regulatory_gff requires file=<regulatory GFF>\n")
+      unless $opts{file};
+  }
+  else {
+    $opts{file} = $string;
+  }
+
+  # matrices= is reserved so the option surface does not change when position
+  # weight matrix support is added; reject it clearly until then
+  throw(
+    "ERROR: --regulatory_gff matrices= is not yet supported; HIGH_INF_POS and ".
+    "MOTIF_SCORE_CHANGE cannot be calculated without position weight matrices\n"
+  ) if $opts{matrices};
+
+  foreach my $key(grep { $opts{$_} } keys %opts) {
+    my $f = $opts{$key};
+    throw("ERROR: --regulatory_gff $key file $f not found\n")
+      unless -e $f || $f =~ /^(ht|f)tp:\/\/.+/;
+    throw("ERROR: Access to remote data files disabled\n")
+      if $self->param('no_remote') && $f =~ /^(ht|f)tp:\/\/.+/;
+  }
+
+  # Each sub-source is its own AnnotationSource. EMARs are a separate file of
+  # RegulatoryFeatures with their own identifier namespace, so they get their own
+  # instance rather than being merged into the main one - merge_features()
+  # deduplicates within a source, and these are genuinely distinct features.
   return [
     Bio::EnsEMBL::VEP::AnnotationSource::File::RegFeat->new({
+      config   => $self->config,
+      file     => $opts{file},
+      activity => $opts{activity},
+    }),
+
+    $opts{emars} ? Bio::EnsEMBL::VEP::AnnotationSource::File::RegFeat->new({
+      config     => $self->config,
+      file       => $opts{emars},
+      short_name => 'EMARs',
+      activity   => $opts{activity},  # uniform cell_type handling; EMAR ids are
+                                      # absent from the activity table, so the
+                                      # join is a no-op but the warning is not
+                                      # spuriously repeated
+    }) : (),
+
+    $opts{motifs} ? Bio::EnsEMBL::VEP::AnnotationSource::File::RegFeat->new({
       config => $self->config,
-      file   => $file,
-    })
+      file   => $opts{motifs},
+      motif  => 1,
+    }) : (),
   ];
 }
 
