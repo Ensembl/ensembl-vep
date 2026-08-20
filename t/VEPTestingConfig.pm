@@ -76,7 +76,6 @@ our %DEFAULTS = (
   custom_gencode_promoter_gff => $Bin.'/testdata/custom/test_gencode_promoter.gff.gz',
   regulatory_gff => $Bin.'/testdata/custom/test_regulatory.gff3.gz',
   regulatory_gff_motifs   => $Bin.'/testdata/custom/test_motif.gff3.gz',
-  regulatory_gff_activity => $Bin.'/testdata/custom/test_regulatory_activity.tsv.gz',
   custom_gtf     => $Bin.'/testdata/custom/test.gtf.gz',
   custom_gtf_mt     => $Bin.'/testdata/custom/test_MT.gtf.gz',
   custom_bigwig  => $Bin.'/testdata/custom/test.bw',

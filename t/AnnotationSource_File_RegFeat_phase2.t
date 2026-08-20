@@ -26,7 +26,6 @@ my $test_cfg = VEPTestingConfig->new();
 
 my $reg      = $test_cfg->{regulatory_gff};
 my $motifs   = $test_cfg->{regulatory_gff_motifs};
-my $activity = $test_cfg->{regulatory_gff_activity};
 
 use_ok('Bio::EnsEMBL::VEP::AnnotationSource::File::RegFeat');
 use_ok('Bio::EnsEMBL::VEP::AnnotationSourceAdaptor');
@@ -156,14 +155,6 @@ sub cfg { Bio::EnsEMBL::VEP::Config->new({ %{$test_cfg->base_testing_cfg}, @_ })
   throws_ok { $asa->get_all_regulatory_gff } qr/requires file=/, 'missing file= throws';
 }
 
-# matrices= reserved but not yet implemented
-{
-  my $asa = Bio::EnsEMBL::VEP::AnnotationSourceAdaptor->new({
-    config => cfg(regulatory_gff => "file=$reg,matrices=$reg")
-  });
-  throws_ok { $asa->get_all_regulatory_gff } qr/matrices= is not yet supported/, 'matrices= rejected';
-}
-
 
 ## EMAR type
 ############
@@ -180,55 +171,41 @@ sub cfg { Bio::EnsEMBL::VEP::Config->new({ %{$test_cfg->base_testing_cfg}, @_ })
 }
 
 
-## activity= join and real --cell_type support
-##############################################
+## --cell_type
+###############
 
 {
-  # available cell types come from the activity header
-  my $as = Bio::EnsEMBL::VEP::AnnotationSource::File::RegFeat->new({
-    config => cfg(regulatory => 1), file => $reg, activity => $activity
-  });
-  is_deeply($as->get_available_cell_types, ['GM12878', 'K562', 'HUVEC'], 'available cell types from activity header');
-}
-
-{
-  # requested cell type is joined onto the matching feature
-  my $as = Bio::EnsEMBL::VEP::AnnotationSource::File::RegFeat->new({
-    config => cfg(regulatory => 1, cell_type => ['GM12878']),
-    file => $reg, activity => $activity
-  });
-  my $feats = $as->_get_regfeats_by_coords(21, 25585500, 25585900);
-  my ($prom) = grep {$_->stable_id eq 'ENSR21_PROM1'} @$feats;
-  ok($prom, 'feature with activity read');
-  is($prom->{cell_types}->{GM12878}, 'ACTIVE', 'activity joined by stable_id');
-
-  # a feature not in the activity table gets no cell types (the CTCF gap)
-  my $ctcf = $as->_get_regfeats_by_coords(21, 25587690, 25587720);
-  my ($c) = grep {$_->{feature_type} eq 'CTCF_binding_site'} @$ctcf;
-  ok($c, 'CTCF feature read');
-  ok(!%{$c->{cell_types} || {}}, 'feature absent from activity table has no cell types');
-}
-
-{
-  # unknown cell type is rejected against the activity header
-  throws_ok {
-    Bio::EnsEMBL::VEP::AnnotationSource::File::RegFeat->new({
-      config => cfg(regulatory => 1, cell_type => ['NOPE']),
-      file => $reg, activity => $activity
-    })
-  } qr/unavailable/, 'unknown cell type rejected';
-}
-
-{
-  # --cell_type without activity= still warns and is ignored (phase-1 behaviour)
+  # A GFF carries no epigenome activity, so --cell_type cannot be honoured: it
+  # is warned about and ignored, leaving CELL_TYPE empty, rather than failing.
   my $as;
   my $warned = warning {
     $as = Bio::EnsEMBL::VEP::AnnotationSource::File::RegFeat->new({
       config => cfg(regulatory => 1, cell_type => ['GM12878']), file => $reg
     })
   };
-  like("$warned", qr/--cell_type is ignored/, '--cell_type without activity warns');
+  like("$warned", qr/--cell_type is ignored/, '--cell_type warns');
   ok($as, 'source still built');
+  ok(
+    scalar @{$as->_get_regfeats_by_coords(21, 25585500, 25585900)},
+    '--cell_type does not prevent annotation'
+  );
+}
+
+{
+  # With emars= there are two regulatory instances; warning_msg deduplicates per
+  # object, so without quiet_cell_type the --cell_type warning would appear twice
+  my @warnings;
+  {
+    local $SIG{__WARN__} = sub { push @warnings, $_[0] };
+    my $asa = Bio::EnsEMBL::VEP::AnnotationSourceAdaptor->new({
+      config => cfg(regulatory_gff => "file=$reg,emars=$reg", cell_type => ['GM12878'])
+    });
+    $asa->get_all_regulatory_gff;
+  }
+  is(
+    scalar(grep {/--cell_type is ignored/} @warnings), 1,
+    '--cell_type warning emitted once, not once per regulatory source'
+  );
 }
 
 done_testing();
