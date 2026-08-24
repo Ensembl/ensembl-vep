@@ -147,12 +147,55 @@ sub cfg { Bio::EnsEMBL::VEP::Config->new({ %{$test_cfg->base_testing_cfg}, @_ })
   throws_ok { $asa->get_all_regulatory_gff } qr/Unsupported --regulatory_gff key/, 'unknown key throws';
 }
 
-# file= required in key=value form
+# at least one recognised key is required, but file= is not special: the three
+# files are independent sources, so any non-empty subset is valid
+{
+  my $asa = Bio::EnsEMBL::VEP::AnnotationSourceAdaptor->new({
+    config => cfg(regulatory_gff => "file=")
+  });
+  throws_ok { $asa->get_all_regulatory_gff } qr/expected key=value/,
+    'key with empty value throws';
+}
+
+# emars= alone - the case this supports directly
+{
+  my $asa = Bio::EnsEMBL::VEP::AnnotationSourceAdaptor->new({
+    config => cfg(regulatory_gff => "emars=$reg")
+  });
+  my $sources = $asa->get_all_regulatory_gff;
+  is(scalar @$sources, 1, 'emars= alone -> one source');
+  is(ref($sources->[0]), 'Bio::EnsEMBL::VEP::AnnotationSource::File::RegFeat',
+    'emars-only source is RegFeat');
+  is($sources->[0]->short_name, 'EMARs', 'emars-only short_name');
+  ok(!$sources->[0]->{is_motif}, 'emars-only source is not a motif source');
+}
+
+# motifs= alone - same rule, falls out of the same change
 {
   my $asa = Bio::EnsEMBL::VEP::AnnotationSourceAdaptor->new({
     config => cfg(regulatory_gff => "motifs=$motifs")
   });
-  throws_ok { $asa->get_all_regulatory_gff } qr/requires file=/, 'missing file= throws';
+  my $sources = $asa->get_all_regulatory_gff;
+  is(scalar @$sources, 1, 'motifs= alone -> one source');
+  ok($sources->[0]->{is_motif}, 'motifs-only source is a motif source');
+}
+
+# emars= alone must still emit the --cell_type warning. It is suppressed on
+# secondary regulatory sources, which previously assumed file= was always
+# present and had already warned; with emars= alone there is no such primary.
+{
+  my @warnings;
+  {
+    local $SIG{__WARN__} = sub { push @warnings, $_[0] };
+    my $asa = Bio::EnsEMBL::VEP::AnnotationSourceAdaptor->new({
+      config => cfg(regulatory_gff => "emars=$reg", cell_type => ['GM12878'])
+    });
+    $asa->get_all_regulatory_gff;
+  }
+  is(
+    scalar(grep {/--cell_type is ignored/} @warnings), 1,
+    '--cell_type warning still emitted when emars= is the only source'
+  );
 }
 
 

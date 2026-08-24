@@ -212,10 +212,13 @@ sub get_all_from_database {
 =head2 get_all_regulatory_gff
 
   Example    : $sources = $asa->get_all_regulatory_gff()
-  Description: Gets the GFF-based regulatory AnnotationSource, if --regulatory_gff
-               was given.
+  Description: Gets the GFF-based regulatory AnnotationSources, if
+               --regulatory_gff was given. One source is created per file
+               supplied (file=, emars=, motifs=); any non-empty combination is
+               valid, so emars= or motifs= alone work as well as file= alone.
   Returntype : arrayref of Bio::EnsEMBL::VEP::AnnotationSource
-  Exceptions : throws if the file does not exist
+  Exceptions : throws if no recognised key is given, if a key is unsupported,
+               or if a file does not exist
   Caller     : get_all()
   Status     : Stable
 
@@ -247,8 +250,12 @@ sub get_all_regulatory_gff {
       "Supported keys: ".join(', ', sort keys %REGULATORY_GFF_KEYS)."\n"
     ) if @invalid;
 
-    throw("ERROR: --regulatory_gff requires file=<regulatory GFF>\n")
-      unless $opts{file};
+    # any non-empty subset is valid: the three files are independent sources,
+    # so emars= or motifs= alone are as meaningful as file= alone
+    throw(
+      "ERROR: --regulatory_gff requires at least one of: ".
+      join(', ', sort keys %REGULATORY_GFF_KEYS)."\n"
+    ) unless grep { $opts{$_} } keys %REGULATORY_GFF_KEYS;
   }
   else {
     $opts{file} = $string;
@@ -266,25 +273,43 @@ sub get_all_regulatory_gff {
   # RegulatoryFeatures with their own identifier namespace, so they get their own
   # instance rather than being merged into the main one - merge_features()
   # deduplicates within a source, and these are genuinely distinct features.
-  return [
-    Bio::EnsEMBL::VEP::AnnotationSource::File::RegFeat->new({
+  #
+  # warning_msg deduplicates per object rather than per run, so the --cell_type
+  # warning has to be suppressed on every regulatory source after the first
+  # (see RegFeat::new). Track that as we go rather than assuming file= is
+  # present, since emars= alone is now a valid invocation.
+  my @sources;
+  my $warned_cell_type = 0;
+
+  if($opts{file}) {
+    push @sources, Bio::EnsEMBL::VEP::AnnotationSource::File::RegFeat->new({
       config => $self->config,
       file   => $opts{file},
-    }),
+    });
+    $warned_cell_type = 1;
+  }
 
-    $opts{emars} ? Bio::EnsEMBL::VEP::AnnotationSource::File::RegFeat->new({
+  if($opts{emars}) {
+    push @sources, Bio::EnsEMBL::VEP::AnnotationSource::File::RegFeat->new({
       config           => $self->config,
       file             => $opts{emars},
       short_name       => 'EMARs',
-      quiet_cell_type  => 1,   # the primary source already warned; see RegFeat::new
-    }) : (),
+      quiet_cell_type  => $warned_cell_type,
+    });
+    $warned_cell_type = 1;
+  }
 
-    $opts{motifs} ? Bio::EnsEMBL::VEP::AnnotationSource::File::RegFeat->new({
+  # motif sources never emit the --cell_type warning at all (RegFeat::new gates
+  # it on !is_motif), so they need no bookkeeping here
+  if($opts{motifs}) {
+    push @sources, Bio::EnsEMBL::VEP::AnnotationSource::File::RegFeat->new({
       config => $self->config,
       file   => $opts{motifs},
       motif  => 1,
-    }) : (),
-  ];
+    });
+  }
+
+  return \@sources;
 }
 
 
