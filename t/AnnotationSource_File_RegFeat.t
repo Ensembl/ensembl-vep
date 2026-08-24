@@ -273,6 +273,37 @@ sub annotate {
   }
 }
 
+# variants in bins adjacent to a promoter's core bin are annotated only when
+# --extended_promoters is set, and the extension reaches back or forward to the
+# promoter's core bin. This tests the extension logic, which is more complex than
+# the simple extended_promoters test above.
+{
+  my @cases = (
+    ['21', 29999800, 'xbound_l', 'ENSR21_PROM_XBOUND_L',
+     'variant bin (29) below promoter core bin (30), extension reaches back'],
+    ['21', 35000200, 'xbound_r', 'ENSR21_PROM_XBOUND_R',
+     'variant bin (35) above promoter core bin (34), extension reaches forward'],
+  );
+
+  for my $case (@cases) {
+    my ($chr, $pos, $id, $stable_id, $desc) = @$case;
+    my $vcf = $test_cfg->create_input_file([[$chr, $pos, $id, 'A', 'G']]);
+
+    for my $ext (0, 1) {
+      my $cfg = base_cfg(extended_promoters => $ext);
+      my $source = Bio::EnsEMBL::VEP::AnnotationSource::File::RegFeat->new({
+        config => $cfg, file => $gff
+      });
+      my $ib = annotate($source, $cfg, $vcf);
+      my ($vf) = @{$ib->buffer};
+      my @hits = grep {$_->feature->stable_id eq $stable_id}
+        values %{$vf->{regulatory_feature_variations} || {}};
+      is(scalar(@hits), $ext ? 1 : 0,
+        "$desc: annotated=".($ext?'yes':'no')." with extended_promoters=$ext");
+    }
+  }
+}
+
 # structural variants pick up the ablation/amplification consequences for free,
 # via AnnotationType::RegFeat's StructuralVariationOverlap branch
 {

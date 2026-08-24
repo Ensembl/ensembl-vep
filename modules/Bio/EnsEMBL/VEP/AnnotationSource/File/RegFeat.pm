@@ -107,6 +107,11 @@ our %HAS_EXTENDED_BOUNDS = map {$_ => 1} qw(
   promoter
 );
 
+# margin to pad the query when extended_promoters is active, so a promoter whose
+# core lies in a neighbouring region but whose extended bounds reach into this
+# one is still found. 
+our $EXTENDED_PROMOTER_MARGIN = 10_000;
+
 # GFF column 3 values accepted when this source is reading a motif GFF
 # (--regulatory_gff motifs=). Kept separate from the regulatory set so a motif
 # file and a regulatory file each accept only their own records.
@@ -272,7 +277,10 @@ sub get_features_by_regions_uncached {
   Example    : $features = $as->_get_regfeats_by_coords($chr, $start, $end)
   Description: Gets all regulatory features overlapping the given region.
                Unlike BaseGXF this does no parent/child rescanning: regulatory
-               features are flat intervals with no sub-features.
+               features are flat intervals with no sub-features. The query is
+               padded by $EXTENDED_PROMOTER_MARGIN when extended_promoters is
+               active, so a promoter whose core lies in a neighbouring region
+               but whose extended bounds reach into this one is still found.
   Returntype : arrayref of Bio::EnsEMBL::Funcgen::RegulatoryFeature
   Exceptions : none
   Caller     : get_features_by_regions_uncached()
@@ -287,14 +295,19 @@ sub _get_regfeats_by_coords {
 
   my $source_chr = $self->get_source_chr_name($c, 'regfeat', $self->valid_chromosomes);
 
-  return [] unless $parser->seek($source_chr, $s - 1, $e + 1);
+  # pad the query on both sides so a promoter whose core sits in a
+  # neighbouring bin, but whose --extended_promoters reach crosses into this
+  # one, is not invisible to this bin's seek. See $EXTENDED_PROMOTER_MARGIN.
+  my $margin = $self->{extended_promoters} ? $EXTENDED_PROMOTER_MARGIN : 0;
+
+  return [] unless $parser->seek($source_chr, $s - 1 - $margin, $e + 1 + $margin);
 
   my $include = $self->include_feature_types;
   my @features;
 
   $parser->next();
 
-  while($parser->{record} && $parser->get_start <= $e) {
+  while($parser->{record} && $parser->get_start <= $e + $margin) {
     my $type = $parser->get_type;
 
     if($include->{$type}) {
