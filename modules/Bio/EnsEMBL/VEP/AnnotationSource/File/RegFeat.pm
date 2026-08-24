@@ -51,9 +51,11 @@ regulatory consequences, as an alternative to the funcgen database
 (Bio::EnsEMBL::VEP::AnnotationSource::Database::RegFeat) or the VEP cache
 (Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat).
 
-We must create RegulatoryFeature objects because regulatory consequence 
-assignment only works for that class. It is gated via the feature_type 
-being RegulatoryFeature (see 
+We must create RegulatoryFeature objects because regulatory consequence
+assignment only works for that class. It is gated on the object's Perl class:
+_get_oc_list blesses a dummy into the OverlapConsequence's feature_class and
+calls isa() on it, so a generic Bio::EnsEMBL::Feature yields no regulatory
+consequences and no error (see
 Bio::EnsEMBL::Variation::BaseVariationFeatureOverlapAllele::_get_oc_list).
 
 Only eight fields survive into the VEP cache (see
@@ -107,7 +109,7 @@ our %HAS_EXTENDED_BOUNDS = map {$_ => 1} qw(
 
 # margin to pad the query when extended_promoters is active, so a promoter whose
 # core lies in a neighbouring region but whose extended bounds reach into this
-# one is still found. 
+# one is still found.
 our $EXTENDED_PROMOTER_MARGIN = 10_000;
 
 # GFF column 3 values accepted when this source is reading a motif GFF
