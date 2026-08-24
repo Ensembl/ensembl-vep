@@ -51,12 +51,10 @@ regulatory consequences, as an alternative to the funcgen database
 (Bio::EnsEMBL::VEP::AnnotationSource::Database::RegFeat) or the VEP cache
 (Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat).
 
-Records are converted to Bio::EnsEMBL::Funcgen::RegulatoryFeature objects. That
-class is a hard requirement rather than a stylistic choice: consequence
-assignment gates on the feature's Perl class in
-Bio::EnsEMBL::Variation::BaseVariationFeatureOverlapAllele, which blesses a dummy
-into the OverlapConsequence's feature_class and calls isa() on it. A generic
-Bio::EnsEMBL::Feature yields no regulatory consequences and no error.
+We must create RegulatoryFeature objects because regulatory consequence 
+assignment only works for that class. It is gated via the feature_type 
+being RegulatoryFeature (see 
+Bio::EnsEMBL::Variation::BaseVariationFeatureOverlapAllele::_get_oc_list).
 
 Only eight fields survive into the VEP cache (see
 Bio::EnsEMBL::VEP::Pipeline::DumpVEP::Dumper::Regulation::clean_regfeat), so the
