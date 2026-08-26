@@ -300,7 +300,8 @@ sub _get_regfeats_by_coords {
   # one, is not invisible to this bin's seek. See $EXTENDED_PROMOTER_MARGIN.
   my $margin = $self->{extended_promoters} ? $EXTENDED_PROMOTER_MARGIN : 0;
 
-  return [] unless $parser->seek($source_chr, $s - 1 - $margin, $e + 1 + $margin);
+  my $start = $s - 1 - $margin < 1 ? 1 : $s - 1 - $margin;
+  return [] unless $parser->seek($source_chr, $start, $e + 1 + $margin);
 
   my $include = $self->include_feature_types;
   my @features;
