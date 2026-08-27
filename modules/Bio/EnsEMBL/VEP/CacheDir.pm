@@ -153,6 +153,17 @@ sub get_all_AnnotationSources {
       bam => $self->param('bam'),
     });
 
+    # Regulatory features come from exactly one source. --regulatory_gff wins
+    # over the cache, warn that the cache is being ignored if both are present
+    my $skip_cache_regfeat = 0;
+    if($self->param('regulatory_gff') and $info->{regulatory}) {
+      $skip_cache_regfeat = 1;
+      $self->warning_msg(
+        "WARNING: Using regulatory features from --regulatory_gff; ".
+        "ignoring the regulatory data in this cache"
+      );
+    }
+
     # add RegFeats if available
     push @as, Bio::EnsEMBL::VEP::AnnotationSource::Cache::RegFeat->new({
       config => $self->config,
@@ -162,7 +173,7 @@ sub get_all_AnnotationSources {
       info => $self->version_data,
       available_cell_types => [split(',', ($info->{cell_types} || ''))],
       valid_chromosomes => $info->{valid_chromosomes},
-    }) if $self->param('regulatory') and $info->{regulatory};
+    }) if $self->param('regulatory') and $info->{regulatory} and !$skip_cache_regfeat;
 
     # add Variation if available
     if($self->param('check_existing') && $info->{variation_cols}) {
