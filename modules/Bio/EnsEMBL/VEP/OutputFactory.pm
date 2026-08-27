@@ -1926,10 +1926,18 @@ sub MotifFeatureVariationAllele_to_output_hash {
   $hash->{STRAND}       = $mf->strand + 0;
   $hash->{CELL_TYPE}    = $self->get_cell_types($mf) if $self->{cell_type};
   $hash->{MOTIF_POS}    = $vfoa->motif_start if defined $vfoa->motif_start;
-  $hash->{HIGH_INF_POS} = ($vfoa->in_informative_position ? 'Y' : 'N');
 
-  my $delta = $vfoa->motif_score_delta if $vfoa->variation_feature_seq =~ /^[ACGT]+$/;
-  $hash->{MOTIF_SCORE_CHANGE} = sprintf("%.3f", $delta) if defined $delta;
+  # HIGH_INF_POS and MOTIF_SCORE_CHANGE both need the position weight matrix
+  # frequencies. A GFF-derived BindingMatrix carries only the matrix identifier
+  # and has no elements, so these cannot be computed - omit them rather than
+  # emit a misleading value (in particular HIGH_INF_POS would print 'N',
+  # asserting "not informative" when the truth is unknown).
+  if(defined $matrix->{elements}) {
+    $hash->{HIGH_INF_POS} = ($vfoa->in_informative_position ? 'Y' : 'N');
+
+    my $delta = $vfoa->motif_score_delta if $vfoa->variation_feature_seq =~ /^[ACGT]+$/;
+    $hash->{MOTIF_SCORE_CHANGE} = sprintf("%.3f", $delta) if defined $delta;
+  }
 
   return $hash;
 }
