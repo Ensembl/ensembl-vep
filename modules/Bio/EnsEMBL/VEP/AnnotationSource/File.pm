@@ -125,7 +125,8 @@ my %VALID_TYPES = (
                  reciprocal     => (optional) bool $calculate_reciprocal_overlap (off by default),
                  overlap_def    => (optional) string $overlap_definition (based on reciprocal by default),
                  num_records    => (optional) maximum number of records to show (50 by default),
-                 summary_stats  => (optional) summary statistics: max, min, mean, count, sum
+                 summary_stats  => (optional) summary statistics: max, min, mean, count, sum,
+                 show_overlaps  => (optional) show overlap bp and percentage (off by default)
                }
   Example    : $as = Bio::EnsEMBL::VEP::AnnotationSource::File->new($args);
   Description: Create a new Bio::EnsEMBL::VEP::AnnotationSource::File object. Will
@@ -166,6 +167,7 @@ sub new {
   $self->{overlap_def}    = $hashref->{overlap_def};
   $self->{num_records}    = defined $hashref->{num_records} ? $hashref->{num_records} : 50;
   $self->{gff_type}       = $hashref->{gff_type}       || "transcript";
+  $self->{show_overlaps}  = $hashref->{show_overlaps}  || 0;
 
   $self->{info} = { custom_info => $hashref };
 
@@ -391,13 +393,13 @@ sub annotate_VariationFeature {
   my $vf = shift;
   my $record_count = shift;
 
-  my ($overlap_result, $overlap_percentage) = $self->_record_overlaps_VF($vf);
+  my ($overlap_result, $overlap_percentage, $overlap_bp) = $self->_record_overlaps_VF($vf);
 
   return unless ($overlap_result);
 
   my $stats      = $self->{summary_stats};
   my $get_scores = defined $stats;
-  my $record = $self->_create_records($overlap_result, $get_scores);
+  my $record = $self->_create_records($overlap_result, $get_scores, $overlap_percentage, $overlap_bp);
 
   return unless @$record;
 
@@ -461,9 +463,14 @@ sub _create_records {
   my $self           = shift;
   my $overlap_result = shift;
   my $get_scores     = shift;
+  my $overlap_percentage = shift;
+  my $overlap_bp = shift;
 
   my $record = [{ name  => $self->_get_record_name }];
+  $self->_add_identifier($record->[0]) if $self->report_coords == 2;     # try to add name besides coord if coords=2
   $record->[0]->{score} = $self->parser->get_score if $get_scores;
+  $record->[0]->{"overlap_percentage"} = $overlap_percentage if defined $overlap_percentage && $self->{show_overlaps};
+  $record->[0]->{"overlap_bp"} = $overlap_bp if defined $overlap_bp && $self->{show_overlaps};
   return $record;
 }
 
@@ -494,6 +501,30 @@ sub _get_record_name {
       $parser->get_end
     ) :
     $name;
+}
+
+
+=head2 _add_identifier
+ 
+  Arg 1      : record hashref
+  Example    : $as->_add_identifier($record);
+  Description: Add an identifier to the given record as read from the 
+               annotation source. Does not add anything if no identifier found.
+  Returntype : none
+  Exceptions : none
+  Caller     : _create_records()
+  Status     : Stable
+
+=cut
+
+sub _add_identifier {
+  my $self = shift;
+  my $record = shift;
+
+  my $parser = $self->parser;
+  my $identifier = $parser->can("get_name") ? $parser->get_name : undef;
+
+  $record->{id} = $identifier if defined $identifier;
 }
 
 
@@ -551,14 +582,16 @@ sub _record_overlaps_VF {
     # check overlap percentage
     my @overlap_start = sort { $a <=> $b } ($vs, $ref_start);
     my @overlap_end   = sort { $a <=> $b } ($ve, $ref_end);
-    my $overlap_percentage = $length != 0 ? 100 * (1 + $overlap_end[0] - $overlap_start[1]) / $length : 100;
+    my $overlap_bp = $length != 0 ? (1 + $overlap_end[0] - $overlap_start[1]) : 100;
+    my $overlap_percentage = $length != 0 ? 100 * $overlap_bp / $length : 100;
 
     unless ($reciprocal) {
       # when reciprocal = 0, check percentage of reference (annotation) variant covered
       my $ref_length = $ref_end - $ref_start + 1;
 
       # in some cases $ref_length can be 0, for example in old VCF with single base deletion without INFO/SVLEN
-      my $ref_overlap_percentage = $ref_length != 0 ? 100 * (1 + $overlap_end[0] - $overlap_start[1]) / $ref_length : 100;
+      $overlap_bp = $ref_length != 0 ? (1 + $overlap_end[0] - $overlap_start[1]) : 100;
+      my $ref_overlap_percentage = $ref_length != 0 ? 100 * $overlap_bp / $ref_length : 100;
 
       $overlap_percentage = $ref_overlap_percentage;
     }
@@ -566,7 +599,7 @@ sub _record_overlaps_VF {
 	return 0 if $overlap_percentage < $overlap_cutoff;
 
     $overlap_percentage = sprintf("%.3f", $overlap_percentage);
-    return overlap($ref_start, $ref_end, $vs, $ve), $overlap_percentage;
+    return overlap($ref_start, $ref_end, $vs, $ve), $overlap_percentage, $overlap_bp;
   }
   elsif($type eq 'exact') {
     my $match = $ref_start == $vf->{start} && $ref_end == $vf->{end};

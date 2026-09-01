@@ -182,6 +182,8 @@ sub _create_records {
   my $self           = shift;
   my $overlap_result = shift;
   my $get_scores     = shift;
+  my $overlap_percentage = shift;
+  my $overlap_bp = shift;
   
   my $record = [{ name  => $self->_get_record_name }];
   my $record_hash = $self->_record_to_hash;
@@ -199,6 +201,10 @@ sub _create_records {
 
   my $associated_gene = $record_hash->{'attributes'}->{'gene_id'} ? $record_hash->{'attributes'}->{'gene_id'}  : '.';
   $record->[0]->{fields}->{associated_gene} = $associated_gene;
+
+  $record->[0]->{overlap_percentage} = $overlap_percentage if defined $overlap_percentage && $self->{show_overlaps};
+  $record->[0]->{overlap_bp} = $overlap_bp if defined $overlap_bp && $self->{show_overlaps};
+  $self->_add_identifier($record->[0]) if $self->report_coords == 2;     # try to add name besides coord if coords=2
 
   return $record;
 }

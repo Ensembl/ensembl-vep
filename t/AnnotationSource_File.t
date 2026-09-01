@@ -50,6 +50,7 @@ is_deeply(
     distance => undef,
     same_type => 0,
     gff_type => 'transcript',
+    show_overlaps => 0,
     info => {
       custom_info => {
         file => 'foo/bar',
