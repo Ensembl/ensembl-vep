@@ -410,27 +410,27 @@ sub _add_check_freq_data_to_vf {
   foreach my $alt(@$alts) {
     my $pass = 0;
 
+    # $freq_data is keyed on the known variant's alleles, $alt is the input's,
+    # and the two representations need not agree. Where compare_existing() has
+    # recorded which known allele this input allele matched, that mapping is
+    # the only safe way to look up the frequency; a bare $freq_data->{$alt} hit
+    # can be a coincidence. An insertion minimised to "-/G" has ALT "G", while
+    # the same known variant stored as "G/GG" has REF "G", and the "fill in by
+    # subtracting" in get_frequency_data() gives that REF a frequency of ~1 -
+    # so a variant seen once in gnomAD looks fixed in the population and is
+    # wrongly dropped by --freq_filter exclude.
+    my $match_b = $matched_alleles->{$alt};
+
     # set freq to 'NA' if the alternate allele hasn't been observed, or
     # the reference allele is the minor allele and the overlapping variant
     # is multiallelic (more than 1 alternative allele), e.g.:
     # Input: 17:7676154 => G/C
     # Minor allele: G (0.4571)
     # Overlapping variant: rs1042522 (G/C/T)
-    my $f = $freq_data->{$alt} || 'NA';
+    my $f = (defined($match_b) ? $freq_data->{$match_b} : $freq_data->{$alt}) || 'NA';
 
-    if ($f eq 'NA') {
-      $pass = 0;
+    $pass = $self->check_pass($pass, $f, $freq_freq, $freq_gt_lt) unless $f eq 'NA';
 
-      # check if there is frequency for the matched alleles
-      my $match_b = $matched_alleles->{$alt};
-      if($match_b && $freq_data->{$match_b}) {
-        $f = $freq_data->{$match_b};
-        $pass = $self->check_pass($pass, $f, $freq_freq, $freq_gt_lt);
-      }
-    }
-    else {
-      $pass = $self->check_pass($pass, $f, $freq_freq, $freq_gt_lt);
-    }
     $used_freqs{$alt} = $f;
 
     $pass_count += $pass;
