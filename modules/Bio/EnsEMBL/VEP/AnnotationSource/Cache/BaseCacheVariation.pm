@@ -251,6 +251,7 @@ sub get_frequency_data {
       $freq_data{$a} = 1 - $total_freq;
     }
   }
+  print("Freq data: ".join(',', map {$_.'='.$freq_data{$_}} keys %freq_data)."\n") ;
 
   $self->_add_check_freq_data_to_vf($vf, \%freq_data, \%matched_alleles) if %freq_data;
 }
@@ -416,8 +417,7 @@ sub _add_check_freq_data_to_vf {
     # Input: 17:7676154 => G/C
     # Minor allele: G (0.4571)
     # Overlapping variant: rs1042522 (G/C/T)
-    my $f = $freq_data->{$alt} || 'NA';
-
+    my $f = $freq_data->{$alt} // 'NA';
     if ($f eq 'NA') {
       $pass = 0;
 
