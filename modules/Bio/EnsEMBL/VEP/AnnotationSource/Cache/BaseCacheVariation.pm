@@ -251,7 +251,7 @@ sub get_frequency_data {
       $freq_data{$a} = 1 - $total_freq;
     }
   }
-  print("Freq data: ".join(',', map {$_.'='.$freq_data{$_}} keys %freq_data)."\n") ;
+
 
   $self->_add_check_freq_data_to_vf($vf, \%freq_data, \%matched_alleles) if %freq_data;
 }
