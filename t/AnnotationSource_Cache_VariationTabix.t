@@ -509,6 +509,22 @@ SKIP: {
     },
     'get_frequency_data - matched alleles'
   );
+
+  # Regression test: zero should count as a real frequency, not as missing data
+  my $ib_zero = get_ib([qw(21 25891796 . C T . . .)]);
+  $vf = $ib_zero->buffer->[0];
+  $c->{freq_pop} = '1KG_AMR';
+  $c->{freq_freq} = 0.001;
+  $c->{freq_gt_lt} = 'lt';
+  $c->_add_check_freq_data_to_vf($vf, { 'T' => 0 }, {});
+
+  is_deeply(
+    $vf->{_freq_check_pass},
+    {
+      'T' => 1,
+    },
+    'get_frequency_data - zero frequency is handled as a real value'
+  );
 }
 
 
