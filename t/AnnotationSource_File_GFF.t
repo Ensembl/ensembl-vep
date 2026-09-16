@@ -33,7 +33,7 @@ SKIP: {
   no warnings 'once';
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'Bio::DB::HTS::Tabix module not available', 52 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+  skip 'Bio::DB::HTS::Tabix module not available', 59 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
 
   ## BASIC TESTS
   ##############
@@ -63,6 +63,25 @@ SKIP: {
 
   ## METHOD TESTS
   ###############
+
+  # An accepted transcript must not be orphaned by filtering its ncRNA_gene parent.
+  my $ncrna_as = Bio::EnsEMBL::VEP::AnnotationSource::File::GFF->new({
+    file => $Bin.'/testdata/custom/ncrna_gene.gff.gz',
+    config => $runner->config,
+  });
+  my $ncrna_trs = [map {$ncrna_as->lazy_load_transcript($_)} @{
+    $ncrna_as->_create_transcripts($ncrna_as->_get_records_by_coords(21, 25585660, 25585660))
+  }];
+  is_deeply(
+    [map {[
+      $_->stable_id,
+      $_->{_gene_stable_id},
+      $_->biotype,
+      [map {[$_->start, $_->end]} @{$_->get_all_Exons}],
+    ]} @$ncrna_trs],
+    [['ncrna_transcript', 'ncrna_gene', 'lncRNA', [[25585656, 25585754], [25585900, 25586000]]]],
+    'ncRNA_gene parent preserves lnc_RNA transcript, gene ID, biotype and exons'
+  );
 
   # _get_records_by_coords
   my $records;
