@@ -69,6 +69,8 @@ The following config files are used and can be modified depending on user requir
   --filters STRING          Comma-separated list of filter conditions to pass to filter_vep, such as "AF < 0.01,Feature is ENST00000377918".
                             Read more on how to write filters at https://ensembl.org/info/docs/tools/vep/script/vep_filter.html
                             Default: null (filter_vep is not run)
+  --vep_memory STRING       Set the starting amount of memory the runVEP module uses.
+                            Default: 4GB
 ```
 
 ---
