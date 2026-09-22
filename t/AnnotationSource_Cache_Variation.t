@@ -471,6 +471,101 @@ $c->annotate_InputBuffer($ib);
 is($ib->buffer->[0]->{existing}->[0]->{AMR}, 0.0014, 'old_maf');
 $c->{old_maf} = 0;
 
+
+## FREQUENCY FILTERING ACROSS DIFFERING ALLELE REPRESENTATIONS
+##############################################################
+# https://github.com/Ensembl/ensembl-vep/issues/1404
+# VEP minimises an inserted base to allele_string "-/G", so the input ALT is
+# "G". The same known variant can be held in the cache in anchored form,
+# "G/GG", whose REF is also "G". get_frequency_data() fills in the known REF's
+# frequency by subtracting the ALT frequencies from 1, so looking the input ALT
+# up by name alone returns ~1 and a variant seen once in gnomAD is dropped by
+# --freq_filter exclude. The matched_alleles mapping from compare_existing()
+# is what tells the two "G"s apart.
+
+my %freq_bak = map {$_ => $c->{$_}} qw(freq_pop freq_freq freq_gt_lt freq_filter);
+
+$c->{freq_pop}    = 'gnomADe';
+$c->{freq_freq}   = 0.05;
+$c->{freq_gt_lt}  = 'gt';
+$c->{freq_filter} = 'exclude';
+
+sub freq_check_insertion {
+  my $gnomade = shift;
+
+  my $vf = Bio::EnsEMBL::Variation::VariationFeature->new_fast({
+    chr            => 21,
+    start          => 25585734,
+    end            => 25585733,
+    strand         => 1,
+    allele_string  => '-/G',
+    variation_name => 'insertion_input',
+  });
+
+  my $existing = {
+    variation_name => 'rs755283040',
+    chr            => 21,
+    start          => 25585734,
+    end            => 25585734,
+    strand         => 1,
+    allele_string  => 'G/GG',
+    gnomADe        => $gnomade,
+  };
+
+  $vf->{existing} = [$c->compare_existing($vf, $existing)];
+  $c->get_frequency_data($vf);
+
+  return $vf;
+}
+
+my $rare_ins = freq_check_insertion('GG:6.365e-06');
+
+is_deeply(
+  $rare_ins->{existing}->[0]->{matched_alleles},
+  [{a_index => 0, a_allele => 'G', b_index => 0, b_allele => 'GG'}],
+  'insertion frequency - input ALT "G" matches known ALT "GG"'
+);
+
+is_deeply(
+  $rare_ins->{_freq_check_freqs},
+  {'GNOMADE' => {'G' => '6.365e-06'}},
+  'insertion frequency - uses the matched allele frequency, not the known REF'
+);
+
+is_deeply(
+  $rare_ins->{_freq_check_pass},
+  {'G' => 0},
+  'insertion frequency - rare insertion does not meet the frequency threshold'
+);
+
+is($rare_ins->{_freq_check_all_failed}, 1, 'insertion frequency - rare insertion all_failed');
+ok(!$rare_ins->{_freq_check_all_passed}, 'insertion frequency - rare insertion not all_passed');
+
+# a genuinely common insertion must still be filtered
+my $common_ins = freq_check_insertion('GG:0.4');
+
+is_deeply(
+  $common_ins->{_freq_check_freqs},
+  {'GNOMADE' => {'G' => '0.4'}},
+  'insertion frequency - common insertion frequency'
+);
+
+is($common_ins->{_freq_check_all_passed}, 1, 'insertion frequency - common insertion all_passed');
+
+# and end to end through the buffer: the rare one is kept, the common one dropped
+foreach my $case([$rare_ins, 1, 'rare insertion kept'], [$common_ins, 0, 'common insertion excluded']) {
+  my ($vf, $expected, $desc) = @$case;
+
+  my $freq_ib = Bio::EnsEMBL::VEP::InputBuffer->new({config => $cfg});
+  $freq_ib->buffer([$vf]);
+  $c->frequency_check_buffer($freq_ib);
+
+  is(scalar @{$freq_ib->buffer}, $expected, 'frequency_check_buffer - '.$desc);
+}
+
+$c->{$_} = $freq_bak{$_} for keys %freq_bak;
+
+
 # done
 done_testing();
 
