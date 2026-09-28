@@ -192,6 +192,24 @@ delete $tmp[0]->{_gene_hgnc_id};
 @tmp = @{$c->merge_features(\@tmp)};
 is($tmp[0]->{_gene_hgnc_id}, 'HGNC:14027', 'merge_features restores missing _gene_hgnc_id');
 
+# HGNC IDs must not be copied between different genes that share a symbol
+# (e.g. snoRNA copies), otherwise HGNC_ID depends on what else is in the buffer (#1959)
+my ($hgnc_donor) = grep {$_->{_gene_symbol} eq 'MRPL39' && defined($_->{_gene_hgnc_id})} @$features;
+my ($other_gene_tr) = grep {defined($_->{_gene_stable_id}) && $_->{_gene_stable_id} ne $hgnc_donor->{_gene_stable_id}} @$features;
+$hgnc_donor = bless({%$hgnc_donor}, ref($hgnc_donor));
+$other_gene_tr = bless({%$other_gene_tr, _gene_symbol => 'MRPL39'}, ref($other_gene_tr));
+delete $other_gene_tr->{_gene_hgnc_id};
+@tmp = @{$c->merge_features([$hgnc_donor, $other_gene_tr])};
+ok(!defined($other_gene_tr->{_gene_hgnc_id}), 'merge_features does not copy _gene_hgnc_id between genes sharing a symbol');
+
+# RefSeq transcripts in merged caches still get their HGNC ID by symbol
+$c->{source_type} = 'merged';
+$hgnc_donor->{_source_cache} = 'Ensembl';
+$other_gene_tr->{_source_cache} = 'RefSeq';
+@tmp = @{$c->merge_features([$hgnc_donor, $other_gene_tr])};
+is($other_gene_tr->{_gene_hgnc_id}, 'HGNC:14027', 'merge_features merged copies _gene_hgnc_id to RefSeq transcript by symbol');
+$c->{source_type} = 'ensembl';
+
 $c->{source_type} = 'refseq';
 
 # check copying/restoration of data
