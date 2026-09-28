@@ -274,6 +274,7 @@ sub merge_features {
   my @return;
 
   my $source_type_is_refseq = $self->{source_type} && ($self->{source_type} eq 'refseq' || $self->{source_type} eq 'merged') ? 1 : 0;
+  my $source_type = $self->{source_type} || '';
 
   while(my $tr = shift @$features) {
 
@@ -307,9 +308,8 @@ sub merge_features {
   ## hack to copy HGNC IDs and RefSeq stuff
   my %by_stable_id;
   foreach my $tr(@return) {
-    my $source_type = $self->{source_type} || '';
-    my $is_refseq_tr = $source_type eq 'refseq' || ($source_type eq 'merged' && ($tr->{_source_cache} || '') eq 'RefSeq');
-    my $hgnc_id = $is_refseq_tr
+    my $match_by_symbol = $source_type eq 'refseq' || ($source_type eq 'merged' && ($tr->{_source_cache} || '') eq 'RefSeq');
+    my $hgnc_id = $match_by_symbol
       ? (defined($tr->{_gene_symbol}) ? $hgnc_ids_by_symbol{$tr->{_gene_symbol}} : undef)
       : (defined($tr->{_gene_stable_id}) ? $hgnc_ids_by_gene{$tr->{_gene_stable_id}} : undef);
     $tr->{_gene_hgnc_id} = $hgnc_id if defined($hgnc_id);
