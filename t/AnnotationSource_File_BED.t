@@ -81,6 +81,30 @@ SKIP: {
     'annotate_InputBuffer - overlap'
   );
 
+  $as->report_coords(2);
+  delete $ib->buffer->[0]->{_custom_annotations};
+  $as->annotate_InputBuffer($ib);  
+  is_deeply(
+    $ib->buffer->[0]->{_custom_annotations},
+    {
+      'test.bed.gz' => [
+        {
+            name => '21:25585721-25585750',
+            id => 'test1' 
+        },
+        { 
+            name => '21:25585733-25585733',
+            id => 'test2'
+        }
+      ]
+    },
+    'annotate_InputBuffer - report_coords(2)'
+  );
+
+  $as->report_coords(0);
+  delete $ib->buffer->[0]->{_custom_annotations};
+
+
   # exact type
   $as->type('exact');
   $as->short_name('foo');
@@ -89,11 +113,6 @@ SKIP: {
   is_deeply(
     $ib->buffer->[0]->{_custom_annotations},
     {
-
-      'test.bed.gz' => [
-        { name => 'test1' },
-        { name => 'test2' }
-      ],
       'foo' => [
         { name => 'test2' }
       ]

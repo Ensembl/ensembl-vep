@@ -207,8 +207,47 @@ SKIP: {
     },
     'annotate_InputBuffer - overlap - report_coords'
   );
-  $as->report_coords(0);
+  
+  delete($ib->buffer->[0]->{_custom_annotations});
+  $as->report_coords(2);
+  $as->annotate_InputBuffer($ib);
+  is_deeply(
+    $ib->buffer->[0]->{_custom_annotations},
+    {
+      'test.vcf.gz' => [
+        { 
+            name => '21:25585733-25585733',
+            id => 'test1'
+        }
+      ]
+    },
+    'annotate_InputBuffer - overlap - report_coords(2)'
+  );
 
+  my $ib2 = Bio::EnsEMBL::VEP::InputBuffer->new({
+    config => $cfg,
+    parser => Bio::EnsEMBL::VEP::Parser::VEP_input->new({
+      config => $cfg,
+      file => $test_cfg->create_input_file([qw(21 25585753 25585753 C/T + unknown_id)]),
+      valid_chromosomes => [21]
+    })
+  });
+  $ib2->next;
+  $as->annotate_InputBuffer($ib2);
+  is_deeply(
+    $ib2->buffer->[0]->{_custom_annotations},
+    {
+      'test.vcf.gz' => [
+        { 
+            name => '21:25585753-25585753'
+        }
+      ]
+    },
+    'annotate_InputBuffer - overlap - report_coords(2) no ID'
+  );
+
+
+  $as->report_coords(0);
 
 
   # VCF info fields
