@@ -1,4 +1,6 @@
 name: Docker
+permissions:
+  contents: read
 on:
   release:
     types: [published]
