@@ -267,12 +267,14 @@ sub merge_features {
   my $self = shift;
   my $features = shift;
 
-  my %hgnc_ids = ();
+  my %hgnc_ids_by_gene = ();
+  my %hgnc_ids_by_symbol = ();
   my %refseq_stuff = ();
   my %seen_trs;
   my @return;
 
   my $source_type_is_refseq = $self->{source_type} && ($self->{source_type} eq 'refseq' || $self->{source_type} eq 'merged') ? 1 : 0;
+  my $source_type = $self->{source_type} || '';
 
   while(my $tr = shift @$features) {
 
@@ -287,7 +289,11 @@ sub merge_features {
     }
 
     ## hack to copy HGNC IDs
-    $hgnc_ids{$tr->{_gene_symbol}} = $tr->{_gene_hgnc_id} if defined($tr->{_gene_hgnc_id});
+    ## Ensembl transcripts only take one from the same gene, RefSeq transcripts match on symbol
+    if(defined($tr->{_gene_hgnc_id})) {
+      $hgnc_ids_by_gene{$tr->{_gene_stable_id}} = $tr->{_gene_hgnc_id} if defined($tr->{_gene_stable_id});
+      $hgnc_ids_by_symbol{$tr->{_gene_symbol}} = $tr->{_gene_hgnc_id} if defined($tr->{_gene_symbol});
+    }
 
     ## hack to copy RefSeq gene stuff
     if($source_type_is_refseq) {
@@ -302,7 +308,11 @@ sub merge_features {
   ## hack to copy HGNC IDs and RefSeq stuff
   my %by_stable_id;
   foreach my $tr(@return) {
-    $tr->{_gene_hgnc_id} = $hgnc_ids{$tr->{_gene_symbol}} if defined($tr->{_gene_symbol}) && defined($hgnc_ids{$tr->{_gene_symbol}});
+    my $match_by_symbol = $source_type eq 'refseq' || ($source_type eq 'merged' && ($tr->{_source_cache} || '') eq 'RefSeq');
+    my $hgnc_id = $match_by_symbol
+      ? (defined($tr->{_gene_symbol}) ? $hgnc_ids_by_symbol{$tr->{_gene_symbol}} : undef)
+      : (defined($tr->{_gene_stable_id}) ? $hgnc_ids_by_gene{$tr->{_gene_stable_id}} : undef);
+    $tr->{_gene_hgnc_id} = $hgnc_id if defined($hgnc_id);
 
     if($source_type_is_refseq) {
       $tr->{$_} ||= $refseq_stuff{$tr->{_gene}->stable_id}->{$_} for qw(_gene_symbol _gene_symbol_source _gene_hgnc_id);
