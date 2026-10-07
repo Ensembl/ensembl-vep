@@ -102,12 +102,6 @@ Below are a list of known Ensembl VEP bugs, where possible, workarounds have bee
    * Please note that this bug also impacts the MAF filtering options on the web version of Ensembl VEP.
 * Non coding transcripts do not get their allele shifted when the `--shift_3prime` is enabled. This has consequence in custom annotation feature when used with the "type=exact" option enabled or any other logic that tries to match variant allele with the annotated feature.
 
-* When running with `--shift_3prime 1`, custom annotation lookups using exact allele matching (for example `--custom <file>,...,vcf,exact,...`) can fail for some shifted alleles (see [issue #1879](https://github.com/Ensembl/ensembl-vep/issues/1879)). Consequence/HGVS annotation may be present while custom fields (for example ClinVar/gnomAD values) are blank because the lookup key does not always match the shifted representation.
-   * Workaround: run Ensembl VEP in two passes and merge outputs.
-   * Pass 1: run with `--shift_3prime 1` and keep consequence/HGVS fields.
-   * Pass 2: run the same input with the same options, but with `--shift_3prime 0`, to recover custom annotations.
-   * Merge custom fields from pass 2 into pass 1 output (for example with `bcftools annotate` or a custom merge script).
-
 * Running `--fork` with `--merged` can cause discrepancies in results for HGNC ids due to internal caching. It is recommended to not run `--fork` when using `--merged` for obtaining HGNC ids.
 * For multi-allelic inputs, the alleles are not minimised by default.
 * When using VEP with Perl version [>=5.18.0](https://perldoc.perl.org/5.18.0/perl5180delta), users may notice non-deterministic ordering of annotations within the `CSQ` field between VEP runs. This is caused by VEP relying on Perl hash  order, which is not deterministic in newer Perl versions. This has been observed when using the `--pick_allele_gene` flag, see issue [#2008](https://github.com/Ensembl/ensembl-vep/issues/2008). A known workaround, if deterministic ordering between VEP runs is required, is to set: `PERL_HASH_SEED=0 PERL_PERTURB_KEYS=0`.
