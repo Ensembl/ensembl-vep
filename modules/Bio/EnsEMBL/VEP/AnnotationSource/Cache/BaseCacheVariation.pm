@@ -428,7 +428,7 @@ sub _add_check_freq_data_to_vf {
     # Input: 17:7676154 => G/C
     # Minor allele: G (0.4571)
     # Overlapping variant: rs1042522 (G/C/T)
-    my $f = (defined($match_b) ? $freq_data->{$match_b} : $freq_data->{$alt}) || 'NA';
+    my $f = (defined($match_b) ? $freq_data->{$match_b} : $freq_data->{$alt}) // 'NA';
 
     $pass = $self->check_pass($pass, $f, $freq_freq, $freq_gt_lt) unless $f eq 'NA';
 
