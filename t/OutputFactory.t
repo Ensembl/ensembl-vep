@@ -684,6 +684,20 @@ is_deeply(
   'VariationFeatureOverlapAllele_to_output_hash - custom annotations'
 );
 
+# allele-specific custom annotations are keyed on the unshifted allele, so they
+# must still be reported for features whose allele has been shifted 3'
+$vfoa->{shift_hash} = { alt_orig_allele_string => 'C' };
+$ib->buffer->[0]->{_custom_annotations} = {
+  custom1 => [ {allele => 'C', name => 'foo'} ],
+};
+is_deeply(
+  $of->VariationFeatureOverlapAllele_to_output_hash($vfoa, {}, $ib->buffer->[0])->{custom1},
+  ['foo'],
+  'VariationFeatureOverlapAllele_to_output_hash - custom annotations on unshifted allele'
+);
+delete($vfoa->{shift_hash});
+delete($ib->buffer->[0]->{_custom_annotations});
+
 
 
 ## frequency tests
@@ -1864,6 +1878,76 @@ SKIP: {
       ]
     ],
     'get_multiple_custom_headers - same short_name'
+  );
+}
+
+
+## custom annotations and 3' shifting
+#####################################
+
+SKIP: {
+  no warnings 'once';
+
+  ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
+  skip 'Bio::DB::HTS::Tabix module not available', 6 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+
+  # 21:25593910 T/TCT inserts CT into a CT repeat, so with shift_3prime the
+  # allele is rotated to TC. The custom file record is keyed on the unshifted
+  # allele, as that is how such data (e.g. ClinVar) is represented, so the
+  # annotation must be reported whether or not the allele has been shifted.
+  my $custom_string =
+    'file=' . $test_cfg->{custom_vcf_shift} . ',short_name=ClinVar,format=vcf,type=exact,fields=CLNSIG';
+
+  foreach my $shift(0, 1) {
+    $runner = get_annotated_buffer_runner({
+      input_file => $test_cfg->create_input_file([qw(21 25593910 shift1 T TCT . . .)]),
+      custom => [$custom_string],
+      shift_3prime => $shift,
+      quiet => 1,
+      warning_file => 'STDERR',
+    });
+    $of = $runner->get_OutputFactory();
+
+    my ($hash) =
+      grep {$_->{Feature} eq 'ENST00000307301'}
+      @{$of->get_all_output_hashes_by_VariationFeature($runner->get_InputBuffer->buffer->[0])};
+
+    is($hash->{Allele}, $shift ? 'TC' : 'CT', "custom annotation exact match - allele with shift_3prime $shift");
+
+    is_deeply(
+      $hash->{ClinVar_CLNSIG},
+      ['Pathogenic'],
+      "custom annotation exact match - shift_3prime $shift"
+    );
+  }
+
+  # the shifted allele of the first ALT (TC) is also the second ALT, so matching
+  # on it would report the second ALT's annotation against the first
+  $runner = get_annotated_buffer_runner({
+    input_file => $test_cfg->create_input_file([qw(21 25593910 shift2 T TCT,TTC . . .)]),
+    custom => [$custom_string],
+    shift_3prime => 1,
+    allele_number => 1,
+    quiet => 1,
+    warning_file => 'STDERR',
+  });
+  $of = $runner->get_OutputFactory();
+
+  my %by_allele_num =
+    map {$_->{ALLELE_NUM} => $_}
+    grep {$_->{Feature} eq 'ENST00000307301'}
+    @{$of->get_all_output_hashes_by_VariationFeature($runner->get_InputBuffer->buffer->[0])};
+
+  is_deeply(
+    $by_allele_num{1}->{ClinVar_CLNSIG},
+    ['Pathogenic'],
+    'custom annotation exact match - shifted multi-allelic, first ALT'
+  );
+
+  is_deeply(
+    $by_allele_num{2}->{ClinVar_CLNSIG},
+    ['Benign'],
+    'custom annotation exact match - shifted multi-allelic, second ALT'
   );
 }
 
