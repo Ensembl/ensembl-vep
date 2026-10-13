@@ -174,6 +174,8 @@ sub _create_records {
   my $self = shift;
   my $overlap_result = shift;
   my $get_scores = shift;
+  my $overlap_percentage = shift;
+  my $overlap_bp = shift;
 
   my @records;
 
@@ -241,6 +243,10 @@ sub _create_records {
         $record->{fields}->{$field} = ref($data) eq 'HASH' ? $data->{$index} : $data;
       }
 
+      $record->{overlap_percentage} = $overlap_percentage if defined $overlap_percentage && $self->{show_overlaps};
+      $record->{overlap_bp} = $overlap_bp if defined $overlap_bp && $self->{show_overlaps};
+      $self->_add_identifier($record) if $self->report_coords == 2;     # try to add name besides coord if coords=2
+
       push @records, $record;
     }
   }
@@ -258,6 +264,10 @@ sub _create_records {
         $record->{fields}->{$field} = $data;
       }
     }
+
+    $record->{overlap_percentage} = $overlap_percentage if defined $overlap_percentage && $self->{show_overlaps};
+    $record->{overlap_bp} = $overlap_bp if defined $overlap_bp && $self->{show_overlaps};
+    $self->_add_identifier($record) if $self->report_coords == 2;     # try to add name besides coord if coords=2
 
     push @records, $record;
   }
@@ -297,13 +307,10 @@ sub _get_record_name {
 }
 
 
-=head2 _get_record_name
+=head2 _get_score
  
-  Example    : $record_name = $as->_get_record_name();
-  Description: Get name for the current record using either ID as
-               found in the source or record coordinates. Defaults
-               to using first ID if multiple found, or coordinates
-               if none found.
+  Example    : $score = $as->_get_score();
+  Description: Get score for the current record from the parser.
   Returntype : string
   Exceptions : none
   Caller     : _create_records()
@@ -315,6 +322,30 @@ sub _get_score {
   my $self  = shift;
   my $score = $self->parser->get_score;
   return $score if $score ne '.';
+}
+
+
+=head2 _add_identifier
+ 
+  Arg 1      : record hashref
+  Example    : $as->_add_identifier($record);
+  Description: Add an identifier to the given record as read from the 
+               annotation source. Does not add anything if no identifier found.
+  Returntype : none
+  Exceptions : none
+  Caller     : _create_records()
+  Status     : Stable
+
+=cut
+
+sub _add_identifier {
+  my $self = shift;
+  my $record = shift;
+
+  my $parser = $self->parser;
+  my $identifier = $parser->get_IDs->[0];
+
+  $record->{id} = $identifier if defined $identifier && $identifier ne '.';
 }
 
 
