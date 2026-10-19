@@ -165,6 +165,8 @@ workflow NF_VEP {
         vep_meta.output_dir = out_dir
         vep_meta.filters = filter
 
+        vep_meta.file_base_name = file(data).getBaseName().replace(".vcf", "")
+
         // NOTE: csi is default unless a tbi index already exists
         vep_meta.index_type = file(data + ".tbi").exists() ? "tbi" : "csi"
 
