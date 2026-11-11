@@ -31,7 +31,7 @@ SKIP: {
   no warnings 'once';
   
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'Bio::DB::HTS::Tabix module not available', 32 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+  skip 'Bio::DB::HTS::Tabix module not available', 36 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
 
   ## BASIC TESTS
   ##############
@@ -446,6 +446,55 @@ SKIP: {
       ]
     },
     'annotate_InputBuffer - SV reverts to overlap'
+  );
+
+  # SV overlap percentage: reciprocal chooses which variant overlap_cutoff applies to.
+  # The input deletion matches same_10kb, covers all of small_2kb (which covers 20% of it)
+  # and is entirely within large_50kb (of which it covers 20%).
+  my $sv_overlap_pc = sub {
+    my $sv_as = Bio::EnsEMBL::VEP::AnnotationSource::File::VCF->new({
+      file => $test_cfg->{custom_sv_vcf},
+      short_name => 'sv',
+      fields => ['PC'],
+      @_
+    });
+
+    my $sv_ib = Bio::EnsEMBL::VEP::InputBuffer->new({
+      config => $cfg,
+      parser => Bio::EnsEMBL::VEP::Parser::VCF->new({
+        config => $cfg,
+        file => $test_cfg->create_input_file([qw(21 25500000 . N <DEL> . . SVTYPE=DEL;END=25510000)]),
+        valid_chromosomes => [21]
+      })
+    });
+    $sv_ib->next;
+    $sv_as->annotate_InputBuffer($sv_ib);
+
+    return { map { $_->{name} => $_->{fields}->{PC} } @{$sv_ib->buffer->[0]->{_custom_annotations}->{sv}} };
+  };
+
+  is_deeply(
+    $sv_overlap_pc->(overlap_cutoff => 80, reciprocal => 0),
+    { same_10kb => '100.000', small_2kb => '100.000' },
+    'annotate_InputBuffer - SV overlap_cutoff - reciprocal=0 - reference variant covered'
+  );
+
+  is_deeply(
+    $sv_overlap_pc->(overlap_cutoff => 80, reciprocal => 1),
+    { large_50kb => '100.000', same_10kb => '100.000' },
+    'annotate_InputBuffer - SV overlap_cutoff - reciprocal=1 - input variant covered'
+  );
+
+  is_deeply(
+    $sv_overlap_pc->(overlap_cutoff => 80, reciprocal => 2),
+    { same_10kb => '100.000' },
+    'annotate_InputBuffer - SV overlap_cutoff - reciprocal=2 - both variants covered'
+  );
+
+  is_deeply(
+    $sv_overlap_pc->(reciprocal => 2),
+    { large_50kb => '20.000', same_10kb => '100.000', small_2kb => '20.000' },
+    'annotate_InputBuffer - SV overlap - reciprocal=2 reports minimum percentage'
   );
 
   # test mismatches in num of ALTs to num INFO chunks
