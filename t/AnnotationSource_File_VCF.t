@@ -463,7 +463,7 @@ SKIP: {
       config => $cfg,
       parser => Bio::EnsEMBL::VEP::Parser::VCF->new({
         config => $cfg,
-        file => $test_cfg->create_input_file([qw(21 25500001 . N <DEL> . . SVTYPE=DEL;END=25510000)]),
+        file => $test_cfg->create_input_file([qw(21 25500000 . N <DEL> . . SVTYPE=DEL;END=25510000)]),
         valid_chromosomes => [21]
       })
     });
@@ -474,27 +474,26 @@ SKIP: {
   };
 
   is_deeply(
-    [sort keys %{$sv_overlap_pc->(overlap_cutoff => 80, reciprocal => 0)}],
-    [qw(same_10kb small_2kb)],
+    $sv_overlap_pc->(overlap_cutoff => 80, reciprocal => 0),
+    { same_10kb => '100.000', small_2kb => '100.000' },
     'annotate_InputBuffer - SV overlap_cutoff - reciprocal=0 - reference variant covered'
   );
 
   is_deeply(
-    [sort keys %{$sv_overlap_pc->(overlap_cutoff => 80, reciprocal => 1)}],
-    [qw(large_50kb same_10kb)],
+    $sv_overlap_pc->(overlap_cutoff => 80, reciprocal => 1),
+    { large_50kb => '100.000', same_10kb => '100.000' },
     'annotate_InputBuffer - SV overlap_cutoff - reciprocal=1 - input variant covered'
   );
 
   is_deeply(
-    [sort keys %{$sv_overlap_pc->(overlap_cutoff => 80, reciprocal => 2)}],
-    [qw(same_10kb)],
+    $sv_overlap_pc->(overlap_cutoff => 80, reciprocal => 2),
+    { same_10kb => '100.000' },
     'annotate_InputBuffer - SV overlap_cutoff - reciprocal=2 - both variants covered'
   );
 
-  my ($ref_pc, $input_pc) = map { $sv_overlap_pc->(reciprocal => $_) } (0, 1);
   is_deeply(
     $sv_overlap_pc->(reciprocal => 2),
-    { map { $_ => $ref_pc->{$_} < $input_pc->{$_} ? $ref_pc->{$_} : $input_pc->{$_} } qw(large_50kb same_10kb small_2kb) },
+    { large_50kb => '20.000', same_10kb => '100.000', small_2kb => '20.000' },
     'annotate_InputBuffer - SV overlap - reciprocal=2 reports minimum percentage'
   );
 
