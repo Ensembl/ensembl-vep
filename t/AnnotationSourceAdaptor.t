@@ -117,7 +117,7 @@ SKIP: {
   no warnings 'once';
 
   ## REMEMBER TO UPDATE THIS SKIP NUMBER IF YOU ADD MORE TESTS!!!!
-  skip 'Bio::DB::HTS::Tabix module not available', 5 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
+  skip 'Bio::DB::HTS::Tabix module not available', 6 unless $Bio::EnsEMBL::VEP::AnnotationSource::File::CAN_USE_TABIX_PM;
 
   $asa->param('custom', ['file=' . $test_cfg->{custom_vcf} . ',short_name=test,format=vcf,type=exact']);
   is_deeply(
@@ -134,7 +134,7 @@ SKIP: {
         'reciprocal' => 0,
         'overlap_cutoff' => 0,
         'reciprocal' => 0,
-        'overlap_def' => "Percentage of input variant covered by reference variant",
+        'overlap_def' => "Percentage of reference variant covered by input variant",
         'distance' => undef,
         'same_type' => 0,
         'num_records' => 50,
@@ -148,7 +148,7 @@ SKIP: {
             'type' => 'exact',
             'overlap_cutoff' => 0,
             'reciprocal' => 0,
-            'overlap_def' => "Percentage of input variant covered by reference variant",
+            'overlap_def' => "Percentage of reference variant covered by input variant",
             'distance' => undef,
             'same_type' => 0,
             'num_records' => 50,
@@ -175,7 +175,7 @@ SKIP: {
         'custom_suppress_filter' => undef,
         'overlap_cutoff' => 0,
         'reciprocal' => 0,
-        'overlap_def' => "Percentage of input variant covered by reference variant",
+        'overlap_def' => "Percentage of reference variant covered by input variant",
         'distance' => undef,
         'same_type' => 0,
         'num_records' => 50,
@@ -189,7 +189,7 @@ SKIP: {
             'type' => 'overlap',
             'overlap_cutoff' => 0,
             'reciprocal' => 0,
-            'overlap_def' => "Percentage of input variant covered by reference variant",
+            'overlap_def' => "Percentage of reference variant covered by input variant",
             'distance' => undef,
             'same_type' => 0,
             'num_records' => 50,
@@ -216,7 +216,7 @@ SKIP: {
         'custom_suppress_filter' => undef,
         'overlap_cutoff' => 0,
         'reciprocal' => 0,
-        'overlap_def' => "Percentage of input variant covered by reference variant",
+        'overlap_def' => "Percentage of reference variant covered by input variant",
         'distance' => undef,
         'same_type' => 0,
         'num_records' => 50,
@@ -230,7 +230,7 @@ SKIP: {
             'type' => 'overlap',
             'overlap_cutoff' => 0,
             'reciprocal' => 0,
-            'overlap_def' => "Percentage of input variant covered by reference variant",
+            'overlap_def' => "Percentage of reference variant covered by input variant",
             'distance' => undef,
             'same_type' => 0,
             'num_records' => 50,
@@ -258,7 +258,7 @@ SKIP: {
         'custom_suppress_filter' => undef,
         'overlap_cutoff' => 0,
         'reciprocal' => 0,
-        'overlap_def' => "Percentage of input variant covered by reference variant",
+        'overlap_def' => "Percentage of reference variant covered by input variant",
         'distance' => undef,
         'same_type' => 0,
         'num_records' => 50,
@@ -273,7 +273,7 @@ SKIP: {
             'type' => 'overlap',
             'overlap_cutoff' => 0,
             'reciprocal' => 0,
-            'overlap_def' => "Percentage of input variant covered by reference variant",
+            'overlap_def' => "Percentage of reference variant covered by input variant",
             'distance' => undef,
             'same_type' => 0,
             'num_records' => 50,
@@ -302,7 +302,7 @@ SKIP: {
         'type' => 'overlap',
         'overlap_cutoff' => 0,
         'reciprocal' => 0,
-        'overlap_def' => "Percentage of input variant covered by reference variant",
+        'overlap_def' => "Percentage of reference variant covered by input variant",
         'distance' => undef,
         'same_type' => 0,
         'num_records' => 50,
@@ -320,7 +320,7 @@ SKIP: {
     'type' => 'overlap',
     'overlap_cutoff' => 0,
     'reciprocal' => 0,
-    'overlap_def' => "Percentage of input variant covered by reference variant",
+    'overlap_def' => "Percentage of reference variant covered by input variant",
     'distance' => undef,
     'same_type' => 0,
     'num_records' => 50,
@@ -337,7 +337,7 @@ SKIP: {
         'type' => 'overlap',
         'overlap_cutoff' => 0,
         'reciprocal' => 0,
-        'overlap_def' => "Percentage of input variant covered by reference variant",
+        'overlap_def' => "Percentage of reference variant covered by input variant",
         'distance' => undef,
         'same_type' => 0,
         'num_records' => 50,
@@ -355,7 +355,7 @@ SKIP: {
     'type' => 'overlap',
     'overlap_cutoff' => 0,
     'reciprocal' => 0,
-    'overlap_def' => "Percentage of input variant covered by reference variant",
+    'overlap_def' => "Percentage of reference variant covered by input variant",
     'distance' => undef,
     'same_type' => 0,
     'num_records' => 50,
@@ -364,6 +364,19 @@ SKIP: {
   }, 'Bio::EnsEMBL::VEP::AnnotationSource::File::VCF' )
     ],
     'get_all_custom - automated ###CHR###'
+  );
+
+  # PC header describes the overlap percentage chosen with reciprocal
+  $asa->param('custom', [
+    map { 'file=' . $test_cfg->{custom_vcf} . ',short_name=test,format=vcf,type=overlap,reciprocal=' . $_ } (1, 2)
+  ]);
+  is_deeply(
+    [map { $_->{overlap_def} } @{$asa->get_all_custom}],
+    [
+      "Percentage of input variant covered by reference variant",
+      "Percentage of minimum reciprocal overlap between input variant and reference variant",
+    ],
+    'get_all_custom - overlap_def follows reciprocal'
   );
 
 }
