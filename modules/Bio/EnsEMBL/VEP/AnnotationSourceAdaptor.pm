@@ -392,9 +392,10 @@ sub get_all_custom {
       gff_type => $hash{"gff_type"} || "transcript"
     };
 
-    $opts->{overlap_def} = $opts->{reciprocal} ?
-      "Percentage of minimum reciprocal overlap between input variant and reference variant" :
-      "Percentage of input variant covered by reference variant";
+    $opts->{overlap_def} =
+      !$opts->{reciprocal}        ? "Percentage of reference variant covered by input variant" :
+      $opts->{reciprocal} eq '2'  ? "Percentage of minimum reciprocal overlap between input variant and reference variant" :
+                                    "Percentage of input variant covered by reference variant";
 
     my $format = $hash{"format"};
     if(defined($format) && $format =~ /^G[TF]F$/i) {
