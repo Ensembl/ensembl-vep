@@ -1366,13 +1366,22 @@ sub VariationFeatureOverlapAllele_to_output_hash {
   if($self->{hgvsg}) {
     # if offline mode then hgvsg_use_accession has to access chromosome synonyms from cache
     if(!$vf->slice->adaptor && $self->{hgvsg_use_accession}) {
-      my $chr_syn = $self->config->{_chromosome_synonyms}->{($vf->{chr})};
-      my @new_chr_array = grep(/NC_/, keys %{$chr_syn});
+      my $chr_syn = undef;
+      if ($vf->{chr} =~ m/^(NC|NT|NW)_/){
+        $chr_syn = $vf->{chr}
+      }
+      else {
+        my $chr_syns = $self->config->{_chromosome_synonyms}->{($vf->{chr})};
+        my @new_chr_array = grep(/^(NC|NT|NW)_/, keys %{$chr_syns});
+        $chr_syn = $new_chr_array[0];
+      }
 
-      my %hgvs_genomic = %{ $vf->hgvs_genomic($vf->slice, $new_chr_array[0]) };
       $vf->{_hgvs_genomic} ||= {};
-      foreach (keys %hgvs_genomic) {
-        $vf->{_hgvs_genomic}->{$_} = $hgvs_genomic{$_};
+      if (defined $chr_syn) {
+        my %hgvs_genomic = %{ $vf->hgvs_genomic($vf->slice, $chr_syn) };
+        foreach (keys %hgvs_genomic) {
+          $vf->{_hgvs_genomic}->{$_} = $hgvs_genomic{$_};
+        }
       }
     }
     else {
