@@ -103,6 +103,52 @@ is_deeply(
   "minimal - long trim"
 );
 
+# Long biallelic alleles must take the same minimisation path as short ones.
+# With three or more bases in ALT, the multiallelic regexp can otherwise
+# backtrack through a long REF while looking for a nonexistent second slash.
+for my $case (
+  ['long REF', ('A' x 60000), 'TGC'],
+  ['long ALT', 'TGC', ('A' x 60000)],
+) {
+  my ($label, $ref, $alt) = @$case;
+  my $allele_string = $ref.'/'.$alt;
+  my $minimised = $p->minimise_alleles([
+    get_vf({allele_string => $allele_string, end => length($ref)})
+  ])->[0];
+  is($minimised->{allele_string}, $allele_string, "minimal - $label alleles");
+  is($minimised->{start}, 1, "minimal - $label start");
+  is($minimised->{end}, length($ref), "minimal - $label end");
+  is($minimised->{original_allele_string}, $allele_string, "minimal - $label original alleles");
+  is($minimised->{minimised}, 1, "minimal - $label marked minimised");
+}
+
+{
+  my $ref = 'G'.('A' x 60000).'C';
+  my $alt = 'GTGCC';
+  my $minimised = $p->minimise_alleles([
+    get_vf({allele_string => $ref.'/'.$alt, end => length($ref)})
+  ])->[0];
+  is($minimised->{allele_string}, ('A' x 60000).'/TGC', 'minimal - long trim both ends');
+  is($minimised->{start}, 2, 'minimal - long trim start');
+  is($minimised->{end}, 60001, 'minimal - long trim end');
+  is($minimised->{original_start}, 1, 'minimal - long original start');
+  is($minimised->{original_end}, 60002, 'minimal - long original end');
+}
+
+{
+  my $alleles = ('A' x 60000).'/TGC/G';
+  my $original = 'G'.$alleles;
+  my $vf = get_vf({
+    allele_string => $alleles, nontrimmed_allele_string => $original, end => 60000
+  });
+  my $result = $p->minimise_alleles([$vf]);
+  is(scalar @$result, 1, 'minimal - long multiallelic count');
+  is($result->[0], $vf, 'minimal - long multiallelic deferred');
+  is($vf->{allele_string}, $alleles, 'minimal - long multiallelic unchanged');
+  is($vf->{original_allele_string}, $original, 'minimal - long multiallelic original');
+  ok(!$vf->{minimised}, 'minimal - long multiallelic not marked minimised');
+}
+
 is($p->get_SO_term('INS'), 'insertion', 'get_SO_term - insertion');
 is($p->get_SO_term('DEL'), 'deletion', 'get_SO_term - deletion');
 is($p->get_SO_term('INV'), 'inversion', 'get_SO_term - inversion');

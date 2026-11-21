@@ -975,7 +975,10 @@ sub minimise_alleles {
       push @return, $vf;
     }
 
-    elsif($vf->{allele_string} =~ /.+\/.+\/.+/)
+    # A biallelic allele string has only one slash. Avoid the potentially
+    # expensive regexp failure when a long allele has no second separator.
+    elsif(index($vf->{allele_string}, '/', index($vf->{allele_string}, '/') + 1) >= 0
+      && $vf->{allele_string} =~ /.+\/.+\/.+/)
     {
       # Updating a flag to minimise multi-allelic variants in split_variants/rejoin_variants
       # $vf->{minimised} = 1;
