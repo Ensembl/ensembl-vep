@@ -65,6 +65,8 @@ use warnings;
 
 package Bio::EnsEMBL::VEP::AnnotationSource::File;
 
+use List::Util qw(min);
+
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
 
@@ -122,7 +124,10 @@ my %VALID_TYPES = (
                  overlap_cutoff => (optional) numeric $minimum_percentage_overlap (0 by default),
                  distance       => (optional) numeric $distance_to_overlapping_variant_ends (off by default),
                  same_type      => (optional) bool $only_match_identical_variant_classes (off by default),
-                 reciprocal     => (optional) bool $calculate_reciprocal_overlap (off by default),
+                 reciprocal     => (optional) int $overlap_percentage_definition (0 by default):
+                                   0: percentage of reference variant covered by input variant,
+                                   1: percentage of input variant covered by reference variant,
+                                   2: minimum of the two (reciprocal overlap),
                  overlap_def    => (optional) string $overlap_definition (based on reciprocal by default),
                  num_records    => (optional) maximum number of records to show (50 by default),
                  summary_stats  => (optional) summary statistics: max, min, mean, count, sum
@@ -553,14 +558,15 @@ sub _record_overlaps_VF {
     my @overlap_end   = sort { $a <=> $b } ($ve, $ref_end);
     my $overlap_percentage = $length != 0 ? 100 * (1 + $overlap_end[0] - $overlap_start[1]) / $length : 100;
 
-    unless ($reciprocal) {
+    if (!$reciprocal || $reciprocal eq '2') {
       # when reciprocal = 0, check percentage of reference (annotation) variant covered
       my $ref_length = $ref_end - $ref_start + 1;
 
       # in some cases $ref_length can be 0, for example in old VCF with single base deletion without INFO/SVLEN
       my $ref_overlap_percentage = $ref_length != 0 ? 100 * (1 + $overlap_end[0] - $overlap_start[1]) / $ref_length : 100;
 
-      $overlap_percentage = $ref_overlap_percentage;
+      # when reciprocal = 2, both variants have to be covered, so take the minimum of the two percentages
+      $overlap_percentage = $reciprocal ? min($overlap_percentage, $ref_overlap_percentage) : $ref_overlap_percentage;
     }
 
 	return 0 if $overlap_percentage < $overlap_cutoff;
