@@ -278,7 +278,7 @@ sub check_frequency_filter {
   $freq_pop_full =~ s/EXAC/ExAC/;
   $freq_pop_full =~ s/ADJ/Adj/;
   $freq_pop_full =~ s/GNOMADE/gnomADe/;
-  $freq_pop_full =~ s/GNOMADg/gnomADg/;
+  $freq_pop_full =~ s/GNOMADG/gnomADg/;
   my ($freq_group, $freq_pop) = split('_', $freq_pop_full);
 
   my %valid = map {$_ => 1} @{$self->get_valid_populations};

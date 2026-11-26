@@ -566,6 +566,24 @@ foreach my $case([$rare_ins, 1, 'rare insertion kept'], [$common_ins, 0, 'common
 $c->{$_} = $freq_bak{$_} for keys %freq_bak;
 
 
+## FREQUENCY FILTER POPULATION NAMES
+####################################
+# gnomAD genomes populations (gnomADg, gnomADg_AFR, ...) are valid --freq_pop
+# values when the cache has those columns
+
+my $cols_bak = $c->{cols};
+my $pop_bak  = $c->{freq_pop};
+$c->{cols} = [@{$cols_bak}, 'gnomADg', 'gnomADg_AFR'];
+
+foreach my $pop(qw(gnomADe_AFR gnomADg gnomADg_AFR)) {
+  $c->{freq_pop} = $pop;
+  lives_ok { $c->check_frequency_filter } 'check_frequency_filter - '.$pop;
+}
+
+$c->{cols}     = $cols_bak;
+$c->{freq_pop} = $pop_bak;
+
+
 # done
 done_testing();
 
